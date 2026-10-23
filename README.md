@@ -1,6 +1,6 @@
 # ZX-REAPER
 
-**R**everse **E**ngineer **A**nything, **P**ort **E**verywhere **R**etro.
+**R**etro **E**ngineer **A**nything, **P**ort **E**verywhere **R**ightnow.
 
 An agent harness for reverse engineering ZX Spectrum games into sources that
 rebuild the original tape byte for byte, are relocatable and free of magic
