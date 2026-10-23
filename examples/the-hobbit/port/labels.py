@@ -289,6 +289,7 @@ LA9E5_16 = 0xAB3A
 LA9E5_18 = 0xAB4A
 LA9E5_15 = 0xAB36
 ArrivalLocation = 0xB6F3
+SpiderEyesFromHL = 0xAB22
 MsgSeeSomePaleBulbous = 0xB311
 LA9E5_14 = 0xAB1F
 MsgSpiderWebSlowly = 0xB0FD

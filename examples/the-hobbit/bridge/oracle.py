@@ -16,6 +16,7 @@ decodes its memory into the stage 4 state (bridge/decode.py). Two checks:
       the same result
 """
 import copy
+import functools
 import inspect
 import os
 import sys
@@ -25,7 +26,7 @@ from decode import decode
 from routines import ANY, ROUTINES, Regs
 import labels
 import main as port_main
-from hobbit.state import Mixed, ReadKey, ReadR, Step, TapeLoad
+from hobbit.state import Mixed, ReadKey, ReadR, Step, TapeLoad, TitleKey
 from zxpyxel import Goto, T_FRAME, headless, zx
 
 PORT = [m for m in list(sys.modules.values())
@@ -40,12 +41,12 @@ class Inputs:
     """The inputs of a stretch of the run, answered in order per kind."""
 
     def __init__(self, items):
-        self.queues = {'key': [], 'r': [], 'mixed': []}
+        self.queues = {'key': [], 'r': [], 'mixed': [], 'title': []}
         for kind, v in items:
             self.queues[kind].append(v)
 
     def answer(self, event):
-        kind = {ReadKey: 'key', ReadR: 'r', Mixed: 'mixed'}.get(type(event))
+        kind = {ReadKey: 'key', ReadR: 'r', Mixed: 'mixed', TitleKey: 'title'}.get(type(event))
         if kind:
             if not self.queues[kind]:
                 raise Mismatch('stage 4 asks for %s, but stage 3 took no more' % type(event).__name__)
@@ -86,13 +87,18 @@ class Oracle:
         taken since the previous pass."""
         rep = self.replay = headless.Replay(self.record, labels)
         self.inputs = []
+        import devices as port_devices
         import keys as port_keys
-        wait_key = port_keys.WaitKey
+        from regs import r
+        wait_key, read_key, last = port_keys.WaitKey, port_devices.ReadKey, [0]
+
+        def ReadKey():
+            read_key()
+            last[0] = r.a
 
         async def WaitKey():
-            await wait_key()
-            from regs import r
-            self.inputs.append(('key', r.a))
+            await wait_key()            # a key, or CR after the idle time-out (no key found)
+            self.inputs.append(('key', None if last[0] == 0 else r.a))
 
         def checkpoint(label):
             rep.checkpoint(label)           # compared with the Z80 here
@@ -102,10 +108,13 @@ class Oracle:
 
         zx.reset(open(os.path.join(paths.ROOT, 'port/image.bin'), 'rb').read())
         zx.inp, zx.on_checkpoint, zx.interrupt = rep.inp, checkpoint, lambda: None
-        zx.r = lambda: self.note('r', rep.r())
+        def read_r():           # the pictures flag was read from the keyboard just before
+            self.note('title', zx.mem[labels.PicturesEnabled])
+            return self.note('r', rep.r())
+        zx.r = read_r
         zx.take = lambda addr, a: self.note('mixed', rep.given(addr, a))
         zx.tape = None
-        port_keys.WaitKey = WaitKey
+        port_keys.WaitKey, port_devices.ReadKey = WaitKey, ReadKey
         try:
             headless.run(port_main.GameStart, frames=2 * rep.z80_frames + 1000)
             if rep.next < len(rep.events):
@@ -114,7 +123,7 @@ class Oracle:
         except headless._End:
             return rep.passes
         finally:
-            port_keys.WaitKey = wait_key
+            port_keys.WaitKey, port_devices.ReadKey = wait_key, read_key
             for name in ('inp', 'r', 'take', 'interrupt'):
                 zx.__dict__.pop(name, None)
             zx.on_checkpoint, zx.tape = None, []
@@ -214,6 +223,7 @@ def check_routines(record, names, limit=None):
             calls[name] += 1
 
         if inspect.iscoroutinefunction(orig):
+            @functools.wraps(orig)
             async def wrapper(*args):
                 call = start()
                 try:
@@ -223,6 +233,7 @@ def check_routines(record, names, limit=None):
                     raise
                 finish(call, None)
         else:
+            @functools.wraps(orig)
             def wrapper(*args):
                 call = start()
                 try:

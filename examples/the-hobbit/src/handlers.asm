@@ -1323,6 +1323,10 @@ LA9E5_13:
   JP EndGame
 LA9E5_14:
   LD HL,MsgSeeSomePaleBulbous
+; Timer 2's fire handler after ActorArrives has written a location id into its
+; low byte with a stale IY (F85): the message printed is whatever HL holds, the
+; handler's own address, so code bytes are printed as a message.
+SpiderEyesFromHL:
   CALL PrintMessage
   LD A,(Chr00PlayerLocation)
   LD C,A

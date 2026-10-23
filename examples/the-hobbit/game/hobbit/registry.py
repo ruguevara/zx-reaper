@@ -11,3 +11,12 @@ def handler(*names):
             HANDLERS[n] = f
         return f
     return register
+
+
+def call(name, s, *args):
+    """Run the handler `name` (a generator: `x = yield from registry.call(...)`)."""
+    import inspect
+    result = HANDLERS[name](s, *args)
+    if inspect.isgenerator(result):
+        result = yield from result
+    return result

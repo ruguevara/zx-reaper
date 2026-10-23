@@ -1500,6 +1500,15 @@ async def LA9E5_14():
     the location he arrived from (ArrivalLocation) or at the other forest
     location (2 <-> 3), "some drops from above" and the game ends."""
     r.hl = MsgSeeSomePaleBulbous
+    return await SpiderEyesFromHL()
+
+
+async def SpiderEyesFromHL():
+    """LA9E5_14 from its CALL PrintMessage: print the message at HL, then the
+    same location test. Run directly as timer 2's fire handler after
+    ActorArrives wrote a location id into its low byte with a stale IY (F85):
+    HL is then this routine's own address, so its code bytes are printed as a
+    message (kept)."""
     await printer.PrintMessage()
     r.a = mem[Chr00PlayerLocation]
     r.c = r.a

@@ -167,6 +167,8 @@ class Vars:
     first_object: int
     second_object: int
     subject: int
+    subj_is_in: int         # the preposition word DescribeLocation writes into MsgSubjIsIn
+                            # (the message's own word slot: it keeps its value between turns)
 
 
 @dataclass
@@ -184,6 +186,8 @@ class GameState:
     picture5: tuple         # the border and attribute bytes of picture 5 (dawn rewrites them)
     terminal: Terminal
     screen: Display = field(default_factory=Display)
+    scratch: dict = field(default_factory=dict, compare=False)   # values kept within a pass
+                            # between routines (the parser's place in the word list...); not state
 
 
 # Events: a routine that needs something from outside, or that holds the game,
@@ -195,7 +199,14 @@ class GameState:
 @dataclass
 class ReadKey:
     """The line editor wants the next key code (a character, CR, a cursor or
-    delete code; the idle time-out types W, A, I, T, CR as keys)."""
+    delete code), or None when the player has been idle for the original's
+    idle time: WaitKey then erases the line, types WAIT and returns CR."""
+
+
+@dataclass
+class TitleKey:
+    """The key at the title: answered with the pictures flag, 0 when N is held
+    (no pictures), else 8."""
 
 
 @dataclass

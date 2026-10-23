@@ -55,6 +55,12 @@ def tables(mem):
                                          L.BLOCKED_EXIT_SIZE)],
         'hints': table3(mem, L.HintTable, name),
         'first_visit_scores': table3(mem, L.FirstVisitScores),
+        'key_masks': list(mem[L.KeyMasks:L.KeyMasks + 8]),
+        'key_table': list(mem[L.KeyTable:L.KeyTable + 40]),
+        'shift_key_table': list(mem[L.ShiftKeyTable:L.ShiftKeyTable + 40]),
+        'border_tile': list(mem[L.BorderTile:L.BorderTile + 10]),
+        'start_command': list(mem[L.StartCommand:L.StartCommand + 7]),
+        'look_command': list(mem[L.LookCommand:L.LookCommand + 5]),
     }
 
 

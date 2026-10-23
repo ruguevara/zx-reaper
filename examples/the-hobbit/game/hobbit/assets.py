@@ -66,7 +66,7 @@ def dump_state(s):
     """The state as JSON-ready values (the screen is the title, kept apart)."""
     from dataclasses import asdict
     d = asdict(s)
-    del d['screen']
+    del d['screen'], d['scratch']
     d['border'] = s.screen.border
     for o in d['orders']:
         o['phrase'] = o['phrase']['words']

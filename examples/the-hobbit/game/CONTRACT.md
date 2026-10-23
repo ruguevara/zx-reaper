@@ -14,7 +14,7 @@ The procedure: `skills/zx-clean/SKILL.md`; the reasons: zx-reaper's
 - Screen: the exact Spectrum screen, part of the state (`GameState.screen`, a
   `zxpyxel.display.Display`), compared byte for byte at every check.
 - Input: as the original (the line editor, arrows, `@`, DELETE, back-space,
-  the idle WAIT).
+  the idle WAIT: the driver decides when the player has been idle).
 - Sound: none (the original is silent).
 - SAVE/LOAD: the state to a file (events `TapeSave`, `TapeLoad`); PRINT: the
   story lines to a transcript file (event `Printed`).
@@ -55,7 +55,7 @@ Requests are answered by the driver through `send`:
 
 | Event | Answer | Where |
 | --- | --- | --- |
-| `ReadKey()` | the next key code | the line editor (stage 3 WaitKey's results) |
+| `ReadKey()` | the next key code, or None for the idle time-out | WaitKey (stage 3 WaitKey's results; on None it erases the line, types WAIT and returns CR, as stage 3 does after its idle scans) |
 | `ReadR()` | the R register | the (re)start (the random seed) |
 | `Mixed()` | the random routine's mixed value | RandomSigned at RandomSigned_Mixed (stage 3 `zx.take`) |
 | `TapeLoad()` | a saved state or None (no tape: wait forever) | LOAD |
@@ -88,6 +88,63 @@ rest). Signatures are fixed here:
 - `world.commit_or_abort(s)` — returns False when the asm pops its caller's
   return address (the caller returns at once); True otherwise. The same for
   `engine.abort_unless_perform(s)`.
+
+## Wave B interfaces
+
+Fixed here so that the wave B slices can be written at the same time (gen: a
+generator, called with `yield from`; a flow target is returned as a name,
+None otherwise). The stage 3 routine each stands for is in brackets.
+
+Table handlers (verb tables, VerbHandlers, timers, arrivals, NPC script
+routines) take `(s)` only: their inputs are in `s.vars` (command,
+first_object, second_object, subject, noun1, noun2, actor...), and they are
+run by `registry.call(name, s)` (gen). A handler that needs something the
+original passed in a register says so in its slice's report.
+
+engine (slice ENGINE)
+- `abort_unless_perform(s)` -> bool [AbortUnlessPerform]
+- `check_dark(s)` -> bool, True when the subject cannot see [CheckDark; callers print 'MsgDark']
+- `check_verb_applies(s)` -> int, also stored in vars.action_allowed [CheckVerbApplies]
+- `describe_location(s, loc)` gen [DescribeLocation]; `describe_location_short(s, loc)` gen
+  [DescribeLocationShort]; `describe_location_intro(s, loc, message)` gen
+  [DescribeLocation_Intro]; `describe_seen(s, loc)` gen [DescribeSeen]
+- `dispatch_command(s)` gen -> flow target [DispatchCommand]
+- `end_turn(s)` gen -> flow target [EndTurn_Timer / L96B3]
+- `find_npc(s, thing_id)` -> index into s.npcs or None [FindNpcState]
+- `init_new_game(s)` gen [InitNewGame]
+- `kill_character(s, thing_id)` gen -> flow target [KillCharacter]; `kill_first_object(s)` gen [L977C]
+- `notify_character(s, thing_id, verb)` gen [NotifyCharacter]
+- `print_message_dot(s, message)` gen [PrintMessageDot]
+- `run_actor_command(s)` gen -> bool, True when done [RunActorCommand]
+- `run_npc_scripts_start(s, npc)` gen, `run_npc_scripts_next(s, npc)` gen (npc: index
+  into s.npcs) [RunNpcScripts_Start/_Next, entered from world.npc_held]
+- `update_player_sight(s)` [UpdatePlayerSight]
+
+handlers (slice HANDLERS)
+- `check_open(s, thing_id)` -> bool, open [CheckOpen]
+- `check_openable(s)` -> (refused, reason) [CheckOpenable]; `check_openable_thing(s, thing_id)`
+  -> (open_already, reason) [CheckOpenable_0]
+- `check_victory(s)` gen -> flow target [CheckVictory]
+- `is_placing_command(s)` -> bool [IsPlacingCommand]
+
+parser and system (slice PARSER)
+- `parser.claim_order_slots(s, n)` [ClaimOrderSlots]; `parser.find_order_slot(s)` -> index
+  or None [FindOrderSlotKeep]; `parser.free_order_slots(s, owner)` [FreeOrderSlots]
+- `parser.parse_line(s)` gen -> bool, True when the records are ready [ParseLine]
+- `parser.print_what(s)` gen [PrintWhat]
+- `parser.run_sentences(s)` gen -> flow target [RunSentences]
+- `parser.run_stored_order(s, run)` gen -> (done, phrase) [RunStoredOrder: run False is A = 0]
+- `parser.test_actor_command(s)` gen -> bool, accepted [TestActorCommand]
+- `system.print_score(s)` gen [PrintScore]
+
+verbs (slice VERBS)
+- `actor_arrives(s, actor, loc)` gen [ActorArrives]; `actor_arrives_describe(s)` gen [ActorArrives_0]
+- `end_game(s)` gen -> 'RestartGame' [EndGame]; `end_game_wait(s)` gen -> 'RestartGame' [EndGame_Wait]
+- `move_actor(s)` gen -> flow target [MoveActor]
+- `open_thing(s, thing_id)` gen [OpenObject_0]
+- and the handlers other code runs by name, registered under their stage 3 names
+  (VerbTake, CloseObject, OpenObject, GiveObject, StrikeObject, ExamineObject,
+  VerbLookThrough, L8F3B, L929C_0, L9404_5, L9404_7...).
 
 ## Assets
 
