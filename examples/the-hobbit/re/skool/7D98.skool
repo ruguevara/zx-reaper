@@ -34,9 +34,11 @@ c$7D98 LD HL,$793E   ; RecWork1
  $7DA5 LD DE,$B6E9   ; SecondObject
  $7DA8 LD BC,$B6FF   ; Noun2Kind
  $7DAB JR Z,$7DFE    ; FindNounElsewhere
+@isub=LD A,(RecWork3+1)
  $7DAD LD A,($7941)  ; candidates accepted
  $7DB0 AND A         ;
  $7DB1 JP Z,$7DF5    ; none: PerformRefusal
+@isub=LD A,(RecWork6+1)
  $7DB4 LD A,($7955)  ; (this load is overwritten)
  $7DB7 LD A,($7948)  ;
  $7DBA JR $7D89      ; AskWhich (HL = $7948 is pushed as the word)

@@ -15,7 +15,7 @@ c$8EEC LD A,($B6E8)        ; the first object
  $8EEF CALL $9BCA          ; its record
  $8EF2 CALL $A5CA          ; open?
  $8EF5 JP Z,$A16C          ; no: "<it> is closed."
- $8EF8 LD A,($B6EA)        ; the subject
+*$8EF8 LD A,($B6EA)        ; the subject
  $8EFB CALL $8ED2          ; shut in by a closed holder?
  $8EFE RET NZ              ; yes: nothing
  $8EFF CALL $9F25          ; the exit this object blocks

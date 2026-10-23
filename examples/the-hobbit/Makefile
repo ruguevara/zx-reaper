@@ -23,6 +23,14 @@ include re/layout.mk
 SHIFT_END  ?= $(REGION_END)
 SHIFT_LOAD ?= $(shell printf '0x%X' $$(($(REGION_START)+$(SHIFT))))
 export SHIFT_END
+# SHIFT_GIVE: an address where A holds a value read from the game's own code
+# (a random routine that reads memory): the original's values there are given
+# to the moved build, so its random numbers do not change with the shift.
+SHIFT_GIVE ?=
+# SHIFT_INPUTS: the scripts the shift test runs (leave out one whose output
+# carries addresses, such as a saved game written to tape)
+SHIFT_INPUTS ?= $(INPUTS)
+GIVE := $(if $(SHIFT_GIVE),--give $(shell printf '0x%X' $$(($(SHIFT_GIVE)+$(SHIFT)))):build/given.txt)
 
 ifneq ($(wildcard src/game.asm),)
   MASTER := asm
@@ -109,6 +117,7 @@ status:
 
 labels: build/game.skool
 	@skool2asm.py -H -c $< 2>&1 >/dev/null | grep -A1 WARNING | grep -v '^--' ; true
+	@$(T)/zxq.py addrs $< $(REGION_START) $(SHIFT_END) ; true
 
 html: build/game.skool
 	skool2html.py -H -d build/html $<
@@ -116,9 +125,11 @@ html: build/game.skool
 ENTRY := $(if $(filter 1,$(ENTRY_IN_REGION)),$(shell printf '0x%X' $$(($(ENTRY_PC)+$(SHIFT)))),$(ENTRY_PC))
 shift-test: $(GAME_ASM) $(SRC) | build
 	sjasmplus --nologo --msg=war -Ibuild -DSHIFT=$(SHIFT) src/build.asm
-	@for i in $(INPUTS); do n=$$(basename $$i .txt); echo "== $$n (shift $(SHIFT))"; \
+	@for i in $(SHIFT_INPUTS); do n=$$(basename $$i .txt); echo "== $$n (shift $(SHIFT))"; \
+	  test -z "$(SHIFT_GIVE)" || $(T)/zxrun.py re/orig.z80 --input $$i \
+	    --take $(SHIFT_GIVE):build/given.txt > /dev/null || exit 1; \
 	  $(T)/zxrun.py re/orig.z80 --clear $(REGION_START)-$(REGION_END) \
-	    --load build/shifted.bin@$(SHIFT_LOAD) --pc $(ENTRY) \
+	    --load build/shifted.bin@$(SHIFT_LOAD) --pc $(ENTRY) $(GIVE) \
 	    --input $$i --expect tests/expected/$$n.hash || exit 1; done
 
 export: build/game.asm

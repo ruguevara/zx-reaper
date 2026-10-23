@@ -2,9 +2,9 @@
 ; $7903 copies 2)
 c$78FB LD C,$06      ;
  $78FD JR $7905      ;
- $78FF LD C,$0A      ;
+*$78FF LD C,$0A      ;
  $7901 JR $7905      ;
- $7903 LD C,$02      ;
+*$7903 LD C,$02      ;
 *$7905 PUSH IY       ;
  $7907 POP HL        ;
  $7908 ADD HL,DE     ;

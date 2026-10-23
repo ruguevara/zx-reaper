@@ -53,7 +53,7 @@ c$92ED LD IX,($B708)     ;
  $9325 INC A             ;
  $9326 JP Z,$9F76        ; no
  $9329 LD B,(IY+$05)     ; weapon attack
- $932C CALL $9D44        ; abandon unless performing
+*$932C CALL $9D44        ; abandon unless performing
 @isub=LD A,STRIKE_SPREAD
  $932F LD A,$15          ;
  $9331 CALL $9CA8        ; random spread

@@ -13,3 +13,5 @@ re/rzx/*.rzx
 re/tap2sna.log
 port/image.bin
 game/assets/
+# frame hashes of the scripts: about 19 MB, rebuilt from the tape by `make expected`
+tests/expected/

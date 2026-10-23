@@ -18,5 +18,5 @@ c$737E LD E,(IX+$01) ;
  $7385 JR Z,$7389    ;
  $7387 LD D,$FF      ;
 *$7389 ADD IX,DE     ;
- $738B XOR A         ; nothing to print
+*$738B XOR A         ; nothing to print
  $738C RET           ;

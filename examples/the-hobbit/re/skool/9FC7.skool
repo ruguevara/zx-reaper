@@ -63,7 +63,7 @@ c$9FC7 PUSH HL       ;
  $A006 LD A,$04      ;
  $A008 CP D          ;
  $A009 JR Z,$A03D    ; the actor is not listed at the top level
- $A00B LD A,(IX+$00) ;
+*$A00B LD A,(IX+$00) ;
  $A00E CALL $9E34    ; can the actor reach it?
  $A011 JR Z,$A03D    ;
  $A013 INC C         ; one more listed

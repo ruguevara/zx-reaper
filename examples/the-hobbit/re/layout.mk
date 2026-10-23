@@ -4,3 +4,12 @@ REGION_END := 0xFC40
 ENTRY_PC := 0x6C00
 ENTRY_IN_REGION := 1
 IMAGE_PATCHES := --patch 24576,re/tape/07.bin
+# The state backup at StateBackup runs to $FFED: a shift above $12 would carry
+# it past $FFFF, so the shift tests use $10 and an odd $7.
+SHIFT := 0x10
+# RandomSigned mixes its seed with bytes read anywhere in memory, code included:
+# a moved build gets the original's mixed value (A at $9CD2, where it is compared with the seed, so retries match too).
+SHIFT_GIVE := 0x9CD2
+# SAVE writes the state blocks to tape, and they hold pointers: a moved build
+# saves different bytes, so the tape signal of save.txt differs by design.
+SHIFT_INPUTS := $(filter-out tests/inputs/save.txt,$(wildcard tests/inputs/*.txt))

@@ -11,7 +11,7 @@ c$A1AE PUSH IY       ;
  $A1C3 POP IX        ;
  $A1C5 POP IY        ;
  $A1C7 RET           ;
- $A1C8 LD A,(IX+$07) ;
+*$A1C8 LD A,(IX+$07) ;
  $A1CB AND $48       ;
  $A1CD CP $40        ;
  $A1CF RET           ;

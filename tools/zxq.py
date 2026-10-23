@@ -45,6 +45,9 @@ The agent should read the disassembly through this tool, never whole.
   zxq.py question set ID STATUS ANSWER   STATUS: open / partial / answered
   zxq.py audit                      open questions and unverified findings
   zxq.py cmp A.bin B.bin ORG        differing addresses and their entries
+  zxq.py addrs GAME.skool LO HI     address operands in LO..HI-1 that stay numbers
+                                    in the asm (no label lands there): they
+                                    would not move with the code
   zxq.py asm GAME.skool             skool2asm output for sjasmplus: ORG +SHIFT (for
                                     the shift test), IXl/IXh/IYl/IYh in upper case
   zxq.py export ASM MODULES OUTDIR  split skool2asm output into modules
@@ -761,6 +764,39 @@ def cmd_reclassify(frag, force):
                                               ' '.join('$%04X' % e.addr for e in new)))
 
 
+def cmd_addrs(skool, lo, hi):
+    """Operands in the whole skool that are addresses in lo..hi-1 but will stay
+    numbers in the asm: no label lands on them (the middle of an instruction or
+    of a data line, an instruction no entry point mark names) and no @isub or
+    @keep says what they are. skool2asm warns only for some of these; a number
+    left in moves nowhere when the code moves."""
+    labelled, lines, pending = set(), [], []
+    for line in open(skool):
+        if line.startswith('@'):
+            pending.append(line.strip())
+            continue
+        m = re.match(r'^([*a-z ])\$([0-9A-F]{4}) (.*)$', line)
+        if not m:
+            pending = []
+            continue
+        a = int(m.group(2), 16)
+        if m.group(1) != ' ' or any(d.startswith('@label=') for d in pending):
+            labelled.add(a)
+        lines.append((a, m.group(3), pending))
+        pending = []
+    out = 0
+    for a, text, directives in lines:
+        code = text.split(';')[0]
+        if code.startswith('DEFB') or any(d.startswith(('@isub', '@keep', '@ssub', '@rsub'))
+                                          for d in directives):
+            continue
+        for v in re.findall(r'\$([0-9A-F]{4})\b', code):
+            if lo <= int(v, 16) < hi and int(v, 16) not in labelled:
+                print('$%04X  %-24s $%s has no label' % (a, code.strip(), v))
+                out += 1
+    return 1 if out else 0
+
+
 def cmd_asm(skool):
     """skool2asm for sjasmplus: ORG lines below $SHIFT_END get +SHIFT so the
     shift test can move the code; skool2asm writes IXl/IXh/IYl/IYh, which
@@ -891,6 +927,8 @@ def main():
         sys.exit(cmd_audit())
     elif cmd == 'cmp' and len(a) == 4:
         cmd_cmp(a[1], a[2], parse_addr(a[3]))
+    elif cmd == 'addrs' and len(a) == 4:
+        sys.exit(cmd_addrs(a[1], parse_addr(a[2]), parse_addr(a[3])))
     elif cmd == 'asm' and len(a) == 2:
         cmd_asm(a[1])
     elif cmd == 'export' and len(a) == 4:

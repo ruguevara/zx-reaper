@@ -15,7 +15,7 @@
 c$9C78 LD A,($B6E8)
 @label=CheckHeldBySubject
 *$9C7B LD HL,$B6EA
- $9C7E CP $FF           ; no object: counts as held
+*$9C7E CP $FF           ; no object: counts as held
  $9C80 SCF
  $9C81 RET Z
  $9C82 PUSH IX          ; IX is not preserved by #R$9C8A

@@ -17,8 +17,10 @@ c$8106 PUSH AF       ;
  $810B ADD HL,DE     ;
  $810C LD A,H        ;
  $810D CP $5A             ; past $59FF?
+@isub=JR NZ,AttrDown_Sbc+1
  $810F JR NZ,$8113        ; no: jumps into SBC HL,DE (LD D,D)
  $8111 AND A         ;
+@label=AttrDown_Sbc
  $8112 SBC HL,DE     ;
  $8114 POP DE        ;
  $8115 POP AF        ;

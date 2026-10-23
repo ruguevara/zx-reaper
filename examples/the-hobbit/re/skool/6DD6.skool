@@ -48,7 +48,7 @@ c$6DD6 LD HL,$0BB8   ;
 @isub=CP CHAR_AT
  $6DFC CP $40        ; "@" on an empty line ...
  $6DFE JP Z,$6E7A    ; ... repeats the previous line
- $6E01 BIT 0,C       ;
+*$6E01 BIT 0,C       ;
  $6E03 CALL Z,$6E4F  ; first key of the line: CursorKeyToWord
  $6E06 LD C,$01      ;
 @isub=CP KEY_DELETE

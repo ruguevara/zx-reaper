@@ -1,6 +1,7 @@
 ; Command handler: copy 6 bytes $B6E0 to $757F, then dispatch (table $828B)
 c$82E2 PUSH DE       ;
  $82E3 LD HL,$B6E0   ;
+@isub=LD DE,ActionSlots+4
  $82E6 LD DE,$757F   ;
  $82E9 LD BC,$0006   ;
  $82EC LDIR          ;

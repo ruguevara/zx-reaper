@@ -1,3 +1,4 @@
 ; Message: The west bank of a black river
-b$B6CA DEFB $78,$87,$79,$02,$04,$78,$81,$FE ; the west <jump to $B6D2> the east
+b$B6CA DEFB $78,$87,$79,$02,$04 ; the west <jump to $B6D2>
+*$B6CF DEFB $78,$81,$FE ; the east (reused as a tail)
  $B6D2 DEFB $88,$1E,$74,$60,$80,$A5,$A5,$4A ; bank of a black river:2

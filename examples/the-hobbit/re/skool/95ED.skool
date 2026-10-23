@@ -32,7 +32,7 @@ c$95ED LD A,($B6EA)   ;
 @isub=BIT LOC_LIT,(IX+$00)
  $9602 BIT 7,(IX+$00) ; lit?
  $9606 JR NZ,$9624    ; yes: sees
- $9608 PUSH IY        ;
+*$9608 PUSH IY        ;
 @isub=LD A,OBJ_SHORT_STRONG_SWORD
  $960A LD A,$0E       ;
  $960C LD IY,$C305    ; the light source
@@ -45,7 +45,7 @@ c$95ED LD A,($B6EA)   ;
 @isub=AND LIGHT_FLAGS_MASK
  $961C AND $1C        ; bits 4 and 2 set, bit 3 clear?
  $961E JR Z,$9628     ; yes: light
- $9620 LD HL,$AE1F    ; "It is dark."
+*$9620 LD HL,$AE1F    ; "It is dark."
  $9623 SCF            ;
 *$9624 POP BC          ;
  $9625 POP IX         ;

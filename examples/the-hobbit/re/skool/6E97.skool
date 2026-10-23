@@ -110,6 +110,7 @@ c$6E97 PUSH DE        ;
  $6F23 AND $30        ;
  $6F25 ADD A,B        ; A = class nibble
  $6F26 DEC HL         ;
+@isub=LD DE,-Vocabulary
  $6F27 LD DE,$A000    ; HL - $6000: the offset of the entry
  $6F2A ADD HL,DE      ;
  $6F2B PUSH HL        ;

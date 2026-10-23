@@ -12,7 +12,7 @@ c$910E CALL $A1F9          ; can it be opened?
  $9111 JP NZ,$A16C         ; no: say why
  $9114 CALL $9D44          ; only when really performing
 @isub=SET FLAG_ACTIVE,(IX+$07)
- $9117 SET 5,(IX+$07)      ; open
+*$9117 SET 5,(IX+$07)      ; open
  $911B LD A,(IX+$00)       ; number of places of the object
  $911E DEC A               ; more than one (a door): done
  $911F RET NZ              ;

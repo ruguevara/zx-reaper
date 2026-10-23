@@ -8,6 +8,6 @@ c$A4C0 LD IX,($B70C) ;
  $A4D2 LD A,($CA99)  ;
  $A4D5 LD ($CA9A),A  ;
  $A4D8 RET           ;
- $A4D9 LD HL,$C34B   ;
+*$A4D9 LD HL,$C34B   ;
  $A4DC RES 5,(HL)    ;
  $A4DE RET           ;

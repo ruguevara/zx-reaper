@@ -10,7 +10,7 @@ c$A5E2 LD A,($B6E8)    ;
  $A5F5 LD A,$02        ;
  $A5F7 LD ($CA85),A    ;
  $A5FA RET             ;
- $A5FB SUB A           ;
+*$A5FB SUB A           ;
  $A5FC LD ($B6F0),A    ;
  $A5FF LD A,($C11C)    ;
  $A602 CP $13          ;

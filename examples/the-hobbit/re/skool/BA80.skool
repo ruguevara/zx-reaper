@@ -3,8 +3,13 @@
 ; Index = (location flags AND $0E)/2: outside, inside, in, on, at. Read at
 ; $963C, copied into the message at $AFFC.
 @label=LocationPrepositions
+@keep
 b$BA80 DEFW $84C2
+@keep
  $BA82 DEFW $837B
+@keep
  $BA84 DEFW $8378
+@keep
  $BA86 DEFW $84AA
+@keep
  $BA88 DEFW $8070

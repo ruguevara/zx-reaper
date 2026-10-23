@@ -175,7 +175,7 @@ top nibble = style (bit 7 proper name; $87A8 = "you"); printed adjectives first,
 +0 N | +1 holder id ($FF: lies at the location) (O) | +2 weight, as container/actor the capacity ($9CE8 sums) |
 +3 bulk/capacity ($9CED) | +4 state byte: the low nibble picks the relation message at $AFCA+4n ("In the", "On the"...), bits 4-6 a "side" tested by the attack check $914A | +5,+6 strengths
 (combat $9171, $92BA) | +7 flags: bit 7 present, 6 character, 5 active/open/alive, 3 dead/disabled, 1 consumable
-(O: door $C14C 80->A0 when opened) | +8,+10,+12 name phrase codes (up to 3) | +14,+15 spare |
+(O: door $C14C 80->A0 when opened) | +8,+10,+12 name phrase codes (up to 3) | +14 W description message (0: none; printed by EXAMINE, #R$93DA: the map and one other) |
 +$10..+$10+N-1 location ids (O: NPC ids change as they walk; doors/rivers/webs list their 2+ places) |
 then the verb table: (verb id, W handler) x k, id 0 = chain to the next entry, $FF ends ($9B81 + $9DBD).
 Handlers called by the verb dispatcher $950F; if the object has none, $C730 is used ($94D6, $95CC).
@@ -313,3 +313,16 @@ $C2xx-$CAxx handler words) and are now type c.
 - $AB24 (3 bytes) is the last bytes of the CALL at $AB22 and the LD at $AB25, which ends at $AB27 (next slice).
 - Dictionary at $6000: word index (2 bytes per first letter) then 5-bit letter strings; seen from $6F5E-$6F72.
 - Not decoded: the meaning of the $793D variables, what the $C730/$C2xx handler tables mean.
+
+## Relocation
+
+`make shift-test` passes at +$10 and +$7 on every script but save.txt (the
+saved game holds pointers, so a moved build writes other bytes to tape). The
+state backup runs to $FFED, so a shift above $12 does not fit. RandomSigned
+reads memory, code included, so the moved build gets the original's mixed
+values at $9CD2 (`SHIFT_GIVE` in re/layout.mk). Pointers that needed more than
+a label: the description pointer at +14 of object records (a byte pair, now a
+word), `-Vocabulary` in ReadTypedWord, the SET/RES byte at SmcSetOrRes+3, the
+jump into AttrDown_Sbc+1, fields such as RecWork3+1; the phrase codes at
+$BA80 and the command table are numbers (`@keep`).
+

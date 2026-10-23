@@ -25,7 +25,7 @@ c$8498 CALL $0556    ;
 @isub=IN A,(PORT_ULA)
  $84A8 IN A,($FE)    ;
 @isub=AND KEY_BITS
- $84AA AND $1F       ;
+*$84AA AND $1F       ;
 @isub=CP KEY_BITS
  $84AC CP $1F        ;
  $84AE JR Z,$84A7    ; no key down yet

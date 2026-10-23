@@ -13,7 +13,7 @@ c$A94E LD A,($B6F6)  ;
  $A968 CALL $9F76    ;
  $A96B CALL $92B5    ;
  $A96E JP $90D2      ;
- $A971 CALL $9D44    ;
+*$A971 CALL $9D44    ;
  $A974 LD A,$47      ;
  $A976 CALL $977F    ;
  $A979 LD A,$48      ;

@@ -34,7 +34,8 @@ Record for a stage 3 port (zxpyxel/headless.py replays it):
   zxrun.py orig.z80 --input play.txt --record play.rec --checkpoint 0x6229 \
       --state 0x4000-0x5B00 --state 0x5FB5-0x8000
   writes every value an IN by the game reads (not by the ROM), in order, each
-  interrupt the ROM's IM1 handler takes, each value an LD A,R reads, and at every pass through
+  interrupt the ROM's IM1 handler takes, each value an LD A,R reads, A at each
+  --take ADDR, and at every pass through
   --checkpoint the clock (T-states since the start) and the --state ranges:
   the first pass in full, then the bytes changed since.
 
@@ -290,52 +291,63 @@ def setup(args, snap, regs):
     return sim, tracer
 
 
-def r_reads(args, snap, regs, events, t0):
-    """Every LD A,R the run executes, in order, as (events before it, clock,
-    value): `events` counts the record's 'in' and 'int' lines before the read.
-    The C simulator stops at one address only, so this is a second run of the
-    same input, stopping at each LD A,R in RAM (the bytes ED 5F; a site that
-    is data is never reached)."""
+def values_at(args, snap, regs, events, t0, takes=()):
+    """The values a port cannot compute, in run order, as (events before it,
+    clock, record line): each LD A,R ('r XX', A after the instruction) and A
+    each time PC reaches an address in `takes` ('a ADDR XX'). `events` counts
+    the record's 'in' and 'int' lines before the value. The C simulator stops
+    at one address only, so each site is a further run of the same input;
+    LD A,R sites are the bytes ED 5F in RAM (data is never reached)."""
     sim0, _ = setup(args, snap, regs)
-    sites = [a for a in range(0x4000, 0xFFFF) if sim0.memory[a] == 0xED and sim0.memory[a + 1] == 0x5F]
-    reads = []
-    for site in sites:
+    sites = [(a, True) for a in range(0x4000, 0xFFFF)
+             if sim0.memory[a] == 0xED and sim0.memory[a + 1] == 0x5F] + [(a, False) for a in takes]
+    found = []
+    for site, is_r in sites:
         sim, tracer = setup(args, snap, regs)
         tracer.record = []
-        f0, state = sim.registers[T] // sim.frame_duration, {'ev': 0}
-        if events and events[0][0] <= 0:
-            tracer.set_keys(events[0][1])
-
-        def frame(scr, frame, border, kb):
-            n = frame - f0 - 1
-            while state['ev'] < len(events) and events[state['ev']][0] <= n + 1:
-                tracer.set_keys(events[state['ev']][1])
-                state['ev'] += 1
-            return n + 1 < args.frames
-
+        frame = frame_keys(sim, tracer, events, args.frames)
         while sim.trace(sim.registers[PC], site, 0, 0, 1, frame, None, tracer.keyboard,
                         None, None)[0] == 3:
             k, t = tracer.events, sim.registers[T] - t0
-            sim.trace(site, -1, 1, 0, 1, frame, None, tracer.keyboard, None, None)
-            reads.append((k, t, sim.registers[A]))
-    return sorted(reads)
+            if is_r:
+                sim.trace(site, -1, 1, 0, 1, frame, None, tracer.keyboard, None, None)
+                found.append((k, t, 'r %02X' % sim.registers[A]))
+            else:
+                found.append((k, t, 'a %04X %02X' % (site, sim.registers[A])))
+    return sorted(found)
 
 
-def merge_r(lines, reads):
-    """Insert 'r XX' lines into the record `lines` (header, then 'in'/'int'/'cp'
-    events): after as many reads ('in' with its count, 'int') as came before
-    it, splitting a run of repeated reads, and among the 'cp' lines there by
-    the clock."""
+def frame_keys(sim, tracer, events, frames):
+    """A frame callback for sim.trace that only applies the input events (as
+    the main run does) and stops after `frames` frames."""
+    f0, state = sim.registers[T] // sim.frame_duration, {'ev': 0}
+    if events and events[0][0] <= 0:
+        tracer.set_keys(events[0][1])
+
+    def frame(scr, frame, border, kb):
+        n = frame - f0 - 1
+        while state['ev'] < len(events) and events[state['ev']][0] <= n + 1:
+            tracer.set_keys(events[state['ev']][1])
+            state['ev'] += 1
+        return n + 1 < frames
+    return frame
+
+
+def merge_values(lines, values):
+    """Insert the (events before, clock, line) `values` into the record `lines`
+    (header, then 'in'/'int'/'cp' events): after as many reads ('in' with its
+    count, 'int') as came before each, splitting a run of repeated reads, and
+    among the 'cp' lines there by the clock."""
     out, k, i = [], 0, 0
     lines = list(lines)
-    for n, t, v in reads:
+    for n, t, line in values:
         while i < len(lines):
             w = lines[i].split()
             if w[0] in ('in', 'int'):
                 c = int(w[3]) if len(w) > 3 else 1
                 if k == n:
                     break
-                if k + c > n:                     # the read falls inside a run
+                if k + c > n:                     # the value falls inside a run
                     first, rest = n - k, k + c - n
                     lines[i:i + 1] = [' '.join(w[:3] + ([str(first)] if first > 1 else [])),
                                       ' '.join(w[:3] + ([str(rest)] if rest > 1 else []))]
@@ -345,7 +357,7 @@ def merge_r(lines, reads):
                 break
             out.append(lines[i])
             i += 1
-        out.append('r %02X' % v)
+        out.append(line)
     return out + lines[i:]
 
 
@@ -392,9 +404,19 @@ def main():
     ap.add_argument('--state', action='append', default=[], metavar='A-B',
                     help='with --record: memory A..B-1 that is game state (repeatable; '
                          'default the screen, 0x4000-0x5B00)')
+    ap.add_argument('--take', action='append', default=[], metavar='ADDR[:FILE]',
+                    help='the value of A each time PC reaches ADDR: with --record, into the '
+                         'record (a value a port takes instead of computing it); otherwise '
+                         'written to FILE, one per line')
+    ap.add_argument('--give', action='append', default=[], metavar='ADDR:FILE',
+                    help='set A from FILE each time PC reaches ADDR (the values of --take): '
+                         'the shift test gives a moved build the original\'s random numbers')
     args = ap.parse_args()
     if args.record and (args.checkpoint is None or args.watch or args.stop is not None):
         sys.exit('--record needs --checkpoint and excludes --watch and --stop')
+    if (args.take and not args.record or args.give) and (args.watch or args.stop is not None
+                                                          or len(args.take + args.give) > 1):
+        sys.exit('--take FILE and --give: one address, without --watch or --stop')
 
     snap = Snapshot.get(args.snapshot)
     if snap is None:
@@ -518,14 +540,34 @@ def main():
             tracer.record.append(' '.join(['cp %d' % (sim.registers[T] - t0)] +
                                           changes(seen, sim.memory, ranges, first)))
             first = False
-        reads = r_reads(args, snap, regs, events, t0)
+        reads = values_at(args, snap, regs, events, t0, [parse_int(a) for a in args.take])
         if reads:
-            tracer.record = merge_r(tracer.record, reads)
+            tracer.record = merge_values(tracer.record, reads)
         with open(args.record, 'w') as f:
             f.write('\n'.join(tracer.record + ['end %d' % len(hashes)]) + '\n')
-        print('record %s: %d reads, %d R reads, %d checkpoints' % (
+        print('record %s: %d reads, %d values (LD A,R, --take), %d checkpoints' % (
             args.record, tracer.events, len(reads),
             sum(r[:2] == 'cp' for r in tracer.record)))
+    elif args.take or args.give:
+        # ponytail: one address per run (the C simulator stops at one address)
+        spec = (args.take or args.give)[0]
+        addr, _, path = spec.partition(':')
+        addr = parse_int(addr)
+        given = [int(v, 16) for v in open(path).read().split()] if args.give else None
+        taken, n = [], 0
+        while sim.trace(sim.registers[PC], addr, 0, 0, 1,
+                        lambda scr, frame, border, kb: on_frame(scr, frame),
+                        exec_map, tracer.keyboard, None, None)[0] == 3:
+            if given is None:
+                taken.append('%02X' % sim.registers[A])
+            elif n < len(given):
+                sim.registers[A] = given[n]
+            n += 1
+        if given is None:
+            open(path, 'w').write('\n'.join(taken) + '\n')
+            print('took A %d times at $%04X' % (n, addr))
+        elif n != len(given):
+            print('gave A %d of %d values at $%04X' % (min(n, len(given)), len(given), addr))
     else:
         sim.trace(sim.registers[PC], stop, 0, 0, 1,
                   lambda scr, frame, border, kb: on_frame(scr, frame),

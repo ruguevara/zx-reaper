@@ -29,7 +29,7 @@ c$977F AND A           ;
  $9799 LD A,C          ;
  $979A JR Z,$97A0      ; none
  $979C LD (IY+$00),$00 ; dormant: the NPC loop skips it
- $97A0 CALL $A18C      ; name becomes "dead ..."
+*$97A0 CALL $A18C      ; name becomes "dead ..."
  $97A3 LD A,C          ;
  $97A4 CALL $7F60      ; free its order slots
  $97A7 POP IX          ;

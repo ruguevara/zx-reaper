@@ -8,6 +8,6 @@
 ; O:IX The exit record (direction, obstacle, destination) found
 @label=FindExitByObstacle
 c$9F25 LD A,($B6E8)
- $9F28 PUSH AF
+*$9F28 PUSH AF
  $9F29 LD A,$01         ; 1 = field +1 (the obstacle), stored by #R$9F30 into the displacement at #R$9F42
  $9F2B JR $9F30

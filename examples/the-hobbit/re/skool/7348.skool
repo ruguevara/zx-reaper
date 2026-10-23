@@ -25,7 +25,7 @@ c$7348 CALL $74C1    ; print the word
  $7353 CALL NZ,$858B ;
  $7356 BIT 4,D       ;
 *$7358 CALL NZ,$8583 ; ...and a new line (PrintNewLine)
- $735B LD DE,($70DD) ; SavedDE
+*$735B LD DE,($70DD) ; SavedDE
  $735F LD IX,($70E0) ; SavedIX
  $7363 LD A,($70DC)  ; SavedA
  $7366 RET           ;

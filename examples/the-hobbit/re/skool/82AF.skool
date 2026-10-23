@@ -1,3 +1,3 @@
 ; Command handler: clear ($B6F2) (table $828B)
 c$82AF XOR A         ;
- $82B0 LD ($B6F2),A  ;
+*$82B0 LD ($B6F2),A  ;

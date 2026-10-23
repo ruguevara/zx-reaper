@@ -15,7 +15,7 @@
 c$8D33 CALL $9C78    ; already held?
  $8D36 LD HL,$AE11   ; "{SUBJ_IS} already carrying {OBJ1}."
  $8D39 JP C,$72DD    ;
- $8D3C CALL $8CF1    ; can the subject lift and carry it?
+*$8D3C CALL $8CF1    ; can the subject lift and carry it?
  $8D3F LD A,($B6EA)  ; the subject
 @label=VerbTake_Up
 *$8D42 CALL $9BCA    ; record of A
@@ -36,5 +36,5 @@ c$8D33 CALL $9C78    ; already held?
  $8D66 LD (IX+$01),A ; the object is now held by the subject
  $8D69 RET           ;
 @isub=LD (Obj12Rope+1),A
- $8D6A LD ($C367),A  ; the rope is held by the subject (holder field of the rope record $C366)
+*$8D6A LD ($C367),A  ; the rope is held by the subject (holder field of the rope record $C366)
  $8D6D RET           ;
