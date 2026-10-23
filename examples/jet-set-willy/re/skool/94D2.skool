@@ -20,6 +20,7 @@ c$94D2 LD A,($80EC)  ;
  $94E1 JR NC,$94E8   ;
  $94E3 LD A,$02      ;
  $94E5 LD ($85D1),A  ;
+@label=ExitRoomDown_Column
  $94E8 LD A,($85D3)  ;
  $94EB AND $1F       ; row 0, same column
  $94ED LD ($85D3),A  ;

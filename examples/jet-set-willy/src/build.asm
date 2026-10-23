@@ -9,5 +9,5 @@ SHIFT = 0
   IF SHIFT == 0
   SAVEBIN "build/blk03.bin",$8000,32768
   ELSE
-  SAVEBIN "build/shifted.bin",$8000+SHIFT,32768
+  SAVEBIN "build/shifted.bin",$8000,32768
   ENDIF

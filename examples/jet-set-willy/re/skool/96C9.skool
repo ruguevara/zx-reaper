@@ -20,6 +20,7 @@ c$96C9 LD A,($85CE)  ;
  $96D1 BIT 4,A       ;
  $96D3 RET NZ        ;
 @label=ReadStartInput_Keys
+@isub=LD BC,KEYROW_START
 *$96D4 LD BC,$AFFE   ;
  $96D7 IN A,(C)      ;
  $96D9 AND $01       ;

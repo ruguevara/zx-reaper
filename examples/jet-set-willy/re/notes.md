@@ -87,3 +87,22 @@ Not executed by these inputs, with the reason:
 - $9283, $9399: rare arrow and rope branches.
 - $93BB-$93D0 and $96F4-$9717: unreachable leftovers (F10, F11).
 The RZX speed run "jsw7.56am" is a different build (25 KB differ) and was not used.
+
+## Relocation
+
+`make shift-test` (SHIFT=0x100) passes on all input scripts (code, title,
+start, pause, play: 58,000 frames with room changes, deaths and game over).
+Only $8000-$9EFF moves (`SHIFT_END` in re/layout.mk); $A000-$FFFF stays at its
+address, and +$100 is the largest shift that fits:
+- memory is used up to $FFFF and $5C00-$7FFF holds the work buffers, so the
+  region cannot grow upwards or move down; the only free page is $9F00
+  (unused zeros, which the Attic arrow bug writes into, F92);
+- entity definitions are found as $1400+index, times 8 (= $A000+8*index), so
+  the table must stay at $A000; rooms are found as page $C0 OR room, so the
+  room table must stay at $C000; items use H=$A4/$A5 and sprites are named by
+  page bytes in the definitions (pages $AB-$BF stay; page $9C moves and is
+  written as SpriteFoot>>8 in the five definitions that use it);
+- the moved tables are page aligned (RowAddressTable, RopeStepTable, CodeTable,
+  the sprite pages $9C/$9D and the room buffer are read with H or D set to the
+  page and L or E as the index), so a shift must be a multiple of $100: an odd
+  shift cannot work without changing instructions.

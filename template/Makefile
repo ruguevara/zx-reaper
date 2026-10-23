@@ -16,6 +16,13 @@ SHIFT   ?= 0x100
 
 include re/layout.mk
 -include scripts/rules.mk
+# The shift test moves REGION_START..SHIFT_END-1; ORGs at or above SHIFT_END stay
+# fixed (tables reached by page arithmetic, memory full up to $FFFF). SHIFT_LOAD
+# is where build/shifted.bin goes (set it to REGION_START when build.asm saves
+# the whole region in shifted mode).
+SHIFT_END  ?= $(REGION_END)
+SHIFT_LOAD ?= $(shell printf '0x%X' $$(($(REGION_START)+$(SHIFT))))
+export SHIFT_END
 
 ifneq ($(wildcard src/game.asm),)
   MASTER := asm
@@ -106,7 +113,7 @@ shift-test: $(GAME_ASM) $(SRC) | build
 	sjasmplus --nologo --msg=war -Ibuild -DSHIFT=$(SHIFT) src/build.asm
 	@for i in $(INPUTS); do n=$$(basename $$i .txt); echo "== $$n (shift $(SHIFT))"; \
 	  $(T)/zxrun.py re/orig.z80 --clear $(REGION_START)-$(REGION_END) \
-	    --load build/shifted.bin@$$(printf '0x%X' $$(($(REGION_START)+$(SHIFT)))) --pc $(ENTRY) \
+	    --load build/shifted.bin@$(SHIFT_LOAD) --pc $(ENTRY) \
 	    --input $$i --expect tests/expected/$$n.hash || exit 1; done
 
 export: build/game.asm

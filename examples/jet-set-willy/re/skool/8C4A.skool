@@ -19,6 +19,7 @@ c$8C4A LD HL,$4000       ; clear the top two thirds of the bitmap
 @label=ShowGameOver_Step
 *$8C71 LD A,($85E4)      ; counter 0, 4, 8 ... $C0
  $8C74 LD C,A            ; BC = $8200 + counter: pixel row counter/2 in the row table
+@isub=LD B,RowAddressTable>>8
  $8C75 LD B,$82 ;
  $8C77 LD A,(BC)         ; low byte of the row address
  $8C78 OR $0F            ; column 15

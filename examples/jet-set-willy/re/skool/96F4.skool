@@ -22,6 +22,7 @@ c$96F4 LD HL,$5E00   ;
  $9705 LD BC,$0FFF   ;
  $9708 LD (HL),$18   ;
  $970A LDIR          ;
+@isub=LD BC,KEYROW_CS_V
  $970C LD BC,$FEFE   ;
 *$970F IN A,(C)      ;
  $9711 BIT 2,A       ;

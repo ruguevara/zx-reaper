@@ -130,7 +130,7 @@ CHEAT_ACTIVE             EQU 10 ; value of the cheat progress byte when the whol
 TUNE_LENGTH_MASK         EQU 0x7E ; mask that turns the tune step counter into twice the note index (64 notes, 2 passes each)
 LIVES_FULL_PITCH         EQU 0x1C ; 4 * START_LIVES: the tune note gets 0x1C - 4 * lives added, so it is unchanged with a full set of lives
 LIFE_FRAME_MASK          EQU 0x60 ; mask of the animation frame offset (0, 0x20, 0x40, 0x60) of the Willy sprites shown as lives
-WILLY_SPRITE_PAGE        EQU 0x9D ; high byte of the Willy sprite page (right-facing frames at 0x9D00, left-facing at 0x9D80)
+WILLY_SPRITE_PAGE        EQU SpriteWillyRight0>>8 ; high byte of the Willy sprite page (right-facing frames at 0x9D00, left-facing at 0x9D80)
 TUNE_BEEP_LOOPS          EQU 3 ; outer loops of 256 beeper writes per note blip in the game
 FLASH_START_ATTR         EQU 0x47 ; first colour of the death flash: bright, white ink, black paper
 FLASH_END_ATTR           EQU 0x3F ; value after the last colour of the death flash (ink 0, bright) is passed

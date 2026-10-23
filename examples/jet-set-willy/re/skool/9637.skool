@@ -38,6 +38,7 @@ c$9637 LD A,($85CF)  ;
  $964E RRCA          ; frame * 32
  $964F OR E          ;
  $9650 LD E,A        ;
+@isub=LD D,WILLY_SPRITE_PAGE
  $9651 LD D,$9D      ;
  $9653 LD A,($8420)  ;
  $9656 CP $1D        ;

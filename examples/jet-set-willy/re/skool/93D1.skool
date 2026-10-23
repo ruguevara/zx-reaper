@@ -67,6 +67,7 @@ c$93D1 LD H,$A4        ;
  $9401 LD (IX+$02),$30 ; digit overflow: back to 0, carry to the next digit
  $9405 DEC IX          ;
  $9407 JR $93F7        ;
+@label=UpdateItems_Sound
  $9409 LD A,($80DE)    ; beep: border colour, then alternating with the beeper bits
  $940C LD C,$80        ; C = $80, $7E, ... 2: 64 half-periods; delay B = $90 - C grows,
 @label=UpdateItems_Beep
@@ -88,6 +89,7 @@ c$93D1 LD H,$A4        ;
  $9425 JR NZ,$942C     ;
  $9427 LD A,$01        ; counter wrapped to 0: every item collected, state 1
  $9429 LD ($85DF),A    ;
+@label=UpdateItems_Remove
  $942C RES 6,(HL)      ; clear the present flag
  $942E JR $9452        ;
 @label=UpdateItems_Draw

@@ -1,3 +1,4 @@
+@org=$A000
 ; Entity definition table: 128 definitions of 8 bytes
 ;
 ; Entity definitions for the moving things of a room: horizontal movers, vertical movers, the swinging rope and the
@@ -79,6 +80,7 @@ b$A000 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; $00: empty entity (type 0); not us
  $A080 DEFB $02,$04,$00,$60,$02,$BA,$00,$B0 ; $10: vertical mover (Y $00-$B0, step +2), page $BA checkered blob (frames 4); rooms 06 1B 26
  $A088 DEFB $02,$04,$00,$60,$02,$BA,$00,$B0 ; $11: vertical mover (Y $00-$B0, step +2), page $BA checkered blob (frames 5); rooms 06 1B 26
  $A090 DEFB $12,$24,$00,$80,$02,$BA,$20,$D0 ; $12: vertical mover (Y $20-$D0, step +2), page $BA dripping fringe (frames 6-7); rooms 06 1B 26
+@isub=DEFB $02,$0A,$00,$20,$02,SpriteFoot>>8,$20,$60
  $A098 DEFB $02,$0A,$00,$20,$02,$9C,$20,$60 ; $13: vertical mover (Y $20-$60, step +2), page $9C barrel (frames 3); rooms 14 22
  $A0A0 DEFB $01,$EA,$00,$A0,$00,$BC,$00,$0A ; $14: horizontal mover (cols $00-$0A), page $BC small flyer (both directions) (frames 0-7); rooms 01 36
  $A0A8 DEFB $81,$E3,$00,$A0,$00,$BC,$0E,$1D ; $15: horizontal mover (cols $0E-$1D) starts right, page $BC small flyer (both directions) (frames 0-7); rooms 01 04 14
@@ -130,9 +132,13 @@ b$A000 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; $00: empty entity (type 0); not us
  $A218 DEFB $81,$E6,$00,$C0,$00,$B4,$18,$1E ; $43: horizontal mover (cols $18-$1E) starts right, page $B4 hatted walker (both directions) (frames 0-7); rooms 1C
  $A220 DEFB $01,$E3,$00,$80,$00,$AE,$15,$1E ; $44: horizontal mover (cols $15-$1E), page $AE arms-up figure on a drum (frames 4-7); rooms 2D
  $A228 DEFB $04,$06,$00,$00,$1C,$00,$41,$00 ; $45: type 4 dart moving left, pattern $41; rooms 0B 0C 0F 11 24 29
+@isub=DEFB $12,$65,$00,$40,$FC,SpriteFoot>>8,$00,$A0
  $A230 DEFB $12,$65,$00,$40,$FC,$9C,$00,$A0 ; $46: vertical mover (Y $00-$A0, step -4), page $9C dressed figure with hat (frames 4-7); rooms 1D
+@isub=DEFB $12,$23,$00,$20,$02,SpriteFoot>>8,$00,$D0
  $A238 DEFB $12,$23,$00,$20,$02,$9C,$00,$D0 ; $47: vertical mover (Y $00-$D0, step +2), page $9C dressed figure with hat (frames 4-7); rooms 1D
+@isub=DEFB $12,$06,$00,$90,$06,SpriteFoot>>8,$00,$C0
  $A240 DEFB $12,$06,$00,$90,$06,$9C,$00,$C0 ; $48: vertical mover (Y $00-$C0, step +6), page $9C foot/dressed figure with hat (frames 2,4); rooms 1D
+@isub=DEFB $12,$6A,$00,$80,$F8,SpriteFoot>>8,$10,$D0
  $A248 DEFB $12,$6A,$00,$80,$F8,$9C,$10,$D0 ; $49: vertical mover (Y $10-$D0, step -8), page $9C dressed figure with hat (frames 6-7); rooms 1D
  $A250 DEFB $81,$E4,$00,$50,$00,$B4,$04,$14 ; $4A: horizontal mover (cols $04-$14) starts right, page $B4 hatted walker (both directions) (frames 0-7); rooms 13
  $A258 DEFB $81,$E6,$00,$50,$00,$B4,$0C,$1C ; $4B: horizontal mover (cols $0C-$1C) starts right, page $B4 hatted walker (both directions) (frames 0-7); rooms 13

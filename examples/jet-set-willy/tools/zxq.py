@@ -713,17 +713,21 @@ def cmd_reclassify(frag, force):
 
 
 def cmd_asm(skool):
-    """skool2asm for sjasmplus: ORG lines get +SHIFT so the shift test can move
-    the code; skool2asm writes IXl/IXh/IYl/IYh, which sjasmplus rejects in mixed
-    case (unless --syntax=i), so they become IXL/IXH/IYL/IYH."""
+    """skool2asm for sjasmplus: ORG lines below $SHIFT_END get +SHIFT so the
+    shift test can move the code; skool2asm writes IXl/IXh/IYl/IYh, which
+    sjasmplus rejects in mixed case (unless --syntax=i), so they become
+    IXL/IXH/IYL/IYH."""
     import subprocess
     r = subprocess.run(['skool2asm.py', '-q', '-w', '-H', '-c', skool], capture_output=True, text=True)
     if r.returncode:
         sys.exit(r.stderr)
     org = re.compile(r'^( +ORG +)(\$[0-9A-Fa-f]+)\s*$')
     half = re.compile(r'\b(I[XY])([hl])\b')
+    shift_end = int(os.environ.get('SHIFT_END') or '0x10000', 0)
     for line in r.stdout.split('\n')[:-1] if r.stdout.endswith('\n') else r.stdout.split('\n'):
-        line = org.sub(r'\1\2+SHIFT', line)
+        m = org.match(line)
+        if m and int(m.group(2)[1:], 16) < shift_end:
+            line = org.sub(r'\1\2+SHIFT', line)
         print(half.sub(lambda m: m.group(1) + m.group(2).upper(), line))
 
 
