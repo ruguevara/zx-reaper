@@ -5,11 +5,12 @@
 @label=StartGame
 c$88FC LD HL,$8585         ; clock text: " 7:00a" from #R$8585 to #R$857F
  $88FF LD DE,$857F         ;
+@isub=LD BC,CLOCK_LENGTH
  $8902 LD BC,$0006         ;
  $8905 LDIR                ;
  $8907 LD HL,$9A00         ; status bar attributes (#R$9A00) to the bottom third of the screen
 @isub=LD DE,BOTTOM_THIRD_ATTRS
  $890A LD DE,$5A00         ;
-@isub=LD BC,ATTRS_SIZE/3
+@isub=LD BC,THIRD_ATTRS_SIZE
  $890D LD BC,$0100         ;
  $8910 LDIR                ;

@@ -13,12 +13,14 @@
 ; Hardware: DI only.
 @label=StartProgram
 c$8400 DI            ;
+@isub=LD HL,SCREEN_ATTRS_BUF-1
  $8401 LD HL,$5BFF   ; planted return address: high byte at $5BFF, low byte at $5BFE
 @isub=LD (HL),RunCodeCheck>>8
  $8404 LD (HL),$86   ;
  $8406 DEC HL        ;
 @isub=LD (HL),RunCodeCheck&$FF
  $8407 LD (HL),$9F   ;
+@isub=LD SP,SCREEN_ATTRS_BUF-2
  $8409 LD SP,$5BFE   ;
  $840C SUB A         ;
  $840D LD L,A        ;

@@ -32,21 +32,27 @@
 ; IX Message text (32 characters)
 ; O:F Z set if the entered code matches
 @label=AskColourCode
+@isub=LD DE,SCREEN+THIRD_SIZE
 c$86C3 LD DE,$4800   ; screen row 8
 @isub=LD C,SCREEN_COLS
  $86C6 LD C,$20      ;
  $86C8 CALL $9680    ; print the message
+@isub=LD HL,SCREEN+THIRD_SIZE+2*SCREEN_COLS+2
  $86CB LD HL,$4842   ; row 10, column 2
  $86CE LD DE,$9B00   ;
  $86D1 LD C,$00      ; overwrite mode
  $86D3 CALL $9456    ; key 1 graphic (DE advances by 32 bytes per call)
+@isub=LD HL,SCREEN+THIRD_SIZE+2*SCREEN_COLS+5
  $86D6 LD HL,$4845   ;
  $86D9 CALL $9456    ; key 2
+@isub=LD HL,SCREEN+THIRD_SIZE+2*SCREEN_COLS+8
  $86DC LD HL,$4848   ;
  $86DF CALL $9456    ; key 3
+@isub=LD HL,SCREEN+THIRD_SIZE+2*SCREEN_COLS+11
  $86E2 LD HL,$484B   ;
  $86E5 CALL $9456    ; key 4
  $86E8 LD HL,$9B80   ;
+@isub=LD DE,ATTRS+THIRD_ATTRS_SIZE
  $86EB LD DE,$5900   ;
 @isub=LD BC,4*SCREEN_COLS
  $86EE LD BC,$0080   ; four rows of attributes
@@ -81,11 +87,13 @@ c$86C3 LD DE,$4800   ; screen row 8
  $8714 LD C,A        ; C ends as the column 0-17
  $8715 JR $870C      ;
 *$8717 LD A,E        ; the row digit
+@isub=LD DE,SCREEN+THIRD_SIZE+30
  $8718 LD DE,$481E   ; row 8, column 30
  $871B CALL $9691    ;
  $871E LD A,C        ;
 @isub=ADD A,'A'
  $871F ADD A,$41     ; the column letter
+@isub=LD DE,SCREEN+THIRD_SIZE+29
  $8721 LD DE,$481D   ; row 8, column 29
  $8724 CALL $9691    ;
 @label=AskColourCode_Slots

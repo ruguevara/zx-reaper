@@ -64,6 +64,7 @@ c$8B07 LD HL,$9A00       ; status bar attributes ...
  $8B0D LD BC,$0100 ;
  $8B10 LDIR ;
  $8B12 LD A,($80DE)      ; room border colour
+@isub=OUT (ULA_PORT),A
  $8B15 OUT ($FE),A       ; restore the border
 ; This entry point is used by the routine at #R$89AD.
 @label=CheckDeath
@@ -115,6 +116,7 @@ c$8B07 LD HL,$9A00       ; status bar attributes ...
 @isub=LD BC,TUNE_BEEP_LOOPS
  $8B60 LD BC,$0003       ; B = 0: 256 passes of the inner loop, C = 3 times
 @label=PlayGameTune_Loop
+@isub=OUT (ULA_PORT),A
 *$8B63 OUT ($FE),A       ; speaker/MIC state with the border
  $8B65 DEC E ;
  $8B66 JR NZ,$8B6B ;

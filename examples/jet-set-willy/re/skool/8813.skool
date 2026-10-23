@@ -42,25 +42,35 @@ c$8813 LD HL,$4000         ; clear the bitmap: first byte, then fill the rest
 *$8844 LD A,(DE)           ; A = attribute of the cell
  $8845 OR A                ;
  $8846 JR Z,$888E          ; attributes $00, $D3, $09, $2D, $24: solid colour cells, no pixels to draw
+@isub=CP FLASH+BRIGHT+RED*PAPER+MAGENTA
  $8848 CP $D3              ;
  $884A JR Z,$888E          ;
+@isub=CP BLUE*PAPER+BLUE
  $884C CP $09              ;
  $884E JR Z,$888E          ;
+@isub=CP CYAN*PAPER+CYAN
  $8850 CP $2D              ;
  $8852 JR Z,$888E          ;
+@isub=CP GREEN*PAPER+GREEN
  $8854 CP $24              ;
  $8856 JR Z,$888E          ;
  $8858 LD C,$00            ; C selects the piece: 0 or $10 by attribute ...
+@isub=CP BLUE*PAPER
  $885A CP $08              ; $08, $29, $05 (and $2C, replaced by $25 below): C = 0
  $885C JR Z,$8871          ;
+@isub=CP CYAN*PAPER+BLUE
  $885E CP $29              ;
  $8860 JR Z,$8871          ;
+@isub=CP CYAN*PAPER+GREEN
  $8862 CP $2C              ;
  $8864 JR Z,$886E          ;
+@isub=CP CYAN
  $8866 CP $05              ;
  $8868 JR Z,$8871          ;
+@isub=LD C,2*CELL_HEIGHT
  $886A LD C,$10            ; any other attribute: C = $10
  $886C JR $8871            ;
+@isub=LD A,GREEN*PAPER+CYAN
 *$886E LD A,$25            ; attribute $2C is stored back as $25 and drawn with C = 0
  $8870 LD (DE),A           ;
 *$8871 LD A,E              ; piece index = C + 8 for odd columns: pieces at #R$8431 (4 pieces of 8 bytes)
@@ -75,14 +85,18 @@ c$8813 LD HL,$4000         ; clear the bitmap: first byte, then fill the rest
  $887E ADD HL,BC           ;
  $887F PUSH DE             ;
  $8880 BIT 0,D             ; cell in the first third ($58xx) or the second ($59xx) of the screen: bitmap page $40 or $48
+@isub=LD D,SCREEN>>8
  $8882 LD D,$40            ;
  $8884 JR Z,$8888          ;
+@isub=LD D,(SCREEN+THIRD_SIZE)>>8
  $8886 LD D,$48            ;
+@isub=LD B,CELL_HEIGHT
 *$8888 LD B,$08            ;
  $888A CALL $969B          ; draw the 8 rows with #R$969B; DE = $40/$48 + attribute address low byte
  $888D POP DE              ;
 *$888E INC DE              ;
  $888F LD A,D              ;
+@isub=CP BOTTOM_THIRD_ATTRS>>8
  $8890 CP $5A              ; stop at $5A00: only the upper two thirds hold the picture
  $8892 JP NZ,$8844         ;
 @label=ShowTitleScreen_Joystick

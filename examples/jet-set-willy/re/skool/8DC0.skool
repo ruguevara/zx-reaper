@@ -12,6 +12,7 @@
 ; O:C Cell value 0-3
 ; O:DE Address of the tile's attribute byte in the room buffer
 @label=StoreCellAttr
+@isub=AND CELLS_PER_BYTE-1
 c$8DC0 AND $03       ;
  $8DC2 LD C,A        ;
  $8DC3 RLCA          ;
@@ -21,7 +22,7 @@ c$8DC0 AND $03       ;
 @isub=ADD A,RoomTiles-RoomBuffer
  $8DC7 ADD A,$A0     ;
  $8DC9 LD E,A        ;
-@isub=LD D,RoomBuffer/256
+@isub=LD D,RoomBuffer>>8
  $8DCA LD D,$80      ;
  $8DCC LD A,(DE)     ;
  $8DCD LD (IX+$00),A ;

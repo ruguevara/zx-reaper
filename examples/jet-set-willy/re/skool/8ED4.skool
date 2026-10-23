@@ -8,6 +8,7 @@
 ; Hardware: reads the keyboard (ports $FBFE, $DFFE, $EFFE, $F7FE, $7EFE...)
 ; and the Kempston port when #R$85CE is set.
 @label=ReadWillyInput
+@isub=LD E,KEYBITS_NONE
 c$8ED4 LD E,$FF      ; E = key bits, nothing pressed
  $8ED6 LD A,($85D6)  ; rope variable
  $8ED9 DEC A         ;
@@ -35,6 +36,7 @@ c$8ED4 LD E,$FF      ; E = key bits, nothing pressed
  $8EFD IN A,(C)      ;
 @isub=AND KEYS_MASK
  $8EFF AND $1F       ;
+@isub=OR KEYBITS_PAD_P
  $8F01 OR $20        ; bit 5 is not a key here
  $8F03 AND E         ; combine with E
  $8F04 LD E,A        ;
@@ -57,17 +59,20 @@ c$8ED4 LD E,$FF      ; E = key bits, nothing pressed
  $8F1A LD B,$E7      ; half rows 1-5 and 6-0 together
  $8F1C IN A,(C)      ;
  $8F1E RRCA          ; keys 5 and 6 (bit 4) to bit 3: left
+@isub=OR ~(1<<(KEY_6_BIT-1))
  $8F1F OR $F7        ; keep only bit 3
  $8F21 AND E         ;
  $8F22 LD E,A        ;
-@isub=LD B,KEYROW_0_9>>8
+@isub=LD B,KEYROW_0_9_HI
  $8F23 LD B,$EF      ; 0 9 8 7 6
  $8F25 IN A,(C)      ; key 8 (bit 2): right
+@isub=OR ~(1<<KEY_8_BIT)
  $8F27 OR $FB        ; keep only bit 2
  $8F29 AND E         ;
  $8F2A LD E,A        ;
  $8F2B IN A,(C)      ; same row again
  $8F2D RRCA          ; key 7 (bit 3) to bit 2: right
+@isub=OR ~(1<<KEY_8_BIT)
  $8F2E OR $FB        ; keep only bit 2
  $8F30 AND E         ;
  $8F31 LD E,A        ;
@@ -122,7 +127,7 @@ c$8ED4 LD E,$FF      ; E = key bits, nothing pressed
 @isub=CP NO_KEYS
  $8F74 CP $1F        ;
  $8F76 JR NZ,$8F8F   ; any of them: jump
-@isub=LD B,KEYROW_0_9>>8
+@isub=LD B,KEYROW_0_9_HI
  $8F78 LD B,$EF      ; key 0
  $8F7A IN A,(C)      ;
  $8F7C BIT 0,A       ; key 0 is bit 0

@@ -12,6 +12,7 @@
 ; Hardware: writes the whole screen (bitmap and attributes); JP 0 resets the machine.
 @label=RunCodeCheck
 c$869F LD HL,$4000   ;
+@isub=LD DE,SCREEN+1
  $86A2 LD DE,$4001   ;
 @isub=LD BC,SCREEN_AND_ATTRS_SIZE-1
  $86A5 LD BC,$1AFF   ;

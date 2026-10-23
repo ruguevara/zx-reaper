@@ -45,13 +45,14 @@ c$873C LD BC,$F7FE    ;
  $874D JR NZ,$8785    ;
 @isub=LD A,(CODE_SLOT_4_ATTR)
  $874F LD A,($5959)   ;
+@isub=AND $FF-FLASH
  $8752 AND $7F        ;
 @isub=CP CODE_SLOT_EMPTY
  $8754 CP $07         ; slot 4 not filled yet: ignore ENTER
  $8756 JR Z,$8785     ;
 @isub=SUB BLUE*PAPER
  $8758 SUB $08        ; slot 4: paper colour minus blue, as 0-3 in bits 4-3
-@isub=AND 3*PAPER
+@isub=AND CODE_PAPER_MASK
  $875A AND $18        ;
  $875C RRCA           ;
  $875D RRCA           ;
@@ -61,7 +62,7 @@ c$873C LD BC,$F7FE    ;
  $8760 LD A,($5953)   ; slot 2
 @isub=SUB BLUE*PAPER
  $8763 SUB $08        ;
-@isub=AND 3*PAPER
+@isub=AND CODE_PAPER_MASK
  $8765 AND $18        ;
  $8767 RLCA           ; to bits 5-4
  $8768 OR C           ;
@@ -70,7 +71,7 @@ c$873C LD BC,$F7FE    ;
  $876A LD A,($5956)   ; slot 3
 @isub=SUB BLUE*PAPER
  $876D SUB $08        ;
-@isub=AND 3*PAPER
+@isub=AND CODE_PAPER_MASK
  $876F AND $18        ;
  $8771 RRCA           ; to bits 3-2
  $8772 OR C           ;
@@ -79,7 +80,7 @@ c$873C LD BC,$F7FE    ;
  $8774 LD A,($5950)   ; slot 1
 @isub=SUB BLUE*PAPER
  $8777 SUB $08        ;
-@isub=AND 3*PAPER
+@isub=AND CODE_PAPER_MASK
  $8779 AND $18        ;
  $877B RLCA           ;
  $877C RLCA           ;
@@ -128,6 +129,7 @@ c$873C LD BC,$F7FE    ;
  $87BB LD (IX+$20),E  ;
 @isub=LD (IX+SCREEN_COLS+1),E
  $87BE LD (IX+$21),E  ;
+@isub=LD BC,DEBOUNCE_LOOPS
  $87C1 LD BC,$0018    ; debounce delay, about 23 ms
 *$87C4 DJNZ $87C4     ;
  $87C6 DEC C          ;

@@ -4,6 +4,7 @@
 c$8C01 LD A,$47          ; first colour: bright white ink, black paper
 @label=PlayDeath_Round
 *$8C03 LD HL,$5800       ; flood the top two thirds of the screen attributes ...
+@isub=LD DE,ATTRS+1
  $8C06 LD DE,$5801 ;
 @isub=LD BC,ROOM_ATTRS_SIZE-1
  $8C09 LD BC,$01FF ;
@@ -11,6 +12,7 @@ c$8C01 LD A,$47          ; first colour: bright white ink, black paper
  $8C0D LDIR ;
  $8C0F LD E,A            ; E = colour
  $8C10 CPL ;
+@isub=AND INK_MASK
  $8C11 AND $07 ;
  $8C13 RLCA ;
  $8C14 RLCA ;
@@ -24,6 +26,7 @@ c$8C01 LD A,$47          ; first colour: bright white ink, black paper
  $8C20 OR $10           ; result unused: A is cleared below
  $8C22 XOR A             ; speaker off, border black
 @label=PlayDeath_Buzz
+@isub=OUT (ULA_PORT),A
 *$8C23 OUT ($FE),A ;
 @isub=XOR BEEPER_BITS
  $8C25 XOR $18 ;
@@ -44,6 +47,7 @@ c$8C01 LD A,$47          ; first colour: bright white ink, black paper
  $8C3B DEC (HL)          ; one life used
  $8C3C LD HL,$85D7       ; state saved at room entry ...
  $8C3F LD DE,$85CF       ; ... back to Willy state ($85CF-$85D5)
+@isub=LD BC,WILLY_STATE_SIZE
  $8C42 LD BC,$0007 ;
  $8C45 LDIR ;
  $8C47 JP $8912          ; enter the room again

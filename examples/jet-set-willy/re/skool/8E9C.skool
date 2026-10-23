@@ -13,7 +13,7 @@ c$8E9C AND $F0       ; Y / 16 = character row, times 16
  $8E9E LD L,A        ; L = row * 16
  $8E9F XOR A         ;
  $8EA0 RL L          ; row * 32; carry = row 8-15
-@isub=ADC A,SCREEN_ATTRS_BUF/256
+@isub=ADC A,SCREEN_ATTRS_BUF>>8
  $8EA2 ADC A,$5C     ; attribute page $5C or $5D
  $8EA4 LD H,A        ;
  $8EA5 LD A,($85D3)  ; old address: keep its column

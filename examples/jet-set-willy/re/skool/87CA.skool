@@ -65,6 +65,7 @@ c$87CA XOR A               ; clear the variables:
  $87FD INC HL              ;
 @isub=LD (HL),ASCII_ZERO
  $87FE LD (HL),$30         ;
+@isub=LD H,ItemRoomTable>>8
  $8800 LD H,$A4            ; HL = item table $A400 + first item index
  $8802 LD A,($A3FF)        ; first item index ($AD)
  $8805 LD L,A              ;

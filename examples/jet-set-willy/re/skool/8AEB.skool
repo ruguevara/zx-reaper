@@ -18,15 +18,17 @@ c$8AEB LD HL,$5800   ; first attribute cell
  $8AEE LD A,(HL)     ;
 @isub=AND INK_MASK
  $8AEF AND $07       ;
+@isub=OUT (ULA_PORT),A
  $8AF1 OUT ($FE),A   ; border = ink of the first cell (before the step)
 @label=CycleColours_Cell
 *$8AF3 LD A,(HL)     ;
+@isub=ADD A,COLOUR_CYCLE_STEP
  $8AF4 ADD A,$03     ;
 @isub=AND INK_MASK
  $8AF6 AND $07       ; new ink
  $8AF8 LD D,A        ;
  $8AF9 LD A,(HL)     ;
-@isub=ADD A,3*PAPER
+@isub=ADD A,COLOUR_CYCLE_STEP*PAPER
  $8AFA ADD A,$18     ; paper + 3
 @isub=AND $FF-INK_MASK-BRIGHT
  $8AFC AND $B8       ; keep flash and paper, clear bright and ink
@@ -34,6 +36,7 @@ c$8AEB LD HL,$5800   ; first attribute cell
  $8AFF LD (HL),A     ;
  $8B00 INC HL        ;
  $8B01 LD A,H        ;
+@isub=CP (ATTRS+ATTRS_SIZE)>>8
  $8B02 CP $5B        ; until the address reaches $5B00
  $8B04 JR NZ,$8AF3   ;
  $8B06 RET           ;

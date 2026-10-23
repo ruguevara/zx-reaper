@@ -31,14 +31,14 @@
 @label=BuildRoomBuffers
 c$8D33 CALL $8D6B    ;
  $8D36 LD IX,$5E00   ; first half: cells 0-255
-@isub=LD A,ROOM_PIXEL_BUF/256
+@isub=LD A,ROOM_PIXEL_BUF>>8
  $8D3A LD A,$70      ;
 @isub=LD (SmcPixelBufPage+1),A
  $8D3C LD ($8D5D),A  ;
  $8D3F CALL $8D4B    ;
-@isub=LD IX,ROOM_ATTR_BUF+$100
+@isub=LD IX,ROOM_ATTR_BUF+THIRD_ATTRS_SIZE
  $8D42 LD IX,$5F00   ; second half: cells 256-511
-@isub=LD A,(ROOM_PIXEL_BUF+$800)/256
+@isub=LD A,(ROOM_PIXEL_BUF+THIRD_SIZE)>>8
  $8D46 LD A,$78      ;
 @isub=LD (SmcPixelBufPage+1),A
  $8D48 LD ($8D5D),A  ;

@@ -168,3 +168,60 @@ KEYROWS_BOTTOM           EQU 0x7EFE ; port that reads half rows CAPS SHIFT-V and
 KEMPSTON_LR_MASK         EQU 3 ; Kempston bits 0 (right) and 1 (left)
 KEY_0_BIT                EQU 0 ; bit of the 0-9 half row that is key 0
 Y_WRAPPED_MIN            EQU 0xF0 ; smallest Y index after a rise that means Willy has gone above the top of the room (Y wrapped below 0)
+CODE_PAPER_MASK          EQU 3*PAPER ; paper bits of a code slot colour after subtracting blue: 0-3 in bits 4-3
+FLASH                    EQU 0x80 ; attribute bit 7: flash
+WILLY_STATE_SIZE         EQU 7 ; bytes of Willy's state (Y, move state, air state, frame, attribute address, jump step) saved at room entry and restored after a death
+COLOUR_CYCLE_STEP        EQU 3 ; colour added to ink and paper in each step of the screen colour cycle
+SCROLL_PITCH_MASK        EQU 0x1F ; title scroll: the position in the message modulo 32 gives the pitch of the sound
+SCROLL_PITCH_BASE        EQU 0x32 ; title scroll: smallest pitch value of the sound
+DEBOUNCE_LOOPS           EQU 24 ; outer loops of 256 DJNZ passes of the colour-code key debounce (about 23 ms)
+GAME_OVER_COLUMN         EQU 15 ; game over: screen column of Willy, the barrel and the falling foot
+GAME_OVER_STEP           EQU 4 ; game over: counter step of the foot per pass (2 pixel rows)
+GAME_OVER_TOGGLES        EQU 64 ; game over: speaker toggles of the whistle in each step
+GAME_OVER_WORD_LEN       EQU 4 ; game over: letters of each of the words Game and Over
+GAME_OVER_FLASH_LOOPS    EQU 6 ; game over: outer loops of 256 DJNZ passes per colour step of the letters
+KEYBITS_NONE             EQU 0xFF ; key-bit byte with no direction key pressed (0 = pressed)
+KEYBITS_PAD_P            EQU 0x20 ; bit 5 of the key-bit byte: not a key in the P O I U Y row, forced to 1 (the left keys use it later)
+KEYROW_0_9_HI            EQU (KEYROW_0_9>>8) ; high byte of the port that reads 0 9 8 7 6
+KEY_8_BIT                EQU 2 ; bit of the 0-9 half row that is key 8 (key 7 is bit 3 and reaches bit 2 after a rotate)
+HI_BYTE                  EQU 256 ; multiplier that puts a value in the high byte of a register pair (B*HI_BYTE+C)
+ENT_TYPE                 EQU 0 ; entity byte 0: type, animation phase and direction
+ENT_ATTR                 EQU 1 ; entity byte 1 (guardian): ink and bright of the sprite, frame mask
+ENT_SWING                EQU 1 ; entity byte 1 (rope): swing position, bit 7 = side, bits 0-6 = distance
+ENT_COLUMN               EQU 2 ; entity byte 2 (guardian, rope): screen column, bits 5-7 frame offset (rope: column of the top)
+ENT_ARROW_Y              EQU 2 ; entity byte 2 (arrow): Y index of the centre row
+ENT_Y                    EQU 3 ; entity byte 3 (guardian): Y index
+ENT_ROPE_COLUMN          EQU 3 ; entity byte 3 (rope): scratch, column of the current rope point
+ENT_STEP                 EQU 4 ; entity byte 4 (vertical guardian): signed Y step per pass
+ENT_ARROW_X              EQU 4 ; entity byte 4 (arrow): X column
+ENT_ROPE_LENGTH          EQU 4 ; entity byte 4 (rope): length in segments
+ENT_PAGE                 EQU 5 ; entity byte 5 (guardian): high byte of the sprite page
+ENT_ARROW_MASK           EQU 5 ; entity byte 5 (arrow): scratch, collision mask
+ENT_ROPE_MASK            EQU 5 ; entity byte 5 (rope): scratch, pixel mask of the current rope point
+ENT_LIMIT_LOW            EQU 6 ; entity byte 6: left end of the beat (horizontal guardian) or top limit (vertical guardian)
+ENT_ARROW_FINS           EQU 6 ; entity byte 6 (arrow): pixel pattern of the fins
+ENT_LIMIT_HIGH           EQU 7 ; entity byte 7: right end of the beat (horizontal guardian), bottom limit (vertical guardian) or swing limit (rope)
+ROPE_SEGMENT             EQU 9 ; rope: segment counter, byte 1 of the entry after the rope (ENT_SIZE+1)
+ROPE_HELD                EQU 11 ; rope: byte 3 of the entry after the rope; bit 0 = this rope holds Willy
+ROPE_SIDE_LEFT           EQU 0x80 ; rope swing position bit 7: leaning left (also the value of distance 0 on the left side)
+ROPE_DIST_MASK           EQU 0x7F ; rope swing position bits 0-6: distance from hanging straight
+ROPE_STEP                EQU 2 ; swing distance change per half step; the rope takes two half steps near the middle
+ROPE_FAST_DOWN           EQU 0x14 ; swing distance after the first step below which a moving-to-middle rope takes a second step
+ROPE_FAST_UP             EQU 0x12 ; swing distance after the first step below which a moving-from-middle rope takes a second step
+ENTITY_LAST_PHASE        EQU 3 ; last animation phase of a guardian (phases 0-3)
+ENTITY_V_FLIP            EQU 8 ; entity byte 0 bit 3 (vertical guardian): flips every pass
+ENTITY_V_ANIM_MASK       EQU 0x18 ; entity byte 0 bits 3-4 (vertical guardian): the phase goes up when either is set after the flip
+Y_LOWER_HALF             EQU 0x80 ; Y index bit 7: set in the lower half of the room (character rows 8-15)
+Y_SNAP_MASK              EQU 0xF8 ; mask that rounds a Y index down to a multiple of 8 (4 pixel rows)
+Y_LOW_FLOOR              EQU 0xD0 ; Y index of the lowest floor (pixel row 104, character row 13)
+ANIM_FRAME_MASK          EQU 3 ; bits 0-1 of an animation frame (Willy's 4 frames per direction)
+THIRD_PAGES              EQU (THIRD_SIZE>>8) ; high-byte step between the thirds of the bitmap (and between the halves of the room buffers)
+ITEM_BEEP_START          EQU 0x80 ; pick-up beep: first value of the counter C (steps down by 2 to 2)
+ITEM_BEEP_DELAY          EQU 0x90 ; pick-up beep: delay B = ITEM_BEEP_DELAY - C, so the pitch falls
+ITEM_COLOURS             EQU 4 ; colours an item cycles through (magenta, green, cyan, yellow)
+FIGURE_ROW               EQU 11 ; Master Bedroom: character row of the top of the figure sprite
+FIGURE_COLUMN            EQU 14 ; Master Bedroom: character column of the figure sprite
+ROOM_NIGHTMARE           EQU 0x1D ; room number of The Nightmare Room, where Willy is drawn with the flapper sprites
+WILLY_FACING_HALF        EQU 0x80 ; offset of the right-facing half (frames 4-7) in a Willy sprite page
+RAMP_OFFSET_MASK         EQU 0x0C ; bits of the ramp Y offset of the Willy sprite (0, 4, 8 or 12 index units)
+TUNE_PASSES              EQU 100 ; passes of 256 inner iterations that one tune note lasts

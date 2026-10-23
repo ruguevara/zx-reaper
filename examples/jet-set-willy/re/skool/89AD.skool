@@ -93,6 +93,7 @@ c$89AD CALL $898B      ; lives in reserve
  $89FB LD BC,$1000     ;
  $89FE LDIR            ;
  $8A00 LD A,($85DF)    ;
+@isub=AND 1<<ENDING_AUTORUN_BIT
  $8A03 AND $02         ;
  $8A05 RRCA            ; 1 in stages 2 and 3, else 0
  $8A06 LD HL,$85D2     ;
@@ -109,6 +110,7 @@ c$89AD CALL $898B      ; lives in reserve
 @isub=AND PAPER_MASK
  $8A18 AND $38         ; paper colour = timer * 8, black ink
  $8A1A LD HL,$5C00     ;
+@isub=LD DE,SCREEN_ATTRS_BUF+1
  $8A1D LD DE,$5C01     ;
 @isub=LD BC,ROOM_ATTRS_SIZE-1
  $8A20 LD BC,$01FF     ;

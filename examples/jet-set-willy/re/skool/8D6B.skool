@@ -42,6 +42,7 @@ c$8D6B LD HL,$8000   ;
  $8D87 CALL $8DC0    ;
  $8D8A INC HL        ;
  $8D8B LD A,L        ; until HL reaches $8080
+@isub=AND ROOM_LAYOUT_SIZE
  $8D8C AND $80       ;
  $8D8E JR Z,$8D72    ;
  $8D90 LD A,($80D9)  ;
@@ -60,6 +61,7 @@ c$8D6B LD HL,$8000   ;
  $8DA9 LD A,($80DA)  ;
  $8DAC AND $01       ;
  $8DAE RLCA          ;
+@isub=ADD A,(-SCREEN_COLS-1)&$FF
  $8DAF ADD A,$DF     ; E = $DF or $E1: step -33 or -31 (D = $FF)
  $8DB1 LD E,A        ;
  $8DB2 LD D,$FF      ;

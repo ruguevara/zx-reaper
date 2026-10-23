@@ -58,7 +58,9 @@ c$88AE JP NZ,$88FC         ; NZ from #R$96A2: the tune was stopped by a start ke
  $88D4 LD C,$20            ;
  $88D6 CALL $9680          ; print the 32-character window on row 19
  $88D9 LD A,($85E4)        ;
+@isub=AND SCROLL_PITCH_MASK
  $88DC AND $1F             ; sound pitch depends on the position in the message
+@isub=ADD A,SCROLL_PITCH_BASE
  $88DE ADD A,$32           ; A = (offset AND $1F) + $32
  $88E0 CALL $96DE          ; sweep sound #R$96DE
 @isub=LD BC,KEYROW_START

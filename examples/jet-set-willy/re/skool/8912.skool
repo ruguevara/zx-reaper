@@ -29,6 +29,7 @@ c$8912 LD A,($8420)        ; room number
 @label=EnterRoom_Slot
 *$892B LD L,(IX+$00)       ; L = definition index of the slot
  $892E RES 7,L             ; bit 7 is ignored
+@isub=LD H,EntityDefs>>11
  $8930 LD H,$14            ; HL = $1400, times 8 below: $A000 + 8 * index
  $8932 ADD HL,HL           ;
  $8933 ADD HL,HL           ;
@@ -37,6 +38,7 @@ c$8912 LD A,($8420)        ; room number
  $8938 LDIR                ;
  $893A LD C,(IX+$01)       ; slot start byte replaces byte 2 of the definition (HL points to it) ...
  $893D LD (HL),C           ;
+@isub=LD BC,ENTITY_SIZE-2
  $893E LD BC,$0006         ; ... and the copy continues with bytes 2-7
  $8941 LDIR                ;
  $8943 INC IX              ; next slot
@@ -45,6 +47,7 @@ c$8912 LD A,($8420)        ; room number
  $8948 JR NZ,$892B         ;
  $894A LD HL,$85CF         ; save Willy's state $85CF-$85D5 at $85D7: position to restart from after a death (#R$8C3C copies it back)
  $894D LD DE,$85D7         ;
+@isub=LD BC,WILLY_STATE_SIZE
  $8950 LD BC,$0007         ;
  $8953 LDIR                ;
  $8955 CALL $8D33          ; expand the room into the empty-room buffers
@@ -63,9 +66,11 @@ c$8912 LD A,($8420)        ; room number
  $896E CALL $9680          ; room name on row 16
  $8971 LD IX,$8554         ;
  $8975 LD DE,$5060         ; status line text on row 19
+@isub=LD C,SCREEN_COLS
  $8978 LD C,$20            ;
  $897A CALL $9680          ;
  $897D LD A,($80DE)        ; border colour of the room
+@isub=LD C,ULA_PORT
  $8980 LD C,$FE            ;
  $8982 OUT (C),A           ;
  $8984 XOR A               ;
