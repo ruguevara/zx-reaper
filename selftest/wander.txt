@@ -1,0 +1,9 @@
+# fixture: wander right, down, left, up
+0   -
+10  P
+40  A
+60  O
+90  Q KF
+110 KR
+150 -
+300 END
