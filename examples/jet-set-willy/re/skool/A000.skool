@@ -1,129 +1,191 @@
-; Data block at A000
-b$A000 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $A008 DEFB $03,$22,$00,$00,$20,$00,$83,$36
- $A010 DEFB $02,$24,$00,$80,$02,$BF,$50,$D0
- $A018 DEFB $02,$2A,$00,$A0,$04,$BF,$58,$D0
- $A020 DEFB $12,$26,$00,$60,$08,$BF,$60,$C0
- $A028 DEFB $02,$25,$00,$40,$0C,$BF,$40,$C0
- $A030 DEFB $02,$25,$00,$40,$0A,$BF,$40,$B0
- $A038 DEFB $02,$65,$00,$64,$F4,$BF,$20,$A0
- $A040 DEFB $02,$6A,$00,$80,$06,$BF,$26,$B0
- $A048 DEFB $02,$2B,$00,$A0,$04,$BF,$80,$E0
- $A050 DEFB $12,$6D,$00,$60,$08,$BE,$10,$D0
- $A058 DEFB $12,$66,$00,$C0,$F6,$BF,$70,$C0
- $A060 DEFB $01,$64,$00,$70,$01,$BE,$13,$1D
- $A068 DEFB $01,$E4,$00,$40,$00,$BC,$00,$09
- $A070 DEFB $12,$6C,$00,$30,$0C,$B9,$00,$C0
- $A078 DEFB $12,$27,$00,$10,$04,$B0,$00,$20
- $A080 DEFB $02,$04,$00,$60,$02,$BA,$00,$B0
- $A088 DEFB $02,$04,$00,$60,$02,$BA,$00,$B0
- $A090 DEFB $12,$24,$00,$80,$02,$BA,$20,$D0
- $A098 DEFB $02,$0A,$00,$20,$02,$9C,$20,$60
- $A0A0 DEFB $01,$EA,$00,$A0,$00,$BC,$00,$0A
- $A0A8 DEFB $81,$E3,$00,$A0,$00,$BC,$0E,$1D
- $A0B0 DEFB $01,$E4,$00,$B0,$01,$BC,$10,$1D
- $A0B8 DEFB $01,$E6,$00,$80,$00,$BC,$05,$1D
- $A0C0 DEFB $01,$ED,$00,$50,$00,$BC,$00,$0A
- $A0C8 DEFB $01,$EB,$00,$70,$00,$BC,$0E,$17
- $A0D0 DEFB $01,$EA,$00,$30,$00,$B6,$05,$1E
- $A0D8 DEFB $12,$6A,$00,$90,$FC,$B2,$80,$D0
- $A0E0 DEFB $01,$E6,$00,$B0,$00,$BC,$0C,$1D
- $A0E8 DEFB $12,$65,$00,$30,$04,$B2,$00,$80
- $A0F0 DEFB $12,$E5,$00,$40,$FC,$AD,$00,$80
- $A0F8 DEFB $12,$23,$00,$90,$04,$B7,$40,$A0
- $A100 DEFB $01,$E5,$00,$D0,$01,$B8,$00,$1E
- $A108 DEFB $01,$E3,$00,$B0,$00,$B8,$10,$1A
- $A110 DEFB $81,$E5,$00,$D0,$01,$B8,$0E,$18
- $A118 DEFB $81,$EA,$00,$90,$00,$B8,$0F,$17
- $A120 DEFB $81,$65,$00,$D0,$00,$AF,$0A,$1E
- $A128 DEFB $01,$EA,$00,$A0,$00,$BC,$08,$18
- $A130 DEFB $01,$6E,$00,$60,$00,$AE,$02,$07
- $A138 DEFB $01,$65,$00,$80,$00,$AF,$0C,$12
- $A140 DEFB $12,$45,$00,$70,$04,$BA,$60,$C0
- $A148 DEFB $12,$66,$00,$96,$02,$BA,$90,$C0
- $A150 DEFB $12,$4B,$00,$90,$FA,$BA,$60,$AE
- $A158 DEFB $02,$4A,$00,$B0,$04,$BA,$90,$B8
- $A160 DEFB $12,$4A,$00,$40,$04,$BA,$00,$D0
- $A168 DEFB $12,$45,$00,$B0,$08,$BA,$00,$D0
- $A170 DEFB $01,$66,$00,$A0,$00,$BB,$00,$13
- $A178 DEFB $01,$6E,$00,$30,$00,$BB,$11,$1E
- $A180 DEFB $02,$2B,$00,$40,$06,$B7,$10,$D0
- $A188 DEFB $12,$26,$00,$C0,$04,$B7,$00,$D0
- $A190 DEFB $12,$24,$00,$80,$F8,$B7,$00,$D0
- $A198 DEFB $12,$2A,$00,$30,$02,$B7,$00,$A0
- $A1A0 DEFB $01,$E3,$00,$D0,$00,$B5,$07,$16
- $A1A8 DEFB $01,$EB,$00,$D0,$00,$B5,$04,$0E
- $A1B0 DEFB $01,$E6,$00,$D0,$00,$BD,$00,$18
- $A1B8 DEFB $81,$67,$00,$90,$00,$BB,$00,$05
- $A1C0 DEFB $81,$E4,$00,$60,$00,$BD,$00,$06
- $A1C8 DEFB $81,$63,$00,$30,$00,$BB,$00,$09
- $A1D0 DEFB $12,$67,$00,$40,$04,$AD,$20,$D0
- $A1D8 DEFB $01,$64,$00,$30,$00,$B9,$00,$1B
- $A1E0 DEFB $84,$06,$00,$00,$D0,$00,$82,$00
- $A1E8 DEFB $81,$66,$00,$50,$00,$AD,$10,$1E
- $A1F0 DEFB $02,$65,$00,$60,$02,$B9,$00,$70
- $A1F8 DEFB $FF,$00,$00,$00,$00,$00,$00,$00
- $A200 DEFB $01,$E3,$00,$30,$00,$B4,$00,$1B
- $A208 DEFB $81,$E6,$00,$60,$00,$B4,$04,$1B
- $A210 DEFB $01,$E4,$00,$90,$00,$B4,$02,$1B
- $A218 DEFB $81,$E6,$00,$C0,$00,$B4,$18,$1E
- $A220 DEFB $01,$E3,$00,$80,$00,$AE,$15,$1E
- $A228 DEFB $04,$06,$00,$00,$1C,$00,$41,$00
- $A230 DEFB $12,$65,$00,$40,$FC,$9C,$00,$A0
- $A238 DEFB $12,$23,$00,$20,$02,$9C,$00,$D0
- $A240 DEFB $12,$06,$00,$90,$06,$9C,$00,$C0
- $A248 DEFB $12,$6A,$00,$80,$F8,$9C,$10,$D0
- $A250 DEFB $81,$E4,$00,$50,$00,$B4,$04,$14
- $A258 DEFB $81,$E6,$00,$50,$00,$B4,$0C,$1C
- $A260 DEFB $21,$EA,$00,$90,$00,$B4,$09,$14
- $A268 DEFB $81,$E7,$00,$90,$00,$B4,$16,$1B
- $A270 DEFB $21,$E6,$00,$D0,$00,$B4,$05,$0C
- $A278 DEFB $41,$E9,$00,$D0,$00,$B4,$0B,$12
- $A280 DEFB $61,$E4,$00,$D0,$00,$B4,$10,$17
- $A288 DEFB $01,$E2,$00,$D0,$00,$B4,$17,$1E
- $A290 DEFB $02,$23,$00,$84,$04,$B0,$70,$B0
- $A298 DEFB $02,$26,$00,$8C,$04,$B0,$70,$B0
- $A2A0 DEFB $02,$29,$00,$94,$04,$B0,$70,$B0
- $A2A8 DEFB $02,$24,$00,$9C,$04,$B0,$70,$B0
- $A2B0 DEFB $02,$22,$00,$A4,$04,$B0,$70,$B0
- $A2B8 DEFB $02,$25,$00,$AC,$04,$B0,$70,$B0
- $A2C0 DEFB $01,$E6,$00,$A0,$00,$B5,$13,$1E
- $A2C8 DEFB $02,$26,$00,$60,$00,$B0,$50,$70
- $A2D0 DEFB $81,$63,$00,$30,$00,$AE,$00,$0B
- $A2D8 DEFB $01,$66,$00,$30,$00,$BE,$0D,$15
- $A2E0 DEFB $01,$67,$01,$60,$00,$B7,$0C,$18
- $A2E8 DEFB $81,$62,$00,$90,$00,$B9,$02,$06
- $A2F0 DEFB $01,$E4,$00,$C0,$00,$AF,$00,$1E
- $A2F8 DEFB $01,$E6,$00,$A0,$00,$BC,$09,$11
- $A300 DEFB $02,$6A,$00,$90,$FC,$AC,$00,$C0
- $A308 DEFB $12,$65,$00,$40,$08,$AC,$00,$C0
- $A310 DEFB $81,$66,$00,$90,$00,$AF,$07,$14
- $A318 DEFB $01,$64,$00,$60,$00,$AD,$07,$11
- $A320 DEFB $12,$64,$00,$80,$FE,$AC,$70,$A0
- $A328 DEFB $02,$6B,$00,$60,$04,$AB,$50,$A0
- $A330 DEFB $12,$65,$00,$98,$02,$AB,$50,$A0
- $A338 DEFB $01,$63,$00,$C0,$00,$B4,$00,$0F
- $A340 DEFB $01,$E6,$00,$20,$00,$BC,$00,$0A
- $A348 DEFB $01,$66,$00,$30,$00,$BE,$16,$1E
- $A350 DEFB $01,$6A,$00,$B0,$00,$AE,$11,$1E
- $A358 DEFB $81,$64,$00,$30,$00,$BE,$12,$16
- $A360 DEFB $81,$63,$00,$90,$00,$BB,$0B,$12
- $A368 DEFB $01,$E6,$00,$70,$00,$BC,$09,$1E
- $A370 DEFB $01,$63,$00,$D0,$00,$AE,$11,$1E
- $A378 DEFB $01,$63,$00,$B0,$00,$B5,$00,$0B
- $A380 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $A388 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $A390 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $A398 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $A3A0 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $A3A8 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $A3B0 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $A3B8 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $A3C0 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $A3C8 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $A3D0 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $A3D8 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $A3E0 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $A3E8 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $A3F0 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $A3F8 DEFB $FF,$00,$00,$00,$00,$00,$00
+; Entity definition table: 128 definitions of 8 bytes
+;
+; Entity definitions for the moving things of a room: horizontal movers, vertical movers, the swinging rope and the
+; flying dart (Willy is not one of them). A room lists up to 8 entities in its entity slots (#R$80F0, 2 bytes each:
+; definition index, start data). The definition for index I is at $A000+8*I. The code at $8922-$8948 (in the room
+; entry routine #R$88AE) copies each slot into the entity buffer (#R$8100): slot index bit 7 is dropped, the
+; definition's bytes +0 and +1 are copied, the slot's second byte is written over the definition's byte +2 (so the
+; table byte +2 is only a scratch byte, $00 in the image, rewritten at every room entry) and bytes +2 to +7 are
+; copied after it. The entity routines #R$90C0 (moves) and #R$91BE (draws) then work on the buffer; both stop at an
+; entry whose first byte is $FF.
+; .
+; Fields (buffer entry = definition with +2 taken from the slot). Types: 1 horizontal mover, 2 vertical mover,
+; 3 rope, 4 dart; 0 = nothing (skipped); types 5-7 are not defined. Types 1 and 2 are drawn as 16x16 sprites with
+; #R$9456, which tests collision against the background pixels: an overlap kills Willy.
+; .
+; +0 byte: bits 0-2 type (see above). The other bits are state that #R$90C0 changes. Type 1: bit 7 = direction (0
+; left, 1 right), bits 5-6 = animation phase 0-3 (counted down when going left, up when going right); the entity
+; steps one column every 4th pass, when the phase wraps (observed in the Bathroom). Type 2: bit 3 toggles every pass,
+; bit 4 set = the phase advances every pass, clear = every second pass; bits 5-7 = animation phase 0-7 (observed
+; with a poked entity: $02, $0A, $2A). Type 3: bit 7 = swing direction. Type 4: bit 7 = direction (0 left: byte +4
+; decreases; 1 right: it increases). $FF ends the list.
+; .
+; +1 byte: types 1 and 2: bits 0-2 ink, bit 3 bright (the paper comes from the background), bits 5-7 = mask. The
+; sprite is chosen as frame F = ((byte +0 AND byte +1) OR byte +2) >> 5 (bits 5-7), at page(+5)*256 + 32*F. The mask
+; lets the animation phase (and the direction bit 7 for type 1) select the frame; mask bits that are 0 leave the frame
+; to the slot's bits 5-7. Type 3 rope: swing position (index into #R$8300, bit 7 = side), changed by #R$90C0, which
+; reverses the swing when the low 7 bits equal byte +7. Type 4: not read ($06).
+; .
+; +2 byte (the slot's second byte): types 1-3: bits 0-4 = column (0-31) of the sprite's left cell, bits 5-7 = frame
+; offset OR-ed into the frame number (e.g. $8x selects frames 4-7). Type 4: Y position as an index into the row
+; address table (#R$8200), so 2 * pixel row (bit 7 = lower half of the screen); the slot values are even except $D5
+; for definition $45 in The Attic (room $29), which makes that dart read the table half a word off (inferred: its
+; pixels then land in unused memory at $9Fxx, only attribute cells are changed).
+; .
+; +3 byte: types 1 and 2: Y position as an index into the row address table (2 * pixel row); #R$90C0 adds the step
+; to it for type 2. Type 3: scratch (current column while the rope is drawn). Type 4: not read.
+; .
+; +4 byte: type 2: Y step added every pass (signed; $04 = 2 pixel rows down, $F4 = 6 rows up). Type 3: rope length in
+; segments ($20). Type 4: X position in cells; moves one cell per pass (observed), shown while it is 0-31; a short
+; beep (#R$91BE) is made when it reaches $2C (moving left) or $F4 (moving right), just before it enters the screen,
+; so it repeats every 256 passes. Type 1: not read (the definitions hold $00 or $01: Unknown).
+; .
+; +5 byte: types 1 and 2: sprite page (high byte of the sprite address; pages $A6-$BF and $9C, see the sprite
+; entries from #R$A600 and #R$9C40). Type 3 and 4: scratch (rope pixel mask; dart collision mask, $FF when the
+; background cell has white ink, which is the ink of Willy).
+; .
+; +6 byte: type 1: leftmost column; type 2: top limit of Y; type 4: pixel pattern drawn above and below the solid
+; centre line of the dart ($82 and $41 look like fins). Type 3: not read ($83).
+; .
+; +7 byte: type 1: rightmost column; type 2: bottom limit of Y; type 3: swing limit ($36); type 4: not read.
+; .
+; Limits: type 1 turns round when the column reaches byte +6 (going left) or +7 (going right). Type 2 reverses its
+; step when Y reaches or passes byte +7, and when it reaches or passes byte +6 (then also clamped to +6).
+; .
+; The rope scratches the next entry's bytes +1 and +3 (its work variables are at +9 and +11 of the rope's own
+; entry), so a rope is followed in the rooms by a dart or by the $FF terminator (rooms $10, $12, $19, $1F, $3A).
+; .
+; Indexes used by rooms $00-$3C: $01-$6F except $2B, plus $7F as the list terminator (slot index $FF, bit 7
+; dropped). Not used: $00 (empty entity), $2B (a complete vertical mover with page $BA faces), $3F (a second
+; $FF entry), $70-$7E (zeros). Rooms $3D-$3F do not hold valid room data. The comment on each line gives index, type,
+; limits, sprite page and frames, and the rooms (hex) whose slots use it.
+@label=EntityDefs
+b$A000 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; $00: empty entity (type 0); not used by rooms 00-3C
+ $A008 DEFB $03,$22,$00,$00,$20,$00,$83,$36 ; $01: type 3 rope, length $20, swing limit $36; rooms 10 12 19 1F 3A
+ $A010 DEFB $02,$24,$00,$80,$02,$BF,$50,$D0 ; $02: vertical mover (Y $50-$D0, step +2), page $BF spear guard/plumed guard (frames 4-7); rooms 05 0E 0F 11
+ $A018 DEFB $02,$2A,$00,$A0,$04,$BF,$58,$D0 ; $03: vertical mover (Y $58-$D0, step +4), page $BF spear guard (frames 4-5); rooms 05 0F 11
+ $A020 DEFB $12,$26,$00,$60,$08,$BF,$60,$C0 ; $04: vertical mover (Y $60-$C0, step +8), page $BF spear guard/plumed guard (frames 4-7); rooms 05 0E 0F 11
+ $A028 DEFB $02,$25,$00,$40,$0C,$BF,$40,$C0 ; $05: vertical mover (Y $40-$C0, step +12), page $BF spear guard (frames 4-5); rooms 0F 11
+ $A030 DEFB $02,$25,$00,$40,$0A,$BF,$40,$B0 ; $06: vertical mover (Y $40-$B0, step +10), page $BF stick figure (frames 0-1); rooms 03
+ $A038 DEFB $02,$65,$00,$64,$F4,$BF,$20,$A0 ; $07: vertical mover (Y $20-$A0, step -12), page $BF stick figure/plumed guard (frames 0-3,6-7); rooms 03 39
+ $A040 DEFB $02,$6A,$00,$80,$06,$BF,$26,$B0 ; $08: vertical mover (Y $26-$B0, step +6), page $BF stick figure (frames 0-3); rooms 03
+ $A048 DEFB $02,$2B,$00,$A0,$04,$BF,$80,$E0 ; $09: vertical mover (Y $80-$E0, step +4), page $BF stick figure (frames 0-1); rooms 08 09
+ $A050 DEFB $12,$6D,$00,$60,$08,$BE,$10,$D0 ; $0A: vertical mover (Y $10-$D0, step +8), page $BE dark ball (frames 4-7); rooms 00
+ $A058 DEFB $12,$66,$00,$C0,$F6,$BF,$70,$C0 ; $0B: vertical mover (Y $70-$C0, step -10), page $BF stick figure (frames 0-3); rooms 28 30
+ $A060 DEFB $01,$64,$00,$70,$01,$BE,$13,$1D ; $0C: horizontal mover (cols $13-$1D), page $BE stalk head (frames 0-3); rooms 00
+ $A068 DEFB $01,$E4,$00,$40,$00,$BC,$00,$09 ; $0D: horizontal mover (cols $00-$09), page $BC small flyer (both directions) (frames 0-7); rooms 0E 0F 10
+ $A070 DEFB $12,$6C,$00,$30,$0C,$B9,$00,$C0 ; $0E: vertical mover (Y $00-$C0, step +12), page $B9 fringed dome (frames 4-7); rooms 01
+ $A078 DEFB $12,$27,$00,$10,$04,$B0,$00,$20 ; $0F: vertical mover (Y $00-$20, step +4), page $B0 dressed figure (frames 4-5); rooms 0E
+ $A080 DEFB $02,$04,$00,$60,$02,$BA,$00,$B0 ; $10: vertical mover (Y $00-$B0, step +2), page $BA checkered blob (frames 4); rooms 06 1B 26
+ $A088 DEFB $02,$04,$00,$60,$02,$BA,$00,$B0 ; $11: vertical mover (Y $00-$B0, step +2), page $BA checkered blob (frames 5); rooms 06 1B 26
+ $A090 DEFB $12,$24,$00,$80,$02,$BA,$20,$D0 ; $12: vertical mover (Y $20-$D0, step +2), page $BA dripping fringe (frames 6-7); rooms 06 1B 26
+ $A098 DEFB $02,$0A,$00,$20,$02,$9C,$20,$60 ; $13: vertical mover (Y $20-$60, step +2), page $9C barrel (frames 3); rooms 14 22
+ $A0A0 DEFB $01,$EA,$00,$A0,$00,$BC,$00,$0A ; $14: horizontal mover (cols $00-$0A), page $BC small flyer (both directions) (frames 0-7); rooms 01 36
+ $A0A8 DEFB $81,$E3,$00,$A0,$00,$BC,$0E,$1D ; $15: horizontal mover (cols $0E-$1D) starts right, page $BC small flyer (both directions) (frames 0-7); rooms 01 04 14
+ $A0B0 DEFB $01,$E4,$00,$B0,$01,$BC,$10,$1D ; $16: horizontal mover (cols $10-$1D), page $BC small flyer (both directions) (frames 0-7); rooms 04 08
+ $A0B8 DEFB $01,$E6,$00,$80,$00,$BC,$05,$1D ; $17: horizontal mover (cols $05-$1D), page $BC small flyer (both directions) (frames 0-7); rooms 04
+ $A0C0 DEFB $01,$ED,$00,$50,$00,$BC,$00,$0A ; $18: horizontal mover (cols $00-$0A), page $BC small flyer (both directions) (frames 0-7); rooms 04 08 0C
+ $A0C8 DEFB $01,$EB,$00,$70,$00,$BC,$0E,$17 ; $19: horizontal mover (cols $0E-$17), page $BC small flyer (both directions) (frames 0-7); rooms 0D
+ $A0D0 DEFB $01,$EA,$00,$30,$00,$B6,$05,$1E ; $1A: horizontal mover (cols $05-$1E), page $B6 flapper (both directions) (frames 0-7); rooms 02 0B 0C 27
+ $A0D8 DEFB $12,$6A,$00,$90,$FC,$B2,$80,$D0 ; $1B: vertical mover (Y $80-$D0, step -4), page $B2 banner/round face (frames 0-7); rooms 09 25 28 3B
+ $A0E0 DEFB $01,$E6,$00,$B0,$00,$BC,$0C,$1D ; $1C: horizontal mover (cols $0C-$1D), page $BC small flyer (both directions) (frames 0-7); rooms 2D 38
+ $A0E8 DEFB $12,$65,$00,$30,$04,$B2,$00,$80 ; $1D: vertical mover (Y $00-$80, step +4), page $B2 banner/round face (frames 0-7); rooms 2C 2D 30 34
+ $A0F0 DEFB $12,$E5,$00,$40,$FC,$AD,$00,$80 ; $1E: vertical mover (Y $00-$80, step -4), page $AD razor blade (frames 4-7); rooms 2E 37
+ $A0F8 DEFB $12,$23,$00,$90,$04,$B7,$40,$A0 ; $1F: vertical mover (Y $40-$A0, step +4), page $B7 dome (frames 2-3); rooms 2E
+ $A100 DEFB $01,$E5,$00,$D0,$01,$B8,$00,$1E ; $20: horizontal mover (cols $00-$1E), page $B8 profile critter/hooded figure (frames 0-7); rooms 02
+ $A108 DEFB $01,$E3,$00,$B0,$00,$B8,$10,$1A ; $21: horizontal mover (cols $10-$1A), page $B8 profile critter/hooded figure (frames 0-7); rooms 15
+ $A110 DEFB $81,$E5,$00,$D0,$01,$B8,$0E,$18 ; $22: horizontal mover (cols $0E-$18) starts right, page $B8 profile critter/hooded figure (frames 0-7); rooms 12
+ $A118 DEFB $81,$EA,$00,$90,$00,$B8,$0F,$17 ; $23: horizontal mover (cols $0F-$17) starts right, page $B8 profile critter/hooded figure (frames 0-7); rooms 2E
+ $A120 DEFB $81,$65,$00,$D0,$00,$AF,$0A,$1E ; $24: horizontal mover (cols $0A-$1E) starts right, page $AF penknife/teardrop with spot (frames 0-7); rooms 04 22 34
+ $A128 DEFB $01,$EA,$00,$A0,$00,$BC,$08,$18 ; $25: horizontal mover (cols $08-$18), page $BC small flyer (both directions) (frames 0-7); rooms 26
+ $A130 DEFB $01,$6E,$00,$60,$00,$AE,$02,$07 ; $26: horizontal mover (cols $02-$07), page $AE two-legged walker (frames 0-3); rooms 20
+ $A138 DEFB $01,$65,$00,$80,$00,$AF,$0C,$12 ; $27: horizontal mover (cols $0C-$12), page $AF penknife/teardrop with spot (frames 0-7); rooms 07 2A
+ $A140 DEFB $12,$45,$00,$70,$04,$BA,$60,$C0 ; $28: vertical mover (Y $60-$C0, step +4), page $BA skull face (frames 0,2); rooms 14 15 2E
+ $A148 DEFB $12,$66,$00,$96,$02,$BA,$90,$C0 ; $29: vertical mover (Y $90-$C0, step +2), page $BA skull face (frames 1,3); rooms 14
+ $A150 DEFB $12,$4B,$00,$90,$FA,$BA,$60,$AE ; $2A: vertical mover (Y $60-$AE, step -6), page $BA skull face (frames 0,2); rooms 02 14 15
+ $A158 DEFB $02,$4A,$00,$B0,$04,$BA,$90,$B8 ; $2B: vertical mover (Y $90-$B8, step +4), page $BA; no room uses it
+ $A160 DEFB $12,$4A,$00,$40,$04,$BA,$00,$D0 ; $2C: vertical mover (Y $00-$D0, step +4), page $BA skull face (frames 1,3); rooms 00 08
+ $A168 DEFB $12,$45,$00,$B0,$08,$BA,$00,$D0 ; $2D: vertical mover (Y $00-$D0, step +8), page $BA skull face (frames 1-3); rooms 0D 1A
+ $A170 DEFB $01,$66,$00,$A0,$00,$BB,$00,$13 ; $2E: horizontal mover (cols $00-$13), page $BB balloon on legs (frames 4-7); rooms 0C
+ $A178 DEFB $01,$6E,$00,$30,$00,$BB,$11,$1E ; $2F: horizontal mover (cols $11-$1E), page $BB balloon on legs (frames 4-7); rooms 08
+ $A180 DEFB $02,$2B,$00,$40,$06,$B7,$10,$D0 ; $30: vertical mover (Y $10-$D0, step +6), page $B7 crowned creature (frames 0-1); rooms 17 18
+ $A188 DEFB $12,$26,$00,$C0,$04,$B7,$00,$D0 ; $31: vertical mover (Y $00-$D0, step +4), page $B7 crowned creature (frames 0-1); rooms 17 18
+ $A190 DEFB $12,$24,$00,$80,$F8,$B7,$00,$D0 ; $32: vertical mover (Y $00-$D0, step -8), page $B7 crowned creature (frames 0-1); rooms 17 18
+ $A198 DEFB $12,$2A,$00,$30,$02,$B7,$00,$A0 ; $33: vertical mover (Y $00-$A0, step +2), page $B7 dome (frames 2-3); rooms 37 39
+ $A1A0 DEFB $01,$E3,$00,$D0,$00,$B5,$07,$16 ; $34: horizontal mover (cols $07-$16), page $B5 spiky post (both directions) (frames 0-7); rooms 31 33 38
+ $A1A8 DEFB $01,$EB,$00,$D0,$00,$B5,$04,$0E ; $35: horizontal mover (cols $04-$0E), page $B5 spiky post (both directions) (frames 0-7); rooms 03 3B
+ $A1B0 DEFB $01,$E6,$00,$D0,$00,$BD,$00,$18 ; $36: horizontal mover (cols $00-$18), page $BD hatted bird (both directions) (frames 0-7); rooms 19
+ $A1B8 DEFB $81,$67,$00,$90,$00,$BB,$00,$05 ; $37: horizontal mover (cols $00-$05) starts right, page $BB cone (frames 0-3); rooms 19 2A
+ $A1C0 DEFB $81,$E4,$00,$60,$00,$BD,$00,$06 ; $38: horizontal mover (cols $00-$06) starts right, page $BD hatted bird (both directions) (frames 0-7); rooms 19
+ $A1C8 DEFB $81,$63,$00,$30,$00,$BB,$00,$09 ; $39: horizontal mover (cols $00-$09) starts right, page $BB cone (frames 0-3); rooms 19
+ $A1D0 DEFB $12,$67,$00,$40,$04,$AD,$20,$D0 ; $3A: vertical mover (Y $20-$D0, step +4), page $AD razor blade (frames 4-7); rooms 22
+ $A1D8 DEFB $01,$64,$00,$30,$00,$B9,$00,$1B ; $3B: horizontal mover (cols $00-$1B), page $B9 coil (frames 0-3); rooms 21
+ $A1E0 DEFB $84,$06,$00,$00,$D0,$00,$82,$00 ; $3C: type 4 dart moving right, pattern $82; rooms 07 09 0B 0F 10 25 29 2A 38 3A
+ $A1E8 DEFB $81,$66,$00,$50,$00,$AD,$10,$1E ; $3D: horizontal mover (cols $10-$1E) starts right, page $AD pincers (frames 0-3); rooms 09 2B
+ $A1F0 DEFB $02,$65,$00,$60,$02,$B9,$00,$70 ; $3E: vertical mover (Y $00-$70, step +2), page $B9 coil (frames 0-3); rooms 09
+ $A1F8 DEFB $FF,$00,$00,$00,$00,$00,$00,$00 ; $3F: terminator: first byte $FF ends the list; not used by any room
+ $A200 DEFB $01,$E3,$00,$30,$00,$B4,$00,$1B ; $40: horizontal mover (cols $00-$1B), page $B4 hatted walker (both directions) (frames 0-7); rooms 31
+ $A208 DEFB $81,$E6,$00,$60,$00,$B4,$04,$1B ; $41: horizontal mover (cols $04-$1B) starts right, page $B4 hatted walker (both directions) (frames 0-7); rooms 31
+ $A210 DEFB $01,$E4,$00,$90,$00,$B4,$02,$1B ; $42: horizontal mover (cols $02-$1B), page $B4 hatted walker (both directions) (frames 0-7); rooms 31
+ $A218 DEFB $81,$E6,$00,$C0,$00,$B4,$18,$1E ; $43: horizontal mover (cols $18-$1E) starts right, page $B4 hatted walker (both directions) (frames 0-7); rooms 1C
+ $A220 DEFB $01,$E3,$00,$80,$00,$AE,$15,$1E ; $44: horizontal mover (cols $15-$1E), page $AE arms-up figure on a drum (frames 4-7); rooms 2D
+ $A228 DEFB $04,$06,$00,$00,$1C,$00,$41,$00 ; $45: type 4 dart moving left, pattern $41; rooms 0B 0C 0F 11 24 29
+ $A230 DEFB $12,$65,$00,$40,$FC,$9C,$00,$A0 ; $46: vertical mover (Y $00-$A0, step -4), page $9C dressed figure with hat (frames 4-7); rooms 1D
+ $A238 DEFB $12,$23,$00,$20,$02,$9C,$00,$D0 ; $47: vertical mover (Y $00-$D0, step +2), page $9C dressed figure with hat (frames 4-7); rooms 1D
+ $A240 DEFB $12,$06,$00,$90,$06,$9C,$00,$C0 ; $48: vertical mover (Y $00-$C0, step +6), page $9C foot/dressed figure with hat (frames 2,4); rooms 1D
+ $A248 DEFB $12,$6A,$00,$80,$F8,$9C,$10,$D0 ; $49: vertical mover (Y $10-$D0, step -8), page $9C dressed figure with hat (frames 6-7); rooms 1D
+ $A250 DEFB $81,$E4,$00,$50,$00,$B4,$04,$14 ; $4A: horizontal mover (cols $04-$14) starts right, page $B4 hatted walker (both directions) (frames 0-7); rooms 13
+ $A258 DEFB $81,$E6,$00,$50,$00,$B4,$0C,$1C ; $4B: horizontal mover (cols $0C-$1C) starts right, page $B4 hatted walker (both directions) (frames 0-7); rooms 13
+ $A260 DEFB $21,$EA,$00,$90,$00,$B4,$09,$14 ; $4C: horizontal mover (cols $09-$14), page $B4 hatted walker (both directions) (frames 0-7); rooms 13
+ $A268 DEFB $81,$E7,$00,$90,$00,$B4,$16,$1B ; $4D: horizontal mover (cols $16-$1B) starts right, page $B4 hatted walker (both directions) (frames 0-7); rooms 13
+ $A270 DEFB $21,$E6,$00,$D0,$00,$B4,$05,$0C ; $4E: horizontal mover (cols $05-$0C), page $B4 hatted walker (both directions) (frames 0-7); rooms 13 1F
+ $A278 DEFB $41,$E9,$00,$D0,$00,$B4,$0B,$12 ; $4F: horizontal mover (cols $0B-$12), page $B4 hatted walker (both directions) (frames 0-7); rooms 13
+ $A280 DEFB $61,$E4,$00,$D0,$00,$B4,$10,$17 ; $50: horizontal mover (cols $10-$17), page $B4 hatted walker (both directions) (frames 0-7); rooms 13
+ $A288 DEFB $01,$E2,$00,$D0,$00,$B4,$17,$1E ; $51: horizontal mover (cols $17-$1E), page $B4 hatted walker (both directions) (frames 0-7); rooms 13
+ $A290 DEFB $02,$23,$00,$84,$04,$B0,$70,$B0 ; $52: vertical mover (Y $70-$B0, step +4), page $B0 ring on a stalk (frames 0-1); rooms 29
+ $A298 DEFB $02,$26,$00,$8C,$04,$B0,$70,$B0 ; $53: vertical mover (Y $70-$B0, step +4), page $B0 ring on a stalk (frames 0-1); rooms 29
+ $A2A0 DEFB $02,$29,$00,$94,$04,$B0,$70,$B0 ; $54: vertical mover (Y $70-$B0, step +4), page $B0 ring on a stalk (frames 0-1); rooms 29
+ $A2A8 DEFB $02,$24,$00,$9C,$04,$B0,$70,$B0 ; $55: vertical mover (Y $70-$B0, step +4), page $B0 ring on a stalk (frames 0-1); rooms 29
+ $A2B0 DEFB $02,$22,$00,$A4,$04,$B0,$70,$B0 ; $56: vertical mover (Y $70-$B0, step +4), page $B0 ring on a stalk (frames 0-1); rooms 29
+ $A2B8 DEFB $02,$25,$00,$AC,$04,$B0,$70,$B0 ; $57: vertical mover (Y $70-$B0, step +4), page $B0 chomping head (frames 2-3); rooms 29
+ $A2C0 DEFB $01,$E6,$00,$A0,$00,$B5,$13,$1E ; $58: horizontal mover (cols $13-$1E), page $B5 spiky post (both directions) (frames 0-7); rooms 0D 1E
+ $A2C8 DEFB $02,$26,$00,$60,$00,$B0,$50,$70 ; $59: vertical mover (Y $50-$70, step +0), page $B0 barred ornament (frames 6-7); rooms 0B 36
+ $A2D0 DEFB $81,$63,$00,$30,$00,$AE,$00,$0B ; $5A: horizontal mover (cols $00-$0B) starts right, page $AE two-legged walker (frames 0-3); rooms 16
+ $A2D8 DEFB $01,$66,$00,$30,$00,$BE,$0D,$15 ; $5B: horizontal mover (cols $0D-$15), page $BE stalk head (frames 0-3); rooms 16
+ $A2E0 DEFB $01,$67,$01,$60,$00,$B7,$0C,$18 ; $5C: horizontal mover (cols $0C-$18), page $B7 bars/spotted ball (frames 4-7); rooms 16 34
+ $A2E8 DEFB $81,$62,$00,$90,$00,$B9,$02,$06 ; $5D: horizontal mover (cols $02-$06) starts right, page $B9 coil (frames 0-3); rooms 16
+ $A2F0 DEFB $01,$E4,$00,$C0,$00,$AF,$00,$1E ; $5E: horizontal mover (cols $00-$1E), page $AF teardrop with spot (frames 4-7); rooms 16
+ $A2F8 DEFB $01,$E6,$00,$A0,$00,$BC,$09,$11 ; $5F: horizontal mover (cols $09-$11), page $BC small flyer (both directions) (frames 0-7); rooms 0B 16
+ $A300 DEFB $02,$6A,$00,$90,$FC,$AC,$00,$C0 ; $60: vertical mover (Y $00-$C0, step -4), page $AC barbed bars (frames 0-3); rooms 1A
+ $A308 DEFB $12,$65,$00,$40,$08,$AC,$00,$C0 ; $61: vertical mover (Y $00-$C0, step +8), page $AC barbed bars/spiral disc (frames 0-7); rooms 25 36
+ $A310 DEFB $81,$66,$00,$90,$00,$AF,$07,$14 ; $62: horizontal mover (cols $07-$14) starts right, page $AF penknife (frames 0-3); rooms 33
+ $A318 DEFB $01,$64,$00,$60,$00,$AD,$07,$11 ; $63: horizontal mover (cols $07-$11), page $AD pincers (frames 0-3); rooms 33
+ $A320 DEFB $12,$64,$00,$80,$FE,$AC,$70,$A0 ; $64: vertical mover (Y $70-$A0, step -2), page $AC barbed bars/spiral disc (frames 0-7); rooms 1B 1E
+ $A328 DEFB $02,$6B,$00,$60,$04,$AB,$50,$A0 ; $65: vertical mover (Y $50-$A0, step +4), page $AB spinning slab/crawler (frames 0-7); rooms 1E 24
+ $A330 DEFB $12,$65,$00,$98,$02,$AB,$50,$A0 ; $66: vertical mover (Y $50-$A0, step +2), page $AB spinning slab/crawler (frames 0-7); rooms 1B 1E
+ $A338 DEFB $01,$63,$00,$C0,$00,$B4,$00,$0F ; $67: horizontal mover (cols $00-$0F), page $B4 hatted walker (left) (frames 0-3); rooms 1B
+ $A340 DEFB $01,$E6,$00,$20,$00,$BC,$00,$0A ; $68: horizontal mover (cols $00-$0A), page $BC small flyer (both directions) (frames 0-7); rooms 24 30
+ $A348 DEFB $01,$66,$00,$30,$00,$BE,$16,$1E ; $69: horizontal mover (cols $16-$1E), page $BE stalk head (frames 0-3); rooms 3C
+ $A350 DEFB $01,$6A,$00,$B0,$00,$AE,$11,$1E ; $6A: horizontal mover (cols $11-$1E), page $AE two-legged walker (frames 0-3); rooms 2B
+ $A358 DEFB $81,$64,$00,$30,$00,$BE,$12,$16 ; $6B: horizontal mover (cols $12-$16) starts right, page $BE stalk head (frames 0-3); rooms 30
+ $A360 DEFB $81,$63,$00,$90,$00,$BB,$0B,$12 ; $6C: horizontal mover (cols $0B-$12) starts right, page $BB balloon on legs (frames 4-7); rooms 32
+ $A368 DEFB $01,$E6,$00,$70,$00,$BC,$09,$1E ; $6D: horizontal mover (cols $09-$1E), page $BC small flyer (both directions) (frames 0-7); rooms 32
+ $A370 DEFB $01,$63,$00,$D0,$00,$AE,$11,$1E ; $6E: horizontal mover (cols $11-$1E), page $AE two-legged walker (frames 0-3); rooms 3C
+ $A378 DEFB $01,$63,$00,$B0,$00,$B5,$00,$0B ; $6F: horizontal mover (cols $00-$0B), page $B5 spiky post (left) (frames 0-3); rooms 07
+ $A380 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; $70: unused, all zero
+ $A388 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; $71: unused, all zero
+ $A390 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; $72: unused, all zero
+ $A398 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; $73: unused, all zero
+ $A3A0 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; $74: unused, all zero
+ $A3A8 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; $75: unused, all zero
+ $A3B0 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; $76: unused, all zero
+ $A3B8 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; $77: unused, all zero
+ $A3C0 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; $78: unused, all zero
+ $A3C8 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; $79: unused, all zero
+ $A3D0 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; $7A: unused, all zero
+ $A3D8 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; $7B: unused, all zero
+ $A3E0 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; $7C: unused, all zero
+ $A3E8 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; $7D: unused, all zero
+ $A3F0 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; $7E: unused, all zero
+@label=EntityTerminatorDef
+ $A3F8 DEFB $FF,$00,$00,$00,$00,$00,$00 ; $7F: terminator: first byte $FF ends the list (used by rooms: slot index $FF; its byte +7 is #R$A3FF, see FirstItemIndex)
