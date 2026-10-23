@@ -8,7 +8,9 @@ description: Name and describe ZX Spectrum skool entries (routines, data, variab
 Input: a list of entry files (`re/skool/XXXX.skool`), usually from
 `tools/zxq.py next N`. Edit only those files. Other agents edit other files
 at the same time, so never edit `head.skool`, never run `make` (it shares
-`build/`); verify with `tools/zxq.py check` instead.
+`build/`); verify with `tools/zxq.py check` instead. Never delete, move,
+restore or regenerate `re/skool/` or any file you were not given (no
+`rm -rf`, no `zxq.py split`/`reclassify`): edit your files in place.
 
 ## Per entry
 

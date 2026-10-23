@@ -583,14 +583,18 @@ def cmd_export(asm_path, modules_path, outdir):
     entry goes to the last module starting at or before it. The ASM must have
     been written from the joined skool (same entry order)."""
     entries = [e for e in load() if e.ctype != 'i']
-    text = open(asm_path).read()
-    head, body = text.split('\n\n', 1) if '\n\n' in text else ('', text)
-    chunks = [c for c in re.split(r'\n\n+', body.strip('\n'))]
+    chunks = re.split(r'\n\n+', open(asm_path).read().strip('\n'))
+    # leading chunks of EQU/ORG lines only (from @equ and @org) are the header
+    directive = re.compile(r'^\s*(\w+\s+EQU\s|ORG\s)', re.I)
+    head = []
+    while chunks and all(directive.match(line) for line in chunks[0].split('\n')):
+        head.append(chunks.pop(0))
+    head = '\n\n'.join(head)
     if len(chunks) != len(entries):
         sys.exit('asm has %d entries, skool has %d: cannot split' % (len(chunks), len(entries)))
     mods = []
     for line in open(modules_path):
-        line = line.split('#')[0].split()
+        line = line.split('#')[0].split()   # `START NAME  # comment`
         if line:
             mods.append((parse_addr(line[0]), line[1]))
     mods.sort()
