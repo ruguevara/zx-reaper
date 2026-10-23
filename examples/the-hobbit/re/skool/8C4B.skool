@@ -1,30 +1,46 @@
-; Routine at 8C4B
-c$8C4B CALL $9D44    ;
- $8C4E LD IX,($B70C) ;
- $8C52 LD A,(IX+$01) ;
- $8C55 CP $FF        ;
- $8C57 JR Z,$8C95    ;
- $8C59 LD HL,$0080   ;
- $8C5C LD ($AFFD),HL ;
- $8C5F LD HL,$AFFC   ;
- $8C62 CALL $72DD    ;
- $8C65 PUSH IX       ;
- $8C67 LD A,(IX+$01) ;
- $8C6A CALL $9BCA    ;
- $8C6D CALL $A09D    ;
- $8C70 LD E,(IX+$08) ;
- $8C73 LD A,(IX+$09) ;
- $8C76 AND $0F       ;
- $8C78 LD D,A        ;
- $8C79 CALL $74C1    ;
- $8C7C LD A,$2E      ;
- $8C7E CALL $858B    ;
- $8C81 CALL $8583    ;
- $8C84 LD HL,$B003   ;
- $8C87 CALL $72DD    ;
- $8C8A POP IX        ;
- $8C8C LD A,(IX+$01) ;
- $8C8F LD B,(IX+$10) ;
- $8C92 JP $9FAF      ;
-*$8C95 LD A,(IX+$10) ;
- $8C98 JP $9630      ;
+; Look: say where the actor is and what is around
+;
+; Default handler of the verb look (CMD_LOOK, id 23; VerbHandlers). When the actor lies at
+; a location (holder AT_LOCATION) it describes the location with its picture and lists
+; (#R$9630). When the actor is inside a holder (a barrel, a boat) it prints
+; "<subj_is> <relation word> <holder name>." (for example "You are in the barrel."): the
+; preposition slot of MsgSubjIsIn is blanked with an empty word item ($80,$00) and the
+; relation word of the holder (#R$A09D: In the, On the...) is printed in its place.
+; Then "<subj> see :" and a list of what the holder holds at its location (#R$9FAF).
+; .
+; Hardware: none directly; the location description may show a picture and wait for a
+; key (#R$9630).
+@label=VerbLook
+c$8C4B CALL $9D44          ; only when really performing
+ $8C4E LD IX,($B70C)       ; the actor
+ $8C52 LD A,(IX+$01)       ; its holder
+@isub=CP AT_LOCATION
+ $8C55 CP $FF              ;
+ $8C57 JR Z,$8C95          ; lies at a location: describe it
+ $8C59 LD HL,$0080         ; empty word item ($80,$00): no preposition
+@isub=LD (MsgSubjIsIn+1),HL
+ $8C5C LD ($AFFD),HL       ; blank the preposition slot of the message
+ $8C5F LD HL,$AFFC         ; "<subj_is>"
+ $8C62 CALL $72DD          ; print it
+ $8C65 PUSH IX             ; keep the actor record
+ $8C67 LD A,(IX+$01)       ;
+ $8C6A CALL $9BCA          ; IX = record of the holder
+ $8C6D CALL $A09D          ; "In the" / "On the"... by the holder's state
+ $8C70 LD E,(IX+$08)       ; name phrase of the holder (+8, +9) without the print mode nibble
+ $8C73 LD A,(IX+$09)       ;
+ $8C76 AND $0F             ;
+ $8C78 LD D,A              ;
+ $8C79 CALL $74C1          ; print the holder's name
+@isub=LD A,CHAR_FULLSTOP
+ $8C7C LD A,$2E            ;
+ $8C7E CALL $858B          ; "."
+ $8C81 CALL $8583          ; new line
+ $8C84 LD HL,$B003         ; "<subj> see :"
+ $8C87 CALL $72DD          ;
+ $8C8A POP IX              ; the actor again
+ $8C8C LD A,(IX+$01)       ; A = the holder
+ $8C8F LD B,(IX+$10)       ; B = where the holder is
+ $8C92 JP $9FAF            ; list what it holds there
+@label=VerbLook_AtLocation
+*$8C95 LD A,(IX+$10)       ; the actor's location
+ $8C98 JP $9630            ; describe it (with picture)

@@ -1,14 +1,39 @@
-; Routine at 76EC
+; Parse a direction or an adverb (word classes 2 and 0)
+;
+; The handler of class 2 (north, up, down, ne...) in ActionTable; class 0
+; (adverbs such as "carefully", "please") enters at #R$76F2.
+; .
+; A direction that comes while the phrase still needs its command word
+; (PF_NEED_COMMAND) is a command by itself, "north": it goes to the verb handler (#R$7731).
+; Otherwise the word is the command's second word, which may be given once
+; (PF_DIRECTION_OK): after a verb, or after an adverb ("go north", "take
+; carefully"). After the nouns of EXCEPT the parser first returns to the main
+; record (#R$7858). The word is stored as the record's second command word (+2,
+; REC_WORD2) and parsing goes on with the next word. A second one, or one in
+; a phrase that has already used it, is refused with "What ?" (#R$7929).
+; .
+; BC The word (dictionary offset)
+; D Class of this word (set to 0 for a direction)
+; E Parser flags (see #R$7585)
+; IY Phrase record being built
+@label=ParseDirection
+@isub=BIT PF_NEED_COMMAND,E
 c$76EC BIT 1,E       ;
- $76EE JR NZ,$7731   ;
+ $76EE JR NZ,$7731   ; no command word yet: "north" is the command
  $76F0 LD D,$00      ;
- $76F2 BIT 2,E       ;
- $76F4 JP Z,$7929    ;
- $76F7 LD A,($B719)  ;
+; Entry point for the words of class 0.
+@label=ParseAdverb
+@isub=BIT PF_DIRECTION_OK,E
+*$76F2 BIT 2,E       ;
+ $76F4 JP Z,$7929    ; already used: RejectLine
+ $76F7 LD A,($B719)  ; AllStage
+@isub=CP ALL_STATE_EXCEPT
  $76FA CP $02        ;
  $76FC JR NZ,$7701   ;
- $76FE CALL $7858    ;
-*$7701 RES 2,E       ;
+ $76FE CALL $7858    ; PreviousRecord: back to the main record
+@isub=RES PF_DIRECTION_OK,E
+*$7701 RES 2,E       ; the second word is taken
+@isub=LD L,REC_WORD2
  $7703 LD L,$02      ;
- $7705 CALL $7918    ;
- $7708 JP $75B4      ;
+ $7705 CALL $7918    ; StoreRecordWord: second command word
+ $7708 JP $75B4      ; ParseNextWord

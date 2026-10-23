@@ -1,51 +1,106 @@
-; Routine at 7795
-c$7795 BIT 1,E         ;
- $7797 JR Z,$77A0      ;
- $7799 LD A,($B6DE)    ;
- $779C CP $A0          ;
- $779E JR Z,$7731      ;
-*$77A0 LD D,$70        ;
-*$77A2 CALL $781C      ;
-*$77A5 CALL $7873      ;
- $77A8 CP $70          ;
- $77AA JR Z,$77A2      ;
- $77AC CP $80          ;
- $77AE JR NZ,$77B9     ;
- $77B0 BIT 4,E         ;
- $77B2 CALL Z,$7924    ;
- $77B5 RES 4,E         ;
- $77B7 JR $77A5        ;
-*$77B9 CP $60          ;
- $77BB JR Z,$77C9      ;
- $77BD CP $50          ;
- $77BF JR Z,$77D1      ;
- $77C1 LD HL,($B6DA)   ;
- $77C4 LD ($B6DC),HL   ;
- $77C7 JR $77D7        ;
-*$77C9 CALL $7809      ;
- $77CC CALL $7873      ;
- $77CF JR $77B9        ;
-*$77D1 LD HL,$757F     ;
- $77D4 LD (HL),C       ;
- $77D5 INC HL          ;
- $77D6 LD (HL),B       ;
-*$77D7 LD D,$50        ;
- $77D9 LD A,($B719)    ;
- $77DC CP $02          ;
- $77DE JR NZ,$7802     ;
- $77E0 LD HL,($757B)   ;
- $77E3 LD A,H          ;
- $77E4 OR L            ;
- $77E5 JR NZ,$77FF     ;
- $77E7 BIT 6,(IY+$19)  ;
- $77EB JR NZ,$77F5     ;
- $77ED LD BC,$FFE8     ;
- $77F0 ADD IY,BC       ;
- $77F2 CALL $7864      ;
-*$77F5 CALL $7850      ;
- $77F8 LD (IY+$01),$40 ;
- $77FC JP $75B4        ;
-*$77FF CALL $7858      ;
-*$7802 CALL $782B      ;
- $7805 JP Z,$75B4      ;
- $7808 RET             ;
+; Parse "in" and the words of a noun phrase (word classes 1, 7, 6, 5)
+;
+; The handler of class 1 (in, into) in ActionTable. It either makes the word the
+; command word or treats it as a preposition, then falls into the loop that
+; reads one whole noun phrase, which the handlers of classes 7 (preposition),
+; 6 (adjective) and 5 (noun) also enter. A phrase is
+; .
+; [preposition ...] [article] [adjective ...] [noun]
+; .
+; with up to two prepositions (#R$781C), one article (a second one is refused,
+; #R$7924), any number of adjectives, two of which are kept (#R$7809), and one
+; noun, kept in the noun slot of ActionSlots ($757F). The first word that is
+; none of these is put back (WordListPtr is reset to InputLinePtr) and ends the
+; phrase. The slots are then copied into a block of the record (#R$782B) and
+; parsing goes on with the next word (#R$75B4).
+; .
+; "in" is a command by itself ("go in") when the phrase has no command word yet
+; and the word before it was AND (via #R$7731); in any other place it is a
+; preposition (D = TOKEN_PREPOSITION).
+; .
+; After EXCEPT (AllStage 2) the phrase is stored differently. A preposition
+; there means the phrase belongs to the main record, to which the parser
+; returns first (#R$7858). Otherwise each noun goes into a record of its own,
+; filled in block A (#R$7850) and flagged RECF_EXCEPT: the first one in the free
+; record below the main record (#R$7864), the following ones (after AND) in the
+; records that #R$75FA has started; these records are not counted in
+; ParserWordCount. They name the objects that ALL leaves out (#R$7A73).
+; .
+; BC The word (dictionary offset)
+; D Class of this word (the other entries set TOKEN_PREPOSITION, TOKEN_ADJECTIVE or TOKEN_NOUN)
+; E Parser flags (see #R$7585)
+; IY Phrase record being built
+@label=ParseIn
+c$7795 BIT 1,E       ; PF_NEED_COMMAND
+ $7797 JR Z,$77A0    ;
+ $7799 LD A,($B6DE)  ; WordFlags: class of the word before
+@isub=CP TOKEN_AND
+ $779C CP $A0        ;
+ $779E JR Z,$7731    ; ParseVerbAsCommand
+@isub=LD D,TOKEN_PREPOSITION
+*$77A0 LD D,$70      ;
+; Entry point for the words of class 7.
+@label=ParsePreposition
+*$77A2 CALL $781C    ; StorePreposition
+@label=ParsePhraseWord
+*$77A5 CALL $7873    ; ReadWord
+@isub=CP TOKEN_PREPOSITION
+ $77A8 CP $70        ;
+ $77AA JR Z,$77A2    ; another preposition
+@isub=CP TOKEN_ARTICLE
+ $77AC CP $80        ;
+ $77AE JR NZ,$77B9   ;
+@isub=BIT PF_ARTICLE_OK,E
+ $77B0 BIT 4,E       ; an article is allowed once
+ $77B2 CALL Z,$7924  ; RejectPhrase
+@isub=RES PF_ARTICLE_OK,E
+ $77B5 RES 4,E       ;
+ $77B7 JR $77A5      ;
+@isub=CP TOKEN_ADJECTIVE
+*$77B9 CP $60        ;
+ $77BB JR Z,$77C9    ;
+@isub=CP TOKEN_NOUN
+ $77BD CP $50        ;
+ $77BF JR Z,$77D1    ;
+ $77C1 LD HL,($B6DA) ; any other word: not part of the phrase,
+ $77C4 LD ($B6DC),HL ; put it back
+ $77C7 JR $77D7      ;
+; Entry point for the words of class 6.
+@label=ParseAdjective
+*$77C9 CALL $7809    ; StoreAdjective
+ $77CC CALL $7873    ; ReadWord
+ $77CF JR $77B9      ;
+; Entry point for the words of class 5.
+@label=ParseNoun
+@isub=LD HL,ActionSlots+4
+*$77D1 LD HL,$757F   ; the noun slot
+ $77D4 LD (HL),C     ;
+ $77D5 INC HL        ;
+ $77D6 LD (HL),B     ;
+@label=EndNounPhrase
+@isub=LD D,TOKEN_NOUN
+*$77D7 LD D,$50      ;
+ $77D9 LD A,($B719)  ; AllStage
+@isub=CP ALL_STATE_EXCEPT
+ $77DC CP $02        ;
+ $77DE JR NZ,$7802   ;
+ $77E0 LD HL,($757B) ; ActionSlots: first preposition
+ $77E3 LD A,H        ;
+ $77E4 OR L          ;
+ $77E5 JR NZ,$77FF   ; a preposition: the main record
+@isub=BIT RECF_EXCEPT,(IY+PARSED_RECORD_SIZE+1)
+ $77E7 BIT 6,(IY+$19) ; is the older record an EXCEPT record?
+ $77EB JR NZ,$77F5   ; yes: IY is already a free record for the next noun
+@isub=LD BC,-PARSED_RECORD_SIZE
+ $77ED LD BC,$FFE8   ;
+ $77F0 ADD IY,BC     ; else this is the first noun: the free record below
+ $77F2 CALL $7864    ; ClearRecord
+@label=StoreExceptNouns
+*$77F5 CALL $7850    ; StoreFirstPhraseBlock
+@isub=LD (IY+1),1<<RECF_EXCEPT
+ $77F8 LD (IY+$01),$40 ; RECF_EXCEPT
+ $77FC JP $75B4      ; ParseNextWord
+*$77FF CALL $7858    ; PreviousRecord
+*$7802 CALL $782B    ; StorePhraseBlock
+ $7805 JP Z,$75B4    ; ParseNextWord
+ $7808 RET           ;

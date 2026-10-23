@@ -1,7 +1,14 @@
-; Routine at 96A8
+; Show a visited location: its name and the lists, without the picture
 ;
-; Used by the routine at #R$8D9D.
-c$96A8 CALL $9BB1    ;
- $96AB CALL $9689    ;
- $96AE CALL $8583    ;
- $96B1 JR $967F      ;
+; The short description of a location the player has seen before (the long one
+; is #R$9630): prints the location's name as words (#R$9689), a new line, and
+; continues in #R$965B with the obstacles, the exits and the objects here.
+; .
+; Hardware: none.
+;
+; A Location id
+@label=DescribeLocationShort
+c$96A8 CALL $9BB1           ; IX = the record
+ $96AB CALL $9689           ; name only (no description message, no picture)
+ $96AE CALL $8583           ; new line
+ $96B1 JR $967F             ; ShowLocation_Lists

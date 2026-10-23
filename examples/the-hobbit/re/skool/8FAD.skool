@@ -1,17 +1,29 @@
-; Routine at 8FAD
-c$8FAD LD A,$0A      ;
- $8FAF CALL $9C9F    ;
- $8FB2 CP $00        ;
- $8FB4 JR Z,$8FAD    ;
-*$8FB6 LD B,A        ;
- $8FB7 CALL $9F08    ;
- $8FBA CP B          ;
- $8FBB JR Z,$8FC7    ;
- $8FBD LD A,B        ;
- $8FBE INC A         ;
- $8FBF CP $0A        ;
- $8FC1 JR C,$8FB6    ;
- $8FC3 LD A,$01      ;
- $8FC5 JR $8FB6      ;
-*$8FC7 LD ($B6E7),A  ;
- $8FCA JP $8D9D      ;
+; Run: move in a random direction that has an exit
+;
+; Default handler of run (id 36; VerbHandlers). Rolls a start direction with
+; RandomUpTo(DIR_DOWN) (0 is rolled again), then tries it and each next direction
+; (after DIR_UP it wraps to DIR_NORTH, so DIR_DOWN is only tried when it is rolled) until
+; #R$9F08 finds an exit of the actor's location. That direction becomes CommandId and the
+; walk continues in #R$8D9D. A location with no exit in the directions 1-9 (the steep
+; paths $4B-$4D have only down) loops here for ever unless 10 was rolled.
+@label=VerbRun
+@isub=LD A,DIR_DOWN
+c$8FAD LD A,$0A            ; random 0-10
+ $8FAF CALL $9C9F          ;
+ $8FB2 CP $00              ; 0 is not a direction
+ $8FB4 JR Z,$8FAD          ;
+@label=VerbRun_Try
+*$8FB6 LD B,A              ; B = the direction tried
+ $8FB7 CALL $9F08          ; is there an exit that way?
+ $8FBA CP B                ; the same: take it
+ $8FBB JR Z,$8FC7          ;
+ $8FBD LD A,B              ; next direction
+ $8FBE INC A               ;
+@isub=CP DIR_DOWN
+ $8FBF CP $0A              ;
+ $8FC1 JR C,$8FB6          ; below 10: try it
+@isub=LD A,DIR_NORTH
+ $8FC3 LD A,$01            ; wrap round to north
+ $8FC5 JR $8FB6            ;
+*$8FC7 LD ($B6E7),A        ; CommandId := the direction
+ $8FCA JP $8D9D            ; and move

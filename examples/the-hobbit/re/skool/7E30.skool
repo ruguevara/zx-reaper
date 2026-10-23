@@ -1,0 +1,25 @@
+; Report that the first noun phrase names nothing here
+;
+; Explain a first noun phrase with no words.
+; .
+; The player typed a verb with no noun ("take", "give"). The words the command
+; record shows before and after the noun are pushed with the verb (#R$7E7C)
+; for the message. When no object was accepted ($7940 is 0) it prints "I see
+; nothing to {verb} ..." ($ADE1). Otherwise the parsed record is saved (offset
+; $7954, the first noun phrase) so that the next line answers, and "{verb} ...
+; what ?" ($ADC4) is printed: "EXAMINE WHAT ?". Both end in #R$7D90.
+; .
+; O:A 0
+; O:F Z
+@label=ReportNoNoun1
+c$7E30 CALL $7E7C    ; PushWordsBefore
+ $7E33 LD HL,($7958) ; RecWord1: the verb
+ $7E36 PUSH HL       ;
+ $7E37 LD HL,$ADE1   ; "I see nothing to {WORD} {WORD} {WORD}"
+ $7E3A LD A,($7940)  ; RecWork3
+ $7E3D AND A         ;
+ $7E3E JP Z,$7D90    ; PrintReplyFail
+ $7E41 LD A,($7954)  ; RecWork6: offset of phrase 1
+ $7E44 CALL $7D74    ; SaveParsedRecord
+ $7E47 LD HL,$ADC4   ; "{WORD} {WORD} {WORD} what ?"
+ $7E4A JP $7D90      ;

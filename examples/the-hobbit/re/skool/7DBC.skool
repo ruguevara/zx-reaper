@@ -1,70 +1,57 @@
-; Routine at 7DBC
+; Explain why the noun phrases did not give one object each
 ;
-; Used by the routine at #R$79B6.
-c$7DBC LD A,($B71B)  ;
+; Entered by a jump from #R$79B6 when the search for the objects of a command
+; (#R$7A14) did not end with exactly one accepted object for each noun phrase.
+; It prints a question or a complaint, or lets the command print its own
+; refusal, and so takes the place of #R$79B6's return: the Z result with A 0
+; goes back to the caller of #R$79B6 (#R$7960), which then has nothing to
+; execute; the paths through #R$7DF5 go on at #R$798E, the end of that record.
+; The decisions, in order:
+; .
+; 1. The words come from an order (InputFromOrder 1, SAY TO): return Z at once,
+; silently.
+; .
+; 2. ALL was typed (VerbAllFlag): the objects of ALL are used up. Silently go to
+; the next record (#R$7994).
+; .
+; 3. Exactly one accepted object for the first noun phrase (RecWork3 $7940 is
+; 1): the second phrase is the trouble (#R$7D98).
+; .
+; 4. No words typed for the first phrase: #R$7E30.
+; .
+; 5. Words typed and no object or place fits them: #R$7DFE.
+; .
+; 6. Candidates found (RecWork2 $793F counts those that passed the check of
+; the command for one object): none passed, so #R$7DF5 prints the refusal; one
+; passed and a second noun is still needed, #R$7D98; one passed and the full
+; check refused it, #R$7DF5; several passed, so ask "Which {word} ?" (#R$7D83).
+; .
+; Bits 0 and 1 of RecWork ($793D) say that the first phrase had words and that
+; some object fitted them.
+@label=ExplainNounFailure
+c$7DBC LD A,($B71B)  ; InputFromOrder
  $7DBF DEC A         ;
- $7DC0 RET Z         ;
- $7DC1 LD A,($B71C)  ;
+ $7DC0 RET Z         ; an order: nothing is said
+ $7DC1 LD A,($B71C)  ; VerbAllFlag
  $7DC4 AND A         ;
  $7DC5 JR Z,$7DCB    ;
- $7DC7 POP HL        ;
- $7DC8 JP $7994      ;
-*$7DCB LD A,($7940)  ;
+ $7DC7 POP HL        ; ALL: drop the return address
+ $7DC8 JP $7994      ; next record
+*$7DCB LD A,($7940)  ; RecWork3: accepted objects for phrase 1
  $7DCE CP $01        ;
- $7DD0 JR Z,$7D98    ;
- $7DD2 LD HL,$793D   ;
- $7DD5 BIT 0,(HL)    ;
- $7DD7 JP Z,$7E30    ;
- $7DDA BIT 1,(HL)    ;
- $7DDC LD HL,$7942   ;
- $7DDF LD DE,$B6E8   ;
- $7DE2 LD BC,$B6FE   ;
- $7DE5 JR Z,$7DFE    ;
- $7DE7 LD A,($793F)  ;
+ $7DD0 JR Z,$7D98    ; ExplainNoun2Failure
+ $7DD2 LD HL,$793D   ; RecWork
+ $7DD5 BIT 0,(HL)    ; words typed for phrase 1?
+ $7DD7 JP Z,$7E30    ; ReportNoNoun1
+ $7DDA BIT 1,(HL)    ; an object fitted?
+ $7DDC LD HL,$7942   ; RecBuf1
+ $7DDF LD DE,$B6E8   ; FirstObject
+ $7DE2 LD BC,$B6FE   ; Noun1Kind
+ $7DE5 JR Z,$7DFE    ; FindNounElsewhere
+ $7DE7 LD A,($793F)  ; RecWork2: candidates that passed the check
  $7DEA AND A         ;
- $7DEB JR Z,$7DF5    ;
+ $7DEB JR Z,$7DF5    ; none: PerformRefusal
  $7DED DEC A         ;
- $7DEE JR NZ,$7D83   ;
- $7DF0 CALL $7AD8    ;
- $7DF3 JR NZ,$7D98   ;
-; This entry point is used by the routines at #R$7960 and #R$7D98.
-*$7DF5 CALL $7D6B    ;
- $7DF8 CALL $950F    ;
- $7DFB JP $798E      ;
-; This entry point is used by the routine at #R$7D98.
-*$7DFE PUSH HL       ;
- $7DFF CALL $9E95    ;
- $7E02 LD A,$01      ;
- $7E04 LD (BC),A     ;
- $7E05 CALL $9EA0    ;
- $7E08 CP $FF        ;
- $7E0A JR NZ,$7E20   ;
- $7E0C POP HL        ;
- $7E0D LD A,$02      ;
- $7E0F LD ($B710),A  ;
- $7E12 LD IX,$C060   ;
- $7E16 XOR A         ;
- $7E17 LD (BC),A     ;
- $7E18 PUSH HL       ;
- $7E19 CALL $9DD9    ;
- $7E1C CP $FF        ;
- $7E1E JR Z,$7E25    ;
-*$7E20 POP HL        ;
- $7E21 LD (DE),A     ;
- $7E22 JP $711A      ;
-*$7E25 CALL $7D6B    ;
- $7E28 LD HL,$ADD3   ;
- $7E2B CALL $72D3    ;
- $7E2E XOR A         ;
- $7E2F RET           ;
-*$7E30 CALL $7E7C    ;
- $7E33 LD HL,($7958) ;
- $7E36 PUSH HL       ;
- $7E37 LD HL,$ADE1   ;
- $7E3A LD A,($7940)  ;
- $7E3D AND A         ;
- $7E3E JP Z,$7D90    ;
- $7E41 LD A,($7954)  ;
- $7E44 CALL $7D74    ;
- $7E47 LD HL,$ADC4   ;
- $7E4A JP $7D90      ;
+ $7DEE JR NZ,$7D83   ; several: AskWhichNoun1
+ $7DF0 CALL $7AD8    ; NeedSecondNoun
+ $7DF3 JR NZ,$7D98   ; ExplainNoun2Failure

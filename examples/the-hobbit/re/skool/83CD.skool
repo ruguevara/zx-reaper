@@ -1,8 +1,9 @@
-; Table of messages by game state (11 records) and its end
+; HELP hints by location (11 records)
 ;
-; Records of 3 bytes: id, message address. FF ends. Looked up by $9DBD with
-; A=($C12B) at $83B0; the message is printed with $72DD.
-@label=StateMessageTable
+; Records of 3 bytes: location id, hint message address; $FF ends. HELP
+; (#R$83A0) looks up the player's location ($C12B) with #R$9DBD and prints the
+; hint, or "You're doing fine." when there is none.
+@label=HintTable
 b$83CD DEFB $06
  $83CE DEFW $B47A
  $83D0 DEFB $09

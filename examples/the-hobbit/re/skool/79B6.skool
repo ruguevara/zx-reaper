@@ -1,43 +1,68 @@
-; Routine at 79B6
+; Match a phrase record to a command and find its objects
 ;
-; Used by the routines at #R$7960 and #R$7F1A.
+; Takes the parsed sentence at IY and prepares everything the check and the
+; verb handlers need: FirstObject and SecondObject start as NO_OBJECT; the
+; record workspace is cleared (#R$79A9); MatchCommand finds the command table
+; record that fits the verb and prepositions (Z here: nothing fits and a message
+; has been printed). The record's number (1-59) becomes CommandId and its
+; address goes to RecPtr3. The flags of the command are unpacked (#R$7B78) and
+; the scan for the first noun is set up (#R$7AA1). ActionPerform is set to 0
+; (test pass).
+; .
+; A command with no nouns (bits 2-3 of StateB71D clear) is ready. For the
+; others #R$7A14 finds the objects the noun phrases mean and puts them in
+; FirstObject and SecondObject; if it cannot, #R$7DBC prints why (I see nothing
+; to ..., or asks what is meant) and the sentence ends there. When ALL was typed
+; (RecWork4 holds the ALL flag; it is copied to VerbAllFlag) the objects come one
+; by one, once per call: an object that EXCEPT names is passed over (#R$7A73)
+; and the scan carries on at the next one.
+; .
+; Hardware: none.
+;
+; IY Parsed phrase record
+; O:F NZ when the sentence is matched and its objects are found, Z when it
+; is not (the message is already printed)
+; O:IX Command table record
+@label=MatchSentence
 c$79B6 LD A,$FF      ;
- $79B8 LD ($B6E9),A  ;
- $79BB LD ($B6E8),A  ;
- $79BE CALL $79A9    ;
- $79C1 CALL $7B9E    ;
- $79C4 RET Z         ;
- $79C5 LD A,$01      ;
+ $79B8 LD ($B6E9),A  ; SecondObject: none
+ $79BB LD ($B6E8),A  ; FirstObject: none
+ $79BE CALL $79A9    ; ResetRecWork
+ $79C1 CALL $7B9E    ; MatchCommand
+ $79C4 RET Z         ; no command fits
+ $79C5 LD A,$01      ; A: the record's index in CommandTable, from 1
  $79C7 PUSH IX       ;
  $79C9 POP HL        ;
- $79CA LD DE,$AB53   ;
+ $79CA LD DE,$AB53   ; CommandTable
  $79CD SBC HL,DE     ;
  $79CF JR Z,$79D9    ;
+@isub=LD DE,COMMAND_RECORD_SIZE
  $79D1 LD DE,$0008   ;
 *$79D4 INC A         ;
  $79D5 SBC HL,DE     ;
  $79D7 JR NZ,$79D4   ;
-*$79D9 LD ($B6E7),A  ;
- $79DC LD ($B6E6),A  ;
- $79DF LD ($795E),IX ;
- $79E3 CALL $7B78    ;
- $79E6 CALL $7AA1    ;
+*$79D9 LD ($B6E7),A  ; CommandId
+ $79DC LD ($B6E6),A  ; SavedCommandId
+ $79DF LD ($795E),IX ; RecPtr3
+ $79E3 CALL $7B78    ; UnpackFlags
+ $79E6 CALL $7AA1    ; StartNounScan1
  $79E9 XOR A         ;
- $79EA LD ($B6FA),A  ;
- $79ED LD A,($B71D)  ;
- $79F0 AND $0C       ;
- $79F2 JR Z,$7A11    ;
- $79F4 LD A,($7952)  ;
- $79F7 LD ($B71C),A  ;
+ $79EA LD ($B6FA),A  ; ActionPerform: test pass
+ $79ED LD A,($B71D)  ; StateB71D: command flags
+ $79F0 AND $0C       ; does the command take nouns?
+ $79F2 JR Z,$7A11    ; no
+ $79F4 LD A,($7952)  ; RecWork4: the ALL flag of the first word
+ $79F7 LD ($B71C),A  ; VerbAllFlag
  $79FA RLCA          ;
  $79FB AND $01       ;
- $79FD LD ($7953),A  ;
-*$7A00 CALL $7A14    ;
- $7A03 JP NZ,$7DBC   ;
- $7A06 LD A,($B71C)  ;
+ $79FD LD ($7953),A  ; RecWork5: 1 when ALL
+@label=MatchSentence_Object
+*$7A00 CALL $7A14    ; ResolveNouns
+ $7A03 JP NZ,$7DBC   ; no (or no single) object: say so
+ $7A06 LD A,($B71C)  ; VerbAllFlag
  $7A09 AND A         ;
- $7A0A JR Z,$7A11    ;
- $7A0C CALL $7A73    ;
- $7A0F JR NZ,$7A00   ;
+ $7A0A JR Z,$7A11    ; not ALL: done
+ $7A0C CALL $7A73    ; IsExcluded: EXCEPT names this object?
+ $7A0F JR NZ,$7A00   ; yes: take the next object
 *$7A11 OR $01        ;
- $7A13 RET           ;
+ $7A13 RET           ; NZ

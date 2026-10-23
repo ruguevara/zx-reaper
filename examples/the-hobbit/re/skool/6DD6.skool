@@ -1,61 +1,101 @@
-; Routine at 6DD6
+; Read a typed line from the keyboard
 ;
-; Used by the routine at #R$6C00.
+; The line editor. Prints the prompt "> " in the input window, then reads keys
+; (#R$7249, which types WAIT by itself when the player is idle) and builds
+; the line in InputLine ($6FF9, up to 128 characters, closed by a CR that is
+; stored in the buffer).
+; .
+; Keys: a cursor key as the first key of a line becomes a one-letter compass
+; command (#R$6E4F: up N, down S, right E, left W) and ends the line.
+; DELETE (CAPS SHIFT+0) erases the whole line (#R$6E8B). Back-space (the left
+; cursor key) removes the last character. Characters are accepted when they
+; are letters or later ($40 and up), a space, a double quote, a full stop, a
+; comma or the CR; digits and other punctuation are ignored. "@" as the first
+; key of an empty line repeats the previous line (#R$6E7A). Each accepted
+; character is echoed in the input window; its code is also stored in
+; CapitalNext, which is then not 0, so the next story text starts with a capital
+; (the code itself does not matter).
+; When the buffer is full further characters are ignored until CR.
+; .
+; Hardware: polls the keyboard (through #R$7249) and echoes in the input
+; window (the output goes there because RawOutputFlag is set).
+;
+; O:A CR after a typed line, 0 after "@"
+; O:F NZ when a line was typed (InputLine holds it), Z when "@" asked for the previous line
+@label=ReadLine
+@isub=LD HL,IDLE_SCANS_MAX
 c$6DD6 LD HL,$0BB8   ;
- $6DD9 LD ($B714),HL ;
+ $6DD9 LD ($B714),HL ; IdleCounter: start counting the idle time
  $6DDC LD A,$01      ;
- $6DDE LD ($B701),A  ;
- $6DE1 LD ($B6FA),A  ;
+ $6DDE LD ($B701),A  ; RawOutputFlag: echo in the input window
+ $6DE1 LD ($B6FA),A  ; ActionPerform
+@isub=LD A,CHAR_PROMPT
  $6DE4 LD A,$3E      ;
- $6DE6 CALL $858B    ;
+ $6DE6 CALL $858B    ; PrintChar
+@isub=LD A,CHAR_SPACE
  $6DE9 LD A,$20      ;
  $6DEB CALL $858B    ;
- $6DEE LD HL,$6FF9   ;
- $6DF1 LD B,$80      ;
-*$6DF3 LD C,$00      ;
+ $6DEE LD HL,$6FF9   ; InputLine
+@isub=LD B,INPUT_LINE_SIZE
+ $6DF1 LD B,$80      ; B: free bytes in the buffer, bit 7 set while empty
+@label=ReadLine_Start
+*$6DF3 LD C,$00      ; C: 0 until the first key of the line is in
 ; This entry point is used by the routine at #R$6E7A.
-*$6DF5 CALL $7249    ;
+@label=ReadLine_Key
+*$6DF5 CALL $7249    ; WaitKey
  $6DF8 BIT 7,B       ;
  $6DFA JR Z,$6E01    ;
- $6DFC CP $40        ;
- $6DFE JP Z,$6E7A    ;
-*$6E01 BIT 0,C       ;
- $6E03 CALL Z,$6E4F  ;
+@isub=CP CHAR_AT
+ $6DFC CP $40        ; "@" on an empty line ...
+ $6DFE JP Z,$6E7A    ; ... repeats the previous line
+ $6E01 BIT 0,C       ;
+ $6E03 CALL Z,$6E4F  ; first key of the line: CursorKeyToWord
  $6E06 LD C,$01      ;
+@isub=CP KEY_DELETE
  $6E08 CP $18        ;
  $6E0A JR NZ,$6E11   ;
- $6E0C CALL $6E8B    ;
- $6E0F JR $6DF3      ;
+ $6E0C CALL $6E8B    ; EraseInputLine
+ $6E0F JR $6DF3      ; and start the line again
+@isub=CP CHAR_BACKSPACE
 *$6E11 CP $08        ;
  $6E13 JR NZ,$6E22   ;
  $6E15 BIT 7,B       ;
- $6E17 JR NZ,$6DF5   ;
+ $6E17 JR NZ,$6DF5   ; empty line: nothing to remove
+@isub=LD A,CHAR_BACKSPACE
  $6E19 LD A,$08      ;
- $6E1B CALL $858B    ;
+ $6E1B CALL $858B    ; rub out the last character on the screen
  $6E1E INC B         ;
  $6E1F DEC HL        ;
  $6E20 JR $6DF5      ;
+@isub=CP CHAR_AT
 *$6E22 CP $40        ;
- $6E24 JR NC,$6E3A   ;
+ $6E24 JR NC,$6E3A   ; letters and later: accept
+@isub=CP CHAR_QUOTE
  $6E26 CP $22        ;
  $6E28 JR Z,$6E3A    ;
+@isub=CP CHAR_SPACE
  $6E2A CP $20        ;
  $6E2C JR Z,$6E3A    ;
+@isub=CP CHAR_CR
  $6E2E CP $0D        ;
  $6E30 JR Z,$6E3A    ;
+@isub=CP CHAR_FULLSTOP
  $6E32 CP $2E        ;
  $6E34 JR Z,$6E3A    ;
+@isub=CP CHAR_COMMA
  $6E36 CP $2C        ;
- $6E38 JR NZ,$6DF5   ;
-*$6E3A LD ($B704),A  ;
+ $6E38 JR NZ,$6DF5   ; anything else: ignore the key
+@label=ReadLine_Accept
+ $6E3A LD ($B704),A  ; CapitalNext: not 0, the next story text starts with a capital
  $6E3D DEC B         ;
  $6E3E INC B         ;
- $6E3F JR Z,$6E47    ;
- $6E41 CALL $858B    ;
+ $6E3F JR Z,$6E47    ; buffer full: do not store
+ $6E41 CALL $858B    ; echo
  $6E44 LD (HL),A     ;
  $6E45 INC HL        ;
  $6E46 DEC B         ;
+@isub=CP CHAR_CR
 *$6E47 CP $0D        ;
- $6E49 JP NZ,$6DF5   ;
- $6E4C OR $01        ;
+ $6E49 JP NZ,$6DF5   ; until CR
+ $6E4C OR $01        ; NZ: a line was typed
  $6E4E RET           ;

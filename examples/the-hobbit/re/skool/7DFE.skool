@@ -1,0 +1,52 @@
+; Find a named object out of reach and say where it is
+;
+; Try a rejected noun phrase as a place or as any object.
+; .
+; The words fitted no object of the kind the command takes. A noun phrase can
+; still be a place of the exits of the actor's location ("take lonelands") or
+; an object of another kind, such as a person for a verb that wants a thing
+; ("eat Gandalf"). The routine looks for the words first among the exits, then
+; among all the objects (AllMode ANY, within reach unless AllActive is set). If one is found it becomes
+; the noun and the command is refused with "You cannot {verb} {noun}." (#R$711A
+; with ActionAllowed 0, so the sentence #R$712B goes to the input window). If
+; none is found the message "I do not see {THING} here" is printed, the
+; address of the typed words being the {THING}.
+; .
+; Entered from #R$7D98 as well.
+; .
+; HL The typed noun phrase (RecBuf1 or RecBuf2)
+; DE Variable to receive the found noun (FirstObject or SecondObject)
+; BC Variable of the noun's kind (Noun1Kind or Noun2Kind), set here
+; O:A 0
+; O:F Z
+@label=FindNounElsewhere
+c$7DFE PUSH HL       ;
+ $7DFF CALL $9E95    ; SeekActorExits
+@isub=LD A,NOUN_PLACE
+ $7E02 LD A,$01      ;
+ $7E04 LD (BC),A     ; the noun is a place
+ $7E05 CALL $9EA0    ; FindExitByName
+@isub=CP END_MARK
+ $7E08 CP $FF        ;
+ $7E0A JR NZ,$7E20   ; found
+ $7E0C POP HL        ;
+@isub=LD A,ALL_MODE_ANY
+ $7E0D LD A,$02      ;
+ $7E0F LD ($B710),A  ; AllMode: any kind of object
+@isub=LD IX,ObjectTable-3
+ $7E12 LD IX,$C060   ;
+ $7E16 XOR A         ;
+ $7E17 LD (BC),A     ; the noun is an object
+ $7E18 PUSH HL       ; kept for the message
+ $7E19 CALL $9DD9    ; FindNextNamedObject
+@isub=CP END_MARK
+ $7E1C CP $FF        ;
+ $7E1E JR Z,$7E25    ; nothing of that name
+*$7E20 POP HL        ;
+ $7E21 LD (DE),A     ; the noun
+ $7E22 JP $711A      ; StartPerform: "You cannot ..."
+*$7E25 CALL $7D6B    ; SetPerformMode
+ $7E28 LD HL,$ADD3   ; "I do not see {THING} here"
+ $7E2B CALL $72D3    ;
+ $7E2E XOR A         ;
+ $7E2F RET           ;

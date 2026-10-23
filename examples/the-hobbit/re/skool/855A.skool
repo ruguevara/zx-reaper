@@ -1,16 +1,37 @@
-; Routine at 855A
+; Verify one tape block of SAVE
 ;
-; Used by the routine at #R$84CC.
-c$855A CALL $0556    ;
- $855D RET C         ;
- $855E LD A,$01      ;
- $8560 LD ($B701),A  ;
- $8563 LD HL,$B381   ;
- $8566 CALL $72DD    ;
-*$8569 XOR A         ;
- $856A IN A,($FE)    ;
- $856C AND $1F       ;
- $856E CP $1F        ;
- $8570 JR Z,$8569    ;
- $8572 POP DE        ;
- $8573 JP $8553      ;
+; Compares a block on tape with memory through the ROM's LD-BYTES (carry clear on
+; entry means verify). Called by #R$84CC for each of the four state blocks, with
+; the block address in IX, its length in DE and the flag byte in A. When the
+; block is right returns to SaveGame. When it differs prints "Tape error -
+; hit any key to continue.", waits for a key and ends the SAVE command at
+; #R$8553: the POP DE drops the return address into SaveGame, so the command
+; ends here.
+; .
+; Hardware: the ROM tape routine (LD-BYTES; it returns with interrupts on); the
+; keyboard port $FE.
+;
+; A Flag byte of the block
+; F Carry clear: verify
+; IX Address of the block
+; DE Length of the block
+@label=VerifyBlock
+c$855A CALL $0556           ; ROM LD-BYTES, verify
+ $855D RET C                ; carry set: the block matched
+@isub=LD A,1
+ $855E LD A,$01             ; RawOutputFlag: input window
+@isub=LD (RawOutputFlag),A
+ $8560 LD ($B701),A
+ $8563 LD HL,$B381          ; "Tape error - hit any key to continue."
+ $8566 CALL $72DD
+@label=VerifyBlock_Wait
+*$8569 XOR A                ; A = 0 selects every half-row
+@isub=IN A,(PORT_ULA)
+ $856A IN A,($FE)
+@isub=AND KEY_BITS
+ $856C AND $1F
+@isub=CP KEY_BITS
+ $856E CP $1F
+ $8570 JR Z,$8569
+ $8572 POP DE               ; drop the return address
+ $8573 JP $8553             ; SaveGame_End: end the command

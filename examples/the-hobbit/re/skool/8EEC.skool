@@ -1,31 +1,48 @@
-; Routine at 8EEC
-c$8EEC LD A,($B6E8)   ;
- $8EEF CALL $9BCA     ;
- $8EF2 CALL $A5CA     ;
- $8EF5 JP Z,$A16C     ;
- $8EF8 LD A,($B6EA)   ;
- $8EFB CALL $8ED2     ;
- $8EFE RET NZ         ;
- $8EFF CALL $9F25     ;
- $8F02 CP $FF         ;
- $8F04 JP Z,$9F76     ;
- $8F07 LD A,(IX+$02)  ;
- $8F0A CP $00         ;
- $8F0C JP Z,$9F76     ;
- $8F0F CALL $9D44     ;
- $8F12 PUSH IX        ;
- $8F14 CALL $9BB1     ;
- $8F17 BIT 7,(IX+$00) ;
- $8F1B POP IX         ;
- $8F1D JR Z,$8F35     ;
- $8F1F LD IY,($B70C)  ;
- $8F23 LD A,(IY+$10)  ;
- $8F26 PUSH AF        ;
- $8F27 LD A,(IX+$02)  ;
- $8F2A LD (IY+$10),A  ;
- $8F2D CALL $962B     ;
- $8F30 POP AF         ;
- $8F31 LD (IY+$10),A  ;
- $8F34 RET            ;
-*$8F35 LD HL,$AE1F    ;
- $8F38 JP $72DD       ;
+; Look through the first object into the place beyond
+;
+; Handler of look through (id 24), reached from the verb tables of doors and windows
+; (for example #R$A761). The first object must be open (#R$A5CA; else "<it> is closed.")
+; and the subject must not be shut in (#R$8ED2: returns silently). The exit whose obstacle
+; is the first object (#R$9F25) gives the place beyond; no such exit or destination 0:
+; refused. When really performing, the subject's location slot is set to that place for
+; the time of the description "<subj> see ..." with its picture (#R$962B) and then put
+; back. The test for a dark place beyond ("It is dark.") reads the wrong location: see
+; the comment at $8F14.
+; .
+; Hardware: none directly; the description may show a picture and wait for a key.
+@label=VerbLookThrough
+c$8EEC LD A,($B6E8)        ; the first object
+ $8EEF CALL $9BCA          ; its record
+ $8EF2 CALL $A5CA          ; open?
+ $8EF5 JP Z,$A16C          ; no: "<it> is closed."
+ $8EF8 LD A,($B6EA)        ; the subject
+ $8EFB CALL $8ED2          ; shut in by a closed holder?
+ $8EFE RET NZ              ; yes: nothing
+ $8EFF CALL $9F25          ; the exit this object blocks
+@isub=CP END_MARK
+ $8F02 CP $FF              ;
+ $8F04 JP Z,$9F76          ; none: refuse
+ $8F07 LD A,(IX+$02)       ; its destination
+ $8F0A CP $00              ;
+ $8F0C JP Z,$9F76          ; none: refuse
+ $8F0F CALL $9D44          ; only when really performing
+ $8F12 PUSH IX             ; keep the exit
+; BUG: A is the perform flag (1) here, left by #R$9D44, not the destination, so this
+; finds location 1 (Bag End, always lit) and the dark test below never fails.
+ $8F14 CALL $9BB1          ; the place beyond: location record
+@isub=BIT LOC_LIT,(IX+$00)
+ $8F17 BIT 7,(IX+$00)      ; lit?
+ $8F1B POP IX              ; the exit again
+ $8F1D JR Z,$8F35          ; not lit: "It is dark."
+ $8F1F LD IY,($B70C)       ; the actor
+ $8F23 LD A,(IY+$10)       ; its own location...
+ $8F26 PUSH AF             ; ... kept
+ $8F27 LD A,(IX+$02)       ; the destination
+ $8F2A LD (IY+$10),A       ; is now the actor's location
+ $8F2D CALL $962B          ; "<subj> see" and the place
+ $8F30 POP AF              ; the real location back
+ $8F31 LD (IY+$10),A       ;
+ $8F34 RET                 ;
+@label=VerbLookThrough_Dark
+*$8F35 LD HL,$AE1F         ; "It is dark."
+ $8F38 JP $72DD            ;

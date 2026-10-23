@@ -1,20 +1,28 @@
-; Routine at 910E
+; Open the first object and show what is inside
 ;
-; Used by the routine at #R$A368.
-c$910E CALL $A1F9     ;
- $9111 JP NZ,$A16C    ;
- $9114 CALL $9D44     ;
- $9117 SET 5,(IX+$07) ;
- $911B LD A,(IX+$00)  ;
- $911E DEC A          ;
- $911F RET NZ         ;
- $9120 LD A,($B6E8)   ;
- $9123 CALL $9D97     ;
- $9126 AND A          ;
- $9127 RET Z          ;
- $9128 LD A,($B6E8)   ;
- $912B CALL $A050     ;
- $912E RET C          ;
- $912F LD B,(IX+$10)  ;
- $9132 LD A,($B6E8)   ;
- $9135 JP $9FAF       ;
+; Common part of the open handlers (called from the handlers of doors, chests and
+; others, for example #R$A368; the object's own handler may do more after it). The reason
+; why the first object cannot be opened (#R$A1F9: locked, or already open) is said with
+; #R$A16C ("The door is locked."). Otherwise, when really performing, the object gets the
+; open flag (FLAG_ACTIVE). An object with one location (a container, not a door) then
+; shows its contents: when it holds something present, #R$A050 prints the line that
+; introduces them ("In the chest there is") and #R$9FAF lists them.
+@label=OpenObject
+c$910E CALL $A1F9          ; can it be opened?
+ $9111 JP NZ,$A16C         ; no: say why
+ $9114 CALL $9D44          ; only when really performing
+@isub=SET FLAG_ACTIVE,(IX+$07)
+ $9117 SET 5,(IX+$07)      ; open
+ $911B LD A,(IX+$00)       ; number of places of the object
+ $911E DEC A               ; more than one (a door): done
+ $911F RET NZ              ;
+ $9120 LD A,($B6E8)        ; the object
+ $9123 CALL $9D97          ; how many present things does it hold?
+ $9126 AND A               ;
+ $9127 RET Z               ; none: done
+ $9128 LD A,($B6E8)        ; the object
+ $912B CALL $A050          ; say what it holds
+ $912E RET C               ; nothing to list
+ $912F LD B,(IX+$10)       ; B = where the object is
+ $9132 LD A,($B6E8)        ; the object is the holder
+ $9135 JP $9FAF            ; list its contents

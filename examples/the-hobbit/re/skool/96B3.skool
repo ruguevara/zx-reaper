@@ -1,55 +1,82 @@
-; Routine at 96B3
+; End of a turn: win test, NPC scripts, timers
 ;
-; Used by the routine at #R$7960.
-c$96B3 PUSH HL       ;
- $96B4 PUSH IX       ;
- $96B6 PUSH IY       ;
- $96B8 PUSH BC       ;
- $96B9 PUSH DE       ;
- $96BA CALL $A9D6    ;
- $96BD CALL $980E    ;
- $96C0 SUB A         ;
- $96C1 LD ($B6F0),A  ;
- $96C4 INC A         ;
- $96C5 LD ($B6FB),A  ;
- $96C8 LD ($B6FA),A  ;
- $96CB LD IY,$CA84   ;
-*$96CF LD A,(IY+$00) ;
- $96D2 CP $FF        ;
- $96D4 JR Z,$971B    ;
- $96D6 LD A,(IY+$01) ;
- $96D9 CP $00        ;
- $96DB JR Z,$9713    ;
- $96DD DEC A         ;
- $96DE LD (IY+$01),A ;
- $96E1 CP $00        ;
- $96E3 JR NZ,$96FE   ;
- $96E5 LD A,($B6F0)  ;
- $96E8 CP $01        ;
- $96EA LD (IY+$01),A ;
- $96ED JR Z,$96FE    ;
- $96EF INC A         ;
- $96F0 LD ($B6F0),A  ;
- $96F3 LD L,(IY+$02) ;
- $96F6 LD H,(IY+$03) ;
- $96F9 CALL $9B6C    ;
- $96FC JR $9713      ;
-*$96FE LD A,(IY+$04) ;
- $9701 CP $00        ;
- $9703 JR Z,$9713    ;
- $9705 CP (IY+$01)   ;
- $9708 JR C,$9713    ;
- $970A LD L,(IY+$05) ;
- $970D LD H,(IY+$06) ;
- $9710 CALL $9B6C    ;
-*$9713 LD DE,$0007   ;
- $9716 ADD IY,DE     ;
- $9718 JP $96CF      ;
-*$971B LD A,$01      ;
- $971D LD ($B702),A  ;
- $9720 POP DE        ;
- $9721 POP BC        ;
- $9722 POP IY        ;
- $9724 POP IX        ;
- $9726 POP HL        ;
- $9727 RET           ;
+; Called after every command the player's turn consists of (#R$7960, once the
+; command has been carried out). First the treasure is tested (#R$A9D6: when
+; the valuable treasure is in the chest the game ends). Then every NPC runs
+; its script (#R$980E). Then the timers (Timers, 10 records of 7 bytes, $FF in
+; byte 0 ends the table) are stepped:
+; .
+; +0 byte: the value the timer starts counting from (the code that starts a timer copies it into the counter, e.g. #R$C7B9; only the end mark is tested here)
+; +1 byte: counter, 0 = the timer is stopped
+; +2 word: handler called when the counter reaches 0 (the timer fires)
+; +4 byte: tick threshold, 0 = no tick
+; +5 word: handler called on a turn that leaves the counter between 1 and the threshold (a tick)
+; .
+; A running timer (counter not 0) is counted down. When it reaches 0 it fires,
+; but only one timer fires in a turn (TimersFired): a second timer that would
+; fire in the same turn has its counter set to 1 instead and fires on the next
+; turn. A timer that has not fired and whose counter is at most the threshold
+; calls its tick handler. Handlers are called with ActionPerform and
+; ActionAllowed both 1, so they act and print. They can start timers, move
+; characters, print messages (the player sees them when MessagesVisible is 1; it
+; is set to 1 at the end of the turn).
+; .
+; Hardware: none itself; the handlers print.
+; .
+; All registers are preserved.
+c$96B3 PUSH HL
+ $96B4 PUSH IX
+ $96B6 PUSH IY
+ $96B8 PUSH BC
+ $96B9 PUSH DE
+ $96BA CALL $A9D6       ; the treasure in the chest ends the game
+ $96BD CALL $980E       ; run every NPC
+ $96C0 SUB A            ; no timer has fired this turn
+ $96C1 LD ($B6F0),A
+ $96C4 INC A            ; A = 1
+ $96C5 LD ($B6FB),A     ; ActionAllowed = 1
+ $96C8 LD ($B6FA),A     ; ActionPerform = 1: real pass
+ $96CB LD IY,$CA84      ; the first timer
+@label=EndTurn_Timer
+*$96CF LD A,(IY+$00)    ; byte 0
+@isub=CP END_MARK
+ $96D2 CP $FF           ; the end of the table?
+ $96D4 JR Z,$971B
+ $96D6 LD A,(IY+$01)    ; the counter
+ $96D9 CP $00           ; stopped: next timer
+ $96DB JR Z,$9713
+ $96DD DEC A            ; count down
+ $96DE LD (IY+$01),A
+ $96E1 CP $00           ; not 0 yet: tick test
+ $96E3 JR NZ,$96FE
+ $96E5 LD A,($B6F0)     ; has a timer fired this turn?
+ $96E8 CP $01           ; (flags kept by the LD below)
+ $96EA LD (IY+$01),A    ; counter := TimersFired: 0 if it fires, 1 if it is put off one turn
+ $96ED JR Z,$96FE       ; another one fired: put off
+ $96EF INC A            ; TimersFired := 1
+ $96F0 LD ($B6F0),A
+ $96F3 LD L,(IY+$02)    ; the fire handler
+ $96F6 LD H,(IY+$03)
+ $96F9 CALL $9B6C       ; call it unless it is 0
+ $96FC JR $9713         ; next timer
+@label=EndTurn_Tick
+*$96FE LD A,(IY+$04)    ; the threshold
+ $9701 CP $00
+ $9703 JR Z,$9713       ; 0: no tick handler
+ $9705 CP (IY+$01)      ; compare with the counter
+ $9708 JR C,$9713       ; counter above the threshold: no tick
+ $970A LD L,(IY+$05)    ; the tick handler
+ $970D LD H,(IY+$06)
+ $9710 CALL $9B6C       ; call it unless it is 0
+@isub=LD DE,TIMER_RECORD_SIZE
+*$9713 LD DE,$0007      ; next timer
+ $9716 ADD IY,DE
+ $9718 JP $96CF
+*$971B LD A,$01         ; messages from now on show
+ $971D LD ($B702),A
+ $9720 POP DE
+ $9721 POP BC
+ $9722 POP IY
+ $9724 POP IX
+ $9726 POP HL
+ $9727 RET

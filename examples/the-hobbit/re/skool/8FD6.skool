@@ -1,12 +1,19 @@
-; Routine at 8FD6
-c$8FD6 LD IX,($B70C) ;
- $8FDA LD B,(IX+$10) ;
- $8FDD LD IX,($B708) ;
- $8FE1 LD A,(IX+$10) ;
- $8FE4 CP B          ;
- $8FE5 JR Z,$8FEF    ;
- $8FE7 CALL $9F2D    ;
- $8FEA CP $FF        ;
- $8FEC JP NZ,$8F3E   ;
-*$8FEF LD HL,$AFE9   ;
- $8FF2 JP $72DD      ;
+; Follow: walk to where the first object is
+;
+; Default handler of follow (id 39; VerbHandlers). Takes the location of the first
+; object. When it is the actor's own location, or when the actor's location has no exit
+; leading there (#R$9F2D), prints "I cannot follow <obj1> from here." Otherwise it walks
+; through that exit like go into (#R$8F3E).
+@label=VerbFollow
+c$8FD6 LD IX,($B70C)       ; the actor
+ $8FDA LD B,(IX+$10)       ; B = where it is
+ $8FDD LD IX,($B708)       ; the first object
+ $8FE1 LD A,(IX+$10)       ; A = where it is
+ $8FE4 CP B                ;
+ $8FE5 JR Z,$8FEF          ; the same place: cannot follow
+ $8FE7 CALL $9F2D          ; the exit of the actor's location that leads there
+@isub=CP END_MARK
+ $8FEA CP $FF              ;
+ $8FEC JP NZ,$8F3E         ; found: walk through it
+*$8FEF LD HL,$AFE9         ; "I cannot follow <obj1> from here."
+ $8FF2 JP $72DD            ;

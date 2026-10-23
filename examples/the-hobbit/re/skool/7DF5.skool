@@ -1,0 +1,7 @@
+; Run the verb handler again to print its refusal
+;
+; This entry point is used by the routines at #R$7960 and #R$7D98.
+@label=PerformRefusal
+c$7DF5 CALL $7D6B    ; SetPerformMode
+ $7DF8 CALL $950F    ; run the command again: its handler prints the refusal
+ $7DFB JP $798E      ; end of the record

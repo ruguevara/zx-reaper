@@ -1,66 +1,104 @@
-; Routine at 99C6
+; Make a character carry out the command in the parser variables
 ;
-; Used by the routines at #R$9928, #R$9974 and #R$9B16.
-c$99C6 PUSH IX       ;
- $99C8 CALL $7AF5    ;
- $99CB JP Z,$9A56    ;
+; Used for every command an NPC runs: from its script (#R$9928, #R$9974), and for
+; the NPC that climbs out of the thing that holds it (#R$9B16). The command is
+; CommandId, FirstObject and SecondObject, the actor is Subject. First the test
+; pass (#R$7AF5, which runs #R$950F with ActionPerform = 0); when the command is
+; refused nothing happens and Z comes back. Otherwise the command is announced to
+; the player and then really done (#R$950F with ActionPerform = 1).
+; .
+; The announcement is the command written as a sentence (#R$712B: "Gandalf opens
+; the door."), and it is printed only when MessagesVisible is 1 (the actor is
+; with the player and the player can see; set by #R$980E). When the actor is not
+; with the player but the first object is one with several places (a door, a
+; river) and the player stands at one of them, the sentence is printed with
+; nobody (NO_ACTOR) as the subject, so that it reads "Someone opens the door.".
+; Going through something (CMD_GO_THROUGH) is announced only when the actor is
+; in the player's location. After the command the actor "enters" and the first
+; object "appears" when they have come to the player's location (#R$9ACD).
+; .
+; The second entry point runs the command at once without the test pass, for
+; an order that #R$7F1A has already tested; the caller has pushed the registers
+; it wants back (#R$980E pushes #R$9901 and IX).
+; .
+; Subject Who acts (not the player)
+; CommandId The verb id
+; FirstObject First object id or $FF
+; Noun1Kind 1: the first noun is a place, the command is just run
+; O:F Z the command was refused in the test pass, NZ it was done
+; IX is preserved.
+@label=RunActorCommand
+c$99C6 PUSH IX          ; IX is restored at the end
+ $99C8 CALL $7AF5       ; test pass
+ $99CB JP Z,$9A56       ; refused: Z
 ; This entry point is used by the routine at #R$980E.
-*$99CE LD A,($B6FE)  ;
- $99D1 CP $01        ;
- $99D3 JR Z,$9A32    ;
- $99D5 LD A,($B6E7)  ;
- $99D8 CP $1E        ;
- $99DA JR NZ,$99E5   ;
- $99DC LD A,($B6F6)  ;
- $99DF LD HL,$C12B   ;
- $99E2 CP (HL)       ;
- $99E3 JR NZ,$9A32   ;
-*$99E5 LD A,($B6E8)  ;
- $99E8 CP $FF        ;
- $99EA JR Z,$9A2B    ;
- $99EC CALL $9F82    ;
- $99EF LD ($980D),A  ;
- $99F2 CP $FF        ;
- $99F4 JR NZ,$9A2B   ;
- $99F6 LD BC,($B6F5) ;
- $99FA LD A,C        ;
- $99FB CP B          ;
- $99FC JR Z,$9A2B    ;
- $99FE LD B,(IX+$00) ;
-*$9A01 CP (IX+$10)   ;
- $9A04 JR Z,$9A0C    ;
- $9A06 INC IX        ;
- $9A08 DJNZ $9A01    ;
- $9A0A JR $9A2B      ;
-*$9A0C LD A,($B6EA)  ;
- $9A0F LD B,A        ;
- $9A10 LD A,$FF      ;
- $9A12 LD ($B6EA),A  ;
- $9A15 LD A,$01      ;
- $9A17 LD ($B702),A  ;
- $9A1A PUSH IY       ;
- $9A1C CALL $712B    ;
- $9A1F POP IY        ;
- $9A21 SUB A         ;
- $9A22 LD ($B702),A  ;
- $9A25 LD A,B        ;
- $9A26 LD ($B6EA),A  ;
- $9A29 JR $9A32      ;
-*$9A2B PUSH IY       ;
- $9A2D CALL $712B    ;
- $9A30 POP IY        ;
-*$9A32 CALL $950F    ;
- $9A35 LD A,($B6EA)  ;
- $9A38 LD HL,$B6F6   ;
- $9A3B LD DE,$B017   ;
- $9A3E CALL $9ACD    ;
- $9A41 LD A,($B6FE)  ;
- $9A44 CP $01        ;
- $9A46 JR Z,$9A54    ;
- $9A48 LD A,($B6E8)  ;
- $9A4B LD HL,$980D   ;
- $9A4E LD DE,$B01C   ;
- $9A51 CALL $9ACD    ;
-*$9A54 OR $01        ;
-*$9A56 POP IX        ;
- $9A58 RET           ;
+@label=RunActorCommand_Run
+*$99CE LD A,($B6FE)     ; Noun1Kind
+@isub=CP 1
+ $99D1 CP $01           ; a place: run it quietly
+ $99D3 JR Z,$9A32
+ $99D5 LD A,($B6E7)     ; CommandId
+@isub=CP CMD_GO_THROUGH
+ $99D8 CP $1E           ; going through something?
+ $99DA JR NZ,$99E5
+ $99DC LD A,($B6F6)     ; ActorLocation
+ $99DF LD HL,$C12B      ; the player's location byte
+ $99E2 CP (HL)          ; is the actor with the player?
+ $99E3 JR NZ,$9A32      ; no: run it quietly
+*$99E5 LD A,($B6E8)     ; FirstObject
+@isub=CP NO_OBJECT
+ $99E8 CP $FF           ; none: announce as usual
+ $99EA JR Z,$9A2B
+ $99EC CALL $9F82       ; A = its location, $FF if it has several; IX = its record
+ $99EF LD ($980D),A     ; remember it for "appears" (FirstObjectPlace)
+@isub=CP NO_OBJECT
+ $99F2 CP $FF           ; in one place only: announce as usual
+ $99F4 JR NZ,$9A2B
+ $99F6 LD BC,($B6F5)    ; C = PlayerLocation, B = ActorLocation
+ $99FA LD A,C           ; the player's location
+ $99FB CP B
+ $99FC JR Z,$9A2B       ; the actor is with the player: announce as usual
+ $99FE LD B,(IX+$00)    ; B = number of places of the object
+@label=RunActorCommand_Places
+*$9A01 CP (IX+$10)      ; is one of them the player's?
+ $9A04 JR Z,$9A0C       ; yes
+ $9A06 INC IX
+ $9A08 DJNZ $9A01
+ $9A0A JR $9A2B         ; no: announce as usual
+*$9A0C LD A,($B6EA)     ; keep Subject
+ $9A0F LD B,A
+@isub=LD A,NO_ACTOR
+ $9A10 LD A,$FF         ; nobody: "Someone"
+ $9A12 LD ($B6EA),A
+ $9A15 LD A,$01         ; the player sees it
+ $9A17 LD ($B702),A     ; MessagesVisible = 1
+ $9A1A PUSH IY
+ $9A1C CALL $712B       ; print the command as a sentence
+ $9A1F POP IY
+ $9A21 SUB A
+ $9A22 LD ($B702),A     ; MessagesVisible = 0
+ $9A25 LD A,B
+ $9A26 LD ($B6EA),A     ; Subject back
+ $9A29 JR $9A32         ; run the command
+@label=RunActorCommand_Say
+*$9A2B PUSH IY
+ $9A2D CALL $712B       ; print the command as a sentence (if visible)
+ $9A30 POP IY
+@label=RunActorCommand_Do
+*$9A32 CALL $950F       ; the real pass
+ $9A35 LD A,($B6EA)     ; the actor
+ $9A38 LD HL,$B6F6      ; where it was
+ $9A3B LD DE,$B017      ; "<name> enters."
+ $9A3E CALL $9ACD
+ $9A41 LD A,($B6FE)     ; Noun1Kind
+@isub=CP 1
+ $9A44 CP $01
+ $9A46 JR Z,$9A54
+ $9A48 LD A,($B6E8)     ; the first object
+ $9A4B LD HL,$980D      ; where it was (FirstObjectPlace)
+ $9A4E LD DE,$B01C      ; "<name> appears."
+ $9A51 CALL $9ACD
+*$9A54 OR $01           ; NZ: done
+@label=RunActorCommand_Exit
+*$9A56 POP IX
+ $9A58 RET

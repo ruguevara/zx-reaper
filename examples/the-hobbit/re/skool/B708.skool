@@ -20,7 +20,7 @@ g$B708 DEFW $0000
  $B70F DEFB $00
 @label=AllMode
  $B710 DEFB $00
-@label=AllError
+@label=NeedsLight
  $B711 DEFB $00
 @label=RandomRomPtr
  $B712 DEFB $00,$00

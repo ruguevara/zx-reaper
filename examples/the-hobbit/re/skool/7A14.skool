@@ -1,43 +1,67 @@
-; Routine at 7A14
+; Find the objects the noun phrases of a sentence mean
 ;
-; Used by the routines at #R$79B6 and #R$7AF5.
-c$7A14 CALL $7CCB    ;
+; The noun matcher of a command. #R$7CCB returns the next candidate that fits
+; the first noun phrase and that the verb lets through (NZ, the object in
+; FirstObject; Z when the candidates are used up). When the command takes a
+; second noun (#R$7AD8) a candidate is kept only if #R$7D17 finds a second-noun
+; candidate that the whole command allows with it (#R$7ABA starts that scan);
+; otherwise the candidate is kept when the check #R$7AED passes with it alone.
+; Kept first candidates are counted in RecWork3 ($7940), the last one in
+; RecWork7 ($7956). When the candidates are used up, exactly one must have
+; been kept: it becomes FirstObject. The second noun is then settled the same
+; way: kept candidates counted in $7941, the last one in RecWork8 ($7957), and
+; exactly one goes to SecondObject.
+; .
+; With ALL typed (RecWork5 is 1) the first kept candidate is returned at once.
+; The scan position (RecPtr1) is not cleared by #R$79A9, so the next call goes
+; on with the next object. No candidate, or more than one, gives NZ, and the
+; caller (#R$79B6) hands over to #R$7DBC, which tells the player ("I see
+; nothing to ...", or asks what is meant).
+; .
+; Hardware: none.
+;
+; RecBuf1 Words of the first noun phrase (RecBuf2 for the second)
+; O:F Z when the objects are found (FirstObject, SecondObject), NZ when they are not
+@label=ResolveNouns
+c$7A14 CALL $7CCB    ; next candidate for the first noun: NZ found
  $7A17 JR NZ,$7A2E   ;
- $7A19 LD A,($7940)  ;
+ $7A19 LD A,($7940)  ; none left: how many were accepted?
  $7A1C CP $01        ;
- $7A1E RET NZ        ;
- $7A1F LD A,($7956)  ;
- $7A22 LD ($B6E8),A  ;
- $7A25 CALL $7ABA    ;
- $7A28 CALL $7AD8    ;
- $7A2B JR NZ,$7A55   ;
- $7A2D RET           ;
-*$7A2E LD HL,$793F   ;
+ $7A1E RET NZ        ; not exactly one: failure
+ $7A1F LD A,($7956)  ; the one accepted object
+ $7A22 LD ($B6E8),A  ; FirstObject
+ $7A25 CALL $7ABA    ; StartNounScan2
+ $7A28 CALL $7AD8    ; NeedSecondNoun
+ $7A2B JR NZ,$7A55   ; yes: pick the second
+ $7A2D RET           ; no: done (Z)
+*$7A2E LD HL,$793F   ; RecWork2: candidates seen for the first noun
  $7A31 INC (HL)      ;
- $7A32 CALL $7AD8    ;
- $7A35 JR Z,$7A50    ;
- $7A37 CALL $7ABA    ;
- $7A3A CALL $7D17    ;
-*$7A3D JR Z,$7A14    ;
- $7A3F LD A,($7953)  ;
+ $7A32 CALL $7AD8    ; NeedSecondNoun
+ $7A35 JR Z,$7A50    ; no: test the command with this candidate
+ $7A37 CALL $7ABA    ; StartNounScan2
+ $7A3A CALL $7D17    ; a candidate for the second noun?
+@label=ResolveNouns_Accept
+*$7A3D JR Z,$7A14    ; none (or the command was refused): the next first candidate
+ $7A3F LD A,($7953)  ; RecWork5: ALL?
  $7A42 DEC A         ;
- $7A43 RET Z         ;
- $7A44 LD A,($B6E8)  ;
+ $7A43 RET Z         ; ALL: this one, now (Z)
+ $7A44 LD A,($B6E8)  ; count this candidate
  $7A47 LD ($7956),A  ;
  $7A4A LD HL,$7940   ;
  $7A4D INC (HL)      ;
  $7A4E JR $7A14      ;
-*$7A50 CALL $7AED    ;
+*$7A50 CALL $7AED    ; RunCheck: Z when refused
  $7A53 JR $7A3D      ;
-*$7A55 CALL $7D17    ;
+@label=ResolveNouns_Second
+*$7A55 CALL $7D17    ; next candidate for the second noun: NZ found
  $7A58 JR NZ,$7A67   ;
- $7A5A LD A,($7941)  ;
+ $7A5A LD A,($7941)  ; none left: how many?
  $7A5D CP $01        ;
- $7A5F RET NZ        ;
+ $7A5F RET NZ        ; not exactly one: failure
  $7A60 LD A,($7957)  ;
- $7A63 LD ($B6E9),A  ;
- $7A66 RET           ;
-*$7A67 LD A,($B6E9)  ;
+ $7A63 LD ($B6E9),A  ; SecondObject
+ $7A66 RET           ; Z: done
+*$7A67 LD A,($B6E9)  ; count this candidate
  $7A6A LD ($7957),A  ;
  $7A6D LD HL,$7941   ;
  $7A70 INC (HL)      ;

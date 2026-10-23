@@ -1,71 +1,101 @@
-; Routine at 9171
-c$9171 CALL $914A     ;
- $9174 LD A,($B6E9)   ;
- $9177 LD HL,$026B    ;
- $917A CP $FF         ;
- $917C JR Z,$9188     ;
- $917E LD IX,($B70A)  ;
- $9182 LD L,(IX+$08)  ;
- $9185 LD H,(IX+$09)  ;
-*$9188 LD ($B6FC),HL  ;
- $918B LD IX,($B70C)  ;
- $918F LD B,(IX+$05)  ;
- $9192 LD A,($B6E9)   ;
- $9195 INC A          ;
- $9196 JR Z,$91AF     ;
- $9198 LD IY,($B70A)  ;
- $919C LD A,(IY+$00)  ;
- $919F DEC A          ;
- $91A0 LD HL,$AF5F    ;
- $91A3 JP NZ,$72DD    ;
- $91A6 LD A,(IY+$05)  ;
- $91A9 ADD A,B        ;
- $91AA JR NC,$91AE    ;
- $91AC LD A,$FF       ;
-*$91AE LD B,A         ;
-*$91AF LD A,B         ;
- $91B0 CALL $9213     ;
- $91B3 LD B,A         ;
- $91B4 CALL $9D44     ;
- $91B7 LD IX,($B708)  ;
- $91BB LD A,(IX+$06)  ;
- $91BE CALL $9213     ;
- $91C1 CP B           ;
- $91C2 LD HL,$AF50    ;
- $91C5 JP NC,$72DD    ;
- $91C8 LD C,A         ;
- $91C9 ADD A,$10      ;
- $91CB JR NC,$91CF    ;
- $91CD LD A,$FF       ;
-*$91CF CP B           ;
- $91D0 JR C,$91FE     ;
- $91D2 LD A,B         ;
- $91D3 SUB C          ;
- $91D4 RLCA           ;
- $91D5 LD E,A         ;
- $91D6 LD D,$00       ;
- $91D8 LD IY,$9226    ;
- $91DC ADD IY,DE      ;
- $91DE LD L,(IY+$00)  ;
- $91E1 LD H,(IY+$01)  ;
- $91E4 RRCA           ;
- $91E5 RRCA           ;
- $91E6 LD B,A         ;
- $91E7 CPL            ;
- $91E8 ADD A,(IX+$05) ;
- $91EB JR NC,$91F0    ;
- $91ED LD (IX+$05),A  ;
-*$91F0 LD A,B         ;
- $91F1 RRCA           ;
- $91F2 CPL            ;
- $91F3 ADD A,(IX+$06) ;
- $91F6 JR NC,$91FB    ;
- $91F8 LD (IX+$06),A  ;
-*$91FB JP $72DD       ;
-*$91FE LD HL,$AE3A    ;
- $9201 CALL $72DD     ;
- $9204 SET 3,(IX+$07) ;
- $9208 LD A,($B6E8)   ;
- $920B CALL $977F     ;
- $920E LD A,$06       ;
- $9210 JP $A16C       ;
+; Attack the first object, with the second as the weapon
+;
+; Default handler of attack (id 15; VerbHandlers; the goblins chain #R$A448 after it).
+; Refused when the two share a side bit (#R$914A). The weapon is the second object
+; (bare hands, the word "fist", when none): it must have exactly one place, else "You
+; cannot kill with <obj2>."; its name phrase goes to TargetNamePtr for the messages.
+; .
+; Strengths (record +5 attack, +6 defence): attack = the actor's +5 plus the weapon's +5
+; (saturating at $FF), defence = the victim's +6; both are rolled with #R$9213 (random
+; spread up to ROLL_SPREAD, which wraps in some cases: finding F9). When the defence
+; is not below the attack: "But the effort is wasted. <his> defense is too strong."
+; Otherwise the excess d is the damage. More than KILL_MARGIN (16): "With one well placed
+; blow <subj> cleave <his> skull.", the victim gets the dead flag and dies (#R$977F; if
+; it is the player the game ends) and "<victim> is dead." is printed (#R$A16C). Else the
+; wound message number d of WoundMessages is printed and the victim's +5 is reduced by
+; X+1 (if it is above X) and its +6 by Y+1 (if above Y), where X is 2d rotated right
+; twice (d/2 for even d; for odd d bit 0 lands in bit 7, so X >= 128 and the reduction
+; practically never happens) and Y is X rotated right once more (inferred from the code).
+; Damage 16 indexes the table one word past its end, at $9246, which is code: a wild
+; message address (finding).
+; .
+; Hardware: none.
+@label=VerbAttack
+c$9171 CALL $914A          ; refuse a fight between friends
+ $9174 LD A,($B6E9)        ; the weapon
+@isub=LD HL,PHRASE_FIST
+ $9177 LD HL,$026B         ; default name: fist
+@isub=CP NO_OBJECT
+ $917A CP $FF              ;
+ $917C JR Z,$9188          ; no weapon
+ $917E LD IX,($B70A)       ; the weapon's record
+ $9182 LD L,(IX+$08)       ; its name phrase...
+ $9185 LD H,(IX+$09)       ;
+*$9188 LD ($B6FC),HL       ; ... for the messages
+ $918B LD IX,($B70C)       ; the attacker
+ $918F LD B,(IX+$05)       ; B = its strength
+ $9192 LD A,($B6E9)        ; the weapon
+ $9195 INC A               ;
+ $9196 JR Z,$91AF          ; none: bare hands
+ $9198 LD IY,($B70A)       ; the weapon's record
+ $919C LD A,(IY+$00)       ; its number of places
+ $919F DEC A               ; more than one (a door): not a weapon
+ $91A0 LD HL,$AF5F         ; "You cannot kill with <obj2>."
+ $91A3 JP NZ,$72DD         ;
+ $91A6 LD A,(IY+$05)       ; the weapon's strength
+ $91A9 ADD A,B             ; plus the attacker's, saturating at $FF
+ $91AA JR NC,$91AE         ;
+ $91AC LD A,$FF            ;
+*$91AE LD B,A              ;
+@label=VerbAttack_Roll
+*$91AF LD A,B              ;
+ $91B0 CALL $9213          ; roll the attack
+ $91B3 LD B,A              ; B = attack
+ $91B4 CALL $9D44          ; only when really performing
+ $91B7 LD IX,($B708)       ; the victim
+ $91BB LD A,(IX+$06)       ; its defence
+ $91BE CALL $9213          ; roll it
+ $91C1 CP B                ; defence against attack
+ $91C2 LD HL,$AF50         ; "But the effort is wasted..."
+ $91C5 JP NC,$72DD         ; defence holds: no effect
+ $91C8 LD C,A              ; C = defence
+@isub=ADD A,KILL_MARGIN
+ $91C9 ADD A,$10           ; defence + 16 (saturating)...
+ $91CB JR NC,$91CF         ;
+ $91CD LD A,$FF            ;
+*$91CF CP B                ;
+ $91D0 JR C,$91FE          ; ... below the attack: a killing blow
+ $91D2 LD A,B              ; damage d = attack - defence, 1-16
+ $91D3 SUB C               ;
+ $91D4 RLCA                ; 2d: word index
+ $91D5 LD E,A              ;
+ $91D6 LD D,$00            ;
+@isub=LD IY,WoundMessages
+ $91D8 LD IY,$9226         ;
+ $91DC ADD IY,DE           ; wound message d
+ $91DE LD L,(IY+$00)       ;
+ $91E1 LD H,(IY+$01)       ; HL = its address
+ $91E4 RRCA                ; 2d rotated right twice: X
+ $91E5 RRCA                ;
+ $91E6 LD B,A              ;
+ $91E7 CPL                 ; victim's +5 reduced by X+1 if above X
+ $91E8 ADD A,(IX+$05)      ;
+ $91EB JR NC,$91F0         ;
+ $91ED LD (IX+$05),A       ;
+*$91F0 LD A,B              ; X rotated once more: Y
+ $91F1 RRCA                ;
+ $91F2 CPL                 ; victim's +6 reduced by Y+1 if above Y
+ $91F3 ADD A,(IX+$06)      ;
+ $91F6 JR NC,$91FB         ;
+ $91F8 LD (IX+$06),A       ;
+*$91FB JP $72DD            ; print the wound
+@label=VerbAttack_Kill
+*$91FE LD HL,$AE3A         ; "With one well placed blow <subj> cleave <his> skull."
+ $9201 CALL $72DD          ;
+@isub=SET FLAG_DEAD,(IX+$07)
+ $9204 SET 3,(IX+$07)      ; dead
+ $9208 LD A,($B6E8)        ; the victim
+ $920B CALL $977F          ; dies
+@isub=LD A,REASON_DEAD
+ $920E LD A,$06            ; "<victim> is dead."
+ $9210 JP $A16C            ;

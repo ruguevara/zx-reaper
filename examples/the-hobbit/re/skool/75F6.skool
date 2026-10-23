@@ -1,69 +1,115 @@
-; Routine at 75F6
+; Parse the end of the line or THEN: close the phrase records
+;
+; The handler of class 12 (the end of the typed line, $C0) in ActionTable;
+; class 11 (THEN, a full stop) and AND enter at #R$75FA. It ends the phrase
+; the parser was building:
+; .
+; 1. A phrase with no command word is refused with "What ?" (#R$792F) for a
+; typed line, except when it is the first and only one and empty (the line was
+; blank or ended at once): the parser then returns NZ without a message.
+; Nothing is checked while the text of an order (SAY TO) is parsed.
+; .
+; 2. The record is closed (#R$7614): after ALL its RECF_ALL flag is set, and
+; ParserWordCount ($B706) counts it, except for an AND inside the nouns of
+; EXCEPT, which goes on filling the same EXCEPT record. IY moves to the next
+; newer record. After AND a new empty record is started at once (#R$75A0).
+; .
+; 3. After THEN and at the end of the line the records are completed. When
+; AwaitingAnswer ($B71A) is not 0 the line is the player's answer to a
+; question of the game ("Which key ?", "Give the map to what ?"): the words the
+; answer's noun phrase (in the first record after the saved one, at $B9B0)
+; lacks are taken from the phrase of the saved record at $B9C8 that the
+; question was about (offset AwaitingAnswer; inferred, run only by the endgame
+; input in re/maps). Then every record without a
+; command word of its own inherits the one of the record before it (#R$78B7:
+; "take the key and the lamp"), walking from the oldest record to the newest.
+; Then, walking back from the newest, a second phrase block (a trailing
+; "in the chest") is copied into older records that have the same command word
+; and no second noun phrase of their own: "put the key and the lamp in the
+; chest" becomes two commands with the chest. Records of the nouns after
+; EXCEPT are skipped by both walks (#R$789F, #R$78A5).
+; .
+; 4. At the end of the line ParserFlag ($B705) is cleared. If it is not 0
+; (THEN) the parse ends here for a typed line, which returns Z so that the
+; caller executes the records and calls the parser again for the rest of the
+; line (#R$6C00); for the text of an order the parser goes on with a new record.
+; .
+; D Class of the word that ended the phrase: THEN, AND or the end of the line
+; E Parser flags (see #R$7585)
+; IY Phrase record being built
+; O:F Z when the records are ready, NZ when the line was refused or is empty
+@label=ParseEnd
 c$75F6 XOR A          ;
- $75F7 LD ($B705),A   ;
+ $75F7 LD ($B705),A   ; ParserFlag 0: the line is finished
 ; This entry point is used by the routines at #R$770B and #R$772F.
-*$75FA BIT 1,E        ;
+@label=ParseThen
+*$75FA BIT 1,E        ; no command word in this phrase?
  $75FC JR Z,$7614     ;
- $75FE LD A,($B706)   ;
+ $75FE LD A,($B706)   ; ParserWordCount
  $7601 AND A          ;
- $7602 JR NZ,$7614    ;
- $7604 LD A,($B6DE)   ;
+ $7602 JR NZ,$7614    ; an older record can lend its command word
+ $7604 LD A,($B6DE)   ; WordFlags: class of the word before
+@isub=CP TOKEN_END
  $7607 CP $C0         ;
  $7609 JR NZ,$760E    ;
- $760B CP D           ;
- $760C JR Z,$75EC     ;
-*$760E CALL $75F1     ;
- $7611 JP Z,$792F     ;
+ $760B CP D           ; end of line right after the start of the line:
+ $760C JR Z,$75EC     ; an empty line (returns the result of TestOrderText)
+*$760E CALL $75F1     ; TestTypedLine
+ $7611 JP Z,$792F     ; typed line without a command: "What ?"
 ; This entry point is used by the routine at #R$7585.
-*$7614 LD A,($B719)   ;
+@label=CloseRecord
+*$7614 LD A,($B719)   ; AllStage
  $7617 DEC A          ;
  $7618 JR NZ,$761E    ;
- $761A SET 7,(IY+$01) ;
-*$761E LD HL,$B706    ;
+@isub=SET RECF_ALL,(IY+1)
+ $761A SET 7,(IY+$01) ; ALL typed: flag the record
+*$761E LD HL,$B706    ; ParserWordCount
  $7621 DEC A          ;
  $7622 LD A,D         ;
  $7623 JR NZ,$7629    ;
- $7625 CP $A0         ;
+@isub=CP TOKEN_AND
+ $7625 CP $A0         ; after EXCEPT, AND adds to the same record
  $7627 JR Z,$762A     ;
-*$7629 INC (HL)       ;
-*$762A CALL $7893     ;
+*$7629 INC (HL)       ; one more record
+*$762A CALL $7893     ; StepNewer
+@isub=CP TOKEN_AND
  $762D CP $A0         ;
- $762F JP Z,$75A0     ;
- $7632 LD A,($B71A)   ;
+ $762F JP Z,$75A0     ; AND: start the next record
+ $7632 LD A,($B71A)   ; AwaitingAnswer
  $7635 AND A          ;
  $7636 JR Z,$7682     ;
- $7638 PUSH DE        ;
+ $7638 PUSH DE        ; the line answers a question:
  $7639 LD E,A         ;
  $763A LD D,$00       ;
- $763C LD HL,$B9C8    ;
+ $763C LD HL,$B9C8    ; HL = the saved record's phrase the question was about
  $763F ADD HL,DE      ;
  $7640 PUSH IY        ;
- $7642 LD IY,$B9B0    ;
- $7646 LD A,(IY+$08)  ;
+ $7642 LD IY,$B9B0    ; the answer's first record
+ $7646 LD A,(IY+$08)  ; has it a noun?
  $7649 OR (IY+$09)    ;
- $764C LD DE,$B9B8    ;
- $764F JR Z,$7668     ;
+ $764C LD DE,$B9B8    ; DE = its phrase REC_PHRASE_A
+ $764F JR Z,$7668     ; no: complete that phrase
  $7651 LD A,(IY+$08)  ;
- $7654 CP (HL)        ;
+ $7654 CP (HL)        ; the same noun as in the question?
  $7655 JR NZ,$765F    ;
  $7657 LD A,(IY+$09)  ;
  $765A INC HL         ;
  $765B CP (HL)        ;
  $765C DEC HL         ;
- $765D JR Z,$7668     ;
-*$765F LD A,(IY+$12)  ;
+ $765D JR Z,$7668     ; yes: complete that phrase
+*$765F LD A,(IY+$12)  ; else its second phrase, if it is empty
  $7662 OR (IY+$13)    ;
- $7665 LD DE,$B9C2    ;
+ $7665 LD DE,$B9C2    ; DE = REC_PHRASE_B of the answer
 *$7668 POP IY         ;
- $766A JR NZ,$7681    ;
- $766C EX DE,HL       ;
- $766D LD B,$03       ;
+ $766A JR NZ,$7681    ; no phrase to complete
+ $766C EX DE,HL       ; HL = the answer's phrase, DE = the saved phrase
+ $766D LD B,$03       ; three words
 *$766F LD A,(HL)      ;
  $7670 INC HL         ;
  $7671 OR (HL)        ;
  $7672 DEC HL         ;
- $7673 JR NZ,$7677    ;
- $7675 LD A,(DE)      ;
+ $7673 JR NZ,$7677    ; word present: keep it
+ $7675 LD A,(DE)      ; missing: take it from the question's phrase
  $7676 LD (HL),A      ;
 *$7677 INC HL         ;
  $7678 INC DE         ;
@@ -74,49 +120,51 @@ c$75F6 XOR A          ;
  $767E INC DE         ;
  $767F DJNZ $766F     ;
 *$7681 POP DE         ;
+@label=InheritWords
 *$7682 PUSH IY        ;
- $7684 LD IY,$B9E0    ;
- $7688 LD A,($B706)   ;
+ $7684 LD IY,$B9E0    ; one record above the oldest
+ $7688 LD A,($B706)   ; ParserWordCount
  $768B LD B,A         ;
  $768C PUSH BC        ;
- $768D CALL $7892     ;
-*$7690 LD A,B         ;
+ $768D CALL $7892     ; StepNewerCount: to the oldest record
+*$7690 LD A,B         ; oldest to newest:
  $7691 AND A          ;
  $7692 JR Z,$76A4     ;
- $7694 CALL $7892     ;
+ $7694 CALL $7892     ; StepNewerCount: IX = the older record
  $7697 LD A,(IY+$01)  ;
  $769A AND $7F        ;
- $769C OR (IY+$00)    ;
- $769F CALL Z,$78B7   ;
+ $769C OR (IY+$00)    ; a record with no command word (RECF_ALL aside)?
+ $769F CALL Z,$78B7   ; InheritRecord: take the older one's
  $76A2 JR $7690       ;
 *$76A4 POP BC         ;
- $76A5 POP IY         ;
+ $76A5 POP IY         ; IY = the free record after the newest
  $76A7 PUSH IY        ;
- $76A9 CALL $788C     ;
-*$76AC LD A,B         ;
+ $76A9 CALL $788C     ; StepOlderCount
+*$76AC LD A,B         ; newest to oldest:
  $76AD AND A          ;
  $76AE JP Z,$76DE     ;
- $76B1 CALL $788C     ;
- $76B4 LD A,(IY+$12)  ;
+ $76B1 CALL $788C     ; StepOlderCount: IX = the newer, IY = the older record
+ $76B4 LD A,(IY+$12)  ; the older one has a second noun phrase: leave it
  $76B7 OR (IY+$13)    ;
  $76BA JR NZ,$76AC    ;
- $76BC LD A,(IY+$00)  ;
+ $76BC LD A,(IY+$00)  ; same command word in both?
  $76BF CP (IX+$00)    ;
  $76C2 JR NZ,$76AC    ;
  $76C4 LD A,(IY+$01)  ;
  $76C7 CP (IX+$01)    ;
  $76CA JR NZ,$76AC    ;
- $76CC LD A,(IX+$0E)  ;
+ $76CC LD A,(IX+$0E)  ; the newer one has a second block (a preposition)?
  $76CF OR (IX+$0F)    ;
  $76D2 JR Z,$76AC     ;
  $76D4 EXX            ;
+@isub=LD DE,REC_BLOCK_B
  $76D5 LD DE,$000E    ;
- $76D8 CALL $78EA     ;
+ $76D8 CALL $78EA     ; CopyBlockFromIX: older record gets that block too
  $76DB JP $76AC       ;
 *$76DE POP IY         ;
- $76E0 LD A,($B705)   ;
+ $76E0 LD A,($B705)   ; ParserFlag
  $76E3 AND A          ;
- $76E4 RET Z          ;
- $76E5 CALL $75F1     ;
- $76E8 RET Z          ;
- $76E9 JP $75A0       ;
+ $76E4 RET Z          ; end of the line: Z, the records are ready
+ $76E5 CALL $75F1     ; TestTypedLine
+ $76E8 RET Z          ; THEN in a typed line: stop here, the rest is parsed later
+ $76E9 JP $75A0       ; an order: go on with a new record

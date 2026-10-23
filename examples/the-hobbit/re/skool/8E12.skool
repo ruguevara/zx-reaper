@@ -1,0 +1,56 @@
+; The actor arrives at the destination
+;
+; Entry point of the arrival: the actor is at its destination B (also #R$9BDD).
+; Moves the actor, announces the place to the player.
+@label=ActorArrives
+c$8E12 CALL $9D44          ; only when really performing
+ $8E15 LD (IY+$10),B       ; the actor's location := destination
+ $8E18 LD A,($B6EA)        ; the subject...
+ $8E1B CALL $9BDD          ; ... takes what it carries along
+ $8E1E LD A,($B6EA)        ; an NPC is done here
+@isub=CP PLAYER
+ $8E21 CP $00              ;
+ $8E23 RET NZ              ;
+ $8E24 LD IX,$C78E         ; arrival handlers of the player
+ $8E28 LD A,($8D9B)        ; destination id
+ $8E2B CALL $9DBD          ;
+ $8E2E JR Z,$8E39          ; none for it
+ $8E30 LD L,(IX+$01)       ; the handler's address...
+ $8E33 LD H,(IX+$02)       ;
+ $8E36 CALL $9B6C          ; ... called if not 0
+*$8E39 CALL $95ED          ; dark? (nothing is described)
+ $8E3C RET C               ; yes: done
+ $8E3D LD A,($B6EA)        ; the subject
+ $8E40 AND A               ;
+ $8E41 LD A,($8D9B)        ; A = destination id
+ $8E44 JR NZ,$8E6A         ; never taken: here the subject is the player
+ $8E46 LD HL,($8D99)       ; the destination's location record
+@isub=BIT LOC_VISITED,(HL)
+ $8E49 BIT 6,(HL)          ;
+ $8E4B JP NZ,$96A8         ; visited before: short description
+@isub=SET LOC_VISITED,(HL)
+ $8E4E SET 6,(HL)          ; first visit: mark it
+ $8E50 PUSH AF             ;
+ $8E51 LD IX,$8D6E         ; score values of first visits
+ $8E55 CALL $9DBD          ; keyed by location id
+ $8E58 JR Z,$8E69          ;
+ $8E5A PUSH DE             ; DE = value; add it to the score
+ $8E5B LD E,(IX+$01)       ;
+ $8E5E LD D,(IX+$02)       ;
+ $8E61 LD HL,($B6F7)       ;
+ $8E64 ADD HL,DE           ;
+ $8E65 LD ($B6F7),HL       ;
+ $8E68 POP DE              ;
+*$8E69 POP AF              ; destination id
+@label=ActorArrives_Describe
+*$8E6A JP $9630            ; describe the place, with picture
+*$8E6D LD HL,$AE23         ; "<the_arg> is too small for <subj> to enter."
+ $8E70 JR $8E79            ; to the common end
+*$8E72 LD IX,($8D99)       ; the destination's record
+ $8E76 LD HL,$AE2E         ; "<the_arg> is too full for <subj> to enter."
+*$8E79 PUSH HL             ; message under the argument...
+ $8E7A LD L,(IX+$02)       ; ... the word at record +2, +3 (the destination's name; for the obstacle its weight: bug)
+ $8E7D LD H,(IX+$03)       ;
+ $8E80 EX (SP),HL          ; stack: that word; HL = message
+ $8E81 CALL $72DD          ; print
+ $8E84 RET                 ;

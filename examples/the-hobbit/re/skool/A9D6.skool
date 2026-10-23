@@ -1,9 +1,19 @@
-; Routine at A9D6
+; Victory check, once per turn
 ;
-; Used by the routine at #R$96B3.
-c$A9D6 LD A,($C5CE)  ;
- $A9D9 CP $25        ;
- $A9DB RET NZ        ;
- $A9DC LD HL,$B3D9   ;
- $A9DF CALL $72DD    ;
- $A9E2 JP $90DF      ;
+; Called at the start of every turn (#R$96B3). Does nothing unless the valuable
+; treasure (OBJ_VALUABLE_TREASURE) is held by the wooden chest (OBJ_WOODEN_CHEST).
+; Then prints the ending ("a cheering crowd of dwarves, hobbits and elves
+; appears. Led by gandalf they carry you off into the sunset, proclaiming you
+; hero of heroes and master adventurer !!!") and goes to the end of the game
+; at #R$90DF: the score, a key and the restart.
+; .
+; Hardware: none.
+@label=CheckVictory
+@isub=LD A,(Obj23TreasureHolder)
+c$A9D6 LD A,($C5CE)         ; holder of the treasure
+@isub=CP OBJ_WOODEN_CHEST
+ $A9D9 CP $25
+ $A9DB RET NZ               ; not in the chest yet
+ $A9DC LD HL,$B3D9          ; the ending text
+ $A9DF CALL $72DD
+ $A9E2 JP $90DF             ; wait for a key and restart (EndGame_Wait)

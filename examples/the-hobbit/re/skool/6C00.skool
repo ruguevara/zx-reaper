@@ -1,202 +1,80 @@
-; Routine at 6C00
-c$6C00 DI            ;
- $6C01 LD DE,$F400   ;
+; Start of the game, restart point and main loop
+;
+; The entry point of the game: the BASIC loader ends with PRINT USR 27648. This
+; entry also holds the restart point and the main loop. How the whole game
+; runs, top down:
+; .
+; Start. The four state blocks that SAVE writes (the variables at $B6EB, the
+; objects and characters at $C11B, the timers at $CA84, the locations at
+; $BA8A) hold the story as loaded from tape. The game copies them to a
+; backup: the big two to StateBackup ($F400), the small two to $5F00. The
+; title screen (the loading picture) is still on the display.
+; .
+; Restart (RestartGame, $6C27). QUIT, death and a tape error all jump here.
+; The stack is reset, the backup is copied back over the state blocks (so the
+; story begins again), the border goes black and the game waits at the title
+; screen for any key. If N is held when the key goes down the pictures are
+; turned off for the whole game. The Z80 refresh register read at that moment
+; is the seed of the random numbers.
+; .
+; Set up. The cursors and column counters of the story window and the input
+; window get their start values, the order slots (what characters were told to
+; do) are cleared, the printer is off, messages are on, the score is 0, the
+; screen is cleared and a rule is drawn between the story and the input
+; window. The first 17 lines of story text will scroll without the pause that
+; otherwise follows each full screen.
+; .
+; Opening. The first time round (ParserWordCount is still $FF from the saved
+; state) the game sets up its hidden starting state (InitNewGame: which exit
+; is blocked, the random event, who is about), echoes "> LOOK" in the input
+; window and runs that command as if it had been typed, so the player starts
+; with the description and the picture of Bag End.
+; .
+; Main loop (MainLoop, $6D13), once per typed line. ReadLine reads a line of
+; up to 128 characters from the keyboard into InputLine. ReadTypedWord turns
+; its words into tokens in ParsedWords: a word of the dictionary, THEN (a full
+; stop), AND (a comma), a double quote or the end of the line. A word that is
+; not in the dictionary prints `I do not know the word "..."` and drops the
+; line. What is typed between double quotes (SAY TO somebody "...") is an order
+; for a character: the closing quote gets a THEN before it, and a line that
+; ends inside quotes is refused. ParseLine then builds phrase records from the
+; tokens, one sentence (up to a THEN) at a time, and RunSentences runs them: it
+; matches each record to a command, finds the objects, checks the command and,
+; if it is allowed, performs it and gives the others their turn. The loop goes
+; round ParseLine and RunSentences while ParserFlag stays set, that is while
+; the line has sentences left, and then reads the next line. A sentence that
+; ParseLine cannot understand (it prints "What ?") drops the rest of the line.
+; The key @ at the start of an empty line repeats the previous line: the
+; editor returns Z and the loop goes straight to RunWordList with the old word
+; list.
+; .
+; A turn. After each sentence the game performed, #R$7960 ticks the timers
+; and runs every other character (one turn of the world) before the next
+; sentence of the line is run. A sentence the game refused takes no turn.
+; .
+; Hardware: DI (interrupts stay off for the whole game); OUT to port $FE for
+; the border and BORDCR for the border colour the ROM would use; IN from port
+; $FE for the title-screen key (all half-rows) and the N key (half-row $7F);
+; the R register as the random seed; the screen bitmap and attributes (cleared
+; with ClearScreen, the rule drawn from BorderTile). All other output goes
+; through the print routines.
+@label=GameStart
+c$6C00 DI            ; interrupts stay off for the whole game
+ $6C01 LD DE,$F400   ; back up the objects and characters ...
  $6C04 LD HL,$C11B   ;
+@isub=LD BC,STATE_OBJECTS_SIZE
  $6C07 LD BC,$0615   ;
  $6C0A LDIR          ;
- $6C0C LD HL,$BA8A   ;
+ $6C0C LD HL,$BA8A   ; ... and the locations (DE goes on after the first copy)
+@isub=LD BC,STATE_LOCATIONS_SIZE
  $6C0F LD BC,$05D9   ;
  $6C12 LDIR          ;
- $6C14 LD DE,$5F00   ;
+ $6C14 LD DE,$5F00   ; back up the saved variables ...
  $6C17 LD HL,$B6EB   ;
+@isub=LD BC,STATE_VARS_SIZE
  $6C1A LD BC,$001D   ;
  $6C1D LDIR          ;
- $6C1F LD HL,$CA84   ;
+ $6C1F LD HL,$CA84   ; ... and the timers and character records
+@isub=LD BC,STATE_TIMERS_SIZE
  $6C22 LD BC,$00BF   ;
  $6C25 LDIR          ;
-; This entry point is used by the routines at #R$8391, #R$8498 and #R$90D2.
-*$6C27 DI            ;
- $6C28 LD SP,$5EFF   ;
- $6C2B LD IX,$CC00   ;
- $6C2F LD A,$05      ;
- $6C31 CALL $9DBD    ;
- $6C34 LD L,(IX+$01) ;
- $6C37 LD H,(IX+$02) ;
- $6C3A LD (HL),$00   ;
- $6C3C INC HL        ;
- $6C3D LD (HL),$00   ;
- $6C3F LD HL,$F400   ;
- $6C42 LD DE,$C11B   ;
- $6C45 LD BC,$0615   ;
- $6C48 LDIR          ;
- $6C4A LD DE,$BA8A   ;
- $6C4D LD BC,$05D9   ;
- $6C50 LDIR          ;
- $6C52 LD HL,$5F00   ;
- $6C55 LD DE,$B6EB   ;
- $6C58 LD BC,$001D   ;
- $6C5B LDIR          ;
- $6C5D LD DE,$CA84   ;
- $6C60 LD BC,$00BF   ;
- $6C63 LDIR          ;
- $6C65 XOR A         ;
- $6C66 OUT ($FE),A   ;
- $6C68 LD A,$38      ;
- $6C6A LD ($5C48),A  ;
-*$6C6D XOR A         ;
- $6C6E IN A,($FE)    ;
- $6C70 AND $1F       ;
- $6C72 CP $1F        ;
- $6C74 JR Z,$6C6D    ;
- $6C76 LD A,$7F      ;
- $6C78 IN A,($FE)    ;
- $6C7A AND $08       ;
- $6C7C LD ($B707),A  ;
- $6C7F LD HL,$50E0   ;
- $6C82 LD ($85B4),HL ;
- $6C85 LD A,$2B      ;
- $6C87 LD ($85B6),A  ;
- $6C8A LD HL,$5020   ;
- $6C8D LD ($869C),HL ;
- $6C90 LD A,$01      ;
- $6C92 LD ($869E),A  ;
- $6C95 LD A,$20      ;
- $6C97 LD ($85B3),A  ;
- $6C9A LD A,$2A      ;
- $6C9C LD ($869B),A  ;
- $6C9F LD B,$C8      ;
- $6CA1 LD HL,$B738   ;
- $6CA4 CALL $70E2    ;
- $6CA7 LD A,R        ;
- $6CA9 LD ($B70E),A  ;
- $6CAC XOR A         ;
- $6CAD LD ($869F),A  ;
- $6CB0 LD ($86A0),A  ;
- $6CB3 LD ($B71A),A  ;
- $6CB6 LD ($B700),A  ;
- $6CB9 LD ($B6F2),A  ;
- $6CBC LD A,$01      ;
- $6CBE LD ($B702),A  ;
- $6CC1 LD ($B6FA),A  ;
- $6CC4 LD ($B704),A  ;
- $6CC7 LD HL,$0000   ;
- $6CCA LD ($B6F7),HL ;
- $6CCD CALL $6FD3    ;
- $6CD0 LD HL,$5140   ;
- $6CD3 LD DE,$6DCC   ;
- $6CD6 LD C,$05      ;
-*$6CD8 LD B,$10      ;
- $6CDA PUSH HL       ;
-*$6CDB LD A,(DE)     ;
- $6CDC LD (HL),A     ;
- $6CDD INC HL        ;
- $6CDE INC DE        ;
- $6CDF LD A,(DE)     ;
- $6CE0 LD (HL),A     ;
- $6CE1 INC HL        ;
- $6CE2 DEC DE        ;
- $6CE3 DJNZ $6CDB    ;
- $6CE5 INC DE        ;
- $6CE6 INC DE        ;
- $6CE7 POP HL        ;
- $6CE8 INC H         ;
- $6CE9 DEC C         ;
- $6CEA JR NZ,$6CD8   ;
- $6CEC LD A,$11      ;
- $6CEE LD ($B716),A  ;
- $6CF1 LD A,($B706)  ;
- $6CF4 INC A         ;
- $6CF5 JR NZ,$6D13   ;
- $6CF7 CALL $97AD    ;
- $6CFA LD HL,$6FF2   ;
-*$6CFD LD A,(HL)     ;
- $6CFE CALL $85B8    ;
- $6D01 INC HL        ;
- $6D02 CP $0D        ;
- $6D04 JR NZ,$6CFD   ;
- $6D06 LD HL,$6FF4   ;
- $6D09 LD DE,$6FF9   ;
- $6D0C LD BC,$0005   ;
- $6D0F LDIR          ;
- $6D11 JR $6D22      ;
-*$6D13 LD A,$01      ;
- $6D15 LD ($B705),A  ;
- $6D18 LD A,$09      ;
- $6D1A LD ($B716),A  ;
- $6D1D CALL $6DD6    ;
- $6D20 JR Z,$6D8A    ;
-*$6D22 LD HL,$709C   ;
- $6D25 LD B,$40      ;
- $6D27 CALL $70E2    ;
- $6D2A LD HL,$6FF9   ;
- $6D2D LD IY,$709C   ;
-*$6D31 CALL $6E97    ;
- $6D34 CP $D0        ;
- $6D36 JR Z,$6DA2    ;
- $6D38 CP $90        ;
- $6D3A JR NZ,$6D6C   ;
- $6D3C LD A,B        ;
- $6D3D AND $0F       ;
- $6D3F OR C          ;
- $6D40 JR NZ,$6D6C   ;
- $6D42 LD A,($B71B)  ;
- $6D45 AND A         ;
- $6D46 JR NZ,$6D4E   ;
- $6D48 INC A         ;
- $6D49 LD ($B71B),A  ;
- $6D4C JR $6D6C      ;
-*$6D4E DEC A         ;
- $6D4F LD ($B71B),A  ;
- $6D52 LD A,(IY-$02) ;
- $6D55 AND $F0       ;
- $6D57 CP $B0        ;
- $6D59 JR Z,$6D6C    ;
- $6D5B CP $A0        ;
- $6D5D JR Z,$6D6C    ;
- $6D5F LD A,$B0      ;
- $6D61 LD (IY+$00),A ;
- $6D64 XOR A         ;
- $6D65 LD (IY+$01),A ;
- $6D68 INC IY        ;
- $6D6A INC IY        ;
-*$6D6C LD (IY+$00),B ;
- $6D6F LD (IY+$01),C ;
- $6D72 INC IY        ;
- $6D74 INC IY        ;
- $6D76 LD A,D        ;
- $6D77 CP $C0        ;
- $6D79 JR NZ,$6D31   ;
- $6D7B LD A,($B71B)  ;
- $6D7E AND A         ;
- $6D7F JR Z,$6D8A    ;
- $6D81 XOR A         ;
- $6D82 LD ($B71B),A  ;
- $6D85 CALL $792F    ;
- $6D88 JR $6D13      ;
-*$6D8A LD HL,$709C   ;
- $6D8D LD ($B6DC),HL ;
-*$6D90 CALL $7585    ;
- $6D93 JP NZ,$6D13   ;
- $6D96 CALL $7960    ;
- $6D99 LD A,($B705)  ;
- $6D9C AND A         ;
- $6D9D JR NZ,$6D90   ;
- $6D9F JP $6D13      ;
-*$6DA2 LD HL,$AD93   ;
- $6DA5 LD A,$01      ;
- $6DA7 LD ($B701),A  ;
- $6DAA CALL $72DD    ;
- $6DAD LD HL,($B6DA) ;
-*$6DB0 LD A,(HL)     ;
- $6DB1 CP $0D        ;
- $6DB3 JR Z,$6DC1    ;
- $6DB5 CP $22        ;
- $6DB7 JR Z,$6DC1    ;
- $6DB9 CALL $858B    ;
- $6DBC INC HL        ;
- $6DBD CP $20        ;
- $6DBF JR NZ,$6DB0   ;
-*$6DC1 LD A,$22      ;
- $6DC3 CALL $858B    ;
- $6DC6 CALL $8583    ;
- $6DC9 JP $6D13      ;

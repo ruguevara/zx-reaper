@@ -1,28 +1,44 @@
-; Routine at 7D17
+; Next candidate for the second noun phrase
 ;
-; Used by the routine at #R$7A14.
+; The same step as #R$7CCB for the second typed noun phrase (RecBuf2), with the
+; cursor RecPtr2 ($7950) that #R$7ABA sets. A place (Noun2Kind NOUN_PLACE) is
+; looked up among the exits (#R$9EA0), anything else among the objects
+; (#R$9DD9) of the kind in bits 0-1 of StateB71E (AllMode). A candidate is
+; accepted when the whole command, both objects, is allowed (#R$7D54); it is left
+; in SecondObject.
+; .
+; AllActive ($B70F) is 0 during the search, so a second object must always be
+; within the actor's reach (#R$9E34); afterwards it is set again to bit 0 of
+; StateB71D, its value for the first noun.
+; .
+; O:A Id of the accepted object or place, $FF when there are no more
+; O:F Z when there are no more
+; O:SecondObject The accepted candidate
+; O:HL Destroyed (IY is preserved)
+@label=NextNoun2
 c$7D17 XOR A         ;
- $7D18 LD ($B70F),A  ;
+ $7D18 LD ($B70F),A  ; AllActive 0
  $7D1B PUSH IY       ;
- $7D1D LD IX,($7950) ;
- $7D21 LD A,($B6FF)  ;
+ $7D1D LD IX,($7950) ; RecPtr2: the cursor
+ $7D21 LD A,($B6FF)  ; Noun2Kind
  $7D24 DEC A         ;
- $7D25 JR Z,$7D49    ;
- $7D27 LD IY,$9DD9   ;
- $7D2B LD A,($B71E)  ;
- $7D2E AND $03       ;
- $7D30 LD ($B710),A  ;
- $7D33 CALL $7D54    ;
+ $7D25 JR Z,$7D49    ; a place
+ $7D27 LD IY,$9DD9   ; FindNextNamedObject
+ $7D2B LD A,($B71E)  ; StateB71E
+ $7D2E AND $03       ; noun 2 kind: bits 0-1
+ $7D30 LD ($B710),A  ; AllMode
+ $7D33 CALL $7D54    ; NextNoun2Match
  $7D36 CP $FF        ;
-*$7D38 LD ($7950),IX ;
+*$7D38 LD ($7950),IX ; RecPtr2
  $7D3C POP IY        ;
  $7D3E PUSH AF       ;
- $7D3F LD A,($B71D)  ;
+ $7D3F LD A,($B71D)  ; StateB71D
  $7D42 AND $01       ;
- $7D44 LD ($B70F),A  ;
+ $7D44 LD ($B70F),A  ; AllActive: bit 0 again
  $7D47 POP AF        ;
  $7D48 RET           ;
-*$7D49 LD IY,$9EA0   ;
- $7D4D CALL $7D54    ;
+@label=NextNoun2Place
+*$7D49 LD IY,$9EA0   ; FindExitByName
+ $7D4D CALL $7D54    ; NextNoun2Match
  $7D50 CP $FF        ;
  $7D52 JR $7D38      ;

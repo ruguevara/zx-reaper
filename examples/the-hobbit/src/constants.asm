@@ -238,19 +238,16 @@ CURSOR_ROW_START         EQU 0xE0 ; low byte of the screen address of column 0 o
 INPUT_COLUMNS_PLUS_1     EQU 33 ; input window: column counter after a back-space at the start of a line
 PICTURE_BITMAP_SIZE      EQU 0x1000 ; bytes of bitmap in the picture area (top 16 character rows)
 PICTURE_ATTRS_SIZE       EQU 0x0200 ; bytes of attributes in the picture area (16 rows of 32)
-PICTURE_TOP_PEN_Y        EQU 0x7F ; pen y of the top pixel row of the picture area (pixel row from the top = 127 - y)
 FILL_SENTINEL            EQU 0x80 ; flood fill: y of the seed that marks the bottom of the seed stack (real pen y is below 128)
 ORDER_SLOT_FREE          EQU 0 ; order slot owner value: slot is free
 FLAG_CONSUMABLE          EQU 1 ; record flag (+7) bit: consumable, vanishes when its holder is emptied
 EXIT_OBSTACLE            EQU 1 ; offset of the obstacle object in an exit record
 EXIT_DEST                EQU 2 ; offset of the destination location in an exit record
 LIST_INDENT              EQU 4 ; story window indent (spaces) of the top level of an object list
-LIST_INDENT_STEP         EQU 2 ; extra indent of each nested level of an object list
 ALL_MODE_ANY             EQU 2 ; AllMode: any object matches (0 things, 1 living characters)
 WORD_IS                  EQU 0x039B ; dictionary offset of the word 'is'
 WORD_ARE                 EQU 0x0065 ; dictionary offset of the word 'are'
 CHAR_FULLSTOP            EQU 0x2E ; full stop character
-ALL_MODE_CHARACTERS      EQU 1 ; AllMode: only living characters match
 TOKEN_END                EQU 0xC0 ; word token of the end of the typed line: class 12
 TOKEN_UNKNOWN            EQU 0xD0 ; word token of a typed word not in the dictionary: class 13
 IDLE_SCANS_MAX           EQU 0x0BB8 ; line editor: key scans without a key before WAIT is typed (3000)
@@ -284,3 +281,57 @@ WORD_BELOW               EQU 0x082B ; dictionary offset of the word 'below'
 WORD_ANOTHER             EQU 0x005E ; dictionary offset of the word 'another'
 WORD_GOBLIN              EQU 0x02E2 ; dictionary offset of the word 'goblin'
 LOC_LIT                  EQU 7 ; location flags (+0) bit: lit (outdoors); clear in caves and dungeons, where the player needs a light
+PIC_CMD_MOVE             EQU 0x08 ; picture command: move the pen (x, y follow); 0 ends, $20-$27 paint attributes, $40-$7F fill, $80-$FF line
+PIC_START_X              EQU 0x7F ; picture drawer: pen x at the start (middle of the 256-wide area)
+PIC_START_Y              EQU 0x3F ; picture drawer: pen y at the start (middle of the 128-high area)
+PIC_ATTR_END             EQU 0xFF ; picture paint command: run byte that ends the runs
+PIC_PAPER_MASK           EQU 0x38 ; attribute bits 3-5: paper colour
+KEY_N                    EQU 0x08 ; keyboard port bit of N in the half-row SPACE SYMBOL-SHIFT M N B (held at the title screen: pictures off)
+CURSOR_GLYPH             EQU 0x2B ; code of the glyph drawn as the input window cursor
+OPENING_LINES            EQU 17 ; story lines shown without a pause after a start (the opening text)
+TURN_NO_PAUSE_LINES      EQU 9 ; story lines shown without a pause after each typed line
+PARSED_WORDS_SIZE        EQU 64 ; bytes in the parsed word list: 32 pairs (tag, word)
+CHAR_QUOTE               EQU 0x22 ; double quote character
+CHAR_COMMA               EQU 0x2C ; comma character
+CHAR_PROMPT              EQU 0x3E ; input prompt character '>'
+CHAR_AT                  EQU 0x40 ; '@' character; typed at the start of a line it repeats the previous command, and codes from here up (letters) are accepted into the line
+KEY_DELETE               EQU 0x18 ; code of CAPS SHIFT+0 (DELETE): erases the typed line
+SCRIPT_OP_MASK           EQU 0x0F ; NPC script command byte: bits 0-3 are the op
+SCRIPT_OP_VERB           EQU 4 ; NPC script op: a verb alone (no objects)
+SCRIPT_OPS_COMMANDS      EQU 5 ; NPC script ops below this run a command (0-3 with objects or a routine, 4 a verb); from here on they steer the script
+SCRIPT_OP_SWITCH         EQU 0x0C ; NPC script op: switch to the script for a behaviour id
+SCRIPT_OP_JUMP           EQU 0x0E ; NPC script op: jump to a script address
+SCRIPT_OP_RANDOM         EQU 0x0F ; NPC script op: jump to a random behaviour-table entry
+SCRIPT_BIT_ERASE         EQU 5 ; NPC script command byte bit: the command byte is zeroed after the command succeeds
+SCRIPT_BIT_NO_ORDER      EQU 6 ; NPC script command byte bit: a stored order (SAY TO) does not replace this command
+SCRIPT_BIT_ROUTINE       EQU 0 ; NPC script command byte bit: op 1 and 3 call a routine, op 0 and 2 run a verb with objects
+SCRIPT_MAX_FAILURES      EQU 6 ; failed script commands after which an NPC gives up its turn
+CMD_GO_THROUGH           EQU 0x1E ; command id of go through
+TIMER_RECORD_SIZE        EQU 7 ; bytes in a timer record (Timers)
+SIGHT_NOISE_HEARD        EQU 2 ; SightState: the dark noise message has been printed this turn
+SIGHT_DARK               EQU 1 ; SightState: the player is in the dark
+REASON_DEAD              EQU 6 ; reason id 6 of the object state words: dead
+CMD_CLIMB_OUT_OF         EQU 0x37 ; command id of climb out of (verb 55)
+PHRASE_FIST              EQU 0x026B ; dictionary offset of the word 'fist', the weapon name of a bare-handed attack
+LOC_VISITED              EQU 6 ; location flags (+0) bit: the player has been here (set by the first arrival)
+KILL_MARGIN              EQU 0x10 ; attack minus defence above which a blow kills
+TOKEN_DIRECTION          EQU 0x20 ; word token class 2: a direction (north, up, off...)
+TOKEN_VERB               EQU 0x30 ; word token class 3: a verb
+TOKEN_NOUN               EQU 0x50 ; word token class 5: a noun
+TOKEN_ADJECTIVE          EQU 0x60 ; word token class 6: an adjective
+TOKEN_PREPOSITION        EQU 0x70 ; word token class 7: a preposition (on, with, to...)
+TOKEN_ARTICLE            EQU 0x80 ; word token class 8: an article or auxiliary word (a, the, is, can...)
+PF_PLAIN_VERB            EQU 0 ; parser flag bit (E): the command word is an ordinary verb, not go/run, so no look-ahead for a direction; cleared by go/run
+PF_NEED_COMMAND          EQU 1 ; parser flag bit (E): the phrase record has no command word yet
+PF_DIRECTION_OK          EQU 2 ; parser flag bit (E): a direction word may still follow the command word
+PF_NO_SAVED_POS          EQU 3 ; parser flag bit (E): no AND has saved a parser position (cleared by AND)
+PF_ARTICLE_OK            EQU 4 ; parser flag bit (E): an article is still allowed at the start of a noun phrase
+CMDF_NOUN2               EQU 2 ; StateB71D bit: the command takes a second noun phrase
+CMDF_NOUN1               EQU 3 ; StateB71D bit: the command takes a first noun phrase
+CMDF_SILENT              EQU 4 ; StateB71D bit: the command is not echoed as a sentence (look, inventory)
+CMDF_PREP1_BEFORE        EQU 5 ; StateB71D bit: the first preposition of the record is printed before the first noun
+CMDG_PREP2_BEFORE        EQU 7 ; StateB71E bit: the second preposition of the record is printed before the first noun
+WORD_CANNOT              EQU 0x00EE ; dictionary offset of the word 'cannot'
+WORD_SOMEWHERE           EQU 0x0AEA ; dictionary offset of the word 'somewhere'
+CMD_FIRST_OTHER          EQU 0x0B ; command ids 1-10 are the ten moves; this is the first other command
+NOUN_PLACE               EQU 1 ; Noun1Kind/Noun2Kind: the noun is a place (an exit destination); 0 is an object

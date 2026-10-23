@@ -1,0 +1,78 @@
+; Main loop: read a line, turn it into words, run its sentences
+@label=MainLoop
+c$6D13 LD A,$01      ;
+ $6D15 LD ($B705),A  ; ParserFlag: the line has sentences to run
+@isub=LD A,TURN_NO_PAUSE_LINES
+ $6D18 LD A,$09      ;
+ $6D1A LD ($B716),A  ; NoPauseLines: nine lines of reply scroll without a pause
+ $6D1D CALL $6DD6    ; ReadLine: NZ a new line, Z the previous one repeated
+ $6D20 JR Z,$6D8A    ; "@": run the old word list again
+@label=BuildWordList
+*$6D22 LD HL,$709C   ; ParsedWords
+@isub=LD B,PARSED_WORDS_SIZE
+ $6D25 LD B,$40      ;
+ $6D27 CALL $70E2    ; ClearBytes: empty the word list
+ $6D2A LD HL,$6FF9   ; InputLine
+ $6D2D LD IY,$709C   ; IY: where the next token goes
+@label=ReadWords
+*$6D31 CALL $6E97    ; ReadTypedWord: B, C token, D its class
+@isub=CP TOKEN_UNKNOWN
+ $6D34 CP $D0        ;
+ $6D36 JR Z,$6DA2    ; a word the game does not know
+@isub=CP TOKEN_QUOTE
+ $6D38 CP $90        ;
+ $6D3A JR NZ,$6D6C   ; not a double quote: store the token
+ $6D3C LD A,B        ;
+ $6D3D AND $0F       ;
+ $6D3F OR C          ;
+ $6D40 JR NZ,$6D6C   ;
+ $6D42 LD A,($B71B)  ; InputFromOrder: 1 inside quotes
+ $6D45 AND A         ;
+ $6D46 JR NZ,$6D4E   ;
+ $6D48 INC A         ; an opening quote: now inside quotes
+ $6D49 LD ($B71B),A  ;
+ $6D4C JR $6D6C      ;
+*$6D4E DEC A         ; a closing quote ...
+ $6D4F LD ($B71B),A  ;
+ $6D52 LD A,(IY-$02) ; ... after the order's last word: if that is not already a
+ $6D55 AND $F0       ; THEN or AND, end the order with a THEN token
+@isub=CP TOKEN_THEN
+ $6D57 CP $B0        ;
+ $6D59 JR Z,$6D6C    ;
+@isub=CP TOKEN_AND
+ $6D5B CP $A0        ;
+ $6D5D JR Z,$6D6C    ;
+@isub=LD A,TOKEN_THEN
+ $6D5F LD A,$B0      ;
+ $6D61 LD (IY+$00),A ;
+ $6D64 XOR A         ;
+ $6D65 LD (IY+$01),A ;
+ $6D68 INC IY        ;
+ $6D6A INC IY        ;
+@label=StoreToken
+*$6D6C LD (IY+$00),B ;
+ $6D6F LD (IY+$01),C ;
+ $6D72 INC IY        ;
+ $6D74 INC IY        ;
+ $6D76 LD A,D        ;
+@isub=CP TOKEN_END
+ $6D77 CP $C0        ;
+ $6D79 JR NZ,$6D31   ; until the end of the line
+ $6D7B LD A,($B71B)  ; the line ended inside quotes?
+ $6D7E AND A         ;
+ $6D7F JR Z,$6D8A    ;
+ $6D81 XOR A         ;
+ $6D82 LD ($B71B),A  ;
+ $6D85 CALL $792F    ; print "What ?"
+ $6D88 JR $6D13      ; and read another line
+@label=RunWordList
+*$6D8A LD HL,$709C   ; ParsedWords
+ $6D8C LD ($B6DC),HL ; WordListPtr: start at the first token
+@label=ParseSentence
+*$6D90 CALL $7585    ; ParseLine: the next sentence of the line into records
+ $6D93 JP NZ,$6D13   ; refused: drop the line
+ $6D96 CALL $7960    ; RunSentences: run the records
+ $6D99 LD A,($B705)  ; ParserFlag
+ $6D9C AND A         ;
+ $6D9D JR NZ,$6D90   ; more of the line: parse the next sentence
+ $6D9F JP $6D13      ; the line is used up: read the next

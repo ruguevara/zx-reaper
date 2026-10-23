@@ -1,9 +1,10 @@
-; Treasure table: score value of each treasure object (14 records)
+; Score for the first visit to a location (14 records)
 ;
-; Records of 3 bytes: object id, score value (word). FF ends. Found with $9DBD
-; at $8E51; the value is added to the score ($B6F7) when the object is first
-; taken.
-@label=TreasureScores
+; Records of 3 bytes: location id, score value (word, in tenths of a per cent);
+; FF ends. When the player first arrives at a location (#R$8E12 marks it with
+; LOC_VISITED), the location is looked up with #R$9DBD and its value is added
+; to the score ($B6F7).
+@label=FirstVisitScores
 b$8D6E DEFB $04
 @keep
  $8D6F DEFW $0019

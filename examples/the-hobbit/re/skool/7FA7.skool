@@ -1,121 +1,156 @@
-; Routine at 7FA7
+; Run the picture commands of a location picture
 ;
-; Used by the routine at #R$7F78.
-c$7FA7 PUSH IY       ;
- $7FA9 PUSH HL       ;
- $7FAA PUSH HL       ;
- $7FAB POP IY        ;
- $7FAD PUSH DE       ;
- $7FAE PUSH BC       ;
- $7FAF CALL $820B    ;
- $7FB2 LD D,$7F      ;
- $7FB4 LD E,$3F      ;
- $7FB6 LD B,$01      ;
- $7FB8 LD C,$01      ;
- $7FBA LD L,$01      ;
-*$7FBC LD A,(IY+$00) ;
- $7FBF AND A         ;
- $7FC0 JP Z,$8069    ;
- $7FC3 INC IY        ;
- $7FC5 CP $08        ;
- $7FC7 JR NZ,$7FD5   ;
- $7FC9 LD D,(IY+$00) ;
- $7FCC INC IY        ;
- $7FCE LD E,(IY+$00) ;
- $7FD1 INC IY        ;
- $7FD3 JR $7FBC      ;
-*$7FD5 BIT 7,A       ;
- $7FD7 JR Z,$7FFA    ;
- $7FD9 LD B,A        ;
- $7FDA AND $07       ;
- $7FDC LD C,A        ;
- $7FDD LD A,B        ;
- $7FDE RRCA          ;
- $7FDF AND $3C       ;
- $7FE1 LD B,A        ;
- $7FE2 LD A,(IY+$00) ;
- $7FE5 AND $3F       ;
- $7FE7 LD L,A        ;
- $7FE8 INC L         ;
- $7FE9 LD A,(IY+$00) ;
- $7FEC INC IY        ;
- $7FEE RLCA          ;
- $7FEF RLCA          ;
- $7FF0 AND $03       ;
- $7FF2 OR B          ;
- $7FF3 LD B,A        ;
- $7FF4 INC B         ;
- $7FF5 CALL $8151    ;
- $7FF8 JR $7FBC      ;
-*$7FFA BIT 6,A       ;
- $7FFC JR Z,$8012    ;
- $7FFE AND $07       ;
- $8000 PUSH DE       ;
- $8001 LD D,(IY+$00) ;
- $8004 INC IY        ;
- $8006 LD E,(IY+$00) ;
- $8009 INC IY        ;
- $800B CALL $8071    ;
- $800E POP DE        ;
- $800F JP $7FBC      ;
-*$8012 BIT 5,A       ;
- $8014 JP Z,$7FBC    ;
- $8017 AND $07       ;
- $8019 RLCA          ;
- $801A RLCA          ;
- $801B RLCA          ;
- $801C PUSH HL       ;
- $801D PUSH DE       ;
- $801E PUSH BC       ;
- $801F LD C,A        ;
- $8020 LD H,(IY+$00) ;
- $8023 INC IY        ;
- $8025 LD L,(IY+$00) ;
- $8028 INC IY        ;
-*$802A LD A,(IY+$00) ;
- $802D INC IY        ;
- $802F CP $FF        ;
- $8031 JR Z,$8063    ;
- $8033 LD B,A        ;
- $8034 AND $03       ;
- $8036 LD E,A        ;
- $8037 LD A,B        ;
- $8038 RRCA          ;
- $8039 RRCA          ;
- $803A AND $3F       ;
- $803C INC A         ;
- $803D LD B,A        ;
-*$803E LD A,(HL)     ;
- $803F AND $07       ;
- $8041 RLCA          ;
- $8042 RLCA          ;
- $8043 RLCA          ;
- $8044 CP C          ;
- $8045 JR NZ,$8049   ;
- $8047 XOR $38       ;
-*$8049 RRCA          ;
- $804A RRCA          ;
- $804B RRCA          ;
- $804C OR C          ;
- $804D LD (HL),A     ;
- $804E LD A,E        ;
- $804F AND A         ;
- $8050 CALL Z,$80F5  ;
- $8053 DEC A         ;
- $8054 CALL Z,$8121  ;
- $8057 DEC A         ;
- $8058 CALL Z,$8106  ;
- $805B DEC A         ;
- $805C CALL Z,$8117  ;
- $805F DJNZ $803E    ;
- $8061 JR $802A      ;
-*$8063 POP BC        ;
- $8064 POP DE        ;
- $8065 POP HL        ;
- $8066 JP $7FBC      ;
-; This entry point is used by the routine at #R$820B.
-*$8069 POP BC        ;
- $806A POP DE        ;
- $806B POP HL        ;
- $806C POP IY        ;
- $806E RET           ;
+; The picture interpreter of #R$7F78. #R$820B first sets the border and fills the
+; picture area (top 16 character rows) with the picture's attribute; then the
+; commands at IY run until a $00 byte. The pen starts at PIC_START_X,
+; PIC_START_Y (x to the right, y upward). Command byte A:
+; .
+; $00 end. $08 (PIC_CMD_MOVE) x y: move the pen. Other values below $20 are
+; skipped.
+; .
+; $80-$FF line, 2 bytes: byte 1 = 1 rrrr L D V, byte 2 = rr nnnnnn. V = 1
+; vertical-major, else horizontal-major; D = 1 the minor step goes down, else
+; up; L = 1 left, else right; n+1 major steps, one minor step after every
+; (rrrrrr + 1) major steps (#R$8151).
+; .
+; $40-$7F flood fill, 3 bytes: ink = A AND 7, x, y of the seed (#R$8071).
+; .
+; $20-$27 paint attributes, 3 bytes and runs: paper = (A AND 7) * 8, then the
+; attribute address (high byte first), then run bytes dd cccccc: direction dd
+; (0 up, 1 right, 2 down, 3 left), cccccc+1 cells, until $FF. Each cell gets the
+; new paper; its ink is inverted when it equalled the new paper.
+; .
+; Hardware: writes the screen bitmap, the attributes and the border (through
+; #R$820B and the drawing routines).
+;
+; HL Address of the picture data (border, attribute, commands)
+; All registers are preserved.
+@label=RunPictureCommands
+c$7FA7 PUSH IY              ; keep IY
+ $7FA9 PUSH HL              ; keep HL
+ $7FAA PUSH HL              ; IY = HL, the data
+ $7FAB POP IY
+ $7FAD PUSH DE
+ $7FAE PUSH BC
+ $7FAF CALL $820B           ; border, attributes, clear; may end the picture (too dark)
+@isub=LD D,PIC_START_X
+ $7FB2 LD D,$7F             ; pen x
+@isub=LD E,PIC_START_Y
+ $7FB4 LD E,$3F             ; pen y
+ $7FB6 LD B,$01             ; B, C, L are set up by each line command
+ $7FB8 LD C,$01
+ $7FBA LD L,$01
+@label=RunPictureCommands_Next
+*$7FBC LD A,(IY+$00)        ; next command byte
+ $7FBF AND A                ; $00: end
+ $7FC0 JP Z,$8069           ; -> RunPictureCommands_End
+ $7FC3 INC IY
+@isub=CP PIC_CMD_MOVE
+ $7FC5 CP $08
+ $7FC7 JR NZ,$7FD5
+ $7FC9 LD D,(IY+$00)        ; move: pen x
+ $7FCC INC IY
+ $7FCE LD E,(IY+$00)        ; pen y
+ $7FD1 INC IY
+ $7FD3 JR $7FBC
+*$7FD5 BIT 7,A              ; bit 7: line
+ $7FD7 JR Z,$7FFA
+ $7FD9 LD B,A               ; B = byte 1
+ $7FDA AND $07              ; C = 0 0 0 0 0 L D V
+ $7FDC LD C,A
+ $7FDD LD A,B
+ $7FDE RRCA                 ; B = rrrr << 2
+ $7FDF AND $3C
+ $7FE1 LD B,A
+ $7FE2 LD A,(IY+$00)        ; byte 2
+ $7FE5 AND $3F              ; L = n + 1 major steps
+ $7FE7 LD L,A
+ $7FE8 INC L
+ $7FE9 LD A,(IY+$00)
+ $7FEC INC IY
+ $7FEE RLCA                 ; the top two bits of byte 2 ...
+ $7FEF RLCA
+ $7FF0 AND $03
+ $7FF2 OR B                 ; ... are the low bits of r
+ $7FF3 LD B,A
+ $7FF4 INC B                ; B = r + 1 major steps per minor step
+ $7FF5 CALL $8151           ; draw the line, pen moves
+ $7FF8 JR $7FBC
+*$7FFA BIT 6,A              ; bit 6: fill
+ $7FFC JR Z,$8012
+ $7FFE AND $07              ; A = ink colour
+ $8000 PUSH DE              ; keep the pen
+ $8001 LD D,(IY+$00)        ; seed x
+ $8004 INC IY
+ $8006 LD E,(IY+$00)        ; seed y
+ $8009 INC IY
+ $800B CALL $8071           ; fill
+ $800E POP DE
+ $800F JP $7FBC
+@label=RunPictureCommands_Paint
+*$8012 BIT 5,A              ; bit 5: paint (otherwise skip the byte)
+ $8014 JP Z,$7FBC
+ $8017 AND $07              ; A = paper colour * 8 (PIC_PAPER_MASK)
+ $8019 RLCA
+ $801A RLCA
+ $801B RLCA
+ $801C PUSH HL              ; keep L, D/E, B/C
+ $801D PUSH DE
+ $801E PUSH BC
+ $801F LD C,A               ; C = new paper
+ $8020 LD H,(IY+$00)        ; H = attribute address, high byte
+ $8023 INC IY
+ $8025 LD L,(IY+$00)        ; L = low byte
+ $8028 INC IY
+@label=RunPictureCommands_Run
+*$802A LD A,(IY+$00)        ; run byte
+ $802D INC IY
+@isub=CP PIC_ATTR_END
+ $802F CP $FF
+ $8031 JR Z,$8063           ; end of the runs
+ $8033 LD B,A
+ $8034 AND $03              ; E = direction 0 up, 1 right, 2 down, 3 left
+ $8036 LD E,A
+ $8037 LD A,B
+ $8038 RRCA
+ $8039 RRCA
+ $803A AND $3F              ; A = cells - 1 ...
+ $803C INC A                ; ... B = cells in the run
+ $803D LD B,A
+@label=RunPictureCommands_Cell
+*$803E LD A,(HL)            ; attribute of the cell
+ $803F AND $07              ; its ink
+ $8041 RLCA
+ $8042 RLCA
+ $8043 RLCA
+ $8044 CP C                 ; equal to the new paper?
+ $8045 JR NZ,$8049
+@isub=XOR PIC_PAPER_MASK
+ $8047 XOR $38              ; invert the ink so it stays visible
+*$8049 RRCA                 ; ink back to bits 0-2
+ $804A RRCA
+ $804B RRCA
+ $804C OR C                 ; with the new paper
+ $804D LD (HL),A
+ $804E LD A,E
+ $804F AND A
+ $8050 CALL Z,$80F5         ; step up
+ $8053 DEC A
+ $8054 CALL Z,$8121         ; step right
+ $8057 DEC A
+ $8058 CALL Z,$8106         ; step down
+ $805B DEC A
+ $805C CALL Z,$8117         ; step left
+ $805F DJNZ $803E
+ $8061 JR $802A
+*$8063 POP BC               ; restore
+ $8064 POP DE
+ $8065 POP HL
+ $8066 JP $7FBC
+; Exit of the drawer (also taken from #R$820B when it is too dark to see).
+@label=RunPictureCommands_End
+*$8069 POP BC
+ $806A POP DE
+ $806B POP HL
+ $806C POP IY
+ $806E RET

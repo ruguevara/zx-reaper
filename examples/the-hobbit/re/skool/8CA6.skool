@@ -1,22 +1,34 @@
-; Routine at 8CA6
-c$8CA6 CALL $8C9B      ;
- $8CA9 CALL $9D44      ;
- $8CAC LD IX,($B708)   ;
- $8CB0 LD A,(IX+$01)   ;
- $8CB3 CP $12          ;
- $8CB5 JR NZ,$8CBB     ;
- $8CB7 LD IX,$C366     ;
-*$8CBB PUSH IX         ;
- $8CBD LD IX,($B70C)   ;
- $8CC1 LD A,(IX+$01)   ;
- $8CC4 POP IX          ;
- $8CC6 LD (IX+$01),A   ;
- $8CC9 BIT 1,(IX+$07)  ;
- $8CCD RET Z           ;
- $8CCE LD (IX+$10),$00 ;
- $8CD2 LD HL,$B142     ;
- $8CD5 LD DE,$0008     ;
- $8CD8 ADD IX,DE       ;
- $8CDA PUSH IX         ;
- $8CDC CALL $72DD      ;
- $8CDF RET             ;
+; Drop the first object
+;
+; Default handler of the verb drop (id 13; VerbHandlers). Refuses with "<subj> not
+; carrying it." unless the subject holds the first object (#R$8C9B). The thing dropped
+; is the first object, except that an object tied to the rope (its holder is OBJ_ROPE)
+; drops the rope instead, as in take (#R$8D33). The dropped record's holder becomes the
+; holder of the actor, so it lies at the location (AT_LOCATION) or stays in the barrel or
+; boat the actor is in; its location slot already follows the actor (#R$9C17). A
+; consumable thing (flag bit 1: liquids) is destroyed: its location is set to 0 and
+; "<thing> evaporates." is printed.
+@label=VerbDrop
+c$8CA6 CALL $8C9B          ; held by the subject, else the caller's caller returns
+ $8CA9 CALL $9D44          ; only when really performing
+ $8CAC LD IX,($B708)       ; the first object
+ $8CB0 LD A,(IX+$01)       ; its holder
+@isub=CP OBJ_ROPE
+ $8CB3 CP $12              ;
+ $8CB5 JR NZ,$8CBB         ; tied to the rope?
+ $8CB7 LD IX,$C366         ; then the rope is what drops
+*$8CBB PUSH IX             ; keep the record to drop
+ $8CBD LD IX,($B70C)       ; the actor
+ $8CC1 LD A,(IX+$01)       ; its holder
+ $8CC4 POP IX              ; the record to drop
+ $8CC6 LD (IX+$01),A       ; now held by the actor's holder
+@isub=BIT FLAG_CONSUMABLE,(IX+$07)
+ $8CC9 BIT 1,(IX+$07)      ;
+ $8CCD RET Z               ; not consumable: done
+ $8CCE LD (IX+$10),$00     ; consumable: nowhere any more
+ $8CD2 LD HL,$B142         ; "<thing> evaporates."
+ $8CD5 LD DE,$0008         ; IX+8 = the name phrase of the thing...
+ $8CD8 ADD IX,DE           ;
+ $8CDA PUSH IX             ; ... as the message's argument
+ $8CDC CALL $72DD          ;
+ $8CDF RET                 ;

@@ -1,0 +1,52 @@
+; Move the actor through the exit in CommandId
+;
+; Entry point of the walk: move the actor in direction CommandId. #R$8F3E joins here
+; after it has made the direction of an exit the verb.
+@label=MoveActor
+c$8DAB LD IY,($B70C)       ; the actor's record
+ $8DAF LD A,(IY+$01)       ; its holder
+@isub=CP AT_LOCATION
+ $8DB2 CP $FF              ;
+ $8DB4 JR Z,$8DC3          ; lies at a location: can walk
+ $8DB6 CALL $9BCA          ; IX = record of the holder
+@isub=BIT FLAG_CHARACTER,(IX+$07)
+ $8DB9 BIT 6,(IX+$07)      ;
+ $8DBD JR Z,$8DD9          ; holder is not a character (barrel, boat): cannot walk
+@isub=LD (IY+$01),AT_LOCATION
+ $8DBF LD (IY+$01),$FF     ; set free of the character holding it
+*$8DC3 LD A,($B6EA)        ; the subject
+ $8DC6 CALL $9CE8          ; weight of what it carries
+ $8DC9 ADD A,(IY+$02)      ; plus its own weight
+ $8DCC LD ($8D9C),A        ; TakeWeight
+ $8DCF LD A,($B6E7)        ; the direction
+ $8DD2 CALL $9F08          ; the exit of its location
+@isub=CP END_MARK
+ $8DD5 CP $FF              ;
+ $8DD7 JR NZ,$8DFA         ; found
+; No way out: refuse; in the dark hit the head.
+@label=MoveActor_NoWay
+*$8DD9 CALL $95ED          ; dark?
+ $8DDC JP NC,$9F76         ; no: "<subj> cannot go <dir>."
+ $8DDF CALL $9D44          ; only when really performing
+ $8DE2 LD IX,$C11B         ; the player
+ $8DE6 AND A               ; carry clear
+ $8DE7 LD HL,$AD7D         ; "But fall and hit your head."
+ $8DEA RR (IX+$05)         ; halve the player's strength (+5)
+ $8DEE JP NZ,$72DD         ; still above 0: print it
+ $8DF1 LD HL,$AD8A         ; "But fall and smash your skull."
+ $8DF4 CALL $72DD          ; print it
+ $8DF7 JP $90D2            ; the game ends: "... is dead."
+@isub=LD A,(IX+EXIT_DEST)
+*$8DFA LD A,(IX+$02)       ; destination
+ $8DFD AND A               ;
+ $8DFE JR Z,$8DD9          ; none: no way
+ $8E00 LD ($8D9B),A        ; TakeId := destination
+@isub=LD A,(IX+EXIT_OBSTACLE)
+ $8E03 LD A,(IX+$01)       ; the obstacle
+ $8E06 CALL $8E85          ; may the actor pass?
+ $8E09 DEC A               ; PASS_BLOCKED: no way
+ $8E0A JR Z,$8DD9          ;
+ $8E0C DEC A               ; PASS_TOO_SMALL
+ $8E0D JR Z,$8E6D          ;
+ $8E0F DEC A               ; PASS_TOO_FULL
+ $8E10 JR Z,$8E72          ;

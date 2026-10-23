@@ -1,19 +1,31 @@
-; Routine at 83A0
-c$83A0 LD A,($B6EA)  ;
- $83A3 AND A         ;
- $83A4 JP NZ,$75B4   ;
- $83A7 PUSH HL       ;
- $83A8 PUSH IX       ;
- $83AA LD HL,$B467   ;
- $83AD LD A,($C12B)  ;
- $83B0 LD IX,$83CD   ;
- $83B4 CALL $9DBD    ;
- $83B7 JR Z,$83BF    ;
- $83B9 LD L,(IX+$01) ;
- $83BC LD H,(IX+$02) ;
-*$83BF LD A,$01      ;
- $83C1 LD ($B701),A  ;
- $83C4 CALL $72DD    ;
- $83C7 POP IX        ;
- $83C9 POP HL        ;
- $83CA JP $82B3      ;
+; Handler of the word HELP
+;
+; For the player (a hint is never given to an order for someone else; those
+; skip to the next word) prints the hint for the player's location from
+; HintTable ("A trolls door needs a trolls key." in the trolls path,
+; for instance), or "You're doing fine." when the location has no hint. Prints
+; in the input window (RawOutputFlag = 1). Then returns to the dispatcher
+; (#R$82B3).
+; .
+; Hardware: none.
+@label=WordHelp
+c$83A0 LD A,($B6EA)         ; actor
+ $83A3 AND A
+ $83A4 JP NZ,$75B4          ; not the player: next word
+ $83A7 PUSH HL
+ $83A8 PUSH IX
+ $83AA LD HL,$B467          ; "You're doing fine."
+ $83AD LD A,($C12B)         ; player location (first byte of its location list)
+ $83B0 LD IX,$83CD
+ $83B4 CALL $9DBD           ; find the hint
+ $83B7 JR Z,$83BF           ; none: keep the default
+ $83B9 LD L,(IX+$01)
+ $83BC LD H,(IX+$02)
+@label=WordHelp_Print
+*$83BF LD A,$01             ; RawOutputFlag: input window
+@isub=LD (RawOutputFlag),A
+ $83C1 LD ($B701),A
+ $83C4 CALL $72DD
+ $83C7 POP IX
+ $83C9 POP HL
+ $83CA JP $82B3

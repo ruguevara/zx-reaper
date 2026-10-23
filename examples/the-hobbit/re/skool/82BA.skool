@@ -1,10 +1,23 @@
-; Routine at 82BA
-c$82BA LD A,($B719)  ;
- $82BD CP $01        ;
- $82BF JP NZ,$7929   ;
- $82C2 LD A,$02      ;
- $82C4 LD ($B719),A  ;
- $82C7 LD A,(IY+$01) ;
- $82CA OR $80        ;
- $82CC LD (IY+$01),A ;
- $82CF JP $75B4      ;
+; Handler of the word EXCEPT
+;
+; Allowed only after ALL (AllStage = ALL_STATE_ALL): AllStage becomes
+; ALL_STATE_EXCEPT and the phrase record at IY gets the flag bit 7 (RECF_ALL)
+; in its byte +1, then the parser goes on with the next word (#R$75B4).
+; After anything else the line is refused with "What ?" (#R$7929).
+; .
+; Hardware: none.
+;
+; IY Phrase record being built
+@label=WordExcept
+c$82BA LD A,($B719)         ; AllStage
+@isub=CP ALL_STATE_ALL
+ $82BD CP $01
+ $82BF JP NZ,$7929          ; no ALL before: "What ?"
+@isub=LD A,ALL_STATE_EXCEPT
+ $82C2 LD A,$02
+ $82C4 LD ($B719),A         ; AllStage
+ $82C7 LD A,(IY+$01)        ; record flags
+@isub=OR 1<<RECF_ALL
+ $82CA OR $80               ; bit 7
+ $82CC LD (IY+$01),A
+ $82CF JP $75B4             ; next word

@@ -1,0 +1,24 @@
+; Report an unknown word and read the next line
+@label=UnknownWord
+c$6DA2 LD HL,$AD93   ; MsgIDoNotKnow
+ $6DA5 LD A,$01      ;
+ $6DA7 LD ($B701),A  ; RawOutputFlag: print in the input window
+ $6DAA CALL $72DD    ; `I do not know the word "`
+ $6DAD LD HL,($B6DA) ; InputLinePtr: the start of the unknown word
+*$6DB0 LD A,(HL)     ;
+@isub=CP CHAR_CR
+ $6DB1 CP $0D        ;
+ $6DB3 JR Z,$6DC1    ;
+@isub=CP CHAR_QUOTE
+ $6DB5 CP $22        ;
+ $6DB7 JR Z,$6DC1    ;
+ $6DB9 CALL $858B    ; PrintChar: echo the word up to the next space
+ $6DBC INC HL        ;
+@isub=CP CHAR_SPACE
+ $6DBD CP $20        ;
+ $6DBF JR NZ,$6DB0   ;
+@isub=LD A,CHAR_QUOTE
+*$6DC1 LD A,$22      ; the closing quote
+ $6DC3 CALL $858B    ;
+ $6DC6 CALL $8583    ; PrintNewLine
+ $6DC9 JP $6D13      ; read another line

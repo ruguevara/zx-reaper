@@ -1,85 +1,131 @@
-; Routine at 950F
+; Carry out the command in the parser variables (test pass or real pass)
 ;
-; Used by the routines at #R$7960, #R$7AED, #R$7AF5, #R$7DBC and #R$99C6.
-c$950F PUSH HL       ;
- $9510 PUSH IX       ;
- $9512 PUSH BC       ;
- $9513 CALL $9B44    ;
- $9516 JP Z,$95DA    ;
- $9519 CALL $95ED    ;
- $951C JR NC,$9539   ;
- $951E LD A,($B711)  ;
- $9521 AND A         ;
- $9522 JR NZ,$9531   ;
- $9524 CALL $9C78    ;
- $9527 JR NC,$9531   ;
- $9529 LD A,($B6E9)  ;
- $952C CALL $9C7B    ;
- $952F JR C,$9539    ;
-*$9531 LD HL,$AFC4   ;
- $9534 CALL $72DD    ;
- $9537 JR $959B      ;
-*$9539 LD A,($B6FE)  ;
- $953C CP $01        ;
- $953E JP Z,$95CC    ;
- $9541 LD A,($B6E8)  ;
- $9544 CP $FF        ;
- $9546 JP Z,$95CC    ;
- $9549 CALL $9BCA    ;
- $954C LD ($B708),IX ;
- $9550 LD A,($B6E8)  ;
- $9553 CALL $9728    ;
- $9556 JR NZ,$959B   ;
- $9558 LD A,($B6E9)  ;
- $955B CP $FF        ;
- $955D JR Z,$957A    ;
- $955F LD A,($B6FF)  ;
- $9562 CP $01        ;
- $9564 JR Z,$95CC    ;
- $9566 LD A,($B6E9)  ;
- $9569 CALL $9BCA    ;
- $956C LD ($B70A),IX ;
- $9570 CALL $9728    ;
- $9573 JR NZ,$959B   ;
- $9575 CALL $A1D0    ;
- $9578 JR Z,$957E    ;
-*$957A LD IX,($B708) ;
-*$957E LD A,($B6E7)  ;
- $9581 CALL $9B81    ;
- $9584 JR NC,$95CC   ;
-*$9586 LD L,(IX+$01) ;
- $9589 LD H,(IX+$02) ;
- $958C CALL $9B6C    ;
- $958F INC IX        ;
- $9591 INC IX        ;
- $9593 INC IX        ;
- $9595 SUB A         ;
- $9596 CP (IX+$00)   ;
- $9599 JR Z,$9586    ;
-*$959B LD A,($B6FA)  ;
- $959E CP $01        ;
- $95A0 JR NZ,$95C7   ;
- $95A2 LD A,($B6EA)  ;
- $95A5 CP $00        ;
- $95A7 JR NZ,$95AF   ;
- $95A9 CALL $95ED    ;
- $95AC CALL C,$72DD  ;
-*$95AF LD A,($B6E7)  ;
- $95B2 LD B,A        ;
- $95B3 LD A,($B6E8)  ;
- $95B6 LD IX,($B708) ;
- $95BA CALL $95DF    ;
- $95BD LD A,($B6E9)  ;
- $95C0 LD IX,($B70A) ;
- $95C4 CALL $95DF    ;
-*$95C7 POP BC        ;
- $95C8 POP IX        ;
- $95CA POP HL        ;
- $95CB RET           ;
-*$95CC LD A,($B6E7)  ;
- $95CF LD IX,$C730   ;
- $95D3 CALL $9DBD    ;
- $95D6 CP $FF        ;
- $95D8 JR NZ,$9586   ;
-*$95DA CALL $72CE    ;
- $95DD JR $95C7      ;
+; Finds the code that does the current command and calls it. The command is
+; CommandId with FirstObject and SecondObject for the actor Subject. The caller
+; runs it twice: first with ActionPerform = 0 (the test pass: the handlers only
+; check, print a refusal and clear ActionAllowed, or set it to 1 when the command
+; may go on; #R$7AED reads the result), then with ActionPerform = 1 (the real
+; pass: the handlers do the work and print the result). The typed command, #R$7960,
+; and every command an NPC runs (#R$99C6) go through here.
+; .
+; Steps. A command that names the same thing twice is refused (#R$9B44,
+; "I cannot do that."). If the actor is the player and it is dark (#R$95ED), the
+; command is refused with "I see nothing here." unless the command is one that
+; does not need light ($B711 = 0, set by #R$7B78) and the objects named are
+; held by the actor (#R$9C78, #R$9C7B). Then the handlers are found: with no first
+; object, or a noun that names a place reached by an exit and not an object
+; (Noun1Kind or Noun2Kind = 1; #R$7B78), the default table VerbHandlers ($C730)
+; is used. Otherwise each object
+; is looked up (#R$9BCA) and a thing that another character carries stops the
+; command (#R$9728, it prints its own message). The verb table of an object (#R$9B81) is
+; searched for CommandId: in the second object when the command puts the first
+; somewhere (#R$A1D0: drop in, put in, put on, take out of, throw through), in the
+; first object otherwise. If that object has no entry for the verb, VerbHandlers
+; is searched (#R$9DBD); if that has none either, "I cannot do that." is printed.
+; Every handler found is called through #R$9B6C: the entry for the verb and then
+; each entry that follows it with verb id 0 (these are called for every verb).
+; .
+; On the real pass for the player the dark is tested again after the handlers
+; (an action may have put the light out): "It is dark." is printed. Then both
+; objects are shown to #R$95DF so that a living character who was the target of
+; the command switches to its script for that verb.
+; .
+; Hardware: none itself; the handlers print.
+; .
+; CommandId The verb id (1-59)
+; FirstObject First object id or $FF
+; SecondObject Second object id or $FF
+; Subject Who acts (0 the player)
+; ActionPerform 0 test pass, 1 real pass
+; O:ActionAllowed After the test pass: 1 when the command is allowed, 0 when it is refused (#R$7AED reads it)
+; HL, IX and BC are preserved.
+@label=DispatchCommand
+c$950F PUSH HL          ; save the registers
+ $9510 PUSH IX
+ $9512 PUSH BC
+ $9513 CALL $9B44       ; CheckNounsDistinct: Z = the same thing twice
+ $9516 JP Z,$95DA       ; refuse: "I cannot do that."
+ $9519 CALL $95ED       ; CheckDark: carry = the subject cannot see
+ $951C JR NC,$9539      ; lit: go on
+ $951E LD A,($B711)     ; dark: does the command need light? (NeedsLight, set by $7B78)
+ $9521 AND A
+ $9522 JR NZ,$9531
+ $9524 CALL $9C78       ; is the first object held by the subject?
+ $9527 JR NC,$9531      ; no: refuse
+ $9529 LD A,($B6E9)     ; and the second one?
+ $952C CALL $9C7B
+ $952F JR C,$9539       ; both held: go on in the dark
+*$9531 LD HL,$AFC4      ; "I see nothing here."
+ $9534 CALL $72DD
+ $9537 JR $959B         ; no handler is run
+*$9539 LD A,($B6FE)     ; Noun1Kind
+ $953C CP $01           ; the first noun is a place: default table
+ $953E JP Z,$95CC
+ $9541 LD A,($B6E8)
+@isub=CP NO_OBJECT
+ $9544 CP $FF           ; no first object: default table
+ $9546 JP Z,$95CC
+ $9549 CALL $9BCA       ; IX = record of the first object
+ $954C LD ($B708),IX    ; keep it for the end of the pass
+ $9550 LD A,($B6E8)
+ $9553 CALL $9728       ; another character carries it? (message)
+ $9556 JR NZ,$959B      ; yes: stop
+ $9558 LD A,($B6E9)
+@isub=CP NO_OBJECT
+ $955B CP $FF           ; no second object: use the first one
+ $955D JR Z,$957A
+ $955F LD A,($B6FF)     ; Noun2Kind
+ $9562 CP $01
+ $9564 JR Z,$95CC
+ $9566 LD A,($B6E9)     ; IX = record of the second object
+ $9569 CALL $9BCA
+ $956C LD ($B70A),IX    ; keep it for the end of the pass
+ $9570 CALL $9728       ; another character carries it? (message)
+ $9573 JR NZ,$959B      ; yes: stop
+ $9575 CALL $A1D0       ; does the command put the first object into the second?
+ $9578 JR Z,$957E       ; yes: the second object has the handler
+*$957A LD IX,($B708)    ; no: the first object has it
+*$957E LD A,($B6E7)     ; the verb id
+ $9581 CALL $9B81       ; FindVerbEntry in the object
+ $9584 JR NC,$95CC      ; none: default table
+@label=DispatchCommand_Call
+*$9586 LD L,(IX+$01)    ; HL = handler of the entry
+ $9589 LD H,(IX+$02)
+ $958C CALL $9B6C       ; call it unless it is 0
+ $958F INC IX           ; next entry
+ $9591 INC IX
+ $9593 INC IX
+ $9595 SUB A            ; an entry with verb id 0 follows:
+ $9596 CP (IX+$00)
+ $9599 JR Z,$9586       ; it is called too
+@label=DispatchCommand_Done
+*$959B LD A,($B6FA)     ; ActionPerform
+ $959E CP $01           ; test pass: nothing more
+ $95A0 JR NZ,$95C7
+ $95A2 LD A,($B6EA)     ; Subject
+@isub=CP PLAYER
+ $95A5 CP $00           ; not the player: no dark test
+ $95A7 JR NZ,$95AF
+ $95A9 CALL $95ED       ; is the player in the dark now?
+ $95AC CALL C,$72DD     ; "It is dark."
+*$95AF LD A,($B6E7)     ; B = the verb id
+ $95B2 LD B,A
+ $95B3 LD A,($B6E8)     ; the first object
+ $95B6 LD IX,($B708)    ; and its record
+ $95BA CALL $95DF       ; NotifyCharacter
+ $95BD LD A,($B6E9)     ; the second object
+ $95C0 LD IX,($B70A)    ; and its record
+ $95C4 CALL $95DF       ; NotifyCharacter
+*$95C7 POP BC           ; restore the registers
+ $95C8 POP IX
+ $95CA POP HL
+ $95CB RET
+@label=DispatchCommand_Default
+*$95CC LD A,($B6E7)     ; the verb id
+ $95CF LD IX,$C730      ; VerbHandlers
+ $95D3 CALL $9DBD       ; find the verb
+@isub=CP END_MARK
+ $95D6 CP $FF           ; not in the table?
+ $95D8 JR NZ,$9586      ; found: call it
+*$95DA CALL $72CE       ; "I cannot do that."
+ $95DD JR $95C7

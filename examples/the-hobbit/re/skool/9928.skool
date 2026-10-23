@@ -1,30 +1,57 @@
-; Routine at 9928
+; Run an NPC script command of op 0-3 (a command with objects, or a routine)
 ;
-; Used by the routine at #R$980E.
-c$9928 CALL $9918      ;
- $992B BIT 0,(IX+$00)  ;
- $992F JR NZ,$994A     ;
- $9931 LD A,(IX+$01)   ;
- $9934 LD ($B6E7),A    ;
- $9937 LD A,(IX+$02)   ;
- $993A LD ($B6E8),A    ;
- $993D LD A,(IX+$03)   ;
- $9940 LD ($B6E9),A    ;
- $9943 CALL $99C6      ;
- $9946 JR Z,$99AA      ;
- $9948 JR $9967        ;
-*$994A LD L,(IX+$01)   ;
- $994D LD H,(IX+$02)   ;
- $9950 SUB A           ;
- $9951 LD ($B6FA),A    ;
- $9954 LD ($B6FB),A    ;
- $9957 CALL $9B6C      ;
- $995A LD A,($B6FB)    ;
- $995D CP $01          ;
- $995F JR NZ,$99AA     ;
- $9961 LD ($B6FA),A    ;
- $9964 CALL $9B6C      ;
-*$9967 BIT 5,(IX+$00)  ;
- $996B JP Z,$9901      ;
- $996E LD (IX+$00),$00 ;
- $9972 JR $9901        ;
+; Called by the script interpreter (#R$980E) for the ops below SCRIPT_OP_VERB.
+; Bit 0 of the command byte tells the two forms apart (the language is described
+; at #R$980E). The script pointer (IY+2, IY+3) is first moved past the command
+; (#R$9918, length 4).
+; .
+; Bit 0 clear (ops 0 and 2): CommandId, FirstObject and SecondObject are taken
+; from bytes +1 to +3 and the command is tried through #R$99C6 (test pass, then
+; done). A refusal is a failure (#R$99AA).
+; .
+; Bit 0 set (ops 1 and 3): bytes +1 and +2 are the address of a routine, +3 is
+; not used. The routine is called like a verb handler in two passes: with
+; ActionPerform and ActionAllowed 0 (the test: the routine must set
+; ActionAllowed to 1 to agree) and, if it agreed, again with ActionPerform = 1
+; (it does its work). A routine that leaves ActionAllowed other than 1 in the
+; test is a failure (#R$99AA).
+; .
+; After a success the NPC is done for this turn. If bit 5 of the command byte
+; is set (SCRIPT_BIT_ERASE) the command byte is first set to 0 in the script
+; itself (a one-shot command). The other bytes stay, so a script that reaches
+; the command again finds op 0 with the old bytes +1 to +3 as verb and objects;
+; the only command with this bit in the data is Thorin's routine at $C8FB and
+; it has not been seen to be reached again with the inputs in re/maps.
+; .
+; IX Address of the command (as HL)
+; IY The NPC record
+@label=RunScriptCommand
+c$9928 CALL $9918       ; move the script pointer on
+@isub=BIT SCRIPT_BIT_ROUTINE,(IX+$00)
+ $992B BIT 0,(IX+$00)   ; a routine?
+ $992F JR NZ,$994A      ; yes
+ $9931 LD A,(IX+$01)    ; the verb
+ $9934 LD ($B6E7),A     ; CommandId
+ $9937 LD A,(IX+$02)    ; the first object
+ $993A LD ($B6E8),A     ; FirstObject
+ $993D LD A,(IX+$03)    ; the second object
+ $9940 LD ($B6E9),A     ; SecondObject
+ $9943 CALL $99C6       ; try it: Z = refused
+ $9946 JR Z,$99AA       ; failed
+ $9948 JR $9967         ; done
+*$994A LD L,(IX+$01)    ; the routine
+ $994D LD H,(IX+$02)
+ $9950 SUB A            ; the test pass:
+ $9951 LD ($B6FA),A     ; ActionPerform = 0
+ $9954 LD ($B6FB),A     ; ActionAllowed = 0
+ $9957 CALL $9B6C       ; call it unless it is 0
+ $995A LD A,($B6FB)     ; it agreed?
+ $995D CP $01
+ $995F JR NZ,$99AA      ; no: failed
+ $9961 LD ($B6FA),A     ; ActionPerform = 1
+ $9964 CALL $9B6C       ; do it
+@isub=BIT SCRIPT_BIT_ERASE,(IX+$00)
+*$9967 BIT 5,(IX+$00)   ; erase after use?
+ $996B JP Z,$9901       ; no: next NPC
+ $996E LD (IX+$00),$00
+ $9972 JR $9901         ; next NPC

@@ -1,13 +1,18 @@
-; Routine at 90EB
-c$90EB CALL $9D44    ;
- $90EE LD HL,$ADF6   ;
- $90F1 CALL $72DD    ;
- $90F4 LD A,($B6EA)  ;
- $90F7 CALL $9D97    ;
- $90FA AND A         ;
- $90FB LD HL,$B33B   ;
- $90FE JP Z,$72DD    ;
- $9101 LD A,($B6EA)  ;
- $9104 LD IX,($B70C) ;
- $9108 LD B,(IX+$10) ;
- $910B JP $9FAF      ;
+; Inventory: list what the subject carries
+;
+; Default handler of inventory (id 26; VerbHandlers). Prints "<subj_is> carrying." and
+; then the objects held by the subject, or "Nothing" when it holds none present (the
+; contents of held containers are listed with them, #R$9FAF).
+@label=VerbInventory
+c$90EB CALL $9D44          ; only when really performing
+ $90EE LD HL,$ADF6         ; "<subj_is> carrying."
+ $90F1 CALL $72DD          ; print it
+ $90F4 LD A,($B6EA)        ; the subject
+ $90F7 CALL $9D97          ; how many present things does it hold?
+ $90FA AND A               ;
+ $90FB LD HL,$B33B         ; "Nothing"
+ $90FE JP Z,$72DD          ; none: print it
+ $9101 LD A,($B6EA)        ; the subject is the holder...
+ $9104 LD IX,($B70C)       ; the actor
+ $9108 LD B,(IX+$10)       ; B = where it is
+ $910B JP $9FAF            ; list what the subject holds

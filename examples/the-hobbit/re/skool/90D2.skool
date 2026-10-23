@@ -1,15 +1,26 @@
-; Routine at 90D2
+; End of the game: dead, or the ending text printed
 ;
-; Used by the routines at #R$8D9D and #R$977F.
-c$90D2 SUB A         ;
- $90D3 LD ($B6EA),A  ;
- $90D6 LD HL,$AFF1   ;
- $90D9 CALL $72DD    ;
- $90DC CALL $83F5    ;
-; This entry point is used by the routine at #R$A9D6.
-*$90DF XOR A         ;
- $90E0 IN A,($FE)    ;
- $90E2 AND $1F       ;
- $90E4 CP $1F        ;
- $90E6 JR Z,$90DF    ;
- $90E8 JP $6C27      ;
+; Entered when the player dies (#R$977F KillCharacter) and from several handlers
+; that kill the player. Sets the actor to the player and prints "You are dead.",
+; then the score (#R$83F5; the mark of how much of the adventure was done), waits
+; for a key and restarts the game at #R$6C27. The victory (#R$A9D6) joins at
+; EndGame_Wait after its own text.
+; .
+; Hardware: reads the keyboard port $FE (all half-rows) in a polling loop.
+@label=EndGame
+c$90D2 SUB A                ; A = 0
+ $90D3 LD ($B6EA),A         ; actor = the player
+ $90D6 LD HL,$AFF1          ; "<subject> is dead."
+ $90D9 CALL $72DD
+ $90DC CALL $83F5           ; "You have mastered ..% Of this adventure."
+; Entry point of #R$A9D6 (the victory): wait for any key.
+@label=EndGame_Wait
+*$90DF XOR A                ; A = 0 selects every half-row
+@isub=IN A,(PORT_ULA)
+ $90E0 IN A,($FE)
+@isub=AND KEY_BITS
+ $90E2 AND $1F
+@isub=CP KEY_BITS
+ $90E4 CP $1F
+ $90E6 JR Z,$90DF
+ $90E8 JP $6C27             ; restart the game

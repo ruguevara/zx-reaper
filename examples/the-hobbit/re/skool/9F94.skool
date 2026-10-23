@@ -1,16 +1,23 @@
-; Routine at 9F94
+; Print "You see :" and the objects lying where the actor is
 ;
-; Used by the routine at #R$965B.
-c$9F94 PUSH IY       ;
- $9F96 PUSH AF       ;
- $9F97 PUSH BC       ;
- $9F98 LD HL,$B003   ;
- $9F9B CALL $72DD    ;
- $9F9E LD A,$FF      ;
- $9FA0 LD IY,($B70C) ;
- $9FA4 LD B,(IY+$10) ;
- $9FA7 CALL $9FAF    ;
- $9FAA POP BC        ;
- $9FAB POP AF        ;
- $9FAC POP IY        ;
- $9FAE RET           ;
+; Prints the message "<subject> see :" and lists the objects with the holder
+; AT_LOCATION at the actor's location (the first location of the record at
+; ActorRecord, $B70C: the player in a location description), or "Nothing"
+; (#R$9FAF). Registers IY, AF and BC are kept.
+; .
+; Hardware: none.
+@label=ListObjectsHere
+c$9F94 PUSH IY
+ $9F96 PUSH AF
+ $9F97 PUSH BC
+ $9F98 LD HL,$B003          ; "<subject> see :"
+ $9F9B CALL $72DD
+@isub=LD A,AT_LOCATION
+ $9F9E LD A,$FF             ; holder: lying at the location
+ $9FA0 LD IY,($B70C)        ; the actor's record
+ $9FA4 LD B,(IY+$10)        ; B = its location
+ $9FA7 CALL $9FAF           ; list, or "Nothing"
+ $9FAA POP BC
+ $9FAB POP AF
+ $9FAC POP IY
+ $9FAE RET

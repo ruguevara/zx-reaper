@@ -10,7 +10,7 @@
 ; alternative address, otherwise the NPC is done for this turn. Any other verb
 ; becomes the command (CommandId, with no first or second object) and is
 ; tried through #R$99C6. When that works the NPC is done for this turn. When it
-; fails, TurnVar1 counts the failure and the NPC continues at the alternative
+; fails, NpcFailures counts the failure and the NPC continues at the alternative
 ; address if the command has one (#R$9885), otherwise with its next command
 ; (#R$987F).
 ; .
@@ -40,7 +40,7 @@ c$9974 LD DE,$0002    ; length of the command
  $99A7 JP $9901       ;
 ; Entry point: the command failed (also used by #R$9928 for orders).
 @label=ScriptCommandFailed
-*$99AA LD HL,$980B    ; TurnVar1 counts the failures
+*$99AA LD HL,$980B    ; NpcFailures counts the failures
  $99AD INC (HL)       ;
  $99AE BIT 4,(IX+$00) ;
  $99B2 JP Z,$987F     ; no alternative: carry on with the script

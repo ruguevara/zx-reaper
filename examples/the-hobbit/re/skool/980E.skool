@@ -1,120 +1,211 @@
-; Routine at 980E
+; Run the script of every NPC for one turn (the script interpreter)
 ;
-; Used by the routine at #R$96B3.
-c$980E CALL $9B02    ;
- $9811 LD IY,$CACB   ;
-*$9815 XOR A         ;
- $9816 LD ($980B),A  ;
- $9819 LD A,(IY+$00) ;
- $981C CP $FF        ;
- $981E JP Z,$9909    ;
- $9821 CP $00        ;
- $9823 JP Z,$9901    ;
- $9826 LD ($B6EA),A  ;
- $9829 CALL $9F82    ;
- $982C LD ($B70C),IX ;
- $9830 LD ($B6F6),A  ;
- $9833 SUB A         ;
- $9834 LD ($B702),A  ;
- $9837 LD A,(IY+$00) ;
- $983A PUSH IY       ;
- $983C LD IY,$C11B   ;
- $9840 CALL $9E25    ;
- $9843 POP IY        ;
- $9845 JR Z,$9868    ;
- $9847 LD A,($980C)  ;
- $984A CP $02        ;
- $984C JR Z,$9868    ;
- $984E LD A,$01      ;
- $9850 LD ($B702),A  ;
- $9853 LD A,($980C)  ;
- $9856 CP $01        ;
- $9858 JR NZ,$9868   ;
- $985A INC A         ;
- $985B LD ($980C),A  ;
- $985E LD HL,$B027   ;
- $9861 CALL $72DD    ;
- $9864 SUB A         ;
- $9865 LD ($B702),A  ;
-*$9868 LD A,$FF      ;
- $986A CP (IX+$01)   ;
- $986D JP NZ,$9B16   ;
+; Called by #R$96B3 after each player command. Goes through the NPC states
+; (NpcStates, 17 records of 7 bytes, $FF ends) and lets each NPC with an id do
+; commands from its script until one of them succeeds or it has failed six times.
+; .
+; Per NPC. Subject is the NPC's id (a record with id 0 is a dormant slot that
+; events fill in, and is skipped), its record goes to ActorRecord, its place to
+; ActorLocation. MessagesVisible is cleared and set to 1 only when the player
+; can see the NPC act: the NPC is within the player's reach (#R$9E25) and the
+; player is not in the dark. In the dark, the first NPC within reach makes
+; SightState go from 1 to 2 and "You hear a noise." is printed once for the turn
+; (after that nothing of the NPCs is printed). NpcFailures counts the failures of
+; the NPC. An NPC that is held by something (its record's holder is not
+; AT_LOCATION) is passed to #R$9B16: the NPC acts as usual when the holder is
+; dead or disabled or is a character; otherwise it does nothing, unless the
+; holder is open or alive, when it tries to climb out (command $37) instead.
+; ActorHasOrder is 1 when the NPC owns a stored order (given with SAY TO,
+; #R$7F10). At the end the Subject is the player again, MessagesVisible is 1
+; and ActorRecord points to the player's record.
+; .
+; THE SCRIPT LANGUAGE. An NPC state record is: +0 id, +1 the highest entry number
+; for random choices, +2 word, the current script (address of the next command),
+; +4 word, the behaviour table, +6 not used by the interpreter. A script is a
+; row of commands in $C82D-$CA83. The first byte of a command is the command
+; byte: bits 0-3 are the op, bit 4 says that a word follows the command, bit 5
+; (SCRIPT_BIT_ERASE) erases the command byte after a success (#R$9928), bit 6
+; (SCRIPT_BIT_NO_ORDER) says that a stored order must not replace the command,
+; bit 7 is not used. The word of bit 4 is the ALTERNATIVE address, a script
+; address: where the NPC goes when the command fails (it is the last two bytes
+; of the command, and the command is 2 bytes longer). The ops:
+; .
+; 0 and 2: verb, object 1, object 2 (4 bytes). The NPC does the command as if it were typed
+; (a verb id from the command table, $FF as an object means none; ids of
+; objects and characters are in the ids list). #R$9928, #R$99C6.
+; .
+; 1 and 3: routine word, one unused byte (4 bytes). The routine is called in two passes like a
+; verb handler and must set ActionAllowed to 1 in the first to agree. #R$9928.
+; .
+; 4: verb (2 bytes). The command without objects: a move (verbs 1-10 are
+; the directions), or $24 (run) and $30 (capture, default handler #R$A3E6). A verb of $FF does nothing: the
+; NPC is done for the turn, or jumps to the alternative address when there is
+; one. #R$9974.
+; .
+; 5-9, B and D: end of the script (1 byte; $07 is the one used). The NPC takes
+; the script of entry 0 of its behaviour table (the default script, #R$9A68) and
+; is done for this turn.
+; .
+; C: behaviour id (2 bytes). Takes the script of the entry with that id in the
+; behaviour table (#R$9AA0) and goes on with it at once.
+; .
+; E: script address (3 bytes). Jumps there and goes on with it at once.
+; .
+; F: highest entry number (2 bytes). Takes the script of a random entry of the behaviour table, from 0 to
+; the smaller of this number and the record's +1 (#R$9A59), and goes on at once.
+; .
+; The behaviour table of an NPC is a row of (id, script word) entries ended by
+; $FF. Entries 0 to the record's +1 have id 0 and are the scripts that op F and
+; the end ops choose among (entry 0 is the default). The entries after them
+; have as their id a command id: when a living NPC is the first or second object of
+; a command that was just done, the entry for that verb (15 attack, 29 give, 48
+; capture) becomes its script (#R$95DF, #R$9AA0).
+; .
+; A turn. The NPC takes the command at its current script address. Ops C, E and F cost
+; no time. A command of op 0-4 is tried: when it succeeds the script address is
+; already past it and the NPC is done for the turn. When it fails the failure
+; counter NpcFailures goes up; the NPC then goes to the alternative address of the
+; command if it has one, or to the next command; at 6 failures the NPC is done for
+; the turn and goes on from there next turn. A command is a failure when the test pass
+; of the command refuses it (#R$99C6).
+; .
+; Stored orders. If the NPC owns a stored order (ActorHasOrder = 1) and the command
+; to be tried is an op 0-4 without bit 6, the order is taken first (#R$7F1A, once
+; per turn). If it parses and is allowed, the NPC does that order instead (#R$99CE)
+; and is done for the turn: the script address does not move. Otherwise the script command is tried.
+; .
+; Hardware: none itself; the commands print through the message printer.
+@label=RunNpcScripts
+c$980E CALL $9B02       ; SightState, PlayerLocation
+ $9811 LD IY,$CACB      ; the first NPC state
+*$9815 XOR A
+ $9816 LD ($980B),A     ; no failures yet (NpcFailures)
+ $9819 LD A,(IY+$00)    ; NPC id
+@isub=CP END_MARK
+ $981C CP $FF           ; the end of the list?
+ $981E JP Z,$9909       ; yes: finish
+ $9821 CP $00           ; 0: a dormant slot
+ $9823 JP Z,$9901       ; skip it
+ $9826 LD ($B6EA),A     ; Subject = the NPC
+ $9829 CALL $9F82       ; A = its location, IX = its record
+ $982C LD ($B70C),IX    ; ActorRecord
+ $9830 LD ($B6F6),A     ; ActorLocation (also $FF if it has several)
+ $9833 SUB A            ; MessagesVisible = 0
+ $9834 LD ($B702),A
+ $9837 LD A,(IY+$00)    ; the NPC id again
+ $983A PUSH IY          ; keep the NPC state
+ $983C LD IY,$C11B      ; IY = the player's record
+ $9840 CALL $9E25       ; can the player reach the NPC?
+ $9843 POP IY
+ $9845 JR Z,$9868       ; no: nothing is seen
+ $9847 LD A,($980C)     ; SightState
+@isub=CP SIGHT_NOISE_HEARD
+ $984A CP $02           ; the noise was heard: nothing is seen
+ $984C JR Z,$9868
+ $984E LD A,$01         ; the player sees what the NPC does
+ $9850 LD ($B702),A     ; MessagesVisible = 1
+ $9853 LD A,($980C)     ; SightState
+@isub=CP SIGHT_DARK
+ $9856 CP $01           ; lit: that is all
+ $9858 JR NZ,$9868
+ $985A INC A            ; dark: SightState = 2 (SIGHT_NOISE_HEARD)
+ $985B LD ($980C),A
+ $985E LD HL,$B027      ; "You hear a noise."
+ $9861 CALL $72DD
+ $9864 SUB A            ; MessagesVisible = 0 again
+ $9865 LD ($B702),A
+*$9868 LD A,$FF
+ $986A CP (IX+$01)      ; is the NPC held by something?
+ $986D JP NZ,$9B16      ; yes: #R$9B16 decides
 ; This entry point is used by the routine at #R$9B16.
-*$9870 LD IX,($B70C) ;
- $9874 CALL $7F10    ;
- $9877 LD A,$00      ;
- $9879 JR NZ,$987C   ;
- $987B INC A         ;
-*$987C LD ($B6F4),A  ;
+@label=RunNpcScripts_Start
+*$9870 LD IX,($B70C)    ; IX = ActorRecord
+ $9874 CALL $7F10       ; does the NPC own a stored order? (Z = yes)
+ $9877 LD A,$00
+ $9879 JR NZ,$987C
+ $987B INC A            ; ActorHasOrder = 1
+*$987C LD ($B6F4),A     ; ActorHasOrder
 ; This entry point is used by the routine at #R$9974.
-*$987F LD L,(IY+$02) ;
- $9882 LD H,(IY+$03) ;
+@label=RunNpcScripts_Script
+*$987F LD L,(IY+$02)    ; HL = the current script
+ $9882 LD H,(IY+$03)
 ; This entry point is used by the routine at #R$9974.
-*$9885 LD A,($980B)  ;
- $9888 CP $06        ;
- $988A JR Z,$9901    ;
- $988C LD A,(HL)     ;
- $988D LD DE,$0004   ;
- $9890 PUSH HL       ;
- $9891 POP IX        ;
- $9893 AND $0F       ;
- $9895 CP $05        ;
- $9897 JR NC,$98CB   ;
- $9899 LD A,($B6F4)  ;
- $989C CP $01        ;
- $989E JR NZ,$98BF   ;
- $98A0 BIT 6,(HL)    ;
- $98A2 JR NZ,$98BF   ;
- $98A4 SUB A         ;
- $98A5 LD ($B6F4),A  ;
- $98A8 INC A         ;
- $98A9 CALL $7F1A    ;
- $98AC JR Z,$98BF    ;
- $98AE LD A,$01      ;
- $98B0 LD ($B6FA),A  ;
- $98B3 LD ($B6FB),A  ;
- $98B6 LD HL,$9901   ;
- $98B9 PUSH HL       ;
- $98BA PUSH IX       ;
- $98BC JP $99CE      ;
-*$98BF LD A,(HL)     ;
- $98C0 AND $0F       ;
- $98C2 CP $04        ;
- $98C4 JP Z,$9974    ;
- $98C7 JR C,$9928    ;
- $98C9 JR $9901      ;
-*$98CB CP $0E        ;
- $98CD JR NZ,$98DD   ;
- $98CF LD E,(IX+$01) ;
- $98D2 LD (IY+$02),E ;
- $98D5 LD E,(IX+$02) ;
- $98D8 LD (IY+$03),E ;
- $98DB JR $987F      ;
-*$98DD CP $0C        ;
- $98DF JR NZ,$98EC   ;
- $98E1 LD B,(IX+$01) ;
- $98E4 LD A,(IY+$00) ;
- $98E7 CALL $9AA0    ;
- $98EA JR $987F      ;
-*$98EC CP $0F        ;
- $98EE JR NZ,$98F5   ;
- $98F0 CALL $9A59    ;
- $98F3 JR $987F      ;
-*$98F5 CP $00        ;
- $98F7 JR NZ,$98FC   ;
- $98F9 ADD HL,DE     ;
- $98FA JR $9885      ;
-*$98FC SUB A         ;
- $98FD LD E,A        ;
- $98FE CALL $9A68    ;
+@label=RunNpcScripts_Command
+*$9885 LD A,($980B)     ; NpcFailures: failures so far
+@isub=CP SCRIPT_MAX_FAILURES
+ $9888 CP $06           ; six: the NPC is done for this turn
+ $988A JR Z,$9901
+ $988C LD A,(HL)        ; the command byte
+ $988D LD DE,$0004      ; DE = length of op 0-3 commands
+ $9890 PUSH HL
+ $9891 POP IX           ; IX = the command
+@isub=AND SCRIPT_OP_MASK
+ $9893 AND $0F          ; the op
+@isub=CP SCRIPT_OPS_COMMANDS
+ $9895 CP $05           ; 5 and over: control ops
+ $9897 JR NC,$98CB
+ $9899 LD A,($B6F4)     ; ActorHasOrder
+ $989C CP $01           ; no stored order: the script command
+ $989E JR NZ,$98BF
+@isub=BIT SCRIPT_BIT_NO_ORDER,(HL)
+ $98A0 BIT 6,(HL)       ; this command is not to be interrupted
+ $98A2 JR NZ,$98BF
+ $98A4 SUB A            ; the order is looked at once per turn
+ $98A5 LD ($B6F4),A
+ $98A8 INC A            ; A = 1: parse and test the order
+ $98A9 CALL $7F1A       ; RunStoredOrder
+ $98AC JR Z,$98BF       ; no usable order: the script command
+ $98AE LD A,$01
+ $98B0 LD ($B6FA),A     ; ActionPerform = 1
+ $98B3 LD ($B6FB),A     ; ActionAllowed = 1
+ $98B6 LD HL,$9901      ; after the order: the next NPC
+ $98B9 PUSH HL          ; (return address of the jump)
+ $98BA PUSH IX          ; (IX is popped by #R$99C6)
+ $98BC JP $99CE         ; do the order at once, the test is done
+*$98BF LD A,(HL)
+ $98C0 AND $0F
+@isub=CP SCRIPT_OP_VERB
+ $98C2 CP $04           ; op 4: a verb alone
+ $98C4 JP Z,$9974
+ $98C7 JR C,$9928       ; op 0-3: #R$9928
+ $98C9 JR $9901
+@isub=CP SCRIPT_OP_JUMP
+*$98CB CP $0E           ; E: jump
+ $98CD JR NZ,$98DD
+ $98CF LD E,(IX+$01)    ; the script address of the command
+ $98D2 LD (IY+$02),E    ; is the current script
+ $98D5 LD E,(IX+$02)
+ $98D8 LD (IY+$03),E
+ $98DB JR $987F         ; go on there
+@isub=CP SCRIPT_OP_SWITCH
+*$98DD CP $0C           ; C: switch behaviour
+ $98DF JR NZ,$98EC
+ $98E1 LD B,(IX+$01)    ; B = the behaviour id
+ $98E4 LD A,(IY+$00)    ; A = the NPC id
+ $98E7 CALL $9AA0       ; SwitchNpcScript
+ $98EA JR $987F         ; go on with the new script
+@isub=CP SCRIPT_OP_RANDOM
+*$98EC CP $0F           ; F: random script
+ $98EE JR NZ,$98F5
+ $98F0 CALL $9A59       ; ChooseRandomScript
+ $98F3 JR $987F         ; go on with it
+*$98F5 CP $00           ; never 0 here (the op is 5 or more): always jumps
+ $98F7 JR NZ,$98FC
+ $98F9 ADD HL,DE
+ $98FA JR $9885
+*$98FC SUB A            ; 5-9, B, D: end of the script
+ $98FD LD E,A           ; entry 0 of the behaviour table
+ $98FE CALL $9A68       ; SelectScript: the default script
 ; This entry point is used by the routines at #R$9928, #R$9974 and #R$9B16.
-*$9901 LD DE,$0007   ;
- $9904 ADD IY,DE     ;
- $9906 JP $9815      ;
-*$9909 SUB A         ;
- $990A LD ($B6EA),A  ;
- $990D INC A         ;
- $990E LD ($B702),A  ;
- $9911 LD HL,$C11B   ;
- $9914 LD ($B70C),HL ;
- $9917 RET           ;
+@label=RunNpcScripts_Next
+@isub=LD DE,NPC_RECORD_SIZE
+*$9901 LD DE,$0007      ; the next NPC
+ $9904 ADD IY,DE
+ $9906 JP $9815
+*$9909 SUB A            ; Subject = the player
+ $990A LD ($B6EA),A
+ $990D INC A
+ $990E LD ($B702),A     ; MessagesVisible = 1
+ $9911 LD HL,$C11B      ; ActorRecord = the player's record
+ $9914 LD ($B70C),HL
+ $9917 RET

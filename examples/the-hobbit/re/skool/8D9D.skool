@@ -1,97 +1,44 @@
-; Routine at 8D9D
+; Move the actor in a direction
 ;
-; Used by the routine at #R$8FAD.
-c$8D9D CALL $95ED      ;
- $8DA0 JR NC,$8DAB     ;
- $8DA2 LD A,$09        ;
- $8DA4 CALL $9C9F      ;
- $8DA7 INC A           ;
- $8DA8 LD ($B6E7),A    ;
-; This entry point is used by the routine at #R$8F3E.
-*$8DAB LD IY,($B70C)   ;
- $8DAF LD A,(IY+$01)   ;
- $8DB2 CP $FF          ;
- $8DB4 JR Z,$8DC3      ;
- $8DB6 CALL $9BCA      ;
- $8DB9 BIT 6,(IX+$07)  ;
- $8DBD JR Z,$8DD9      ;
- $8DBF LD (IY+$01),$FF ;
-*$8DC3 LD A,($B6EA)    ;
- $8DC6 CALL $9CE8      ;
- $8DC9 ADD A,(IY+$02)  ;
- $8DCC LD ($8D9C),A    ;
- $8DCF LD A,($B6E7)    ;
- $8DD2 CALL $9F08      ;
- $8DD5 CP $FF          ;
- $8DD7 JR NZ,$8DFA     ;
-*$8DD9 CALL $95ED      ;
- $8DDC JP NC,$9F76     ;
- $8DDF CALL $9D44      ;
- $8DE2 LD IX,$C11B     ;
- $8DE6 AND A           ;
- $8DE7 LD HL,$AD7D     ;
- $8DEA RR (IX+$05)     ;
- $8DEE JP NZ,$72DD     ;
- $8DF1 LD HL,$AD8A     ;
- $8DF4 CALL $72DD      ;
- $8DF7 JP $90D2        ;
-*$8DFA LD A,(IX+$02)   ;
- $8DFD AND A           ;
- $8DFE JR Z,$8DD9      ;
- $8E00 LD ($8D9B),A    ;
- $8E03 LD A,(IX+$01)   ;
- $8E06 CALL $8E85      ;
- $8E09 DEC A           ;
- $8E0A JR Z,$8DD9      ;
- $8E0C DEC A           ;
- $8E0D JR Z,$8E6D      ;
- $8E0F DEC A           ;
- $8E10 JR Z,$8E72      ;
-; This entry point is used by the routine at #R$9BDD.
-*$8E12 CALL $9D44      ;
- $8E15 LD (IY+$10),B   ;
- $8E18 LD A,($B6EA)    ;
- $8E1B CALL $9BDD      ;
- $8E1E LD A,($B6EA)    ;
- $8E21 CP $00          ;
- $8E23 RET NZ          ;
- $8E24 LD IX,$C78E     ;
- $8E28 LD A,($8D9B)    ;
- $8E2B CALL $9DBD      ;
- $8E2E JR Z,$8E39      ;
- $8E30 LD L,(IX+$01)   ;
- $8E33 LD H,(IX+$02)   ;
- $8E36 CALL $9B6C      ;
-*$8E39 CALL $95ED      ;
- $8E3C RET C           ;
- $8E3D LD A,($B6EA)    ;
- $8E40 AND A           ;
- $8E41 LD A,($8D9B)    ;
- $8E44 JR NZ,$8E6A     ;
- $8E46 LD HL,($8D99)   ;
- $8E49 BIT 6,(HL)      ;
- $8E4B JP NZ,$96A8     ;
- $8E4E SET 6,(HL)      ;
- $8E50 PUSH AF         ;
- $8E51 LD IX,$8D6E     ;
- $8E55 CALL $9DBD      ;
- $8E58 JR Z,$8E69      ;
- $8E5A PUSH DE         ;
- $8E5B LD E,(IX+$01)   ;
- $8E5E LD D,(IX+$02)   ;
- $8E61 LD HL,($B6F7)   ;
- $8E64 ADD HL,DE       ;
- $8E65 LD ($B6F7),HL   ;
- $8E68 POP DE          ;
-*$8E69 POP AF          ;
-*$8E6A JP $9630        ;
-*$8E6D LD HL,$AE23     ;
- $8E70 JR $8E79        ;
-*$8E72 LD IX,($8D99)   ;
- $8E76 LD HL,$AE2E     ;
-*$8E79 PUSH HL         ;
- $8E7A LD L,(IX+$02)   ;
- $8E7D LD H,(IX+$03)   ;
- $8E80 EX (SP),HL      ;
- $8E81 CALL $72DD      ;
- $8E84 RET             ;
+; Default handler (VerbHandlers) of the ten direction verbs (go north ... go down;
+; CommandId holds DIR_NORTH to DIR_DOWN), also entered by run (#R$8FAD). The actor is
+; the Subject: the player or an NPC acting from its script. It has three parts:
+; $8D9D chooses the direction, #R$8DAB moves through the exit and #R$8E12 is the
+; arrival.
+; .
+; Direction: in the dark (#R$95ED) the player cannot choose; CommandId becomes a random
+; direction 1-10. A way out of a holder is refused unless the holder is a character
+; (then the actor is set free of it); an actor inside a barrel or a boat cannot walk.
+; TakeWeight is what the actor weighs plus what it carries (#R$9CE8). The exit comes
+; from #R$9F08. Without an exit (or with destination 0) the command is refused
+; (#R$9F76: "<subj> cannot go north."); but in the dark the player blunders into a wall:
+; the player's strength (record +5) is halved, "But fall and hit your head.", and when
+; the halving leaves 0, "But fall and smash your skull." and the game ends (#R$90D2).
+; .
+; Obstacle: #R$8E85 tests the exit's obstacle and the destination's capacity. Blocked:
+; refused. Too small or too full: "<the thing> is too small (full) for <subj> to
+; enter." (the too small message takes its word from record bytes +2,+3 of the obstacle,
+; its weight, which is a bug: it prints a wrong word; see the findings).
+; .
+; Arrival (#R$8E12, also entered by #R$9BDD for a player carried to a new place, with TakeId
+; and B set): when really performing, the actor's location slot (record +$10) becomes
+; B, what it carries comes along (#R$9BDD) and an NPC is done (its movement is shown by
+; #R$9ACD). For the player the arrival handler of the destination runs (ArrivalHandlers),
+; and unless it is dark the destination is described: the first time (location flag
+; LOC_VISITED not yet set) the flag is set, the score is raised by the value found for the
+; location id in #R$8D6E (that table is keyed by location id, not by treasure) and the
+; full description with picture follows (#R$9630); a visited location gets the short
+; one (#R$96A8).
+; .
+; Hardware: none directly; the description may show a picture and wait for a key.
+;
+; B New location id ($8E12 only)
+; IY Record of the actor ($8E12 only; #R$9BDD enters with the IY of its own caller)
+@label=VerbMove
+c$8D9D CALL $95ED          ; dark?
+ $8DA0 JR NC,$8DAB         ; no: keep the direction
+@isub=LD A,DIR_DOWN-1
+ $8DA2 LD A,$09            ; in the dark: a random direction...
+ $8DA4 CALL $9C9F          ; ... 0-9...
+ $8DA7 INC A               ; ... plus 1: 1-10
+ $8DA8 LD ($B6E7),A        ; CommandId := the random direction

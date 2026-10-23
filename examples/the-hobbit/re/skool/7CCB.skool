@@ -1,23 +1,40 @@
-; Routine at 7CCB
+; Next candidate for the first noun phrase
 ;
-; Used by the routine at #R$7A14.
+; One step of the search for what the first typed noun phrase (RecBuf1) means.
+; The search position is the cursor RecPtr1 ($794E), which #R$7AA1 sets before
+; the first call; every call goes on from where the last one stopped.
+; .
+; If Noun1Kind is NOUN_PLACE the candidates are the destinations of the exits
+; of the actor's location whose names fit the phrase (#R$9EA0). Otherwise they
+; are the objects whose names fit (#R$9DD9) and that are of the kind the
+; command takes: AllMode ($B710) is set from bits 2-3 of StateB71E (0 things,
+; 1 living characters, 2 anything). A candidate is accepted when the check of
+; the command lets it through (#R$7CFC); the accepted one is left in
+; FirstObject.
+; .
+; O:A Id of the accepted object or place, $FF when there are no more
+; O:F Z when there are no more
+; O:FirstObject The accepted candidate
+; O:HL Destroyed (IY is preserved)
+@label=NextNoun1
 c$7CCB PUSH IY       ;
- $7CCD LD IX,($794E) ;
- $7CD1 LD A,($B6FE)  ;
+ $7CCD LD IX,($794E) ; RecPtr1: the cursor
+ $7CD1 LD A,($B6FE)  ; Noun1Kind
  $7CD4 DEC A         ;
- $7CD5 JR Z,$7CF1    ;
- $7CD7 LD IY,$9DD9   ;
- $7CDB LD A,($B71E)  ;
+ $7CD5 JR Z,$7CF1    ; a place
+ $7CD7 LD IY,$9DD9   ; FindNextNamedObject
+ $7CDB LD A,($B71E)  ; StateB71E
  $7CDE RRCA          ;
  $7CDF RRCA          ;
- $7CE0 AND $03       ;
- $7CE2 LD ($B710),A  ;
- $7CE5 CALL $7CFC    ;
+ $7CE0 AND $03       ; noun 1 kind: bits 2-3
+ $7CE2 LD ($B710),A  ; AllMode
+ $7CE5 CALL $7CFC    ; NextNoun1Match
  $7CE8 CP $FF        ;
-*$7CEA LD ($794E),IX ;
+*$7CEA LD ($794E),IX ; RecPtr1
  $7CEE POP IY        ;
  $7CF0 RET           ;
-*$7CF1 LD IY,$9EA0   ;
- $7CF5 CALL $7CFC    ;
+@label=NextNoun1Place
+*$7CF1 LD IY,$9EA0   ; FindExitByName
+ $7CF5 CALL $7CFC    ; NextNoun1Match
  $7CF8 CP $FF        ;
  $7CFA JR $7CEA      ;

@@ -1,17 +1,42 @@
-; Routine at 7D98
+; Explain why the second noun phrase gave no single object
 ;
-; Used by the routine at #R$7DBC.
-c$7D98 LD HL,$793E   ;
- $7D9B BIT 0,(HL)    ;
- $7D9D JP Z,$7E4D    ;
- $7DA0 BIT 1,(HL)    ;
- $7DA2 LD HL,$7948   ;
- $7DA5 LD DE,$B6E9   ;
- $7DA8 LD BC,$B6FF   ;
- $7DAB JR Z,$7DFE    ;
- $7DAD LD A,($7941)  ;
+; Reached from #R$7DBC when the first noun phrase is settled (one object) and
+; the second is not. RecWork1 ($793E) says what
+; the matcher saw of the second phrase: bit 0 the player typed words for it,
+; bit 1 some object or place fitted them; $7941 (RecWork3+1) counts the
+; candidates the command accepted. The cases:
+; .
+; 1. No words typed, a second noun is needed: #R$7E4D asks "... what ?" or says
+; there is nothing to use.
+; .
+; 2. Words typed, nothing fitted them: #R$7DFE looks for a place or any object of
+; that name, and else says "I do not see ... here".
+; .
+; 3. Fitting candidates, none accepted: #R$7DF5 runs the command in perform mode so
+; that its own refusal is printed.
+; .
+; 4. Several accepted (the player must choose): the record is saved and "Which
+; ... ?" is asked (#R$7D89). This case is odd: the code loads A twice and puts
+; the address RecBuf2 ($7948) on the stack where #R$7D83 puts the first word of
+; the phrase, so the question prints a stray word ("Which ting ?") and
+; AwaitingAnswer gets the low byte of that word instead of the offset of the
+; phrase. Not executed with the inputs in re/maps; seen by calling this
+; routine with RecWork1 = 3 and $7941 = 2.
+; .
+; Like #R$7DBC it ends by returning to the caller of #R$79B6 or jumping to the
+; end of the turn code at #R$798E.
+@label=ExplainNoun2Failure
+c$7D98 LD HL,$793E   ; RecWork1
+ $7D9B BIT 0,(HL)    ; words typed for phrase 2?
+ $7D9D JP Z,$7E4D    ; ReportNoSecondNoun
+ $7DA0 BIT 1,(HL)    ; a candidate fitted?
+ $7DA2 LD HL,$7948   ; RecBuf2
+ $7DA5 LD DE,$B6E9   ; SecondObject
+ $7DA8 LD BC,$B6FF   ; Noun2Kind
+ $7DAB JR Z,$7DFE    ; FindNounElsewhere
+ $7DAD LD A,($7941)  ; candidates accepted
  $7DB0 AND A         ;
- $7DB1 JP Z,$7DF5    ;
- $7DB4 LD A,($7955)  ;
+ $7DB1 JP Z,$7DF5    ; none: PerformRefusal
+ $7DB4 LD A,($7955)  ; (this load is overwritten)
  $7DB7 LD A,($7948)  ;
- $7DBA JR $7D89      ;
+ $7DBA JR $7D89      ; AskWhich (HL = $7948 is pushed as the word)

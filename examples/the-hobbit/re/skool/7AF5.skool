@@ -1,51 +1,74 @@
-; Routine at 7AF5
+; Test whether a character can do a command
 ;
-; Used by the routine at #R$99C6.
+; Used by the NPC script interpreter (#R$99C6) for a command it wants a
+; character to carry out: CommandId, FirstObject and SecondObject are already
+; set (Noun1Kind and Noun2Kind say whether a noun is an object or a place; the
+; acting character is Subject). The routine does what the sentence matcher
+; does for a typed sentence, but without a typed sentence: it fetches the
+; command's table record (#R$70E8), packs and unpacks its flags (#R$70F3,
+; #R$7B78) and puts the name phrases of the two objects into RecBuf1 and
+; RecBuf2 (#R$7B63) so that the noun matcher recognises exactly them.
+; ActionPerform is 0 for the test.
+; .
+; A command without nouns is checked at once (#R$950F; the result is
+; ActionAllowed). A command with nouns goes through #R$7A14 with RecWork5 = 1,
+; which confirms that the objects fit the command. ActionPerform is left 1 on
+; return, so the caller can carry the command out. All registers and the scan
+; position RecPtr1 ($794E) are kept.
+; .
+; Hardware: none (the check may print a message when it refuses).
+;
+; CommandId The command (1-59)
+; FirstObject First object or NO_OBJECT
+; SecondObject Second object or NO_OBJECT
+; Noun1Kind 0 an object, else a place (Noun2Kind for the second)
+; O:F NZ when the command can be done, Z when it is refused
+@label=TestActorCommand
 c$7AF5 PUSH HL       ;
  $7AF6 PUSH IY       ;
  $7AF8 PUSH IX       ;
  $7AFA PUSH DE       ;
  $7AFB PUSH BC       ;
- $7AFC LD HL,($794E) ;
+ $7AFC LD HL,($794E) ; RecPtr1
  $7AFF PUSH HL       ;
- $7B00 LD A,($B6E7)  ;
- $7B03 CALL $70E8    ;
+ $7B00 LD A,($B6E7)  ; CommandId
+ $7B03 CALL $70E8    ; CommandRecordAddr
  $7B06 PUSH HL       ;
- $7B07 POP IX        ;
- $7B09 CALL $79A9    ;
- $7B0C CALL $70F3    ;
- $7B0F CALL $7B78    ;
- $7B12 LD A,($B6E8)  ;
+ $7B07 POP IX        ; IX: the command's record
+ $7B09 CALL $79A9    ; ResetRecWork
+ $7B0C CALL $70F3    ; PackCommandFlags
+ $7B0F CALL $7B78    ; UnpackFlags
+ $7B12 LD A,($B6E8)  ; FirstObject
  $7B15 LD B,A        ;
- $7B16 LD A,($B6FE)  ;
- $7B19 LD DE,$7942   ;
- $7B1C CALL $7B63    ;
- $7B1F LD A,($B6E9)  ;
+ $7B16 LD A,($B6FE)  ; Noun1Kind
+ $7B19 LD DE,$7942   ; RecBuf1
+ $7B1C CALL $7B63    ; CopyNamePhrase
+ $7B1F LD A,($B6E9)  ; SecondObject
  $7B22 LD B,A        ;
- $7B23 LD A,($B6FF)  ;
- $7B26 LD DE,$7948   ;
+ $7B23 LD A,($B6FF)  ; Noun2Kind
+ $7B26 LD DE,$7948   ; RecBuf2
  $7B29 CALL $7B63    ;
- $7B2C CALL $7AA6    ;
+ $7B2C CALL $7AA6    ; start the scan for the first noun (ignores VerbAllFlag)
  $7B2F XOR A         ;
- $7B30 LD ($B6FA),A  ;
- $7B33 LD A,($B71D)  ;
- $7B36 AND $0C       ;
+ $7B30 LD ($B6FA),A  ; ActionPerform: test pass
+ $7B33 LD A,($B71D)  ; StateB71D: command flags
+ $7B36 AND $0C       ; does the command take nouns?
  $7B38 JR NZ,$7B43   ;
- $7B3A CALL $950F    ;
- $7B3D LD A,($B6FB)  ;
+ $7B3A CALL $950F    ; no: check it directly
+ $7B3D LD A,($B6FB)  ; ActionAllowed
  $7B40 AND A         ;
  $7B41 JR $7B52      ;
 *$7B43 LD A,$01      ;
- $7B45 LD ($7953),A  ;
- $7B48 CALL $7A14    ;
+ $7B45 LD ($7953),A  ; RecWork5: take the first match
+ $7B48 CALL $7A14    ; ResolveNouns
  $7B4B JR Z,$7B50    ;
- $7B4D XOR A         ;
+ $7B4D XOR A         ; no match: Z
  $7B4E JR $7B52      ;
-*$7B50 OR $01        ;
+*$7B50 OR $01        ; matched: NZ
 *$7B52 LD A,$01      ;
- $7B54 LD ($B6FA),A  ;
+ $7B54 LD ($B6FA),A  ; ActionPerform: the caller carries it out
  $7B57 POP HL        ;
- $7B58 LD ($794E),HL ;
+ $7B58 LD ($794E),HL ; RecPtr1 as it was
  $7B5B POP BC        ;
  $7B5C POP DE        ;
  $7B5D POP IX        ;

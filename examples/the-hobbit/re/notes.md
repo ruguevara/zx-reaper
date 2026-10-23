@@ -182,7 +182,7 @@ Handlers called by the verb dispatcher $950F; if the object has none, $C730 is u
 
 ### Scripts ($C82D..)
 NPC record at $CACB+7k: +0 id (0 = dormant slot: $C7AA writes $42 butler, $C7D9 $46 Bard, $C7CE $3C dragon), +1 highest
-random index, +2 W current script, +4 W behaviour table (id, W script; $FF; 0 default, $F idle, others by events/$0C),
+random index, +2 W current script, +4 W behaviour table (id, W script; $FF; 0 default, then command ids as events: $0F attack, $1D give, $30 capture; F51),
 +6 spare. Run by $980E for every NPC each turn. Command byte: low nibble op, bit 4 = extra W (alternative target),
 bit 5 erase after use, bit 6 not interruptible by orders. Op 0/2: verb,noun1,noun2 executed as typed; 1/3: W routine +
 pad; 4: verb only; $C: switch behaviour (arg id); $E: jump W; $F: random entry 0..arg ($9A59); 5-9,B,D: restart.

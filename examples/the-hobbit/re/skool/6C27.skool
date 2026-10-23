@@ -1,0 +1,128 @@
+; Restart the game: restore the saved state and begin a new game
+;
+; This entry point is used by the routines at #R$8391, #R$8498 and #R$90D2.
+@label=RestartGame
+c$6C27 DI            ;
+ $6C28 LD SP,$5EFF   ; the stack lives at $5EFF and below
+ $6C2B LD IX,$CC00   ; PictureTable: zero the border and attribute bytes of
+ $6C2F LD A,$05      ; picture 5 (already 0 on the tape; reason unknown, see
+ $6C31 CALL $9DBD    ; the notes)
+ $6C34 LD L,(IX+$01) ;
+ $6C37 LD H,(IX+$02) ;
+ $6C3A LD (HL),$00   ;
+ $6C3C INC HL        ;
+ $6C3D LD (HL),$00   ;
+ $6C3F LD HL,$F400   ; copy the backups over the state blocks
+ $6C42 LD DE,$C11B   ;
+@isub=LD BC,STATE_OBJECTS_SIZE
+ $6C45 LD BC,$0615   ;
+ $6C48 LDIR          ;
+ $6C4A LD DE,$BA8A   ;
+@isub=LD BC,STATE_LOCATIONS_SIZE
+ $6C4D LD BC,$05D9   ;
+ $6C50 LDIR          ;
+ $6C52 LD HL,$5F00   ;
+ $6C55 LD DE,$B6EB   ;
+@isub=LD BC,STATE_VARS_SIZE
+ $6C58 LD BC,$001D   ;
+ $6C5B LDIR          ;
+ $6C5D LD DE,$CA84   ;
+@isub=LD BC,STATE_TIMERS_SIZE
+ $6C60 LD BC,$00BF   ;
+ $6C63 LDIR          ;
+ $6C65 XOR A         ;
+@isub=OUT (PORT_ULA),A
+ $6C66 OUT ($FE),A   ; black border
+@isub=LD A,WHITE*PAPER+BLACK
+ $6C68 LD A,$38      ;
+ $6C6A LD ($5C48),A  ; BORDCR: black ink on white paper
+@label=WaitTitleKey
+*$6C6D XOR A         ; A = 0 selects all eight half-rows
+@isub=IN A,(PORT_ULA)
+ $6C6E IN A,($FE)    ;
+@isub=AND KEY_BITS
+ $6C70 AND $1F       ;
+@isub=CP KEY_BITS
+ $6C72 CP $1F        ; all five lines high: no key
+ $6C74 JR Z,$6C6D    ; wait for any key
+@isub=LD A,KB_ROW_SPACE_B
+ $6C76 LD A,$7F      ; half-row SPACE SYMBOL-SHIFT M N B
+@isub=IN A,(PORT_ULA)
+ $6C78 IN A,($FE)    ;
+@isub=AND KEY_N
+ $6C7A AND $08       ; 0 when N is held (the key is down), else $08
+ $6C7C LD ($B707),A  ; PicturesEnabled
+ $6C7F LD HL,$50E0   ; input window cursor: the bottom row ...
+ $6C82 LD ($85B4),HL ;
+@isub=LD A,CURSOR_GLYPH
+ $6C85 LD A,$2B      ;
+ $6C87 LD ($85B6),A  ; InputCursorGlyph
+ $6C8A LD HL,$5020   ; story window cursor: its last row
+ $6C8D LD ($869C),HL ;
+ $6C90 LD A,$01      ;
+ $6C92 LD ($869E),A  ; StoryCursorPixel
+@isub=LD A,INPUT_COLUMNS
+ $6C95 LD A,$20      ;
+ $6C97 LD ($85B3),A  ; InputColumn: a full line of columns left
+@isub=LD A,STORY_COLUMNS
+ $6C9A LD A,$2A      ;
+ $6C9C LD ($869B),A  ; StoryColumn
+@isub=LD B,ORDER_SLOT_SIZE*ORDER_SLOTS
+ $6C9F LD B,$C8      ;
+ $6CA1 LD HL,$B738   ; OrderSlots
+ $6CA4 CALL $70E2    ; ClearBytes: no character has an order
+ $6CA7 LD A,R        ; the refresh register depends on how long the title
+ $6CA9 LD ($B70E),A  ; screen waited: RandomSeed
+ $6CAC XOR A         ;
+ $6CAD LD ($869F),A  ; ListIndent
+ $6CB0 LD ($86A0),A  ; StoryLastChar
+ $6CB3 LD ($B71A),A  ; AwaitingAnswer: no question pending
+ $6CB6 LD ($B700),A  ; LispFlag
+ $6CB9 LD ($B6F2),A  ; PrinterFlag: printer off
+ $6CBC LD A,$01      ;
+ $6CBE LD ($B702),A  ; MessagesVisible
+ $6CC1 LD ($B6FA),A  ; ActionPerform: do, not just test
+ $6CC4 LD ($B704),A  ; CapitalNext: the first letter is a capital
+ $6CC7 LD HL,$0000   ;
+ $6CCA LD ($B6F7),HL ; Score
+ $6CCD CALL $6FD3    ; ClearScreen
+ $6CD0 LD HL,$5140   ; draw the rule between story and input window: 5 pixel
+ $6CD3 LD DE,$6DCC   ; lines (BorderTile rows) of 16 two-byte tiles each
+ $6CD6 LD C,$05      ;
+*$6CD8 LD B,$10      ;
+ $6CDA PUSH HL       ;
+*$6CDB LD A,(DE)     ;
+ $6CDC LD (HL),A     ;
+ $6CDD INC HL        ;
+ $6CDE INC DE        ;
+ $6CDF LD A,(DE)     ;
+ $6CE0 LD (HL),A     ;
+ $6CE1 INC HL        ;
+ $6CE2 DEC DE        ; the same two bytes again for the next tile
+ $6CE3 DJNZ $6CDB    ;
+ $6CE5 INC DE        ;
+ $6CE6 INC DE        ; the next pixel line's two bytes
+ $6CE7 POP HL        ;
+ $6CE8 INC H         ;
+ $6CE9 DEC C         ;
+ $6CEA JR NZ,$6CD8   ;
+@isub=LD A,OPENING_LINES
+ $6CEC LD A,$11      ;
+ $6CEE LD ($B716),A  ; NoPauseLines: the opening text scrolls without pauses
+ $6CF1 LD A,($B706)  ; ParserWordCount, $FF until the first line is parsed
+ $6CF4 INC A         ;
+ $6CF5 JR NZ,$6D13   ; not $FF: no automatic LOOK (not seen to happen)
+@label=AutoLook
+ $6CF7 CALL $97AD    ; InitNewGame
+ $6CFA LD HL,$6FF2   ; StartCommand: echo "> LOOK" in the input window
+*$6CFD LD A,(HL)     ;
+ $6CFE CALL $85B8    ; PrintInputWindowChar
+ $6D01 INC HL        ;
+@isub=CP CHAR_CR
+ $6D02 CP $0D        ;
+ $6D04 JR NZ,$6CFD   ;
+ $6D06 LD HL,$6FF4   ; LookCommand: "LOOK", CR becomes the typed line
+ $6D09 LD DE,$6FF9   ; InputLine
+ $6D0C LD BC,$0005   ;
+ $6D0F LDIR          ;
+ $6D11 JR $6D22      ; and is parsed as if the player had typed it

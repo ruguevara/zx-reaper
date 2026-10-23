@@ -1,8 +1,18 @@
-; Routine at 8391
-c$8391 CALL $83F5    ;
-*$8394 XOR A         ;
- $8395 IN A,($FE)    ;
- $8397 AND $1F       ;
- $8399 CP $1F        ;
- $839B JR Z,$8394    ;
- $839D JP $6C27      ;
+; Handler of the word QUIT
+;
+; Prints the score (#R$83F5), waits for a key and restarts the game at #R$6C27,
+; which restores the starting state and the title wait.
+; .
+; Hardware: reads the keyboard port $FE (all half-rows) in a polling loop.
+@label=WordQuit
+c$8391 CALL $83F5           ; "You have mastered ..% Of this adventure."
+@label=WordQuit_Wait
+*$8394 XOR A                ; A = 0 selects every half-row
+@isub=IN A,(PORT_ULA)
+ $8395 IN A,($FE)
+@isub=AND KEY_BITS
+ $8397 AND $1F
+@isub=CP KEY_BITS
+ $8399 CP $1F               ; no key down
+ $839B JR Z,$8394
+ $839D JP $6C27             ; restart the game

@@ -1,37 +1,64 @@
-; Routine at 7960
+; Run the parsed sentences, one turn each
 ;
-; Used by the routine at #R$6C00.
+; Takes the phrase records ParseLine has left on the phrase stack (the first at
+; $B9C8, the others below it at 24-byte steps, ParserWordCount of them) and
+; runs them in order. For each record: #R$79B6 matches it to a command and finds
+; its objects; if that fails (a message was printed) the rest of the line is
+; given up (ParserFlag is cleared). The command is then checked once with
+; ActionPerform 0 (#R$7AED). A command the check refuses has printed its reason
+; and takes no turn: it goes on at #R$7DF5. A command that passes is printed as
+; a sentence (#R$712B), carried out (#R$950F, ActionPerform 1) and followed by
+; the turn of the world, EndOfTurn: the timers tick (#R$96B3) and every other
+; character acts. With ALL typed (VerbAllFlag not 0) the same record is matched
+; again for the next object (#R$79B6 keeps the scan position) until none is left.
+; Then the next record is taken; a record that only holds the nouns after EXCEPT
+; is stepped over.
+; .
+; When a question of the game is waiting for its answer (AwaitingAnswer, set by
+; #R$7D74), the first record is the saved question and is not run again: the
+; routine goes straight to the next record. The flag is cleared.
+; .
+; Hardware: none directly (the commands print and draw through the output routines).
+;
+; O:F Z (the caller tests ParserFlag to know whether the line has more sentences)
+@label=RunSentences
 c$7960 XOR A          ;
- $7961 LD ($B71C),A   ;
- $7964 LD IY,$B9C8    ;
- $7968 LD HL,$B71A    ;
+ $7961 LD ($B71C),A   ; VerbAllFlag: not ALL
+ $7964 LD IY,$B9C8    ; the first record
+ $7968 LD HL,$B71A    ; AwaitingAnswer
  $796B CP (HL)        ;
- $796C LD (HL),A      ;
- $796D JP NZ,$7994    ;
-*$7970 CALL $79B6     ;
- $7973 JR NZ,$797A    ;
- $7975 XOR A          ;
- $7976 LD ($B705),A   ;
- $7979 RET            ;
-*$797A CALL $7AED     ;
- $797D JP Z,$7DF5     ;
- $7980 LD A,$01       ;
- $7982 LD ($B6FA),A   ;
- $7985 CALL $712B     ;
- $7988 CALL $950F     ;
+ $796C LD (HL),A      ; clear it
+ $796D JP NZ,$7994    ; there was one: skip the saved question record
+@label=RunSentences_Record
+*$7970 CALL $79B6    ; MatchSentence
+ $7973 JR NZ,$797A   ;
+ $7975 XOR A         ; not understood: give up the rest of the line
+ $7976 LD ($B705),A  ; ParserFlag
+ $7979 RET           ;
+*$797A CALL $7AED    ; RunCheck: Z when the command is refused
+ $797D JP Z,$7DF5    ; refused: print the reason, no turn
+ $7980 LD A,$01      ;
+ $7982 LD ($B6FA),A  ; ActionPerform: carry it out
+ $7985 CALL $712B    ; print the command as a sentence
+ $7988 CALL $950F    ; carry out the command
 ; This entry point is used by the routine at #R$7B9E.
-*$798B CALL $96B3     ;
+@label=EndOfTurn
+*$798B CALL $96B3    ; the world's turn: timers, then the other characters
 ; This entry point is used by the routine at #R$7DBC.
-*$798E LD A,($B71C)   ;
- $7991 AND A          ;
- $7992 JR NZ,$7970    ;
+@label=RunSentences_More
+*$798E LD A,($B71C)  ; VerbAllFlag
+ $7991 AND A         ;
+ $7992 JR NZ,$7970   ; ALL: the same record again for the next object
 ; This entry point is used by the routine at #R$7DBC.
-*$7994 LD A,($B706)   ;
- $7997 DEC A          ;
- $7998 LD ($B706),A   ;
- $799B RET Z          ;
- $799C LD BC,$FFE8    ;
-*$799F ADD IY,BC      ;
+@label=NextRecord
+*$7994 LD A,($B706)  ; ParserWordCount
+ $7997 DEC A         ;
+ $7998 LD ($B706),A  ;
+ $799B RET Z         ; no record left
+@isub=LD BC,-PARSED_RECORD_SIZE
+ $799C LD BC,$FFE8   ;
+*$799F ADD IY,BC     ; the next record, further down the stack
+@isub=BIT RECF_EXCEPT,(IY+1)
  $79A1 BIT 6,(IY+$01) ;
- $79A5 JR NZ,$799F    ;
- $79A7 JR $7970       ;
+ $79A5 JR NZ,$799F   ; skip the records that only hold EXCEPT nouns
+ $79A7 JR $7970      ;

@@ -1,38 +1,58 @@
-; Routine at A3E6
-c$A3E6 LD IX,($B708)   ;
- $A3EA LD A,(IX+$04)   ;
- $A3ED AND $70         ;
- $A3EF PUSH IX         ;
- $A3F1 LD IX,($B70C)   ;
- $A3F5 AND (IX+$04)    ;
- $A3F8 POP IX          ;
- $A3FA JP NZ,$9F76     ;
- $A3FD BIT 6,(IX+$07)  ;
- $A401 JP Z,$9F76      ;
- $A404 LD A,($B6EA)    ;
- $A407 LD B,$1F        ;
- $A409 CP $40          ;
- $A40B JR Z,$A413      ;
- $A40D CP $42          ;
- $A40F JR Z,$A413      ;
- $A411 LD B,$0D        ;
-*$A413 LD A,($B6F6)    ;
- $A416 CP B            ;
- $A417 JP Z,$9F76      ;
- $A41A CALL $9D44      ;
- $A41D LD IX,($B708)   ;
- $A421 LD (IX+$10),B   ;
- $A424 LD (IX+$01),$FF ;
- $A428 LD A,($B6E8)    ;
- $A42B CALL $9BDD      ;
- $A42E LD A,($B6E8)    ;
- $A431 CP $00          ;
- $A433 RET NZ          ;
- $A434 LD ($B6EA),A    ;
- $A437 LD HL,$C11B     ;
- $A43A LD ($B70C),HL   ;
- $A43D CALL $95ED      ;
- $A440 RET C           ;
- $A441 LD A,B          ;
- $A442 LD HL,$AFFC     ;
- $A445 JP $964D        ;
+; Capture: send the first object to a prison
+;
+; Default handler of capture (id 48; VerbHandlers). Refused when the two share a side
+; bit in their state bytes (+4, STATE_SIDE_BITS), when the first object is not a
+; character, or when the capturer's location (ActorLocation, set by the NPC loop) is the
+; prison already. The prison is LOC_DARK_DUNGEON for the wood elf and the butler
+; (the elvenking's), else LOC_GOBLINS_DUNGEON. When really performing the captive's holder
+; becomes AT_LOCATION and its location the prison, and what it carries goes with it
+; (#R$9BDD). When the captive is the player, he is made the subject and, unless it is
+; dark, "You are in" and the prison are described (#R$964D).
+; .
+; Hardware: none directly; the description may show a picture and wait for a key.
+@label=VerbCapture
+c$A3E6 LD IX,($B708)       ; the first object, the captive
+ $A3EA LD A,(IX+$04)       ; its side bits...
+@isub=AND STATE_SIDE_BITS
+ $A3ED AND $70             ;
+ $A3EF PUSH IX             ; keep the captive
+ $A3F1 LD IX,($B70C)       ; the actor
+ $A3F5 AND (IX+$04)        ; shared with the captive?
+ $A3F8 POP IX              ;
+ $A3FA JP NZ,$9F76         ; yes: refuse
+@isub=BIT FLAG_CHARACTER,(IX+$07)
+ $A3FD BIT 6,(IX+$07)      ; not a character: refuse
+ $A401 JP Z,$9F76          ;
+ $A404 LD A,($B6EA)        ; the subject
+@isub=LD B,LOC_DARK_DUNGEON
+ $A407 LD B,$1F            ;
+@isub=CP CHR_WOOD_ELF
+ $A409 CP $40              ;
+ $A40B JR Z,$A413          ;
+@isub=CP CHR_BUTLER
+ $A40D CP $42              ;
+ $A40F JR Z,$A413          ;
+@isub=LD B,LOC_GOBLINS_DUNGEON
+ $A411 LD B,$0D            ;
+*$A413 LD A,($B6F6)        ; where the NPC last run is
+ $A416 CP B                ;
+ $A417 JP Z,$9F76          ; already in the prison: refuse
+ $A41A CALL $9D44          ; only when really performing
+ $A41D LD IX,($B708)       ; the captive
+ $A421 LD (IX+$10),B       ; its location := the prison
+@isub=LD (IX+$01),AT_LOCATION
+ $A424 LD (IX+$01),$FF     ; lies at a location
+ $A428 LD A,($B6E8)        ; the captive's id...
+ $A42B CALL $9BDD          ; ... takes what it carries along
+ $A42E LD A,($B6E8)        ; the captive
+@isub=CP PLAYER
+ $A431 CP $00              ;
+ $A433 RET NZ              ; not the player: done
+ $A434 LD ($B6EA),A        ; the player is the subject (A = 0)
+ $A437 LD HL,$C11B         ; and the actor
+ $A43A LD ($B70C),HL       ;
+ $A43D CALL $95ED          ; dark? (nothing is described)
+ $A440 RET C               ;
+ $A441 LD A,B              ; A = the prison
+ $A442 LD HL,$AFFC         ; "<subj_is> in"
+ $A445 JP $964D            ; describe the prison

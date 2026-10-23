@@ -1,11 +1,13 @@
 ; Message printer saved registers
 ;
 ; Set by $72DD on entry: A ($70DC), DE ($70DD), IX ($70E0); restored by control
-; codes ($735B).
+; codes ($735B). Between them, $70DF is set while a command is echoed as a
+; sentence.
 @label=SavedA
 g$70DC DEFB $00
 @label=SavedDE
  $70DD DEFW $0000
- $70DF DEFB $00
+@label=EchoingCommand
+ $70DF DEFB $00        ; 1 while #R$712B builds the command's sentence (F29)
 @label=SavedIX
  $70E0 DEFW $0000
