@@ -24,8 +24,18 @@ else
   GAME_ASM := build/game.asm
 endif
 
-.PHONY: all verify test expected coverage status labels html shift-test export clean help
+.PHONY: all verify test expected coverage status labels html shift-test export clean help restore
 all: verify
+
+# The tape and everything copied from it (re/tape/, re/*.z80) stay out of git;
+# put the tape into original/ and run `make restore` to recreate them.
+restore: re/tape/tape.txt re/orig.z80 re/image.z80
+re/tape/tape.txt: $(ORIG)
+	$(T)/zxtape.py split $< re/tape
+re/orig.z80: $(ORIG)
+	tap2sna.py $< $@ > re/tap2sna.log
+re/image.z80: re/orig.z80 re/tape/tape.txt
+	snapmod.py $(IMAGE_PATCHES) re/orig.z80 $@
 
 help:
 	@echo "make            build + byte-identity check against $(ORIG)"
@@ -37,6 +47,7 @@ help:
 	@echo "make shift-test build the code at +SHIFT ($(SHIFT)) and replay tests (relocatability)"
 	@echo "make html       browsable skool2html disassembly in build/html"
 	@echo "make export     freeze re/skool into src/*.asm modules (src becomes the master)"
+	@echo "make restore    recreate re/tape, re/orig.z80, re/image.z80 from original/"
 	@echo "sources: $(MASTER)"
 
 build:

@@ -184,6 +184,7 @@ def main():
     with open(os.path.join(p, 're/layout.mk'), 'w') as f:
         f.write('# Written by zxinit.py\nREGION_START := 0x%04X\nREGION_END := 0x%04X\n'
                 'ENTRY_PC := 0x%04X\nENTRY_IN_REGION := %d\n' % (lo, hi, pc, lo <= pc < hi))
+        f.write('IMAGE_PATCHES := %s\n' % ' '.join('--patch %d,%s' % (st, path) for st, path in patches))
     notes = os.path.join(p, 're/notes.md')
     with open(notes, 'a') as f:
         f.write('\n## Init (zxinit.py)\n\n- original: `%s`\n- code region: $%04X-$%04X\n'
