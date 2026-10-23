@@ -22,7 +22,7 @@ row    = 8*TT + RRR   (0-23)
 ```
 
 So one cell right is +1, one cell down is +$20 inside a third, and crossing
-from row 7 to row 8 adds $0800-$E0 = $0720 (the step from the last row of one
+from row 7 to row 8 adds $0800-&#36;E0 = $0720 (the step from the last row of one
 third to the first row of the next). [StepCell](../src/library.asm#L643) does this arithmetic; the
 drawing routines add $4000 and use the offset directly as a bitmap address.
 Only the guard AI converts positions to row and column, into [HoraceCell](../src/variables.asm#L225)
@@ -224,7 +224,7 @@ Each byte encodes the cell as a 2x2 grid of 4x4-pixel blocks:
 
 So $33 is a full cell, $11 the left half, $22 the right half. Seen as blocks,
 each word is a 64 x 10 grid. [DrawBlocks](../src/library.asm#L706) converts the top two bits into a
-pixel byte ($F0, $0F or $FF) repeated over four pixel rows, then the bottom
+pixel byte (&#36;F0, $0F or $FF) repeated over four pixel rows, then the bottom
 two bits over the next four.
 
 ## Texts
