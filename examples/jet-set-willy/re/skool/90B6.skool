@@ -1,8 +1,31 @@
-; Routine at 90B6
+; Abandon the frame update and mark Willy as killed
 ;
-; Used by the routine at #R$961E.
+; Jumped to (never called) from the collision and hazard checks of the frame
+; update. Two entry points:
+; .
+; $90B6 drops two return addresses (for a hazard check called two levels
+; below #R$89AD) and falls into $90B7, which drops one more (for a routine
+; called directly from #R$89AD). The frame loop #R$89AD is entered by JP
+; with an empty stack (SP=$5BFE), so both leave the stack empty again.
+; Observed: at $90B7 reached from #R$91BE the word on the stack is $89EF,
+; the return address inside #R$89AD.
+; .
+; Then Willy's state variable at $85D1 is set to $FF and control jumps to
+; $89F5, the part of #R$89AD that copies the $6000 buffer to the screen, so
+; the rest of the frame update (remaining sprites and checks) is skipped.
+; Inferred from the code: #R$8B07 tests $85D1 = $FF at $8B17 and goes to
+; $8C01, a colour flash with sound, so $FF means Willy has been killed.
+; .
+; Reached from: the nasty-tile check #R$961E (JP Z,$90B6); $8EE3 in #R$8DD3
+; (when $85D1 >= $0C); $9231 and $9297 in #R$91BE (collision with an
+; entity); $9566 in #R$9534 (collision of the sprite drawn at $686E with
+; what is already in the buffer, in room $23).
+; .
+; Hardware: none directly (the jump target copies the buffer to the screen).
+@label=KillWillyNested
 c$90B6 POP HL        ;
 ; This entry point is used by the routines at #R$8DD3, #R$91BE and #R$9534.
+@label=KillWilly
 *$90B7 POP HL        ;
  $90B8 LD A,$FF      ;
  $90BA LD ($85D1),A  ;

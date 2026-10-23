@@ -1,11 +1,20 @@
-; Routine at 948A
+@equ=ROOM_EXIT_LEFT=$80E9
+; Leave the room through the left exit
 ;
-; Used by the routine at #R$8DD3.
+; Makes the left neighbour (byte $E9 of the room, #R$80E9) the current room
+; and puts Willy on column 30 of the same row: his attribute address
+; (#R$85D3) gets column bits 11110. Willy's other state is kept. Pops the
+; caller's return address and jumps to #R$8912, which loads the new room and
+; restarts the game loop, so it never returns.
+; .
+; Reached when Willy walks off column 0 (jump from #R$8DD3). Observed with
+; the simulator: see finding.
+@label=ExitRoomLeft
 c$948A LD A,($80E9)  ;
- $948D LD ($8420),A  ;
+ $948D LD ($8420),A  ; new current room
  $9490 LD A,($85D3)  ;
  $9493 OR $1F        ;
- $9495 AND $FE       ;
+ $9495 AND $FE       ; column = 30 (low 5 bits 11110), row bits unchanged
  $9497 LD ($85D3),A  ;
- $949A POP HL        ;
- $949B JP $8912      ;
+ $949A POP HL        ; drop the return address
+ $949B JP $8912      ; load the new room

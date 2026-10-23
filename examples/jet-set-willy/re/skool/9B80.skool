@@ -1,4 +1,16 @@
-; Data block at 9B80
+; Colour-code screen attributes
+;
+; 128 bytes copied by #R$86C3 to $5900-$597F (attribute rows 8-11):
+; row 8: columns 0-27 $45 (bright cyan ink, for the message), columns 28-31 $47
+; (bright white, for the grid cell letter and digit);
+; row 9 and columns 0-1 of row 10: 0;
+; rows 10-11, columns 2-12: the four keys, 2x2 cells each at columns 2, 5, 8, 11:
+; ink blue ($41, bright), red ($42, bright), magenta ($03), green ($04), with the
+; top-right cell of each key paper white ($79, $7A, $3B, $3C) for a highlight;
+; rows 10-11, columns 16-17, 19-20, 22-23, 25-26: $07 (white ink, black paper) =
+; the four empty colour slots filled by #R$873C (value $07 means empty).
+; All other cells are 0.
+@label=CodeScreenAttrs
 b$9B80 DEFS $1C,$45
  $9B9C DEFB $47,$47,$47,$47
  $9BA0 DEFS $22

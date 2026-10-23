@@ -1,2 +1,10 @@
-; Message at 857C
+; Items collected, as three ASCII digits
+;
+; Shown on the status line ("Items collected 000"; printed by #R$89AD at
+; screen address $5070). #R$87CA sets it to "000" at the start of a game and
+; #R$93D1 adds 1 for every item collected, with decimal carry from the last
+; digit to the first.
+; .
+; Observed: "000" becomes "001" at the first pick-up; "099" becomes "100".
+@label=ItemsCollectedText
 t$857C DEFM "000"

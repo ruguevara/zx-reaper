@@ -1,4 +1,18 @@
-; Routine at 96F4
+; Unused test code: show the room's attribute map, X resets
+;
+; Never executed and unreachable: it follows the RET of #R$96DE, nothing jumps or
+; calls to $96F4 and no word in the image holds that address. Not part of the
+; game; it looks like a debugging aid. What it would do (run in the simulator
+; from the in-game snapshot): copies the empty-room attribute master copy
+; ($5E00-$5FFF, 512 bytes) over the top two thirds of the attributes, fills the
+; bitmap of the top two thirds ($4000-$4FFF) with $18 (a thin vertical bar in
+; every cell), so the room's colour layout is shown without sprites or graphics.
+; It then polls the keyboard half row CS-V (port $FEFE) forever; the X key (bit
+; 2) jumps to $0000, which resets the machine. Observed: with X pressed the run
+; reaches PC=$0000 after a frame or two, without X it stays in the polling loop.
+; .
+; Hardware: writes screen bitmap and attributes; reads keyboard port $FEFE.
+@label=ShowAttrMap
 c$96F4 LD HL,$5E00   ;
  $96F7 LD DE,$5800   ;
  $96FA LD BC,$0200   ;

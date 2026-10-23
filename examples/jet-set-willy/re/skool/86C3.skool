@@ -1,56 +1,103 @@
-; Routine at 86C3
+@equ=FRAMES=$5C78
+; Show the colour-code screen and read the player's answer
 ;
-; Used by the routine at #R$869F.
-c$86C3 LD DE,$4800   ;
+; Draws the message line (32 characters at IX, ROM font) on screen row 8, the
+; four coloured key graphics 1-4 (#R$9B00, 16x16 each) at columns 2, 5, 8 and 11
+; of rows 10-11, and copies the attributes #R$9B80 to rows 8-11 ($5900-$597F).
+; That leaves four empty 2x2-cell colour slots at columns 16, 19, 22 and 25
+; of rows 10-11 (attribute addresses $5950, $5953, $5956, $5959).
+; .
+; Grid cell: FRAMES ($5C78) is increased by $25 and stored back. If the result is
+; below $B3 it is the cell index L, otherwise L = result-$B4 (see the quirk
+; below). The expected code byte is CodeTable[L]+L, stored
+; in #R$85E4. The cell is shown as a letter 'A'+(L mod 18) at column 29 and a
+; digit '0'+(L div 18) at column 30 of row 8, i.e. a grid of 18 columns (A-R)
+; by 10 rows (0-9). With the simulator's FRAMES=$12 the first cell is L=$37,
+; "B3". Checked in the simulator for all 256 start values of FRAMES: the stored
+; code byte and the new FRAMES always matched this rule.
+; .
+; Quirk: a result of exactly $B3 (FRAMES was $8E) is not below $B3, so SUB $B4
+; runs and gives L=$FF. The code is then taken from $9EFF, outside the 180
+; cells, and the location shown is ">D" (row digit '0'+14). Index $B3 itself,
+; the last cell (row 9, column R), is never produced, so one cell is unused.
+; .
+; Then it loops forever over the four slots calling #R$873C for each one, and
+; starts again at slot 1 after slot 4. The loop is left only inside #R$873C: when
+; ENTER is pressed with slot 4 filled, #R$873C discards its return address and
+; returns from this routine instead, with Z set if the code is right.
+; .
+; Hardware: writes the screen bitmap and attributes; FRAMES is read as a
+; source of a pseudo-random number. Interrupts are off, so FRAMES does not
+; change during the screen except through this routine.
+; .
+; IX Message text (32 characters)
+; O:F Z set if the entered code matches
+@label=AskColourCode
+c$86C3 LD DE,$4800   ; screen row 8
+@isub=LD C,SCREEN_COLS
  $86C6 LD C,$20      ;
- $86C8 CALL $9680    ;
- $86CB LD HL,$4842   ;
+ $86C8 CALL $9680    ; print the message
+ $86CB LD HL,$4842   ; row 10, column 2
  $86CE LD DE,$9B00   ;
- $86D1 LD C,$00      ;
- $86D3 CALL $9456    ;
+ $86D1 LD C,$00      ; overwrite mode
+ $86D3 CALL $9456    ; key 1 graphic (DE advances by 32 bytes per call)
  $86D6 LD HL,$4845   ;
- $86D9 CALL $9456    ;
+ $86D9 CALL $9456    ; key 2
  $86DC LD HL,$4848   ;
- $86DF CALL $9456    ;
+ $86DF CALL $9456    ; key 3
  $86E2 LD HL,$484B   ;
- $86E5 CALL $9456    ;
+ $86E5 CALL $9456    ; key 4
  $86E8 LD HL,$9B80   ;
  $86EB LD DE,$5900   ;
- $86EE LD BC,$0080   ;
+@isub=LD BC,4*SCREEN_COLS
+ $86EE LD BC,$0080   ; four rows of attributes
  $86F1 LDIR          ;
  $86F3 LD A,($5C78)  ;
+@isub=ADD A,CODE_GRID_STEP
  $86F6 ADD A,$25     ;
  $86F8 LD ($5C78),A  ;
+@isub=CP CODE_GRID_CELLS-1
  $86FB CP $B3        ;
  $86FD JR C,$8701    ;
+@isub=SUB CODE_GRID_CELLS
  $86FF SUB $B4       ;
-*$8701 LD L,A        ;
+@label=AskColourCode_Cell
+*$8701 LD L,A        ; L = grid cell index
+@isub=LD H,CodeTable>>8
  $8702 LD H,$9E      ;
  $8704 LD A,(HL)     ;
- $8705 ADD A,L       ;
+ $8705 ADD A,L       ; expected code = table byte + cell index
  $8706 LD ($85E4),A  ;
  $8709 LD C,L        ;
- $870A LD E,$2F      ;
+@isub=LD E,'0'-1
+ $870A LD E,$2F      ; E counts the rows: becomes '0' on the first pass
+@label=AskColourCode_Row
 *$870C INC E         ;
  $870D LD A,C        ;
+@isub=CP CODE_GRID_COLS
  $870E CP $12        ;
  $8710 JR C,$8717    ;
+@isub=SUB CODE_GRID_COLS
  $8712 SUB $12       ;
- $8714 LD C,A        ;
+ $8714 LD C,A        ; C ends as the column 0-17
  $8715 JR $870C      ;
-*$8717 LD A,E        ;
- $8718 LD DE,$481E   ;
+*$8717 LD A,E        ; the row digit
+ $8718 LD DE,$481E   ; row 8, column 30
  $871B CALL $9691    ;
  $871E LD A,C        ;
- $871F ADD A,$41     ;
- $8721 LD DE,$481D   ;
+@isub=ADD A,'A'
+ $871F ADD A,$41     ; the column letter
+ $8721 LD DE,$481D   ; row 8, column 29
  $8724 CALL $9691    ;
+@label=AskColourCode_Slots
+@isub=LD IX,CODE_SLOT_1_ATTR
 *$8727 LD IX,$5950   ;
-*$872B CALL $873C    ;
+*$872B CALL $873C    ; read one slot
  $872E INC IX        ;
  $8730 INC IX        ;
- $8732 INC IX        ;
+ $8732 INC IX        ; next slot, 3 attribute cells to the right
  $8734 LD A,IXl      ;
+@isub=CP CODE_SLOT_END
  $8736 CP $5C        ;
  $8738 JR NZ,$872B   ;
- $873A JR $8727      ;
+ $873A JR $8727      ; after slot 4 start again with slot 1

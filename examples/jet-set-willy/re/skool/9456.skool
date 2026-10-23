@@ -1,12 +1,35 @@
-; Routine at 9456
+; Draw a 16x16 sprite, optionally testing for collision
 ;
-; Used by the routines at #R$86C3, #R$898B, #R$8B07, #R$91BE and #R$9534.
+; Draws a 16x16 sprite of 16 pixel rows, 2 bytes per row (left byte, right byte;
+; 32 bytes, row-interleaved), at a byte-aligned position in a Spectrum-layout
+; bitmap. The target is either the screen ($4000) or a buffer in the same
+; layout (the $6000 buffer, see #R$8200).
+; .
+; Mode 0 (C bit 0 clear): the sprite bytes replace the bitmap bytes.
+; .
+; Mode 1 (C bit 0 set): collision test. Each sprite byte is ANDed with the
+; bitmap byte under it; if the result is not zero the routine returns at once
+; with NZ (rows drawn before that stay drawn); otherwise the byte is ORed in.
+; .
+; The address steps down a pixel row with INC H and handles the character-row
+; and one-third-of-the-bitmap boundaries.
+; .
+; Hardware: writes the screen bitmap or a bitmap buffer in screen layout.
+;
+; DE Sprite graphic address
+; HL Bitmap address of the top-left byte
+; C Bit 0: 0 = overwrite, 1 = draw with collision test
+; O:A 0 when drawn completely (Z set); in mode 1, the overlapping bits when stopped (NZ)
+; O:HL Bitmap address of the pixel row below the sprite (when drawn completely)
+@label=DrawSprite
+@isub=LD B,SPRITE_HEIGHT
 c$9456 LD B,$10      ;
+@label=DrawSprite_Row
 *$9458 BIT 0,C       ;
  $945A LD A,(DE)     ;
  $945B JR Z,$9461    ;
  $945D AND (HL)      ;
- $945E RET NZ        ;
+ $945E RET NZ        ; collision with the left byte
  $945F LD A,(DE)     ;
  $9460 OR (HL)       ;
 *$9461 LD (HL),A     ;
@@ -16,17 +39,17 @@ c$9456 LD B,$10      ;
  $9466 LD A,(DE)     ;
  $9467 JR Z,$946D    ;
  $9469 AND (HL)      ;
- $946A RET NZ        ;
+ $946A RET NZ        ; collision with the right byte
  $946B LD A,(DE)     ;
  $946C OR (HL)       ;
 *$946D LD (HL),A     ;
  $946E DEC L         ;
- $946F INC H         ;
+ $946F INC H         ; next pixel row
  $9470 INC DE        ;
  $9471 LD A,H        ;
  $9472 AND $07       ;
  $9474 JR NZ,$9486   ;
- $9476 LD A,H        ;
+ $9476 LD A,H        ; crossed into the next character row
  $9477 SUB $08       ;
  $9479 LD H,A        ;
  $947A LD A,L        ;
@@ -34,9 +57,9 @@ c$9456 LD B,$10      ;
  $947D LD L,A        ;
  $947E AND $E0       ;
  $9480 JR NZ,$9486   ;
- $9482 LD A,H        ;
+ $9482 LD A,H        ; crossed into the next third of the bitmap
  $9483 ADD A,$08     ;
  $9485 LD H,A        ;
 *$9486 DJNZ $9458    ;
- $9488 XOR A         ;
+ $9488 XOR A         ; Z set: no collision
  $9489 RET           ;

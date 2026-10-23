@@ -1,2 +1,5 @@
-; Message at 85AB
+; Colour-code prompt, second attempt
+;
+; Same layout as #R$858B; used by #R$869F after a wrong code.
+@label=TryAgainText
 t$85AB DEFM "Sorry, try code at location     "

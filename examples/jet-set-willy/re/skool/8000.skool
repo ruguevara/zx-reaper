@@ -1,3 +1,81 @@
 @org
-; Data block at 8000
-b$8000 DEFS $0100
+; Current room buffer
+;
+; A copy of the current room's 256-byte definition (from $C000+256*room, copied
+; by #R$88AE at room entry). The routines that draw and move things read the
+; room from here. Format (offsets from $8000):
+; .
+; $00-$7F: layout, 512 cells (16 rows of 32), 2 bits per cell, 4 cells per
+; byte with the first cell in bits 7-6. A cell value 0-3 selects tile 0-3
+; below (#R$8D6B expands this into attributes).
+; .
+; $80-$9F: room name (32 ASCII characters, shown in the status line).
+; .
+; $A0-$D5: six tiles of 9 bytes: attribute, then 8 pixel rows. The tiles are
+; (in this order) background, floor, wall, nasty, ramp, conveyor; only the
+; first four can appear in the layout, ramp and conveyor are added from their
+; fields. The routines compare attributes read from the attribute buffer
+; with these tile attributes to find out what is where, so the attributes
+; of the six tiles of one room should differ.
+; .
+; $D6: conveyor direction; $D7: conveyor address (word, in the $5E00
+; attribute buffer); $D9: conveyor length in cells.
+; .
+; $DA: ramp direction (bit 0); $DB: ramp address (word, in the $5E00
+; attribute buffer); $DD: ramp length in cells.
+; .
+; $DE: border colour. $DF-$E0: Unknown.
+; .
+; $E1-$E8: item graphic (8 bytes, one character cell).
+; .
+; $E9-$EC: room numbers to the left, right, up and down.
+; .
+; $ED-$EF: Unknown.
+; .
+; $F0-$FF: eight entity slots, 2 bytes each: definition index (bit 7
+; Unknown, cleared before use), and one byte stored into the entity buffer
+; (#R$8100). Entity definitions are at $A000, 8 bytes each.
+@label=RoomBuffer
+b$8000 DEFS $0080
+@label=RoomName
+ $8080 DEFS $0020
+@label=RoomTiles
+ $80A0 DEFS $09
+@label=TileFloor
+ $80A9 DEFS $09
+@label=TileWall
+ $80B2 DEFS $09
+@label=TileNasty
+ $80BB DEFS $09
+@label=TileRamp
+ $80C4 DEFS $09
+@label=TileConveyor
+ $80CD DEFS $09
+@label=RoomConveyorDir
+ $80D6 DEFS $01
+@label=RoomConveyorAddr
+ $80D7 DEFS $02
+@label=RoomConveyorLen
+ $80D9 DEFS $01
+@label=RoomRampDir
+ $80DA DEFS $01
+@label=RoomRampAddr
+ $80DB DEFS $02
+@label=RoomRampLen
+ $80DD DEFS $01
+@label=RoomBorder
+ $80DE DEFS $01
+ $80DF DEFS $02
+@label=RoomItemGfx
+ $80E1 DEFS $08
+@label=RoomExitLeft
+ $80E9 DEFS $01
+@label=RoomExitRight
+ $80EA DEFS $01
+@label=RoomExitUp
+ $80EB DEFS $01
+@label=RoomExitDown
+ $80EC DEFS $01
+ $80ED DEFS $03
+@label=RoomEntitySlots
+ $80F0 DEFS $10

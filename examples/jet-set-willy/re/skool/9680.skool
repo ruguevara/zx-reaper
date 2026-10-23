@@ -1,12 +1,24 @@
-; Routine at 9680
+; Print a text string with the ROM font
 ;
-; Used by the routines at #R$86C3, #R$87CA, #R$88AE, #R$89AD and #R$8B07.
+; Prints C characters from the message at IX, one character cell per
+; character, left to right, using #R$9691 for each. Character codes are
+; ASCII (bit 7 ignored). Used for titles, the scrolling message and the
+; status line.
+; .
+; Hardware: writes the screen bitmap.
+;
+; IX Address of the message
+; DE Screen address of the first character cell (pixel row 0 of the cell)
+; C Number of characters
+; O:IX Address after the message
+; O:DE Screen address after the last character cell
+@label=PrintText
 c$9680 LD A,(IX+$00) ;
  $9683 CALL $9691    ;
  $9686 INC IX        ;
- $9688 INC E         ;
+ $9688 INC E         ; next column
  $9689 LD A,D        ;
- $968A SUB $08       ;
+ $968A SUB $08       ; undo the 8 INC D of #R$9691
  $968C LD D,A        ;
  $968D DEC C         ;
  $968E JR NZ,$9680   ;

@@ -1,2 +1,7 @@
-; Message at 858B
+; Colour-code prompt, first attempt
+;
+; 32 characters shown on screen row 8 by #R$86C3 (via #R$9680). The last four
+; characters are blanks that the grid cell letter and digit overwrite at columns
+; 29 and 30.
+@label=EnterCodeText
 t$858B DEFM "Enter Code at grid location     "

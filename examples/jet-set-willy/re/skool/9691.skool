@@ -1,14 +1,33 @@
-; Routine at 9691
+@equ=ROM_FONT_CODE0=$3C00
+; Draw one character from the ROM font
 ;
-; Used by the routines at #R$86C3 and #R$9680.
+; Looks up the 8-byte glyph of character A in the ROM character set and copies
+; it to the screen with #R$969B. The glyph address is $3C00+8*A, so printable
+; ASCII (32-127) finds its ROM glyph at $3D00 upwards; bit 7 of A is ignored.
+; .
+; Hardware: reads the ROM character set, writes the screen bitmap.
+;
+; A Character code (ASCII)
+; DE Screen address of pixel row 0 of the character cell
+; O:DE Screen address of pixel row 0 of the cell 8 pixel rows lower (D advanced by 8)
+@label=PrintChar
+@isub=LD H,ROM_FONT_CODE0/CELL_HEIGHT/256
 c$9691 LD H,$07      ;
  $9693 LD L,A        ;
- $9694 SET 7,L       ;
+ $9694 SET 7,L       ; HL = $0780+A (A < 128)
  $9696 ADD HL,HL     ;
  $9697 ADD HL,HL     ;
  $9698 ADD HL,HL     ;
+@isub=LD B,CELL_HEIGHT
  $9699 LD B,$08      ;
+; Alternative entry: copy 8 bytes from HL to the 8 pixel rows of one character
+; cell at DE (D advances by 1 per byte, so D ends 8 higher). B must be 8.
+; Used for the title graphic pieces and the item graphic as well as glyphs.
 ; This entry point is used by the routines at #R$87CA and #R$93D1.
+; HL Address of 8 bytes of pixel data
+; DE Screen address of pixel row 0 of the cell
+; B Number of pixel rows (8)
+@label=DrawGlyph8
 *$969B LD A,(HL)     ;
  $969C LD (DE),A     ;
  $969D INC HL        ;

@@ -1,14 +1,27 @@
-; Routine at 8DC0
+; Store the attribute of a layout cell
 ;
-; Used by the routine at #R$8D6B.
+; Takes the low two bits of A as a tile number 0-3, reads that tile's attribute
+; byte from the room buffer's tile table (#R$8000, tiles at $80A0, 9 bytes
+; each) and stores it at (IX), then advances IX. Used by #R$8D6B for each of
+; the 4 cells of a layout byte.
+;
+; A Layout cell value (bits 0-1 used)
+; IX Attribute buffer address of the cell
+; O:IX Address of the next cell
+; O:A Attribute stored
+; O:C Cell value 0-3
+; O:DE Address of the tile's attribute byte in the room buffer
+@label=StoreCellAttr
 c$8DC0 AND $03       ;
  $8DC2 LD C,A        ;
  $8DC3 RLCA          ;
  $8DC4 RLCA          ;
- $8DC5 RLCA          ;
- $8DC6 ADD A,C       ;
+ $8DC5 RLCA          ; 8*tile
+ $8DC6 ADD A,C       ; 9*tile (TILE_SIZE)
+@isub=ADD A,RoomTiles-RoomBuffer
  $8DC7 ADD A,$A0     ;
  $8DC9 LD E,A        ;
+@isub=LD D,RoomBuffer/256
  $8DCA LD D,$80      ;
  $8DCC LD A,(DE)     ;
  $8DCD LD (IX+$00),A ;

@@ -1,3 +1,36 @@
-; Data block at 8100
+; Entity buffer: 8 entities of 8 bytes, ended by $FF
+;
+; Filled at room entry by #R$88AE: for each of the 8 entity slots of the room
+; (#R$80F0) the 8-byte definition at $A000+8*index is copied here; its byte +2
+; is first replaced by the slot's second byte (observed: the definition table
+; itself is modified too, e.g. $A1DA changes from $00 to $10 in the Bathroom).
+; The entities are then updated and drawn each frame by #R$90C0 and #R$91BE,
+; which stop at an entry whose first byte is $FF. Slot index $7F points to the
+; definition at $A3F8, which starts with $FF, so a room that uses fewer than 8
+; slots ends the list early (observed in the Bathroom: entry 1 is $FF); the
+; byte at $8140 ends the list when all 8 slots are used.
+; .
+; Entry fields (from the code; most are Unknown until #R$90C0 and #R$91BE
+; are annotated):
+; .
+; +0 byte: bits 0-1 select the kind of movement handled by #R$90C0 (0 = none,
+; 1, 2 and 3 take different paths); other bits Unknown (bit 7 is toggled by
+; the update code, bits 5-6 change in steps of $20); $FF ends the list
+; .
+; +1 byte: Unknown (animation/phase counter)
+; .
+; +2 byte: low 5 bits: screen column; high 3 bits: used with +0 and +1 to
+; choose the animation frame (multiple of $20 in the sprite page)
+; .
+; +3 byte: vertical position, an index into the row address table #R$8200
+; (2 per pixel row)
+; .
+; +4 byte: vertical step (kind 2 adds it to +3 and reverses it at the limits)
+; .
+; +5 byte: high byte of the sprite page address
+; .
+; +6, +7 bytes: limits (positions where the entity turns), Unknown which
+; fields they bound for each kind
+@label=EntityBuffer
 b$8100 DEFS $40
  $8140 DEFB $FF

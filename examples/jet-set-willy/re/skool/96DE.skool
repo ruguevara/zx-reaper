@@ -1,14 +1,35 @@
-; Routine at 96DE
+; Play a sweeping pulse sound
 ;
-; Used by the routine at #R$88AE.
+; Makes E = A passes. In each pass, N (A counting down from its start value
+; to 1) selects one of E port writes (the one where B = N): that write has the
+; speaker and MIC bits set, all the others have them clear. The single pulse
+; therefore moves one step along the pass each time, which makes a sweeping
+; chirp. The other bits written are those of N, so the border colour (bits
+; 0-2) also changes from pass to pass.
+; .
+; #R$88AE calls this after each step of the message that scrolls along the
+; bottom of the title screen, with A = (message offset AND $1F) + $32, so the
+; sound depends on the position in the message. Observed: with no key pressed
+; after the code entry, the title tune ends at about frame 1583 and the first
+; call follows with A = $32. Not executed in the coverage maps in re/maps.
+; .
+; Hardware: writes port $FE (border, speaker, MIC); timing loops.
+;
+; A Start value of N (about 50 to 81 as called)
+; O:A 0
+@label=PlaySweepSound
 c$96DE LD E,A        ;
+@isub=LD C,ULA_PORT
  $96DF LD C,$FE      ;
+@label=PlaySweepSound_Pass
 *$96E1 LD D,A        ;
  $96E2 RES 4,D       ;
  $96E4 RES 3,D       ;
  $96E6 LD B,E        ;
+@label=PlaySweepSound_Step
 *$96E7 CP B          ;
  $96E8 JR NZ,$96EC   ;
+@isub=LD D,BEEPER_BITS
  $96EA LD D,$18      ;
 *$96EC OUT (C),D     ;
  $96EE DJNZ $96E7    ;

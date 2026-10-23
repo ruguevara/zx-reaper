@@ -1,20 +1,43 @@
-; Routine at 94F9
+@equ=ROOM_CONVEYOR_DIR=$80D6
+@equ=ROOM_CONVEYOR_ADDR=$80D7
+@equ=ROOM_CONVEYOR_LEN=$80D9
+; Animate the conveyor belt of the room
 ;
-; Used by the routine at #R$89AD.
+; Uses the conveyor fields of the current room: direction (byte $D6, #R$80D6),
+; address (word at $D7, #R$80D7) and length in cells (byte $D9, #R$80D9). The
+; address is an attribute address in the empty-room buffer ($5E00-$5FFF):
+; bit 0 of its high byte selects the upper or lower half of the room and the
+; low byte is row-in-half * 32 + column, so the routine turns it into the
+; address of the first cell in the empty-room screen buffer (page $70 or
+; $78). Nothing happens when the length is 0.
+; .
+; The routine reads pixel row 0 and pixel row 2 of the FIRST cell only and
+; rotates them by two bits in opposite directions (direction 0: row 0 left,
+; row 2 right; direction non-zero: row 0 right, row 2 left). The two results
+; are then stored into row 0 and row 2 of every cell of the belt, so all
+; cells end up identical (the belt tile is assumed to be the same in every
+; cell). The other pixel rows are not changed. The change is made in the
+; master copy, so it accumulates from pass to pass; #R$89AD copies the master
+; into the screen buffer every pass.
+; Observed: in the Bathroom (4 cells) row 0 of all four cells goes $A5, $96,
+; $5A, $69, $A5... (rotation left by two bits per pass).
+; .
+; Hardware: none (memory only).
+@label=AnimateConveyor
 c$94F9 LD HL,($80D7) ;
  $94FC LD A,H        ;
- $94FD AND $01       ;
+ $94FD AND $01       ; bit 0: lower half
  $94FF RLCA          ;
  $9500 RLCA          ;
  $9501 RLCA          ;
- $9502 ADD A,$70     ;
+ $9502 ADD A,$70     ; $70 or $78: empty-room screen buffer page
  $9504 LD H,A        ;
  $9505 LD E,L        ;
- $9506 LD D,H        ;
+ $9506 LD D,H        ; DE = HL = pixel row 0 of the first cell
  $9507 LD A,($80D9)  ;
  $950A OR A          ;
  $950B RET Z         ;
- $950C LD B,A        ;
+ $950C LD B,A        ; B = number of cells
  $950D LD A,($80D6)  ;
  $9510 OR A          ;
  $9511 JR NZ,$9526   ;
@@ -26,8 +49,9 @@ c$94F9 LD HL,($80D7) ;
  $951A LD C,(HL)     ;
  $951B RRC C         ;
  $951D RRC C         ;
-*$951F LD (DE),A     ;
- $9520 LD (HL),C     ;
+@label=AnimateConveyor_Cell
+*$951F LD (DE),A     ; store pixel row 0 (same value in every cell)
+ $9520 LD (HL),C     ; store pixel row 2
  $9521 INC L         ;
  $9522 INC E         ;
  $9523 DJNZ $951F    ;

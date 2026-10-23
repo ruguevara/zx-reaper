@@ -1,2 +1,5 @@
 ; Unused
+;
+; Zeros in the tape image; nothing in the code refers to this range as far as
+; the entries checked show (see #R$8000 for the buffers before it).
 u$8141 DEFS $BF

@@ -1,10 +1,30 @@
-; Routine at 93BB
+; Unused code fragment: fill a 2x3 block of attribute cells
+;
+; Never executed and unreachable: it follows the unconditional JP $91C2 at the
+; end of #R$91BE, and no jump, call or word in the image points to $93BB-$93D0.
+; It starts with LD (HL),A, so it looks like the tail of a routine whose first
+; part is not in the image; what it was called from is Unknown.
+; .
+; What it would do (checked by calling it in the simulator with HL=$58A5, A=2
+; and $80A0=$38): the ink A is merged with the paper, bright and flash bits of
+; the room's first tile attribute ($80A0, the background tile) and stored in
+; the 2x3 block of attribute cells (2 wide, 3 high) whose top-left cell is HL:
+; (HL), (HL+1), (HL+$20), (HL+$21), (HL+$40), (HL+$41). Result there: $3A in all
+; six cells.
+; .
+; Hardware: writes screen attributes.
+; .
+; A Ink colour (bits 0-2)
+; HL Attribute address of the top-left cell
+@label=FillAttrBlock
 c$93BB LD (HL),A     ;
- $93BC LD A,($80A0)  ;
- $93BF AND $F8       ;
+ $93BC LD A,($80A0)  ; attribute of the room background tile
+@isub=AND ATTR_INK_CLEAR
+ $93BF AND $F8       ; keep paper, bright, flash
  $93C1 OR (HL)       ;
  $93C2 LD (HL),A     ;
- $93C3 LD DE,$001F   ;
+@isub=LD DE,SCREEN_COLS-1
+ $93C3 LD DE,$001F   ; with INC HL: next row, same column
  $93C6 INC HL        ;
  $93C7 LD (HL),A     ;
  $93C8 ADD HL,DE     ;

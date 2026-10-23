@@ -1,3 +1,26 @@
-; Data block at 8421
+; Willy's walking state transition table (16 bytes)
+;
+; Read by #R$8DD3 (at $8F65) after the keyboard/joystick has been scanned.
+; Index = key bits + old state, where the old state is the byte #R$85D0
+; (0-3) and the key bits are 0 (no direction pressed), 4 (a left key or
+; joystick left pressed), 8 (a right key pressed) or 12 (both). The byte read
+; becomes the new #R$85D0. Bits of the state:
+; .
+; bit 0: facing/direction, 1 = left, 0 = right (#R$9637 picks the sprite half
+; from it and #R$8DD3 moves left when it is set).
+; bit 1: Willy walks this frame (set at the start of a jump too).
+; .
+; Rows of four, by old state 0, 1, 2, 3:
+; .
+; +$00 no key: $00,$01,$00,$01 (keep the direction, stop walking)
+; +$04 left:   $01,$03,$01,$03 (face left; walk only if already facing left,
+; so a change of direction takes one frame without a step)
+; +$08 right:  $02,$00,$02,$00 (face right; walk only if already facing right)
+; +$0C both:   $00,$01,$02,$03 (state unchanged)
+; .
+; Observed in the simulator with tests/inputs/start.txt: pressing P in the
+; Bathroom: state 0 -> 2; kept at 2 while P is held; released: 2 -> 0;
+; pressing O: 0 -> 1 (turn) -> 3 (walk) -> 3.
+@label=MoveStateTable
 b$8421 DEFB $00,$01,$00,$01,$01,$03,$01,$03
  $8429 DEFB $02,$00,$02,$00,$00,$01,$02,$03

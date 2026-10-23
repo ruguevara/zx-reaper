@@ -1,2 +1,10 @@
-; Game status buffer entry at A3FF
+; Index of the first item in the item table
+;
+; The item table (#R$A400 and #R$A500) holds one entry per index; entries
+; before this index are zeros and are never used. This byte ($AD) is the
+; index of the first real item, so the table has 256 - $AD = 83 items. It is
+; read when a game starts (#R$87CA sets the present flag of every item from
+; here to index $FF and copies this value to #R$85DE) and at every pass by
+; #R$93D1 as the start of its loop. Nothing writes it while the game runs.
+@label=FirstItemIndex
 g$A3FF DEFB $AD

@@ -1,19 +1,41 @@
-; Routine at 9637
+; Draw Willy into the $6000 screen buffer
 ;
-; Used by the routine at #R$95C8.
+; Picks Willy's 16x16 sprite from the 8-frame sprite page $9D00 (32 bytes per
+; frame) and ORs it into the buffer through the row address table #R$8200.
+; Inputs are game variables, not registers:
+; .
+; $85CF Willy's vertical position: index into the row address table (2 per
+; pixel row; $D0 = pixel row 104)
+; $85D0 bit 0: facing; selects the sprite half (frames 0-3 or 4-7)
+; $85D2 bits 0-1: animation frame within that half
+; $85D3 low 5 bits: screen column of the left byte (the word is also the
+; address of Willy's top-left cell in the attribute buffer)
+; .
+; In room $1D (compared with $8420) the sprite page is $B600 instead, with the
+; facing half swapped: Willy is drawn as something else there (a different
+; creature in the pictures at $B600; not further identified).
+; .
+; Unlike #R$9456 there is no collision test; the bits are ORed in.
+; .
+; Hardware: writes the $6000 bitmap buffer.
+;
+; B Extra vertical offset, in table index units (2 per pixel row); 0 unless
+; Willy is standing on a ramp (see #R$95C8)
+@label=DrawWilly
 c$9637 LD A,($85CF)  ;
  $963A ADD A,B       ;
+@isub=LD IXh,RowAddressTable/256
  $963B LD IXh,$82    ;
  $963E LD IXl,A      ;
  $9640 LD A,($85D0)  ;
  $9643 AND $01       ;
- $9645 RRCA          ;
+ $9645 RRCA          ; facing -> bit 7
  $9646 LD E,A        ;
  $9647 LD A,($85D2)  ;
  $964A AND $03       ;
  $964C RRCA          ;
  $964D RRCA          ;
- $964E RRCA          ;
+ $964E RRCA          ; frame * 32
  $964F OR E          ;
  $9650 LD E,A        ;
  $9651 LD D,$9D      ;
@@ -24,11 +46,19 @@ c$9637 LD A,($85CF)  ;
  $965C LD A,E        ;
  $965D XOR $80       ;
  $965F LD E,A        ;
+@isub=LD B,SPRITE_HEIGHT
 *$9660 LD B,$10      ;
  $9662 LD A,($85D3)  ;
  $9665 AND $1F       ;
  $9667 LD C,A        ;
+; Alternative entry: OR a 16x16 sprite into the $6000 buffer through a row
+; address table.
+; IX Address of the table entry of the first pixel row (#R$8200 + index)
+; DE Sprite graphic address
+; C Screen column of the left byte (0-31)
+; B Number of pixel rows (16)
 ; This entry point is used by the routine at #R$959A.
+@label=DrawSpriteRows
 *$9668 LD A,(IX+$00) ;
  $966B LD H,(IX+$01) ;
  $966E OR C          ;

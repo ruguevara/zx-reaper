@@ -1,6 +1,30 @@
-; Routine at 8D33
+@equ=ROOM_PIXEL_BUF=$7000
+; Build the empty-room attribute and bitmap buffers
 ;
-; Used by the routine at #R$88AE.
+; Called by #R$88AE at room entry. First expands the layout into the
+; attributes at $5E00 with #R$8D6B. Then, for each of the 512 cells, it finds
+; the tile whose attribute equals the cell's attribute and copies that tile's 8
+; pixel rows into the $7000 bitmap buffer (screen layout: the first 256 cells
+; go to $7000-$77FF, the last 256 to $7800-$7FFF; pixel row k of cell n is at
+; base+n+256*k).
+; .
+; The tile is found with CPIR over the six tile definitions at $80A0, so the
+; attribute byte is looked up, not the tile number: if two tiles of a room have
+; the same attribute, the first one wins (inferred). A pixel byte equal to the
+; attribute could also be matched before the right tile; TODO whether any room
+; does that.
+; .
+; The copy loop's pixel buffer high byte is a self-modified operand: the code
+; at $8D3C and $8D48 stores $70 / $78 into the LD D,n at $8D5C (SmcBufferPage).
+; .
+; Observed: a Python model of the attribute step and this copy reproduces
+; $5E00-$5FFF and $7000-$7FFF of a snapshot taken in the Bathroom exactly.
+; .
+; Hardware: none (memory only). The buffers are copied to $5C00/$6000 and to
+; the screen later by the frame code (#R$89AD).
+;
+; O:A Corrupted (all other registers too)
+@label=BuildRoomBuffers
 c$8D33 CALL $8D6B    ;
  $8D36 LD IX,$5E00   ;
  $8D3A LD A,$70      ;

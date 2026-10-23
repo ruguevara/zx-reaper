@@ -1,38 +1,80 @@
-; Routine at 93D1
+@equ=ROOM_BORDER=$80DE
+@equ=ROOM_ITEM_GRAPHIC=$80E1
+; Draw the items of the current room and collect the one Willy touches
 ;
-; Used by the routine at #R$89AD.
+; Walks the whole item table (#R$A400 and #R$A500) from the entry at
+; #R$A3FF to the end (L wraps to 0) and handles every item whose room
+; number is the current room (#R$8420) and whose "present" flag (bit 6 of
+; the first byte) is still set. For each such item:
+; .
+; The item cell is looked up in the attribute buffer at $5C00 (bit 7 of the
+; first byte selects the page $5C00 or $5D00, the second byte is the low
+; byte of the address). If its ink is 7 (white) the item is collected.
+; Willy is the sprite that is drawn with ink 7 (#R$961E writes his
+; attribute before this routine runs), so this is the pick-up test: any
+; other attribute with ink 7 on that cell would collect the item too. Not
+; checked: guardian attributes with ink 7 (TODO). Two items on the same
+; cell are collected in the same pass, because the attribute does not
+; change when the first is collected (observed, see finding).
+; .
+; Collecting: the three ASCII digits at #R$857C are incremented with decimal
+; carry, a falling beep is played (border colour of the room, speaker and MIC
+; toggled), #R$85DE is incremented (when it wraps to 0 all items are
+; collected and #R$85DF is set to 1) and the present flag (bit 6) is
+; cleared.
+; .
+; Drawing (item not touched): the ink of the cell is set to 3 + ((#R$85CB +
+; table index) AND 3), so the items flash through magenta, green, cyan and
+; yellow, keeping the paper, bright and flash bits; the 8 bytes of the
+; room's item graphic (#R$80E1) are copied into the screen buffer at $6000
+; (or $6800 for items in the bottom half of the room), one byte per pixel
+; row, at the column and character row taken from the second byte.
+; .
+; Hardware: writes the speaker/MIC/border bits of port $FE (busy-wait beep)
+; on a pick-up; the pixels go to the screen buffer, not to the screen.
+@label=UpdateItems
 c$93D1 LD H,$A4        ;
  $93D3 LD A,($A3FF)    ;
  $93D6 LD L,A          ;
-*$93D7 LD C,(HL)       ;
+@label=UpdateItems_Loop
+*$93D7 LD C,(HL)       ; C = room number with bits 6 and 7 as flags; bit 7 dropped
  $93D8 RES 7,C         ;
  $93DA LD A,($8420)    ;
- $93DD OR $40          ;
+@isub=OR ITEM_PRESENT
+ $93DD OR $40          ; compare with (current room | present flag)
  $93DF CP C            ;
- $93E0 JR NZ,$9452     ;
- $93E2 LD A,(HL)       ;
+ $93E0 JR NZ,$9452     ; another room, or already collected
+ $93E2 LD A,(HL)       ; bit 7 (bottom half) becomes bit 0 of the attribute page
  $93E3 RLCA            ;
  $93E4 AND $01         ;
  $93E6 ADD A,$5C       ;
- $93E8 LD D,A          ;
+ $93E8 LD D,A          ; D = $5C or $5D
  $93E9 INC H           ;
- $93EA LD E,(HL)       ;
+ $93EA LD E,(HL)       ; E = low byte of the cell address (second table)
  $93EB DEC H           ;
  $93EC LD A,(DE)       ;
+@isub=AND INK_MASK
  $93ED AND $07         ;
- $93EF CP $07          ;
- $93F1 JR NZ,$9430     ;
- $93F3 LD IX,$857C     ;
+@isub=CP WHITE
+ $93EF CP $07          ; ink 7 = Willy is on the cell
+ $93F1 JR NZ,$9430     ; not touched: draw the item
+ $93F3 LD IX,$857C     ; collected: add 1 to the three-digit counter
+@label=UpdateItems_Carry
 *$93F7 INC (IX+$02)    ;
  $93FA LD A,(IX+$02)   ;
+@isub=CP ASCII_AFTER_NINE
  $93FD CP $3A          ;
  $93FF JR NZ,$9409     ;
- $9401 LD (IX+$02),$30 ;
+@isub=LD (IX+$02),ASCII_ZERO
+ $9401 LD (IX+$02),$30 ; digit overflow: back to 0, carry to the next digit
  $9405 DEC IX          ;
  $9407 JR $93F7        ;
-*$9409 LD A,($80DE)    ;
- $940C LD C,$80        ;
-*$940E OUT ($FE),A     ;
+@isub=LD A,(ROOM_BORDER)
+ $9409 LD A,($80DE)    ; beep: border colour, then alternating with the beeper bits
+ $940C LD C,$80        ; C = $80, $7E, ... 2: 64 half-periods; delay B = $90 - C grows,
+@label=UpdateItems_Beep
+*$940E OUT ($FE),A     ; so the pitch falls
+@isub=XOR BEEPER_BITS
  $9410 XOR $18         ;
  $9412 LD E,A          ;
  $9413 LD A,$90        ;
@@ -47,20 +89,22 @@ c$93D1 LD H,$A4        ;
  $9421 INC A           ;
  $9422 LD ($85DE),A    ;
  $9425 JR NZ,$942C     ;
- $9427 LD A,$01        ;
+ $9427 LD A,$01        ; counter wrapped to 0: every item collected, state 1
  $9429 LD ($85DF),A    ;
-*$942C RES 6,(HL)      ;
+ $942C RES 6,(HL)      ; clear the present flag
  $942E JR $9452        ;
-*$9430 LD A,($85CB)    ;
+@label=UpdateItems_Draw
+*$9430 LD A,($85CB)    ; ink = 3 + ((pass counter + table index) AND 3)
  $9433 ADD A,L         ;
  $9434 AND $03         ;
  $9436 ADD A,$03       ;
  $9438 LD C,A          ;
  $9439 LD A,(DE)       ;
+@isub=AND $FF-INK_MASK
  $943A AND $F8         ;
  $943C OR C            ;
  $943D LD (DE),A       ;
- $943E LD A,(HL)       ;
+ $943E LD A,(HL)       ; bit 7 (bottom half) becomes bit 3: D = $60 or $68
  $943F RLCA            ;
  $9440 RLCA            ;
  $9441 RLCA            ;
@@ -69,10 +113,13 @@ c$93D1 LD H,$A4        ;
  $9445 ADD A,$60       ;
  $9447 LD D,A          ;
  $9448 PUSH HL         ;
+@isub=LD HL,ROOM_ITEM_GRAPHIC
  $9449 LD HL,$80E1     ;
+@isub=LD B,CELL_HEIGHT
  $944C LD B,$08        ;
  $944E CALL $969B      ;
  $9451 POP HL          ;
+@label=UpdateItems_Next
 *$9452 INC L           ;
  $9453 JR NZ,$93D7     ;
  $9455 RET             ;

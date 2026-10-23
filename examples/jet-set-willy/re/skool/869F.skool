@@ -1,13 +1,26 @@
-; Routine at 869F
+; Colour-code protection: two attempts, then reset
+;
+; Reached by the RET at the end of #R$8400, never called. Clears the bitmap and
+; the attributes to zero (black on black), then calls #R$86C3 with the prompt
+; "Enter Code at grid location" (#R$858B). If the code was right (Z set) the game
+; goes on at #R$87CA. Otherwise #R$86C3 is called again with "Sorry, try code at
+; location" (#R$85AB); it shows a different grid cell, because #R$86C3 adds to
+; FRAMES every time. A second wrong code jumps to $0000, which restarts the
+; machine through the ROM. Checked in the simulator with wrong codes: the
+; second prompt appears and the second miss reaches PC=$0000.
+; .
+; Hardware: writes the whole screen (bitmap and attributes); JP 0 resets the machine.
+@label=RunCodeCheck
 c$869F LD HL,$4000   ;
  $86A2 LD DE,$4001   ;
+@isub=LD BC,SCREEN_AND_ATTRS_SIZE-1
  $86A5 LD BC,$1AFF   ;
  $86A8 LD (HL),$00   ;
  $86AA LDIR          ;
- $86AC LD IX,$858B   ;
+ $86AC LD IX,$858B   ; first attempt message
  $86B0 CALL $86C3    ;
- $86B3 JP Z,$87CA    ;
- $86B6 LD IX,$85AB   ;
+ $86B3 JP Z,$87CA    ; code correct: continue with the game
+ $86B6 LD IX,$85AB   ; second attempt message
  $86BA CALL $86C3    ;
  $86BD JP Z,$87CA    ;
- $86C0 JP $0000      ;
+ $86C0 JP $0000      ; wrong twice: reset

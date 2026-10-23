@@ -1,12 +1,25 @@
-; Routine at 96C9
+; Test for the start action: joystick fire, key 0 or ENTER
 ;
-; Used by the routine at #R$96A2.
+; If the Kempston joystick was detected (flag at $85CE, set by #R$87CA), reads
+; the joystick port and returns NZ when fire is pressed. Otherwise, or when fire
+; is not pressed, reads keyboard port $AFFE, which selects the half-rows 0-6
+; and H-ENTER together: bit 0 is key 0 or ENTER. Used to stop the title tune
+; (#R$96A2); #R$88AE tests the same keys itself.
+; .
+; Hardware: reads port $1F (Kempston joystick) and port $AFFE (keyboard).
+;
+; O:F NZ if fire, key 0 or ENTER is pressed; Z if not
+; O:A Corrupted
+@label=ReadStartInput
 c$96C9 LD A,($85CE)  ;
  $96CC OR A          ;
  $96CD JR Z,$96D4    ;
+@isub=IN A,(KEMPSTON_PORT)
  $96CF IN A,($1F)    ;
+@isub=BIT KEMPSTON_FIRE_BIT,A
  $96D1 BIT 4,A       ;
  $96D3 RET NZ        ;
+@label=ReadStartInput_Keys
 *$96D4 LD BC,$AFFE   ;
  $96D7 IN A,(C)      ;
  $96D9 AND $01       ;

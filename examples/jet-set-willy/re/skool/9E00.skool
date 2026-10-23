@@ -1,4 +1,23 @@
-; Data block at 9E00
+; Colour-code table: grid cell index to code byte minus index
+;
+; 256 bytes, read by #R$86C3 as CodeTable[L] for the grid cell index L; the
+; expected code byte is CodeTable[L]+L (mod 256), see #R$86C3 and #R$873C. The
+; byte holds four colours, two bits each, key number minus 1, slot 1 in the
+; top bits. Example: L=$37 (cell B3) holds $A2, $A2+$37=$D9 = 11 01 10 01 = keys
+; 4-2-3-2.
+; .
+; Used part: indexes $00-$B2 (179 cells, the grid is 18 columns A-R by 10 rows
+; 0-9 = 180 cells). Index $B3 (the last cell) is never produced and index $FF is
+; read in one case only (the quirk of #R$86C3, when FRAMES is $8E: location ">D").
+; .
+; The table does not look designed: the 180 bytes have only 83 distinct values
+; and the whole 256-byte block, including the 76 bytes after the used part
+; ($9EB4-$9EFF), disassembles as plausible Z80 code of some other program that
+; keeps variables at $40xx and calls routines below $2C00. It is not a piece of
+; the 48K Spectrum ROM (no run of 6 or more bytes matches the ROM). So the
+; table is probably a block of foreign program bytes used as a source of
+; arbitrary numbers; where it came from is Unknown. Nothing reads $9EB4-$9EFE.
+@label=CodeTable
 b$9E00 DEFB $2B,$4B,$0D,$78,$CA,$60,$1D,$CD,$5B,$1E,$FE,$2C,$C0,$18,$F3,$11
  $9E10 DEFB $F2,$40,$1A,$B7,$CA,$A0,$19,$3C,$32,$9A,$40,$12,$7E,$FE,$87,$28
  $9E20 DEFB $0C,$CD,$5A,$1E,$C0,$7A,$B3,$C2,$C5,$1E,$3C,$18,$02,$D7,$C0,$2A

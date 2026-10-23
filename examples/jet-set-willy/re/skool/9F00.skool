@@ -1,2 +1,6 @@
-; Unused
+; Unused area
+;
+; 256 zero bytes. Nothing references them (no operand or word in the image
+; points here). The byte at $9EFF just before it is the one case where
+; #R$9E00 is read beyond its used part.
 u$9F00 DEFS $0100

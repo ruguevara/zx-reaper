@@ -1,24 +1,42 @@
-; Routine at 96A2
+; Play a tune on the beeper until its end marker or a key press
 ;
-; Used by the routine at #R$87CA.
+; The tune is a list of one-byte notes ended by $FF. Each note byte is a
+; half-period count: a square wave with the speaker/MIC bits toggled every E
+; passes of the inner loop, for 100 passes of 256 inner iterations (fixed note
+; length, so a tune has no rests and no length codes). Halfway through the
+; note (when the outer count is $32) E is doubled, so the second half of each
+; note is an octave lower (inferred from the code; not listened to).
+; .
+; After each note #R$96C9 is called; the tune stops if it reports a press.
+; .
+; Hardware: writes port $FE (speaker and MIC bits, border black); timing loops.
+;
+; HL Address of the tune
+; O:HL Address of the $FF terminator, or of the note after which the tune was stopped
+; O:F Z if the tune ended, NZ if stopped by #R$96C9
+@label=PlayTune
 c$96A2 LD A,(HL)     ;
+@isub=CP TUNE_END
  $96A3 CP $FF        ;
  $96A5 RET Z         ;
  $96A6 LD BC,$0064   ;
  $96A9 XOR A         ;
  $96AA LD E,(HL)     ;
  $96AB LD D,E        ;
+@label=PlayTune_Pass
+@isub=OUT (ULA_PORT),A
 *$96AC OUT ($FE),A   ;
  $96AE DEC D         ;
  $96AF JR NZ,$96B4   ;
  $96B1 LD D,E        ;
- $96B2 XOR $18       ;
+@isub=XOR BEEPER_BITS
+ $96B2 XOR $18       ; toggle speaker and MIC
 *$96B4 DJNZ $96AC    ;
  $96B6 EX AF,AF'     ;
  $96B7 LD A,C        ;
  $96B8 CP $32        ;
  $96BA JR NZ,$96BE   ;
- $96BC RL E          ;
+ $96BC RL E          ; halfway through the note: double the half-period
 *$96BE EX AF,AF'     ;
  $96BF DEC C         ;
  $96C0 JR NZ,$96AC   ;

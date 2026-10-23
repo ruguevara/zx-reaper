@@ -1,8 +1,23 @@
-; Routine at 8400
+; Program entry: set up the stack and run a decryption loop that changes nothing
+;
+; Entered once, from the BASIC loader's jump to $8400. Disables interrupts (no
+; instruction later in the program enables them), plants the return address
+; #R$869F by hand at $5BFE/$5BFF, points SP at it and then runs a loop over
+; $8500-$FFFF. The loop reads each byte, computes A = L XOR byte XOR H, discards
+; A and writes the byte back unchanged, so memory is the same afterwards (checked
+; with the simulator: no byte of $8000-$FFFF differs when $869F is reached). Its
+; only effect is a delay of about 22 frames; why it is there is Unknown (it
+; looks like the shell of a decryptor with the key removed). The final RET pops
+; the planted word and starts #R$869F with SP=$5C00 and HL=$0000.
+; .
+; Hardware: DI only.
+@label=StartProgram
 c$8400 DI            ;
- $8401 LD HL,$5BFF   ;
+ $8401 LD HL,$5BFF   ; planted return address: high byte at $5BFF, low byte at $5BFE
+@isub=LD (HL),RunCodeCheck>>8
  $8404 LD (HL),$86   ;
  $8406 DEC HL        ;
+@isub=LD (HL),RunCodeCheck&$FF
  $8407 LD (HL),$9F   ;
  $8409 LD SP,$5BFE   ;
  $840C SUB A         ;
@@ -10,14 +25,15 @@ c$8400 DI            ;
  $840E XOR $0A       ;
  $8410 LD B,A        ;
  $8411 INC B         ;
- $8412 LD H,B        ;
- $8413 RRC H         ;
+ $8412 LD H,B        ; B=$0B
+ $8413 RRC H         ; H=$85: HL=$8500
+@label=StartProgram_Loop
 *$8415 LD C,(HL)     ;
- $8416 LD A,L        ;
+ $8416 LD A,L        ; A is computed but never used
  $8417 XOR C         ;
  $8418 XOR H         ;
- $8419 LD (HL),C     ;
+ $8419 LD (HL),C     ; the byte is written back as it was read
  $841A INC HL        ;
- $841B BIT 7,H       ;
+ $841B BIT 7,H       ; loop until HL wraps from $FFFF to $0000
  $841D JR NZ,$8415   ;
- $841F RET           ;
+ $841F RET           ; returns to #R$869F

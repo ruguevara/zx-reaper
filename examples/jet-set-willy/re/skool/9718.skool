@@ -1,2 +1,5 @@
-; Unused
+; Unused area
+;
+; 232 zero bytes. Nothing references them (no operand or word in the image
+; points here, and the code never executes here).
 u$9718 DEFS $E8

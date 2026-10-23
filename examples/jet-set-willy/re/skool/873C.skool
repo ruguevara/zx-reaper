@@ -1,72 +1,134 @@
-; Routine at 873C
+; Read one colour key into a slot, or check the code on ENTER
 ;
-; Used by the routine at #R$86C3.
+; Called by #R$86C3 once per slot. Waits until keys 1-4 are all up, then loops:
+; - ENTER (and slot 4 already filled): checks the code and returns to the
+;   caller of #R$86C3 (see below).
+; - key 1, 2, 3 or 4 alone: paints the 2x2 cells of the slot with that colour
+;   (paper blue, red, magenta, green), waits about 23 ms and returns, so
+;   #R$86C3 moves on to the next slot.
+; - anything else (several keys, key 5, nothing): the slot is set flashing (bit 7
+;   of its four attributes) as a cursor and the loop goes on.
+; .
+; Slots are cycled forever, so a filled slot flashes in its colour when its turn
+; comes round again and can be overwritten by a later pass.
+; ENTER is ignored while the attribute of slot 4 is still the empty value $07
+; (flash bit ignored).
+; .
+; The code byte is built from the paper colours of the slots 1-4 (index 0-3 =
+; key number minus 1): slot 1 in bits 7-6, slot 2 in bits 5-4, slot 3 in bits
+; 3-2, slot 4 in bits 1-0. It is compared with #R$85E4. The routine then does
+; POP HL, throwing away its return address to #R$86C3, so the RET after the
+; compare returns to the caller of #R$86C3 (#R$869F) with the flags of the
+; comparison: Z set if the code is right. Checked in the simulator: 4-2-3-2 for
+; grid cell B3 is accepted (code $D9); 1,2,3,2 then a new key 4 over slot 1 and
+; ENTER is accepted too; ENTER after three slots does nothing.
+; .
+; Hardware: reads keyboard half rows 1-5 (port $F7FE) and H-ENTER (port $BFFE);
+; writes screen attributes; a timing loop of 24*256 DJNZ passes as debounce.
+; .
+; IX Attribute address of the slot's top-left cell
+; O:F Z set if ENTER ended the input and the code is right (see above)
+@label=ReadCodeSlot
+@isub=LD BC,KEYROW_1_5
 c$873C LD BC,$F7FE    ;
  $873F IN A,(C)       ;
+@isub=AND KEYS_1_4_MASK
  $8741 AND $0F        ;
- $8743 CP $0F         ;
+@isub=CP KEYS_1_4_MASK
+ $8743 CP $0F         ; wait until keys 1-4 are released
  $8745 JR NZ,$873C    ;
+@label=ReadCodeSlot_Poll
+@isub=LD B,KEYROW_H_ENTER_HI
 *$8747 LD B,$BF       ;
  $8749 IN A,(C)       ;
- $874B BIT 0,A        ;
+ $874B BIT 0,A        ; ENTER (bit set = not pressed)
  $874D JR NZ,$8785    ;
+@isub=LD A,(CODE_SLOT_4_ATTR)
  $874F LD A,($5959)   ;
  $8752 AND $7F        ;
- $8754 CP $07         ;
+@isub=CP CODE_SLOT_EMPTY
+ $8754 CP $07         ; slot 4 not filled yet: ignore ENTER
  $8756 JR Z,$8785     ;
- $8758 SUB $08        ;
+@isub=SUB BLUE*PAPER
+ $8758 SUB $08        ; slot 4: paper colour minus blue, as 0-3 in bits 4-3
+@isub=AND 3*PAPER
  $875A AND $18        ;
  $875C RRCA           ;
  $875D RRCA           ;
- $875E RRCA           ;
+ $875E RRCA           ; to bits 1-0
  $875F LD C,A         ;
- $8760 LD A,($5953)   ;
+@isub=LD A,(CODE_SLOT_2_ATTR)
+ $8760 LD A,($5953)   ; slot 2
+@isub=SUB BLUE*PAPER
  $8763 SUB $08        ;
+@isub=AND 3*PAPER
  $8765 AND $18        ;
- $8767 RLCA           ;
+ $8767 RLCA           ; to bits 5-4
  $8768 OR C           ;
  $8769 LD C,A         ;
- $876A LD A,($5956)   ;
+@isub=LD A,(CODE_SLOT_3_ATTR)
+ $876A LD A,($5956)   ; slot 3
+@isub=SUB BLUE*PAPER
  $876D SUB $08        ;
+@isub=AND 3*PAPER
  $876F AND $18        ;
- $8771 RRCA           ;
+ $8771 RRCA           ; to bits 3-2
  $8772 OR C           ;
  $8773 LD C,A         ;
- $8774 LD A,($5950)   ;
+@isub=LD A,(CODE_SLOT_1_ATTR)
+ $8774 LD A,($5950)   ; slot 1
+@isub=SUB BLUE*PAPER
  $8777 SUB $08        ;
+@isub=AND 3*PAPER
  $8779 AND $18        ;
  $877B RLCA           ;
  $877C RLCA           ;
- $877D RLCA           ;
- $877E POP HL         ;
- $877F OR C           ;
+ $877D RLCA           ; to bits 7-6
+ $877E POP HL         ; discard the return address into #R$86C3
+ $877F OR C           ; A = the entered code
  $8780 LD HL,$85E4    ;
- $8783 CP (HL)        ;
- $8784 RET            ;
-*$8785 SET 7,(IX+$00) ;
+ $8783 CP (HL)        ; Z if equal
+ $8784 RET            ; returns to the caller of #R$86C3
+@label=ReadCodeSlot_Key
+*$8785 SET 7,(IX+$00) ; flash the slot as a cursor
  $8789 SET 7,(IX+$01) ;
+@isub=SET 7,(IX+SCREEN_COLS)
  $878D SET 7,(IX+$20) ;
+@isub=SET 7,(IX+SCREEN_COLS+1)
  $8791 SET 7,(IX+$21) ;
+@isub=LD BC,KEYROW_1_5
  $8795 LD BC,$F7FE    ;
  $8798 IN A,(C)       ;
+@isub=AND KEYS_1_4_MASK
  $879A AND $0F        ;
+@isub=LD E,BLUE*PAPER
  $879C LD E,$08       ;
+@isub=CP KEY_1_ONLY
  $879E CP $0E         ;
  $87A0 JR Z,$87B5     ;
+@isub=LD E,RED*PAPER
  $87A2 LD E,$10       ;
+@isub=CP KEY_2_ONLY
  $87A4 CP $0D         ;
  $87A6 JR Z,$87B5     ;
+@isub=LD E,MAGENTA*PAPER
  $87A8 LD E,$18       ;
+@isub=CP KEY_3_ONLY
  $87AA CP $0B         ;
  $87AC JR Z,$87B5     ;
+@isub=LD E,GREEN*PAPER
  $87AE LD E,$20       ;
+@isub=CP KEY_4_ONLY
  $87B0 CP $07         ;
- $87B2 JP NZ,$8747    ;
-*$87B5 LD (IX+$00),E  ;
+ $87B2 JP NZ,$8747    ; no single colour key: poll again
+@label=ReadCodeSlot_Paint
+*$87B5 LD (IX+$00),E  ; fill the slot with the colour (clears the flash bit)
  $87B8 LD (IX+$01),E  ;
+@isub=LD (IX+SCREEN_COLS),E
  $87BB LD (IX+$20),E  ;
+@isub=LD (IX+SCREEN_COLS+1),E
  $87BE LD (IX+$21),E  ;
- $87C1 LD BC,$0018    ;
+ $87C1 LD BC,$0018    ; debounce delay, about 23 ms
 *$87C4 DJNZ $87C4     ;
  $87C6 DEC C          ;
  $87C7 JR NZ,$87C4    ;

@@ -1,8 +1,30 @@
-; Routine at 8D6B
+@equ=ROOM_ATTR_BUF=$5E00
+; Expand the room layout into the attribute buffer
 ;
-; Used by the routine at #R$8D33.
+; Builds the attributes of the empty room (no sprites) at $5E00, 512 bytes
+; for the 16 rows of 32 cells of the playing area:
+; .
+; 1. Each of the 128 layout bytes at $8000 holds 4 cells of 2 bits, first cell
+; in bits 7-6; every cell is replaced by its tile's attribute through #R$8DC0.
+; 2. If the conveyor length ($80D9) is not 0, that many cells starting at the
+; conveyor address ($80D7, an address in the $5E00 buffer) get the conveyor
+; tile's attribute (tile 5, $80CD).
+; 3. If the ramp length ($80DD) is not 0, that many cells get the ramp tile's
+; attribute (tile 4, $80C4), starting at the ramp address ($80DB) and moving
+; up one row per cell, one column left when ramp direction bit 0 ($80DA) is
+; 0 (step -33) and one column right when it is 1 (step -31).
+; .
+; Observed: a Python model of these three steps reproduces $5E00-$5FFF of a
+; snapshot taken in the Bathroom exactly (that room has a conveyor and a
+; ramp going right).
+; .
+; Hardware: none (memory only).
+;
+; O:A Corrupted (HL, IX, B, DE also change)
+@label=ExpandRoomLayout
 c$8D6B LD HL,$8000   ;
  $8D6E LD IX,$5E00   ;
+@label=ExpandRoomLayout_Byte
 *$8D72 LD A,(HL)     ;
  $8D73 RLCA          ;
  $8D74 RLCA          ;
@@ -20,7 +42,7 @@ c$8D6B LD HL,$8000   ;
  $8D86 LD A,(HL)     ;
  $8D87 CALL $8DC0    ;
  $8D8A INC HL        ;
- $8D8B LD A,L        ;
+ $8D8B LD A,L        ; until HL reaches $8080
  $8D8C AND $80       ;
  $8D8E JR Z,$8D72    ;
  $8D90 LD A,($80D9)  ;
@@ -39,7 +61,7 @@ c$8D6B LD HL,$8000   ;
  $8DA9 LD A,($80DA)  ;
  $8DAC AND $01       ;
  $8DAE RLCA          ;
- $8DAF ADD A,$DF     ;
+ $8DAF ADD A,$DF     ; E = $DF or $E1: step -33 or -31 (D = $FF)
  $8DB1 LD E,A        ;
  $8DB2 LD D,$FF      ;
  $8DB4 LD A,($80DD)  ;

@@ -1,4 +1,11 @@
-; Data block at 9B00
+; Colour-code screen key graphics
+;
+; Four 16x16 pixel graphics, 32 bytes each (16 rows of 2 bytes): the keys
+; 1, 2, 3 and 4 shown in rows 10-11 of the code screen. Drawn by #R$86C3 with
+; #R$9456 at columns 2, 5, 8 and 11. Their colours come from the attributes
+; at #R$9B80: most pixels are set (key colour as ink) and the digit is made of
+; unset pixels, which show black on the black paper.
+@label=CodeKeyGraphics
 b$9B00 DEFB $7F,$FE
  $9B02 DEFB $C3,$03
  $9B04 DEFB $BF,$FD

@@ -1,4 +1,32 @@
-; Data block at 8300
+; Rope shape tables (per-segment steps, 2 x 128 bytes)
+;
+; Describes the curve of a swinging rope (entity type 3, the entity routine
+; #R$91BE; the swing itself is moved by #R$90C0). The rope is drawn as a chain
+; of points, one pixel each. For every segment S (0 to the rope length, byte 4
+; of the entity, $20 for the ropes in this game) the routine takes the index
+; I = S + swing phase (low 7 bits of entity byte 1) and, after plotting the
+; point, moves to the next one by two steps taken from this table:
+; .
+; +$00-$7F (read with L = I): number of pixels to move sideways (0-3), to the
+; left when bit 7 of entity byte 1 is set, to the right when it is clear.
+; +$80-$FF (read with L = I OR $80): vertical step, as a number of bytes in
+; the pixel-row table #R$8200 (2 bytes per pixel row, so 6 = 3 pixel rows and
+; 4 = 2 pixel rows).
+; .
+; The data is only defined for I = 0 to $55; the rest is zero. The largest
+; phase is $36 (entity byte 7 of the rope definition) plus the length $20
+; gives $56, whose value is also zero. For a small index the rope hangs
+; straight down (3 rows per segment, no sideways steps); the larger the index,
+; the more the segments lean (up to 3 pixels sideways with 2 rows down), so
+; the swing phase bends the rope progressively from the top.
+; .
+; Observed with the simulator in "We must perform a Quirkafleeg" (room $10):
+; plotting the chain from these tables reproduces the rope pixels on screen
+; (33 of 33 points at three of five sampled frames, the screen being one
+; update behind the phase byte).
+; .
+; Hardware: none.
+@label=RopeStepTable
 b$8300 DEFS $20
  $8320 DEFB $01,$01,$01,$01,$01,$01,$01,$01
  $8328 DEFB $01,$01,$01,$01
@@ -6,6 +34,7 @@ b$8300 DEFS $20
  $8342 DEFB $01,$02,$02,$01,$01,$02,$01,$01,$02,$02,$03,$02,$03,$02,$03,$03
  $8352 DEFB $03,$03,$03,$03
  $8356 DEFS $2A
+@label=RopeStepTable_Rows
  $8380 DEFS $30,$06
  $83B0 DEFB $04,$06,$06,$04,$06,$04,$06,$04
  $83B8 DEFB $06,$04,$04,$04,$06

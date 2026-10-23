@@ -1,2 +1,14 @@
-; Game status buffer entry at 85DE
+; Item counter (counts up to 256 when every item is collected)
+;
+; Set to the index of the first item (#R$A3FF, $AD) when a game starts
+; (#R$87CA, at $8806) and incremented by #R$93D1 for every item collected.
+; With N items in the table (256 minus the first index, 83 here) it wraps to 0
+; exactly when the last one is collected; #R$93D1 then also sets #R$85DF to 1.
+; The value is not displayed: the display is the three ASCII digits at
+; #R$857C.
+; .
+; Observed: starts at $AD, becomes $AE after the first pick-up in the
+; Bathroom; with the first item index poked to $FF the pick-up wraps it to 0
+; and #R$85DF becomes 1.
+@label=ItemCounter
 g$85DE DEFB $00

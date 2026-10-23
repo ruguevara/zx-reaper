@@ -1,2 +1,8 @@
-; Message at 8451
+; Unused text "AIR"
+;
+; Three characters just before the title text at #R$8454. Nothing references them:
+; no operand or word in the image points to $8451-$8453, and overwriting them
+; changed no frame in two simulator runs (the start script for 800 frames and an
+; in-game fuzz run for 1500 frames). Purpose Unknown; probably a leftover label.
+@label=UnusedAirText
 t$8451 DEFM "AIR"

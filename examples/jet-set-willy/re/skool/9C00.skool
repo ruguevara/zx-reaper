@@ -1,4 +1,14 @@
-; Unused
+; Leftover assembler source text
+;
+; 64 bytes of text from the source file of the program (an assembler's line
+; buffer left in memory), cut off at $9C3F where the sprite data at #R$9C40
+; begins. Nothing references it. Readable parts: "NZ,ENDPAUSE", "INC E",
+; "JR NZ,PAUSE", "INC D", "JR NZ,PAUSE", i.e. the lines of a delay loop with
+; labels PAUSE and ENDPAUSE. The lines are split into fields by TAB ($09); each
+; line seems to be preceded by a 2-byte prefix ("J" $06 or "J" $0C for the
+; instruction part) and followed by a byte that grows by $21 per line
+; ($82, $A3, $C4, $E5, $06); the meaning of those bytes is Unknown.
+@label=LeftoverSource
 u$9C00 DEFB $4E,$5A,$2C,$45,$4E,$44,$50,$41,$55,$53,$45,$82,$4A,$06,$09,$49
  $9C10 DEFB $4E,$43,$09,$45,$A3,$4A,$0C,$09,$4A,$52,$09,$4E,$5A,$2C,$50,$41
  $9C20 DEFB $55,$53,$45,$C4,$4A,$06,$09,$49,$4E,$43,$09,$44,$E5,$4A,$0C,$09

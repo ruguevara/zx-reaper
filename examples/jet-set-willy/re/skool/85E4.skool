@@ -1,2 +1,10 @@
-; Game status buffer entry at 85E4
+; Scratch byte: expected colour code, later a loop counter
+;
+; Written by #R$86C3 with the expected colour-code byte (table byte + grid cell
+; index) and compared by #R$873C. After the code check the program reuses the
+; byte as a loop counter in two places: #R$88AE sets it to 0 and counts up to
+; $E0 (it offsets into the scrolling text at #R$8454), and #R$8B07 sets it to 0
+; and adds 4 up to $C4 (it selects a position from the table at $8200 and a
+; border/attribute value). Exact meaning there is Unknown here.
+@label=ScratchByte
 g$85E4 DEFB $00
