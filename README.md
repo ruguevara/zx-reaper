@@ -18,7 +18,7 @@ any stage is a place to stop, fork and ship.
 | 1 | tape → automatic disassembly (SkoolKit) → tape | tape and snapshot byte-identical | built: `zx-init`, `zx-coverage`, `zx-classify` |
 | 2 | automatic disassembly → annotated, relocatable asm without magic numbers → tape | the same, plus `make shift-test` and routine models (`make diff`) | built: `zx-annotate` to `zx-document`, models in `zx-port` |
 | 3 | asm → Python on `zxpyxel`, a library that stands in for the 48K hardware on [Pyxel](https://github.com/kitao/pyxel): the original memory layout, the same screens and behaviour, code that follows the asm routine by routine | routines against the Z80 code (`zxdiff.py`); the whole game by replaying the Z80 run's input and comparing game memory at checkpoints (`make port-test`) | built: `zx-port`; Hungry Horace ported whole ([docs/port.md](docs/port.md)) |
-| 4 | Python on `zxpyxel` → game logic in plain Python plus graphics, input and sound subsystems with nothing Spectrum-specific in the logic, on the framework the user picks (Pyxel, pygame, SDL2, …) | golden runs decoded from the Z80 records: state, screen and sound per pass of the main loop | design: [docs/stage4.md](docs/stage4.md) |
+| 4 | Python on `zxpyxel` → game logic in plain Python plus graphics, input and sound subsystems with nothing Spectrum-specific in the logic, on the framework the user picks (Pyxel, pygame, SDL2, …) | stage 3 as the oracle: every routine call and every step of the recorded runs, state, screen and sound | built: `zx-clean`; Hungry Horace in faithful mode ([docs/stage4.md](docs/stage4.md)) |
 | 5 | game logic → C/C++ with SDL2 or platform libraries, or JS for the web | the stage 4 golden runs | optional |
 
 Stages 4 and 5 are optional and go wherever a project needs. Fork the stage 3
@@ -96,6 +96,7 @@ stays out of git: put it into `original/` and run `make restore`.
 | export | `zx-export` | `src/*.asm` modules are the master, still `IDENTICAL` |
 | article | `zx-document` | `docs/` written, audit done, links resolve |
 | models, port | `zx-port` | routines pass `make diff` against the Z80 code; a stage 3 port passes `make port-test` |
+| clean logic (stage 4) | `zx-clean` | the game in `game/` passes `make stage4-test` against stage 3 |
 
 ## Tools
 
@@ -122,10 +123,12 @@ projects built with it.
 
 ## Limits
 
-- Stage 3 of "Port everywhere" is built and done on one game, Hungry Horace
-  (every main-loop pass identical to the Z80 under three recorded runs);
-  sound is not yet judged by ear, and stages 4 and 5 are a design
-  ([docs/port.md](docs/port.md)). The replay sees the ROM's IM1 interrupts
+- Stages 3 and 4 of "Port everywhere" are built and done on one game, Hungry
+  Horace: stage 3 identical to the Z80 at every main-loop pass of three
+  recorded runs ([docs/port.md](docs/port.md)), stage 4 identical to stage 3
+  at every step, in faithful mode, without deviations yet
+  ([docs/stage4.md](docs/stage4.md)); the sound is judged by ear, and stage
+  5 is a design. The replay sees the ROM's IM1 interrupts
   only; a game with its own IM2 handler needs its checkpoint at a HALT.
 - `zxrun.py` is 48K only and has no memory contention: frame hashes check
   logic, not cycle-exact effects (multicolour, border tricks). Check those in

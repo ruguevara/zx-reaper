@@ -30,7 +30,9 @@ automatic disassembly → tape, 2 → annotated asm → tape, 3 → Python on th
 `zxpyxel` library over Pyxel with the same screens and behaviour, 4 → plain
 Python game logic on any framework, 5 → C/C++ or JS. Stages 1 and 2 are
 built; stage 3 is built and done on Hungry Horace (`docs/port.md`, skill
-`zx-port`); 4 and 5 are optional and done per project.
+`zx-port`); stage 4 is built and done on Hungry Horace in faithful mode
+(`docs/stage4.md`, skill `zx-clean`); 4 and 5 are optional and done per
+project.
 
 - Every stage ends with a check against the stage before it: byte-identical
   tape and snapshot (1, 2), the same game memory at every checkpoint under

@@ -25,7 +25,7 @@ else
 endif
 
 .DELETE_ON_ERROR:
-.PHONY: all verify test expected coverage status labels html shift-test export clean help restore diff audit doctor port-test port-html
+.PHONY: all verify test expected coverage status labels html shift-test export clean help restore diff audit doctor port-test port-html stage4-test game-html
 all: verify
 
 # The tape and everything copied from it (re/tape/, re/*.z80) stay out of git;
@@ -51,7 +51,9 @@ help:
 	@echo "make restore    recreate re/tape, re/orig.z80, re/image.z80 from original/"
 	@echo "make diff       differential tests: Z80 routines against tests/models/*.py"
 	@echo "make port-test  stage 3: the Python port in port/ replays the Z80 runs of tests/inputs"
-	@echo "make port-html  the port as one web page, build/web/game.html (holds game data: not for git)"
+	@echo "make port-html  the port as one web page, build/web/port.html (holds game data: not for git)"
+	@echo "make stage4-test stage 4: the game in game/ against stage 3, step by step (skill zx-clean)"
+	@echo "make game-html  the stage 4 game as one web page, build/web/game.html"
 	@echo "make audit      open questions (re/questions.md) and unverified findings (re/findings.md)"
 	@echo "make doctor     check tools and what this project is missing"
 	@echo "sources: $(MASTER)"
@@ -152,11 +154,26 @@ port-test: port/labels.py port/variables.py port/image.bin $(RECORDS)
 	@test -n "$(PORT_ENTRY)" || { echo "set PORT_ENTRY in re/layout.mk"; exit 1; }
 	@$(T)/zxport.py check $(PORT_ENTRY) $(RECORDS)
 
+# one web page from DIR/play.py: the folder copied without caches, packaged, made HTML
+define WEB
+	rm -rf build/web/$(1) build/web/$(1).pyxapp build/web/$(1).html
+	$(PY) -c "import shutil; shutil.copytree('$(1)', 'build/web/$(1)', ignore=shutil.ignore_patterns('__pycache__'))"
+	cd build/web && pyxel package $(1) $(1)/play.py && pyxel app2html $(1).pyxapp
+	@echo "serve it: $(PY) -m http.server -d build/web, then open http://localhost:8000/$(1).html"
+endef
+
 port-html: port/labels.py port/variables.py port/image.bin
-	rm -rf build/web
-	$(PY) -c "import shutil; shutil.copytree('port', 'build/web/game', ignore=shutil.ignore_patterns('__pycache__'))"
-	cd build/web && pyxel package game game/play.py && pyxel app2html game.pyxapp
-	@echo "serve it: $(PY) -m http.server -d build/web, then open http://localhost:8000/game.html"
+	$(call WEB,port)
+
+# Stage 4 (skill zx-clean): the game in game/, bridge/ checks it against stage 3
+game/assets.json: port/image.bin port/labels.py port/variables.py
+	$(PY) bridge/assets.py
+
+stage4-test: game/assets.json $(RECORDS)
+	@$(PY) bridge/oracle.py game $(RECORDS)
+
+game-html: game/assets.json
+	$(call WEB,game)
 
 audit:
 	@$(T)/zxq.py audit; true

@@ -10,3 +10,4 @@ re/tape/
 re/*.z80
 re/tap2sna.log
 port/image.bin
+game/assets.json

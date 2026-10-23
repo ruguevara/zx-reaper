@@ -297,9 +297,10 @@ lines.
 | web, `pyxel app2html` (Pyodide 0.29.3, Chrome) | 48.5-48.8 fps; the WAV chunks play without errors; `ctypes.memmove` into `data_ptr()` works; a key on the title starts a game |
 | size | the web build is one 43 KB HTML file plus Pyxel's runtime from its CDN |
 
-Not checked: how the beeper sounds (needs ears), the seams between WAV chunks,
-and why the web build runs 3% slow (frame pacing under a 60 Hz display is the
-likely cause).
+Not checked: why the web build runs 3% slow (frame pacing under a 60 Hz
+display is the likely cause). The beeper through WAV chunks was judged by
+ear on the whole game (2026-10-23): it sounds right, the seams between
+chunks do not show.
 
 ## Hungry Horace (2026-10-23)
 
@@ -340,4 +341,3 @@ bytes are printed now), and words written as bytes (`mem16` and `v`).
 2. The drawing, text and sprite layer over memory (`zxpyxel.display`, the
    display API of [stage4.md](stage4.md)), with the prototype's tests;
    hyperdream switches to it.
-3. Hear the port: the beeper through WAV chunks on the desktop and the web.

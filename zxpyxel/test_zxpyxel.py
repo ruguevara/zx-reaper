@@ -1,5 +1,6 @@
 """Checks of the core: python -m zxpyxel.test_zxpyxel (or pytest)."""
 from zxpyxel import T_FRAME, Goto, dispatch, headless, keys, mem, mem16, screen, sound, zx
+from zxpyxel.display import Display, attr
 from zxpyxel.memory import Byte, Table, Variables, Word
 from zxpyxel.machine import FRAMES
 
@@ -51,6 +52,18 @@ def test_memory():
         assert False, 'index outside the table'
     except IndexError:
         pass
+
+
+def test_display():
+    d = Display()
+    d.cls(attr(0, 7))
+    d.text(1, 9, 'A', attr(2, 7, bright=True))
+    zx.reset()
+    for line in range(8):                   # the same bytes as a Spectrum's screen
+        zx.mem[0x4000 + 0x0800 + line * 256 + 0x20 + 1] = d.glyph(1, 9)[line]
+    zx.mem[0x5800:0x5B00] = d.data[6144:]
+    assert d.data[:6144] == zx.mem[0x4000:0x5800] and d.glyph(1, 9) == zx.mem[0x3E08:0x3E10]   # A is character 65
+    assert screen.render(d.data, base=0) == screen.render(zx.mem) and d.attr(1, 9) == 0x7A
 
 
 def test_goto():

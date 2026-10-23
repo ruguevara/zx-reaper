@@ -1,7 +1,7 @@
 """Screen memory → palette indices, one byte per pixel (256x192): colours 0-7,
 BRIGHT as 8-15, FLASH swapping ink and paper in phase 1."""
-LINE = [0x4000 | (y & 0xC0) << 5 | (y & 7) << 8 | (y & 0x38) << 2 for y in range(192)]
-ATTR = [0x5800 + (y >> 3) * 32 for y in range(192)]
+LINE = [(y & 0xC0) << 5 | (y & 7) << 8 | (y & 0x38) << 2 for y in range(192)]   # from $4000
+ATTR = [0x1800 + (y >> 3) * 32 for y in range(192)]
 _BITS = [bytes(b >> (7 - i) & 1 for i in range(8)) for b in range(256)]
 
 # RGB levels (normal, bright) of the palettes from the zxpyxel prototype
@@ -27,11 +27,13 @@ def _table(phase):
 _TABLES = [_table(0), _table(1)]
 
 
-def render(mem, flash=0):
+def render(mem, flash=0, base=0x4000):
+    """The screen at `base` in `mem` (a 64K memory, or a 6912-byte display
+    with base 0)."""
     t = _TABLES[flash]
     out = []
     for y in range(192):
-        o, a = LINE[y], ATTR[y]
+        o, a = base + LINE[y], base + ATTR[y]
         out += [t[mem[a + x] << 8 | mem[o + x]] for x in range(32)]
     return b''.join(out)
 

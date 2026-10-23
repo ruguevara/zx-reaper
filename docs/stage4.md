@@ -1,6 +1,7 @@
 # Stage 4: clean game logic, the Spectrum look kept
 
-Status: design (2026-10-23), nothing built. Stage 3 (`port.md`) is the
+Status: built for Hungry Horace in faithful mode (2026-10-23; results at
+the end). How to do it: the `zx-clean` skill. Stage 3 (`port.md`) is the
 starting point: a port that keeps the asm's memory layout and is identical
 to the Z80 at every pass of the main loop.
 
@@ -9,12 +10,18 @@ Decisions:
 1. **Faithful first.** Stage 4 reproduces stage 3's behaviour, quirks
    included. Fixing a quirk is a deviation, switched on by a flag and
    recorded in a register, never a silent change.
-2. **In slices, with teacher forcing.** The new code is written one slice of
-   behaviour at a time by subagents, each checked against the golden runs,
-   with the slices not yet written fed from the golden run on every pass.
+2. **In slices.** The new code is written one stage 3 module at a time by
+   subagents. Planned with teacher forcing; built more simply: stage 3,
+   already identical to the Z80, is the oracle. While it replays a record,
+   every call of a stage 3 routine is decoded before and after, and the
+   stage 4 routine must turn the one into the other (see Tests). Every call
+   in the recorded runs is a test case, and no slice needs the others.
 3. **The display API lives in `zxpyxel`.** The same calls draw a stage 4 port
    and a new game in the Spectrum style (hyperdream), so this is also the
    drawing layer that `port.md` plans for new games.
+4. **The oracle runs live.** The checks run stage 3 next to stage 4 rather
+   than reading golden files; the language-neutral golden runs below are
+   written when stage 5 needs them.
 
 ## What changes, what stays
 
@@ -103,76 +110,69 @@ A pacer runs the logic at the original speed: passes per second from the
 pace formula (`PaceAndChime`'s delay at each GuardInterval, measured against
 the Z80 clock in the records). There are no T-states in the logic.
 
-## Golden runs
+## The oracle and golden runs
 
-The tests compare stage 4 with the Z80, through files that know nothing of
-the Spectrum:
+The checks compare stage 4 with stage 3, which `make port-test` keeps
+identical to the Z80 (and which the oracle checks against the Z80 again as
+it runs):
 
-- **State.** A decoder, written once per game, reads stage 3 memory (`v`,
-  `mem`) into a normalised `GameState`. The Z80 records of stage 3 already
-  hold the whole memory at every pass, so the golden state comes from the
-  Z80 itself, not from stage 3.
-- **Input.** The reads recorded between two checkpoints become the keys
-  known held or not during that pass (each read names its half-row), so
-  input is matched per pass, never per frame or per `IN`.
-- **Screen.** The display file and attributes at the pass, from the record.
-- **Sound.** The effects started in each pass, from stage 3 instrumented to
-  name its sound routines (stage 3 is identical to the Z80, so it is a valid
-  oracle here).
+- **State.** A decoder, written once per game (`bridge/decode.py`), reads
+  stage 3 memory into the stage 4 state; scratch memory is left out.
+- **Input.** The reads stage 3 makes in a step become its Actions, decoded
+  the way the stage 3 routine that made them reads them; input is matched
+  per step, never per frame or per `IN`.
+- **Sound.** The speaker edges in a step, named by the stage 3 routine that
+  made them (repeats collapsed when compared).
+- **Interrupts.** The interrupts the Z80 took in a step (in the record) are
+  an action: a timing effect the logic cannot know.
 
-Format: one JSON object per pass (`keys`, `state`, `sounds`, a hash and the
-cells of the screen), so stage 5 in C or JS reads the same files. The golden
-runs are build files (`build/golden/`): they are made from game data.
+Step boundaries are the stage 3 checkpoints of the main loop and of the
+title loop. The decoder and the oracle are the stage's only
+Spectrum-specific test code (`bridge/`); they go when stage 4 records its
+own golden runs.
 
-The decoder, the input decoding and the screen comparison are the stage's
-only Spectrum-specific test code, in one adapter module; it is deleted when
-stage 4 records its own golden runs.
+Golden files, for stage 5: one JSON object per step (`actions`, `state`,
+`sounds`, the screen's hash and changed cells), written from the same
+oracle; build files (`build/golden/`), since they are made from game data.
 
 ## Tests
 
-| # | Test | Catches |
-| --- | --- | --- |
-| 1 | state per pass against the golden runs | any difference in the rules |
-| 2 | screen per pass: `render(state)` against the recorded screen, with a side-by-side PNG and the differing cells on failure | drawing errors, lost traces of the original's incremental drawing |
-| 3 | sound effects per pass against stage 3's | missing or misplaced effects; optionally each effect's waveform against stage 3's speaker edges |
-| 4 | scenarios: the state of pass N of a golden run loaded, K passes stepped, compared | rare events (the bell, a death, the exit) in seconds, without replaying the run |
-| 5 | invariants under random actions: Horace never inside a wall, at most four guards, the score never falls within a game, a pass for every 10,000 points | errors outside the recorded runs |
-| 6 | coverage: every logic function runs in some golden run | a slice that passes only because nothing reached it |
-| 7 | speed: passes per second at each pace against the record's clock, within a tolerance | a wrong pacer (soft check, judged by eye too) |
+| # | Test | Catches | Built |
+| --- | --- | --- | --- |
+| 1 | every call of a stage 3 routine: the stage 4 routine on the decoded state before must give the state after, the same Goto, the same sounds (`bridge/oracle.py routine`) | a slice's errors, before the slices are put together | yes |
+| 2 | the game step by step: state and sounds (`make stage4-test`) | any difference in the rules or the flow | yes |
+| 3 | the screen: `render(state)` through `zxpyxel.display` against stage 3's screen, byte for byte | drawing errors, lost traces of the original's incremental drawing | yes, every 50th step |
+| 4 | coverage: every stage 4 routine runs in some record | a slice that passes only because nothing reached it | yes |
+| 5 | scenarios: the state of step N loaded, K steps run | rare events in seconds | no: test 1 covers them on every recorded call |
+| 6 | invariants under random actions: Horace never inside a wall, at most four guards, the score never falls within a game | errors outside the recorded runs | no |
+| 7 | speed: passes per second at each pace against the record's clock | a wrong pacer | no (by eye) |
 
 Deviation register (`re/deviations.md`): each quirk the faithful mode keeps
 and a fixed mode may drop (`OR C` for `OR E` in TickGuardTimers, the delay
 underflow at paces 1-3, the guard that picks up another guard's items, the
 bell scored at a distance), with the finding it comes from. Faithful mode
-must pass the golden runs; a fixed mode records its own golden runs, which
+must pass the oracle; a fixed mode records its own golden runs, which
 become the reference for stage 5. The stack leak of the demo abort has no
 equivalent and is not a deviation.
 
 ## Order of work
 
-1. **Harness.** The `GameState` dataclasses (from `docs/02-data.md` and
-   `variables.asm`), the decoder, golden runs from the records, the stage 4
-   check with teacher forcing, the scenario loader. Proof: stage 3, decoded,
-   passes its own golden runs.
-2. **Slices**, one subagent each, in parallel where they do not share state:
-   maze and Horace's movement; the guards' AI; eating and score; bell and
-   fruit; death, game over and the demo; rendering; sound. Before each pass
-   of a slice's test, the fields of the slices not yet written are copied
-   from the golden run; after it, only the slice's fields are compared.
-3. **Integration.** Forcing off, everything compared on every run: the
-   stage's gate. Then the deviations, each behind its flag with its own
-   golden runs.
-4. **Hosts.** Pyxel as in stage 3 (desktop, `make port-html`); another
-   framework is another host module over the same display, sound and
-   controls.
+1. **Harness** (lead): the state (from `docs/02-data.md` and
+   `variables.asm`), `bridge/decode.py`, `bridge/assets.py`,
+   `bridge/oracle.py`, the leaf helpers (`world.py`, checked against the
+   stage 3 library routines with test 1).
+2. **Slices**, one subagent per stage 3 module, in parallel, against a
+   contract: which stage 4 routine stands for which stage 3 routine, the
+   signatures, which are generators, which return a flow target. Each
+   passes test 1 on every record.
+3. **Integration** (lead): the flow (`Game.step`), test 2 on every record:
+   the stage's gate. Then the deviations, each behind its flag.
+4. **Hosts**: Pyxel (`game/play.py`, `make game-html`); another framework is
+   another host over the same display, sounds and controls.
 
-As in stage 3, the lead writes the contract first: `GameState`, the
-signatures of `step` and `render`, the events, which fields belong to which
-slice.
+## Hungry Horace
 
-## Hungry Horace: where the effort will go
-
-Not into the API but into the model. The game's logic reads the screen:
+Where the effort went: not into the API but into the model. The game's logic reads the screen:
 collisions are attribute colours (walls, flowers, the bell, guards), and each
 guard carries the four cells under it, which is how fruit appears and how a
 guard can pick up another guard's items. The clean model is a 32×24 grid of
@@ -181,6 +181,30 @@ what they cover; several quirks come from drawing order (who is drawn last
 owns the cell's colour) and are modelled on purpose or registered as
 deviations. The rest (score, timers, pace, the demo's autopilot) maps
 directly from stage 3.
+
+Built (`examples/hungry-horace/`): `game/horace/` (state, world, movement,
+sprites, events, flow, render, sounds, controls; about 900 lines), `game/play.py`
+(a pacer over `zxpyxel.pyxel_host.run_display`), `bridge/` (decoder, assets,
+oracle). The lead wrote the state, the world helpers, the flow and the
+bridge; three subagents (Sonnet) ported movement, sprites and events in
+parallel from the `zx-clean` skill and a contract.
+
+| Check | Result |
+| --- | --- |
+| routines: every call of 17 stage 3 routines on the three records | all match (demo 2,384 passes, play 5,536, bell 15,567) |
+| the game, step by step: state and sounds | demo 2,664 steps, play 5,544, bell 15,576: all match |
+| the screen, rendered through `zxpyxel.display` | byte for byte equal to stage 3's (every 50th step) |
+| coverage | every stage 4 routine runs in some record |
+| free play, headless | 300 s of play in 19 s |
+
+Found on the way: the oracle first collapsed repeated sounds across a whole
+step, which hid a second chirp in the same step from the routine check (two
+subagents diagnosed it independently); it now records every speaker edge and
+collapses repeats only when it compares. The contract had left the data of
+the sound effects open, so the noise and the chime came out in a shape the
+synthesiser did not expect; the free-play run caught it. Not done yet:
+deviations (a fixed mode), timing checked against the records' clock, the
+golden files for stage 5.
 
 ## Stage 5
 

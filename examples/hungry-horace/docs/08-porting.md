@@ -159,3 +159,12 @@ original. `python port/play.py` plays it; `make port-test` replays the three
 runs of `tests/inputs/` recorded on the Z80 and checks every pass of the
 main loop against them, byte for byte. The non-local exits are `Goto`
 exceptions that `Start` dispatches, and the quirks above are kept.
+
+## The clean version
+
+[`game/`](../game) is the same game as plain Python (stage 4): the state as
+plain values with (col, row) positions and the 32x24 grid of cells the rules
+read colours from, routines that read as the rules, sound and time as events,
+the Spectrum look through `zxpyxel.display`. `python game/play.py` plays it;
+`make stage4-test` checks it against the stage 3 port step by step, and
+`python bridge/oracle.py routine NAME build/record/*.rec` routine by routine.

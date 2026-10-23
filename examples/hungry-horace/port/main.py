@@ -43,6 +43,7 @@ async def ShowTitle():
     print_text(TitleText, SCREEN + 2 * THIRD_SIZE + 6 * SCREEN_COLS)
     v.GameActive = saved
     while True:                 # TitleLoop
+        zx.checkpoint('TitleLoop')      # a step of stage 4 (bridge/oracle.py)
         for row in (5, 12):
             a = ATTRS + row * SCREEN_COLS
             ink = (mem[a] + 1) & WHITE * PAPER + WHITE | WHITE * PAPER
