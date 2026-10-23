@@ -28,6 +28,7 @@ at the same time, so never edit `head.skool`, never run `make` (it shares
 ; Draw a sprite
 ;
 ; Copies a 16x16 sprite (32 bytes, cells TL TR BL BR) to the screen.
+; .
 ; Hardware: writes the screen bitmap.
 ;
 ; HL Sprite graphic address
@@ -39,6 +40,11 @@ c$9100 LD B,$10        ; 16 pixel rows
  $9102 LD A,$FB        ; read Q-T
 ```
 
+- Entry header layout is fixed: title, `;`, description, `;`, register lines.
+  A bare `;` line ends the description, so separate description paragraphs
+  with `; .` (otherwise skool2asm reads the next paragraph as registers and
+  fails). An `@isub` applies to the instruction on the next line only; put it
+  directly above that instruction.
 - Title: one line, what it is. Description: what it does in game terms, then
   a `Hardware:` sentence when it touches the screen, attributes, ports, ROM,
   interrupts or timing loops (this is what a port to C/Python must replace).
