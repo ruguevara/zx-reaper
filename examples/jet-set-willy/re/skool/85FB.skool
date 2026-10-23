@@ -1,4 +1,22 @@
-; Data block at 85FB
+; Title tune: 99 notes and an end marker
+;
+; Played once by #R$87CA (#R$88AB) with #R$96A2 each time the title screen is
+; drawn; it ends with $FF. One byte per note: the half-period count E of the
+; square wave (larger = lower). Every note has the same length, about 0.29 s
+; (100 x 256 inner loops), so the 99 notes take about 29 s (observed: the tune
+; started at frame 137 and #R$96A2 returned at frame 1583 without a key). The
+; first half of each note sounds at about 3.5 MHz / (2 * (40 * E + 6)) Hz, the
+; second half an octave lower (E doubled); e.g. $51 = 539 Hz, $3C = 727 Hz, $33
+; = 855 Hz (computed, not heard; the pitches are within a quarter tone of equal-
+; tempered notes).
+; .
+; The notes come in 33 groups of three (the lines of the listing: a bar of three
+; equal notes, 3/4 time). Most groups are a low note followed by two higher
+; ones: the first group $51,$3C,$33 is C#5 F#5 A5 by the computed pitches,
+; repeated for eight bars, then the chords move (D5 F#5 A5, D5 G5 B5, C#5 F5 B5,
+; ...) and the tune ends on F5 F#4 F5. The tune cannot be named from these notes
+; alone: Unknown.
+@label=TitleTune
 b$85FB DEFB $51,$3C,$33
  $85FE DEFB $51,$3C,$33
  $8601 DEFB $51,$3C,$33

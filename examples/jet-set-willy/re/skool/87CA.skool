@@ -74,7 +74,7 @@ c$87CA XOR A               ; clear the variables:
 *$8809 SET 6,(HL)          ; mark the item present, for items from the first index up to $FF
  $880B INC L               ;
  $880C JR NZ,$8809         ; until L wraps to 0
- $880E LD HL,$85E2         ; tune flag byte: set bit 0 (a key is considered held), keep bit 1 (tune off)
+ $880E LD HL,$85E2         ; tune flag byte #R$85E2: set bit 0 (a key is held: ENTER, which started the game, is on the half row that toggles the tune, so this keeps it from toggling); bit 1 (tune off) is kept
  $8811 SET 0,(HL)          ;
 ; This entry point is used by the routine at #R$88AE.
 ; Redraw the title screen: clear the bitmap, copy the attributes, draw the title graphic (alternative entry, from #R$88AE after a scroll of the message).

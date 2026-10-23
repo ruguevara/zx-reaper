@@ -75,3 +75,25 @@ CYAN                     EQU 5 ; Spectrum colour 5
 BEDROOM_FLOOR_Y          EQU 0xD0 ; Willy Y index on the lowest floor (pixel row 104); selects the guard figure's walking frames
 BEDROOM_MID_Y            EQU 0xC0 ; Willy Y index below which the guard figure uses its last frame
 Y_CELL_MASK              EQU 0x0F ; Y index bits within a character row (16 units per row): non-zero when Willy is between rows
+ENTITY_TYPE_MASK         EQU 0x07 ; entity byte 0 bits 0-2: entity type, which selects the drawing code
+ENTITY_MOVE_MASK         EQU 0x03 ; bits of the entity type the movement routine tells apart (type 4 reads as 0 there and is not moved)
+ENTITY_HORIZONTAL        EQU 1 ; entity type 1: guardian that walks left and right along a row
+ENTITY_VERTICAL          EQU 2 ; entity type 2: guardian that moves up and down a column
+ENTITY_ROPE              EQU 3 ; entity type 3: swinging rope
+ENTITY_ARROW             EQU 4 ; entity type 4: arrow that flies across the room
+ENTITY_DIR_BIT           EQU 7 ; entity byte 0 bit 7: direction (arrow, horizontal guardian: 1 = right; rope: swing direction)
+ENTITY_PHASE_STEP        EQU 0x20 ; one animation phase in entity byte 0 (the phase is in bits 5-6 or 5-7)
+ENTITY_FRAME_MASK        EQU 0xE0 ; entity bytes 0-2: bits 5-7 pick the sprite frame (frame number times 32 is the sprite offset)
+ENTITY_GO_RIGHT          EQU 0x81 ; entity byte 0 of a horizontal guardian that has just turned right: type 1, direction right, phase 0
+ENTITY_GO_LEFT           EQU 0x61 ; entity byte 0 of a horizontal guardian that has just turned left: type 1, direction left, phase 3
+COLUMN_MASK              EQU 0x1F ; bits 0-4: screen column 0-31
+ROPE_FREE                EQU 0 ; state of the rope variable at #R$85D6: Willy holds no rope
+ROPE_LET_GO              EQU 0xF0 ; rope variable value after Willy leaves a rope: counts up by 1 per rope pass until it wraps to 0, so he cannot grab a rope for 16 passes
+ROPE_MIN_SEGMENT         EQU 0x0C ; lowest segment Willy can climb to when the up exit of the room is the room itself
+ARROW_BEEP_LEFT          EQU 0x2C ; arrow X at which a left-moving arrow sounds its beep (13 passes before it reaches column 31)
+ARROW_BEEP_RIGHT         EQU 0xF4 ; arrow X at which a right-moving arrow sounds its beep (12 passes before it reaches column 0)
+ARROW_BEEP_COUNT         EQU 0x80 ; number of speaker toggles in the arrow beep (delays 2, then 128 down to 2)
+PIXEL_LEFT               EQU 0x80 ; bit mask of the leftmost pixel of a byte
+PAPER_MASK               EQU 0x38 ; attribute bits 3-5: paper colour
+DRAW_COLLIDE             EQU 1 ; DrawSprite mode (value of C): draw with collision test, stop at the first overlapping pixel
+ENTITY_ATTR_MASK         EQU 0x0F ; entity byte +1 bits 0-3: ink (bits 0-2) and bright (bit 3) of the sprite

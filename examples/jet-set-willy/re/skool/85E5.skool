@@ -1,12 +1,32 @@
-; Data block at 85E5
-b$85E5 DEFB $1F,$1F
- $85E7 DEFB $1D,$1F
- $85E9 DEFB $17,$1F
- $85EB DEFB $1F,$1B
- $85ED DEFB $0F,$1F
- $85EF DEFB $1B,$1F
- $85F1 DEFB $0F,$1F
- $85F3 DEFB $1F,$0F
- $85F5 DEFB $1F,$1E
- $85F7 DEFB $1B,$1F
- $85F9 DEFB $17,$1F
+; Cheat key sequence: 11 pairs of half-row key masks
+;
+; The keys that must be pressed one after the other (one key at a time) in the
+; game to switch on the cheat: W R I T E T Y P E R. Each pair is (byte 0 = half
+; row Q-T read from port $FBFE, byte 1 = half row P-Y read from port $DFFE),
+; bits 0-4 as read from the port with 0 meaning pressed, so $1F means no key in
+; that half row. In byte 0 bit 1 is W, bit 3 R, bit 2 E, bit 4 T; in byte 1 bit
+; 2 is I, bit 4 Y, bit 0 P.
+; .
+; The progress (step number 0-10) is the byte #R$85E3; #R$8B07 reads the pair
+; for the current step at #R$85E5 + 2 + 2 * step ($8BB6 loads $85E7 and adds 2 *
+; step). A matching pair advances the step; no key or the previous step's pair
+; (key still held) keeps it; any other reading sets the step back to 0. The
+; first pair ($1F,$1F) at $85E5 is the "previous pair" of step 0. Step 10 is the
+; completed sequence (no pair beyond the table is read). Observed: pressing W,
+; R, I, T, E, T, Y, P, E, R one at a time in the Bathroom snapshot with the room
+; poked to $1C (First Landing; the code also requires room $1C and Y = $D0, #R$85CF) makes
+; #R$85E3 count 1 to 10; W and R together, or a key out of order, set it back to
+; 0. With step 10 reached, key 9 together with keys 1-6 teleports to the room
+; whose number is the keys as bits (observed: 9+2+3 gave room 6).
+@label=CheatKeyTable
+b$85E5 DEFB $1F,$1F ; before step 0: no key in either half row (also the "previous step" pair of step 0)
+ $85E7 DEFB $1D,$1F ; step 0: key W
+ $85E9 DEFB $17,$1F ; step 1: key R
+ $85EB DEFB $1F,$1B ; step 2: key I
+ $85ED DEFB $0F,$1F ; step 3: key T
+ $85EF DEFB $1B,$1F ; step 4: key E
+ $85F1 DEFB $0F,$1F ; step 5: key T
+ $85F3 DEFB $1F,$0F ; step 6: key Y
+ $85F5 DEFB $1F,$1E ; step 7: key P
+ $85F7 DEFB $1B,$1F ; step 8: key E
+ $85F9 DEFB $17,$1F ; step 9: key R

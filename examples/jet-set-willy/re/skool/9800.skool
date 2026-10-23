@@ -1,4 +1,20 @@
-; Data block at 9800
+; Title screen attributes: rows 0-15, 32 bytes per row
+;
+; Attributes of the upper two thirds of the title screen (16 rows of 32 bytes,
+; row 0 first). #R$87CA copies $300 bytes from here to $5800, so the attributes
+; of the third part of the title screen come from #R$9A00 (the status bar
+; colours). It then reads the copy on the screen to decide what to draw in each
+; cell:
+; .
+; $00 black, nothing drawn. $D3 (flash, bright red paper, magenta ink): the big
+; letters "JET SET WILLY", cells without pixels, the red paper is the letter.
+; $09, $24, $2D: solid blue, green and cyan blocks of the picture, also without
+; pixels. The drawing loop skips exactly these five values.
+; $08, $29, $05 and $2C (the last stored back as $25) are drawn with the edge
+; pieces +0/+8 of #R$8431; any other attribute ($28, $25, $04 occur in this
+; data) with the pieces +$10/+$18. Taken from the code of #R$87CA; the result is
+; the triangle of the title screenshot (blue, green and cyan faces).
+@label=TitleAttributes
 b$9800 DEFS $52
  $9852 DEFB $28,$28,$05,$05,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
  $9862 DEFB $00,$00,$D3,$D3,$D3,$00,$D3,$D3,$D3,$00,$D3,$D3,$D3,$00,$28,$D3

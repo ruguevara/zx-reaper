@@ -1,13 +1,29 @@
-; Data block at 9A00
-b$9A00 DEFS $20,$46
- $9A20 DEFS $40
- $9A60 DEFB $01,$02,$03,$04,$05,$06
- $9A66 DEFS $14,$07
- $9A7A DEFB $06,$05,$04,$03,$02,$01
- $9A80 DEFS $20
- $9AA0 DEFB $45,$45,$06,$06,$04,$04,$41,$41
+; Status bar attributes: rows 16-23, 32 bytes per row
+;
+; Attributes of the bottom third of the screen (rows 16-23), copied to $5A00 by
+; #R$88AE when a game starts and by #R$8B07. As part of the $300-byte copy of
+; #R$9800 they are also the bottom third of the title screen, before #R$87CA
+; sets row 19. The game loop copies only the top two thirds from the attribute
+; buffer to the screen, so these stay as they are.
+; .
+; Row 16 ($9A00): bright yellow ink on black, the room name. Rows 17-18: black.
+; Row 19 ($9A60): the status line, black paper, ink 1 to 6 on the first six
+; cells, white (7) on 20 cells and ink 6 to 1 on the last six (the screenshot
+; shows the letters of "Items" in different colours). Row 20: black. Rows 21-22
+; ($9AA0, $9AC0): the lives, seven pairs of cells, one pair per Willy figure
+; drawn by #R$898B, with the attributes $45 (bright cyan ink), $06 (yellow), $04
+; (green), $41 (bright blue), $05 (cyan), $43 (bright magenta), $44 (bright
+; green), all on black. Row 23: black.
+@label=StatusBarAttributes
+b$9A00 DEFS $20,$46 ; row 16: room name, bright yellow ink
+ $9A20 DEFS $40 ; rows 17-18: black
+ $9A60 DEFB $01,$02,$03,$04,$05,$06 ; row 19: status line, ink 1-6
+ $9A66 DEFS $14,$07 ; 20 cells with white ink
+ $9A7A DEFB $06,$05,$04,$03,$02,$01 ; ink 6-1
+ $9A80 DEFS $20 ; row 20: black
+ $9AA0 DEFB $45,$45,$06,$06,$04,$04,$41,$41 ; row 21: colours of the lives (2 cells per figure), 7 figures
  $9AA8 DEFB $05,$05,$43,$43,$44,$44
  $9AAE DEFS $12
- $9AC0 DEFB $45,$45,$06,$06,$04,$04,$41,$41
+ $9AC0 DEFB $45,$45,$06,$06,$04,$04,$41,$41 ; row 22: the same
  $9AC8 DEFB $05,$05,$43,$43,$44,$44
- $9ACE DEFS $32
+ $9ACE DEFS $32 ; rest of row 22 and row 23: black

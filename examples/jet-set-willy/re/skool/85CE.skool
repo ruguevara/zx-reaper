@@ -4,7 +4,7 @@
 ; Cleared and then set by #R$87CA if port $1F never returned bit 5 in 256 reads.
 ; Read by #R$96C9 (fire starts the game while the title tune plays) and by the
 ; movement code #R$8DD3, which then adds port $1F (right = bit 0, left = bit 1,
-; fire = bit 4) to the key input. Observed: in the simulator, which returns 0
+; fire = bit 4, used for the jump: inferred from the code) to the key input. Observed: in the simulator, which returns 0
 ; for port $1F, the flag is 1 after the title screen; in the Bathroom snapshot
 ; with the flag poked to 1 the Kempston right input moves Willy right, with 0 it
 ; does not; fire at the tune starts the game.

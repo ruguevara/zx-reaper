@@ -1,4 +1,20 @@
-; Data block at 865F
+; In-game tune: 64 notes, one per two game-loop passes
+;
+; Played by #R$8B07 (from $8B4D) while the tune is on (bit 1 of #R$85E2 clear;
+; the H to ENTER half row toggles it). No end marker: the table is used as a
+; loop. On every pass of the game loop the counter #R$85E1 is incremented and
+; the note is byte (#R$85E1 AND $7E) / 2, so each note lasts two passes and the
+; whole tune 128 passes. Only the passes with the tune on increment the counter;
+; the same counter also selects Willy's frame in the lives display (#R$898B).
+; .
+; Each byte is a half-period count E as in #R$85FB (larger = lower), here played
+; for 3 x 256 inner loops (about 9 ms, a short blip every pass; the pitch is the
+; half-period before doubling, no octave drop). The count actually used is E +
+; 28 - 4 * lives (#R$85CC), so the tune sounds lower as lives are lost: observed
+; E = $48 with 7 lives, $50 with 5 and $60 with 1 for the note at index $16. The
+; melody (by computed pitch, as for the title tune) starts B4 A#4 B4 A#4 A4 A4
+; F4 F4 F4 F4 A4 A#4 B4 ...; it is not named: Unknown.
+@label=GameTune
 b$865F DEFB $56,$60,$56,$60,$66,$66,$80,$80,$80,$80,$66,$60,$56,$60,$56,$60
  $866F DEFB $66,$60,$56,$4C,$48,$4C,$48,$4C,$56,$56,$56,$56,$56,$56,$56,$56
  $867F DEFB $40,$40,$40,$40,$44,$44,$4C,$4C,$56,$60,$66,$60,$56,$56,$66,$66
