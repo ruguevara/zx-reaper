@@ -1,2 +1,10 @@
-; Game status buffer entry at 8420
+; Current room number
+;
+; Number of the room Willy is in. The room data is at $C000 + 256 * number
+; (#R$8912 uses the low 6 bits). Set to $21, the Bathroom, by #R$87CA; changed
+; by the room exit routines (#R$948A, #R$949E, #R$94B0, #R$94D2) from the exit
+; bytes of the room, and by the cheat teleport of #R$8B07 (with key 9 held, keys
+; 1-5 and 6 give the number in binary: observed, 2+3 gave room 6). Also read by
+; the code that depends on the room (#R$93D1, #R$9637 and others).
+@label=CurrentRoom
 g$8420 DEFB $00

@@ -1,47 +1,77 @@
-; Routine at 95C8
+; Mark Willy's attribute cells, check for nasties and draw him
 ;
-; Used by the routine at #R$89AD.
-c$95C8 LD HL,($85D3) ;
- $95CB LD B,$00      ;
- $95CD LD A,($80DA)  ;
+; Called by #R$89AD once per frame after #R$8DD3 has moved Willy (skipped in
+; ending stage 3, #R$85DF, so Willy is then not drawn at all). Works in the
+; attribute buffer $5C00 on Willy's cells, starting from the address in
+; #R$85D3 (top-left cell; Willy is 2 cells wide and 2 or 3 cells high).
+; .
+; 1. Ramp offset (B). If the cell under Willy's feet is a ramp cell (its
+; attribute equals the ramp tile attribute $80C4: the cell two rows down, in
+; the left column when the ramp direction #R$80DA is 0, in the right column
+; when it is 1) and Willy is not jumping or falling (#R$85D1 = 0), the sprite
+; is drawn lower by 0 to 6 pixel rows (B = 0, 4, 8, 12 in row table units,
+; two per pixel row) following his walking frame (#R$85D2 bits 0-1): B =
+; 4*frame for a ramp that rises to the left, 12-4*frame for one that rises
+; to the right, so he stays on the slope between cell steps. Otherwise B = 0.
+; .
+; 2. #R$961E is called for the six cells (the third row only counts as
+; Willy's when his Y plus B (#R$85CF) is not on a character row boundary,
+; C & $0F); each cell that holds the background attribute gets ink 7, which
+; is how #R$93D1 sees him touch an item, and any cell that holds the nasty
+; tile attribute kills him.
+; .
+; 3. Jumps to #R$9637 to draw the sprite, with the offset B.
+; .
+; Observed with test calls: Willy at $5D48 on the Bathroom ramp (direction 1,
+; Y $A0) is drawn from pixel row 86, 84, 82, 80 for frames 0-3, on the Master
+; Bedroom ramp (direction 0, Y $C0) from row 96, 98, 100, 102.
+; .
+; Hardware: none (writes the attribute and bitmap buffers).
+@label=PlaceWilly
+c$95C8 LD HL,($85D3) ; Willy's top-left attribute cell
+ $95CB LD B,$00      ; no ramp offset
+ $95CD LD A,($80DA)  ; ramp direction
  $95D0 AND $01       ;
- $95D2 ADD A,$40     ;
+@isub=ADD A,2*SCREEN_COLS
+ $95D2 ADD A,$40     ; 2 rows down, column 0 or 1
  $95D4 LD E,A        ;
  $95D5 LD D,$00      ;
- $95D7 ADD HL,DE     ;
- $95D8 LD A,($80C4)  ;
+ $95D7 ADD HL,DE     ; the cell under Willy's feet
+ $95D8 LD A,($80C4)  ; ramp tile attribute
  $95DB CP (HL)       ;
- $95DC JR NZ,$95F8   ;
+ $95DC JR NZ,$95F8   ; not on a ramp
  $95DE LD A,($85D1)  ;
  $95E1 OR A          ;
- $95E2 JR NZ,$95F8   ;
- $95E4 LD A,($85D2)  ;
+ $95E2 JR NZ,$95F8   ; jumping or falling: no offset
+ $95E4 LD A,($85D2)  ; animation frame
  $95E7 AND $03       ;
  $95E9 RLCA          ;
- $95EA RLCA          ;
+ $95EA RLCA          ; frame * 4
  $95EB LD B,A        ;
  $95EC LD A,($80DA)  ;
  $95EF AND $01       ;
- $95F1 DEC A         ;
+ $95F1 DEC A         ; direction 0: $FF, 1: 0
  $95F2 XOR $0C       ;
  $95F4 XOR B         ;
- $95F5 AND $0C       ;
+ $95F5 AND $0C       ; direction 0: frame*4, direction 1: 12-frame*4
  $95F7 LD B,A        ;
 *$95F8 LD HL,($85D3) ;
- $95FB LD DE,$001F   ;
- $95FE LD C,$0F      ;
- $9600 CALL $961E    ;
+@isub=LD DE,SCREEN_COLS-1
+ $95FB LD DE,$001F   ; from the right cell to the left cell of the next row
+@isub=LD C,Y_CELL_MASK
+ $95FE LD C,$0F      ; the first two rows always count
+ $9600 CALL $961E    ; row 0, left
  $9603 INC HL        ;
- $9604 CALL $961E    ;
+ $9604 CALL $961E    ; row 0, right
  $9607 ADD HL,DE     ;
- $9608 CALL $961E    ;
+ $9608 CALL $961E    ; row 1, left
  $960B INC HL        ;
- $960C CALL $961E    ;
- $960F LD A,($85CF)  ;
+ $960C CALL $961E    ; row 1, right
+ $960F LD A,($85CF)  ; Y index
  $9612 ADD A,B       ;
- $9613 LD C,A        ;
+ $9613 LD C,A        ; low nibble: 0 on a character row boundary
  $9614 ADD HL,DE     ;
- $9615 CALL $961E    ;
+ $9615 CALL $961E    ; row 2, left
  $9618 INC HL        ;
- $9619 CALL $961E    ;
- $961C JR $9637      ;
+ $9619 CALL $961E    ; row 2, right
+ $961C JR $9637      ; draw Willy

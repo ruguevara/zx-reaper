@@ -1,14 +1,27 @@
-; Routine at 9584
+; Check whether Willy has reached the toilet
 ;
-; Used by the routine at #R$89AD.
-c$9584 LD A,($8420)  ;
+; Called by #R$89AD every frame while the ending stage #R$85DF is 2 (Willy is
+; running to the toilet). In the Bathroom (room $21) with Willy's attribute
+; address at $5DBC (low byte $BC: row 13, column 28, where the toilet is
+; drawn by #R$959A) it zeroes the frame counter #R$85CB (so the toilet
+; animation starts from frame 0) and sets the stage to 3, which freezes
+; Willy there.
+; .
+; Observed: Willy runs right from the Master Bedroom through the Top Landing
+; to the Bathroom and the stage changes from 2 to 3 at $9596 (frame 1063 of
+; the run in finding F65).
+@label=CheckToiletReached
+c$9584 LD A,($8420)  ; current room
+@isub=CP ROOM_BATHROOM
  $9587 CP $21        ;
  $9589 RET NZ        ;
- $958A LD A,($85D3)  ;
- $958D CP $BC        ;
+ $958A LD A,($85D3)  ; low byte of Willy's attribute address
+@isub=CP TOILET_ATTR_LOW
+ $958D CP $BC        ; only the low byte is compared
  $958F RET NZ        ;
  $9590 XOR A         ;
  $9591 LD ($85CB),A  ;
+@isub=LD A,STAGE_AT_TOILET
  $9594 LD A,$03      ;
- $9596 LD ($85DF),A  ;
+ $9596 LD ($85DF),A  ; Willy stops
  $9599 RET           ;

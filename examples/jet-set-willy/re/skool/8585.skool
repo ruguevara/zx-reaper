@@ -1,2 +1,6 @@
-; Message at 8585
+; Initial game clock text
+;
+; The 6 characters " 7:00a" that #R$88AE copies to #R$857F when the game starts
+; (and not when a new life starts: the clock keeps running through deaths).
+@label=ClockStartText
 t$8585 DEFM " 7:00a"

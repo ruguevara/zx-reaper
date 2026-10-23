@@ -1,111 +1,176 @@
-; Routine at 87CA
-;
-; Used by the routines at #R$869F, #R$89AD and #R$8B07.
-c$87CA XOR A         ;
- $87CB LD ($85CE),A  ;
- $87CE LD ($85E1),A  ;
- $87D1 LD ($85CD),A  ;
- $87D4 LD ($85D1),A  ;
- $87D7 LD ($85CB),A  ;
- $87DA LD ($85E0),A  ;
- $87DD LD ($85DF),A  ;
- $87E0 LD A,$07      ;
- $87E2 LD ($85CC),A  ;
- $87E5 LD A,$D0      ;
- $87E7 LD ($85CF),A  ;
- $87EA LD A,$21      ;
- $87EC LD ($8420),A  ;
- $87EF LD HL,$5DB4   ;
- $87F2 LD ($85D3),HL ;
- $87F5 LD HL,$857C   ;
- $87F8 LD (HL),$30   ;
- $87FA INC HL        ;
- $87FB LD (HL),$30   ;
- $87FD INC HL        ;
- $87FE LD (HL),$30   ;
- $8800 LD H,$A4      ;
- $8802 LD A,($A3FF)  ;
- $8805 LD L,A        ;
- $8806 LD ($85DE),A  ;
-*$8809 SET 6,(HL)    ;
- $880B INC L         ;
- $880C JR NZ,$8809   ;
- $880E LD HL,$85E2   ;
- $8811 SET 0,(HL)    ;
+; Start a new game: reset the state, show the title screen, play its tune
+; Entered when the colour code is accepted (#R$869F), when the game ends because
+; the clock reaches the end (#R$89AD, $8A88), when CAPS SHIFT and SPACE are held
+; together in the game loop (#R$89AD, $8AB8; observed) and when the game-over
+; scene ends (#R$8B07, $8D30). Not a subroutine: it never returns and ends by
+; falling through into #R$88AE.
+; .
+; Part 1 ($87CA-$8812) resets the game variables: no joystick, Willy alive,
+; standing at the start position in room $21 (the Bathroom) with 7 lives, the
+; item counter at the first item index, "000" items collected, and every item in
+; the item table (from #R$A3FF to $A4FF) marked present. The tune on/off flag
+; keeps its value (only its bit 0, the "key held" flag, is set); the cheat key
+; progress at #R$85E3 is not reset either.
+; .
+; Part 2 ($8813, entered again by #R$88AE after each scroll of the message)
+; draws the title screen: clears the bitmap, copies the $300 attribute bytes
+; from #R$9800 (the title attributes, with the status bar attributes of #R$9A00
+; as the bottom third) to the screen, sets the text line (row 19) to bright
+; yellow ink and prints the first 32 characters of the message at #R$8454 there.
+; It then walks the attribute cells of the upper two thirds and draws the
+; diagonal edge pieces of the title graphic (#R$8431) into cells whose attribute
+; is not one of the solid-colour codes; the big letters and the solid parts of
+; the picture are attribute cells with an empty bitmap.
+; .
+; Part 3 ($8895) detects a Kempston joystick: port $1F is read 256 times and the
+; flag at #R$85CE is set when bit 5 never came up (a real interface returns 0
+; there; a floating bus, as on a bare 48K, usually returns set bits). With
+; interrupts off it then plays the title tune #R$85FB with #R$96A2; #R$88AE gets
+; the Z flag from it: Z when the tune ended, NZ when it was stopped by fire, key
+; 0 or ENTER.
+; .
+; Hardware: writes the screen bitmap and attributes, reads port $1F (Kempston)
+; and, through the tune, writes port $FE (beeper). Interrupts stay disabled.
+@equ=BOTTOM_THIRD_SCREEN=$5000
+@equ=TEXT_LINE_SCREEN=$5060
+@equ=TEXT_LINE_ATTR=$5A60
+@equ=BOTTOM_THIRD_ATTRS=$5A00
+@label=NewGame
+c$87CA XOR A               ; clear the variables:
+ $87CB LD ($85CE),A        ; no Kempston joystick detected (yet)
+ $87CE LD ($85E1),A        ; frame counter used for the tune position and Willy animation in the lives display
+ $87D1 LD ($85CD),A        ; counter read by #R$89AD (screen paper colour effect; nothing else sets it)
+ $87D4 LD ($85D1),A        ; Willy is not killed (#R$85D1 = $FF would kill him)
+ $87D7 LD ($85CB),A        ; frame counter (the game clock advances when it wraps)
+ $87DA LD ($85E0),A        ; counter incremented every frame by #R$89AD
+ $87DD LD ($85DF),A        ; game state (#R$85DF)
+@isub=LD A,START_LIVES
+ $87E0 LD A,$07            ; lives
+ $87E2 LD ($85CC),A        ; lives (#R$85CC)
+@isub=LD A,WILLY_START_Y
+ $87E5 LD A,$D0            ;
+ $87E7 LD ($85CF),A        ; Willy start Y
+@isub=LD A,START_ROOM
+ $87EA LD A,$21            ;
+ $87EC LD ($8420),A        ; start in the Bathroom
+@isub=LD HL,WILLY_START_ATTR
+ $87EF LD HL,$5DB4         ;
+ $87F2 LD ($85D3),HL       ; Willy start position in the attribute buffer (#R$85D3)
+ $87F5 LD HL,$857C         ; items collected: three ASCII digits "000"
+@isub=LD (HL),ASCII_ZERO
+ $87F8 LD (HL),$30         ;
+ $87FA INC HL              ;
+@isub=LD (HL),ASCII_ZERO
+ $87FB LD (HL),$30         ;
+ $87FD INC HL              ;
+@isub=LD (HL),ASCII_ZERO
+ $87FE LD (HL),$30         ;
+ $8800 LD H,$A4            ; HL = item table $A400 + first item index
+ $8802 LD A,($A3FF)        ; first item index ($AD)
+ $8805 LD L,A              ;
+ $8806 LD ($85DE),A        ; item counter starts at the first index; counts up to 0 when all are collected
+@label=NewGame_Item
+@isub=SET ITEM_PRESENT_BIT,(HL)
+*$8809 SET 6,(HL)          ; mark the item present, for items from the first index up to $FF
+ $880B INC L               ;
+ $880C JR NZ,$8809         ; until L wraps to 0
+ $880E LD HL,$85E2         ; tune flag byte: set bit 0 (a key is considered held), keep bit 1 (tune off)
+ $8811 SET 0,(HL)          ;
 ; This entry point is used by the routine at #R$88AE.
-*$8813 LD HL,$4000   ;
- $8816 LD DE,$4001   ;
- $8819 LD BC,$17FF   ;
- $881C LD (HL),$00   ;
- $881E LDIR          ;
- $8820 LD HL,$9800   ;
- $8823 LD BC,$0300   ;
- $8826 LDIR          ;
- $8828 LD HL,$5A60   ;
- $882B LD DE,$5A61   ;
- $882E LD BC,$001F   ;
- $8831 LD (HL),$46   ;
- $8833 LDIR          ;
- $8835 LD IX,$8454   ;
- $8839 LD DE,$5060   ;
- $883C LD C,$20      ;
- $883E CALL $9680    ;
- $8841 LD DE,$5800   ;
-*$8844 LD A,(DE)     ;
- $8845 OR A          ;
- $8846 JR Z,$888E    ;
- $8848 CP $D3        ;
- $884A JR Z,$888E    ;
- $884C CP $09        ;
- $884E JR Z,$888E    ;
- $8850 CP $2D        ;
- $8852 JR Z,$888E    ;
- $8854 CP $24        ;
- $8856 JR Z,$888E    ;
- $8858 LD C,$00      ;
- $885A CP $08        ;
- $885C JR Z,$8871    ;
- $885E CP $29        ;
- $8860 JR Z,$8871    ;
- $8862 CP $2C        ;
- $8864 JR Z,$886E    ;
- $8866 CP $05        ;
- $8868 JR Z,$8871    ;
- $886A LD C,$10      ;
- $886C JR $8871      ;
-*$886E LD A,$25      ;
- $8870 LD (DE),A     ;
-*$8871 LD A,E        ;
- $8872 AND $01       ;
- $8874 RLCA          ;
- $8875 RLCA          ;
- $8876 RLCA          ;
- $8877 OR C          ;
- $8878 LD C,A        ;
- $8879 LD B,$00      ;
- $887B LD HL,$8431   ;
- $887E ADD HL,BC     ;
- $887F PUSH DE       ;
- $8880 BIT 0,D       ;
- $8882 LD D,$40      ;
- $8884 JR Z,$8888    ;
- $8886 LD D,$48      ;
-*$8888 LD B,$08      ;
- $888A CALL $969B    ;
- $888D POP DE        ;
-*$888E INC DE        ;
- $888F LD A,D        ;
- $8890 CP $5A        ;
- $8892 JP NZ,$8844   ;
- $8895 LD BC,$001F   ;
- $8898 DI            ;
- $8899 XOR A         ;
-*$889A IN E,(C)      ;
- $889C OR E          ;
- $889D DJNZ $889A    ;
- $889F AND $20       ;
- $88A1 JR NZ,$88A8   ;
- $88A3 LD A,$01      ;
- $88A5 LD ($85CE),A  ;
-*$88A8 LD HL,$85FB   ;
- $88AB CALL $96A2    ;
+; Redraw the title screen: clear the bitmap, copy the attributes, draw the title graphic (alternative entry, from #R$88AE after a scroll of the message).
+; Redraw the title screen: clear the bitmap, copy the attributes, draw the title
+; graphic (alternative entry, from #R$88AE after a scroll of the message).
+; Redraw the title screen: clear the bitmap, copy the attributes, draw the title
+; graphic (alternative entry, from #R$88AE after a scroll of the message).
+@label=ShowTitleScreen
+*$8813 LD HL,$4000         ; clear the bitmap: first byte, then fill the rest
+@isub=LD DE,SCREEN+1
+ $8816 LD DE,$4001         ;
+@isub=LD BC,BITMAP_SIZE-1
+ $8819 LD BC,$17FF         ;
+ $881C LD (HL),$00         ;
+ $881E LDIR                ;
+ $8820 LD HL,$9800         ; title attributes (#R$9800) to the screen: 3 thirds, the last third is the status bar colours
+@isub=LD BC,ATTRS_SIZE
+ $8823 LD BC,$0300         ;
+ $8826 LDIR                ;
+@isub=LD HL,TEXT_LINE_ATTR
+ $8828 LD HL,$5A60         ; row 19: bright yellow ink on black
+@isub=LD DE,TEXT_LINE_ATTR+1
+ $882B LD DE,$5A61         ;
+@isub=LD BC,SCREEN_COLS-1
+ $882E LD BC,$001F         ;
+@isub=LD (HL),BRIGHT+YELLOW
+ $8831 LD (HL),$46         ;
+ $8833 LDIR                ;
+ $8835 LD IX,$8454         ; first 32 characters of the message "+++++ Press ENTER to Start +++++"
+@isub=LD DE,TEXT_LINE_SCREEN
+ $8839 LD DE,$5060         ; row 19
+@isub=LD C,SCREEN_COLS
+ $883C LD C,$20            ;
+ $883E CALL $9680          ;
+@isub=LD DE,ATTRS
+ $8841 LD DE,$5800         ; walk the attribute cells of the upper two thirds
+@label=ShowTitleScreen_Cell
+*$8844 LD A,(DE)           ; A = attribute of the cell
+ $8845 OR A                ;
+ $8846 JR Z,$888E          ; attributes $00, $D3, $09, $2D, $24: solid colour cells, no pixels to draw
+ $8848 CP $D3              ;
+ $884A JR Z,$888E          ;
+ $884C CP $09              ;
+ $884E JR Z,$888E          ;
+ $8850 CP $2D              ;
+ $8852 JR Z,$888E          ;
+ $8854 CP $24              ;
+ $8856 JR Z,$888E          ;
+ $8858 LD C,$00            ; C selects the piece: 0 or $10 by attribute ...
+ $885A CP $08              ; $08, $29, $05 (and $2C, replaced by $25 below): C = 0
+ $885C JR Z,$8871          ;
+ $885E CP $29              ;
+ $8860 JR Z,$8871          ;
+ $8862 CP $2C              ;
+ $8864 JR Z,$886E          ;
+ $8866 CP $05              ;
+ $8868 JR Z,$8871          ;
+ $886A LD C,$10            ; any other attribute: C = $10
+ $886C JR $8871            ;
+*$886E LD A,$25            ; attribute $2C is stored back as $25 and drawn with C = 0
+ $8870 LD (DE),A           ;
+*$8871 LD A,E              ; piece index = C + 8 for odd columns: pieces at #R$8431 (4 pieces of 8 bytes)
+ $8872 AND $01             ;
+ $8874 RLCA                ;
+ $8875 RLCA                ;
+ $8876 RLCA                ;
+ $8877 OR C                ;
+ $8878 LD C,A              ;
+ $8879 LD B,$00            ;
+ $887B LD HL,$8431         ; HL = piece address
+ $887E ADD HL,BC           ;
+ $887F PUSH DE             ;
+ $8880 BIT 0,D             ; cell in the first third ($58xx) or the second ($59xx) of the screen: bitmap page $40 or $48
+ $8882 LD D,$40            ;
+ $8884 JR Z,$8888          ;
+ $8886 LD D,$48            ;
+*$8888 LD B,$08            ;
+ $888A CALL $969B          ; draw the 8 rows with #R$969B; DE = $40/$48 + attribute address low byte
+ $888D POP DE              ;
+*$888E INC DE              ;
+ $888F LD A,D              ;
+ $8890 CP $5A              ; stop at $5A00: only the upper two thirds hold the picture
+ $8892 JP NZ,$8844         ;
+@label=ShowTitleScreen_Joystick
+@isub=LD BC,KEMPSTON_PORT
+ $8895 LD BC,$001F         ; B = 0: 256 reads of port $1F
+ $8898 DI                  ; interrupts stay off from here to the start of the game
+ $8899 XOR A               ;
+*$889A IN E,(C)            ; OR together 256 readings
+ $889C OR E                ;
+ $889D DJNZ $889A          ;
+@isub=AND KEMPSTON_UNUSED_MASK
+ $889F AND $20             ;
+ $88A1 JR NZ,$88A8         ;
+ $88A3 LD A,$01            ; bit 5 never set: treat as a Kempston interface (fire starts the game)
+ $88A5 LD ($85CE),A        ; joystick flag #R$85CE = 1
+@label=ShowTitleScreen_Tune
+*$88A8 LD HL,$85FB         ; title tune; returns NZ if stopped by fire, 0 or ENTER
+ $88AB CALL $96A2          ; falls into #R$88AE, which tests the flag

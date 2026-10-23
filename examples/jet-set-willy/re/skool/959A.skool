@@ -1,24 +1,41 @@
-; Routine at 959A
+; Draw the toilet in the Bathroom
 ;
-; Used by the routine at #R$9534.
-c$959A LD A,($8420)  ;
+; Reached by the jump at $9539 of #R$9534 for every room except the Master
+; Bedroom; does nothing outside the Bathroom (room $21). Otherwise ORs one of
+; the toilet frames of #R$A600 into the $6000 buffer at column 28 and pixel
+; row 104 (the floor, where Willy stands) with #R$9668, after Willy has been
+; drawn, so he walks through it. The frame is bit 0 of the frame counter
+; #R$85CB times 32, plus 64 when the ending stage #R$85DF is 3. The four
+; attribute cells (rows 13-14, columns 28-29) are set to $07, white ink.
+; .
+; Hardware: none (writes the $6000 and $5C00 buffers).
+@label=DrawToilet
+c$959A LD A,($8420)  ; current room
+@isub=CP ROOM_BATHROOM
  $959D CP $21        ;
  $959F RET NZ        ;
  $95A0 LD A,($85CB)  ;
- $95A3 AND $01       ;
+ $95A3 AND $01       ; bit 0 of the frame counter
  $95A5 RRCA          ;
  $95A6 RRCA          ;
- $95A7 RRCA          ;
- $95A8 LD E,A        ;
+ $95A7 RRCA          ; -> 0 or $20
+ $95A8 LD E,A        ; frame 0 or 1
  $95A9 LD A,($85DF)  ;
+@isub=CP STAGE_AT_TOILET
  $95AC CP $03        ;
  $95AE JR NZ,$95B2   ;
- $95B0 SET 6,E       ;
-*$95B2 LD D,$A6      ;
- $95B4 LD IX,$82D0   ;
- $95B8 LD BC,$101C   ;
+ $95B0 SET 6,E       ; at the toilet: frame 2 or 3
+@isub=LD D,SpritesToilet/256
+*$95B2 LD D,$A6      ; DE = sprite
+@isub=LD IX,RowAddressTable+BEDROOM_FLOOR_Y
+ $95B4 LD IX,$82D0   ; row table entry of pixel row 104
+@isub=LD BC,SPRITE_HEIGHT*256+TOILET_COLUMN
+ $95B8 LD BC,$101C   ; 16 rows, column 28
  $95BB CALL $9668    ;
+@isub=LD HL,WHITE*256+WHITE
  $95BE LD HL,$0707   ;
- $95C1 LD ($5DBC),HL ;
- $95C4 LD ($5DDC),HL ;
+@isub=LD (SCREEN_ATTRS_BUF+13*SCREEN_COLS+TOILET_COLUMN),HL
+ $95C1 LD ($5DBC),HL ; row 13, columns 28-29
+@isub=LD (SCREEN_ATTRS_BUF+14*SCREEN_COLS+TOILET_COLUMN),HL
+ $95C4 LD ($5DDC),HL ; row 14
  $95C7 RET           ;

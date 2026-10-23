@@ -1,2 +1,12 @@
-; Message at 857F
+; Game clock text: 6 characters
+;
+; The time of day as ASCII, printed at column 25 of row 19 each frame (#R$89AD):
+; hours (blank or "1", then a digit), ":", minutes (two digits), and the letter
+; "a" or "p". Starts as " 7:00a" (copied from #R$8585 by #R$88AE). The minutes
+; advance each time the frame counter #R$85CB wraps to 0 (every 256 passes of
+; the game loop; observed). The hour goes 12 to 1 and switches "a" to "p" there;
+; the game ends and restarts (#R$87CA) when the clock reaches 13:00 with the
+; letter "p" (observed with "12:59p"). Poked values: " 9:59a" gives "10:00a",
+; "12:59a" gives " 1:00p".
+@label=ClockText
 t$857F DEFM " 7:00a"

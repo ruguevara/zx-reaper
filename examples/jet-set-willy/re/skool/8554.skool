@@ -1,2 +1,10 @@
-; Message at 8554
+; Status line text: 32 characters
+;
+; Printed on row 19 of the screen by #R$88AE when a room is entered. Columns
+; 0-15 "Items collected ", 16-18 the item count digits (printed over each frame
+; from #R$857C by #R$89AD at $5070), column 19 a blank, 20-23 "Time", 24 a
+; blank, 25-30 the clock (printed over each frame from #R$857F at $5079) and
+; column 31 "m", which completes "am" or "pm" after the clock letter. The
+; "00:00" and the three zeros here are placeholders that are never seen.
+@label=StatusLineText
 t$8554 DEFM "Items collected 000 Time 00:00 m"

@@ -1,16 +1,33 @@
-; Routine at 961E
+; Mark one attribute cell as Willy's and kill him on a nasty
 ;
-; Used by the routine at #R$95C8.
-c$961E LD A,($80A0)  ;
+; If the cell holds the room's background attribute ($80A0) and C & $0F is
+; not 0, the cell gets that attribute with ink 7 (Willy's colour; paper,
+; bright and flash are kept). Cells with any other attribute (floor, wall,
+; guardians) are left alone. Then, whatever the cell now holds, it is compared
+; with the nasty tile attribute ($80BB); a match jumps to #R$90B6, which
+; drops the return addresses of this routine and #R$95C8 and kills Willy.
+; So the nasty test covers all six cells even where nothing is written
+; (standing on a nasty floor kills him). Observed with test calls: a nasty
+; attribute in the right cell of Willy's top row, or in the row below his
+; feet with Y on a row boundary, jumps to $90B6; two columns to the right it
+; does not.
+; .
+; HL Attribute buffer address of the cell
+; C Low nibble 0: leave the cell alone (third row of cells while Willy is on a row boundary)
+; O:HL Unchanged
+@label=MarkWillyCell
+c$961E LD A,($80A0)  ; background attribute
  $9621 CP (HL)       ;
- $9622 JR NZ,$962F   ;
+ $9622 JR NZ,$962F   ; not empty: leave the cell
  $9624 LD A,C        ;
+@isub=AND Y_CELL_MASK
  $9625 AND $0F       ;
  $9627 JR Z,$962F    ;
  $9629 LD A,($80A0)  ;
- $962C OR $07        ;
+@isub=OR WHITE
+ $962C OR $07        ; ink 7
  $962E LD (HL),A     ;
-*$962F LD A,($80BB)  ;
+*$962F LD A,($80BB)  ; nasty tile attribute
  $9632 CP (HL)       ;
- $9633 JP Z,$90B6    ;
+ $9633 JP Z,$90B6    ; Willy dies
  $9636 RET           ;

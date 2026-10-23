@@ -1,2 +1,30 @@
-; Game status buffer entry at 85DF
+; Ending stage: what the game does once every item is collected
+;
+; One byte, 0 at the start of a game (#R$87CA clears it). The values form a
+; one-way sequence; nothing sets it back except a new game.
+; .
+; 0: normal play. In the Master Bedroom (room $23) #R$9534 draws a guard
+; figure (#R$9C80) that kills Willy on contact.
+; .
+; 1: every item is collected (set by #R$93D1 when #R$85DE wraps to 0). The
+; figure is no longer drawn, so Willy can walk to the bed end of the Master
+; Bedroom. Everything else is as in state 0.
+; .
+; 2: set by #R$9534 when Willy in the Master Bedroom is in a column below 6
+; (the bed end). #R$8DD3 now sees the right key as pressed (the P bit of port
+; $DFFE is inverted at $8F05) so Willy runs right by himself, twice as fast
+; (#R$89AD ORs bit 0 into the animation frame #R$85D2), a jump key is ignored
+; ($8F8F) and holding a right key stops him. He leaves through the right exit
+; and the rooms on the way to the Bathroom are played as usual.
+; .
+; 3: set by #R$9584 when Willy is at $5DBC (Bathroom, column 28, row 13: the
+; toilet). #R$89AD then no longer calls #R$8DD3 (no movement, no keys) or
+; #R$95C8 (Willy is neither drawn nor checked for nasties), and #R$959A draws
+; the second pair of toilet frames. Nothing leaves this state: the game goes
+; on with the other sprites, the clock and the status line until the clock
+; passes 12:59pm or caps shift + space are held, both of which restart at the
+; title screen (#R$87CA).
+; .
+; Observed in the simulator, see findings F61-F66.
+@label=EndingStage
 g$85DF DEFB $00

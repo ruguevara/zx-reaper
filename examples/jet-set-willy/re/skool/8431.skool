@@ -1,4 +1,19 @@
-; Data block at 8431
+; Title graphic edge pieces: four 8x8 cells
+;
+; Pixel data (8 bytes each) of the slanted edges of the picture on the title
+; screen, drawn by #R$87CA with #R$969B into cells of the attribute map #R$9800
+; that are not solid colours. A 16-pixel-wide edge takes two cells side by side:
+; the piece is +0 or +$10, chosen by the cell attribute (see #R$87CA), plus 8
+; when the cell column is odd (the right cell).
+; .
+; +$00 left cell of an edge that runs down and to the right at 2 pixels per row:
+; the edge in rows 0-3 ($C0,$F0,$FC,$FF), solid below it, the filled part is the
+; left side.
+; +$08 right cell of the same edge: empty in rows 0-3, the edge in rows 4-7.
+; +$10 left cell of an edge that runs down and to the left: solid in rows 0-3,
+; then $FC,$F0,$C0,$00.
+; +$18 right cell of that edge: $FC,$F0,$C0,$00 in rows 0-3, empty below.
+@label=TitleEdgePieces
 b$8431 DEFB $C0,$F0,$FC,$FF,$FF,$FF,$FF,$FF
  $8439 DEFB $00,$00,$00,$00,$C0,$F0,$FC,$FF
  $8441 DEFB $FF,$FF,$FF,$FF,$FC,$F0,$C0,$00

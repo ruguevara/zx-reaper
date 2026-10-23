@@ -1,4 +1,14 @@
-; Message at 8454
+; Title screen message: 256 characters, scrolled along row 19
+;
+; Eight lines of 32 characters, ASCII (character $7F is the copyright sign of
+; the ROM font). #R$87CA prints the first 32 characters on the title screen;
+; #R$88AE then shows a 32-character window that moves one character per step
+; over the whole text (offsets 0 to $DF). The last 32 characters equal the first
+; 32, so the scroll ends where it started. Text: "+++++ Press ENTER to Start
+; +++++", the title and credit lines, and the story: guide Willy to collect all
+; the items around the house before midnight so that Maria will let him get to
+; his bed.
+@label=TitleMessage
 t$8454 DEFM "+++++ Press ENTER to Start +++++"
  $8474 DEFM "  JET-SET WILLY by Matthew Smith"
  $8494 DEFM "  ",$7F," 1984 SOFTWARE PROJECTS Ltd ."

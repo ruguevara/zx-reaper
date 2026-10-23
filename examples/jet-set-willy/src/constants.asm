@@ -46,3 +46,32 @@ ASCII_ZERO               EQU 0x30 ; ASCII code of the digit 0
 ASCII_AFTER_NINE         EQU 0x3A ; ASCII code after the digit 9 (the digit overflows)
 CELLS_PER_BYTE           EQU 4 ; room layout cells packed per byte (2 bits each)
 ROOM_LAYOUT_SIZE         EQU 0x80 ; bytes of room layout
+START_ROOM               EQU 0x21 ; room where a new game starts (the Bathroom)
+START_LIVES              EQU 7 ; lives at the start of a game
+WILLY_START_Y            EQU 0xD0 ; Willy start Y at a new game (pixel row index, standing on the Bathroom floor)
+WILLY_START_ATTR         EQU 0x5DB4 ; start address of Willy's attribute cell in the attribute buffer at a new game
+ITEM_PRESENT_BIT         EQU 6 ; bit number of the item-present flag in the item table
+BRIGHT                   EQU 0x40 ; attribute bit 6
+YELLOW                   EQU 6 ; Spectrum colour 6
+KEMPSTON_UNUSED_MASK     EQU 0x20 ; bit 5 of the Kempston port: always 0 on a real interface, set by some floating-bus reads
+KEYROW_START             EQU 0xAFFE ; port that reads half-rows 6-0 and H-ENTER together: bit 0 = key 0 or ENTER (0 = pressed)
+TITLE_SCROLL_STEPS       EQU 0xE0 ; steps of the title message scroll (message length 256 - window 32)
+ROOM_TABLE_PAGE          EQU 0xC0 ; high byte of the room table (room N is at ROOM_TABLE_PAGE*256 + 256*N)
+ROOM_SLOTS               EQU 8 ; entity slots per room
+BITMAP_SIZE              EQU 0x1800 ; bytes of the screen bitmap
+THIRD_SIZE               EQU 0x800 ; bytes of bitmap in one third of the screen (8 character rows)
+ROOM_SIZE                EQU 0x100 ; bytes per room in the room table and in the room buffer
+BRIGHT_WHITE_ON_BLUE     EQU 0x4F ; attribute of the scrolling title message line
+ROOM_BATHROOM            EQU 0x21 ; room number of The Bathroom
+ROOM_MASTER_BEDROOM      EQU 0x23 ; room number of the Master Bedroom
+STAGE_PLAYING            EQU 0 ; EndingStage 0: normal play, not every item collected
+STAGE_ALL_ITEMS          EQU 1 ; EndingStage 1: every item collected
+STAGE_RUN_TO_TOILET      EQU 2 ; EndingStage 2: Willy reached the bed end of the Master Bedroom; he now runs right by himself and cannot jump
+STAGE_AT_TOILET          EQU 3 ; EndingStage 3: Willy is at the toilet in the Bathroom; he is no longer moved, drawn or checked
+BED_END_COLUMN           EQU 6 ; Master Bedroom: Willy in a column below this (the bed end) starts the run to the toilet
+TOILET_COLUMN            EQU 28 ; Bathroom: screen column of the toilet sprite (2 cells wide)
+TOILET_ATTR_LOW          EQU 0xBC ; low byte of Willy's attribute address (DBC: row 13, column 28) when he is at the toilet
+CYAN                     EQU 5 ; Spectrum colour 5
+BEDROOM_FLOOR_Y          EQU 0xD0 ; Willy Y index on the lowest floor (pixel row 104); selects the guard figure's walking frames
+BEDROOM_MID_Y            EQU 0xC0 ; Willy Y index below which the guard figure uses its last frame
+Y_CELL_MASK              EQU 0x0F ; Y index bits within a character row (16 units per row): non-zero when Willy is between rows

@@ -1,41 +1,75 @@
-; Routine at 9534
+; Room events of the Master Bedroom and the Bathroom
 ;
-; Used by the routine at #R$89AD.
-c$9534 LD A,($8420)  ;
+; Called once per frame by #R$89AD after Willy has been moved and drawn. In
+; any room except the Master Bedroom (room $23) it jumps to #R$959A, which
+; handles the Bathroom and returns.
+; .
+; Master Bedroom, ending stage 0 (#R$85DF): draws one of the four figure
+; sprites #R$9C80-#R$9CFF at $686E of the $6000 buffer (column 14, pixel row
+; 88) with the collision test of #R$9456, after Willy and the room are
+; already in the buffer. Touching the figure kills Willy (#R$90B7). The frame
+; follows Willy's Y index (#R$85CF): Y = $D0 (the low floor) alternates
+; frames 0 and 1 with bit 1 of the frame counter #R$85CB; Y from $C0 up
+; (a ramp or a low jump) gives frame 2; a smaller Y (the upper platform,
+; where the figure stands) gives frame 3. The two cells in the first
+; character row of the figure get attribute $45 (bright cyan), the two below
+; get $07 (white).
+; .
+; Master Bedroom, ending stage not 0: no figure. If Willy's column is below 6
+; (the bed end) the stage becomes 2 and he starts running to the toilet
+; (see #R$85DF).
+; .
+; Hardware: none (writes the $6000 and $5C00 buffers).
+@label=UpdateBedroom
+c$9534 LD A,($8420)  ; current room
+@isub=CP ROOM_MASTER_BEDROOM
  $9537 CP $23        ;
- $9539 JR NZ,$959A   ;
+ $9539 JR NZ,$959A   ; other rooms: Bathroom handler
  $953B LD A,($85DF)  ;
  $953E OR A          ;
- $953F JR NZ,$9576   ;
+ $953F JR NZ,$9576   ; every item collected: no figure
  $9541 LD A,($85CB)  ;
- $9544 AND $02       ;
+ $9544 AND $02       ; bit 1 of the frame counter
  $9546 RRCA          ;
  $9547 RRCA          ;
  $9548 RRCA          ;
- $9549 RRCA          ;
- $954A OR $80        ;
+ $9549 RRCA          ; -> $20 or 0
+ $954A OR $80        ; frame 0 ($9C80) or 1 ($9CA0)
  $954C LD E,A        ;
  $954D LD A,($85CF)  ;
- $9550 CP $D0        ;
+@isub=CP BEDROOM_FLOOR_Y
+ $9550 CP $D0        ; Willy on the low floor: keep the walking frame
  $9552 JR Z,$955C    ;
- $9554 LD E,$C0      ;
+@isub=LD E,SpriteFigure2&$FF
+ $9554 LD E,$C0      ; frame 2
+@isub=CP BEDROOM_MID_Y
  $9556 CP $C0        ;
  $9558 JR NC,$955C   ;
- $955A LD E,$E0      ;
-*$955C LD D,$9C      ;
- $955E LD HL,$686E   ;
- $9561 LD C,$01      ;
+@isub=LD E,SpriteFigure3&$FF
+ $955A LD E,$E0      ; Willy higher up: frame 3
+@isub=LD D,SpriteFigure0/256
+*$955C LD D,$9C      ; DE = sprite
+@isub=LD HL,SCREEN_PIXEL_BUF+$86E
+ $955E LD HL,$686E   ; buffer address of the figure
+ $9561 LD C,$01      ; collision test
  $9563 CALL $9456    ;
- $9566 JP NZ,$90B7   ;
+ $9566 JP NZ,$90B7   ; overlaps Willy (or anything drawn): Willy dies
+@isub=LD HL,(BRIGHT+CYAN)*256+BRIGHT+CYAN
  $9569 LD HL,$4545   ;
- $956C LD ($5D6E),HL ;
+@isub=LD (SCREEN_ATTRS_BUF+11*SCREEN_COLS+14),HL
+ $956C LD ($5D6E),HL ; row 11, columns 14-15
+@isub=LD HL,WHITE*256+WHITE
  $956F LD HL,$0707   ;
- $9572 LD ($5D8E),HL ;
+@isub=LD (SCREEN_ATTRS_BUF+12*SCREEN_COLS+14),HL
+ $9572 LD ($5D8E),HL ; row 12, columns 14-15
  $9575 RET           ;
-*$9576 LD A,($85D3)  ;
- $9579 AND $1F       ;
+; Ending stage not 0: watch for Willy reaching the bed end of the room.
+*$9576 LD A,($85D3)  ; low byte of Willy's attribute address
+ $9579 AND $1F       ; column
+@isub=CP BED_END_COLUMN
  $957B CP $06        ;
  $957D RET NC        ;
+@isub=LD A,STAGE_RUN_TO_TOILET
  $957E LD A,$02      ;
- $9580 LD ($85DF),A  ;
+ $9580 LD ($85DF),A  ; the run to the toilet starts
  $9583 RET           ;
