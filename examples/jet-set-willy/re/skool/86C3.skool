@@ -1,4 +1,3 @@
-@equ=FRAMES=$5C78
 ; Show the colour-code screen and read the player's answer
 ;
 ; Draws the message line (32 characters at IX, ROM font) on screen row 8, the

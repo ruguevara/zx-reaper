@@ -1,38 +1,67 @@
-; Data block at ED00
-b$ED00 DEFB $A0,$00,$00,$00,$00,$00,$AA,$AA
- $ED08 DEFB $A0,$00,$00,$00,$00,$00,$AA,$AA
- $ED10 DEFB $A0,$00,$00,$00,$00,$00,$AA,$AA
- $ED18 DEFB $A0,$00,$00,$00,$00,$05,$AA,$AA
- $ED20 DEFB $A8,$00,$00,$00,$00,$00,$AA,$AA
- $ED28 DEFB $AA,$00,$00,$00,$10,$00,$02,$AA
- $ED30 DEFB $AA,$80,$00,$00,$00,$50,$00,$AA
- $ED38 DEFB $AA,$A0,$00,$00,$00,$00,$00,$0A
- $ED40 DEFB $AA,$A8,$00,$00,$50,$00,$00,$00
- $ED48 DEFB $AA,$AA,$00,$00,$00,$C0,$00,$00
- $ED50 DEFB $AA,$AA,$80,$00,$00,$00,$00,$00
- $ED58 DEFB $AA,$AA,$A0,$00,$00,$00,$00,$00
- $ED60 DEFB $AA,$AA,$A8,$00,$00,$00,$00,$00
- $ED68 DEFB $AA,$AA,$AA,$00,$00,$00,$00,$00
- $ED70 DEFB $AA,$AA,$AA,$80,$30,$0C,$0C,$00
- $ED78 DEFB $AA,$AA,$AA,$AA,$AA,$AA,$AA,$AA
+; Room 45 ($2D): Under the Drive
+;
+; Format: see #R$C000.
+; .
+; Border: green (4). Conveyor: moves Willy left, 14 cells from row 10 column
+; 18. Ramp: 12 cells from row 14 column 13 up to row 3 column 2, rising to the
+; left.
+; .
+; Items: none in the item table. The room nevertheless has an item graphic
+; (leftover: never drawn).
+; .
+; Exits: left Room 6 (Entrance to Hades, #R$C600); right Room 46 (Tree Root,
+; #R$EE00); up Room 4 (The Drive, #R$C400); down Room 0 (The Off Licence,
+; #R$C000). Odd: the right exit of Room 6 is Room 5, not this room; the left
+; edge of the layout is walled in (no free cell next to it), so the left exit
+; (byte 6) cannot be used by walking (inferred from the layout).
+; .
+; Entities: slot 0: definition $1C (at $A0E0) start $10; slot 1: definition
+; $1D (at $A0E8) start $92; slot 2: definition $44 (at $A220) start $96. List
+; ends at slot 3 ($FF).
+@label=RoomUnderTheDrive
+b$ED00 DEFB $A0,$00,$00,$00,$00,$00,$AA,$AA ; row 0: ##......................########
+ $ED08 DEFB $A0,$00,$00,$00,$00,$00,$AA,$AA ; row 1: ##......................########
+ $ED10 DEFB $A0,$00,$00,$00,$00,$00,$AA,$AA ; row 2: ##......................########
+ $ED18 DEFB $A0,$00,$00,$00,$00,$05,$AA,$AA ; row 3: ##....................--########
+ $ED20 DEFB $A8,$00,$00,$00,$00,$00,$AA,$AA ; row 4: ###.....................########
+ $ED28 DEFB $AA,$00,$00,$00,$10,$00,$02,$AA ; row 5: ####.............-.........#####
+ $ED30 DEFB $AA,$80,$00,$00,$00,$50,$00,$AA ; row 6: #####...............--......####
+ $ED38 DEFB $AA,$A0,$00,$00,$00,$00,$00,$0A ; row 7: ######........................##
+ $ED40 DEFB $AA,$A8,$00,$00,$50,$00,$00,$00 ; row 8: #######.........--..............
+ $ED48 DEFB $AA,$AA,$00,$00,$00,$C0,$00,$00 ; row 9: ########............*...........
+ $ED50 DEFB $AA,$AA,$80,$00,$00,$00,$00,$00 ; row 10: #########.......................
+ $ED58 DEFB $AA,$AA,$A0,$00,$00,$00,$00,$00 ; row 11: ##########......................
+ $ED60 DEFB $AA,$AA,$A8,$00,$00,$00,$00,$00 ; row 12: ###########.....................
+ $ED68 DEFB $AA,$AA,$AA,$00,$00,$00,$00,$00 ; row 13: ############....................
+ $ED70 DEFB $AA,$AA,$AA,$80,$30,$0C,$0C,$00 ; row 14: #############....*....*...*.....
+ $ED78 DEFB $AA,$AA,$AA,$AA,$AA,$AA,$AA,$AA ; row 15: ################################
+; Room name: 32 characters, printed at the bottom of the screen when the room is entered.
  $ED80 DEFM "          Under the Drive       "
- $EDA0 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00
- $EDA9 DEFB $06,$FF,$FF,$A5,$58,$24,$42,$20,$00
- $EDB2 DEFB $0C,$10,$2A,$55,$A0,$10,$20,$10,$08
- $EDBB DEFB $04,$18,$18,$14,$22,$22,$55,$11,$28
- $EDC4 DEFB $07,$80,$40,$A0,$50,$A8,$54,$AA,$55
- $EDCD DEFB $02,$E0,$AA,$F8,$00,$FF,$FF,$66,$66
- $EDD6 DEFB $00,$52,$5F,$0E
- $EDDA DEFB $00,$CD,$5F,$0C
- $EDDE DEFB $04,$00,$00
- $EDE1 DEFB $81,$64,$CD,$0F,$61,$DA,$33,$1A
- $EDE9 DEFB $06,$2E,$04,$00
- $EDED DEFB $00,$00,$00
- $EDF0 DEFB $1C,$10
- $EDF2 DEFB $1D,$92
- $EDF4 DEFB $44,$96
- $EDF6 DEFB $FF,$00
- $EDF8 DEFB $00,$00
- $EDFA DEFB $00,$00
- $EDFC DEFB $00,$00
- $EDFE DEFB $00,$00
+; Six tiles of 9 bytes: attribute, then 8 pixel rows. Tile 0 background, 1 floor, 2 wall, 3 nasty, 4 ramp, 5 conveyor.
+ $EDA0 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00 ; tile 0 (background): black on black
+ $EDA9 DEFB $06,$FF,$FF,$A5,$58,$24,$42,$20,$00 ; tile 1 (floor): yellow on black
+ $EDB2 DEFB $0C,$10,$2A,$55,$A0,$10,$20,$10,$08 ; tile 2 (wall): green on blue
+ $EDBB DEFB $04,$18,$18,$14,$22,$22,$55,$11,$28 ; tile 3 (nasty): green on black
+ $EDC4 DEFB $07,$80,$40,$A0,$50,$A8,$54,$AA,$55 ; tile 4 (ramp): white on black
+ $EDCD DEFB $02,$E0,$AA,$F8,$00,$FF,$FF,$66,$66 ; tile 5 (conveyor): red on black
+; Conveyor: direction, address of the leftmost cell in the attribute buffer, length in cells.
+ $EDD6 DEFB $00,$52,$5F,$0E ; direction 0 (left), address $5F52 = row 10 column 18, 14 cells
+; Ramp: direction, attribute buffer address of its lowest cell, length in cells.
+ $EDDA DEFB $00,$CD,$5F,$0C ; direction 0 (rises to the left), lowest cell $5FCD = row 14 column 13, 12 cells
+; Border colour; then $DF-$E0, not read by any code.
+ $EDDE DEFB $04,$00,$00 ; border green (4); $DF-$E0 = $00,$00
+; Item graphic: 8 pixel rows shared by all items of the room.
+ $EDE1 DEFB $81,$64,$CD,$0F,$61,$DA,$33,$1A ; item graphic
+; Exits: room numbers left, right, up, down.
+ $EDE9 DEFB $06,$2E,$04,$00 ; left 6, right 46, up 4, down 0
+; Three bytes not read by any code.
+ $EDED DEFB $00,$00,$00 ; unused
+; Entity slots: definition index, start byte (see #R$C000).
+ $EDF0 DEFB $1C,$10 ; definition $1C, start $10 (column 16)
+ $EDF2 DEFB $1D,$92 ; definition $1D, start $92 (column 18)
+ $EDF4 DEFB $44,$96 ; definition $44, start $96 (column 22)
+ $EDF6 DEFB $FF,$00 ; end of list
+ $EDF8 DEFB $00,$00 ; empty
+ $EDFA DEFB $00,$00 ; empty
+ $EDFC DEFB $00,$00 ; empty
+ $EDFE DEFB $00,$00 ; empty

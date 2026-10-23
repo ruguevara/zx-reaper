@@ -1,38 +1,63 @@
-; Data block at FC00
-b$FC00 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $FC08 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $FC10 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $FC18 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $FC20 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $FC28 DEFB $00,$00,$00,$00,$00,$01,$55,$55
- $FC30 DEFB $00,$00,$00,$00,$00,$00,$80,$00
- $FC38 DEFB $00,$00,$00,$00,$04,$00,$80,$00
- $FC40 DEFB $00,$00,$00,$00,$00,$00,$90,$00
- $FC48 DEFB $00,$00,$00,$00,$00,$00,$80,$00
- $FC50 DEFB $00,$00,$00,$15,$55,$55,$55,$55
- $FC58 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $FC60 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $FC68 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $FC70 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $FC78 DEFB $FF,$FF,$FF,$FF,$C0,$00,$00,$00
+; Room 60 ($3C): The Bow
+;
+; Format: see #R$C000.
+; .
+; Border: cyan (5). Conveyor: moves Willy right, 15 cells from row 15 column
+; 17. Ramp: 6 cells from row 14 column 16 up to row 9 column 11, rising to the
+; left.
+; .
+; Items (from the item table at #R$A400): 1, at row 8 column 26.
+; .
+; Exits: left Room 0 (The Off Licence, #R$C000); right Room 59 (The Yacht,
+; #R$FB00); up Room 0 (The Off Licence, #R$C000); down Room 0 (The Off
+; Licence, #R$C000).
+; .
+; Entities: slot 0: definition $69 (at $A348) start $17; slot 1: definition
+; $6E (at $A370) start $14. List ends at slot 2 ($FF).
+@label=RoomBow
+b$FC00 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; row 0: ................................
+ $FC08 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; row 1: ................................
+ $FC10 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; row 2: ................................
+ $FC18 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; row 3: ................................
+ $FC20 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; row 4: ................................
+ $FC28 DEFB $00,$00,$00,$00,$00,$01,$55,$55 ; row 5: .......................---------
+ $FC30 DEFB $00,$00,$00,$00,$00,$00,$80,$00 ; row 6: ........................#.......
+ $FC38 DEFB $00,$00,$00,$00,$04,$00,$80,$00 ; row 7: ..................-.....#.......
+ $FC40 DEFB $00,$00,$00,$00,$00,$00,$90,$00 ; row 8: ........................#-......
+ $FC48 DEFB $00,$00,$00,$00,$00,$00,$80,$00 ; row 9: ........................#.......
+ $FC50 DEFB $00,$00,$00,$15,$55,$55,$55,$55 ; row 10: .............-------------------
+ $FC58 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; row 11: ................................
+ $FC60 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; row 12: ................................
+ $FC68 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; row 13: ................................
+ $FC70 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; row 14: ................................
+ $FC78 DEFB $FF,$FF,$FF,$FF,$C0,$00,$00,$00 ; row 15: *****************...............
+; Room name: 32 characters, printed at the bottom of the screen when the room is entered.
  $FC80 DEFM "             The Bow            "
- $FCA0 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00
- $FCA9 DEFB $44,$FF,$AA,$55,$FF,$00,$00,$00,$00
- $FCB2 DEFB $3D,$C9,$C9,$C9,$C9,$C9,$C9,$C9,$C9
- $FCBB DEFB $4F,$40,$82,$52,$00,$00,$00,$00,$00
- $FCC4 DEFB $07,$80,$40,$20,$10,$08,$04,$02,$01
- $FCCD DEFB $0E,$FF,$AA,$AA,$00,$AA,$FF,$00,$00
- $FCD6 DEFB $01,$F1,$5F,$0F
- $FCDA DEFB $00,$D0,$5F,$06
- $FCDE DEFB $05,$00,$00
- $FCE1 DEFB $48,$39,$26,$DA,$5B,$64,$9C,$12
- $FCE9 DEFB $00,$3B,$00,$00
- $FCED DEFB $00,$00,$00
- $FCF0 DEFB $69,$17
- $FCF2 DEFB $6E,$14
- $FCF4 DEFB $FF,$00
- $FCF6 DEFB $00,$00
- $FCF8 DEFB $00,$00
- $FCFA DEFB $00,$00
- $FCFC DEFB $00,$00
- $FCFE DEFB $00,$00
+; Six tiles of 9 bytes: attribute, then 8 pixel rows. Tile 0 background, 1 floor, 2 wall, 3 nasty, 4 ramp, 5 conveyor.
+ $FCA0 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00 ; tile 0 (background): black on black
+ $FCA9 DEFB $44,$FF,$AA,$55,$FF,$00,$00,$00,$00 ; tile 1 (floor): bright green on black
+ $FCB2 DEFB $3D,$C9,$C9,$C9,$C9,$C9,$C9,$C9,$C9 ; tile 2 (wall): cyan on white
+ $FCBB DEFB $4F,$40,$82,$52,$00,$00,$00,$00,$00 ; tile 3 (nasty): bright white on blue
+ $FCC4 DEFB $07,$80,$40,$20,$10,$08,$04,$02,$01 ; tile 4 (ramp): white on black
+ $FCCD DEFB $0E,$FF,$AA,$AA,$00,$AA,$FF,$00,$00 ; tile 5 (conveyor): yellow on blue
+; Conveyor: direction, address of the leftmost cell in the attribute buffer, length in cells.
+ $FCD6 DEFB $01,$F1,$5F,$0F ; direction 1 (right), address $5FF1 = row 15 column 17, 15 cells
+; Ramp: direction, attribute buffer address of its lowest cell, length in cells.
+ $FCDA DEFB $00,$D0,$5F,$06 ; direction 0 (rises to the left), lowest cell $5FD0 = row 14 column 16, 6 cells
+; Border colour; then $DF-$E0, not read by any code.
+ $FCDE DEFB $05,$00,$00 ; border cyan (5); $DF-$E0 = $00,$00
+; Item graphic: 8 pixel rows shared by all items of the room.
+ $FCE1 DEFB $48,$39,$26,$DA,$5B,$64,$9C,$12 ; item graphic
+; Exits: room numbers left, right, up, down.
+ $FCE9 DEFB $00,$3B,$00,$00 ; left 0, right 59, up 0, down 0
+; Three bytes not read by any code.
+ $FCED DEFB $00,$00,$00 ; unused
+; Entity slots: definition index, start byte (see #R$C000).
+ $FCF0 DEFB $69,$17 ; definition $69, start $17 (column 23)
+ $FCF2 DEFB $6E,$14 ; definition $6E, start $14 (column 20)
+ $FCF4 DEFB $FF,$00 ; end of list
+ $FCF6 DEFB $00,$00 ; empty
+ $FCF8 DEFB $00,$00 ; empty
+ $FCFA DEFB $00,$00 ; empty
+ $FCFC DEFB $00,$00 ; empty
+ $FCFE DEFB $00,$00 ; empty

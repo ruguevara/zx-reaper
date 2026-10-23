@@ -1,38 +1,142 @@
-; Data block at C000
-b$C000 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $C008 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $C010 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $C018 DEFB $00,$00,$00,$AA,$AA,$AA,$AA,$AA
- $C020 DEFB $00,$00,$00,$80,$00,$00,$00,$02
- $C028 DEFB $00,$00,$00,$80,$00,$00,$00,$02
- $C030 DEFB $00,$00,$00,$8C,$00,$00,$00,$02
- $C038 DEFB $00,$00,$00,$80,$00,$00,$00,$02
- $C040 DEFB $00,$00,$00,$80,$00,$00,$00,$02
- $C048 DEFB $00,$00,$00,$80,$00,$00,$00,$02
- $C050 DEFB $00,$00,$00,$80,$00,$00,$00,$02
- $C058 DEFB $00,$00,$00,$AA,$00,$00,$02,$AA
- $C060 DEFB $00,$00,$00,$00,$00,$00,$00,$02
- $C068 DEFB $00,$00,$00,$00,$00,$00,$00,$02
- $C070 DEFB $00,$00,$00,$00,$00,$00,$00,$02
- $C078 DEFB $55,$55,$55,$55,$55,$55,$55,$55
+; Room 0 ($00): The Off Licence
+;
+; This entry carries the format description of all rooms; the other rooms
+; refer to it. Rooms 0-46 and 48-60 are normal rooms, room 47 is an empty room
+; titled "[", rooms 61-63 hold stray bytes that are not a room. The game
+; starts in room 33 (The Bathroom, #R$87CA stores $21 in $8420 at $87EC).
+; .
+; Format of a room (256 bytes at $C000+256*N, N = 0-63). #R$8912 copies the
+; room to $8000 when it is entered and all game code reads that copy (the room
+; number is kept in $8420; the page address is $C0 OR N, so only the low 6
+; bits of N matter). Offsets below are from the start of the room.
+; .
+; +$00-$7F layout: 16 rows of 32 cells (the 16 character rows of the playing
+; area), 8 bytes per row, 2 bits per cell, leftmost cell in bits 7-6 of the
+; first byte of the row. The cell value (0-3) selects tile 0-3 of the room
+; (#R$8D6B, #R$8DC0). In the row comments of every room below the cells are
+; drawn as . background, - floor, # wall, * nasty; conveyor and ramp are not
+; part of the layout bytes.
+; .
+; +$80-$9F name: 32 characters, printed by #R$9680 on the bottom third of the
+; screen (at $5000) when the room is entered.
+; .
+; +$A0-$D5 six tiles of 9 bytes: an attribute byte followed by 8 pixel rows.
+; Tile 0 background (also the empty space Willy falls through), 1 floor (Willy
+; stands on it; its attribute is never compared by the code), 2 wall (blocks
+; sideways and upward movement: #R$8DD3), 3 nasty (kills on touch: #R$961E), 4
+; ramp, 5 conveyor. The game finds tiles by attribute byte, not by number:
+; #R$8D33 and the movement code compare the attribute bytes in the cell buffer
+; with the first byte of tile 0, 2, 3, 4, 5 ($80A0, $80B2, $80BB, $80C4,
+; $80CD). #R$8D33 looks each attribute up with CPIR over the first 54 bytes of
+; the tile area and draws the 8 bytes that follow the first match, so a tile
+; whose attribute byte also occurs earlier in the tile area (as a pixel byte
+; of an earlier tile) is drawn with the wrong pixels. Observed in rooms 24, 29
+; and 36 (see their descriptions). Tiles used in one room need different
+; attribute bytes (no room checked has two used tiles with the same
+; attribute).
+; .
+; +$D6 conveyor direction (0 = moves Willy left, 1 = right), +$D7 word:
+; address of the leftmost conveyor cell in the attribute buffer ($5E00 +
+; 32*row + column), +$D9 length in cells (0 = no conveyor; the direction and
+; address bytes are then leftovers). The cells are filled with tile 5 after
+; the layout (#R$8D6B); #R$94F9 animates the pixel rows 0 and 2 of the cells.
+; .
+; +$DA ramp direction (bit 0 only: 0 = rises to the left, 1 = rises to the
+; right), +$DB word: attribute buffer address of the lowest cell of the ramp,
+; +$DD length in cells (0 = no ramp). Each further cell is one row up and one
+; column left (bit 0 = 0, step -33) or right (bit 0 = 1, step -31). Filled
+; with tile 4 (#R$8D6B).
+; .
+; +$DE border colour (the whole byte is written to port $FE, bits 3-4 are
+; toggled by the sound code; values 1-6 are used). +$DF-$E0: not read by any
+; code. Rooms 0-4 hold $00,$40,$80,$C0,$C0 followed by $A0 (as a word $A000,
+; $A040, $A080, $A0C0, $A0C0: looks like leftover pointers into the entity
+; definitions), all other rooms hold zeros.
+; .
+; +$E1-$E8 item graphic: 8 pixel rows, one picture for every item in the room
+; (#R$93D1). Where the items are is not stored here: see the item table at
+; #R$A400.
+; .
+; +$E9-$EC exits: room numbers left, right, up, down (observed: holding left
+; in room 33 enters the room in byte +$E9 = 34). #R$948A, #R$949E, #R$94B0 and
+; #R$94D2 load the new room number into $8420 and re-enter #R$8912. Nothing
+; treats 0 as 'no exit': an exit byte 0 leads to room 0, and the bytes of
+; edges Willy cannot reach are mostly 0. Bits 6-7 of the byte are ignored
+; (page = $C0 OR byte).
+; .
+; +$ED-$EF: not read by any code; zero in every room that has the room format.
+; .
+; +$F0-$FF eight entity slots of 2 bytes: definition index, start byte.
+; #R$8912 copies, for each slot, 8 bytes from the entity definition at
+; $A000+8*(index AND $7F) to the entity buffer at $8100+8*slot, with the start
+; byte replacing byte 2 (it is also stored in the definition table: inferred
+; from $893A-$893D). The start byte low 5 bits are then the entity's column
+; (inferred from #R$91BE); the high 3 bits are mixed into its animation frame
+; (inferred, not confirmed). A slot with index 0 is an empty entity
+; (definition 0 is all zeros: it is skipped by #R$90C0 and #R$91BE). A slot
+; with index $FF ends the list ($A3F8 begins with $FF); when all 8 slots are
+; used the byte $FF at $8140 ends it. Slots after an $FF are copied but never
+; used.
+; .
+; Border: cyan (5). Conveyor: moves Willy left, 12 cells from row 9 column 19.
+; Ramp: 4 cells from row 14 column 23 up to row 11 column 26, rising to the
+; right.
+; .
+; Items (from the item table at #R$A400): 12, at row 4 columns 19-30.
+; .
+; Exits: left Room 1 (The Bridge, #R$C100); right Room 0 (The Off Licence,
+; #R$C000); up Room 0 (The Off Licence, #R$C000); down Room 0 (The Off
+; Licence, #R$C000). Odd: the right, up and down exits lead back to this room.
+; .
+; Entities: slot 0: definition $0A (at $A050) start $8A; slot 1: definition
+; $0C (at $A060) start $1D; slot 2: definition $2C (at $A160) start $27. List
+; ends at slot 3 ($FF).
+; .
+; Bytes $DF-$E0 hold $00,$A0 (see #R$C000).
+@label=RoomOffLicence
+b$C000 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; row 0: ................................
+ $C008 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; row 1: ................................
+ $C010 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; row 2: ................................
+ $C018 DEFB $00,$00,$00,$AA,$AA,$AA,$AA,$AA ; row 3: ............####################
+ $C020 DEFB $00,$00,$00,$80,$00,$00,$00,$02 ; row 4: ............#..................#
+ $C028 DEFB $00,$00,$00,$80,$00,$00,$00,$02 ; row 5: ............#..................#
+ $C030 DEFB $00,$00,$00,$8C,$00,$00,$00,$02 ; row 6: ............#.*................#
+ $C038 DEFB $00,$00,$00,$80,$00,$00,$00,$02 ; row 7: ............#..................#
+ $C040 DEFB $00,$00,$00,$80,$00,$00,$00,$02 ; row 8: ............#..................#
+ $C048 DEFB $00,$00,$00,$80,$00,$00,$00,$02 ; row 9: ............#..................#
+ $C050 DEFB $00,$00,$00,$80,$00,$00,$00,$02 ; row 10: ............#..................#
+ $C058 DEFB $00,$00,$00,$AA,$00,$00,$02,$AA ; row 11: ............####...........#####
+ $C060 DEFB $00,$00,$00,$00,$00,$00,$00,$02 ; row 12: ...............................#
+ $C068 DEFB $00,$00,$00,$00,$00,$00,$00,$02 ; row 13: ...............................#
+ $C070 DEFB $00,$00,$00,$00,$00,$00,$00,$02 ; row 14: ...............................#
+ $C078 DEFB $55,$55,$55,$55,$55,$55,$55,$55 ; row 15: --------------------------------
+; Room name: 32 characters, printed at the bottom of the screen when the room is entered.
  $C080 DEFM "         The Off Licence        "
- $C0A0 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00
- $C0A9 DEFB $44,$FF,$DE,$6C,$88,$12,$40,$04,$00
- $C0B2 DEFB $16,$22,$FF,$88,$FF,$22,$FF,$88,$FF
- $C0BB DEFB $05,$F8,$88,$9E,$BD,$BD,$9E,$88,$F8
- $C0C4 DEFB $07,$03,$00,$0C,$00,$30,$00,$C0,$00
- $C0CD DEFB $43,$33,$FF,$33,$00,$FF,$00,$AA,$00
- $C0D6 DEFB $00,$33,$5F,$0C
- $C0DA DEFB $01,$D7,$5F,$04
- $C0DE DEFB $05,$00,$A0
- $C0E1 DEFB $18,$18,$3C,$7E,$62,$62,$62,$7E
- $C0E9 DEFB $01,$00,$00,$00
- $C0ED DEFB $00,$00,$00
- $C0F0 DEFB $0A,$8A
- $C0F2 DEFB $0C,$1D
- $C0F4 DEFB $2C,$27
- $C0F6 DEFB $FF,$00
- $C0F8 DEFB $00,$00
- $C0FA DEFB $00,$00
- $C0FC DEFB $00,$00
- $C0FE DEFB $00,$00
+; Six tiles of 9 bytes: attribute, then 8 pixel rows. Tile 0 background, 1 floor, 2 wall, 3 nasty, 4 ramp, 5 conveyor.
+ $C0A0 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00 ; tile 0 (background): black on black
+ $C0A9 DEFB $44,$FF,$DE,$6C,$88,$12,$40,$04,$00 ; tile 1 (floor): bright green on black
+ $C0B2 DEFB $16,$22,$FF,$88,$FF,$22,$FF,$88,$FF ; tile 2 (wall): yellow on red
+ $C0BB DEFB $05,$F8,$88,$9E,$BD,$BD,$9E,$88,$F8 ; tile 3 (nasty): cyan on black
+ $C0C4 DEFB $07,$03,$00,$0C,$00,$30,$00,$C0,$00 ; tile 4 (ramp): white on black
+ $C0CD DEFB $43,$33,$FF,$33,$00,$FF,$00,$AA,$00 ; tile 5 (conveyor): bright magenta on black
+; Conveyor: direction, address of the leftmost cell in the attribute buffer, length in cells.
+ $C0D6 DEFB $00,$33,$5F,$0C ; direction 0 (left), address $5F33 = row 9 column 19, 12 cells
+; Ramp: direction, attribute buffer address of its lowest cell, length in cells.
+ $C0DA DEFB $01,$D7,$5F,$04 ; direction 1 (rises to the right), lowest cell $5FD7 = row 14 column 23, 4 cells
+; Border colour; then $DF-$E0, not read by any code.
+ $C0DE DEFB $05,$00,$A0 ; border cyan (5); $DF-$E0 = $00,$A0
+; Item graphic: 8 pixel rows shared by all items of the room.
+ $C0E1 DEFB $18,$18,$3C,$7E,$62,$62,$62,$7E ; item graphic
+; Exits: room numbers left, right, up, down.
+ $C0E9 DEFB $01,$00,$00,$00 ; left 1, right 0, up 0, down 0
+; Three bytes not read by any code.
+ $C0ED DEFB $00,$00,$00 ; unused
+; Entity slots: definition index, start byte (see #R$C000).
+ $C0F0 DEFB $0A,$8A ; definition $0A, start $8A (column 10)
+ $C0F2 DEFB $0C,$1D ; definition $0C, start $1D (column 29)
+ $C0F4 DEFB $2C,$27 ; definition $2C, start $27 (column 7)
+ $C0F6 DEFB $FF,$00 ; end of list
+ $C0F8 DEFB $00,$00 ; empty
+ $C0FA DEFB $00,$00 ; empty
+ $C0FC DEFB $00,$00 ; empty
+ $C0FE DEFB $00,$00 ; empty

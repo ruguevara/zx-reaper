@@ -1,38 +1,63 @@
-; Data block at EC00
-b$EC00 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $EC08 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $EC10 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $EC18 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $EC20 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $EC28 DEFB $92,$00,$00,$00,$04,$00,$00,$00
- $EC30 DEFB $90,$00,$00,$00,$10,$00,$00,$00
- $EC38 DEFB $90,$00,$00,$00,$40,$00,$00,$00
- $EC40 DEFB $92,$00,$00,$01,$00,$00,$00,$00
- $EC48 DEFB $92,$80,$00,$04,$00,$00,$00,$00
- $EC50 DEFB $92,$A0,$82,$10,$00,$00,$00,$00
- $EC58 DEFB $92,$AA,$AA,$40,$00,$00,$00,$00
- $EC60 DEFB $92,$AA,$AA,$00,$00,$00,$00,$00
- $EC68 DEFB $10,$00,$00,$00,$00,$00,$00,$00
- $EC70 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $EC78 DEFB $AA,$AA,$AA,$00,$00,$00,$00,$00
+; Room 44 ($2C): On top of the house
+;
+; Format: see #R$C000.
+; .
+; Border: magenta (3). Conveyor: none. Ramp: 6 cells from row 10 column 12 up
+; to row 5 column 17, rising to the right.
+; .
+; Items (from the item table at #R$A400): 1, at row 4 column 18.
+; .
+; Exits: left Room 14 (Rescue Esmerelda, #R$CE00); right Room 0 (The Off
+; Licence, #R$C000); up Room 0 (The Off Licence, #R$C000); down Room 38
+; (Priests' Hole, #R$E600). Odd: the up exit of Room 38 is Room 60, not this
+; room.
+; .
+; Entities: slot 0: definition $1D (at $A0E8) start $14. List ends at slot 1
+; ($FF).
+@label=RoomTopOfTheHouse
+b$EC00 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; row 0: ................................
+ $EC08 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; row 1: ................................
+ $EC10 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; row 2: ................................
+ $EC18 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; row 3: ................................
+ $EC20 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; row 4: ................................
+ $EC28 DEFB $92,$00,$00,$00,$04,$00,$00,$00 ; row 5: #-.#..............-.............
+ $EC30 DEFB $90,$00,$00,$00,$10,$00,$00,$00 ; row 6: #-...............-..............
+ $EC38 DEFB $90,$00,$00,$00,$40,$00,$00,$00 ; row 7: #-..............-...............
+ $EC40 DEFB $92,$00,$00,$01,$00,$00,$00,$00 ; row 8: #-.#...........-................
+ $EC48 DEFB $92,$80,$00,$04,$00,$00,$00,$00 ; row 9: #-.##.........-.................
+ $EC50 DEFB $92,$A0,$82,$10,$00,$00,$00,$00 ; row 10: #-.###..#..#.-..................
+ $EC58 DEFB $92,$AA,$AA,$40,$00,$00,$00,$00 ; row 11: #-.#########-...................
+ $EC60 DEFB $92,$AA,$AA,$00,$00,$00,$00,$00 ; row 12: #-.#########....................
+ $EC68 DEFB $10,$00,$00,$00,$00,$00,$00,$00 ; row 13: .-..............................
+ $EC70 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; row 14: ................................
+ $EC78 DEFB $AA,$AA,$AA,$00,$00,$00,$00,$00 ; row 15: ############....................
+; Room name: 32 characters, printed at the bottom of the screen when the room is entered.
  $EC80 DEFM "         On top of the house    "
- $ECA0 DEFB $08,$00,$00,$00,$00,$00,$00,$00,$00
- $ECA9 DEFB $0E,$A0,$40,$80,$00,$00,$00,$00,$00
- $ECB2 DEFB $4B,$51,$AA,$00,$AA,$15,$AA,$00,$AA
- $ECBB DEFB $FF,$00,$00,$00,$00,$00,$00,$00,$00
- $ECC4 DEFB $0F,$01,$03,$06,$0D,$1A,$34,$68,$D0
- $ECCD DEFB $FF,$00,$00,$00,$00,$00,$00,$00,$00
- $ECD6 DEFB $00,$00,$00,$00
- $ECDA DEFB $01,$4C,$5F,$06
- $ECDE DEFB $03,$00,$00
- $ECE1 DEFB $00,$00,$18,$14,$1A,$35,$6B,$D0
- $ECE9 DEFB $0E,$00,$00,$26
- $ECED DEFB $00,$00,$00
- $ECF0 DEFB $1D,$14
- $ECF2 DEFB $FF,$00
- $ECF4 DEFB $00,$00
- $ECF6 DEFB $00,$00
- $ECF8 DEFB $00,$00
- $ECFA DEFB $00,$00
- $ECFC DEFB $00,$00
- $ECFE DEFB $00,$00
+; Six tiles of 9 bytes: attribute, then 8 pixel rows. Tile 0 background, 1 floor, 2 wall, 3 nasty, 4 ramp, 5 conveyor.
+ $ECA0 DEFB $08,$00,$00,$00,$00,$00,$00,$00,$00 ; tile 0 (background): black on blue
+ $ECA9 DEFB $0E,$A0,$40,$80,$00,$00,$00,$00,$00 ; tile 1 (floor): yellow on blue
+ $ECB2 DEFB $4B,$51,$AA,$00,$AA,$15,$AA,$00,$AA ; tile 2 (wall): bright magenta on blue
+ $ECBB DEFB $FF,$00,$00,$00,$00,$00,$00,$00,$00 ; tile 3 (nasty): bright white on white, flashing [not used in this room]
+ $ECC4 DEFB $0F,$01,$03,$06,$0D,$1A,$34,$68,$D0 ; tile 4 (ramp): white on blue
+ $ECCD DEFB $FF,$00,$00,$00,$00,$00,$00,$00,$00 ; tile 5 (conveyor): bright white on white, flashing [not used in this room]
+; Conveyor: direction, address of the leftmost cell in the attribute buffer, length in cells.
+ $ECD6 DEFB $00,$00,$00,$00 ; no conveyor (length 0)
+; Ramp: direction, attribute buffer address of its lowest cell, length in cells.
+ $ECDA DEFB $01,$4C,$5F,$06 ; direction 1 (rises to the right), lowest cell $5F4C = row 10 column 12, 6 cells
+; Border colour; then $DF-$E0, not read by any code.
+ $ECDE DEFB $03,$00,$00 ; border magenta (3); $DF-$E0 = $00,$00
+; Item graphic: 8 pixel rows shared by all items of the room.
+ $ECE1 DEFB $00,$00,$18,$14,$1A,$35,$6B,$D0 ; item graphic
+; Exits: room numbers left, right, up, down.
+ $ECE9 DEFB $0E,$00,$00,$26 ; left 14, right 0, up 0, down 38
+; Three bytes not read by any code.
+ $ECED DEFB $00,$00,$00 ; unused
+; Entity slots: definition index, start byte (see #R$C000).
+ $ECF0 DEFB $1D,$14 ; definition $1D, start $14 (column 20)
+ $ECF2 DEFB $FF,$00 ; end of list
+ $ECF4 DEFB $00,$00 ; empty
+ $ECF6 DEFB $00,$00 ; empty
+ $ECF8 DEFB $00,$00 ; empty
+ $ECFA DEFB $00,$00 ; empty
+ $ECFC DEFB $00,$00 ; empty
+ $ECFE DEFB $00,$00 ; empty

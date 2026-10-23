@@ -1,5 +1,3 @@
-@equ=ROOM_BORDER=$80DE
-@equ=ROOM_ITEM_GRAPHIC=$80E1
 ; Draw the items of the current room and collect the one Willy touches
 ;
 ; Walks the whole item table (#R$A400 and #R$A500) from the entry at
@@ -15,7 +13,7 @@
 ; other attribute with ink 7 on that cell would collect the item too. Not
 ; checked: guardian attributes with ink 7 (TODO). Two items on the same
 ; cell are collected in the same pass, because the attribute does not
-; change when the first is collected (observed, see finding).
+; change when the first is collected (observed, F18).
 ; .
 ; Collecting: the three ASCII digits at #R$857C are incremented with decimal
 ; carry, a falling beep is played (border colour of the room, speaker and MIC
@@ -26,7 +24,7 @@
 ; Drawing (item not touched): the ink of the cell is set to 3 + ((#R$85CB +
 ; table index) AND 3), so the items flash through magenta, green, cyan and
 ; yellow, keeping the paper, bright and flash bits; the 8 bytes of the
-; room's item graphic (#R$80E1) are copied into the screen buffer at $6000
+; room's item graphic ($80E1) are copied into the screen buffer at $6000
 ; (or $6800 for items in the bottom half of the room), one byte per pixel
 ; row, at the column and character row taken from the second byte.
 ; .

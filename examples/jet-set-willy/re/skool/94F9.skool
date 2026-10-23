@@ -1,10 +1,7 @@
-@equ=ROOM_CONVEYOR_DIR=$80D6
-@equ=ROOM_CONVEYOR_ADDR=$80D7
-@equ=ROOM_CONVEYOR_LEN=$80D9
 ; Animate the conveyor belt of the room
 ;
-; Uses the conveyor fields of the current room: direction (byte $D6, #R$80D6),
-; address (word at $D7, #R$80D7) and length in cells (byte $D9, #R$80D9). The
+; Uses the conveyor fields of the current room: direction (byte $D6, $80D6),
+; address (word at $D7, $80D7) and length in cells (byte $D9, $80D9). The
 ; address is an attribute address in the empty-room buffer ($5E00-$5FFF):
 ; bit 0 of its high byte selects the upper or lower half of the room and the
 ; low byte is row-in-half * 32 + column, so the routine turns it into the
@@ -30,6 +27,7 @@ c$94F9 LD HL,($80D7) ;
  $94FF RLCA          ;
  $9500 RLCA          ;
  $9501 RLCA          ;
+@isub=ADD A,ROOM_PIXEL_BUF/256
  $9502 ADD A,$70     ; $70 or $78: empty-room screen buffer page
  $9504 LD H,A        ;
  $9505 LD E,L        ;

@@ -1,7 +1,6 @@
-@equ=ROOM_EXIT_RIGHT=$80EA
 ; Leave the room through the right exit
 ;
-; Makes the right neighbour (byte $EA of the room, #R$80EA) the current
+; Makes the right neighbour (byte $EA of the room, $80EA) the current
 ; room and puts Willy on column 0 of the same row (column bits of his
 ; attribute address #R$85D3 cleared). Pops the caller's return address and
 ; jumps to #R$8912, which loads the new room and restarts the game loop, so

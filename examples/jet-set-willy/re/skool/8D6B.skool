@@ -1,4 +1,3 @@
-@equ=ROOM_ATTR_BUF=$5E00
 ; Expand the room layout into the attribute buffer
 ;
 ; Builds the attributes of the empty room (no sprites) at $5E00, 512 bytes

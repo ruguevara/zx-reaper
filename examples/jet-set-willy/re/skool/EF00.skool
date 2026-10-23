@@ -1,20 +1,38 @@
-; Data block at EF00
-b$EF00 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $EF08 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $EF10 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $EF18 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $EF20 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $EF28 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $EF30 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $EF38 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $EF40 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $EF48 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $EF50 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $EF58 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $EF60 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $EF68 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $EF70 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $EF78 DEFB $00,$00,$00,$00,$00,$00,$00,$00
+; Room 47 ($2F): Empty room titled "["
+;
+; Format: see #R$C000. An empty room: the layout is all background, the name
+; is the single character "[" surrounded by spaces, the tile area holds zeros
+; followed by bytes that look like Z80 code (not a valid set of tiles), the
+; border byte is $7E (low 3 bits: yellow), $DF-$E0 hold $FE,$2C and the entity
+; list is empty ($FF in slot 0). The unused tile bytes are harmless as long as
+; no cell uses a tile other than 0.
+; .
+; Exits: left Room 29 (The Nightmare Room, #R$DD00); right byte 205 = $CD,
+; page $CD = Room 13 (Out on a limb, #R$CD00); up Room 28 (First Landing,
+; #R$DC00); down Room 43 (Conservatory Roof, #R$EB00).
+; .
+; Entered only from the right exit of Room 46 (Tree Root, #R$EE00), whose
+; right edge is walled in, so no way to enter it by walking was found
+; (inferred from the layout). Observed: starting in this room from a snapshot,
+; Willy falls out through the bottom into Room 43 within 40 frames.
+@label=RoomBracket
+b$EF00 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; row 0: ................................
+ $EF08 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; row 1: ................................
+ $EF10 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; row 2: ................................
+ $EF18 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; row 3: ................................
+ $EF20 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; row 4: ................................
+ $EF28 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; row 5: ................................
+ $EF30 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; row 6: ................................
+ $EF38 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; row 7: ................................
+ $EF40 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; row 8: ................................
+ $EF48 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; row 9: ................................
+ $EF50 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; row 10: ................................
+ $EF58 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; row 11: ................................
+ $EF60 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; row 12: ................................
+ $EF68 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; row 13: ................................
+ $EF70 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; row 14: ................................
+ $EF78 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; row 15: ................................
+; Room name: 32 characters, printed at the bottom of the screen when the room is entered.
  $EF80 DEFM "         [                      "
  $EFA0 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00
  $EFA9 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$04
@@ -28,11 +46,12 @@ b$EF00 DEFB $00,$00,$00,$00,$00,$00,$00,$00
  $EFE1 DEFB $C0,$D7,$C5,$7E,$FE,$23,$CC,$78
  $EFE9 DEFB $1D,$CD,$1C,$2B
  $EFED DEFB $E3,$E5,$11
- $EFF0 DEFB $FF,$00
- $EFF2 DEFB $00,$00
- $EFF4 DEFB $00,$00
- $EFF6 DEFB $00,$00
- $EFF8 DEFB $00,$00
- $EFFA DEFB $00,$00
- $EFFC DEFB $00,$00
- $EFFE DEFB $00,$00
+; Entity slots: definition index, start byte (see #R$C000).
+ $EFF0 DEFB $FF,$00 ; end of list
+ $EFF2 DEFB $00,$00 ; empty
+ $EFF4 DEFB $00,$00 ; empty
+ $EFF6 DEFB $00,$00 ; empty
+ $EFF8 DEFB $00,$00 ; empty
+ $EFFA DEFB $00,$00 ; empty
+ $EFFC DEFB $00,$00 ; empty
+ $EFFE DEFB $00,$00 ; empty

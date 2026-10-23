@@ -1,38 +1,64 @@
-; Data block at C200
-b$C200 DEFB $00,$03,$FF,$CF,$FC,$00,$00,$00
- $C208 DEFB $AA,$AA,$AF,$FF,$3F,$00,$00,$00
- $C210 DEFB $00,$00,$3F,$D0,$5C,$00,$00,$00
- $C218 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $C220 DEFB $AA,$80,$00,$00,$00,$00,$00,$00
- $C228 DEFB $00,$01,$40,$04,$00,$04,$00,$00
- $C230 DEFB $00,$00,$01,$00,$04,$00,$00,$00
- $C238 DEFB $AA,$A8,$00,$00,$00,$01,$00,$00
- $C240 DEFB $00,$00,$14,$10,$10,$00,$00,$00
- $C248 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $C250 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $C258 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $C260 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $C268 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $C270 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $C278 DEFB $55,$55,$55,$55,$55,$55,$55,$55
+; Room 2 ($02): Under the MegaTree
+;
+; Format: see #R$C000.
+; .
+; Border: yellow (6). Conveyor: none. Ramp: none.
+; .
+; Items (from the item table at #R$A400): 1, at row 0 column 22.
+; .
+; Exits: left Room 3 (At the Foot of the MegaTree, #R$C300); right Room 1 (The
+; Bridge, #R$C100); up Room 0 (The Off Licence, #R$C000); down Room 0 (The Off
+; Licence, #R$C000).
+; .
+; Entities: slot 0: definition $20 (at $A100) start $10; slot 1: definition
+; $2A (at $A150) start $0E; slot 2: definition $1A (at $A0D0) start $1B. List
+; ends at slot 3 ($FF).
+; .
+; Bytes $DF-$E0 hold $80,$A0 (see #R$C000).
+@label=RoomUnderMegaTree
+b$C200 DEFB $00,$03,$FF,$CF,$FC,$00,$00,$00 ; row 0: .......******.*****.............
+ $C208 DEFB $AA,$AA,$AF,$FF,$3F,$00,$00,$00 ; row 1: ##########******.***............
+ $C210 DEFB $00,$00,$3F,$D0,$5C,$00,$00,$00 ; row 2: .........****-..--*.............
+ $C218 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; row 3: ................................
+ $C220 DEFB $AA,$80,$00,$00,$00,$00,$00,$00 ; row 4: #####...........................
+ $C228 DEFB $00,$01,$40,$04,$00,$04,$00,$00 ; row 5: .......--.....-.......-.........
+ $C230 DEFB $00,$00,$01,$00,$04,$00,$00,$00 ; row 6: ...........-......-.............
+ $C238 DEFB $AA,$A8,$00,$00,$00,$01,$00,$00 ; row 7: #######................-........
+ $C240 DEFB $00,$00,$14,$10,$10,$00,$00,$00 ; row 8: .........--..-...-..............
+ $C248 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; row 9: ................................
+ $C250 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; row 10: ................................
+ $C258 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; row 11: ................................
+ $C260 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; row 12: ................................
+ $C268 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; row 13: ................................
+ $C270 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; row 14: ................................
+ $C278 DEFB $55,$55,$55,$55,$55,$55,$55,$55 ; row 15: --------------------------------
+; Room name: 32 characters, printed at the bottom of the screen when the room is entered.
  $C280 DEFM "       Under the MegaTree       "
- $C2A0 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00
- $C2A9 DEFB $44,$D7,$B3,$75,$6D,$5C,$18,$08,$04
- $C2B2 DEFB $42,$BD,$AA,$5D,$A2,$F3,$0A,$06,$01
- $C2BB DEFB $46,$49,$6A,$3B,$3A,$FC,$1E,$6B,$E8
- $C2C4 DEFB $FF,$00,$00,$00,$FF,$00,$00,$00,$00
- $C2CD DEFB $FF,$00,$00,$00,$00,$00,$00,$00,$00
- $C2D6 DEFB $00,$00,$00,$00
- $C2DA DEFB $00,$00,$00,$00
- $C2DE DEFB $06,$80,$A0
- $C2E1 DEFB $81,$42,$24,$18,$3C,$18,$3C,$C3
- $C2E9 DEFB $03,$01,$00,$00
- $C2ED DEFB $00,$00,$00
- $C2F0 DEFB $20,$10
- $C2F2 DEFB $2A,$0E
- $C2F4 DEFB $1A,$1B
- $C2F6 DEFB $FF,$00
- $C2F8 DEFB $00,$00
- $C2FA DEFB $00,$00
- $C2FC DEFB $00,$00
- $C2FE DEFB $00,$00
+; Six tiles of 9 bytes: attribute, then 8 pixel rows. Tile 0 background, 1 floor, 2 wall, 3 nasty, 4 ramp, 5 conveyor.
+ $C2A0 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00 ; tile 0 (background): black on black
+ $C2A9 DEFB $44,$D7,$B3,$75,$6D,$5C,$18,$08,$04 ; tile 1 (floor): bright green on black
+ $C2B2 DEFB $42,$BD,$AA,$5D,$A2,$F3,$0A,$06,$01 ; tile 2 (wall): bright red on black
+ $C2BB DEFB $46,$49,$6A,$3B,$3A,$FC,$1E,$6B,$E8 ; tile 3 (nasty): bright yellow on black
+ $C2C4 DEFB $FF,$00,$00,$00,$FF,$00,$00,$00,$00 ; tile 4 (ramp): bright white on white, flashing [not used in this room]
+ $C2CD DEFB $FF,$00,$00,$00,$00,$00,$00,$00,$00 ; tile 5 (conveyor): bright white on white, flashing [not used in this room]
+; Conveyor: direction, address of the leftmost cell in the attribute buffer, length in cells.
+ $C2D6 DEFB $00,$00,$00,$00 ; no conveyor (length 0)
+; Ramp: direction, attribute buffer address of its lowest cell, length in cells.
+ $C2DA DEFB $00,$00,$00,$00 ; no ramp (length 0)
+; Border colour; then $DF-$E0, not read by any code.
+ $C2DE DEFB $06,$80,$A0 ; border yellow (6); $DF-$E0 = $80,$A0
+; Item graphic: 8 pixel rows shared by all items of the room.
+ $C2E1 DEFB $81,$42,$24,$18,$3C,$18,$3C,$C3 ; item graphic
+; Exits: room numbers left, right, up, down.
+ $C2E9 DEFB $03,$01,$00,$00 ; left 3, right 1, up 0, down 0
+; Three bytes not read by any code.
+ $C2ED DEFB $00,$00,$00 ; unused
+; Entity slots: definition index, start byte (see #R$C000).
+ $C2F0 DEFB $20,$10 ; definition $20, start $10 (column 16)
+ $C2F2 DEFB $2A,$0E ; definition $2A, start $0E (column 14)
+ $C2F4 DEFB $1A,$1B ; definition $1A, start $1B (column 27)
+ $C2F6 DEFB $FF,$00 ; end of list
+ $C2F8 DEFB $00,$00 ; empty
+ $C2FA DEFB $00,$00 ; empty
+ $C2FC DEFB $00,$00 ; empty
+ $C2FE DEFB $00,$00 ; empty

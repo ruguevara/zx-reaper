@@ -1,4 +1,12 @@
-; Data block at FE00
+; Room 62 ($3E): Stray bytes (not a room)
+;
+; Not a room: stray bytes. Nothing in the game refers to this page; it looks
+; like Z80 machine code or data left in memory by the author's tools (no field
+; of the room format makes sense: name, tile and exit bytes are arbitrary;
+; room 61, the same kind of data, was loaded from a snapshot and shows noise).
+; No exit of any room leads here, so the game does not load it by walking
+; (inferred). Format: see #R$C000.
+@label=RoomStray62
 b$FE00 DEFB $D2,$44,$A1,$42,$79,$44,$54,$00
  $FE08 DEFB $7A,$44,$BD,$44,$45,$01,$00,$43
  $FE10 DEFB $F5,$FE,$04,$4F,$00,$43,$89,$47

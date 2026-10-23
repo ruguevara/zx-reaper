@@ -1,38 +1,61 @@
-; Data block at CA00
-b$CA00 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $CA08 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $CA10 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $CA18 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $CA20 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $CA28 DEFB $AA,$AA,$AA,$00,$00,$00,$00,$00
- $CA30 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $CA38 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $CA40 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $CA48 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $CA50 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $CA58 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $CA60 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $CA68 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $CA70 DEFB $40,$00,$00,$00,$00,$00,$00,$00
- $CA78 DEFB $A0,$00,$00,$00,$00,$00,$00,$00
+; Room 10 ($0A): The Front Door
+;
+; Format: see #R$C000.
+; .
+; Border: red (2). Conveyor: none. Ramp: 2 cells from row 15 column 2 up to
+; row 14 column 1, rising to the left.
+; .
+; Items (from the item table at #R$A400): 1, at row 4 column 11.
+; .
+; Exits: left Room 11 (The Hall, #R$CB00); right Room 9 (On a Branch Over the
+; Drive, #R$C900); up Room 0 (The Off Licence, #R$C000); down Room 5 (The
+; Security Guard, #R$C500).
+; .
+; Entities: none. List ends at slot 0 ($FF).
+@label=RoomFrontDoor
+b$CA00 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; row 0: ................................
+ $CA08 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; row 1: ................................
+ $CA10 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; row 2: ................................
+ $CA18 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; row 3: ................................
+ $CA20 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; row 4: ................................
+ $CA28 DEFB $AA,$AA,$AA,$00,$00,$00,$00,$00 ; row 5: ############....................
+ $CA30 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; row 6: ................................
+ $CA38 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; row 7: ................................
+ $CA40 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; row 8: ................................
+ $CA48 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; row 9: ................................
+ $CA50 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; row 10: ................................
+ $CA58 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; row 11: ................................
+ $CA60 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; row 12: ................................
+ $CA68 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; row 13: ................................
+ $CA70 DEFB $40,$00,$00,$00,$00,$00,$00,$00 ; row 14: -...............................
+ $CA78 DEFB $A0,$00,$00,$00,$00,$00,$00,$00 ; row 15: ##..............................
+; Room name: 32 characters, printed at the bottom of the screen when the room is entered.
  $CA80 DEFM "         The Front Door         "
- $CAA0 DEFB $28,$00,$00,$00,$00,$00,$00,$00,$00
- $CAA9 DEFB $47,$FF,$AA,$77,$AA,$77,$AA,$55,$AA
- $CAB2 DEFB $3A,$20,$10,$0E,$C1,$30,$09,$C6,$20
- $CABB DEFB $FF,$00,$00,$00,$00,$00,$00,$00,$00
- $CAC4 DEFB $2F,$C0,$40,$B0,$50,$AC,$54,$AB,$55
- $CACD DEFB $FF,$00,$00,$00,$00,$00,$00,$00,$00
- $CAD6 DEFB $00,$00,$00,$00
- $CADA DEFB $00,$E2,$5F,$02
- $CADE DEFB $02,$00,$00
- $CAE1 DEFB $0C,$1C,$1C,$1E,$1B,$3F,$78,$FF
- $CAE9 DEFB $0B,$09,$00,$05
- $CAED DEFB $00,$00,$00
- $CAF0 DEFB $FF,$00
- $CAF2 DEFB $00,$00
- $CAF4 DEFB $00,$00
- $CAF6 DEFB $00,$00
- $CAF8 DEFB $00,$00
- $CAFA DEFB $00,$00
- $CAFC DEFB $00,$00
- $CAFE DEFB $00,$00
+; Six tiles of 9 bytes: attribute, then 8 pixel rows. Tile 0 background, 1 floor, 2 wall, 3 nasty, 4 ramp, 5 conveyor.
+ $CAA0 DEFB $28,$00,$00,$00,$00,$00,$00,$00,$00 ; tile 0 (background): black on cyan
+ $CAA9 DEFB $47,$FF,$AA,$77,$AA,$77,$AA,$55,$AA ; tile 1 (floor): bright white on black
+ $CAB2 DEFB $3A,$20,$10,$0E,$C1,$30,$09,$C6,$20 ; tile 2 (wall): red on white
+ $CABB DEFB $FF,$00,$00,$00,$00,$00,$00,$00,$00 ; tile 3 (nasty): bright white on white, flashing [not used in this room]
+ $CAC4 DEFB $2F,$C0,$40,$B0,$50,$AC,$54,$AB,$55 ; tile 4 (ramp): white on cyan
+ $CACD DEFB $FF,$00,$00,$00,$00,$00,$00,$00,$00 ; tile 5 (conveyor): bright white on white, flashing [not used in this room]
+; Conveyor: direction, address of the leftmost cell in the attribute buffer, length in cells.
+ $CAD6 DEFB $00,$00,$00,$00 ; no conveyor (length 0)
+; Ramp: direction, attribute buffer address of its lowest cell, length in cells.
+ $CADA DEFB $00,$E2,$5F,$02 ; direction 0 (rises to the left), lowest cell $5FE2 = row 15 column 2, 2 cells
+; Border colour; then $DF-$E0, not read by any code.
+ $CADE DEFB $02,$00,$00 ; border red (2); $DF-$E0 = $00,$00
+; Item graphic: 8 pixel rows shared by all items of the room.
+ $CAE1 DEFB $0C,$1C,$1C,$1E,$1B,$3F,$78,$FF ; item graphic
+; Exits: room numbers left, right, up, down.
+ $CAE9 DEFB $0B,$09,$00,$05 ; left 11, right 9, up 0, down 5
+; Three bytes not read by any code.
+ $CAED DEFB $00,$00,$00 ; unused
+; Entity slots: definition index, start byte (see #R$C000).
+ $CAF0 DEFB $FF,$00 ; end of list
+ $CAF2 DEFB $00,$00 ; empty
+ $CAF4 DEFB $00,$00 ; empty
+ $CAF6 DEFB $00,$00 ; empty
+ $CAF8 DEFB $00,$00 ; empty
+ $CAFA DEFB $00,$00 ; empty
+ $CAFC DEFB $00,$00 ; empty
+ $CAFE DEFB $00,$00 ; empty

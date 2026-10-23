@@ -1,7 +1,6 @@
-@equ=ROOM_EXIT_DOWN=$80EC
 ; Leave the room through the bottom: enter the room below at its top
 ;
-; Makes the room below (byte $EC of the room, #R$80EC) the current room and
+; Makes the room below (byte $EC of the room, $80EC) the current room and
 ; puts Willy at the top: Y (#R$85CF) is set to 0, the row bits of his
 ; attribute address (#R$85D3) are cleared with the column kept, and the
 ; attribute page (#R$85D4) is $5C (upper half). If the jump/fall state

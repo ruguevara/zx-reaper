@@ -1,4 +1,37 @@
-; Data block at A400
+; Item table, first half: room, flags and screen half of each item
+;
+; One byte per item, indexed by L from #R$A3FF ($AD) to $FF (83 items; the
+; first $AD bytes are unused zeros). The matching entry of the second half
+; is #R$A500 + the same index. Item entry format:
+; .
+; bits 0-5 of the first byte (this table): room number (0-63);
+; bit 6: the item is still there. Clear in the file; #R$87CA sets it for every
+; item when a game starts and #R$93D1 clears it when Willy collects the item;
+; bit 7: the item is in the bottom half of the room (character rows 8-15),
+; clear for the top half (rows 0-7);
+; second byte (#R$A500 + index): character cell inside that half: bits 0-4
+; = column (0-31, x = column * 8), bits 5-7 = row within the half (0-7).
+; The character row of the room (0-15) is therefore (second byte >> 5) +
+; 8 * bit 7 of the first byte, and the second byte is also the low byte of the
+; cell's address in the attribute buffer page $5C00/$5D00 (bit 7 chooses the
+; page) and in the screen buffer page $60/$68 (the 8 pixel rows are 256 bytes
+; apart).
+; .
+; The graphic and colour of every item are the same in a room: the 8 bytes of
+; the room's item graphic (room byte $E1-$E8).
+; .
+; Decoded from re/image.z80 (a short script reading the image): 83 items in 38
+; rooms. Items per room: room $00: 12, $02: 1, $03: 3, $07: 1, $09: 1, $0A: 1,
+; $0C: 3, $0D: 2, $0E: 2, $0F: 1, $10: 1, $11: 1, $12: 1, $13: 1, $15: 7,
+; $16: 2, $19: 4, $1B: 1, $1C: 1, $1D: 1, $1E: 1, $1F: 1, $21: 1, $22: 1,
+; $25: 3, $26: 1, $28: 1, $2B: 4, $2C: 1, $2E: 2, $31: 6, $32: 4, $33: 1,
+; $38: 4, $39: 1, $3A: 2, $3B: 1, $3C: 1. The two items of room $3A (indexes
+; $C0 and $C6) are on the same cell, so only 82 different cells are used; both
+; are collected together.
+; .
+; The only code that touches the item tables is #R$87CA (sets bit 6) and
+; #R$93D1 (reads, clears bit 6): static search for loads of the pages $A4/$A5.
+@label=ItemRoomTable
 b$A400 DEFS $AD
  $A4AD DEFB $B2,$B2,$B2,$B2,$B8,$B8,$B8,$B8,$AB,$AB,$AB,$AB,$9F,$92,$0F,$10
  $A4BD DEFB $11,$BC,$BB,$BA,$25,$25,$A5,$1B,$B9,$BA,$1C,$A2,$19,$19,$99,$99

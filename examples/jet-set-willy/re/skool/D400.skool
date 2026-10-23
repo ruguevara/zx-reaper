@@ -1,38 +1,64 @@
-; Data block at D400
-b$D400 DEFB $A0,$40,$0A,$00,$00,$00,$00,$00
- $D408 DEFB $A0,$40,$0A,$00,$00,$00,$00,$00
- $D410 DEFB $A0,$40,$0A,$00,$00,$00,$00,$00
- $D418 DEFB $00,$40,$00,$00,$00,$00,$00,$00
- $D420 DEFB $00,$40,$00,$00,$00,$00,$00,$00
- $D428 DEFB $55,$55,$5A,$0A,$AA,$AA,$AA,$AA
- $D430 DEFB $00,$00,$10,$00,$00,$00,$00,$00
- $D438 DEFB $00,$00,$10,$00,$00,$00,$00,$00
- $D440 DEFB $00,$00,$15,$55,$55,$55,$55,$55
- $D448 DEFB $00,$00,$10,$00,$00,$00,$00,$00
- $D450 DEFB $00,$00,$10,$00,$00,$00,$00,$00
- $D458 DEFB $00,$00,$10,$00,$00,$00,$00,$00
- $D460 DEFB $00,$00,$10,$00,$00,$00,$00,$00
- $D468 DEFB $00,$00,$10,$00,$00,$00,$00,$00
- $D470 DEFB $AA,$AA,$AA,$AA,$AA,$AA,$AA,$AA
- $D478 DEFB $AA,$AA,$AA,$AA,$AA,$AA,$AA,$AA
+; Room 20 ($14): Ballroom East
+;
+; Format: see #R$C000.
+; .
+; Border: red (2). Conveyor: none. Ramp: none.
+; .
+; Items: none in the item table. The room nevertheless has an item graphic
+; (leftover: never drawn).
+; .
+; Exits: left Room 21 (Ballroom West, #R$D500); right Room 11 (The Hall,
+; #R$CB00); up Room 26 (East Wall Base, #R$DA00); down Room 0 (The Off
+; Licence, #R$C000).
+; .
+; Entities: slot 0: definition $13 (at $A098) start $6C; slot 1: definition
+; $2A (at $A150) start $05; slot 2: definition $28 (at $A140) start $07; slot
+; 3: definition $29 (at $A148) start $2B; slot 4: definition $15 (at $A0A8)
+; start $18. List ends at slot 5 ($FF).
+@label=RoomBallroomEast
+b$D400 DEFB $A0,$40,$0A,$00,$00,$00,$00,$00 ; row 0: ##..-.....##....................
+ $D408 DEFB $A0,$40,$0A,$00,$00,$00,$00,$00 ; row 1: ##..-.....##....................
+ $D410 DEFB $A0,$40,$0A,$00,$00,$00,$00,$00 ; row 2: ##..-.....##....................
+ $D418 DEFB $00,$40,$00,$00,$00,$00,$00,$00 ; row 3: ....-...........................
+ $D420 DEFB $00,$40,$00,$00,$00,$00,$00,$00 ; row 4: ....-...........................
+ $D428 DEFB $55,$55,$5A,$0A,$AA,$AA,$AA,$AA ; row 5: ----------##..##################
+ $D430 DEFB $00,$00,$10,$00,$00,$00,$00,$00 ; row 6: .........-......................
+ $D438 DEFB $00,$00,$10,$00,$00,$00,$00,$00 ; row 7: .........-......................
+ $D440 DEFB $00,$00,$15,$55,$55,$55,$55,$55 ; row 8: .........-----------------------
+ $D448 DEFB $00,$00,$10,$00,$00,$00,$00,$00 ; row 9: .........-......................
+ $D450 DEFB $00,$00,$10,$00,$00,$00,$00,$00 ; row 10: .........-......................
+ $D458 DEFB $00,$00,$10,$00,$00,$00,$00,$00 ; row 11: .........-......................
+ $D460 DEFB $00,$00,$10,$00,$00,$00,$00,$00 ; row 12: .........-......................
+ $D468 DEFB $00,$00,$10,$00,$00,$00,$00,$00 ; row 13: .........-......................
+ $D470 DEFB $AA,$AA,$AA,$AA,$AA,$AA,$AA,$AA ; row 14: ################################
+ $D478 DEFB $AA,$AA,$AA,$AA,$AA,$AA,$AA,$AA ; row 15: ################################
+; Room name: 32 characters, printed at the bottom of the screen when the room is entered.
  $D480 DEFM "         Ballroom East          "
- $D4A0 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00
- $D4A9 DEFB $06,$AA,$55,$22,$44,$22,$44,$22,$44
- $D4B2 DEFB $0F,$44,$44,$FF,$11,$11,$FF,$55,$AA
- $D4BB DEFB $FF,$00,$00,$00,$00,$00,$00,$00,$00
- $D4C4 DEFB $FF,$00,$00,$00,$00,$00,$00,$00,$00
- $D4CD DEFB $FF,$00,$00,$00,$00,$00,$00,$00,$00
- $D4D6 DEFB $00,$00,$00,$00
- $D4DA DEFB $00,$00,$00,$00
- $D4DE DEFB $02,$00,$00
- $D4E1 DEFB $81,$81,$42,$24,$18,$18,$18,$E7
- $D4E9 DEFB $15,$0B,$1A,$00
- $D4ED DEFB $00,$00,$00
- $D4F0 DEFB $13,$6C
- $D4F2 DEFB $2A,$05
- $D4F4 DEFB $28,$07
- $D4F6 DEFB $29,$2B
- $D4F8 DEFB $15,$18
- $D4FA DEFB $FF,$00
- $D4FC DEFB $00,$00
- $D4FE DEFB $00,$00
+; Six tiles of 9 bytes: attribute, then 8 pixel rows. Tile 0 background, 1 floor, 2 wall, 3 nasty, 4 ramp, 5 conveyor.
+ $D4A0 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00 ; tile 0 (background): black on black
+ $D4A9 DEFB $06,$AA,$55,$22,$44,$22,$44,$22,$44 ; tile 1 (floor): yellow on black
+ $D4B2 DEFB $0F,$44,$44,$FF,$11,$11,$FF,$55,$AA ; tile 2 (wall): white on blue
+ $D4BB DEFB $FF,$00,$00,$00,$00,$00,$00,$00,$00 ; tile 3 (nasty): bright white on white, flashing [not used in this room]
+ $D4C4 DEFB $FF,$00,$00,$00,$00,$00,$00,$00,$00 ; tile 4 (ramp): bright white on white, flashing [not used in this room]
+ $D4CD DEFB $FF,$00,$00,$00,$00,$00,$00,$00,$00 ; tile 5 (conveyor): bright white on white, flashing [not used in this room]
+; Conveyor: direction, address of the leftmost cell in the attribute buffer, length in cells.
+ $D4D6 DEFB $00,$00,$00,$00 ; no conveyor (length 0)
+; Ramp: direction, attribute buffer address of its lowest cell, length in cells.
+ $D4DA DEFB $00,$00,$00,$00 ; no ramp (length 0)
+; Border colour; then $DF-$E0, not read by any code.
+ $D4DE DEFB $02,$00,$00 ; border red (2); $DF-$E0 = $00,$00
+; Item graphic: 8 pixel rows shared by all items of the room.
+ $D4E1 DEFB $81,$81,$42,$24,$18,$18,$18,$E7 ; item graphic
+; Exits: room numbers left, right, up, down.
+ $D4E9 DEFB $15,$0B,$1A,$00 ; left 21, right 11, up 26, down 0
+; Three bytes not read by any code.
+ $D4ED DEFB $00,$00,$00 ; unused
+; Entity slots: definition index, start byte (see #R$C000).
+ $D4F0 DEFB $13,$6C ; definition $13, start $6C (column 12)
+ $D4F2 DEFB $2A,$05 ; definition $2A, start $05 (column 5)
+ $D4F4 DEFB $28,$07 ; definition $28, start $07 (column 7)
+ $D4F6 DEFB $29,$2B ; definition $29, start $2B (column 11)
+ $D4F8 DEFB $15,$18 ; definition $15, start $18 (column 24)
+ $D4FA DEFB $FF,$00 ; end of list
+ $D4FC DEFB $00,$00 ; empty
+ $D4FE DEFB $00,$00 ; empty

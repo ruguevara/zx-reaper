@@ -14,6 +14,13 @@
 ; The address steps down a pixel row with INC H and handles the character-row
 ; and one-third-of-the-bitmap boundaries.
 ; .
+; Callers: #R$86C3, #R$898B and #R$8B07 use mode 0 directly on the screen
+; (C = 0). #R$91BE and #R$9534 use mode 1 on the $6000 buffer, after Willy and
+; the room are already drawn there, and send a collision to #R$90B7 (observed
+; in the Bathroom: C = 1, DE = $B900, HL = $607B). Observed with a test call:
+; mode 0 replaces bytes and returns Z with HL = $6040 after a sprite drawn at
+; $6000; mode 1 over set pixels returns NZ with part of the sprite drawn.
+; .
 ; Hardware: writes the screen bitmap or a bitmap buffer in screen layout.
 ;
 ; DE Sprite graphic address

@@ -1,38 +1,67 @@
-; Data block at D600
-b$D600 DEFB $00,$00,$80,$00,$00,$00,$00,$00
- $D608 DEFB $00,$00,$80,$00,$00,$00,$00,$00
- $D610 DEFB $00,$00,$80,$00,$00,$00,$00,$00
- $D618 DEFB $00,$00,$00,$00,$00,$00,$03,$00
- $D620 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $D628 DEFB $00,$01,$95,$55,$55,$50,$00,$55
- $D630 DEFB $00,$00,$80,$00,$00,$00,$00,$00
- $D638 DEFB $00,$00,$80,$00,$00,$00,$00,$00
- $D640 DEFB $A5,$55,$85,$00,$00,$00,$00,$00
- $D648 DEFB $A0,$00,$80,$00,$00,$00,$55,$40
- $D650 DEFB $A0,$00,$80,$00,$01,$40,$00,$00
- $D658 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $D660 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $D668 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $D670 DEFB $AA,$AA,$AA,$AA,$AA,$AA,$AA,$AA
- $D678 DEFB $AA,$AA,$AA,$AA,$AA,$AA,$AA,$AA
+; Room 22 ($16): To the Kitchens    Main Stairway
+;
+; Format: see #R$C000.
+; .
+; Border: green (4). Conveyor: moves Willy left, 2 cells from row 8 column 14.
+; Ramp: 12 cells from row 11 column 31 up to row 0 column 20, rising to the
+; left.
+; .
+; Items (from the item table at #R$A400): 2, at row 6 column 9; row 9 column
+; 2.
+; .
+; Exits: left Room 23 (The Kitchen, #R$D700); right Room 21 (Ballroom West,
+; #R$D500); up Room 28 (First Landing, #R$DC00); down Room 0 (The Off Licence,
+; #R$C000).
+; .
+; Entities: slot 0: definition $5A (at $A2D0) start $04; slot 1: definition
+; $5B (at $A2D8) start $10; slot 2: definition $5C (at $A2E0) start $96; slot
+; 3: definition $5D (at $A2E8) start $04; slot 4: definition $5E (at $A2F0)
+; start $96; slot 5: definition $5F (at $A2F8) start $0B. List ends at slot 6
+; ($FF).
+@label=RoomMainStairway
+b$D600 DEFB $00,$00,$80,$00,$00,$00,$00,$00 ; row 0: ........#.......................
+ $D608 DEFB $00,$00,$80,$00,$00,$00,$00,$00 ; row 1: ........#.......................
+ $D610 DEFB $00,$00,$80,$00,$00,$00,$00,$00 ; row 2: ........#.......................
+ $D618 DEFB $00,$00,$00,$00,$00,$00,$03,$00 ; row 3: ...........................*....
+ $D620 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; row 4: ................................
+ $D628 DEFB $00,$01,$95,$55,$55,$50,$00,$55 ; row 5: .......-#-------------......----
+ $D630 DEFB $00,$00,$80,$00,$00,$00,$00,$00 ; row 6: ........#.......................
+ $D638 DEFB $00,$00,$80,$00,$00,$00,$00,$00 ; row 7: ........#.......................
+ $D640 DEFB $A5,$55,$85,$00,$00,$00,$00,$00 ; row 8: ##------#.--....................
+ $D648 DEFB $A0,$00,$80,$00,$00,$00,$55,$40 ; row 9: ##......#...............-----...
+ $D650 DEFB $A0,$00,$80,$00,$01,$40,$00,$00 ; row 10: ##......#..........--...........
+ $D658 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; row 11: ................................
+ $D660 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; row 12: ................................
+ $D668 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; row 13: ................................
+ $D670 DEFB $AA,$AA,$AA,$AA,$AA,$AA,$AA,$AA ; row 14: ################################
+ $D678 DEFB $AA,$AA,$AA,$AA,$AA,$AA,$AA,$AA ; row 15: ################################
+; Room name: 32 characters, printed at the bottom of the screen when the room is entered.
  $D680 DEFM "To the Kitchens    Main Stairway"
- $D6A0 DEFB $08,$00,$00,$00,$00,$00,$00,$00,$00
- $D6A9 DEFB $0D,$FF,$FF,$00,$FF,$00,$00,$00,$00
- $D6B2 DEFB $3A,$00,$15,$BF,$15,$00,$51,$FB,$51
- $D6BB DEFB $4D,$18,$5A,$BD,$19,$7E,$99,$24,$24
- $D6C4 DEFB $0F,$C0,$80,$30,$20,$0C,$08,$03,$02
- $D6CD DEFB $6B,$F0,$AA,$78,$FF,$AA,$55,$AA,$55
- $D6D6 DEFB $00,$0E,$5F,$02
- $D6DA DEFB $00,$7F,$5F,$0C
- $D6DE DEFB $04,$00,$00
- $D6E1 DEFB $40,$A0,$F0,$F8,$FC,$7A,$25,$02
- $D6E9 DEFB $17,$15,$1C,$00
- $D6ED DEFB $00,$00,$00
- $D6F0 DEFB $5A,$04
- $D6F2 DEFB $5B,$10
- $D6F4 DEFB $5C,$96
- $D6F6 DEFB $5D,$04
- $D6F8 DEFB $5E,$96
- $D6FA DEFB $5F,$0B
- $D6FC DEFB $FF,$00
- $D6FE DEFB $00,$00
+; Six tiles of 9 bytes: attribute, then 8 pixel rows. Tile 0 background, 1 floor, 2 wall, 3 nasty, 4 ramp, 5 conveyor.
+ $D6A0 DEFB $08,$00,$00,$00,$00,$00,$00,$00,$00 ; tile 0 (background): black on blue
+ $D6A9 DEFB $0D,$FF,$FF,$00,$FF,$00,$00,$00,$00 ; tile 1 (floor): cyan on blue
+ $D6B2 DEFB $3A,$00,$15,$BF,$15,$00,$51,$FB,$51 ; tile 2 (wall): red on white
+ $D6BB DEFB $4D,$18,$5A,$BD,$19,$7E,$99,$24,$24 ; tile 3 (nasty): bright cyan on blue
+ $D6C4 DEFB $0F,$C0,$80,$30,$20,$0C,$08,$03,$02 ; tile 4 (ramp): white on blue
+ $D6CD DEFB $6B,$F0,$AA,$78,$FF,$AA,$55,$AA,$55 ; tile 5 (conveyor): bright magenta on cyan
+; Conveyor: direction, address of the leftmost cell in the attribute buffer, length in cells.
+ $D6D6 DEFB $00,$0E,$5F,$02 ; direction 0 (left), address $5F0E = row 8 column 14, 2 cells
+; Ramp: direction, attribute buffer address of its lowest cell, length in cells.
+ $D6DA DEFB $00,$7F,$5F,$0C ; direction 0 (rises to the left), lowest cell $5F7F = row 11 column 31, 12 cells
+; Border colour; then $DF-$E0, not read by any code.
+ $D6DE DEFB $04,$00,$00 ; border green (4); $DF-$E0 = $00,$00
+; Item graphic: 8 pixel rows shared by all items of the room.
+ $D6E1 DEFB $40,$A0,$F0,$F8,$FC,$7A,$25,$02 ; item graphic
+; Exits: room numbers left, right, up, down.
+ $D6E9 DEFB $17,$15,$1C,$00 ; left 23, right 21, up 28, down 0
+; Three bytes not read by any code.
+ $D6ED DEFB $00,$00,$00 ; unused
+; Entity slots: definition index, start byte (see #R$C000).
+ $D6F0 DEFB $5A,$04 ; definition $5A, start $04 (column 4)
+ $D6F2 DEFB $5B,$10 ; definition $5B, start $10 (column 16)
+ $D6F4 DEFB $5C,$96 ; definition $5C, start $96 (column 22)
+ $D6F6 DEFB $5D,$04 ; definition $5D, start $04 (column 4)
+ $D6F8 DEFB $5E,$96 ; definition $5E, start $96 (column 22)
+ $D6FA DEFB $5F,$0B ; definition $5F, start $0B (column 11)
+ $D6FC DEFB $FF,$00 ; end of list
+ $D6FE DEFB $00,$00 ; empty

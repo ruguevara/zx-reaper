@@ -1,4 +1,3 @@
-@equ=ROOM_PIXEL_BUF=$7000
 ; Build the empty-room attribute and bitmap buffers
 ;
 ; Called by #R$88AE at room entry. First expands the layout into the
@@ -8,17 +7,22 @@
 ; go to $7000-$77FF, the last 256 to $7800-$7FFF; pixel row k of cell n is at
 ; base+n+256*k).
 ; .
-; The tile is found with CPIR over the six tile definitions at $80A0, so the
-; attribute byte is looked up, not the tile number: if two tiles of a room have
-; the same attribute, the first one wins (inferred). A pixel byte equal to the
-; attribute could also be matched before the right tile; TODO whether any room
-; does that.
+; The tile is found with CPIR over the 54 bytes of the six tile definitions at
+; $80A0, so it is the attribute byte that is looked up, not a tile number: the
+; first byte in the table equal to the attribute decides, and the 8 bytes after
+; it are copied. That is the tile's own pixel data only if no earlier byte of
+; the table (attribute or pixel row) has the same value. In rooms 24, 29, 36,
+; 49 and 51 a used tile does not satisfy this (found by scanning the rooms in
+; the tape image), and the simulator then copies the 8 bytes after the earlier
+; match (observed for rooms 24, 29 and 49).
 ; .
 ; The copy loop's pixel buffer high byte is a self-modified operand: the code
-; at $8D3C and $8D48 stores $70 / $78 into the LD D,n at $8D5C (SmcBufferPage).
+; at $8D3C and $8D48 stores $70 / $78 into the LD D,n at $8D5C
+; (SmcPixelBufPage).
 ; .
 ; Observed: a Python model of the attribute step and this copy reproduces
-; $5E00-$5FFF and $7000-$7FFF of a snapshot taken in the Bathroom exactly.
+; $5E00-$5FFF and $7000-$7FFF of a snapshot taken in the Bathroom exactly, and
+; the same for rooms 24, 29 and 49 loaded into $8000 and run here.
 ; .
 ; Hardware: none (memory only). The buffers are copied to $5C00/$6000 and to
 ; the screen later by the frame code (#R$89AD).
@@ -26,22 +30,32 @@
 ; O:A Corrupted (all other registers too)
 @label=BuildRoomBuffers
 c$8D33 CALL $8D6B    ;
- $8D36 LD IX,$5E00   ;
+ $8D36 LD IX,$5E00   ; first half: cells 0-255
+@isub=LD A,ROOM_PIXEL_BUF/256
  $8D3A LD A,$70      ;
+@isub=LD (SmcPixelBufPage+1),A
  $8D3C LD ($8D5D),A  ;
  $8D3F CALL $8D4B    ;
- $8D42 LD IX,$5F00   ;
+@isub=LD IX,ROOM_ATTR_BUF+$100
+ $8D42 LD IX,$5F00   ; second half: cells 256-511
+@isub=LD A,(ROOM_PIXEL_BUF+$800)/256
  $8D46 LD A,$78      ;
+@isub=LD (SmcPixelBufPage+1),A
  $8D48 LD ($8D5D),A  ;
+@label=BuildRoomBuffers_Half
 *$8D4B LD C,$00      ;
-*$8D4D LD E,C        ;
+@label=BuildRoomBuffers_Cell
+*$8D4D LD E,C        ; E = cell index in this half
  $8D4E LD A,(IX+$00) ;
  $8D51 LD HL,$80A0   ;
+@isub=LD BC,TILE_COUNT*TILE_SIZE
  $8D54 LD BC,$0036   ;
  $8D57 CPIR          ;
  $8D59 LD C,E        ;
+@isub=LD B,CELL_HEIGHT
  $8D5A LD B,$08      ;
- $8D5C LD D,$00      ;
+@label=SmcPixelBufPage
+ $8D5C LD D,$00      ; operand $8D5D: set to $70 or $78 by this routine
 *$8D5E LD A,(HL)     ;
  $8D5F LD (DE),A     ;
  $8D60 INC HL        ;

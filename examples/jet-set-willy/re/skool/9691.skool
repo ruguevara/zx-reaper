@@ -1,4 +1,3 @@
-@equ=ROM_FONT_CODE0=$3C00
 ; Draw one character from the ROM font
 ;
 ; Looks up the 8-byte glyph of character A in the ROM character set and copies

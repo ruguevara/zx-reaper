@@ -1,38 +1,62 @@
-; Data block at F900
-b$F900 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $F908 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $F910 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $F918 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $F920 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $F928 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $F930 DEFB $00,$00,$00,$00,$00,$00,$15,$55
- $F938 DEFB $00,$00,$00,$00,$00,$00,$D0,$00
- $F940 DEFB $00,$00,$00,$00,$00,$03,$10,$00
- $F948 DEFB $00,$00,$00,$00,$00,$0C,$10,$00
- $F950 DEFB $00,$00,$00,$00,$00,$30,$10,$00
- $F958 DEFB $00,$00,$00,$00,$01,$55,$55,$55
- $F960 DEFB $00,$00,$00,$00,$03,$00,$00,$00
- $F968 DEFB $00,$00,$04,$00,$0C,$00,$00,$00
- $F970 DEFB $00,$00,$00,$00,$A0,$00,$00,$00
- $F978 DEFB $00,$00,$10,$00,$A0,$55,$55,$00
+; Room 57 ($39): Above the West Bedroom
+;
+; Format: see #R$C000.
+; .
+; Border: red (2). Conveyor: none. Ramp: 8 cells from row 13 column 17 up to
+; row 6 column 24, rising to the right.
+; .
+; Items (from the item table at #R$A400): 1, at row 9 column 23.
+; .
+; Exits: left Room 0 (The Off Licence, #R$C000); right Room 56 (West Wing
+; Roof, #R$F800); up Room 0 (The Off Licence, #R$C000); down Room 55 (West
+; Bedroom, #R$F700).
+; .
+; Entities: slot 0: definition $07 (at $A038) start $CB; slot 1: definition
+; $33 (at $A198) start $4E. List ends at slot 2 ($FF).
+@label=RoomAboveWestBedroom
+b$F900 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; row 0: ................................
+ $F908 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; row 1: ................................
+ $F910 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; row 2: ................................
+ $F918 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; row 3: ................................
+ $F920 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; row 4: ................................
+ $F928 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; row 5: ................................
+ $F930 DEFB $00,$00,$00,$00,$00,$00,$15,$55 ; row 6: .........................-------
+ $F938 DEFB $00,$00,$00,$00,$00,$00,$D0,$00 ; row 7: ........................*-......
+ $F940 DEFB $00,$00,$00,$00,$00,$03,$10,$00 ; row 8: .......................*.-......
+ $F948 DEFB $00,$00,$00,$00,$00,$0C,$10,$00 ; row 9: ......................*..-......
+ $F950 DEFB $00,$00,$00,$00,$00,$30,$10,$00 ; row 10: .....................*...-......
+ $F958 DEFB $00,$00,$00,$00,$01,$55,$55,$55 ; row 11: ...................-------------
+ $F960 DEFB $00,$00,$00,$00,$03,$00,$00,$00 ; row 12: ...................*............
+ $F968 DEFB $00,$00,$04,$00,$0C,$00,$00,$00 ; row 13: ..........-.......*.............
+ $F970 DEFB $00,$00,$00,$00,$A0,$00,$00,$00 ; row 14: ................##..............
+ $F978 DEFB $00,$00,$10,$00,$A0,$55,$55,$00 ; row 15: .........-......##..--------....
+; Room name: 32 characters, printed at the bottom of the screen when the room is entered.
  $F980 DEFM "   Above the West Bedroom       "
- $F9A0 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00
- $F9A9 DEFB $04,$F7,$AA,$55,$EF,$00,$00,$00,$00
- $F9B2 DEFB $23,$AA,$55,$AA,$55,$AA,$55,$AA,$55
- $F9BB DEFB $06,$30,$60,$C0,$80,$00,$00,$00,$00
- $F9C4 DEFB $07,$01,$00,$06,$09,$13,$06,$6C,$98
- $F9CD DEFB $FF,$00,$00,$00,$00,$00,$00,$00,$00
- $F9D6 DEFB $00,$00,$00,$00
- $F9DA DEFB $01,$B1,$5F,$08
- $F9DE DEFB $02,$00,$00
- $F9E1 DEFB $08,$10,$20,$21,$12,$AC,$40,$20
- $F9E9 DEFB $00,$38,$00,$37
- $F9ED DEFB $00,$00,$00
- $F9F0 DEFB $07,$CB
- $F9F2 DEFB $33,$4E
- $F9F4 DEFB $FF,$00
- $F9F6 DEFB $00,$00
- $F9F8 DEFB $00,$00
- $F9FA DEFB $00,$00
- $F9FC DEFB $00,$00
- $F9FE DEFB $00,$00
+; Six tiles of 9 bytes: attribute, then 8 pixel rows. Tile 0 background, 1 floor, 2 wall, 3 nasty, 4 ramp, 5 conveyor.
+ $F9A0 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00 ; tile 0 (background): black on black
+ $F9A9 DEFB $04,$F7,$AA,$55,$EF,$00,$00,$00,$00 ; tile 1 (floor): green on black
+ $F9B2 DEFB $23,$AA,$55,$AA,$55,$AA,$55,$AA,$55 ; tile 2 (wall): magenta on green
+ $F9BB DEFB $06,$30,$60,$C0,$80,$00,$00,$00,$00 ; tile 3 (nasty): yellow on black
+ $F9C4 DEFB $07,$01,$00,$06,$09,$13,$06,$6C,$98 ; tile 4 (ramp): white on black
+ $F9CD DEFB $FF,$00,$00,$00,$00,$00,$00,$00,$00 ; tile 5 (conveyor): bright white on white, flashing [not used in this room]
+; Conveyor: direction, address of the leftmost cell in the attribute buffer, length in cells.
+ $F9D6 DEFB $00,$00,$00,$00 ; no conveyor (length 0)
+; Ramp: direction, attribute buffer address of its lowest cell, length in cells.
+ $F9DA DEFB $01,$B1,$5F,$08 ; direction 1 (rises to the right), lowest cell $5FB1 = row 13 column 17, 8 cells
+; Border colour; then $DF-$E0, not read by any code.
+ $F9DE DEFB $02,$00,$00 ; border red (2); $DF-$E0 = $00,$00
+; Item graphic: 8 pixel rows shared by all items of the room.
+ $F9E1 DEFB $08,$10,$20,$21,$12,$AC,$40,$20 ; item graphic
+; Exits: room numbers left, right, up, down.
+ $F9E9 DEFB $00,$38,$00,$37 ; left 0, right 56, up 0, down 55
+; Three bytes not read by any code.
+ $F9ED DEFB $00,$00,$00 ; unused
+; Entity slots: definition index, start byte (see #R$C000).
+ $F9F0 DEFB $07,$CB ; definition $07, start $CB (column 11)
+ $F9F2 DEFB $33,$4E ; definition $33, start $4E (column 14)
+ $F9F4 DEFB $FF,$00 ; end of list
+ $F9F6 DEFB $00,$00 ; empty
+ $F9F8 DEFB $00,$00 ; empty
+ $F9FA DEFB $00,$00 ; empty
+ $F9FC DEFB $00,$00 ; empty
+ $F9FE DEFB $00,$00 ; empty

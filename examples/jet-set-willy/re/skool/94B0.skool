@@ -1,7 +1,6 @@
-@equ=ROOM_EXIT_UP=$80EB
 ; Leave the room through the top: enter the room above at its bottom
 ;
-; Makes the room above (byte $EB of the room, #R$80EB) the current room and
+; Makes the room above (byte $EB of the room, $80EB) the current room and
 ; puts Willy at the bottom: Willy's attribute address (#R$85D3/#R$85D4) gets
 ; row 5 of the lower half (row 13 of the room, attribute page $5D), the
 ; column is kept, Willy's Y (#R$85CF) becomes $D0 (twice the pixel row, 104)

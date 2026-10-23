@@ -1,38 +1,68 @@
-; Data block at EE00
-b$EE00 DEFB $AA,$0A,$AA,$AA,$AA,$AA,$AA,$AA
- $EE08 DEFB $AA,$0A,$AA,$AA,$AA,$AA,$AA,$AA
- $EE10 DEFB $AA,$0A,$AA,$AA,$AA,$AA,$AA,$AA
- $EE18 DEFB $AA,$0A,$A0,$AA,$AA,$AA,$AA,$AA
- $EE20 DEFB $AA,$0A,$A0,$AA,$00,$A0,$00,$0A
- $EE28 DEFB $AA,$0A,$A0,$AA,$00,$A0,$00,$0A
- $EE30 DEFB $AA,$0A,$A0,$00,$00,$A0,$00,$0A
- $EE38 DEFB $AA,$0A,$A0,$00,$00,$A0,$00,$0A
- $EE40 DEFB $00,$00,$05,$00,$00,$A0,$00,$0A
- $EE48 DEFB $00,$00,$00,$00,$00,$00,$00,$0A
- $EE50 DEFB $00,$00,$00,$00,$00,$00,$00,$2A
- $EE58 DEFB $00,$00,$00,$01,$55,$55,$40,$AA
- $EE60 DEFB $00,$00,$00,$00,$00,$00,$02,$AA
- $EE68 DEFB $00,$00,$00,$00,$00,$00,$0A,$AA
- $EE70 DEFB $00,$0C,$03,$03,$00,$30,$2A,$AA
- $EE78 DEFB $AA,$AA,$AA,$AA,$AA,$AA,$AA,$AA
+; Room 46 ($2E): Tree Root
+;
+; Format: see #R$C000.
+; .
+; Border: blue (1). Conveyor: moves Willy left, 13 cells from row 10 column 0.
+; Ramp: 6 cells from row 14 column 24 up to row 9 column 29, rising to the
+; right.
+; .
+; Items (from the item table at #R$A400): 2, at row 3 column 10; row 4 column
+; 29.
+; .
+; Exits: left Room 45 (Under the Drive, #R$ED00); right Room 47 (the room
+; titled "[", #R$EF00); up Room 3 (At the Foot of the MegaTree, #R$C300); down
+; Room 0 (The Off Licence, #R$C000). Odd: the down exit of Room 3 is Room 0,
+; not this room; the right edge of the layout is walled in (no free cell next
+; to it), so the right exit (byte 47) cannot be used by walking (inferred from
+; the layout).
+; .
+; Entities: slot 0: definition $1E (at $A0F0) start $84; slot 1: definition
+; $28 (at $A140) start $0D; slot 2: definition $23 (at $A118) start $13; slot
+; 3: definition $1F (at $A0F8) start $59. List ends at slot 4 ($FF).
+@label=RoomTreeRoot
+b$EE00 DEFB $AA,$0A,$AA,$AA,$AA,$AA,$AA,$AA ; row 0: ####..##########################
+ $EE08 DEFB $AA,$0A,$AA,$AA,$AA,$AA,$AA,$AA ; row 1: ####..##########################
+ $EE10 DEFB $AA,$0A,$AA,$AA,$AA,$AA,$AA,$AA ; row 2: ####..##########################
+ $EE18 DEFB $AA,$0A,$A0,$AA,$AA,$AA,$AA,$AA ; row 3: ####..####..####################
+ $EE20 DEFB $AA,$0A,$A0,$AA,$00,$A0,$00,$0A ; row 4: ####..####..####....##........##
+ $EE28 DEFB $AA,$0A,$A0,$AA,$00,$A0,$00,$0A ; row 5: ####..####..####....##........##
+ $EE30 DEFB $AA,$0A,$A0,$00,$00,$A0,$00,$0A ; row 6: ####..####..........##........##
+ $EE38 DEFB $AA,$0A,$A0,$00,$00,$A0,$00,$0A ; row 7: ####..####..........##........##
+ $EE40 DEFB $00,$00,$05,$00,$00,$A0,$00,$0A ; row 8: ..........--........##........##
+ $EE48 DEFB $00,$00,$00,$00,$00,$00,$00,$0A ; row 9: ..............................##
+ $EE50 DEFB $00,$00,$00,$00,$00,$00,$00,$2A ; row 10: .............................###
+ $EE58 DEFB $00,$00,$00,$01,$55,$55,$40,$AA ; row 11: ...............----------...####
+ $EE60 DEFB $00,$00,$00,$00,$00,$00,$02,$AA ; row 12: ...........................#####
+ $EE68 DEFB $00,$00,$00,$00,$00,$00,$0A,$AA ; row 13: ..........................######
+ $EE70 DEFB $00,$0C,$03,$03,$00,$30,$2A,$AA ; row 14: ......*....*...*.....*...#######
+ $EE78 DEFB $AA,$AA,$AA,$AA,$AA,$AA,$AA,$AA ; row 15: ################################
+; Room name: 32 characters, printed at the bottom of the screen when the room is entered.
  $EE80 DEFM "           Tree Root            "
- $EEA0 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00
- $EEA9 DEFB $06,$FF,$FF,$00,$00,$00,$00,$00,$00
- $EEB2 DEFB $0A,$66,$99,$24,$24,$77,$88,$8D,$72
- $EEBB DEFB $02,$1C,$2A,$5F,$7D,$BE,$FE,$D2,$7C
- $EEC4 DEFB $43,$03,$02,$0D,$02,$31,$08,$D5,$22
- $EECD DEFB $04,$EE,$AA,$38,$FF,$FF,$10,$10,$38
- $EED6 DEFB $00,$40,$5F,$0D
- $EEDA DEFB $01,$D8,$5F,$06
- $EEDE DEFB $01,$00,$00
- $EEE1 DEFB $02,$1D,$22,$5E,$BE,$7C,$38,$10
- $EEE9 DEFB $2D,$2F,$03,$00
- $EEED DEFB $00,$00,$00
- $EEF0 DEFB $1E,$84
- $EEF2 DEFB $28,$0D
- $EEF4 DEFB $23,$13
- $EEF6 DEFB $1F,$59
- $EEF8 DEFB $FF,$00
- $EEFA DEFB $00,$00
- $EEFC DEFB $00,$00
- $EEFE DEFB $00,$00
+; Six tiles of 9 bytes: attribute, then 8 pixel rows. Tile 0 background, 1 floor, 2 wall, 3 nasty, 4 ramp, 5 conveyor.
+ $EEA0 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00 ; tile 0 (background): black on black
+ $EEA9 DEFB $06,$FF,$FF,$00,$00,$00,$00,$00,$00 ; tile 1 (floor): yellow on black
+ $EEB2 DEFB $0A,$66,$99,$24,$24,$77,$88,$8D,$72 ; tile 2 (wall): red on blue
+ $EEBB DEFB $02,$1C,$2A,$5F,$7D,$BE,$FE,$D2,$7C ; tile 3 (nasty): red on black
+ $EEC4 DEFB $43,$03,$02,$0D,$02,$31,$08,$D5,$22 ; tile 4 (ramp): bright magenta on black
+ $EECD DEFB $04,$EE,$AA,$38,$FF,$FF,$10,$10,$38 ; tile 5 (conveyor): green on black
+; Conveyor: direction, address of the leftmost cell in the attribute buffer, length in cells.
+ $EED6 DEFB $00,$40,$5F,$0D ; direction 0 (left), address $5F40 = row 10 column 0, 13 cells
+; Ramp: direction, attribute buffer address of its lowest cell, length in cells.
+ $EEDA DEFB $01,$D8,$5F,$06 ; direction 1 (rises to the right), lowest cell $5FD8 = row 14 column 24, 6 cells
+; Border colour; then $DF-$E0, not read by any code.
+ $EEDE DEFB $01,$00,$00 ; border blue (1); $DF-$E0 = $00,$00
+; Item graphic: 8 pixel rows shared by all items of the room.
+ $EEE1 DEFB $02,$1D,$22,$5E,$BE,$7C,$38,$10 ; item graphic
+; Exits: room numbers left, right, up, down.
+ $EEE9 DEFB $2D,$2F,$03,$00 ; left 45, right 47, up 3, down 0
+; Three bytes not read by any code.
+ $EEED DEFB $00,$00,$00 ; unused
+; Entity slots: definition index, start byte (see #R$C000).
+ $EEF0 DEFB $1E,$84 ; definition $1E, start $84 (column 4)
+ $EEF2 DEFB $28,$0D ; definition $28, start $0D (column 13)
+ $EEF4 DEFB $23,$13 ; definition $23, start $13 (column 19)
+ $EEF6 DEFB $1F,$59 ; definition $1F, start $59 (column 25)
+ $EEF8 DEFB $FF,$00 ; end of list
+ $EEFA DEFB $00,$00 ; empty
+ $EEFC DEFB $00,$00 ; empty
+ $EEFE DEFB $00,$00 ; empty

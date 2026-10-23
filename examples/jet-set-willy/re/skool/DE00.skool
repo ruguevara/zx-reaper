@@ -1,38 +1,63 @@
-; Data block at DE00
-b$DE00 DEFB $00,$00,$00,$A0,$00,$00,$00,$00
- $DE08 DEFB $00,$00,$00,$A0,$00,$00,$00,$00
- $DE10 DEFB $00,$00,$00,$90,$00,$00,$00,$00
- $DE18 DEFB $00,$00,$00,$94,$00,$00,$00,$00
- $DE20 DEFB $00,$00,$00,$95,$50,$00,$00,$00
- $DE28 DEFB $00,$00,$00,$81,$08,$00,$00,$00
- $DE30 DEFB $00,$00,$00,$01,$04,$00,$00,$00
- $DE38 DEFB $00,$00,$00,$00,$04,$00,$00,$00
- $DE40 DEFB $00,$00,$00,$80,$00,$00,$00,$00
- $DE48 DEFB $00,$00,$00,$82,$00,$00,$00,$00
- $DE50 DEFB $00,$08,$20,$82,$08,$00,$00,$00
- $DE58 DEFB $00,$08,$20,$82,$08,$00,$00,$00
- $DE60 DEFB $AA,$AA,$AA,$AA,$AA,$AA,$5A,$AA
- $DE68 DEFB $AA,$AA,$00,$00,$00,$00,$5A,$AA
- $DE70 DEFB $AA,$AA,$00,$00,$00,$00,$5A,$AA
- $DE78 DEFB $AA,$AA,$55,$55,$55,$55,$5A,$AA
+; Room 30 ($1E): The Banyan Tree
+;
+; Format: see #R$C000.
+; .
+; Border: red (2). Conveyor: none. Ramp: 8 cells from row 11 column 4 up to
+; row 4 column 11, rising to the right.
+; .
+; Items (from the item table at #R$A400): 1, at row 14 column 8.
+; .
+; Exits: left Room 31 (Swimming Pool, #R$DF00); right Room 29 (The Nightmare
+; Room, #R$DD00); up Room 36 (A bit of tree, #R$E400); down Room 24 (West of
+; Kitchen, #R$D800).
+; .
+; Entities: slot 0: definition $64 (at $A320) start $8A; slot 1: definition
+; $65 (at $A328) start $8D; slot 2: definition $66 (at $A330) start $10; slot
+; 3: definition $58 (at $A2C0) start $16. List ends at slot 4 ($FF).
+@label=RoomBanyanTree
+b$DE00 DEFB $00,$00,$00,$A0,$00,$00,$00,$00 ; row 0: ............##..................
+ $DE08 DEFB $00,$00,$00,$A0,$00,$00,$00,$00 ; row 1: ............##..................
+ $DE10 DEFB $00,$00,$00,$90,$00,$00,$00,$00 ; row 2: ............#-..................
+ $DE18 DEFB $00,$00,$00,$94,$00,$00,$00,$00 ; row 3: ............#--.................
+ $DE20 DEFB $00,$00,$00,$95,$50,$00,$00,$00 ; row 4: ............#-----..............
+ $DE28 DEFB $00,$00,$00,$81,$08,$00,$00,$00 ; row 5: ............#..-..#.............
+ $DE30 DEFB $00,$00,$00,$01,$04,$00,$00,$00 ; row 6: ...............-..-.............
+ $DE38 DEFB $00,$00,$00,$00,$04,$00,$00,$00 ; row 7: ..................-.............
+ $DE40 DEFB $00,$00,$00,$80,$00,$00,$00,$00 ; row 8: ............#...................
+ $DE48 DEFB $00,$00,$00,$82,$00,$00,$00,$00 ; row 9: ............#..#................
+ $DE50 DEFB $00,$08,$20,$82,$08,$00,$00,$00 ; row 10: ......#..#..#..#..#.............
+ $DE58 DEFB $00,$08,$20,$82,$08,$00,$00,$00 ; row 11: ......#..#..#..#..#.............
+ $DE60 DEFB $AA,$AA,$AA,$AA,$AA,$AA,$5A,$AA ; row 12: ########################--######
+ $DE68 DEFB $AA,$AA,$00,$00,$00,$00,$5A,$AA ; row 13: ########................--######
+ $DE70 DEFB $AA,$AA,$00,$00,$00,$00,$5A,$AA ; row 14: ########................--######
+ $DE78 DEFB $AA,$AA,$55,$55,$55,$55,$5A,$AA ; row 15: ########------------------######
+; Room name: 32 characters, printed at the bottom of the screen when the room is entered.
  $DE80 DEFM "       The Banyan Tree          "
- $DEA0 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00
- $DEA9 DEFB $48,$00,$A2,$00,$00,$00,$46,$00,$93
- $DEB2 DEFB $16,$4A,$29,$25,$49,$92,$A4,$25,$94
- $DEBB DEFB $0E,$A5,$5A,$A5,$5A,$A5,$5A,$A5,$5A
- $DEC4 DEFB $07,$03,$00,$0C,$00,$30,$00,$C0,$00
- $DECD DEFB $FF,$00,$00,$00,$00,$00,$00,$00,$00
- $DED6 DEFB $00,$00,$00,$00
- $DEDA DEFB $01,$64,$5F,$08
- $DEDE DEFB $02,$00,$00
- $DEE1 DEFB $05,$38,$45,$82,$82,$82,$44,$38
- $DEE9 DEFB $1F,$1D,$24,$18
- $DEED DEFB $00,$00,$00
- $DEF0 DEFB $64,$8A
- $DEF2 DEFB $65,$8D
- $DEF4 DEFB $66,$10
- $DEF6 DEFB $58,$16
- $DEF8 DEFB $FF,$00
- $DEFA DEFB $00,$00
- $DEFC DEFB $00,$00
- $DEFE DEFB $00,$00
+; Six tiles of 9 bytes: attribute, then 8 pixel rows. Tile 0 background, 1 floor, 2 wall, 3 nasty, 4 ramp, 5 conveyor.
+ $DEA0 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00 ; tile 0 (background): black on black
+ $DEA9 DEFB $48,$00,$A2,$00,$00,$00,$46,$00,$93 ; tile 1 (floor): bright black on blue
+ $DEB2 DEFB $16,$4A,$29,$25,$49,$92,$A4,$25,$94 ; tile 2 (wall): yellow on red
+ $DEBB DEFB $0E,$A5,$5A,$A5,$5A,$A5,$5A,$A5,$5A ; tile 3 (nasty): yellow on blue [not used in this room]
+ $DEC4 DEFB $07,$03,$00,$0C,$00,$30,$00,$C0,$00 ; tile 4 (ramp): white on black
+ $DECD DEFB $FF,$00,$00,$00,$00,$00,$00,$00,$00 ; tile 5 (conveyor): bright white on white, flashing [not used in this room]
+; Conveyor: direction, address of the leftmost cell in the attribute buffer, length in cells.
+ $DED6 DEFB $00,$00,$00,$00 ; no conveyor (length 0)
+; Ramp: direction, attribute buffer address of its lowest cell, length in cells.
+ $DEDA DEFB $01,$64,$5F,$08 ; direction 1 (rises to the right), lowest cell $5F64 = row 11 column 4, 8 cells
+; Border colour; then $DF-$E0, not read by any code.
+ $DEDE DEFB $02,$00,$00 ; border red (2); $DF-$E0 = $00,$00
+; Item graphic: 8 pixel rows shared by all items of the room.
+ $DEE1 DEFB $05,$38,$45,$82,$82,$82,$44,$38 ; item graphic
+; Exits: room numbers left, right, up, down.
+ $DEE9 DEFB $1F,$1D,$24,$18 ; left 31, right 29, up 36, down 24
+; Three bytes not read by any code.
+ $DEED DEFB $00,$00,$00 ; unused
+; Entity slots: definition index, start byte (see #R$C000).
+ $DEF0 DEFB $64,$8A ; definition $64, start $8A (column 10)
+ $DEF2 DEFB $65,$8D ; definition $65, start $8D (column 13)
+ $DEF4 DEFB $66,$10 ; definition $66, start $10 (column 16)
+ $DEF6 DEFB $58,$16 ; definition $58, start $16 (column 22)
+ $DEF8 DEFB $FF,$00 ; end of list
+ $DEFA DEFB $00,$00 ; empty
+ $DEFC DEFB $00,$00 ; empty
+ $DEFE DEFB $00,$00 ; empty
