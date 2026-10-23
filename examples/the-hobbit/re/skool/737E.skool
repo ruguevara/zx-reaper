@@ -1,0 +1,9 @@
+; Routine at 737E
+c$737E LD E,(IX+$01) ;
+ $7381 LD D,$00      ;
+ $7383 BIT 7,E       ;
+ $7385 JR Z,$7389    ;
+ $7387 LD D,$FF      ;
+*$7389 ADD IX,DE     ;
+ $738B XOR A         ;
+ $738C RET           ;

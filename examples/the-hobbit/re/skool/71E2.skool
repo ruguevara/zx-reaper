@@ -1,6 +1,6 @@
 ; Routine at 71E2
 ;
-; Used by the routines at #R$73C7 and #R$7B63.
+; Used by the routines at #R$73C2, #R$7B63 and #R$7E4D.
 c$71E2 PUSH DE       ;
  $71E3 PUSH IX       ;
  $71E5 CALL $9BCA    ;

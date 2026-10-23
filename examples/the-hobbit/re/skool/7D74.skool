@@ -1,3 +1,10 @@
-; Data block at 7D74
-b$7D74 DEFB $32,$1A,$B7,$FD,$E5,$E1,$11,$C8
- $7D7C DEFB $B9,$01,$18,$00,$ED,$B0,$C9
+; Routine at 7D74
+;
+; Used by the routines at #R$7D83, #R$7DBC and #R$7E4D.
+c$7D74 LD ($B71A),A  ;
+ $7D77 PUSH IY       ;
+ $7D79 POP HL        ;
+ $7D7A LD DE,$B9C8   ;
+ $7D7D LD BC,$0018   ;
+ $7D80 LDIR          ;
+ $7D82 RET           ;

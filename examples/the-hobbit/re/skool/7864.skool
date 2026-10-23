@@ -1,6 +1,6 @@
 ; Routine at 7864
 ;
-; Used by the routines at #R$7585 and #R$77B9.
+; Used by the routines at #R$7585 and #R$7795.
 c$7864 PUSH IY       ;
  $7866 POP HL        ;
  $7867 LD B,$18      ;

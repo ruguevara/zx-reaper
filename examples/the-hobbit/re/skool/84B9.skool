@@ -1,0 +1,14 @@
+; Routine at 84B9
+;
+; Used by the routines at #R$843A and #R$84CC.
+c$84B9 XOR A         ;
+ $84BA IN A,($FE)    ;
+ $84BC AND $1F       ;
+ $84BE CP $1F        ;
+ $84C0 JR NZ,$84B9   ;
+*$84C2 XOR A         ;
+ $84C3 IN A,($FE)    ;
+ $84C5 AND $1F       ;
+ $84C7 CP $1F        ;
+ $84C9 JR Z,$84C2    ;
+ $84CB RET           ;

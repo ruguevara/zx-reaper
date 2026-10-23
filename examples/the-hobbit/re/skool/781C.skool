@@ -1,2 +1,10 @@
-; Message at 781C
-t$781C DEFM "!zu4"
+; Routine at 781C
+;
+; Used by the routine at #R$7795.
+c$781C LD HL,$757A   ;
+ $781F INC (HL)      ;
+ $7820 LD A,(HL)     ;
+ $7821 CP $03        ;
+ $7823 JP NC,$7924   ;
+ $7826 LD HL,$757B   ;
+ $7829 JR $780C      ;

@@ -1,2 +1,0 @@
-; Data block at 7E68
-b$7E68 DEFB $A7,$CA,$90,$7D

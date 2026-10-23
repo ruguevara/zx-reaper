@@ -1,5 +1,5 @@
 ; Routine at 72CE
 ;
-; Used by the routine at #R$950F.
+; Used by the routines at #R$924F and #R$950F.
 c$72CE LD HL,$AFBF   ;
  $72D1 JR $72DD      ;

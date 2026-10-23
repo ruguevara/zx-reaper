@@ -1,6 +1,6 @@
 ; Routine at 9DD9
 ;
-; Used by the routine at #R$7A73.
+; Used by the routines at #R$7A73 and #R$7DBC.
 c$9DD9 PUSH BC       ;
  $9DDA PUSH DE       ;
  $9DDB PUSH IY       ;

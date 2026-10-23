@@ -1,4 +1,0 @@
-; Data block at 7DBA
-b$7DBA DEFB $18,$CD,$3A,$1B,$B7,$3D,$C8,$3A
- $7DC2 DEFB $1C,$B7,$A7,$28,$04,$E1,$C3,$94
- $7DCA DEFB $79,$3A,$40,$79,$FE,$01,$28,$C6

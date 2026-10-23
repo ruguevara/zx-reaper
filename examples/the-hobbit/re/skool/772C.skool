@@ -1,2 +1,0 @@
-; Data block at 772C
-b$772C DEFB $C3,$FA,$75,$CB,$83

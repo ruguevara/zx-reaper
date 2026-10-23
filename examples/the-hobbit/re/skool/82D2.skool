@@ -1,0 +1,7 @@
+; Routine at 82D2
+c$82D2 LD A,($B719)  ;
+ $82D5 CP $02        ;
+ $82D7 JP Z,$75B4    ;
+ $82DA LD A,$01      ;
+ $82DC LD ($B719),A  ;
+ $82DF JP $75B4      ;

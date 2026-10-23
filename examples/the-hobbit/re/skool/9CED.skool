@@ -1,6 +1,6 @@
 ; Routine at 9CED
 ;
-; Used by the routine at #R$939E.
+; Used by the routines at #R$8CF1 and #R$939E.
 c$9CED PUSH BC       ;
  $9CEE LD B,$00      ;
 ; This entry point is used by the routine at #R$9CE8.

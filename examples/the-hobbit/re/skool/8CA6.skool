@@ -1,0 +1,22 @@
+; Routine at 8CA6
+c$8CA6 CALL $8C9B      ;
+ $8CA9 CALL $9D44      ;
+ $8CAC LD IX,($B708)   ;
+ $8CB0 LD A,(IX+$01)   ;
+ $8CB3 CP $12          ;
+ $8CB5 JR NZ,$8CBB     ;
+ $8CB7 LD IX,$C366     ;
+*$8CBB PUSH IX         ;
+ $8CBD LD IX,($B70C)   ;
+ $8CC1 LD A,(IX+$01)   ;
+ $8CC4 POP IX          ;
+ $8CC6 LD (IX+$01),A   ;
+ $8CC9 BIT 1,(IX+$07)  ;
+ $8CCD RET Z           ;
+ $8CCE LD (IX+$10),$00 ;
+ $8CD2 LD HL,$B142     ;
+ $8CD5 LD DE,$0008     ;
+ $8CD8 ADD IX,DE       ;
+ $8CDA PUSH IX         ;
+ $8CDC CALL $72DD      ;
+ $8CDF RET             ;

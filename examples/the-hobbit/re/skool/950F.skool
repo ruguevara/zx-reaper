@@ -1,6 +1,6 @@
 ; Routine at 950F
 ;
-; Used by the routines at #R$7960, #R$7AED, #R$7AF5, #R$7DF5 and #R$99C6.
+; Used by the routines at #R$7960, #R$7AED, #R$7AF5, #R$7DBC and #R$99C6.
 c$950F PUSH HL       ;
  $9510 PUSH IX       ;
  $9512 PUSH BC       ;

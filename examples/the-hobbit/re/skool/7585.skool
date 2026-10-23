@@ -3,7 +3,8 @@
 ; Used by the routine at #R$6C00.
 c$7585 LD IY,$B9C8   ;
  $7589 XOR A         ;
- $758A LD ($B71B),A  ;
+; This entry point is used by the routine at #R$82FD.
+*$758A LD ($B71B),A  ;
  $758D CALL $785F    ;
  $7590 LD ($B706),A  ;
  $7593 LD E,$FF      ;
@@ -12,7 +13,7 @@ c$7585 LD IY,$B9C8   ;
  $7599 LD D,$A0      ;
  $759B JP NZ,$7614   ;
  $759E LD D,$C0      ;
-; This entry point is used by the routine at #R$75F6.
+; This entry point is used by the routines at #R$75F6 and #R$8251.
 *$75A0 XOR A         ;
  $75A1 LD ($757A),A  ;
  $75A4 LD A,E        ;
@@ -23,8 +24,8 @@ c$7585 LD IY,$B9C8   ;
  $75AD JR NZ,$75B1   ;
  $75AF RES 1,E       ;
 *$75B1 CALL $7864    ;
-; This entry point is used by the routines at #R$76EC, #R$7731, #R$77B9 and
-; #R$7924.
+; This entry point is used by the routines at #R$76EC, #R$772F, #R$7795,
+; #R$7929, #R$82B3, #R$82BA, #R$82D2, #R$8315 and #R$83A0.
 *$75B4 LD HL,$757B   ;
  $75B7 LD B,$0A      ;
  $75B9 CALL $70E2    ;

@@ -14,7 +14,8 @@ c$6C00 DI            ;
  $6C1F LD HL,$CA84   ;
  $6C22 LD BC,$00BF   ;
  $6C25 LDIR          ;
- $6C27 DI            ;
+; This entry point is used by the routines at #R$8391, #R$8498 and #R$90D2.
+*$6C27 DI            ;
  $6C28 LD SP,$5EFF   ;
  $6C2B LD IX,$CC00   ;
  $6C2F LD A,$05      ;

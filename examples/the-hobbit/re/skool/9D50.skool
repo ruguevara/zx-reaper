@@ -1,10 +1,32 @@
-; Data block at 9D50
-b$9D50 DEFB $3A,$E8,$B6,$FD,$E5,$DD,$E5,$E5
- $9D58 DEFB $CD,$CA,$9B,$DD,$46,$01,$DD,$21
- $9D60 DEFB $60,$C0,$CD,$A9,$9B,$28,$2A,$FD
- $9D68 DEFB $BE,$01,$20,$F6,$FD,$CB,$07,$4E
- $9D70 DEFB $28,$19,$F5,$FD,$36,$10,$00,$FD
- $9D78 DEFB $36,$01,$FF,$FD,$CB,$07,$BE,$CD
- $9D80 DEFB $C7,$9E,$21,$43,$B1,$CD,$DD,$72
- $9D88 DEFB $F1,$18,$D7,$FD,$70,$01,$C3,$62
- $9D90 DEFB $9D,$E1,$DD,$E1,$FD,$E1,$C9
+; Routine at 9D50
+;
+; Used by the routine at #R$92ED.
+c$9D50 LD A,($B6E8)    ;
+; This entry point is used by the routine at #R$977F.
+*$9D53 PUSH IY         ;
+ $9D55 PUSH IX         ;
+ $9D57 PUSH HL         ;
+ $9D58 CALL $9BCA      ;
+ $9D5B LD B,(IX+$01)   ;
+ $9D5E LD IX,$C060     ;
+*$9D62 CALL $9BA9      ;
+ $9D65 JR Z,$9D91      ;
+ $9D67 CP (IY+$01)     ;
+ $9D6A JR NZ,$9D62     ;
+ $9D6C BIT 1,(IY+$07)  ;
+ $9D70 JR Z,$9D8B      ;
+ $9D72 PUSH AF         ;
+ $9D73 LD (IY+$10),$00 ;
+ $9D77 LD (IY+$01),$FF ;
+ $9D7B RES 7,(IY+$07)  ;
+ $9D7F CALL $9EC7      ;
+ $9D82 LD HL,$B143     ;
+ $9D85 CALL $72DD      ;
+ $9D88 POP AF          ;
+ $9D89 JR $9D62        ;
+*$9D8B LD (IY+$01),B   ;
+ $9D8E JP $9D62        ;
+*$9D91 POP HL          ;
+ $9D92 POP IX          ;
+ $9D94 POP IY          ;
+ $9D96 RET             ;

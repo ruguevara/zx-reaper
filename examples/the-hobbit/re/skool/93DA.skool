@@ -1,33 +1,20 @@
-; Data block at 93DA
-b$93DA DEFB $CD,$44,$9D,$3A,$E8,$B6,$CD,$CA
- $93E2 DEFB $9B,$DD,$6E,$0E,$DD,$66,$0F,$7C
- $93EA DEFB $B5,$C2,$DD,$72,$21,$00,$B0,$CD
- $93F2 DEFB $DD,$72,$DD,$E5,$FD,$E1,$CD,$C7
- $93FA DEFB $9E,$3E,$2E,$CD,$8B,$85,$CD,$83
- $9402 DEFB $85,$C9,$DD,$2A,$08,$B7,$CD,$CA
- $940A DEFB $A5,$CA,$6C,$A1,$3A,$E8,$B6,$CD
- $9412 DEFB $97,$9D,$FE,$00,$28,$0B,$CD,$44
- $941A DEFB $9D,$CD,$50,$9D,$DD,$CB,$07,$96
- $9422 DEFB $C9,$3E,$02,$C3,$6C,$A1,$CD,$25
- $942A DEFB $8D,$CD,$44,$9D,$3A,$F6,$B6,$DD
- $9432 DEFB $2A,$0A,$B7,$DD,$46,$00,$DD,$BE
- $943A DEFB $10,$28,$07,$DD,$23,$10,$F7,$C3
- $9442 DEFB $CE,$72,$DD,$7E,$11,$05,$20,$01
- $944A DEFB $AF,$F5,$21,$FC,$AD,$CD,$DD,$72
- $9452 DEFB $F1,$DD,$2A,$08,$B7,$DD,$77,$10
- $945A DEFB $DD,$36,$01,$FF,$47,$3A,$E8,$B6
- $9462 DEFB $CD,$DD,$9B,$3A,$2B,$C1,$A7,$CA
- $946A DEFB $D2,$90,$C9,$CD,$F9,$A1,$C2,$6C
- $9472 DEFB $A1,$3E,$C6,$32,$8B,$94,$FD,$2A
- $947A DEFB $0A,$B7,$FD,$CB,$07,$5E,$3E,$83
- $9482 DEFB $C2,$64,$A1,$CD,$44,$9D,$DD,$CB
- $948A DEFB $07,$C6,$C9,$DD,$2A,$08,$B7,$DD
- $9492 DEFB $CB,$07,$46,$3E,$00,$CA,$6C,$A1
- $949A DEFB $CD,$04,$A2,$C2,$6C,$A1,$3E,$86
- $94A2 DEFB $18,$D1,$CD,$9B,$8C,$3A,$E9,$B6
- $94AA DEFB $CD,$28,$9F,$FE,$FF,$CA,$76,$9F
- $94B2 DEFB $FD,$2A,$0A,$B7,$FD,$CB,$07,$6E
- $94BA DEFB $3E,$05,$CA,$64,$A1,$CD,$44,$9D
- $94C2 DEFB $DD,$46,$02,$DD,$2A,$08,$B7,$DD
- $94CA DEFB $36,$01,$FF,$DD,$70,$10,$3A,$E8
- $94D2 DEFB $B6,$C3,$DD,$9B
+; Routine at 93DA
+;
+; Used by the routine at #R$A7C4.
+c$93DA CALL $9D44    ;
+ $93DD LD A,($B6E8)  ;
+ $93E0 CALL $9BCA    ;
+ $93E3 LD L,(IX+$0E) ;
+ $93E6 LD H,(IX+$0F) ;
+ $93E9 LD A,H        ;
+ $93EA OR L          ;
+ $93EB JP NZ,$72DD   ;
+ $93EE LD HL,$B000   ;
+ $93F1 CALL $72DD    ;
+ $93F4 PUSH IX       ;
+ $93F6 POP IY        ;
+ $93F8 CALL $9EC7    ;
+ $93FB LD A,$2E      ;
+ $93FD CALL $858B    ;
+ $9400 CALL $8583    ;
+ $9403 RET           ;

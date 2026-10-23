@@ -1,0 +1,6 @@
+; Routine at 84B3
+;
+; Used by the routines at #R$8451 and #R$84CC.
+c$84B3 LD BC,$0003   ;
+ $84B6 LDIR          ;
+ $84B8 RET           ;

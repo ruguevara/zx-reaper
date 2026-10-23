@@ -1,0 +1,28 @@
+; Routine at 83F5
+;
+; Used by the routines at #R$8391 and #R$90D2.
+c$83F5 PUSH HL       ;
+ $83F6 PUSH DE       ;
+ $83F7 XOR A         ;
+ $83F8 LD ($B701),A  ;
+ $83FB LD HL,$B454   ;
+ $83FE CALL $72DD    ;
+ $8401 LD HL,($B6F7) ;
+ $8404 LD DE,$0064   ;
+ $8407 CALL $842E    ;
+ $840A CALL NZ,$858B ;
+ $840D LD DE,$000A   ;
+ $8410 CALL $842E    ;
+ $8413 CALL $858B    ;
+ $8416 LD A,$2E      ;
+ $8418 CALL $858B    ;
+ $841B LD A,L        ;
+ $841C ADD A,$30     ;
+ $841E CALL $858B    ;
+ $8421 XOR A         ;
+ $8422 LD ($B704),A  ;
+ $8425 LD HL,$B462   ;
+ $8428 CALL $72DD    ;
+ $842B POP DE        ;
+ $842C POP HL        ;
+ $842D RET           ;

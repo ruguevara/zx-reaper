@@ -1,2 +1,11 @@
-; Message at 842E
-t$842E DEFM ">/<"
+; Routine at 842E
+;
+; Used by the routine at #R$83F5.
+c$842E LD A,$2F      ;
+*$8430 INC A         ;
+ $8431 AND A         ;
+ $8432 SBC HL,DE     ;
+ $8434 JR NC,$8430   ;
+ $8436 ADD HL,DE     ;
+ $8437 CP $30        ;
+ $8439 RET           ;

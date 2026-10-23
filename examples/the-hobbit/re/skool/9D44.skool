@@ -1,7 +1,9 @@
 ; Routine at 9D44
 ;
-; Used by the routines at #R$8C4B, #R$8D9D, #R$910E, #R$939E, #R$A525, #R$A640,
-; #R$A657, #R$A8D2 and #R$A9BD.
+; Used by the routines at #R$8C4B, #R$8CA6, #R$8D33, #R$8D9D, #R$8EEC, #R$8F3E,
+; #R$9034, #R$90EB, #R$910E, #R$9138, #R$9171, #R$924F, #R$92ED, #R$939E,
+; #R$93DA, #R$A3E6, #R$A4DF, #R$A4FE, #R$A525, #R$A5D1, #R$A640, #R$A657,
+; #R$A7C4, #R$A8D2, #R$A926 and #R$A9BD.
 c$9D44 LD A,($B6FA)  ;
  $9D47 CP $01        ;
  $9D49 RET Z         ;

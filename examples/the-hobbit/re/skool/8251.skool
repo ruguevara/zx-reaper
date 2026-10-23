@@ -1,0 +1,23 @@
+; Routine at 8251
+c$8251 LD HL,$8271   ;
+ $8254 PUSH DE       ;
+ $8255 LD D,$0D      ;
+*$8257 LD A,(HL)     ;
+ $8258 INC HL        ;
+ $8259 CP C          ;
+ $825A JR NZ,$8260   ;
+ $825C LD A,(HL)     ;
+ $825D CP B          ;
+ $825E JR Z,$8267    ;
+*$8260 INC HL        ;
+ $8261 DEC D         ;
+ $8262 JR NZ,$8257   ;
+ $8264 JP $75A0      ;
+*$8267 LD DE,$0019   ;
+ $826A ADD HL,DE     ;
+ $826B LD E,(HL)     ;
+ $826C INC HL        ;
+ $826D LD D,(HL)     ;
+ $826E EX DE,HL      ;
+ $826F POP DE        ;
+ $8270 JP (HL)       ;

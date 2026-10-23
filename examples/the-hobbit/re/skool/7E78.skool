@@ -1,0 +1,5 @@
+; Routine at 7E78
+;
+; Used by the routine at #R$7E4D.
+c$7E78 LD A,$28      ;
+ $7E7A JR $7E7E      ;

@@ -1,0 +1,16 @@
+; Routine at 9213
+;
+; Used by the routine at #R$9171.
+c$9213 PUSH BC       ;
+ $9214 LD B,A        ;
+ $9215 LD A,$0A      ;
+ $9217 CALL $9CA8    ;
+ $921A LD C,A        ;
+ $921B ADD A,B       ;
+ $921C JR NC,$9224   ;
+ $921E XOR A         ;
+ $921F BIT 7,C       ;
+ $9221 JR NZ,$9224   ;
+ $9223 DEC A         ;
+*$9224 POP BC        ;
+ $9225 RET           ;

@@ -1,6 +1,6 @@
 ; Routine at 9BDD
 ;
-; Used by the routines at #R$8D9D and #R$939E.
+; Used by the routines at #R$8D9D, #R$939E and #R$A3E6.
 c$9BDD LD HL,$9BDC   ;
  $9BE0 LD (HL),$01   ;
  $9BE2 CALL $9C17    ;

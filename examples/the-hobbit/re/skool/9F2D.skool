@@ -3,7 +3,8 @@
 ; Used by the routine at #R$8FD6.
 c$9F2D PUSH AF       ;
  $9F2E LD A,$02      ;
- $9F30 LD ($9F42),A  ;
+; This entry point is used by the routine at #R$9F25.
+*$9F30 LD ($9F42),A  ;
  $9F33 POP AF        ;
  $9F34 PUSH BC       ;
  $9F35 PUSH IY       ;

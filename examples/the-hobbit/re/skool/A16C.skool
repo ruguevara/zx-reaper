@@ -1,0 +1,20 @@
+; Routine at A16C
+;
+; Used by the routines at #R$8EEC, #R$910E, #R$9138, #R$9171 and #R$92ED.
+c$A16C LD L,(IX+$08) ;
+ $A16F LD H,(IX+$09) ;
+; This entry point is used by the routine at #R$A164.
+*$A172 PUSH DE       ;
+ $A173 PUSH HL       ;
+ $A174 LD HL,$A224   ;
+ $A177 BIT 7,A       ;
+ $A179 JR Z,$A17E    ;
+ $A17B LD HL,$A234   ;
+*$A17E CALL $A0BD    ;
+ $A181 POP HL        ;
+ $A182 PUSH DE       ;
+ $A183 PUSH HL       ;
+ $A184 LD HL,$AFBB   ;
+ $A187 CALL $72DD    ;
+ $A18A POP DE        ;
+ $A18B RET           ;

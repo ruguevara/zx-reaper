@@ -7,6 +7,7 @@ c$8D9D CALL $95ED      ;
  $8DA4 CALL $9C9F      ;
  $8DA7 INC A           ;
  $8DA8 LD ($B6E7),A    ;
+; This entry point is used by the routine at #R$8F3E.
 *$8DAB LD IY,($B70C)   ;
  $8DAF LD A,(IY+$01)   ;
  $8DB2 CP $FF          ;

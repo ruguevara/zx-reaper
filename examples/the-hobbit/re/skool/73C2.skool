@@ -1,0 +1,19 @@
+; Routine at 73C2
+c$73C2 LD A,$01      ;
+ $73C4 LD ($B703),A  ;
+; This entry point is used by the routine at #R$712B.
+*$73C7 LD A,($B6FF)  ;
+ $73CA AND A         ;
+ $73CB LD A,($B6E9)  ;
+; This entry point is used by the routine at #R$73AF.
+*$73CE JR Z,$73D6    ;
+ $73D0 PUSH HL       ;
+ $73D1 CALL $71D5    ;
+ $73D4 JR $73DA      ;
+; This entry point is used by the routine at #R$7488.
+*$73D6 PUSH HL       ;
+ $73D7 CALL $71E2    ;
+*$73DA CALL $7434    ;
+ $73DD POP HL        ;
+ $73DE XOR A         ;
+ $73DF RET           ;

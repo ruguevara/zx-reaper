@@ -1,0 +1,9 @@
+; Routine at 73FC
+;
+; Used by the routine at #R$7407.
+c$73FC LD DE,$0990   ;
+ $73FF AND A         ;
+ $7400 RET NZ        ;
+ $7401 LD DE,$0BEA   ;
+ $7404 OR $01        ;
+ $7406 RET           ;

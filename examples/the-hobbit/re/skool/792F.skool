@@ -1,9 +1,0 @@
-; Routine at 792F
-;
-; Used by the routines at #R$6C00 and #R$75F6.
-c$792F LD HL,$AD9F   ;
- $7932 LD A,$01      ;
- $7934 LD ($B701),A  ;
- $7937 CALL $72DD    ;
- $793A OR $01        ;
- $793C RET           ;

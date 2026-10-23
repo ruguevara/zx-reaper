@@ -1,0 +1,3 @@
+; Routine at 7407
+c$7407 LD A,($B6E8)  ;
+ $740A JR $73FC      ;

@@ -1,3 +1,2 @@
 ; Data block at 73BD
-b$73BD DEFB $CD,$8B,$85,$AF,$C9,$3E,$01,$32
- $73C5 DEFB $03,$B7
+b$73BD DEFB $CD,$8B,$85,$AF,$C9

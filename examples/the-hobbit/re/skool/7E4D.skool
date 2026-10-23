@@ -1,0 +1,20 @@
+; Routine at 7E4D
+;
+; Used by the routine at #R$7D98.
+c$7E4D CALL $7E78    ;
+ $7E50 LD HL,$0000   ;
+ $7E53 PUSH HL       ;
+ $7E54 LD A,($B6E8)  ;
+ $7E57 CALL $71E2    ;
+ $7E5A PUSH HL       ;
+ $7E5B CALL $7E7C    ;
+ $7E5E LD HL,($7958) ;
+ $7E61 PUSH HL       ;
+ $7E62 LD HL,$ADE7   ;
+ $7E65 LD A,($7941)  ;
+ $7E68 AND A         ;
+ $7E69 JP Z,$7D90    ;
+ $7E6C LD A,($7955)  ;
+ $7E6F CALL $7D74    ;
+ $7E72 LD HL,$ADC0   ;
+ $7E75 JP $7D90      ;

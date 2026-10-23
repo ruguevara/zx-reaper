@@ -1,0 +1,6 @@
+; Data block at 83CD
+b$83CD DEFB $06,$7A,$B4,$09,$8A,$B4,$0D,$9A
+ $83D5 DEFB $B4,$42,$BE,$B4,$1F,$CA,$B4,$20
+ $83DD DEFB $DA,$B4,$2A,$FA,$B4,$2E,$04,$B5
+ $83E5 DEFB $29,$18,$B5,$1A,$2F,$B5,$05,$3E
+ $83ED DEFB $B5,$FF,$CD,$F5,$83,$C3,$B3,$82

@@ -1,0 +1,9 @@
+; Routine at A4DF
+c$A4DF CALL $9D44    ;
+ $A4E2 LD A,$0A      ;
+ $A4E4 CALL $9C9F    ;
+ $A4E7 LD HL,$B0A6   ;
+ $A4EA CP $08        ;
+ $A4EC JP NC,$A1E3   ;
+ $A4EF LD HL,$B047   ;
+ $A4F2 JP $A1E3      ;

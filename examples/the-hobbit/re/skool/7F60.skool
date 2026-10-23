@@ -1,6 +1,6 @@
 ; Routine at 7F60
 ;
-; Used by the routine at #R$7F1A.
+; Used by the routines at #R$7F1A and #R$977F.
 c$7F60 PUSH HL       ;
  $7F61 PUSH DE       ;
  $7F62 PUSH BC       ;

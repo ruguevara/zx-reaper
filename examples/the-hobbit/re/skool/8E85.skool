@@ -1,6 +1,6 @@
 ; Routine at 8E85
 ;
-; Used by the routine at #R$8D9D.
+; Used by the routines at #R$8D9D and #R$8F3E.
 c$8E85 AND A          ;
  $8E86 JR Z,$8EA7     ;
  $8E88 CALL $9BCA     ;

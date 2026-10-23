@@ -1,0 +1,4 @@
+; Data block at A814
+b$A814 DEFB $3A,$E9,$B6,$CD,$28,$9F,$FE,$FF
+ $A81C DEFB $CA,$76,$9F,$CD,$44,$9D,$21,$66
+ $A824 DEFB $AF,$CD,$DD

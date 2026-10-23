@@ -1,0 +1,11 @@
+; Routine at 7394
+c$7394 POP DE        ;
+ $7395 POP HL        ;
+ $7396 EX (SP),HL    ;
+ $7397 PUSH DE       ;
+ $7398 EX DE,HL      ;
+ $7399 LD A,$01      ;
+ $739B LD ($B703),A  ;
+ $739E CALL $7478    ;
+ $73A1 XOR A         ;
+ $73A2 RET           ;

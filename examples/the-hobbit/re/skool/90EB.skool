@@ -1,0 +1,13 @@
+; Routine at 90EB
+c$90EB CALL $9D44    ;
+ $90EE LD HL,$ADF6   ;
+ $90F1 CALL $72DD    ;
+ $90F4 LD A,($B6EA)  ;
+ $90F7 CALL $9D97    ;
+ $90FA AND A         ;
+ $90FB LD HL,$B33B   ;
+ $90FE JP Z,$72DD    ;
+ $9101 LD A,($B6EA)  ;
+ $9104 LD IX,($B70C) ;
+ $9108 LD B,(IX+$10) ;
+ $910B JP $9FAF      ;

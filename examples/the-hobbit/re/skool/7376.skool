@@ -1,7 +1,8 @@
-; Data block at 7376
-b$7376 DEFB $D1,$E1,$E3,$D5,$EB,$F6,$01,$C9
- $737E DEFB $DD,$5E,$01,$16,$00,$CB,$7B,$28
- $7386 DEFB $02,$16,$FF,$DD,$19,$AF,$C9,$ED
- $738E DEFB $5B,$FC,$B6,$F6,$01,$C9,$D1,$E1
- $7396 DEFB $E3,$D5,$EB,$3E,$01,$32,$03,$B7
- $739E DEFB $CD,$78,$74,$AF,$C9
+; Routine at 7376
+c$7376 POP DE        ;
+ $7377 POP HL        ;
+ $7378 EX (SP),HL    ;
+ $7379 PUSH DE       ;
+ $737A EX DE,HL      ;
+ $737B OR $01        ;
+ $737D RET           ;

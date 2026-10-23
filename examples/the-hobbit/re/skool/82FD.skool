@@ -1,0 +1,14 @@
+; Routine at 82FD
+;
+; Used by the routine at #R$8315.
+c$82FD LD A,D        ;
+ $82FE LD ($824F),A  ;
+ $8301 PUSH DE       ;
+ $8302 PUSH BC       ;
+ $8303 PUSH IY       ;
+ $8305 LD A,($B706)  ;
+ $8308 LD ($8250),A  ;
+ $830B LD DE,$FFE8   ;
+ $830E ADD IY,DE     ;
+ $8310 LD A,$01      ;
+ $8312 JP $758A      ;

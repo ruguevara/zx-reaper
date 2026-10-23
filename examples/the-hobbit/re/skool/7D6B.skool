@@ -1,6 +1,6 @@
 ; Routine at 7D6B
 ;
-; Used by the routine at #R$7DF5.
+; Used by the routines at #R$7D90 and #R$7DBC.
 c$7D6B LD A,$01      ;
  $7D6D LD ($B6FA),A  ;
  $7D70 LD ($B701),A  ;

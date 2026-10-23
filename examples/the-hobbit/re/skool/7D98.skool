@@ -1,2 +1,17 @@
-; Message at 7D98
-t$7D98 DEFM "!>y"
+; Routine at 7D98
+;
+; Used by the routine at #R$7DBC.
+c$7D98 LD HL,$793E   ;
+ $7D9B BIT 0,(HL)    ;
+ $7D9D JP Z,$7E4D    ;
+ $7DA0 BIT 1,(HL)    ;
+ $7DA2 LD HL,$7948   ;
+ $7DA5 LD DE,$B6E9   ;
+ $7DA8 LD BC,$B6FF   ;
+ $7DAB JR Z,$7DFE    ;
+ $7DAD LD A,($7941)  ;
+ $7DB0 AND A         ;
+ $7DB1 JP Z,$7DF5    ;
+ $7DB4 LD A,($7955)  ;
+ $7DB7 LD A,($7948)  ;
+ $7DBA JR $7D89      ;

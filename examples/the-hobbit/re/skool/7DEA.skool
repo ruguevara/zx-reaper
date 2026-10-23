@@ -1,3 +1,0 @@
-; Data block at 7DEA
-b$7DEA DEFB $A7,$28,$08,$3D,$20,$93,$CD,$D8
- $7DF2 DEFB $7A,$20,$A3

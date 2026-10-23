@@ -1,0 +1,16 @@
+; Routine at 855A
+;
+; Used by the routine at #R$84CC.
+c$855A CALL $0556    ;
+ $855D RET C         ;
+ $855E LD A,$01      ;
+ $8560 LD ($B701),A  ;
+ $8563 LD HL,$B381   ;
+ $8566 CALL $72DD    ;
+*$8569 XOR A         ;
+ $856A IN A,($FE)    ;
+ $856C AND $1F       ;
+ $856E CP $1F        ;
+ $8570 JR Z,$8569    ;
+ $8572 POP DE        ;
+ $8573 JP $8553      ;

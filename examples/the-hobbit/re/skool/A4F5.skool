@@ -1,0 +1,3 @@
+; Data block at A4F5
+b$A4F5 DEFB $CD,$44,$9D,$21,$4B,$B0,$C3,$E3
+ $A4FD DEFB $A1

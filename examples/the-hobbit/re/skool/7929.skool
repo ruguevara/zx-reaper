@@ -1,0 +1,12 @@
+; Routine at 7929
+;
+; Used by the routines at #R$76EC, #R$772F and #R$82BA.
+c$7929 CALL $75F1    ;
+ $792C JP NZ,$75B4   ;
+; This entry point is used by the routines at #R$6C00 and #R$75F6.
+*$792F LD HL,$AD9F   ;
+ $7932 LD A,$01      ;
+ $7934 LD ($B701),A  ;
+ $7937 CALL $72DD    ;
+ $793A OR $01        ;
+ $793C RET           ;

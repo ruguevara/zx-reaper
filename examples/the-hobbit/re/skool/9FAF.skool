@@ -1,6 +1,6 @@
 ; Routine at 9FAF
 ;
-; Used by the routines at #R$8C4B, #R$910E and #R$9F94.
+; Used by the routines at #R$8C4B, #R$90EB, #R$910E and #R$9F94.
 c$9FAF PUSH IY       ;
  $9FB1 PUSH DE       ;
  $9FB2 PUSH BC       ;

@@ -1,2 +1,0 @@
-; Data block at 7DA5
-b$7DA5 DEFB $11,$E9,$B6,$01,$FF,$B6

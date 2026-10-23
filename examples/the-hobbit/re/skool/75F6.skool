@@ -1,7 +1,7 @@
 ; Routine at 75F6
 c$75F6 XOR A          ;
  $75F7 LD ($B705),A   ;
-; This entry point is used by the routine at #R$7731.
+; This entry point is used by the routines at #R$770B and #R$772F.
 *$75FA BIT 1,E        ;
  $75FC JR Z,$7614     ;
  $75FE LD A,($B706)   ;

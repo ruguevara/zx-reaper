@@ -1,0 +1,22 @@
+; Routine at 9034
+c$9034 CALL $9D44    ;
+ $9037 LD A,($B6E8)  ;
+ $903A CALL $9A85    ;
+ $903D CP $FF        ;
+ $903F LD A,$00      ;
+ $9041 JR Z,$9058    ;
+ $9043 LD A,($B6F9)  ;
+ $9046 CP $00        ;
+ $9048 JR NZ,$9058   ;
+ $904A LD A,(IY+$06) ;
+ $904D CP $00        ;
+ $904F JR Z,$9058    ;
+ $9051 CALL $9C9F    ;
+ $9054 CP $00        ;
+ $9056 JR Z,$905C    ;
+*$9058 CALL $7EBA    ;
+ $905B RET           ;
+*$905C LD HL,$B1E3   ;
+ $905F CALL $72DD    ;
+ $9062 SUB A         ;
+ $9063 JR $9058      ;

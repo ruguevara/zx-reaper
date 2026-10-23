@@ -1,0 +1,19 @@
+; Routine at 914A
+;
+; Used by the routine at #R$9171.
+c$914A LD IX,($B708)  ;
+ $914E LD A,($B6EA)   ;
+ $9151 AND A          ;
+ $9152 JR NZ,$915E    ;
+ $9154 BIT 4,(IX+$04) ;
+ $9158 JR Z,$915E     ;
+ $915A RES 4,(IX+$04) ;
+*$915E LD A,(IX+$04)  ;
+ $9161 AND $70        ;
+ $9163 LD IX,($B70C)  ;
+ $9167 AND (IX+$04)   ;
+ $916A RET Z          ;
+ $916B POP HL         ;
+ $916C XOR A          ;
+ $916D LD ($B6FB),A   ;
+ $9170 RET            ;

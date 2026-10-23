@@ -1,0 +1,15 @@
+; Routine at A73B
+c$A73B LD HL,$C3B9    ;
+ $A73E BIT 3,(HL)     ;
+ $A740 RET Z          ;
+ $A741 CALL $97FF     ;
+ $A744 LD IX,$C1AD    ;
+ $A748 SET 3,(IX+$07) ;
+ $A74C LD A,$02       ;
+ $A74E CALL $A18C     ;
+ $A751 LD A,$02       ;
+ $A753 LD IY,$C11B    ;
+ $A757 CALL $9E25     ;
+ $A75A RET Z          ;
+ $A75B LD HL,$B109    ;
+ $A75E JP $72DD       ;

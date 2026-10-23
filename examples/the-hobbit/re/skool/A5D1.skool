@@ -1,0 +1,8 @@
+; Routine at A5D1
+c$A5D1 CALL $9D44    ;
+ $A5D4 LD HL,$C452   ;
+ $A5D7 LD A,($C12B)  ;
+ $A5DA CP (HL)       ;
+ $A5DB RET NZ        ;
+ $A5DC LD HL,$B085   ;
+ $A5DF JP $97F4      ;

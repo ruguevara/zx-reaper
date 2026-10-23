@@ -1,0 +1,19 @@
+; Routine at 8F3E
+;
+; Used by the routine at #R$8FD6.
+c$8F3E CP $FF        ;
+ $8F40 JP Z,$9F76    ;
+ $8F43 LD A,(IX+$02) ;
+ $8F46 CP $00        ;
+ $8F48 JP Z,$9F76    ;
+ $8F4B LD A,(IX+$01) ;
+ $8F4E PUSH IX       ;
+ $8F50 CALL $8E85    ;
+ $8F53 POP IX        ;
+ $8F55 JP NZ,$9F76   ;
+ $8F58 CALL $9D44    ;
+ $8F5B LD A,(IX+$00) ;
+ $8F5E LD ($B6E7),A  ;
+ $8F61 LD A,$FF      ;
+ $8F63 LD ($B6E8),A  ;
+ $8F66 JP $8DAB      ;

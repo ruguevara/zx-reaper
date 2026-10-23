@@ -1,6 +1,7 @@
 ; Routine at A1E3
 ;
-; Used by the routines at #R$A525, #R$A640, #R$A657, #R$A8D2 and #R$A9BD.
+; Used by the routines at #R$A4DF, #R$A4FE, #R$A525, #R$A640, #R$A657, #R$A7C4,
+; #R$A8D2, #R$A926 and #R$A9BD.
 c$A1E3 PUSH HL       ;
  $A1E4 LD HL,$B009   ;
  $A1E7 CALL $72DD    ;

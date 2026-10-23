@@ -1,0 +1,6 @@
+; Routine at A5CA
+;
+; Used by the routines at #R$8EEC and #R$9138.
+c$A5CA BIT 5,(IX+$07) ;
+ $A5CE LD A,$05       ;
+ $A5D0 RET            ;

@@ -18,7 +18,8 @@ c$9630 PUSH AF       ;
  $9648 LD (HL),E     ;
  $9649 POP AF        ;
  $964A LD HL,$AFFC   ;
- $964D PUSH IX       ;
+; This entry point is used by the routines at #R$962B and #R$A3E6.
+*$964D PUSH IX       ;
  $964F PUSH IY       ;
  $9651 PUSH BC       ;
  $9652 CALL $965B    ;

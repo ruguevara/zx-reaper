@@ -1,6 +1,6 @@
 ; Routine at 9CA8
 ;
-; Used by the routine at #R$9C9F.
+; Used by the routines at #R$9213, #R$92ED and #R$9C9F.
 c$9CA8 PUSH IX        ;
  $9CAA PUSH BC        ;
  $9CAB LD C,A         ;

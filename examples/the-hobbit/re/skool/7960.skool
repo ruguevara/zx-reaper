@@ -21,10 +21,11 @@ c$7960 XOR A          ;
  $7988 CALL $950F     ;
 ; This entry point is used by the routine at #R$7B9E.
 *$798B CALL $96B3     ;
-; This entry point is used by the routine at #R$7DF5.
+; This entry point is used by the routine at #R$7DBC.
 *$798E LD A,($B71C)   ;
  $7991 AND A          ;
  $7992 JR NZ,$7970    ;
+; This entry point is used by the routine at #R$7DBC.
 *$7994 LD A,($B706)   ;
  $7997 DEC A          ;
  $7998 LD ($B706),A   ;

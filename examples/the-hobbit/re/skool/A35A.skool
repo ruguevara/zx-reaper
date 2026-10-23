@@ -1,3 +1,0 @@
-; Data block at A35A
-b$A35A DEFB $B0,$C3,$DD,$72,$CD,$FF,$97,$DD
- $A362 DEFB $2A,$08,$B7,$C3,$17,$91

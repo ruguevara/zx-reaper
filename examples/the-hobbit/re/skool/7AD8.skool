@@ -1,6 +1,6 @@
 ; Routine at 7AD8
 ;
-; Used by the routine at #R$7A14.
+; Used by the routines at #R$7A14 and #R$7DBC.
 c$7AD8 LD A,($B71D)  ;
  $7ADB BIT 2,A       ;
  $7ADD RET Z         ;

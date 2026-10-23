@@ -1,0 +1,6 @@
+; Data block at A1AE
+b$A1AE DEFB $FD,$E5,$DD,$E5,$DD,$21,$60,$C0
+ $A1B6 DEFB $CD,$A9,$9B,$28,$05,$FD,$BE,$01
+ $A1BE DEFB $20,$F6,$DD,$7E,$00,$DD,$E1,$FD
+ $A1C6 DEFB $E1,$C9,$DD,$7E,$07,$E6,$48,$FE
+ $A1CE DEFB $40,$C9

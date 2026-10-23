@@ -1,0 +1,7 @@
+; Routine at 9246
+;
+; Used by the routine at #R$8CF1.
+c$9246 LD IX,($B708) ;
+ $924A LD A,(IX+$00) ;
+ $924D DEC A         ;
+ $924E RET           ;

@@ -1,8 +1,9 @@
 ; Routine at A0BA
 ;
-; Used by the routines at #R$A0C8 and #R$A138.
+; Used by the routines at #R$A0C8, #R$A138 and #R$A7C4.
 c$A0BA LD HL,$A20E   ;
- $A0BD LD E,A        ;
+; This entry point is used by the routine at #R$A16C.
+*$A0BD LD E,A        ;
  $A0BE RES 7,E       ;
  $A0C0 LD D,$00      ;
  $A0C2 ADD HL,DE     ;

@@ -1,6 +1,7 @@
 ; Routine at 9F76
 ;
-; Used by the routines at #R$8D9D and #R$A368.
+; Used by the routines at #R$8CF1, #R$8D33, #R$8D9D, #R$8EEC, #R$8F3E, #R$92ED,
+; #R$A368 and #R$A3E6.
 c$9F76 LD A,($B6FA)  ;
  $9F79 DEC A         ;
  $9F7A JP Z,$712B    ;

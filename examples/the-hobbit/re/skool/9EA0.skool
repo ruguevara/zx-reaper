@@ -1,6 +1,21 @@
-; Data block at 9EA0
-b$9EA0 DEFB $FD,$E5,$D5,$11,$02,$00,$CD,$93
- $9EA8 DEFB $9B,$28,$18,$DD,$7E,$02,$DD,$E5
- $9EB0 DEFB $CD,$B1,$9B,$DD,$E5,$FD,$E1,$DD
- $9EB8 DEFB $E1,$FD,$19,$CD,$F3,$71,$20,$E6
- $9EC0 DEFB $DD,$7E,$02,$D1,$FD,$E1,$C9
+; Routine at 9EA0
+;
+; Used by the routine at #R$7DBC.
+c$9EA0 PUSH IY       ;
+ $9EA2 PUSH DE       ;
+ $9EA3 LD DE,$0002   ;
+*$9EA6 CALL $9B93    ;
+ $9EA9 JR Z,$9EC3    ;
+ $9EAB LD A,(IX+$02) ;
+ $9EAE PUSH IX       ;
+ $9EB0 CALL $9BB1    ;
+ $9EB3 PUSH IX       ;
+ $9EB5 POP IY        ;
+ $9EB7 POP IX        ;
+ $9EB9 ADD IY,DE     ;
+ $9EBB CALL $71F3    ;
+ $9EBE JR NZ,$9EA6   ;
+ $9EC0 LD A,(IX+$02) ;
+*$9EC3 POP DE        ;
+ $9EC4 POP IY        ;
+ $9EC6 RET           ;

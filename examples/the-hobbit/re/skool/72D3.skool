@@ -1,15 +1,17 @@
 ; Routine at 72D3
 ;
-; Used by the routine at #R$7B9E.
+; Used by the routines at #R$7B9E, #R$7D90 and #R$7DBC.
 c$72D3 LD A,($B71B)  ;
  $72D6 AND A         ;
  $72D7 JR Z,$72DD    ;
  $72D9 XOR A         ;
  $72DA LD ($B6FA),A  ;
-; This entry point is used by the routines at #R$6C00, #R$72CE, #R$792F,
-; #R$8C4B, #R$8D9D, #R$8FD6, #R$939E, #R$950F, #R$965B, #R$9686, #R$9728,
-; #R$97F4, #R$980E, #R$9ACD, #R$9F94, #R$9FAF, #R$A050, #R$A09D, #R$A0C8,
-; #R$A138, #R$A1E3 and #R$A9D6.
+; This entry point is used by the routines at #R$6C00, #R$72CE, #R$7929,
+; #R$83A0, #R$83F5, #R$8498, #R$84CC, #R$855A, #R$8C4B, #R$8C9B, #R$8CA6,
+; #R$8CF1, #R$8D33, #R$8D9D, #R$8EEC, #R$8FD6, #R$9034, #R$90D2, #R$90EB,
+; #R$9171, #R$924F, #R$939E, #R$93DA, #R$950F, #R$965B, #R$9686, #R$9728,
+; #R$97F4, #R$980E, #R$9ACD, #R$9D50, #R$9F94, #R$9FAF, #R$A050, #R$A09D,
+; #R$A0C8, #R$A138, #R$A16C, #R$A1E3, #R$A358, #R$A448, #R$A73B and #R$A9D6.
 *$72DD LD ($70DD),DE ;
  $72E1 LD ($70E0),IX ;
  $72E5 LD ($70DC),A  ;
@@ -17,6 +19,7 @@ c$72D3 LD A,($B71B)  ;
  $72EB AND A         ;
  $72EC JR NZ,$72F1   ;
  $72EE LD ($B6FB),A  ;
+; This entry point is used by the routine at #R$73E0.
 *$72F1 PUSH HL       ;
  $72F2 POP IX        ;
 *$72F4 LD A,(IX+$00) ;

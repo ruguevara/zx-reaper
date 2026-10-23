@@ -1,6 +1,6 @@
 ; Routine at 7478
 ;
-; Used by the routine at #R$9ED6.
+; Used by the routines at #R$7394 and #R$9ED6.
 c$7478 PUSH DE       ;
  $7479 LD A,($B703)  ;
  $747C AND A         ;

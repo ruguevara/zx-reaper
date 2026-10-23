@@ -1,6 +1,6 @@
 ; Routine at 782B
 ;
-; Used by the routine at #R$77B9.
+; Used by the routine at #R$7795.
 c$782B BIT 6,E       ;
  $782D JR NZ,$7850   ;
  $782F BIT 7,E       ;
@@ -11,3 +11,20 @@ c$782B BIT 6,E       ;
 *$7838 RES 7,E       ;
  $783A PUSH DE       ;
  $783B LD DE,$000E   ;
+*$783E PUSH BC       ;
+ $783F PUSH IY       ;
+ $7841 POP HL        ;
+ $7842 ADD HL,DE     ;
+ $7843 EX DE,HL      ;
+ $7844 LD HL,$757B   ;
+ $7847 LD BC,$000A   ;
+ $784A LDIR          ;
+ $784C POP BC        ;
+ $784D POP DE        ;
+ $784E XOR A         ;
+ $784F RET           ;
+; This entry point is used by the routine at #R$7795.
+*$7850 RES 6,E       ;
+ $7852 PUSH DE       ;
+ $7853 LD DE,$0004   ;
+ $7856 JR $783E      ;

@@ -1,7 +1,15 @@
-; Data block at 73E0
-b$73E0 DEFB $DD,$23,$DD,$E5,$E1,$E5,$DD,$5E
- $73E8 DEFB $00,$16,$00,$CB,$7B,$28,$02,$16
- $73F0 DEFB $FF,$19,$CD,$F1,$72,$DD,$E1,$AF
- $73F8 DEFB $C9,$3A,$EA,$B6,$11,$90,$09,$A7
- $7400 DEFB $C0,$11,$EA,$0B,$F6,$01,$C9,$3A
- $7408 DEFB $E8,$B6,$18,$F0
+; Routine at 73E0
+c$73E0 INC IX        ;
+ $73E2 PUSH IX       ;
+ $73E4 POP HL        ;
+ $73E5 PUSH HL       ;
+ $73E6 LD E,(IX+$00) ;
+ $73E9 LD D,$00      ;
+ $73EB BIT 7,E       ;
+ $73ED JR Z,$73F1    ;
+ $73EF LD D,$FF      ;
+*$73F1 ADD HL,DE     ;
+ $73F2 CALL $72F1    ;
+ $73F5 POP IX        ;
+ $73F7 XOR A         ;
+ $73F8 RET           ;

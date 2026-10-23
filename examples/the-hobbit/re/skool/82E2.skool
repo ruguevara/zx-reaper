@@ -1,0 +1,5 @@
+; Data block at 82E2
+b$82E2 DEFB $D5,$21,$E0,$B6,$11,$7F,$75,$01
+ $82EA DEFB $06,$00,$ED,$B0,$D1,$CB,$7B,$CD
+ $82F2 DEFB $F7,$82,$C3,$B4,$75,$CA,$38,$78
+ $82FA DEFB $C3,$50,$78

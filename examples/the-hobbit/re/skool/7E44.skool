@@ -1,5 +1,0 @@
-; Data block at 7E44
-b$7E44 DEFB $CD,$74,$7D,$21,$C4,$AD,$C3,$90
- $7E4C DEFB $7D,$CD,$78,$7E,$21,$00,$00,$E5
- $7E54 DEFB $3A,$E8,$B6,$CD,$E2,$71,$E5,$CD
- $7E5C DEFB $7C,$7E

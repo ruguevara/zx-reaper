@@ -1,0 +1,8 @@
+; Routine at 8391
+c$8391 CALL $83F5    ;
+*$8394 XOR A         ;
+ $8395 IN A,($FE)    ;
+ $8397 AND $1F       ;
+ $8399 CP $1F        ;
+ $839B JR Z,$8394    ;
+ $839D JP $6C27      ;

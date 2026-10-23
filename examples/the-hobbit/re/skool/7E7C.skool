@@ -1,2 +1,22 @@
-; Message at 7E7C
-t$7E7C DEFM "> 2"
+; Routine at 7E7C
+;
+; Used by the routines at #R$7DBC and #R$7E4D.
+c$7E7C LD A,$20       ;
+; This entry point is used by the routine at #R$7E78.
+*$7E7E LD ($7E92),A   ;
+ $7E81 LD ($7EA1),A   ;
+ $7E84 LD IX,($795E)  ;
+ $7E88 LD L,(IX+$04)  ;
+ $7E8B LD H,(IX+$05)  ;
+ $7E8E BIT 7,(IX+$07) ;
+ $7E92 JR NZ,$7E97    ;
+ $7E94 LD HL,$0000    ;
+*$7E97 EX (SP),HL     ;
+ $7E98 PUSH HL        ;
+ $7E99 LD L,(IX+$02)  ;
+ $7E9C LD H,(IX+$03)  ;
+ $7E9F BIT 5,H        ;
+ $7EA1 JR NZ,$7EA6    ;
+ $7EA3 LD HL,$0000    ;
+*$7EA6 EX (SP),HL     ;
+ $7EA7 JP (HL)        ;

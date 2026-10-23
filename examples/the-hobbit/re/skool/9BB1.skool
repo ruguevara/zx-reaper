@@ -1,7 +1,7 @@
 ; Routine at 9BB1
 ;
-; Used by the routines at #R$71D5, #R$8E85, #R$9630, #R$965B, #R$96A8, #R$9C41,
-; #R$9D37 and #R$A0AE.
+; Used by the routines at #R$71D5, #R$8E85, #R$8EEC, #R$9630, #R$965B, #R$96A8,
+; #R$9C41, #R$9D37, #R$9EA0, #R$A0AE and #R$A7C4.
 c$9BB1 CP $50        ;
  $9BB3 JR C,$9BB7    ;
  $9BB5 XOR A         ;

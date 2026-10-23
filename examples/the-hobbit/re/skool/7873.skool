@@ -1,6 +1,6 @@
 ; Routine at 7873
 ;
-; Used by the routines at #R$7585, #R$7731 and #R$77B9.
+; Used by the routines at #R$7585, #R$770B, #R$772F and #R$7795.
 c$7873 LD HL,($B6DC) ;
  $7876 LD ($B6DA),HL ;
  $7879 LD A,D        ;

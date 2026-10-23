@@ -1,0 +1,11 @@
+; Routine at 7EA8
+;
+; Used by the routine at #R$7B9E.
+c$7EA8 LD HL,($795C) ;
+ $7EAB PUSH HL       ;
+ $7EAC LD HL,($795A) ;
+ $7EAF PUSH HL       ;
+ $7EB0 LD HL,($7958) ;
+ $7EB3 PUSH HL       ;
+ $7EB4 LD HL,$ADB0   ;
+ $7EB7 JP $7D90      ;

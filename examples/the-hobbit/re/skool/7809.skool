@@ -1,8 +1,9 @@
 ; Routine at 7809
 ;
-; Used by the routine at #R$77B9.
+; Used by the routine at #R$7795.
 c$7809 LD HL,$7581   ;
- $780C LD A,(HL)     ;
+; This entry point is used by the routine at #R$781C.
+*$780C LD A,(HL)     ;
  $780D INC HL        ;
  $780E OR (HL)       ;
  $780F JR Z,$7818    ;

@@ -1,4 +1,12 @@
-; Data block at 711A
-b$711A DEFB $AF,$32,$FB,$B6,$3C,$32,$FA,$B6
- $7122 DEFB $3A,$1B,$B7,$A7,$CC,$2B,$71,$AF
- $712A DEFB $C9
+; Routine at 711A
+;
+; Used by the routine at #R$7DBC.
+c$711A XOR A         ;
+ $711B LD ($B6FB),A  ;
+ $711E INC A         ;
+ $711F LD ($B6FA),A  ;
+ $7122 LD A,($B71B)  ;
+ $7125 AND A         ;
+ $7126 CALL Z,$712B  ;
+ $7129 XOR A         ;
+ $712A RET           ;

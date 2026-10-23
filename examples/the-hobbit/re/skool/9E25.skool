@@ -1,6 +1,6 @@
 ; Routine at 9E25
 ;
-; Used by the routine at #R$980E.
+; Used by the routines at #R$980E and #R$A73B.
 c$9E25 CALL $9E2B    ;
  $9E28 CALL $9E40    ;
 *$9E2B PUSH IX       ;

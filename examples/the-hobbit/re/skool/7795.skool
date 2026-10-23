@@ -1,6 +1,51 @@
-; Data block at 7795
-b$7795 DEFB $CB,$4B,$28,$07,$3A,$DE,$B6,$FE
- $779D DEFB $A0,$28,$91,$16,$70,$CD,$1C,$78
- $77A5 DEFB $CD,$73,$78,$FE,$70,$28,$F6,$FE
- $77AD DEFB $80,$20,$09,$CB,$63,$CC,$24,$79
- $77B5 DEFB $CB,$A3,$18,$EC
+; Routine at 7795
+c$7795 BIT 1,E         ;
+ $7797 JR Z,$77A0      ;
+ $7799 LD A,($B6DE)    ;
+ $779C CP $A0          ;
+ $779E JR Z,$7731      ;
+*$77A0 LD D,$70        ;
+*$77A2 CALL $781C      ;
+*$77A5 CALL $7873      ;
+ $77A8 CP $70          ;
+ $77AA JR Z,$77A2      ;
+ $77AC CP $80          ;
+ $77AE JR NZ,$77B9     ;
+ $77B0 BIT 4,E         ;
+ $77B2 CALL Z,$7924    ;
+ $77B5 RES 4,E         ;
+ $77B7 JR $77A5        ;
+*$77B9 CP $60          ;
+ $77BB JR Z,$77C9      ;
+ $77BD CP $50          ;
+ $77BF JR Z,$77D1      ;
+ $77C1 LD HL,($B6DA)   ;
+ $77C4 LD ($B6DC),HL   ;
+ $77C7 JR $77D7        ;
+*$77C9 CALL $7809      ;
+ $77CC CALL $7873      ;
+ $77CF JR $77B9        ;
+*$77D1 LD HL,$757F     ;
+ $77D4 LD (HL),C       ;
+ $77D5 INC HL          ;
+ $77D6 LD (HL),B       ;
+*$77D7 LD D,$50        ;
+ $77D9 LD A,($B719)    ;
+ $77DC CP $02          ;
+ $77DE JR NZ,$7802     ;
+ $77E0 LD HL,($757B)   ;
+ $77E3 LD A,H          ;
+ $77E4 OR L            ;
+ $77E5 JR NZ,$77FF     ;
+ $77E7 BIT 6,(IY+$19)  ;
+ $77EB JR NZ,$77F5     ;
+ $77ED LD BC,$FFE8     ;
+ $77F0 ADD IY,BC       ;
+ $77F2 CALL $7864      ;
+*$77F5 CALL $7850      ;
+ $77F8 LD (IY+$01),$40 ;
+ $77FC JP $75B4        ;
+*$77FF CALL $7858      ;
+*$7802 CALL $782B      ;
+ $7805 JP Z,$75B4      ;
+ $7808 RET             ;

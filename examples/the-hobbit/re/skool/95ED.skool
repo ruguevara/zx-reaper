@@ -1,6 +1,7 @@
 ; Routine at 95ED
 ;
-; Used by the routines at #R$712B, #R$820B, #R$8D9D, #R$950F and #R$9B02.
+; Used by the routines at #R$712B, #R$820B, #R$8D9D, #R$950F, #R$9B02 and
+; #R$A3E6.
 c$95ED LD A,($B6EA)   ;
  $95F0 AND A          ;
  $95F1 RET NZ         ;

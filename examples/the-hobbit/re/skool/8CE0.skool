@@ -1,0 +1,4 @@
+; Data block at 8CE0
+b$8CE0 DEFB $3A,$E8,$B6,$21,$E9,$B6,$CD,$7E
+ $8CE8 DEFB $9C,$21,$B5,$AF,$C2,$DD,$72,$18
+ $8CF0 DEFB $4B

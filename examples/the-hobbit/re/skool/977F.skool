@@ -1,0 +1,25 @@
+; Routine at 977F
+;
+; Used by the routine at #R$9171.
+c$977F AND A           ;
+ $9780 JP Z,$90D2      ;
+ $9783 PUSH BC         ;
+ $9784 PUSH IY         ;
+ $9786 PUSH IX         ;
+ $9788 LD C,A          ;
+ $9789 CALL $9BCA      ;
+ $978C SET 3,(IX+$07)  ;
+ $9790 CALL $9D53      ;
+ $9793 LD A,C          ;
+ $9794 CALL $9A85      ;
+ $9797 CP $FF          ;
+ $9799 LD A,C          ;
+ $979A JR Z,$97A0      ;
+ $979C LD (IY+$00),$00 ;
+*$97A0 CALL $A18C      ;
+ $97A3 LD A,C          ;
+ $97A4 CALL $7F60      ;
+ $97A7 POP IX          ;
+ $97A9 POP IY          ;
+ $97AB POP BC          ;
+ $97AC RET             ;

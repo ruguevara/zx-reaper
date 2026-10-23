@@ -1,7 +1,7 @@
 ; Routine at 9DBD
 ;
-; Used by the routines at #R$6C00, #R$7F78, #R$8D9D, #R$94D6, #R$950F, #R$9AA0,
-; #R$9B81 and #R$9BCA.
+; Used by the routines at #R$6C00, #R$7F78, #R$83A0, #R$8D9D, #R$94D6, #R$950F,
+; #R$9AA0, #R$9B81 and #R$9BCA.
 c$9DBD EXX           ;
  $9DBE PUSH IX       ;
  $9DC0 POP HL        ;

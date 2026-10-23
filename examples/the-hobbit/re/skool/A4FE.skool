@@ -1,0 +1,12 @@
+; Routine at A4FE
+c$A4FE CALL $9D44    ;
+ $A501 LD A,$02      ;
+ $A503 CALL $9C9F    ;
+ $A506 LD HL,$B052   ;
+ $A509 CP $00        ;
+ $A50B JP Z,$A1E3    ;
+ $A50E LD HL,$B05B   ;
+ $A511 CP $01        ;
+ $A513 JP Z,$A1E3    ;
+ $A516 LD HL,$B05F   ;
+ $A519 JP $A1E3      ;

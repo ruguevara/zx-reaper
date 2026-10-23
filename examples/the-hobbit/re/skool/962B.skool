@@ -1,2 +1,5 @@
-; Data block at 962B
-b$962B DEFB $21,$00,$B0,$18,$1D
+; Routine at 962B
+;
+; Used by the routine at #R$8EEC.
+c$962B LD HL,$B000   ;
+ $962E JR $964D      ;

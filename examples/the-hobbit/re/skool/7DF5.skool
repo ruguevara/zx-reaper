@@ -1,6 +1,0 @@
-; Routine at 7DF5
-;
-; Used by the routine at #R$7960.
-c$7DF5 CALL $7D6B    ;
- $7DF8 CALL $950F    ;
- $7DFB JP $798E      ;

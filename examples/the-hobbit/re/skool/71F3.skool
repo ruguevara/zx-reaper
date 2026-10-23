@@ -1,6 +1,6 @@
 ; Routine at 71F3
 ;
-; Used by the routines at #R$7B9E and #R$9DD9.
+; Used by the routines at #R$7B9E, #R$9DD9 and #R$9EA0.
 c$71F3 PUSH DE       ;
  $71F4 PUSH HL       ;
  $71F5 PUSH IY       ;

@@ -1,7 +1,8 @@
 ; Routine at 858B
 ;
 ; Used by the routines at #R$6C00, #R$6DD6, #R$6E4F, #R$6E7A, #R$6E8B, #R$712B,
-; #R$7249, #R$72C3, #R$7348, #R$74BA, #R$8583, #R$8C4B, #R$97F4 and #R$9FC7.
+; #R$7249, #R$72C3, #R$7348, #R$74BA, #R$83F5, #R$8583, #R$8C4B, #R$93DA,
+; #R$97F4 and #R$9FC7.
 c$858B CALL $8576    ;
  $858E RET Z         ;
  $858F PUSH AF       ;

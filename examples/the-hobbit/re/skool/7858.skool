@@ -1,6 +1,6 @@
 ; Routine at 7858
 ;
-; Used by the routines at #R$76EC and #R$77B9.
+; Used by the routines at #R$76EC and #R$7795.
 c$7858 CALL $78A5    ;
  $785B PUSH IX       ;
  $785D POP IY        ;

@@ -1,3 +1,11 @@
-; Data block at 97FF
-b$97FF DEFB $C5,$ED,$4B,$FA,$B6,$79,$A0,$20
- $9807 DEFB $01,$C1,$C1,$C9,$00,$00,$00
+; Routine at 97FF
+;
+; Used by the routine at #R$A73B.
+c$97FF PUSH BC       ;
+ $9800 LD BC,($B6FA) ;
+ $9804 LD A,C        ;
+ $9805 AND B         ;
+ $9806 JR NZ,$9809   ;
+ $9808 POP BC        ;
+*$9809 POP BC        ;
+ $980A RET           ;

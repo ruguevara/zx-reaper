@@ -1,3 +1,17 @@
-; Data block at 770B
-b$770B DEFB $CB,$9B,$D5,$CD,$73,$78,$FE,$A0
- $7713 DEFB $28,$F9
+; Routine at 770B
+c$770B RES 3,E       ;
+ $770D PUSH DE       ;
+*$770E CALL $7873    ;
+ $7711 CP $A0        ;
+ $7713 JR Z,$770E    ;
+ $7715 DEC HL        ;
+ $7716 DEC HL        ;
+ $7717 LD ($7574),HL ;
+ $771A LD ($B6DC),HL ;
+ $771D POP DE        ;
+ $771E LD A,E        ;
+ $771F LD ($7576),A  ;
+ $7722 LD ($7577),IY ;
+ $7726 LD A,($B706)  ;
+ $7729 LD ($7579),A  ;
+ $772C JP $75FA      ;

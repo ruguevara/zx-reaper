@@ -1,6 +1,6 @@
 ; Routine at 9A85
 ;
-; Used by the routine at #R$9AA0.
+; Used by the routines at #R$9034, #R$977F and #R$9AA0.
 c$9A85 PUSH DE       ;
  $9A86 PUSH BC       ;
  $9A87 LD B,A        ;

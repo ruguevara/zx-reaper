@@ -1,6 +1,6 @@
 ; Routine at 712B
 ;
-; Used by the routines at #R$7960, #R$99C6 and #R$9F76.
+; Used by the routines at #R$711A, #R$7960, #R$99C6 and #R$9F76.
 c$712B LD A,$01      ;
  $712D LD ($70DF),A  ;
  $7130 XOR A         ;

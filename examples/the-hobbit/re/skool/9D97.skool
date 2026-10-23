@@ -1,6 +1,6 @@
 ; Routine at 9D97
 ;
-; Used by the routines at #R$910E and #R$A050.
+; Used by the routines at #R$90EB, #R$910E and #R$A050.
 c$9D97 PUSH IX        ;
  $9D99 PUSH IY        ;
  $9D9B PUSH BC        ;

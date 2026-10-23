@@ -1,0 +1,6 @@
+; Routine at 82A5
+c$82A5 IN A,($FB)    ;
+ $82A7 BIT 6,A       ;
+ $82A9 JR NZ,$82B3   ;
+ $82AB LD A,$01      ;
+ $82AD JR $82B0      ;

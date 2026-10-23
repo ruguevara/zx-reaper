@@ -1,0 +1,15 @@
+; Routine at 8498
+;
+; Used by the routine at #R$8451.
+c$8498 CALL $0556    ;
+ $849B RET C         ;
+ $849C LD A,$01      ;
+ $849E LD ($B701),A  ;
+ $84A1 LD HL,$B357   ;
+ $84A4 CALL $72DD    ;
+*$84A7 XOR A         ;
+ $84A8 IN A,($FE)    ;
+ $84AA AND $1F       ;
+ $84AC CP $1F        ;
+ $84AE JR Z,$84A7    ;
+ $84B0 JP $6C27      ;

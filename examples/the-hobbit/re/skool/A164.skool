@@ -1,15 +1,6 @@
-; Data block at A164
-b$A164 DEFB $FD,$6E,$08,$FD,$66,$09,$18,$06
-*$A16C DEFB $DD,$6E,$08,$DD,$66,$09,$D5,$E5
- $A174 DEFB $21,$24,$A2,$CB,$7F,$28,$03,$21
- $A17C DEFB $34,$A2,$CD,$BD,$A0,$E1,$D5,$E5
- $A184 DEFB $21,$BB,$AF,$CD,$DD,$72,$D1,$C9
- $A18C DEFB $DD,$E5,$CD,$CA,$9B,$DD,$36,$0C
- $A194 DEFB $00,$DD,$36,$0D,$00,$11,$CD,$00
- $A19C DEFB $DD,$CB,$07,$76,$28,$03,$11,$92
- $A1A4 DEFB $01,$DD,$73,$0A,$DD,$72,$0B,$DD
- $A1AC DEFB $E1,$C9,$FD,$E5,$DD,$E5,$DD,$21
- $A1B4 DEFB $60,$C0,$CD,$A9,$9B,$28,$05,$FD
- $A1BC DEFB $BE,$01,$20,$F6,$DD,$7E,$00,$DD
- $A1C4 DEFB $E1,$FD,$E1,$C9,$DD,$7E,$07,$E6
- $A1CC DEFB $48,$FE,$40,$C9
+; Routine at A164
+;
+; Used by the routine at #R$924F.
+c$A164 LD L,(IY+$08) ;
+ $A167 LD H,(IY+$09) ;
+ $A16A JR $A172      ;

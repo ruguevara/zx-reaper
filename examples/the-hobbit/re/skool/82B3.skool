@@ -1,0 +1,6 @@
+; Routine at 82B3
+;
+; Used by the routines at #R$82A5, #R$83A0, #R$843A, #R$8451 and #R$84CC.
+c$82B3 LD A,($B6DE)  ;
+ $82B6 LD D,A        ;
+ $82B7 JP $75B4      ;

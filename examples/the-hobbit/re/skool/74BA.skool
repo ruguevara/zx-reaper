@@ -8,7 +8,7 @@ c$74BA LD E,(HL)     ;
  $74BE AND $0F       ;
  $74C0 LD D,A        ;
 ; This entry point is used by the routines at #R$712B, #R$72D3, #R$7348,
-; #R$743F, #R$7478, #R$7488, #R$8C4B, #R$9ED6, #R$A0C8 and #R$A138.
+; #R$743F, #R$7478, #R$7488, #R$8C4B, #R$9ED6, #R$A0C8, #R$A138 and #R$A448.
 *$74C1 LD A,D        ;
  $74C2 AND $0F       ;
  $74C4 OR E          ;

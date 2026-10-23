@@ -1,0 +1,5 @@
+; Data block at 9226
+b$9226 DEFB $3C,$AF,$2B,$AF,$20,$AF,$15,$AF
+ $922E DEFB $09,$AF,$F4,$AE,$E2,$AE,$D1,$AE
+ $9236 DEFB $BA,$AE,$AC,$AE,$98,$AE,$8B,$AE
+ $923E DEFB $7A,$AE,$70,$AE,$5A,$AE,$49,$AE

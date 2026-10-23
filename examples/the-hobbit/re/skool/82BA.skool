@@ -1,0 +1,10 @@
+; Routine at 82BA
+c$82BA LD A,($B719)  ;
+ $82BD CP $01        ;
+ $82BF JP NZ,$7929   ;
+ $82C2 LD A,$02      ;
+ $82C4 LD ($B719),A  ;
+ $82C7 LD A,(IY+$01) ;
+ $82CA OR $80        ;
+ $82CC LD (IY+$01),A ;
+ $82CF JP $75B4      ;

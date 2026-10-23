@@ -1,0 +1,19 @@
+; Routine at 83A0
+c$83A0 LD A,($B6EA)  ;
+ $83A3 AND A         ;
+ $83A4 JP NZ,$75B4   ;
+ $83A7 PUSH HL       ;
+ $83A8 PUSH IX       ;
+ $83AA LD HL,$B467   ;
+ $83AD LD A,($C12B)  ;
+ $83B0 LD IX,$83CD   ;
+ $83B4 CALL $9DBD    ;
+ $83B7 JR Z,$83BF    ;
+ $83B9 LD L,(IX+$01) ;
+ $83BC LD H,(IX+$02) ;
+*$83BF LD A,$01      ;
+ $83C1 LD ($B701),A  ;
+ $83C4 CALL $72DD    ;
+ $83C7 POP IX        ;
+ $83C9 POP HL        ;
+ $83CA JP $82B3      ;

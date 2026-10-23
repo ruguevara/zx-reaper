@@ -1,2 +1,7 @@
-; Data block at 9F25
-b$9F25 DEFB $3A,$E8,$B6,$F5,$3E,$01,$18,$03
+; Routine at 9F25
+;
+; Used by the routine at #R$8EEC.
+c$9F25 LD A,($B6E8)  ;
+ $9F28 PUSH AF       ;
+ $9F29 LD A,$01      ;
+ $9F2B JR $9F30      ;

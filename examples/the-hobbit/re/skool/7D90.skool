@@ -1,0 +1,7 @@
+; Routine at 7D90
+;
+; Used by the routines at #R$7DBC, #R$7E4D and #R$7EA8.
+c$7D90 CALL $7D6B    ;
+ $7D93 CALL $72D3    ;
+ $7D96 XOR A         ;
+ $7D97 RET           ;

@@ -1,2 +1,9 @@
-; Message at 7D83
-t$7D83 DEFM ":Ty*By"
+; Routine at 7D83
+;
+; Used by the routine at #R$7DBC.
+c$7D83 LD A,($7954)  ;
+ $7D86 LD HL,($7942) ;
+; This entry point is used by the routine at #R$7D98.
+*$7D89 PUSH HL       ;
+ $7D8A CALL $7D74    ;
+ $7D8D LD HL,$ADCC   ;

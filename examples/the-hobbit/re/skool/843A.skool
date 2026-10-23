@@ -1,0 +1,12 @@
+; Routine at 843A
+c$843A LD A,$04      ;
+ $843C OUT ($FE),A   ;
+ $843E CALL $84B9    ;
+*$8441 XOR A         ;
+ $8442 IN A,($FE)    ;
+ $8444 AND $1F       ;
+ $8446 CP $1F        ;
+ $8448 JR NZ,$8441   ;
+ $844A LD A,$07      ;
+ $844C OUT ($FE),A   ;
+ $844E JP $82B3      ;

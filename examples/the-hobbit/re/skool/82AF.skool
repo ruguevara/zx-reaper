@@ -1,0 +1,2 @@
+; Data block at 82AF
+b$82AF DEFB $AF,$32,$F2,$B6

@@ -1,0 +1,23 @@
+; Routine at 8D33
+c$8D33 CALL $9C78    ;
+ $8D36 LD HL,$AE11   ;
+ $8D39 JP C,$72DD    ;
+ $8D3C CALL $8CF1    ;
+ $8D3F LD A,($B6EA)  ;
+*$8D42 CALL $9BCA    ;
+ $8D45 LD A,($B6E8)  ;
+ $8D48 CP (IX+$01)   ;
+ $8D4B JP Z,$9F76    ;
+ $8D4E LD A,(IX+$01) ;
+ $8D51 CP $FF        ;
+ $8D53 JR NZ,$8D42   ;
+ $8D55 LD IX,($B708) ;
+ $8D59 CALL $9D44    ;
+ $8D5C LD A,(IX+$01) ;
+ $8D5F CP $12        ;
+ $8D61 LD A,($B6EA)  ;
+ $8D64 JR Z,$8D6A    ;
+ $8D66 LD (IX+$01),A ;
+ $8D69 RET           ;
+*$8D6A LD ($C367),A  ;
+ $8D6D RET           ;

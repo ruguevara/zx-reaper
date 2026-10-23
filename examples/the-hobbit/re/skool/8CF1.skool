@@ -1,0 +1,33 @@
+; Routine at 8CF1
+;
+; Used by the routine at #R$8D33.
+c$8CF1 LD IX,($B708)  ;
+ $8CF5 LD A,($B6E8)   ;
+ $8CF8 CALL $9CED     ;
+ $8CFB ADD A,(IX+$03) ;
+ $8CFE JR NC,$8D02    ;
+ $8D00 LD A,$FF       ;
+*$8D02 LD B,A         ;
+ $8D03 LD IY,($B70C)  ;
+ $8D07 LD A,(IY+$03)  ;
+ $8D0A SUB B          ;
+ $8D0B LD HL,$AE04    ;
+ $8D0E JR C,$8D20     ;
+ $8D10 PUSH AF        ;
+ $8D11 LD A,($B6EA)   ;
+ $8D14 CALL $9CED     ;
+ $8D17 LD B,A         ;
+ $8D18 POP AF         ;
+ $8D19 SUB B          ;
+ $8D1A JP P,$8D25     ;
+ $8D1D LD HL,$AE0C    ;
+*$8D20 EX (SP),HL     ;
+ $8D21 POP HL         ;
+ $8D22 JP $72DD       ;
+; This entry point is used by the routine at #R$924F.
+*$8D25 CALL $9246     ;
+ $8D28 JR NZ,$8D2F    ;
+ $8D2A BIT 1,(IX+$07) ;
+ $8D2E RET Z          ;
+*$8D2F POP HL         ;
+ $8D30 JP $9F76       ;
