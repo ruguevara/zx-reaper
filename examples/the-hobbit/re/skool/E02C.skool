@@ -1,0 +1,21 @@
+; Picture $0D: round-domed stone building with a small door, yellow (reuses
+; picture 1F's strokes)
+;
+; Strokes of a night or colour variant: the last command, $08, takes its x,y
+; from the first two bytes (the header) of picture $1F, whose strokes then
+; continue to draw.
+@label=Picture0D
+b$E02C DEFB $00,$30
+ $E02E DEFB $08,$84,$55
+ $E031 DEFB $85,$CF
+ $E033 DEFB $85,$05
+ $E035 DEFB $81,$C3
+ $E037 DEFB $80,$43
+ $E039 DEFB $82,$83
+ $E03B DEFB $82,$43
+ $E03D DEFB $82,$03
+ $E03F DEFB $82,$01
+ $E041 DEFB $83,$8F
+ $E043 DEFB $86,$CE
+ $E045 DEFB $40,$84,$6B
+ $E048 DEFB $08

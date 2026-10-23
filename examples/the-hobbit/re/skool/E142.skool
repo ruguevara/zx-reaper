@@ -1,0 +1,49 @@
+; Picture $05: dark forest clearing with a cauldron, black (reuses picture 1C's
+; strokes)
+;
+; Strokes of a night or colour variant: the last command, $08, takes its x,y
+; from the first two bytes (the header) of picture $1C, whose strokes then
+; continue to draw.
+@label=Picture05
+b$E142 DEFB $00,$00
+ $E144 DEFB $08,$5E,$36
+ $E147 DEFB $B2,$59
+ $E149 DEFB $87,$02
+ $E14B DEFB $82,$02
+ $E14D DEFB $83,$42
+ $E14F DEFB $83,$82
+ $E151 DEFB $83,$C2
+ $E153 DEFB $87,$82
+ $E155 DEFB $87,$42
+ $E157 DEFB $87,$02
+ $E159 DEFB $86,$42
+ $E15B DEFB $86,$82
+ $E15D DEFB $86,$C2
+ $E15F DEFB $86,$C2
+ $E161 DEFB $08,$5D,$35
+ $E164 DEFB $82,$03
+ $E166 DEFB $86,$02
+ $E168 DEFB $87,$42
+ $E16A DEFB $87,$82
+ $E16C DEFB $83,$82
+ $E16E DEFB $83,$82
+ $E170 DEFB $83,$42
+ $E172 DEFB $83,$02
+ $E174 DEFB $82,$82
+ $E176 DEFB $82,$82
+ $E178 DEFB $82,$82
+ $E17A DEFB $40,$6B,$21
+ $E17D DEFB $40,$6B,$29
+ $E180 DEFB $40,$65,$2F
+ $E183 DEFB $08,$61,$1C
+ $E186 DEFB $86,$04
+ $E188 DEFB $80,$C4
+ $E18A DEFB $80,$04
+ $E18C DEFB $08,$75,$1C
+ $E18F DEFB $82,$04
+ $E191 DEFB $08,$79,$17
+ $E194 DEFB $84,$84
+ $E196 DEFB $84,$04
+ $E198 DEFB $40,$74,$19
+ $E19B DEFB $40,$60,$19
+ $E19E DEFB $08

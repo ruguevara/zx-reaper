@@ -1,2 +1,5 @@
-; Unused
-s$F35A DEFS $08E6
+; End byte of picture $27
+;
+; The $00 that ends picture $27 (the pictures are packed; the table's last
+; record points to $F1E6).
+b$F35A DEFB $00
