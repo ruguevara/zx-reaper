@@ -443,6 +443,7 @@ RandomSigned_1:
   XOR (IX+$01)
   PUSH HL
   LD HL,RandomSeed
+RandomSigned_Mixed:               ; A: the mixed value (a replay takes the Z80's: PORT_TAKE)
   CP (HL)
   POP HL
   JR Z,RandomSigned_Retry

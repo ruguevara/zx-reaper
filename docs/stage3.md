@@ -113,6 +113,7 @@ zx.inp(port)                     # $xxFE: half-rows selected by the high byte, b
                                  # $1F: Kempston
 zx.spend(t)                      # charge T-states
 zx.r()                           # LD A,R: from the clock; in a replay the value the Z80 read
+zx.take(addr, a)                 # a value the port cannot be sure of: a; in a replay the Z80's A at addr
 await zx.sync()                  # hand the host every frame the clock has passed
 await zx.halt()                  # clock to the next frame boundary, then sync
 zx.di(); zx.ei(); zx.im2(fn)     # interrupts; the IM1 default only counts FRAMES

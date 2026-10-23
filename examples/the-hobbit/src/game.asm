@@ -17,7 +17,7 @@ STATE_COPY EQU $5F00
 
   INCLUDE "dictionary.asm"
   INCLUDE "main.asm"
-  INCLUDE "input.asm"
+  INCLUDE "keys.asm"
   INCLUDE "printer.asm"
   INCLUDE "parser.asm"
   INCLUDE "drawing.asm"

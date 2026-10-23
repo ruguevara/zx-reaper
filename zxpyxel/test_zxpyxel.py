@@ -111,7 +111,7 @@ def test_goto():
 def test_replay(path='/tmp/zxpyxel-test.rec'):
     """Repeated reads ('in PORT VAL COUNT') and R reads come back in order."""
     open(path, 'w').write('checkpoint 8000\nstate 9000-9001\nin 00FE BF 3\nr 15\n'
-                          'in 7FFE BE\ncp 100 9000:2a\nend 1\n')
+                          'in 7FFE BE\na 9CD2 07\ncp 100 9000:2a\nend 1\n')
 
     class labels:
         Loop = 0x8000
@@ -121,11 +121,29 @@ def test_replay(path='/tmp/zxpyxel-test.rec'):
             assert zx.inp(0x00FE) == 0xBF
         zx.mem[0x9000] = zx.r() + 0x15
         assert zx.inp(0x7FFE) == 0xBE
+        assert zx.take(0x9CD2, 0x55) == 0x07
         zx.checkpoint('Loop')
         zx.inp(0x00FE)                       # past the end of the record: the replay stops
 
     zx.reset()
     assert headless.replay(main, path, labels)[0] == 1
+
+
+def test_tape():
+    """A block saved through SA_BYTES verifies and loads back; a missing one waits."""
+    from zxpyxel import rom
+    zx.reset()
+    zx.mem[0x8000:0x8003] = b'abc'
+
+    async def main():
+        await rom.SA_BYTES(0x8000, 3, 0xFF)
+        assert await rom.LD_BYTES(0x8000, 3, 0xFF, False)       # verify
+        zx.mem[0x8000:0x8003] = b'xyz'
+        assert not await rom.LD_BYTES(0x8000, 3, 0xFF, False)
+        assert await rom.LD_BYTES(0x8000, 3, 0xFF, True) and zx.mem[0x8000:0x8003] == b'abc'
+        await rom.LD_BYTES(0x8000, 4, 0xFF, True)              # no such block: waits
+
+    assert headless.run(main, frames=300) == 300
 
 
 def test_render():

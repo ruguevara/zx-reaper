@@ -40,7 +40,7 @@ class Replay:
                 self.ranges = [tuple(int(x, 16) for x in r.split('-')) for r in w[1:]]
             elif w[0] == 'checkpoint':
                 self.addr = int(w[1], 16)
-            elif w[0] in ('in', 'cp', 'int', 'r'):
+            elif w[0] in ('in', 'cp', 'int', 'r', 'a'):
                 self.events.append(w)
             elif w[0] == 'end':
                 self.z80_frames = int(w[1])
@@ -62,6 +62,7 @@ class Replay:
         e = self.events[self.next]
         if e[0] != kind:
             z80 = ('reads port ' + e[1] if e[0] == 'in' else 'reads R' if e[0] == 'r'
+                   else 'gives A at ' + e[1] if e[0] == 'a'
                    else 'is at the checkpoint (frame %d)' % (int(e[1]) // T_FRAME))
             raise Mismatch('%s, where the Z80 %s%s' % (what, z80, self.where()))
         self.next += 1
@@ -85,6 +86,12 @@ class Replay:
 
     def r(self):
         return int(self.take('r', 'the port reads R')[1], 16)
+
+    def given(self, addr, a):
+        e = self.take('a', 'the port takes A at %04X' % addr)
+        if int(e[1], 16) != addr:
+            raise Mismatch('the port takes A at %04X, the Z80 gave it at %s%s' % (addr, e[1], self.where()))
+        return int(e[2], 16)
 
     def checkpoint(self, label):
         if self.labels.get(label) != self.addr:
@@ -125,22 +132,26 @@ class Replay:
 
 
 def replay(main, path, labels):
-    """Run `main` against the record at `path`: each zx.inp and zx.r gets the
-    value the Z80 read, each zx.checkpoint(label) must come where the Z80 passed its
+    """Run `main` against the record at `path`: each zx.inp, zx.r and zx.take
+    gets the value the Z80 read, each zx.checkpoint(label) must come where the Z80 passed its
     checkpoint, with the same state, and the interrupt handler runs where the
     Z80 took an interrupt (at the port's next read or checkpoint) instead of
     by the port's clock. `labels` is the port's labels module.
     Returns (checkpoints matched, Z80 clock, port clock at the last one);
     raises Mismatch at the first difference."""
     r = Replay(path, labels)
-    zx.inp, zx.r, zx.on_checkpoint = r.inp, r.r, r.checkpoint
+    zx.inp, zx.r, zx.take, zx.on_checkpoint = r.inp, r.r, r.given, r.checkpoint
     zx.interrupt = lambda: None     # interrupts come from the record
+    zx.tape = None                  # the Z80 run had no tape playing
     try:
         frames = run(main, frames=2 * r.z80_frames + 1000)
     except _End:
         return r.passes, r.z80_t, r.port_t
     finally:
-        del zx.inp, zx.r, zx.interrupt
+        del zx.inp, zx.r, zx.take, zx.interrupt
         zx.on_checkpoint = None
+        zx.tape = []
+    if r.next == len(r.events):     # the port waits where the Z80 run ended waiting
+        return r.passes, r.z80_t, r.port_t
     raise Mismatch('the port ran %d frames and used %d of %d record events%s' % (
         frames, r.next, len(r.events), r.where()))

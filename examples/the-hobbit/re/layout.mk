@@ -13,3 +13,10 @@ SHIFT_GIVE := 0x9CD2
 # SAVE writes the state blocks to tape, and they hold pointers: a moved build
 # saves different bytes, so the tape signal of save.txt differs by design.
 SHIFT_INPUTS := $(filter-out tests/inputs/save.txt,$(wildcard tests/inputs/*.txt))
+# Stage 3 (port/): the main loop is the checkpoint; the stack page is not state.
+# RandomSigned reads memory the port does not have (the Z80's stack), so the
+# record holds its mixed value and the port takes it (zx.take).
+PORT_ENTRY := main.GameStart
+PORT_CHECKPOINT := MainLoop
+PORT_STATE := --state 0x4000-0x5B00 --state 0x5F00-0x5FDC --state 0x6000-0x10000
+PORT_TAKE := RandomSigned_Mixed

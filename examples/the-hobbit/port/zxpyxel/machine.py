@@ -66,6 +66,8 @@ class Spectrum:
         self.interrupts = False
         self.handler = self.count_frames
         self.on_checkpoint = None
+        self.tape = []             # blocks saved through rom.SA_BYTES (None: no tape)
+        self.tape_pos = 0
 
     def out(self, port, v):
         if port & 1 == 0:          # ULA: border bits 0-2, speaker bit 4
@@ -84,6 +86,12 @@ class Spectrum:
 
     def spend(self, t):
         self.t += t
+
+    def take(self, addr, a):
+        """A value the port computes but cannot be sure of (a random routine that
+        reads the Z80's stack): `a` when playing; in a replay the value A had
+        on the Z80 when PC reached `addr` (zxrun.py --take, PORT_TAKE)."""
+        return a
 
     def r(self):
         """LD A,R. The refresh register counts instruction fetches, which a

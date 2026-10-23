@@ -16,7 +16,8 @@ A model is a Python file:
 
     ROUTINE = 'StepCell'              # label (from the symbol file) or address
     INPUTS = ['A', 'HL']              # registers the cases set (documentation)
-    OUTPUTS = {'regs': ['HL'],        # registers compared after the routine returns
+    OUTPUTS = {'regs': ['HL', 'ZF'],  # registers compared after the routine returns
+                                      # (ZF, CF, SF, PF: one flag, 0 or 1)
                'mem': [('Score', 2)]} # memory ranges compared (label or address, length)
     KINDS = ['typical', 'boundary']   # case kinds that must be present
 
@@ -60,9 +61,14 @@ SENTINEL = 0x0001
 MAX_OPS = 5000000
 
 
+FLAG_BITS = {'ZF': 6, 'CF': 0, 'SF': 7, 'PF': 2}   # one flag of F, as 0 or 1
+
+
 def reg_get(regs, name):
     shadow = name.startswith('^')
     base = name[1:] if shadow else name
+    if base in FLAG_BITS:
+        return regs[getattr(simutils, 'xF' if shadow else 'F')] >> FLAG_BITS[base] & 1
     if base in PAIRS:
         hi, lo = PAIRS[base]
         if shadow:

@@ -36,7 +36,7 @@ Tools: sjasmplus, Python 3 with SkoolKit 10.1 (`pip install -r ../../requirement
 | --- | --- | --- |
 | dictionary | $6000 | the vocabulary: letter index and 562 words in 5-bit letters |
 | main | $6C00 | start, restart, the main loop, the line editor |
-| input | $6E4F | typed words to tokens, command table helpers, the wait for a key and the WAIT time-out |
+| keys | $6E4F | typed words to tokens, command table helpers, the wait for a key and the WAIT time-out |
 | printer | $7291 | the message interpreter: control codes, names, articles, dictionary words |
 | parser | $7585 | sentences: word classes, phrase records, nouns, questions, orders (SAY TO) |
 | drawing | $7F77 | location pictures: the command interpreter, lines, flood fill, attributes |

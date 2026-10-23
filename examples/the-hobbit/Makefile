@@ -145,6 +145,9 @@ diff: build/blocks.stamp
 # Stage 3 (skill zx-port): set PORT_ENTRY (module.Routine in port/) and
 # PORT_CHECKPOINT (the main loop's label) in re/layout.mk
 PORT_STATE ?= --state 0x4000-0x5B00 --state $(REGION_START)-$(REGION_END)
+# PORT_TAKE: labels where A holds a value the port cannot compute (a random
+# routine that reads the Z80's stack or code); the record holds it, zx.take gives it
+PORT_TAKE ?=
 RECORDS := $(INPUTS:tests/inputs/%.txt=build/record/%.rec)
 
 port/labels.py: build/blocks.stamp
@@ -161,7 +164,9 @@ build/record/%.rec: tests/inputs/%.txt re/orig.z80 build/blocks.stamp
 	@mkdir -p build/record
 	@a=$$(sed -n 's/^$(PORT_CHECKPOINT): EQU //p' build/game.sym); \
 	test -n "$$a" || { echo "no label $(PORT_CHECKPOINT) in build/game.sym"; exit 1; }; \
-	$(T)/zxrun.py re/orig.z80 --input $< --record $@ --checkpoint $$a $(PORT_STATE) > /dev/null
+	take=; for l in $(PORT_TAKE); do t=$$(sed -n "s/^$$l: EQU //p" build/game.sym); \
+	  test -n "$$t" || { echo "no label $$l in build/game.sym"; exit 1; }; take="$$take --take $$t"; done; \
+	$(T)/zxrun.py re/orig.z80 --input $< --record $@ --checkpoint $$a $(PORT_STATE) $$take > /dev/null
 
 port-test: port/labels.py port/variables.py port/image.bin $(RECORDS)
 	@test -n "$(PORT_ENTRY)" || { echo "set PORT_ENTRY in re/layout.mk"; exit 1; }
