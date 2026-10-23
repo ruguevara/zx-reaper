@@ -4,28 +4,28 @@ What this reverse engineering must answer; revisit before finishing. Edit throug
 
 | ID | Status | Question | Answer |
 | --- | --- | --- | --- |
-| Q1 | open | How is the game loaded and where does control pass to it (loader stages, protection, decryption)? |  |
-| Q2 | open | What is the memory map: code, data, variables, buffers, unused areas? |  |
-| Q3 | open | What are the controls (keys, joysticks, redefinition, pause, sound toggle)? |  |
-| Q4 | open | What happens on the title screen, menu and demo, and how does a game start? |  |
-| Q5 | open | What does one pass of the main loop do, in which order, and what sets the game speed (frames, delays, interrupts)? |  |
-| Q6 | open | How does Bilbo move between locations, and how are locations connected (exits, doors, special crossings, darkness)? |  |
-| Q7 | open | How do the other characters move and decide (ANIMACTION: rules, randomness, who follows, attacks, captures)? |  |
-| Q8 | open | How is the score ("mastered N% of this adventure") counted and shown? |  |
-| Q9 | open | How does Bilbo die (fights, strength, falls), and what happens after death? |  |
-| Q10 | open | How does the game end (the treasure in the chest, death, QUIT), and what restarts it? |  |
-| Q11 | open | What are the data formats (level maps, sprites, tiles, fonts, texts, tables)? |  |
-| Q12 | open | Where do random numbers come from? |  |
-| Q13 | open | What sounds does the game make and how? |  |
-| Q14 | open | Which hardware does each routine touch (screen, attributes, border, ports, ROM, interrupts, timing)? |  |
-| Q15 | open | What happens at the edges of every counter: minimum, maximum, overflow (lives, level, speed, score digits, timers, indexes)? |  |
-| Q16 | open | Which code never ran in our inputs, and is it dead or only unreached? |  |
-| Q17 | open | Which bugs does the original have, and is each one observed? |  |
-| Q18 | open | How is a typed line parsed (INGLISH): vocabulary format, verbs, adverbs, prepositions, AND/ALL/EXCEPT, ambiguity queries, the 128-character limit? |  |
-| Q19 | open | How are messages and descriptions stored and printed (compression, dictionary, control codes, the two windows, scrolling, the 42-column font)? |  |
-| Q20 | open | How are objects modelled (location, container, weight, size, light, liquids, locks, breakable, open/closed) and what rules apply to them? |  |
-| Q21 | open | How are location pictures stored and drawn (format, primitives, fill), and when are they shown? |  |
-| Q22 | open | How does fighting work (strength, weapons, who wins, death of characters)? |  |
-| Q23 | open | How does time pass (real-time WAIT after idle, turns, the order in which characters act)? |  |
-| Q24 | open | How does SAY TO work (ANIMTALK): who agrees, and why? |  |
-| Q25 | open | How do SAVE, LOAD, PRINT, NOPRINT, PAUSE and QUIT work, and which ROM routines and ports do they use? |  |
+| Q1 | answered | How is the game loaded and where does control pass to it (loader stages, protection, decryption)? | docs/01-overview.md (How it loads): standard ROM blocks, no protection: BASIC hobbit (CLEAR 24575, LOAD "p" CODE 16384 = loading screen, LOAD "h" CODE = 40000 bytes at $6000, PRINT USR 27648) -> GameStart $6C00 |
+| Q2 | answered | What is the memory map: code, data, variables, buffers, unused areas? | docs/01-overview.md (Memory map, The saved state); re/notes.md |
+| Q3 | answered | What are the controls (keys, joysticks, redefinition, pause, sound toggle)? | docs/04-game-loop.md (The line editor): keyboard only, own edge-triggered scanner (F12); cursor keys 5-8 as the first key type N/S/E/W; DELETE, back-space; @ repeats the last line (F37); key 7 mid-line types [ (F79); N held at the title turns pictures off; PAUSE word; no joystick, no redefinition, no sound |
+| Q4 | answered | What happens on the title screen, menu and demo, and how does a game start? | docs/03-title-and-menu.md: no menu or demo; the loading screen stays until a key; N held = no pictures; R register = seed; InitNewGame (blocked exit, riddle) and the opening LOOK (F47) |
+| Q5 | answered | What does one pass of the main loop do, in which order, and what sets the game speed (frames, delays, interrupts)? | docs/04-game-loop.md: MainLoop once per typed line, one turn per performed command (test pass, real pass, EndOfTurn: victory test, NPC scripts, timers); no frame sync, no interrupts; waits: idle WAIT after 3000 scans ~19 s (F36), scroll pause (F35), picture key wait, PAUSE |
+| Q6 | answered | How does Bilbo move between locations, and how are locations connected (exits, doors, special crossings, darkness)? | docs/05-world.md (Locations and exits, Moving, Obstacles, Light and darkness) and the map in docs/07-graphics.md; F4, F45, F53, F54, F55, F82, F84 |
+| Q7 | answered | How do the other characters move and decide (ANIMACTION: rules, randomness, who follows, attacks, captures)? | docs/05-characters.md: 17 NPC records, script ops, behaviour tables switched by events (attack 15, give 29, capture 48), orders from SAY TO, random script choice; F6, F44, F51, F52, F73, F76 |
+| Q8 | answered | How is the score ("mastered N% of this adventure") counted and shown? | docs/05-end-and-score.md (The score): tenths of a percent, only first visits to 14 locations score (FirstVisitScores), maximum 750 = 75.0%, printed by PrintScore/DecimalDigit; F24, F57, F64 |
+| Q9 | answered | How does Bilbo die (fights, strength, falls), and what happens after death? | docs/05-end-and-score.md (Death: 12 causes), docs/05-characters.md (Fights); after death: You are dead, the score, a key, RestartGame; F56, F65, F76, F80, F81, F83 |
+| Q10 | answered | How does the game end (the treasure in the chest, death, QUIT), and what restarts it? | docs/05-end-and-score.md: the treasure held by the wooden chest (CheckVictory at each turn; no score printed, F78), death (EndGame), QUIT; all restart through RestartGame from the backups |
+| Q11 | answered | What are the data formats (level maps, sprites, tiles, fonts, texts, tables)? | docs/02-data.md (all record layouts), docs/05-text-and-screen.md (messages), docs/05-pictures.md (pictures), docs/05-characters.md (scripts); F1-F5, F25 |
+| Q12 | answered | Where do random numbers come from? | docs/05-time.md (Random numbers): RandomSigned mixes the seed (R at the title key) with bytes read through a pointer walking all 64K; RandomUpTo folds it; F19, F63, F74 |
+| Q13 | answered | What sounds does the game make and how? | none: no OUT sets the speaker bit (picture border bytes are 0-7); only SAVE makes a tape signal through the ROM SA-BYTES (docs/01-overview.md, Hardware) |
+| Q14 | answered | Which hardware does each routine touch (screen, attributes, border, ports, ROM, interrupts, timing)? | docs/01-overview.md (Hardware it uses) and docs/08-porting.md (Hardware touch points); every routine description in src/ has a Hardware: sentence |
+| Q15 | answered | What happens at the edges of every counter: minimum, maximum, overflow (lives, level, speed, score digits, timers, indexes)? | docs/06-tricks.md (Bugs); score F64, strengths F9 F65 F81, wounds F56, carrying F67 F68, input line F69 F70 F71, order slots F72 F73, random ranges F74, timers F75 |
+| Q16 | partial | Which code never ran in our inputs, and is it dead or only unreached? | 85% of the instructions ran (5862/6922); unreachable code listed in docs/06-tricks.md (Code that never ran: F42, L738D, LA1AE, $ADDA...); the rest is unreached handlers (boat, side door, magic door, locks), annotated from reading only |
+| Q17 | answered | Which bugs does the original have, and is each one observed? | docs/06-tricks.md (Bugs table): F9, F34, F39, F46, F53, F54, F55, F56, F61, F65, F66, F67, F68, F70, F71, F72, F73, F77, F82, F84 |
+| Q18 | answered | How is a typed line parsed (INGLISH): vocabulary format, verbs, adverbs, prepositions, AND/ALL/EXCEPT, ambiguity queries, the 128-character limit? | docs/05-parser.md: dictionary lookup and prefix rules, word classes and ActionTable, phrase records, AND/THEN (F62), ALL/EXCEPT (F20, F26), IT, command matching, noun resolution and replies (F48, F60), questions (F61), SAY TO; 128-character line F69, long words F70, token overflow F71 |
+| Q19 | answered | How are messages and descriptions stored and printed (compression, dictionary, control codes, the two windows, scrolling, the 42-column font)? | docs/05-text-and-screen.md: message bytecode (F2), control codes, print modes and verb endings, common words, dictionary words; story window 42 columns of 6 pixels with scroll and pause (F22, F35), input window 32 columns in the ROM font; capitals (F28) |
+| Q20 | answered | How are objects modelled (location, container, weight, size, light, liquids, locks, breakable, open/closed) and what rules apply to them? | docs/05-world.md (Objects): holder chain and places, reach, weight and size rules (F18, F67, F68), flags open/locked/broken/liquid (F17), light (F45, F46); flag bits 2 and 4 of +7 only partly known (docs/06-tricks.md, Open questions) |
+| Q21 | answered | How are location pictures stored and drawn (format, primitives, fill), and when are they shown? | docs/05-pictures.md (format: lines, flood fill, paint, colour; when shown) and docs/07-graphics.md (all 22 rendered); picture 5 day/night F77 |
+| Q22 | answered | How does fighting work (strength, weapons, who wins, death of characters)? | docs/05-characters.md (Fights, Death and capture): attack = strength + weapon vs defence, rolled; kill above +16, wound messages, strength loss; F9, F46, F56, F65, F66 |
+| Q23 | answered | How does time pass (real-time WAIT after idle, turns, the order in which characters act)? | docs/05-time.md: a turn per performed command, characters in NPC table order then timers; idle WAIT after ~19 s (F36); one timer fires per turn (F50, F75) |
+| Q24 | answered | How does SAY TO work (ANIMTALK): who agrees, and why? | docs/05-parser.md (Orders: SAY TO) and docs/05-characters.md (Orders): orders parsed into 8 slots, the character accepts a random 0..obedience of them (F44), ReplyGiven gives one; carried out in its turns; F14, F23, F72, F73 |
+| Q25 | answered | How do SAVE, LOAD, PRINT, NOPRINT, PAUSE and QUIT work, and which ROM routines and ports do they use? | docs/05-save-and-printer.md: SAVE/LOAD four headerless blocks via ROM SA-BYTES $04C2 / LD-BYTES $0556 (verify after SAVE, restart on a LOAD error); PRINT/NOPRINT port $FB, line images; PAUSE green border; QUIT restarts; F21, F84 |

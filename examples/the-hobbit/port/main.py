@@ -160,7 +160,7 @@ async def RunWordList():
 async def UnknownWord():
     """`I do not know the word "..."` in the input window."""
     r.hl = MsgIDoNotKnow
-    v.RawOutputFlag = 1
+    r.a = v.RawOutputFlag = 1
     await printer.PrintMessage()
     r.hl = v.InputLinePtr
     while True:

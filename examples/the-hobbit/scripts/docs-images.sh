@@ -35,3 +35,12 @@ $RUN re/orig.z80 --input tests/inputs/endgame.txt --shot 26120:$IMG/play-rivende
   --shot 115060:$IMG/play-dragon.png --shot 136830:$IMG/win.png
 $RUN re/orig.z80 --input tests/inputs/journey.txt --frames 171241 --shot 171240:$IMG/play-dark.png
 $RUN re/orig.z80 --input tests/inputs/die.txt --shot 7400:$IMG/play-death.png
+
+# Edge case: the player poked into location $2F, which has no exits: LOOK lists
+# obstacles read from the bytes after the record (the game itself never lets
+# the player in: THE PLACE IS TOO FULL FOR YOU TO ENTER)
+printf '0 -\n10 TYPE look\n+700 END\n' > $TMP/look.txt
+$RUN $TMP/bagend.z80 --poke 0xC12B,0x2F --input $TMP/look.txt --frames 600 --shot 599:$IMG/edge-2f-look.png
+
+# The location map of docs/07-graphics.md (Mermaid, printed to stdout)
+python3 scripts/locmap.py > $TMP/map.md
