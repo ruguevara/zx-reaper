@@ -4,20 +4,20 @@ What this reverse engineering must answer; revisit before finishing. Edit throug
 
 | ID | Status | Question | Answer |
 | --- | --- | --- | --- |
-| Q1 | open | How is the game loaded and where does control pass to it (loader stages, protection, decryption)? |  |
-| Q2 | open | What is the memory map: code, data, variables, buffers, unused areas? |  |
-| Q3 | open | What are the controls (keys, joysticks, redefinition, pause, sound toggle)? |  |
-| Q4 | open | What happens on the title screen, menu and demo, and how does a game start? |  |
-| Q5 | open | What does one pass of the main loop do, in which order, and what sets the game speed (frames, delays, interrupts)? |  |
-| Q6 | open | How does the player move and what does it collide with? |  |
-| Q7 | open | How do enemies move and decide (AI rules, randomness, difficulty)? |  |
-| Q8 | open | How is the score counted and shown; how are extra lives awarded? |  |
-| Q9 | open | How is a life lost and what happens at game over (high score)? |  |
-| Q10 | open | How do levels advance, what changes per level, and what happens after the last one? |  |
-| Q11 | open | What are the data formats (level maps, sprites, tiles, fonts, texts, tables)? |  |
-| Q12 | open | Where do random numbers come from? |  |
-| Q13 | open | What sounds does the game make and how? |  |
-| Q14 | open | Which hardware does each routine touch (screen, attributes, border, ports, ROM, interrupts, timing)? |  |
-| Q15 | open | What happens at the edges of every counter: minimum, maximum, overflow (lives, level, speed, score digits, timers, indexes)? |  |
-| Q16 | open | Which code never ran in our inputs, and is it dead or only unreached? |  |
-| Q17 | open | Which bugs does the original have, and is each one observed? |  |
+| Q1 | answered | How is the game loaded and where does control pass to it (loader stages, protection, decryption)? | Standard ROM tape: BASIC autostart loads 32K code at $8000, JP $8400; fake decryption loop (F1-F3); colour-code check at $869F/$86C3 with table $9E00, two tries then reset (F4-F8). |
+| Q2 | answered | What is the memory map: code, data, variables, buffers, unused areas? | re/notes.md memory map: buffers $5C00-$7FFF and $8000-$83FF, code $8400-$9717, data $9800-$BFFF (attributes, sprites, entity definitions $A000, items $A400), 61 rooms at $C000 plus 3 stray pages (F35, F41). |
+| Q3 | answered | What are the controls (keys, joysticks, redefinition, pause, sound toggle)? | Keys F107/F108: left Q E T U O 5 6, right W R Y I P 7 8, jump bottom row and 0, Kempston (detected, F46/F71); pause A-G (F97), tune H-ENTER (F100), quit CAPS+SPACE (F99); no redefinition. |
+| Q4 | answered | What happens on the title screen, menu and demo, and how does a game start? | Title: attributes $9800 with edge pieces, title tune, then 224-step scroll with colour cycling, repeat; ENTER/0 (fire during the tune) starts (F70, F78). No demo. |
+| Q5 | answered | What does one pass of the main loop do, in which order, and what sets the game speed (frames, delays, interrupts)? | F93/F94: fixed order of 19 steps per pass; no interrupt sync (DI, no HALT): speed is set by the code's own run time, ~13.4 passes/s with the tune on. |
+| Q6 | answered | How does the player move and what does it collide with? | F109-F116: jump 18 passes, falls of 5+ rows kill, walking 1 cell per 4 passes, ramps, conveyors, walls (asymmetric head test F116), nasties via attribute (F68), ropes (F87-F89). |
+| Q7 | answered | How do enemies move and decide (AI rules, randomness, difficulty)? | Entities F51-F53, F80-F86: horizontal and vertical guardians between limits, arrows across the room with a warning beep, ropes; no AI, no randomness; collision by pixels (F83). |
+| Q8 | answered | How is the score counted and shown; how are extra lives awarded? | No score: items collected counter 000-083 (F16); no extra lives (F101). |
+| Q9 | answered | How is a life lost and what happens at game over (high score)? | Death on guardian/arrow/nasty contact or long fall: flash scene F103, state restored from $85D7 (F77); after 7 reserve lives game over scene F104, back to the title; no high score. |
+| Q10 | answered | How do levels advance, what changes per level, and what happens after the last one? | No levels: 61 rooms joined by exits (F21, F27, F36); after all 83 items Willy can reach the bed, runs to the toilet and stays (F61-F66); the clock ends the game at 13:00 (F75, F95). |
+| Q11 | answered | What are the data formats (level maps, sprites, tiles, fonts, texts, tables)? | Room format F26-F33 (re/notes.md, #R$C000), entity definitions F50-F56, items F15, sprites 16x16 32 bytes, tunes F44/F74, cheat table #R$85E5. |
+| Q12 | answered | Where do random numbers come from? | None: no random number source; the code screen's grid cell comes from FRAMES (F4). |
+| Q13 | answered | What sounds does the game make and how? | Beeper only: tunes (F44, F74), step clicks, item beep, arrow chirp (F85), death and game-over sweeps (F103, F104), title sweep (#R$96DE). |
+| Q14 | answered | Which hardware does each routine touch (screen, attributes, border, ports, ROM, interrupts, timing)? | Every routine header has a Hardware sentence; screen access goes through buffers $5C00/$6000 copied by the frame loop. |
+| Q15 | partial | What happens at the edges of every counter: minimum, maximum, overflow (lives, level, speed, score digits, timers, indexes)? | Items counter wraps $FF->0 to signal all collected (F17); fall state wraps $10->$0C (F111); lives 7..0 (F101); clock to 13:00 (F95); code-screen FRAMES quirk (F6); rope release countdown (F89). Not checked: entity limits at the screen edges. |
+| Q16 | answered | Which code never ran in our inputs, and is it dead or only unreached? | re/notes.md Coverage: 97% executed; the rest is flash timer never set (F105), clock end and cheat (observed by pokes), rare branches, and two unreachable leftovers (F10, F11). |
+| Q17 | answered | Which bugs does the original have, and is each one observed? | Observed: Attic arrow writes into the entity definitions (F92); tile lookup by attribute gives wrong pixels in rooms 24, 29, 36 (F30/F40); duplicate item cell (F18); code-screen cell $B3 never asked (F6); wall test asymmetry (F116); unreachable rooms and garbage room pages (F35, F41); no ending screen (F66). |
