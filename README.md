@@ -18,7 +18,7 @@ any stage is a place to stop, fork and ship.
 | 1 | tape → automatic disassembly (SkoolKit) → tape | tape and snapshot byte-identical | built: `zx-init`, `zx-coverage`, `zx-classify` |
 | 2 | automatic disassembly → annotated, relocatable asm without magic numbers → tape | the same, plus `make shift-test` and routine models (`make diff`) | built: `zx-annotate` to `zx-document`, models in `zx-port` |
 | 3 | asm → Python on `zxpyxel`, a library that stands in for the 48K hardware on [Pyxel](https://github.com/kitao/pyxel): the original memory layout, the same screens and behaviour, code that follows the asm routine by routine | routines against the Z80 code (`zxdiff.py`); the whole game by replaying the Z80 run's input and comparing game memory at checkpoints (`make port-test`) | built: `zx-port`; Hungry Horace ported whole ([docs/port.md](docs/port.md)) |
-| 4 | Python on `zxpyxel` → game logic in plain Python plus graphics, input and sound subsystems with nothing Spectrum-specific, on the framework the user picks (Pyxel, pygame, SDL2, …) | the stage 3 checkpoints through an adapter, then its own golden runs | optional |
+| 4 | Python on `zxpyxel` → game logic in plain Python plus graphics, input and sound subsystems with nothing Spectrum-specific in the logic, on the framework the user picks (Pyxel, pygame, SDL2, …) | golden runs decoded from the Z80 records: state, screen and sound per pass of the main loop | design: [docs/stage4.md](docs/stage4.md) |
 | 5 | game logic → C/C++ with SDL2 or platform libraries, or JS for the web | the stage 4 golden runs | optional |
 
 Stages 4 and 5 are optional and go wherever a project needs. Fork the stage 3
@@ -54,7 +54,7 @@ the full Hungry Horace run and its comparison with the SkoolKit reference:
 | `template/` | what every game project starts with: `Makefile`, `AGENTS.md`, `skills/`, `re/questions.md`, `re/findings.md` |
 | `selftest/` | fixture game and an end-to-end test of the whole pipeline |
 | `zxpyxel/` | the stage 3 library: a stand-in for the 48K Spectrum on Pyxel, for ported and new games ([docs/port.md](docs/port.md)) |
-| `docs/` | the method, the reference run report, `port.md` (the stage 3 design) |
+| `docs/` | the method, the reference run report, `port.md` (stage 3), `stage4.md` (the stage 4 design) |
 | `examples/hungry-horace/` | the reference run: Hungry Horace (1982) taken through every stage, compared with the SkoolKit reference disassembly |
 | `examples/jet-set-willy/` | second run: Jet Set Willy (1984), compared with the SkoolKit reference; report in `re/comparison.md` |
 

@@ -248,18 +248,11 @@ How to run them: the `zx-port` skill. Why they look like this:
 
 ## Stages 4 and 5
 
-Stage 4 takes the Spectrum out of the code one subsystem at a time:
-variables move from `mem` into Python objects, screen writes become draw
-calls on a framebuffer or sprites, beeper loops become sound events, keys
-become actions. While the screen and the variables still exist in some form,
-the checkpoint test runs through an adapter that writes the old memory
-ranges; after that, the stage 4 code records its own golden runs. The game
-can then move to whatever framework the user prefers.
-
-Stage 5 ports the plain game logic to C/C++ (SDL2 or a platform library) or
-JS. `async` routines become JS `async`/`await`, and in C a state machine or a
-game thread that blocks on a frame semaphore. The host contract is what each
-platform reimplements.
+Design: [stage4.md](stage4.md). Stage 4 keeps the look and takes the
+Spectrum out of the logic: a pure `Game.step(actions)` over plain state, a
+display API in `zxpyxel` that keeps attributes and the ROM font, sound
+effects as data. It is checked against golden runs decoded from the Z80
+records, slice by slice; stage 5 reuses those golden runs in C or JS.
 
 Going back: stage 3 keeps the memory layout and the labels, so a change made
 in Python goes back to asm (or z88dk C) routine by routine, with `zxdiff` run
@@ -344,6 +337,7 @@ bytes are printed now), and words written as bytes (`mem16` and `v`).
 
 1. The selftest fixture game ported in `selftest/`, so `selftest/run.sh`
    checks stage 3 end to end.
-2. The drawing, text and sprite layer over memory, with the prototype's
-   tests; hyperdream switches to it.
+2. The drawing, text and sprite layer over memory (`zxpyxel.display`, the
+   display API of [stage4.md](stage4.md)), with the prototype's tests;
+   hyperdream switches to it.
 3. Hear the port: the beeper through WAV chunks on the desktop and the web.
