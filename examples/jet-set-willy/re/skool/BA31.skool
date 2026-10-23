@@ -1,2 +1,0 @@
-; Data block at BA31
-b$BA31 DEFB $8E,$9E,$F9,$8D,$F1,$1D,$B8

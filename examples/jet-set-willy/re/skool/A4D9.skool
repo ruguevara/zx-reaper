@@ -1,4 +1,0 @@
-; Data block at A4D9
-b$A4D9 DEFB $95,$95,$95,$95,$95,$0E,$0A,$95
- $A4E1 DEFB $95,$0E,$0D,$0D,$2C,$13,$83,$83
- $A4E9 DEFB $83

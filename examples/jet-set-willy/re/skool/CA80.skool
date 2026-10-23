@@ -1,2 +1,0 @@
-; Message at CA80
-t$CA80 DEFM "         The Front Door         ("

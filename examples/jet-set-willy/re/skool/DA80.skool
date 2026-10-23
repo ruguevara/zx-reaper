@@ -1,2 +1,0 @@
-; Message at DA80
-t$DA80 DEFM "         East Wall Base         "

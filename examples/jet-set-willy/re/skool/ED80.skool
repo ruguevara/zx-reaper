@@ -1,2 +1,0 @@
-; Message at ED80
-t$ED80 DEFM "          Under the Drive       "

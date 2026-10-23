@@ -1,2 +1,0 @@
-; Data block at D578
-b$D578 DEFB $AA,$AA,$AA,$AA,$AA,$AA,$AA,$AA

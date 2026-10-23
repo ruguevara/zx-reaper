@@ -1,2 +1,0 @@
-; Data block at DFB5
-b$DFB5 DEFB $BB

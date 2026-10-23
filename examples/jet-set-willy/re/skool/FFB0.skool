@@ -1,3 +1,0 @@
-; Data block at FFB0
-b$FFB0 DEFB $D1,$BB,$30,$04,$2F,$83,$5F,$23
- $FFB8 DEFB $79,$CD

@@ -1,5 +1,0 @@
-; Data block at DBC4
-b$DBC4 DEFB $07,$03,$00,$0C,$00,$30,$00,$C0
- $DBCC DEFB $00,$07,$00,$0A,$BD,$FF,$00,$AA
- $DBD4 DEFB $55,$AA,$00,$00,$00,$00,$01,$B1
- $DBDC DEFB $5F,$07,$02,$00,$00,$10

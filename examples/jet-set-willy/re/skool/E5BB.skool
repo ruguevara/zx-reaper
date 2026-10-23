@@ -1,2 +1,0 @@
-; Data block at E5BB
-b$E5BB DEFB $06,$82

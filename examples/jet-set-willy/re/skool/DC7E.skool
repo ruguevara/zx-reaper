@@ -1,2 +1,0 @@
-; Data block at DC7E
-b$DC7E DEFB $AA,$AA

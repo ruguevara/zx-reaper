@@ -1,2 +1,0 @@
-; Data block at DBBE
-b$DBBE DEFB $AA,$55,$AA

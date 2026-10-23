@@ -1,2 +1,0 @@
-; Data block at E27D
-b$E27D DEFB $05

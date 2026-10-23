@@ -1,2 +1,0 @@
-; Data block at D1BE
-b$D1BE DEFB $1A

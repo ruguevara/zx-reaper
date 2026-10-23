@@ -1,0 +1,2 @@
+; Game status buffer entry at 85E1
+g$85E1 DEFB $00

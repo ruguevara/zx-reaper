@@ -1,4 +1,0 @@
-; Data block at F668
-b$F668 DEFB $00,$00,$00,$00,$02,$AA,$AA,$AA
- $F670 DEFB $00,$00,$00,$00,$0A,$AA,$AA,$AA
- $F678 DEFB $00,$00,$00,$00,$2A,$AA,$AA,$AA

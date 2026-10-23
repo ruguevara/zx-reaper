@@ -1,2 +1,0 @@
-; Data block at AC75
-b$AC75 DEFB $84,$3D,$BD,$E0,$07

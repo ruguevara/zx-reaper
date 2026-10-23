@@ -671,6 +671,11 @@ def cmd_reclassify(frag, force):
         sys.exit(r.stderr)
     head, new = split_entries(r.stdout)
     new = [e for e in new if e.ctype != 'i']
+    # keep an @org that opened a replaced entry (the first entry of a block)
+    org = {e.addr for e in hit if re.match(r'@org\b', e.text)}
+    for e in new:
+        if e.addr in org and not re.match(r'@org\b', e.text):
+            e.text = '@org\n' + e.text
     for e in hit:
         os.remove(e.fname)
     for e in new:

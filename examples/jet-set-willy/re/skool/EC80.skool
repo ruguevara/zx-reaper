@@ -1,2 +1,0 @@
-; Message at EC80
-t$EC80 DEFM "         On top of the house    "

@@ -1,3 +1,0 @@
-; Data block at DBB2
-b$DBB2 DEFB $16,$A8,$25,$00,$25,$A8,$40,$DD
- $DBBA DEFB $40

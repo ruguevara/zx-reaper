@@ -1,4 +1,0 @@
-; Data block at D9A0
-b$D9A0 DEFB $0E,$00,$00,$00,$00,$00,$00,$00
- $D9A8 DEFB $00,$0D,$FF,$FF,$55,$AA,$55,$AA
- $D9B0 DEFB $00,$00,$22,$92

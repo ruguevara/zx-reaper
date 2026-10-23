@@ -1,2 +1,0 @@
-; Data block at FE26
-b$FE26 DEFB $CC,$4C,$99,$4C,$BF

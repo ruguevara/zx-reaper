@@ -1,2 +1,0 @@
-; Message at FC80
-t$FC80 DEFM "             The Bow            "

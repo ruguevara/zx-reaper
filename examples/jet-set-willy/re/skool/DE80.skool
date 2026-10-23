@@ -1,2 +1,0 @@
-; Message at DE80
-t$DE80 DEFM "       The Banyan Tree          "

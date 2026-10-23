@@ -1,2 +1,0 @@
-; Message at CB80
-t$CB80 DEFM "            The Hall            "

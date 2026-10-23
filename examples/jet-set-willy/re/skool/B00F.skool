@@ -1,2 +1,0 @@
-; Message at B00F
-t$B00F DEFM "\"DD"

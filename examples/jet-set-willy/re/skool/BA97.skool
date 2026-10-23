@@ -1,4 +1,0 @@
-; Data block at BA97
-b$BA97 DEFB $81,$04,$82,$2B,$C6,$12,$FC,$0C
- $BA9F DEFB $FD,$40,$A8,$FD,$54,$7A,$A8,$15
- $BAA7 DEFB $52,$3A,$AC

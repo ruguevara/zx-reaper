@@ -1,6 +1,0 @@
-; Data block at EAB0
-b$EAB0 DEFB $01,$02,$1E,$66,$B6,$6D,$BB,$66
- $EAB8 DEFB $B9,$6D,$B6,$F5,$66,$AA,$5F,$BC
- $EAC0 DEFB $63,$AC,$6B,$A4,$0F,$01,$02,$04
- $EAC8 DEFB $28,$10,$28,$40,$80,$0E,$A5,$AA
- $EAD0 DEFB $BD

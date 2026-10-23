@@ -1,2 +1,0 @@
-; Data block at D1B9
-b$D1B9 DEFB $7F,$7F

@@ -1,2 +1,0 @@
-; Message at CE80
-t$CE80 DEFM "        Rescue Esmerelda        "

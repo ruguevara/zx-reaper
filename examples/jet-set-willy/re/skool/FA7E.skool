@@ -1,2 +1,0 @@
-; Data block at FA7E
-b$FA7E DEFB $AA,$AA

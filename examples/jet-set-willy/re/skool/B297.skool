@@ -1,5 +1,0 @@
-; Data block at B297
-b$B297 DEFB $CA,$38,$1C,$16,$78,$0B,$F0,$02
- $B29F DEFB $C0,$03,$C0,$0D,$F0,$1A,$F8,$3F
- $B2A7 DEFB $FC,$51,$8C,$64,$26,$C5,$A7,$B3
- $B2AF DEFB $CF,$5D,$BB,$AA,$77,$5F,$FA

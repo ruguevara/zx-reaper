@@ -1,2 +1,0 @@
-; Data block at FE33
-b$FE33 DEFB $1D,$E6

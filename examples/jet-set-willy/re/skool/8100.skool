@@ -1,0 +1,3 @@
+; Data block at 8100
+b$8100 DEFS $40
+ $8140 DEFB $FF

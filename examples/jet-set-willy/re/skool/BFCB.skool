@@ -1,5 +1,0 @@
-; Data block at BFCB
-b$BFCB DEFB $14,$32,$60,$1F,$C4,$08,$82,$07
- $BFD3 DEFB $2C,$15,$50,$2A,$A4,$55,$44,$AA
- $BFDB DEFB $84,$45,$00,$0C,$C0,$00,$00,$07
- $BFE3 DEFB $00,$2F,$A4

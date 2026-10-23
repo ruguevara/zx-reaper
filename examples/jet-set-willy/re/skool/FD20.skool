@@ -1,3 +1,0 @@
-; Data block at FD20
-b$FD20 DEFB $F5,$CD,$B4,$5B,$C4,$ED,$5B,$5E
- $FD28 DEFB $23,$7E

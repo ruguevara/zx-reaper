@@ -1,4 +1,0 @@
-; Data block at A5B1
-b$A5B1 DEFB $C9,$B3,$7B,$46,$1F,$19,$1C,$16
- $A5B9 DEFB $64,$99,$9F,$9F,$9F,$1A,$CD,$B6
- $A5C1 DEFB $3C,$D0,$A6,$DD,$37,$B6

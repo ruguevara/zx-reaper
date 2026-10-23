@@ -1,3 +1,0 @@
-; Data block at EDA0
-b$EDA0 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $EDA8 DEFB $00,$06,$FF,$FF,$A5

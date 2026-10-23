@@ -1,5 +1,0 @@
-; Data block at C8A0
-b$C8A0 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $C8A8 DEFB $00,$04,$F5,$FA,$BF,$1F,$26,$14
- $C8B0 DEFB $22,$10,$16,$AB,$AB,$AD,$AA,$AA
- $C8B8 DEFB $AE,$55,$55,$06

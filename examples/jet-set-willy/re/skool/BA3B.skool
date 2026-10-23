@@ -1,4 +1,0 @@
-; Data block at BA3B
-b$BA3B DEFB $1A,$4C,$32,$07,$E0,$07,$E0,$0F
- $BA43 DEFB $F0,$1F,$F8,$DF,$FB,$3F,$FC,$1F
- $BA4B DEFB $F8,$31,$8C

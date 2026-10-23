@@ -1,4 +1,0 @@
-; Data block at FD94
-b$FD94 DEFB $C1,$D1,$C5,$71,$EB,$13,$06,$00
- $FD9C DEFB $ED,$B0,$EB,$70,$23,$70,$2B,$C1
- $FDA4 DEFB $D1,$E5,$AF,$47,$03,$ED

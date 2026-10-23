@@ -1,4 +1,0 @@
-; Data block at DAA0
-b$DAA0 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $DAA8 DEFB $00,$05,$5B,$A4,$A4,$55,$0A,$00
- $DAB0 DEFB $00,$00

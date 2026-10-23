@@ -1,3 +1,0 @@
-; Data block at EAA0
-b$EAA0 DEFB $08,$00,$00,$00,$00,$00,$00,$00
- $EAA8 DEFB $00,$0C,$B5,$AA

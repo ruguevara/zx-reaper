@@ -1,2 +1,0 @@
-; Data block at DF67
-b$DF67 DEFB $AA,$AA

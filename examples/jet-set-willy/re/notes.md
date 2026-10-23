@@ -8,6 +8,47 @@ routine or data block is annotated.
 
 | Range | What | Status |
 | --- | --- | --- |
+| $5B00-$5BFF | stack (SP=$5BFE set at $8400) | stack |
+| $5C00-$5DFF | attribute buffer: room with sprites (copied to $5800) | buffer |
+| $5E00-$5FFF | attribute buffer: empty room (master copy) | buffer |
+| $6000-$6FFF | screen buffer: room with sprites (copied to $4000) | buffer |
+| $7000-$7FFF | screen buffer: empty room (master copy) | buffer |
+| $8000-$80FF | current room, copied from $C000+256*room | buffer (room format below) |
+| $8100-$8140 | entity buffer: 8 entities x 8 bytes, $FF terminator | buffer |
+| $8141-$81FF | unused (zeros) | unused |
+| $8200-$82FF | 128 words: screen-buffer address of each pixel row ($6000-based) | data:words |
+| $8300-$83FF | rope table (two 128-byte halves, read with L and L+128) | data (inferred) |
+| $8400-$841F | start: SP, return to $869F; fake decryption loop (bytes rewritten unchanged) | code |
+| $8420 | current room number | vars |
+| $8421-$8430 | 16-byte table read by $8F65 | data (TODO) |
+| $8431-$8450 | title graphic pieces (read by $887B) | data |
+| $8451-$869E | texts, variables $85CB-$85E4, key table $85E5-$85FA, tunes $85FB/$865F | text, vars, data |
+| $869F-$9716 | code (with unused fragments $93BB-$93D0 and $96F4-$9717) | code |
+| $9718-$97FF | unused (zeros) | unused |
+| $9800-$99FF | title screen attributes (copied to $5800, 512 bytes) | data |
+| $9A00-$9AFF | status bar attributes (copied to $5A00) | data |
+| $9B00-$9B7F | code-entry key graphics (4 x 32 bytes) | data |
+| $9B80-$9BFF | code-entry screen attributes (copied to $5900) | data |
+| $9C00-$9C3F | leftover assembler source text | unused |
+| $9C40-$9C7F | game over: foot, barrel | data:sprites |
+| $9C80-$9CFF | Maria (4 frames) | data:sprites |
+| $9D00-$9DFF | Willy (8 frames, 32 bytes each) | data:sprites |
+| $9E00-$9EB3 | code table: grid location L -> code byte - L | data |
+| $9EB4-$9EFF | leftover bytes | unknown |
+| $9F00-$9FFF | unused (zeros) | unused |
+| $A000-$A3FE | entity definitions, 8 bytes each (index*8+$A000) | data |
+| $A3FF | index of the first item in the item table | data/var |
+| $A400-$A5FF | item table: two 256-byte halves | data |
+| $A600-$BFFF | sprites, 32 bytes each (toilet at $A600) | data:sprites |
+| $C000-$FFFF | 64 rooms, 256 bytes each | data:rooms |
+
+Room format (256 bytes, copied to $8000): $00-$7F layout, 2 bits per cell
+(512 cells); $80-$9F name; $A0-$D5 six tiles of 9 bytes (attribute + 8 pixel
+rows: background, floor, wall, nasty, ramp, conveyor); $D6 conveyor direction,
+$D7 conveyor address (word), $D9 conveyor length; $DA ramp direction, $DB ramp
+address (word), $DD ramp length; $DE border colour; $DF-$E0 unknown; $E1-$E8
+item graphic; $E9-$EC exits (left, right, up, down); $ED-$EF unknown; $F0-$FF
+eight entity slots (2 bytes each: definition index, start data).
 
 ## Open questions
 
@@ -16,3 +57,24 @@ routine or data block is annotated.
 - original: `original/game.tap`
 - code region: $8000-$FFFF
 - handover PC: $8400
+
+## Loader and protection
+
+- Tape: BASIC "Jetset1" (autostart line 10) loads code "Jetset2" 32768 bytes at
+  $8000 and jumps to $8400. Standard ROM blocks; no turbo, no encryption.
+- $8400 looks like a decryptor: it XORs each byte of $8500-$FFFF with L and H
+  but stores the original byte back, so nothing changes. It then RETs to $869F
+  through a stack word it planted at $5BFE.
+- Colour-code protection: $86C3 shows a grid location (from FRAMES at $5C78) and
+  waits for four colours (keys 1-4, ENTER). Code byte = $9E00[L] + L, two bits
+  per position. Two tries, then JP 0. Input script `tests/inputs/code.txt`
+  enters the code for the simulator's fixed start (B3: 4-2-3-2).
+
+## Coverage
+
+93% of code instructions executed: fuzz from the code screen, `code`, `title`,
+`start` scripts, four fuzz runs from an in-game snapshot (re/maps/fuzz2-5),
+and an RZX walkthrough ("Perfect JSW" from the RZX Archive, same version: only
+runtime state differs in $8000-$FFFF). Not executed: $88AE-$88F9 (part),
+$8AEB, parts of $89AD and $8B07, $9534-$9575, $96DE. The RZX speed run
+"jsw7.56am" is a different build (25 KB differ) and was not used.

@@ -1,2 +1,0 @@
-; Data block at FE2E
-b$FE2E DEFB $01

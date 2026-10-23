@@ -1,5 +1,0 @@
-; Data block at FBA0
-b$FBA0 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $FBA8 DEFB $00,$06,$BB,$DD,$DD,$EE,$00,$00
- $FBB0 DEFB $00,$00,$3D,$BB,$77,$EE,$DD,$BB
- $FBB8 DEFB $77,$EE,$DD,$42,$7E,$BF,$BF

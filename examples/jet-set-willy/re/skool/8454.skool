@@ -1,0 +1,9 @@
+; Message at 8454
+t$8454 DEFM "+++++ Press ENTER to Start +++++"
+ $8474 DEFM "  JET-SET WILLY by Matthew Smith"
+ $8494 DEFM "  ",$7F," 1984 SOFTWARE PROJECTS Ltd ."
+ $84B4 DEFM " . . . .Guide Willy to collect a"
+ $84D4 DEFM "ll the items around the house be"
+ $84F4 DEFM "fore Midnight so Maria will let "
+ $8514 DEFM "you get to your bed. . . . . . ."
+ $8534 DEFM "+++++ Press ENTER to Start +++++"

@@ -1,2 +1,0 @@
-; Message at F380
-t$F380 DEFM "           Tool  Shed           "

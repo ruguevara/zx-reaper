@@ -1,5 +1,0 @@
-; Data block at AB91
-b$AB91 DEFB $DA,$3B,$AE,$2E,$AB,$24,$F9,$20
- $AB99 DEFB $DB,$20,$D8,$01,$54,$02,$8A,$00
- $ABA1 DEFB $00,$02,$02,$02,$02,$01,$74,$00
- $ABA9 DEFB $D8

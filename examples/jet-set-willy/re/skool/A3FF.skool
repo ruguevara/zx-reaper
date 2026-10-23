@@ -1,0 +1,2 @@
+; Game status buffer entry at A3FF
+g$A3FF DEFB $AD

@@ -1,2 +1,0 @@
-; Message at DB80
-t$DB80 DEFM "           The Chapel           "

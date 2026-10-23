@@ -1,4 +1,0 @@
-; Data block at FD46
-b$FD46 DEFB $16,$00,$19,$19,$7E,$23,$66,$6F
- $FD4E DEFB $7B,$11,$57,$75,$EB,$E3,$EB,$E5
- $FD56 DEFB $0C,$0D,$C8,$FE,$18,$3E,$01

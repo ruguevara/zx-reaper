@@ -1,5 +1,0 @@
-; Data block at F160
-b$F160 DEFB $AA,$00,$00,$C3,$03,$00,$00,$00
- $F168 DEFB $AA,$00,$00,$00,$00,$00,$0A,$AA
- $F170 DEFB $AA,$A8,$00,$00,$00,$00,$2A,$AA
- $F178 DEFB $AA,$AA,$AA,$AA,$AA,$AA,$AA,$AA

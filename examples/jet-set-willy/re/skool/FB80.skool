@@ -1,2 +1,0 @@
-; Message at FB80
-t$FB80 DEFM "           The Yacht            "

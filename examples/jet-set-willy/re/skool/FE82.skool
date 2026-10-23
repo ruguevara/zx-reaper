@@ -1,3 +1,0 @@
-; Data block at FE82
-b$FE82 DEFB $10,$D3,$C1,$06,$40,$CD,$60,$00
- $FE8A DEFB $21,$80,$80

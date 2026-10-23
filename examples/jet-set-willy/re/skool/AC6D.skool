@@ -1,2 +1,0 @@
-; Data block at AC6D
-b$AC6D DEFB $04,$1D,$B8,$00,$00

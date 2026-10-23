@@ -1,5 +1,0 @@
-; Data block at FE5A
-b$FE5A DEFB $60,$E8,$5E,$42,$00,$28,$60,$4A
- $FE62 DEFB $6D,$0E,$5F,$2C,$00,$47,$6D,$8F
- $FE6A DEFB $1B,$46,$54,$00,$00,$00,$18,$62
- $FE72 DEFB $FF,$FF,$06

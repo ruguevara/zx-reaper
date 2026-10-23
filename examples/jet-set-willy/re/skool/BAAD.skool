@@ -1,3 +1,0 @@
-; Data block at BAAD
-b$BAAD DEFB $B6,$9F,$99,$FD,$76,$C6,$BB,$92
- $BAB5 DEFB $74,$81,$9A

@@ -1,8 +1,2 @@
-; Data block at 8420
-b$8420 DEFB $00,$00,$01,$00,$01,$01,$03,$01
- $8428 DEFB $03,$02,$00,$02,$00,$00,$01,$02
- $8430 DEFB $03,$C0,$F0,$FC,$FF,$FF,$FF,$FF
- $8438 DEFB $FF,$00,$00,$00,$00,$C0,$F0,$FC
- $8440 DEFB $FF,$FF,$FF,$FF,$FF,$FC,$F0,$C0
- $8448 DEFB $00,$FC,$F0,$C0,$00,$00,$00,$00
- $8450 DEFB $00
+; Game status buffer entry at 8420
+g$8420 DEFB $00
