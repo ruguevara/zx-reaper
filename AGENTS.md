@@ -30,7 +30,7 @@ The harness works toward five stages (README, "Port everywhere"): 1 tape →
 automatic disassembly → tape, 2 → annotated asm → tape, 3 → Python on the
 `zxpyxel` library over Pyxel with the same screens and behaviour, 4 → plain
 Python game logic on any framework, 5 → C/C++ or JS. Stages 1 and 2 are
-built; stage 3 is built and done on Hungry Horace (`docs/port.md`, skill
+built; stage 3 is built and done on Hungry Horace (`docs/stage3.md`, skill
 `zx-port`); stage 4 is built and done on Hungry Horace in faithful mode
 (`docs/stage4.md`, skill `zx-clean`); 4 and 5 are optional and done per
 project.
@@ -46,6 +46,8 @@ project.
   into projects, like `tools/`.
 - 48K only until a 48K game has been through stage 3. AY goes through
   pyayay when it comes.
-- `docs/port.md` is the design until the code exists; once a part is built,
-  the code and the `zx-port` skill are the reference and the design note
-  shrinks to the reasons.
+- `docs/stage3.md` and `docs/stage4.md` are the stage notes, in one shape:
+  status, decisions, design, checks, how the work is split, the Hungry
+  Horace results, next steps. A note is the design until the code exists;
+  once a part is built, the code and the skill (`zx-port`, `zx-clean`) are
+  the reference and the note keeps the reasons.

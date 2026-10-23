@@ -32,7 +32,7 @@ else
 endif
 
 .DELETE_ON_ERROR:
-.PHONY: all verify test expected coverage status labels html shift-test export clean help restore diff audit doctor port-test port-html stage4-test game-html
+.PHONY: all verify test expected coverage status labels html shift-test export clean help restore diff audit doctor port-test port-html game-test game-html
 all: verify
 
 # The tape and everything copied from it (re/tape/, re/*.z80) stay out of git;
@@ -59,7 +59,7 @@ help:
 	@echo "make diff       differential tests: Z80 routines against tests/models/*.py"
 	@echo "make port-test  stage 3: the Python port in port/ replays the Z80 runs of tests/inputs"
 	@echo "make port-html  the port as one web page, build/web/port.html (holds game data: not for git)"
-	@echo "make stage4-test stage 4: the game in game/ against stage 3, step by step (skill zx-clean)"
+	@echo "make game-test  stage 4: the game in game/ against stage 3, step by step (skill zx-clean)"
 	@echo "make game-html  the stage 4 game as one web page, build/web/game.html"
 	@echo "make audit      open questions (re/questions.md) and unverified findings (re/findings.md)"
 	@echo "make doctor     check tools and what this project is missing"
@@ -172,7 +172,7 @@ port-html: port/labels.py port/variables.py port/image.bin
 game/assets/state.json: | port/image.bin port/labels.py port/variables.py
 	$(PY) bridge/assets.py
 
-stage4-test: game/assets/state.json $(RECORDS)
+game-test: game/assets/state.json $(RECORDS)
 	@$(PY) bridge/oracle.py game $(RECORDS)
 	@$(PY) bridge/oracle.py play
 

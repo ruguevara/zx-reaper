@@ -71,7 +71,7 @@ the original (document it as such, keep the model faithful to the Z80).
 The port runs the same game in Python: same memory layout, same screens,
 same behaviour under the same input, one function per routine. It runs on
 `port/zxpyxel/` (a stand-in for the 48K machine, design in zx-reaper's
-`docs/port.md`). Setup, once: `make port/labels.py port/variables.py
+`docs/stage3.md`). Setup, once: `make port/labels.py port/variables.py
 port/image.bin` (again after a change to `src/`); set
 `PORT_ENTRY` (`main.Start`) and `PORT_CHECKPOINT` (the main loop's label) in
 `re/layout.mk`, and `PORT_STATE` if the game keeps state outside the screen

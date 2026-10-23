@@ -7,7 +7,7 @@ description: Start a ZX Spectrum RE project from a TAP/TZX, or repair the start 
 
 ## Standard tape (ROM loader, headed blocks)
 
-1. `python3 <kit>/tools/zxinit.py game.tap game-re/` (add `--rzx play.rzx` if you have one).
+1. `python3 <zx-reaper>/tools/zxinit.py game.tap game-re/` (add `--rzx play.rzx` if you have one).
 2. It must end with `IDENTICAL`. Read its TODO lines and `re/notes.md`.
 3. `tools/zxdoctor.py` must say `ready`. Read `re/questions.md` (the default
    question list): add game-specific questions, delete those that cannot apply.

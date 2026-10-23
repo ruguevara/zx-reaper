@@ -27,7 +27,7 @@ that read like the rules, events for sound and time. It looks the same (the
 
 `game/` never imports `port/` or anything with an address. The bridge is
 test and build code. Setup: `cp -R port/zxpyxel game/` (the library, as in
-`port/`), then `make game/assets/state.json`; `make stage4-test` is the gate,
+`port/`), then `make game/assets/state.json`; `make game-test` is the gate,
 `python game/play.py` plays it, `make game-html` builds the web page.
 
 ## The state
@@ -65,7 +65,7 @@ has such a form; bytes only where it has none:
   ROM's font and bytes) is not copied.
 
 `bridge/assets.py` writes the files once and keeps them after that (edits
-are not overwritten; `--force` writes them again). `make stage4-test` is the
+are not overwritten; `--force` writes them again). `make game-test` is the
 round-trip check: the game loads the files and must still match stage 3.
 
 ## Routines
@@ -108,7 +108,7 @@ time, and compares:
    `routine all` checks every registered routine in one replay. A routine
    that works on stage 3 scratch memory (a working buffer) is checked through
    its caller.
-2. **The game** (the stage's gate, `make stage4-test`): `python
+2. **The game** (the stage's gate, `make game-test`): `python
    bridge/oracle.py game build/record/*.rec` runs `Game` in lockstep with
    stage 3: at every step boundary (a pass of the title loop or of the main
    loop) the same Actions go in, and the state and the sounds must be equal;

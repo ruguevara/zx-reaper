@@ -13,6 +13,8 @@ The agent should read the disassembly through this tool, never whole.
   zxq.py reclassify FRAG.ctl [-f]   regenerate the entries a control-file fragment
                                     covers (ends with `i $END`); -f also replaces
                                     annotated entries
+  zxq.py cut ADDR TITLE             split the entry containing ADDR there; the new
+                                    entry keeps the annotations of its instructions
   zxq.py peek ADDR [LEN]            hex + text dump of the image
   zxq.py strings [MIN [START END]]  text runs (plain or bit-7 terminated), default
                                     $5B00-$FFFF
@@ -640,6 +642,32 @@ def cmd_audit():
     return 1 if count(qs, 'open') or count(fs, 'unknown') else 0
 
 
+def cmd_cut(addr, title):
+    """Split an entry at ADDR into a new entry titled TITLE, keeping every
+    annotation (comments, @label, @isub) with the instruction it belongs to."""
+    e = next((e for e in load() if e.addr < addr <= e.end), None)
+    if e is None:
+        sys.exit('$%04X is not inside an entry (or already starts one)' % addr)
+    lines = e.text.rstrip('\n').split('\n')
+    i = next((n for n, l in enumerate(lines)
+              if (m := INSTR.match(l)) and int(m.group(2), 16) == addr), None)
+    if i is None:
+        sys.exit('no instruction at $%04X in %s' % (addr, e.fname))
+    j = i
+    while j > 0 and lines[j - 1].startswith(('@', ';')):
+        j -= 1
+    pre = lines[j:i]
+    first = e.ctype + lines[i][1:]
+    new = ['; ' + title]
+    comments = [l for l in pre if l.startswith(';')]
+    if comments:
+        new += [';'] + comments
+    new += [l for l in pre if l.startswith('@')] + [first] + lines[i + 1:]
+    open(e.fname, 'w').write('\n'.join(lines[:j]) + '\n')
+    open(os.path.join(SKOOL_DIR, '%04X.skool' % addr), 'w').write('\n'.join(new) + '\n')
+    print('%s -> $%04X-$%04X and $%04X-$%04X' % (e.name, e.addr, addr - 1, addr, e.end))
+
+
 def cmd_reclassify(frag, force):
     import subprocess
     addrs = []
@@ -671,6 +699,11 @@ def cmd_reclassify(frag, force):
         sys.exit(r.stderr)
     head, new = split_entries(r.stdout)
     new = [e for e in new if e.ctype != 'i']
+    # keep an @org that opened a replaced entry (the first entry of a block)
+    org = {e.addr for e in hit if re.match(r'@org\b', e.text)}
+    for e in new:
+        if e.addr in org and not re.match(r'@org\b', e.text):
+            e.text = '@org\n' + e.text
     for e in hit:
         os.remove(e.fname)
     for e in new:
@@ -680,17 +713,21 @@ def cmd_reclassify(frag, force):
 
 
 def cmd_asm(skool):
-    """skool2asm for sjasmplus: ORG lines get +SHIFT so the shift test can move
-    the code; skool2asm writes IXl/IXh/IYl/IYh, which sjasmplus rejects in mixed
-    case (unless --syntax=i), so they become IXL/IXH/IYL/IYH."""
+    """skool2asm for sjasmplus: ORG lines below $SHIFT_END get +SHIFT so the
+    shift test can move the code; skool2asm writes IXl/IXh/IYl/IYh, which
+    sjasmplus rejects in mixed case (unless --syntax=i), so they become
+    IXL/IXH/IYL/IYH."""
     import subprocess
     r = subprocess.run(['skool2asm.py', '-q', '-w', '-H', '-c', skool], capture_output=True, text=True)
     if r.returncode:
         sys.exit(r.stderr)
     org = re.compile(r'^( +ORG +)(\$[0-9A-Fa-f]+)\s*$')
     half = re.compile(r'\b(I[XY])([hl])\b')
+    shift_end = int(os.environ.get('SHIFT_END') or '0x10000', 0)
     for line in r.stdout.split('\n')[:-1] if r.stdout.endswith('\n') else r.stdout.split('\n'):
-        line = org.sub(r'\1\2+SHIFT', line)
+        m = org.match(line)
+        if m and int(m.group(2)[1:], 16) < shift_end:
+            line = org.sub(r'\1\2+SHIFT', line)
         print(half.sub(lambda m: m.group(1) + m.group(2).upper(), line))
 
 
@@ -708,6 +745,11 @@ def cmd_export(asm_path, modules_path, outdir):
     while chunks and all(directive.match(line) for line in chunks[0].split('\n')):
         head.append(chunks.pop(0))
     head = '\n\n'.join(head)
+    # an @org on a later entry (a fixed part after a shifted one) is a chunk
+    # of its own: it belongs to the entry that follows
+    for i in range(len(chunks) - 2, -1, -1):
+        if all(re.match(r'^\s*ORG\s', line, re.I) for line in chunks[i].split('\n')):
+            chunks[i:i + 2] = [chunks[i] + '\n' + chunks[i + 1]]
     if len(chunks) != len(entries):
         sys.exit('asm has %d entries, skool has %d: cannot split' % (len(chunks), len(entries)))
     mods = []
@@ -767,6 +809,8 @@ def main():
         cmd_status(a[1:])
     elif cmd == 'unexec' and len(a) > 1:
         cmd_unexec(a[1:])
+    elif cmd == 'cut' and len(a) == 3:
+        cmd_cut(parse_addr(a[1]), a[2])
     elif cmd == 'reclassify' and len(a) in (2, 3):
         cmd_reclassify(a[1], a[2:] == ['-f'])
     elif cmd == 'peek' and len(a) in (2, 3):

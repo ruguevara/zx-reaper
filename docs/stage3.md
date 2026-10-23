@@ -1,21 +1,20 @@
 # Stage 3: a Python port on a Spectrum stand-in library
 
-Status: the library's core and its Pyxel host exist (`zxpyxel/`), and Hungry
-Horace is ported whole and passes the stage's check (`examples/hungry-horace/
-port/`; results under "Hungry Horace"). How to port: the `zx-port` skill.
-The drawing layer for new games is still design; the next steps are at the
-end.
+Status: built. The library's core and its Pyxel host exist (`zxpyxel/`), and
+Hungry Horace is ported whole and passes the stage's check
+(`examples/hungry-horace/port/`; results under "Hungry Horace"). How to
+port: the `zx-port` skill; this note keeps the reasons.
 
 Stage 3 turns the annotated asm into Python that runs the same game: the same
 screens, the same behaviour under the same input, and code that follows the
 asm routine by routine. It runs on `zxpyxel`, the library that stands in
 for the 48K hardware the game touches, with Pyxel underneath for the window,
-keys and sound. It is the first stage that runs off the Spectrum and the base
-for stages 4 and 5 (README, "Port everywhere"). The same library serves new
-games in the Spectrum style: their drawing calls write the same screen bytes
-that a port writes.
+keys and sound. It is the first stage that runs off the Spectrum, and the
+oracle of stage 4 ([stage4.md](stage4.md)).
 
-## Framework: Pyxel
+## Decisions
+
+### Pyxel
 
 | | Pyxel 2.9 | pygame-ce | PySDL2 |
 | --- | --- | --- | --- |
@@ -28,13 +27,13 @@ that a port writes.
 
 Pyxel. The Spectrum's 16 colours (15 distinct) are its palette, the screen
 fits its 256×256 image bank, 50 fps is a setting, and a desktop build or a
-single HTML page is one command each: that is what "clone, tweak, play, ship"
+single HTML page is one command each: that is what "fork, play, ship"
 needs. Its weak point is sound: there is no raw-buffer API, so beeper audio
 goes through a WAV file per chunk (see Sound). If that is not good enough,
 pygame-ce replaces only the host module (the host contract below); the game
 code and the core do not change.
 
-## Principles
+### Principles
 
 1. **The asm's shape survives.** Memory is a 64K `bytearray` at the original
    addresses. Code, data and the screen stay where the asm puts them; data
@@ -62,6 +61,22 @@ code and the core do not change.
    floating bus, no raster timing. A game that relies on more (border
    stripes, multicolour) gets the effect redrawn on the host, not emulated.
 
+### From the prototype
+
+`zxpyxel` began as a prototype written for a new game in the Spectrum style;
+its master copy is now here (`zxpyxel/`). What changed on the way:
+
+- The prototype kept the screen in numpy arrays (a bool bitmap and an
+  attribute grid). Now there is one screen, the display file in the
+  Spectrum's layout, and drawing writes its bytes; numpy and Pillow leave
+  the library, which must run in Pyodide and be copied into a project as it
+  is. PNG goes through the library's own standard-library codec.
+- Update/draw callbacks become `run(main)` with an `async` main for ports,
+  and `run_display(update, display)` for games that are not ports.
+- An embedded 768-byte font becomes the ROM's font at $3D00.
+- Kept: the palettes, the FLASH phase, the Pyxel recipe (palette override,
+  blit through `images[0].data_ptr()`, border through `cls`), headless tests.
+
 ## The library
 
 ```
@@ -78,14 +93,12 @@ zxpyxel/
   headless.py    no window: scripted keys, or a Z80 record replayed and checked at checkpoints
 ```
 
-Not built yet: drawing primitives over the display (lines, rectangles,
-polygons, clipping) for new games.
-
 A port uses the machine and writes screen memory the way the original does.
-A new game uses the same machine and draws with `draw`, `text` and `sprite`,
-which write the same display-file bytes and attributes; it is an `async`
-main that awaits `zx.halt()` once per frame. Everything below the host module
-is shared, so a new game can mix in routines ported from an old one.
+A game that is not a port (stage 4, a new game in the Spectrum style) draws
+on `zxpyxel.display`, which writes the same display-file bytes and
+attributes without addresses, and runs under `run_display`. Not built yet:
+drawing primitives over the display (lines, rectangles, polygons, clipping)
+for new games.
 
 ### Machine
 
@@ -108,9 +121,8 @@ raise Goto(NextMaze)             # a jump that drops return addresses; dispatch(
 
 All three views of memory are the same 64K and wrap like the Z80 on a
 store, so a byte is never written as a word by mistake and the port needs no
-`& 0xFF` on memory. `v` is the seam for stage 4: its fields can move into a
-Python object while the routines keep saying `v.Score`. Not built yet:
-`zx.r()` for `LD A,R` (recorded values in a replay), until a game needs it.
+`& 0xFF` on memory. Not built yet: `zx.r()` for `LD A,R` (recorded values in
+a replay), until a game needs it.
 
 `sync` gives the host one frame for each frame boundary the clock has
 crossed: fifty for a one-second blocking sound, none when a main-loop pass is
@@ -123,14 +135,15 @@ screens it shows are as coarse as the sync points are.
 
 How much to `spend`: exact counts for delay and sound loops (the asm gives
 them: Hungry Horace's `Delay` is 26 T-states per pass); for other code,
-per-routine or per-pass figures measured in the simulator. A HALT-locked game
-needs hardly any: they only matter for frames where its work overruns.
+per-routine figures measured in the simulator (`zxdiff.py --tstates`). A
+HALT-locked game needs hardly any: they only matter for frames where its
+work overruns.
 
 The ROM area holds the 48K ROM, for games that read the font or use ROM bytes
-as random numbers; it is also the font of `text`. The library ships it (taken
-from SkoolKit's `resources/48.rom`; Amstrad allows distributing it with
-emulators). A write there is a bug in the port: the headless host checks at
-every frame that the ROM is intact.
+as random numbers; it is also the font of `display.text`. The library ships
+it (taken from SkoolKit's `resources/48.rom`; Amstrad allows distributing it
+with emulators). A write there is a bug in the port: the headless host
+checks at every frame that the ROM is intact.
 
 ### Screen
 
@@ -173,12 +186,15 @@ Kempston.
 
 ### Host contract
 
-A host is one module that:
+A host is one module that, 50 times a second:
 
-1. sets `zx.keys`, then calls `game.send(None)`, 50 times a second;
-2. shows `screen.render(mem, flash)` inside the border colour;
-3. plays the PCM from `zx.take_audio()`;
-4. stops when the game coroutine returns.
+1. gives the game the ZX keys held: for a port it sets `zx.keys` and calls
+   `game.send(None)`; for a display game it calls `update(keys)`;
+2. shows the screen bytes (`screen.render(mem, flash)` for a port,
+   `screen.render(display.data, flash, base=0)` for a display) inside the
+   border colour;
+3. plays the PCM (`zx.take_audio()`, or what `update` returned);
+4. stops when the game ends.
 
 ## Port code
 
@@ -214,16 +230,15 @@ port/
   zxpyxel/      the library, copied from zx-reaper by zxinit.py, like tools/
   labels.py     labels and constants (make port/labels.py)
   variables.py  the data labels as typed fields of `v` (make port/variables.py)
-  image.bin     tools/zxport.py image re/orig.z80 port/image.bin: the 48K RAM
-                at handover (game data, never committed)
+  image.bin     the 48K RAM at handover (make port/image.bin; game data, never committed)
   *.py          one per src/*.asm module (main.asm → main.py)
   play.py       loads image.bin, runs Start on the Pyxel host
 ```
 
-Everything the game needs is in `port/`, so `pyxel package port port/play.py`
-and `pyxel app2html` make the desktop and web builds from it as it is.
+Everything the game needs is in `port/`, so `make port-html` (Pyxel's
+`package` and `app2html`) makes a web page from it as it is.
 
-## Tests: identical behaviour
+## Checks
 
 How to run them: the `zx-port` skill. Why they look like this:
 
@@ -233,79 +248,46 @@ How to run them: the `zx-port` skill. Why they look like this:
    where the port's `zx.spend` figures come from.
 2. **The whole game, by checkpoint replay** (`make port-test`). The Z80 run
    (`zxrun.py --record`) writes every value an IN by the game reads, with
-   its port address, in order, and at every pass through one checkpoint
-   address the clock and the game state: the screen, the code region and
-   any system variable the game uses, not the stack. The state is stored,
-   not hashed (the first pass in full, then the changes), so a mismatch
-   names the bytes, by label or screen cell. The port runs headless with the
-   reads replayed and compares at `zx.checkpoint`; a read on another port,
-   or a read where the Z80 was at the checkpoint, stops it at once. Input is
-   matched by read order, not by frame, so the port's timing does not have
-   to match; the drift of its clock is reported instead. Records are build
-   files (`build/record/`): they hold game data. Limit: an interrupt
-   handler that changes variables in mid-pass runs at a different point in
-   the port; in such games, put the checkpoint at a HALT, where both are in
-   step.
-3. **By eye.** The Pyxel host next to Fuse. Speed and sound are judged here,
-   not tested.
+   its port address, in order, the interrupts the ROM's handler takes, and
+   at every pass through one checkpoint address the clock and the game
+   state: the screen, the code region and any system variable the game
+   uses, not the stack. The state is stored, not hashed (the first pass in
+   full, then the changes), so a mismatch names the bytes, by label or
+   screen cell. The port runs headless with the reads replayed and compares
+   at `zx.checkpoint`; a read on another port, or a read where the Z80 was
+   at the checkpoint, stops it at once. Input is matched by read order, not
+   by frame, so the port's timing does not have to match; the drift of its
+   clock is reported instead. The check also lists the port's routines no
+   record ran. Records are build files (`build/record/`): they hold game
+   data. Limit: an interrupt handler that changes variables in mid-pass runs
+   at a different point in the port; in such games, put the checkpoint at a
+   HALT, where both are in step.
+3. **By eye and ear.** The Pyxel host next to Fuse. Speed and sound are
+   judged here, not tested.
 
-## Stages 4 and 5
+## Hungry Horace
 
-Design: [stage4.md](stage4.md). Stage 4 keeps the look and takes the
-Spectrum out of the logic: a pure `Game.step(actions)` over plain state, a
-display API in `zxpyxel` that keeps attributes and the ROM font, sound
-effects as data. It is checked against golden runs decoded from the Z80
-records, slice by slice; stage 5 reuses those golden runs in C or JS.
+### The spike (title to the first maze)
 
-Going back: stage 3 keeps the memory layout and the labels, so a change made
-in Python goes back to asm (or z88dk C) routine by routine, with `zxdiff` run
-the other way: the Python routine is the oracle.
-
-## From the prototype
-
-`zxpyxel` began as a prototype written for a new game in the Spectrum style;
-its master copy is now here (`zxpyxel/`). What changed on the way:
-
-- The prototype kept the screen in numpy arrays (a bool bitmap and an
-  attribute grid). Now there is one screen, the display file in the
-  Spectrum's layout, and drawing writes its bytes; numpy and Pillow leave
-  the library, which must run in Pyodide and be copied into a project as it
-  is. PNG sprites become bytes at build time.
-- Update/draw callbacks become `run(main)` with an `async` main for ports
-  (`run_display(update, display)` for games that are not ports). A
-  callback-style game is `while True: update(); draw(); await zx.halt()`.
-- An embedded 768-byte font becomes the ROM's font at $3D00.
-- Kept: the palettes, the FLASH phase, the Pyxel recipe (palette override,
-  blit through `images[0].data_ptr()`, border through `cls`), headless tests.
-
-## Spike: Hungry Horace (2026-10-23)
-
-Ported: `Start` up to `InitMaze` (the title with its colour cycle, rising
-tone and any-key check; the start of a game or demo; maze 1 with the status
-line or the demo banner), in `examples/hungry-horace/port/`, about 200
-lines.
+Ported first: `Start` up to `InitMaze` (the title with its colour cycle,
+rising tone and any-key check; the start of a game or demo; maze 1 with the
+status line or the demo banner), about 200 lines, to try the platform.
 
 | Check | Result |
 | --- | --- |
-| memory when `InitMaze` is reached, demo, against the Z80 run (`port/check_spike.py`) | screen and attributes identical; every game variable identical; only $5F93-$5F9C differ, the Z80 stack |
-| timing | the port reaches `InitMaze` at frame 584, the Z80 at 614: only the beeper loops are charged so far |
+| memory when `InitMaze` is reached, demo, against the Z80 run | screen and attributes identical; every game variable identical; only $5F93-$5F9C differ, the Z80 stack |
 | desktop, Pyxel 2.9.4 | 50.1 fps; 96 beeper chunks in 400 frames through `Sound.pcm` without errors |
 | web, `pyxel app2html` (Pyodide 0.29.3, Chrome) | 48.5-48.8 fps; the WAV chunks play without errors; `ctypes.memmove` into `data_ptr()` works; a key on the title starts a game |
-| size | the web build is one 43 KB HTML file plus Pyxel's runtime from its CDN |
+| size | the web build is one HTML file of tens of KB plus Pyxel's runtime from its CDN |
 
-Not checked: why the web build runs 3% slow (frame pacing under a 60 Hz
-display is the likely cause). The beeper through WAV chunks was judged by
-ear on the whole game (2026-10-23): it sounds right, the seams between
-chunks do not show.
+### The whole game
 
-## Hungry Horace (2026-10-23)
-
-The whole game in about 1,100 lines of Python (six modules, one per asm
-module), ported by the method of the `zx-port` skill: the lead wrote the
-tools and `main.py` (control flow), subagents on a cheaper model ported the
-modules, the leaf modules first (library, guards), then movement, sprites
-and events in parallel against a fixed contract (signatures, which routines
-are async, the Goto targets).
+About 1,100 lines of Python (six modules, one per asm module), ported by the
+method of the `zx-port` skill: the lead wrote the tools and `main.py`
+(control flow), subagents on a cheaper model ported the modules, the leaf
+modules first (library, guards), then movement, sprites and events in
+parallel against a fixed contract (signatures, which routines are async, the
+Goto targets).
 
 | Check | Result |
 | --- | --- |
@@ -313,6 +295,7 @@ are async, the Goto targets).
 | whole game, `make port-test` | every main-loop pass identical to the Z80 in all game memory: demo 2,384 passes, play 5,536, bell 15,567 (11,000 frames of random play that take the bell, eat a guard and leave by the arrows) |
 | clock | the port runs 1.3-2.0% fast against the Z80 |
 | speed, headless | about 14,000 frames a second |
+| by ear | the beeper through WAV chunks sounds right on the whole game; the seams between chunks do not show |
 
 The first replay of the integrated port matched 2,147 passes and stopped at
 FRAMES: the ROM's BEEPER returns with interrupts on, the game's DI comes one
@@ -328,12 +311,13 @@ from the instructions rather than the header (an `E'` in a header can mean
 E after the caller's EXX), flags and unused registers in the test cases,
 how to split T-states between a routine and its callees (`zxdiff.py
 --tstates`), whole-screen mismatches flooding the output (only the differing
-bytes are printed now), and words written as bytes (`mem16` and `v`).
+bytes are printed now), and a word written as a byte (`mem16` and `v`).
 
 ## Next steps
 
 1. The selftest fixture game ported in `selftest/`, so `selftest/run.sh`
    checks stage 3 end to end.
-2. The drawing, text and sprite layer over memory (`zxpyxel.display`, the
-   display API of [stage4.md](stage4.md)), with the prototype's tests, for
-   new games in the Spectrum style.
+2. Drawing primitives over `zxpyxel.display` (lines, rectangles, polygons,
+   clipping) with the prototype's tests, for new games in the Spectrum style.
+3. Why the web build runs 3% slow (frame pacing under a 60 Hz display is the
+   likely cause).

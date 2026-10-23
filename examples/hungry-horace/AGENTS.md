@@ -1,7 +1,10 @@
-# AGENTS.md — reverse engineering of a ZX Spectrum game
+# AGENTS.md — reverse engineering and porting a ZX Spectrum game
 
 Goal: sources (asm, BASIC, data, tape manifest) that build a tape **byte-identical**
-to `original/`, readable enough for a human to change the game.
+to `original/`, readable enough for a human to change the game (stages 1 and 2);
+then, if the project goes on, the game in Python with the original's memory
+layout (stage 3, `port/`) and as clean game logic (stage 4, `game/`), each
+checked against the stage before.
 
 ## The one rule
 
@@ -30,12 +33,15 @@ states (`git commit -m "re: <what>"`). Never edit `original/`.
 | `tests/inputs/*.txt` | input scripts; `tests/expected/*.hash` their recorded frame hashes |
 | `scripts/rules.mk` | extra build steps (encryption, compression), optional |
 | `port/` | stage 3: the game in Python on `port/zxpyxel/`, checked by `make port-test` (skill `zx-port`) |
+| `game/` | stage 4: the game as clean logic, its data as editable files in `game/assets/`, checked by `make game-test` (skill `zx-clean`) |
+| `bridge/` | stage 4's link to stage 3: the decoder, the asset extraction, the oracle |
 
 ## Tools (run from the project root)
 
 ```
 make / make test / make status / make labels / make shift-test / make export / make help
-make doctor / make diff / make audit / make port-test
+make doctor / make diff / make audit
+make port-test / make game-test / make port-html / make game-html
 tools/zxq.py next 20                 what to annotate next (dependencies first)
 tools/zxq.py show $8000              one entry + its callers and callees
 tools/zxq.py refs $5C00              who reads, writes, calls an address
@@ -43,6 +49,7 @@ tools/zxq.py peek $9000 64 | strings 5 [START END]
 tools/zxq.py gfx $A000 256 2 /tmp/s.png [cells]   look at bytes as a bitmap, then view the PNG
 tools/zxq.py unexec re/maps/*.map    code never executed (data candidates)
 tools/zxq.py reclassify frag.ctl     re-disassemble a range from a control-file fragment
+tools/zxq.py cut $8C4A "Title"       split an annotated entry at an address, keeping its annotation
 tools/zxq.py check                   byte check in a private build dir (use this, not make, in parallel agents)
 tools/zxq.py const [NAME VALUE TEXT] numeric constants (src/constants.asm), used via @isub
 tools/zxq.py equs [--uses]           address names (@equ) and every operand they replace
@@ -68,15 +75,22 @@ Phases (details in the skills in `skills/`):
 4. `zx-annotate` — names, titles, descriptions; the bulk of the work.
 5. `zx-relocate` — symbolic operands until `make shift-test` passes.
 6. `zx-export` — modules in `src/`, final pass, README.
-- `zx-port` — executable models of routines (annotation proof) and, later, the
-  port to C/Python routine by routine against the Z80 code.
 7. `zx-document` — the article in `docs/`: how the game works, top-down, with
    a PNG gallery of sprites, tiles and level maps and links into `src/`.
+8. `zx-port` — executable models of routines (annotation proof, any time after
+   annotation) and stage 3: the port to Python routine by routine against the
+   Z80 code, `make port-test`.
+9. `zx-clean` — stage 4: the port as clean game logic in `game/`, checked
+   against stage 3, `make game-test`.
 
 Orchestration: the lead agent plans, classifies, relocates and reviews. Bulk
 annotation goes to subagents (cheaper model) in batches of 5–15 related entries
 from `zxq.py next`; each subagent edits only the files it was given and returns
-the new labels and one-line titles. The lead runs `make`, commits, and repeats.
+the new labels and one-line titles, and proposes splits where a second routine
+starts inside an entry. The lead applies splits with `zxq.py cut`, runs `make`,
+commits, and repeats. In a port the lead writes the control flow and a contract
+(signatures, events, what other modules call); subagents port one module each
+and pass its check before the lead puts them together.
 
 ## Conventions
 

@@ -62,7 +62,7 @@ def _run(update, screen_of, title='ZX Spectrum', scale=3, border=32, palette='pu
         frame += 1
         if pcm:
             # ponytail: one WAV per chunk through Sound.pcm; a tone that spans
-            # frames while the game runs gets a seam each frame (docs/port.md)
+            # frames while the game runs gets a seam each frame (docs/stage3.md)
             with open(wav, 'wb') as f:
                 f.write(sound.wav(pcm, RATE))
             pyxel.sounds[0].pcm(wav)

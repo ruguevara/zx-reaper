@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Inputs of a stage 3 port on zxpyxel (docs/port.md in zx-reaper).
+"""Inputs of a stage 3 port on zxpyxel (docs/stage3.md in zx-reaper).
 
   zxport.py labels [SYMFILE] > port/labels.py   labels and constants as Python names
                                                  (default build/game.sym; run make first)

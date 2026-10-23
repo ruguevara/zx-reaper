@@ -4,7 +4,9 @@ Russian version: [hungry-horace-run.ru.md](hungry-horace-run.ru.md).
 
 A full run of the [method](method.md) on Hungry Horace (Psion/Melbourne House, 1982), with the result compared against Richard Dymond's reference disassembly (skoolkit.ca, version 2026-04-10). The reference was downloaded into a separate folder and not opened until annotation was finished; subagents were forbidden to search for other people's disassemblies.
 
-## Result
+## Stages 1 and 2: reverse engineering
+
+### Result
 
 - Sources: 13 asm modules (4,454 lines), 2 BASIC programs, `src/constants.asm`, a tape manifest. `make` builds a TZX tape byte-identical to the original, including both BASIC programs and the tape pauses.
 - 106 entries, 100% annotated, 166 labels; every routine has a title, a description, registers and a `Hardware:` line.
@@ -14,20 +16,20 @@ A full run of the [method](method.md) on Hungry Horace (Psion/Melbourne House, 1
 - The article, in the [ZX-REAPER](../README.md) repository, [`examples/hungry-horace/docs/`](../examples/hungry-horace/docs/README.md): 14 files, ~17.6 thousand words, 849 relative links to the sources (all checked), diagrams of the main loop, tables of the structures, an analysis of the guards' AI with a worked example, a gallery of 17 pictures, notes for porting to C/Python.
 - The sources are there too, in `examples/hungry-horace/`, without the tape; put the tape into `original/game.tzx`, then run `make restore` and `make`.
 
-## Time and tokens
+### Time and tokens
 
-| Stage | Who | Time |
+| Phase | Who | Time |
 | --- | --- | --- |
 | init, coverage 92%, data classification | script + lead | ~15 min |
 | wave 1: 26 leaf routines | 4 subagents in parallel | ~13 min |
 | wave 2: 10 mid-level routines | 3 subagents | ~11 min |
 | wave 3: main loop, death, variables, data | 4 subagents | ~12 min |
 | integration, constants, shift test, export | lead | ~5 min |
-| article with gallery (stage 6) | 1 subagent (Opus) | ~24 min |
+| article with gallery (phase 6) | 1 subagent (Opus) | ~24 min |
 
 Annotation subagents (Sonnet): ~1.58 million tokens over 11 runs, 100–180 thousand per group; the article's author, another ~0.32 million. Human: no actions beyond setting the task.
 
-## Comparison with the reference
+### Comparison with the reference
 
 Tool: `tools/zxcompare.py ours.skool hh.skool --pairs pairs.tsv` (in ZX-REAPER).
 
@@ -86,9 +88,16 @@ The reference is line-by-line comments and separate pages (bugs, facts, POKEs, s
 
 After the article stage and a pass over the register, one of the reference's five bugs is still not found: "Who ate my lunch?". It stands in `re/findings.md` as `unknown` (F22). The findings register: 18 observed, 3 inferred, 2 open, 1 refuted claim.
 
+### Lessons for the method
+
+1. A single run is as accurate in meaning as the reference, which a human has been refining since 2014: names and purposes matched wherever both sides named something.
+2. The weak spot is bugs that show only at the edges: a long game, two-digit counters, two guards interacting. A separate "bug hunt" pass is needed: for each counter, what happens at its minimum, its maximum and on overflow; a simulator run with substituted values (`--poke` lives = 9, maze number = 28, speed = 1).
+3. There are few line comments (18%). If the reference's style is wanted, raise the bar in `zx-annotate` ("a comment on every instruction that means something in terms of the game"). Porting to C does not need it: long descriptions are more useful.
+4. Holes in the kit found and fixed along the way: `@equ` before `@start` was silently ignored; subagents named game variables with `@equ` (this breaks relocation), and now `equs --consolidate` turns them into labels; a bare `;` line inside a description breaks skool2asm, so the skill got the rule `; .`; one subagent ran `rm -rf re/skool` and restored it from a copy, so the skill now forbids touching shared files.
+
 ## Stage 3: the port to Python
 
-The whole game on `zxpyxel` (`examples/hungry-horace/port/`, six modules, ~1,100 lines). The order of work is in the `zx-port` skill, the design in [port.md](port.md).
+The whole game on `zxpyxel` (`examples/hungry-horace/port/`, six modules, ~1,100 lines). The order of work is in the `zx-port` skill, the design in [stage3.md](stage3.md).
 
 | Step | Who | Time |
 | --- | --- | --- |
@@ -114,10 +123,3 @@ The same game as plain Python (`examples/hungry-horace/game/`, the `horace` pack
 Every call of the 17 stage 3 routines on the three records gives the same state, the same transition and the same sounds in the stage 4 version. The game matches step by step at every step (demo 2,664, play 5,544, bell 15,576), and the screen through `zxpyxel.display` is byte-identical. No code was fixed after integration. Two errors were in the bridge and in the contract. The oracle collapsed repeated sounds across a whole step, so a second chirp in the same step dropped out of the routine check (two subagents found this independently). The contract did not specify the data of the sound effects, so the noise and the chime arrived in the wrong shape; the free-play run caught it.
 
 The world model: the game's rules read the screen (collisions go by a cell's colour; a guard keeps the cells under it, which is how fruit appears). So the state holds a 32×24 grid of cells, each with a glyph and an attribute. That grid is the game's real world; rendering only copies it to the screen.
-
-## Lessons for the method
-
-1. A single run is as accurate in meaning as the reference, which a human has been refining since 2014: names and purposes matched wherever both sides named something.
-2. The weak spot is bugs that show only at the edges: a long game, two-digit counters, two guards interacting. A separate "bug hunt" pass is needed: for each counter, what happens at its minimum, its maximum and on overflow; a simulator run with substituted values (`--poke` lives = 9, maze number = 28, speed = 1).
-3. There are few line comments (18%). If the reference's style is wanted, raise the bar in `zx-annotate` ("a comment on every instruction that means something in terms of the game"). Porting to C does not need it: long descriptions are more useful.
-4. Holes in the kit found and fixed along the way: `@equ` before `@start` was silently ignored; subagents named game variables with `@equ` (this breaks relocation), and now `equs --consolidate` turns them into labels; a bare `;` line inside a description breaks skool2asm, so the skill got the rule `; .`; one subagent ran `rm -rf re/skool` and restored it from a copy, so the skill now forbids touching shared files.
