@@ -1,0 +1,72 @@
+---
+name: zx-document
+description: Write the docs/ article that explains how a reverse-engineered ZX Spectrum game works, top-down, with a graphics gallery rendered to PNG and links into the sources. Use after annotation (titles and labels exist), before or after export.
+---
+
+# zx-document
+
+Output: `docs/README.md` (index) plus one file per section, written for a
+reader who knows programming but not this game: the level of a good Habr or
+blog article. Every claim points to code with a relative link, so the docs
+work on a private GitHub repository.
+
+## Files
+
+```
+docs/README.md            title, screenshot, one-paragraph summary, table of contents
+docs/01-overview.md       the game, the hardware it uses, memory map, how it loads
+docs/02-data.md           data structures: variables, records, tables, formats (field tables)
+docs/03-title-and-menu.md title screen, demo mode, start of a game
+docs/04-game-loop.md      main loop, frame by frame; timing and speed
+docs/05-<subsystem>.md    one file per subsystem (player, enemies/AI, collisions,
+                          scoring, sound, screen drawing, levels...)
+docs/06-tricks.md         non-obvious code: self-modifying code, ROM data reuse,
+                          dead code, bugs, size/speed hacks
+docs/07-graphics.md       gallery: every sprite set, tile set, font, title
+                          graphic, loading screen and every level map as PNG
+docs/08-porting.md        what a C/Python port must replace: hardware touch
+                          points, timing, data formats, entry points
+docs/img/                 PNGs (committed)
+```
+
+## Writing rules
+
+- Top-down: start with what the player sees, then the loop, then subsystems,
+  then details. Each file starts with a 2-3 sentence summary.
+- Link names to sources: `[DrawSprite](../src/screen.asm#L120)` after export,
+  or `[DrawSprite](../re/skool/6BD6.skool)` before. Get line numbers with
+  `grep -n '^DrawSprite:' src/*.asm`; re-check them after every export.
+- Use tables for record layouts (`Offset | Size | Meaning`), constants and
+  memory maps; Mermaid `flowchart` for the main loop and state machines
+  (GitHub renders it); short asm excerpts (5-15 lines) only where the trick is
+  in the code itself.
+- State what is verified and what is inferred. Mark guesses as such.
+- Numbers: hex with `$`, decimal in parentheses where it helps (`$0300` (768)).
+- No filler, no marketing tone, no metaphors.
+
+## Graphics
+
+All images come from the game's bytes, never redrawn by hand:
+
+- Sprite and tile sheets: `tools/zxgfx.py sheet ADDR COUNT W H docs/img/x.png
+  --attrs ...` (colours = the attributes the game uses; `--layout linear` for
+  row-ordered sprites).
+- Levels, title graphics and anything with its own drawing routine: call the
+  game's routine in the simulator and save the screen:
+  `tools/zxrun.py re/orig.z80 --cls ATTR --call DrawMaze --reg HL=... --reg DE=$4000
+  --reg BC=$300 --png docs/img/level1.png [--crop X,Y,W,H]`
+  (use the routine's address; registers as its description says).
+- Screens in play: `tools/zxrun.py re/orig.z80 --input tests/inputs/X.txt
+  --shot F:docs/img/x.png`.
+- Loading screen: `sna2img.py data/screen*.scr docs/img/loading.png`.
+- Put the commands in `docs/img/Makefile` (or `scripts/docs-images.sh`) so
+  images can be regenerated after changes.
+
+Check every image by looking at it before linking it.
+
+## Done when
+
+All sections exist, every subsystem routine of the main loop is mentioned
+with a link, every graphic and level is in the gallery, and the links resolve
+(`grep -o '](\.\./[^)#]*' docs/*.md | sed 's/.*](//' | sort -u | xargs ls`
+from `docs/`).

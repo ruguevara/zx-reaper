@@ -63,6 +63,8 @@ Phases (details in the skills in `skills/`):
 4. `zx-annotate` — names, titles, descriptions; the bulk of the work.
 5. `zx-relocate` — symbolic operands until `make shift-test` passes.
 6. `zx-export` — modules in `src/`, final pass, README.
+7. `zx-document` — the article in `docs/`: how the game works, top-down, with
+   a PNG gallery of sprites, tiles and level maps and links into `src/`.
 
 Orchestration: the lead agent plans, classifies, relocates and reviews. Bulk
 annotation goes to subagents (cheaper model) in batches of 5–15 related entries

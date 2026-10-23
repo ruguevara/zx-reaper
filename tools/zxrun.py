@@ -25,6 +25,12 @@ Examples:
   zxrun.py new.z80 --frames 2000 --input play.txt --expect orig.hash
   zxrun.py orig.z80 --frames 300 --watch 0x8000-0x80FF --watch-from 250
   zxrun.py orig.z80 --load build/code.bin@0x8100 --pc 0x8100 ...   (shift test)
+
+Calling a routine (render data with the game's own code, for docs):
+  zxrun.py orig.z80 --cls 0x38 --call 0x6B75 --reg HL=0x6FF7 --reg DE=0x4000 \
+      --reg BC=0x300 --png maze1.png [--crop X,Y,W,H]
+  pushes a return address, runs ADDR with interrupts off until it returns,
+  then writes the screen (cells X,Y,W,H) as PNG.
 """
 import argparse
 import hashlib
@@ -36,7 +42,7 @@ from skoolkit import CSimulator, SkoolKitError
 from skoolkit.graphics import Frame, scr_udgs
 from skoolkit.components import get_image_writer
 from skoolkit.simulator import Simulator
-from skoolkit.simutils import from_snapshot, get_state
+from skoolkit.simutils import SP, from_snapshot, get_state
 from skoolkit.snapshot import Snapshot, write_snapshot
 
 PC, T, IFF = 24, 25, 26
@@ -128,8 +134,9 @@ class Tracer:
             self.io_log.append((registers[T] + offset, self.outfffd & 15, value))
 
 
-def png(scr, path):
-    frame = Frame(scr_udgs(scr, 0, 0, 32, 24, 0, 6144), 2)
+def png(scr, path, crop=(0, 0, 32, 24), scale=2):
+    x, y, w, h = crop
+    frame = Frame(scr_udgs(scr, x, y, w, h, 0, 6144), scale)
     with open(path, 'wb') as f:
         get_image_writer().write_image([frame], f)
 
@@ -158,6 +165,12 @@ def main():
                     help='load a binary into memory before running')
     ap.add_argument('--pc', type=parse_int, help='set PC before running')
     ap.add_argument('--clear', metavar='A-B', help='zero memory A..B-1 before --load')
+    ap.add_argument('--cls', type=parse_int, metavar='ATTR', help='clear the screen to ATTR first')
+    ap.add_argument('--call', type=parse_int, metavar='ADDR', help='call a routine and stop on return')
+    ap.add_argument('--reg', action='append', default=[], metavar='R=V', help='register for --call')
+    ap.add_argument('--png', help='write the final screen as PNG')
+    ap.add_argument('--crop', default='0,0,32,24', help='cells X,Y,W,H for --png (default whole screen)')
+    ap.add_argument('--scale', type=int, default=2, help='--png scale (default 2)')
     ap.add_argument('--watch', metavar='A[-B]', help='log writes to A..B (pure Python simulator)')
     ap.add_argument('--watch-from', type=int, default=0, metavar='FRAME',
                     help='run fast until FRAME, then start watching')
@@ -166,7 +179,10 @@ def main():
     snap = Snapshot.get(args.snapshot)
     if snap is None:
         sys.exit('cannot read snapshot %s' % args.snapshot)
-    regs = {'PC': args.pc} if args.pc is not None else None
+    regs = {'PC': args.pc} if args.pc is not None else {}
+    for spec in args.reg:
+        r, _, v = spec.partition('=')
+        regs[r.upper()] = parse_int(v)
     sim = from_snapshot(CSimulator or Simulator, snap, regs, None,
                         {'fast_djnz': False, 'fast_ldir': False})
     if len(sim.memory) != 0x10000:
@@ -179,6 +195,10 @@ def main():
         data = open(fname, 'rb').read()
         a = parse_int(addr)
         sim.memory[a:a + len(data)] = list(data)
+
+    if args.cls is not None:
+        sim.memory[0x4000:0x5800] = [0] * 0x1800
+        sim.memory[0x5800:0x5B00] = [args.cls] * 0x300
 
     tracer = Tracer()
     tracer.border = [(0, snap.border)]
@@ -245,6 +265,23 @@ def main():
         return n + 1 < args.frames
 
     stop = -1 if args.stop is None else args.stop
+    crop = tuple(int(v) for v in args.crop.split(','))
+    if args.call is not None:
+        ret = 0x0001          # never executed by a routine under test
+        sp = (sim.registers[SP] - 2) & 0xFFFF
+        sim.memory[sp], sim.memory[sp + 1] = ret & 255, ret >> 8
+        sim.registers[SP] = sp
+        cond, ops = sim.trace(args.call, ret, 50000000, 0, 0, None, None, tracer.keyboard,
+                              None, None)
+        print('returned from $%04X after %d instructions' % (args.call, ops)
+              if sim.registers[PC] == ret else 'did not return (PC=$%04X)' % sim.registers[PC])
+        if args.png:
+            png(sim.memory[0x4000:0x5B00], args.png, crop, args.scale)
+            print('wrote %s' % args.png)
+        if args.dump:
+            ram, registers, st, machine = get_state(sim)
+            write_snapshot(args.dump, ram, registers, st, machine)
+        return
     watch_log = []
     if args.watch:
         lo, _, hi = args.watch.partition('-')
@@ -284,6 +321,9 @@ def main():
         ram, registers, st, machine = get_state(sim)
         write_snapshot(args.dump, ram, registers, st, machine)
         print('wrote %s' % args.dump)
+    if args.png:
+        png(sim.memory[0x4000:0x5B00], args.png, crop, args.scale)
+        print('wrote %s' % args.png)
     if expected is not None:
         if state['diverged'] is not None:
             sys.exit(1)
