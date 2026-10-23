@@ -1,2 +1,15 @@
-; Message at B1EE
-t$B1EE DEFM "rgdvN,gd"
+; Message: It cannot be seen, cannot be felt / Cannot be hear...
+;
+; It cannot be seen, cannot be felt / Cannot be heard, cannot be smelt. / It
+; lies behind stars and under hills, / And empty holes it fills. / It comes
+; first and follows after, / ends life, kills laughter.
+b$B1EE DEFB $72,$67,$64,$76,$4E,$2C,$67,$64 ; it cannot be see "N," cannot be
+ $B1F6 DEFB $89,$15,$0D,$F0,$EE,$64,$C9,$85 ; felt <nl> cannot:7 be hear:4
+ $B1FE DEFB $2C,$67,$64,$8A,$DE,$2E,$0D     ; "," cannot be smelt "." <nl>
+ $B205 DEFB $F3,$9E,$C9,$DB,$88,$25,$CB,$0F ; it:7 lie:4 behind star:4
+ $B20D DEFB $61,$8B,$9B,$83,$42,$2C,$0D     ; and under hills "," <nl>
+ $B214 DEFB $F0,$5B,$D2,$28,$83,$5D,$53,$72 ; and:7 empty hole "S" it
+ $B21C DEFB $C2,$61,$2E,$0D,$F3,$9E,$C8,$71 ; fill:4 "." <nl> it:7 come:4
+ $B224 DEFB $89,$1C,$61,$C2,$85,$80,$49,$2C ; first and follow:4 after ","
+ $B22C DEFB $0D,$C8,$D5,$89,$DF,$2C,$C3,$A8 ; <nl> end:4 life "," kill:4
+ $B234 DEFB $89,$D3,$2E,$16                 ; laughter "." <end>

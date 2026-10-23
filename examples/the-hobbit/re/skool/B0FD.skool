@@ -1,0 +1,4 @@
+; Message: The spider web is slowly smothering you
+@label=MsgSpiderWebSlowly
+b$B0FD DEFB $78,$86,$23,$87,$76,$71,$85,$DB ; the spider web is slowly
+ $B105 DEFB $85,$F3,$A7,$A8                 ; smothering you:2

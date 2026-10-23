@@ -1,0 +1,3 @@
+; Message: A hard dangerous path in the misty mountains
+b$B59F DEFB $60,$83,$16,$81,$85,$84,$D4,$70 ; a hard dangerous path in
+ $B5A7 DEFB $78,$84,$40,$A4,$56             ; the misty mountains:2

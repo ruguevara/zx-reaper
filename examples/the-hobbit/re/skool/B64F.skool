@@ -1,0 +1,3 @@
+; Message: A wooden town in the middle of long lake
+b$B64F DEFB $60,$87,$A2,$86,$DC,$70,$78 ; a wooden town in the
+ $B656 DEFB $8A,$19,$74,$84,$0F,$A3,$B7 ; middle of long lake:2

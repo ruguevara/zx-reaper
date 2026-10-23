@@ -1,0 +1,4 @@
+; Message: <subj> give <obj1> a nasty slash in the leg.
+@label=MsgGiveNastySlashLeg
+b$AE8B DEFB $06,$82,$D4,$07,$60,$84,$6A ; <subj> give <obj1> a nasty
+ $AE92 DEFB $D5,$C3,$70,$78,$B3,$C9     ; slash in the leg:3

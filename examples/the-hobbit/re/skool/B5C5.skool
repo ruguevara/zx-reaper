@@ -1,0 +1,4 @@
+; Message: A large dry cave which is quite comfortable
+@label=MsgLargeDryCaveWhich
+b$B5C5 DEFB $60,$83,$BF,$81,$EC,$81,$12 ; a large dry cave
+ $B5CC DEFB $8B,$D1,$71,$85,$1C,$A1,$3F ; which is quite comfortable:2

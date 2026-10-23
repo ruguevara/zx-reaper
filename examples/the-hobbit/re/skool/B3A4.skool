@@ -1,2 +1,12 @@
-; Message at B3A4
-t$B3A4 DEFM "REWINDa PREPARE TAPE"
+; Message: Rewind and prepare tape for     verification  -- t...
+;
+; Rewind and prepare tape for     verification  -- then hit any key.
+@label=MsgRewindPrepareTapeFor
+b$B3A4 DEFM "REWIND"
+ $B3AA DEFB $61                     ; and
+ $B3AB DEFM " PREPARE TAPE"
+ $B3B8 DEFB $82,$8F                 ; for
+ $B3BA DEFM "     VERIFICATION  --"
+ $B3CF DEFB $86,$A2,$83,$47         ; then hit
+ $B3D3 DEFM " ANY"
+ $B3D7 DEFB $B3,$A5                 ; key:3

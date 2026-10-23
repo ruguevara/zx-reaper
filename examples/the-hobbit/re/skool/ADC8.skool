@@ -1,2 +1,0 @@
-; Message at ADC8
-t$ADC8 DEFM " ? "

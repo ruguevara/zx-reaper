@@ -1,0 +1,6 @@
+; Message: Take care to leave at the right time.
+b$B504 DEFB $86,$8C             ; take
+ $B506 DEFM " CARE"
+ $B50B DEFB $7B,$83,$C4,$63,$78 ; to leave at the
+ $B510 DEFM " RIGHT"
+ $B516 DEFB $BB,$87             ; time:3

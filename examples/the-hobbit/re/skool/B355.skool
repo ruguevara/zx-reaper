@@ -1,2 +1,0 @@
-; Data block at B355
-b$B355 DEFB $B3,$A5

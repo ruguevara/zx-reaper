@@ -1,0 +1,4 @@
+; Message: A nasty slice misses <his_obj1> heart.
+@label=MsgNastySliceMissesHeart
+b$AE70 DEFB $60,$84,$6A,$85,$CF,$CA,$25,$0E ; a nasty slice miss:4 <his_obj1>
+ $AE78 DEFB $B3,$22                         ; heart:3

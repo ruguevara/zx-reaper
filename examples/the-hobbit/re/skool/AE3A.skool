@@ -1,0 +1,7 @@
+; Message: With one well placed blow <subj> cleave <his_obj1>...
+;
+; With one well placed blow <subj> cleave <his_obj1> skull.
+@label=MsgWithOneWellPlacedBlow
+b$AE3A DEFB $7E,$84,$AD,$8B,$C4,$CA,$7E     ; with one well place:4
+ $AE41 DEFB $80,$AF,$06,$88,$66,$0E,$B5,$BE ; blow <subj> cleave <his_obj1>
+                                            ; skull:3

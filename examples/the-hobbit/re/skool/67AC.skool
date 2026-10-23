@@ -1,0 +1,297 @@
+; Words only messages use
+;
+; Same format; no index by letter, class 0, in alphabetical order. A message
+; names one by its offset ($67AC = offset $7AC).
+b$67AC DEFB $01,$02,$0C,$85                                         ; able
+ $67B0 DEFB $01,$02,$0F,$15,$94                                     ; about
+ $67B5 DEFB $01,$02,$0F,$16,$85                                     ; above
+ $67BA DEFB $01,$04,$16,$05,$0E,$14,$15,$12,$85                     ; adventure
+ $67C3 DEFB $01,$07,$01,$09,$8E                                     ; again
+ $67C8 DEFB $01,$07,$01,$09,$0E,$13,$94                             ; against
+ $67CF DEFB $01,$08,$05,$01,$84                                     ; ahead
+ $67D4 DEFB $01,$0C,$09,$16,$85                                     ; alive
+ $67D9 DEFB $01,$0C,$0D,$0F,$13,$94                                 ; almost
+ $67DF DEFB $01,$0C,$0F,$0E,$87                                     ; along
+ $67E4 DEFB $01,$0E,$09,$0D,$01,$8C                                 ; animal
+ $67EA DEFB $01,$90,$10,$05,$01,$92                                 ; appear
+                                                                    ; (other,
+                                                                    ; +s)
+ $67F0 DEFB $01,$90,$B0,$12,$0F,$01,$03,$88                         ; approach
+                                                                    ; (other,
+                                                                    ; +ing)
+ $67F8 DEFB $01,$12,$0F,$15,$0E,$84                                 ; around
+ $67FE DEFB $01,$12,$12,$09,$16,$05,$93                             ; arrives
+ $6805 DEFB $01,$13,$80                                             ; as
+ $6808 DEFB $01,$13,$09,$04,$85                                     ; aside
+ $680D DEFB $01,$13,$0C,$05,$05,$90                                 ; asleep
+ $6813 DEFB $01,$94,$14,$05,$0D,$10,$94                             ; attempt
+                                                                    ; (other,
+                                                                    ; +s)
+ $681A DEFB $01,$17,$01,$99                                         ; away
+ $681E DEFB $02,$01,$0E,$8B                                         ; bank
+ $6822 DEFB $02,$05,$80                                             ; be
+ $6825 DEFB $02,$05,$08,$09,$0E,$84                                 ; behind
+ $682B DEFB $02,$05,$0C,$0F,$97                                     ; below
+ $6830 DEFB $02,$09,$12,$14,$08,$04,$01,$99                         ; birthday
+ $6838 DEFB $02,$0C,$09,$0D,$05,$99                                 ; blimey
+ $683E DEFB $02,$92,$21,$0E,$04,$09,$13,$88                         ; brandish
+                                                                    ; (other,
+                                                                    ; +es)
+ $6846 DEFB $02,$12,$09,$0E,$8B                                     ; brink
+ $684B DEFB $02,$12,$0F,$01,$04,$13,$09,$04,$85                     ; broadside
+ $6854 DEFB $02,$15,$0C,$02,$0F,$15,$93                             ; bulbous
+ $685B DEFB $02,$19,$80                                             ; by
+ $685E DEFB $03,$01,$12,$12,$19,$09,$0E,$87                         ; carrying
+ $6866 DEFB $03,$8C,$05,$01,$16,$85                                 ; cleave
+                                                                    ; (other,
+                                                                    ; +s)
+ $686C DEFB $03,$0C,$09,$06,$86                                     ; cliff
+ $6871 DEFB $03,$8F,$0D,$85                                         ; come
+                                                                    ; (other,
+                                                                    ; +s)
+ $6875 DEFB $03,$8F,$8D,$10,$0C,$05,$14,$85                         ; complete
+                                                                    ; (other,
+                                                                    ; +d)
+ $687D DEFB $03,$8F,$0E,$07,$12,$01,$14,$15,$0C,$01,$14,$09,$0F,$8E ; congratulation
+                                                                    ; (other,
+                                                                    ; +s)
+ $688B DEFB $03,$0F,$0F,$8B                                         ; cook
+ $688F DEFB $03,$15,$12,$12,$05,$0E,$94                             ; current
+ $6896 DEFB $03,$12,$09,$13,$90                                     ; crisp
+ $689B DEFB $04,$81,$17,$8E                                         ; dawn
+                                                                    ; (other,
+                                                                    ; +s)
+ $689F DEFB $04,$01,$99                                             ; day
+ $68A2 DEFB $04,$05,$06,$05,$0E,$13,$85                             ; defense
+ $68A9 DEFB $04,$05,$13,$03,$05,$0E,$04,$93                         ; descends
+ $68B1 DEFB $04,$09,$85                                             ; die
+ $68B4 DEFB $04,$09,$84                                             ; did
+ $68B7 DEFB $04,$09,$8D                                             ; dim
+ $68BA DEFB $04,$09,$13,$14,$01,$0E,$03,$85                         ; distance
+ $68C2 DEFB $04,$8F,$20,$80                                         ; do (other,
+                                                                    ; +es)
+ $68C6 DEFB $04,$8F,$A0,$80                                         ; do (other,
+                                                                    ; +ing)
+ $68CA DEFB $04,$12,$09,$10,$93                                     ; drips
+ $68CF DEFB $05,$06,$06,$0F,$12,$94                                 ; effort
+ $68D5 DEFB $05,$8E,$04,$80                                         ; end
+                                                                    ; (other,
+                                                                    ; +s)
+ $68D9 DEFB $05,$0E,$14,$12,$01,$0E,$03,$85                         ; entrance
+ $68E1 DEFB $05,$96,$01,$10,$0F,$12,$01,$14,$85                     ; evaporate
+                                                                    ; (other,
+                                                                    ; +s)
+ $68EA DEFB $05,$16,$05,$0E,$09,$0E,$87                             ; evening
+ $68F1 DEFB $05,$18,$09,$14,$93                                     ; exits
+ $68F6 DEFB $05,$18,$10,$05,$03,$94                                 ; expect
+ $68FC DEFB $06,$01,$09,$0C,$05,$84                                 ; failed
+ $6902 DEFB $06,$01,$09,$0C,$09,$0E,$87                             ; failing
+ $6909 DEFB $06,$01,$92                                             ; far
+ $690C DEFB $06,$01,$14,$01,$8C                                     ; fatal
+ $6911 DEFB $06,$05,$05,$84                                         ; feed
+ $6915 DEFB $06,$05,$0C,$94                                         ; felt
+ $6919 DEFB $06,$09,$94                                             ; fit
+ $691C DEFB $06,$09,$12,$13,$94                                     ; first
+ $6921 DEFB $06,$8C,$01,$0D,$85                                     ; flame
+                                                                    ; (other,
+                                                                    ; +s)
+ $6926 DEFB $06,$8C,$0F,$01,$94                                     ; float
+                                                                    ; (other,
+                                                                    ; +s)
+ $692B DEFB $06,$0C,$19,$09,$0E,$87                                 ; flying
+ $6931 DEFB $06,$0F,$0F,$94                                         ; foot
+ $6935 DEFB $06,$0F,$0F,$14,$09,$0E,$87                             ; footing
+ $693C DEFB $06,$0F,$15,$92                                         ; four
+ $6940 DEFB $06,$12,$0F,$0E,$94                                     ; front
+ $6945 DEFB $07,$05,$14,$14,$09,$0E,$87                             ; getting
+ $694C DEFB $07,$0C,$01,$0E,$03,$09,$0E,$87                         ; glancing
+ $6954 DEFB $07,$0C,$09,$04,$05,$93                                 ; glides
+ $695A DEFB $07,$0C,$15,$14,$14,$0F,$0E,$99                         ; gluttony
+ $6962 DEFB $07,$0F,$94                                             ; got
+ $6965 DEFB $07,$12,$0F,$15,$0E,$84                                 ; ground
+ $696B DEFB $07,$12,$0F,$97                                         ; grow
+ $696F DEFB $07,$15,$01,$12,$84                                     ; guard
+ $6974 DEFB $08,$01,$0E,$07,$09,$0E,$87                             ; hanging
+ $697B DEFB $08,$01,$93                                             ; has
+ $697E DEFB $08,$01,$16,$85                                         ; have
+ $6982 DEFB $08,$05,$80                                             ; he
+ $6985 DEFB $08,$85,$81,$92                                         ; hear
+                                                                    ; (other,
+                                                                    ; +d)
+ $6989 DEFB $08,$05,$12,$85                                         ; here
+ $698D DEFB $08,$09,$8D                                             ; him
+ $6990 DEFB $08,$09,$93                                             ; his
+ $6993 DEFB $08,$0F,$97                                             ; how
+ $6996 DEFB $08,$0F,$17,$0C,$93                                     ; howls
+ $699B DEFB $08,$15,$12,$12,$99                                     ; hurry
+ $69A0 DEFB $09,$0E,$05,$06,$06,$05,$03,$14,$09,$16,$85             ; ineffective
+ $69AB DEFB $09,$14,$93                                             ; its
+ $69AE DEFB $0A,$0F,$82                                             ; job
+ $69B1 DEFB $0A,$15,$13,$94                                         ; just
+ $69B5 DEFB $0C,$15,$12,$03,$88                                     ; lurch
+ $69BA DEFB $0B,$05,$05,$10,$93                                     ; keeps
+ $69BF DEFB $0B,$0E,$0F,$03,$0B,$93                                 ; knocks
+ $69C5 DEFB $0B,$0E,$0F,$97                                         ; know
+ $69C9 DEFB $0C,$01,$13,$94                                         ; last
+ $69CD DEFB $0C,$01,$15,$07,$08,$93                                 ; laughs
+ $69D3 DEFB $0C,$01,$15,$07,$08,$14,$05,$92                         ; laughter
+ $69DB DEFB $0C,$89,$05,$80                                         ; lie
+                                                                    ; (other,
+                                                                    ; +s)
+ $69DF DEFB $0C,$09,$06,$85                                         ; life
+ $69E3 DEFB $0C,$09,$16,$05,$93                                     ; lives
+ $69E8 DEFB $0C,$8F,$13,$85                                         ; lose
+                                                                    ; (other,
+                                                                    ; +s)
+ $69EC DEFB $0C,$0F,$15,$84                                         ; loud
+ $69F0 DEFB $0C,$15,$03,$0B,$99                                     ; lucky
+ $69F5 DEFB $0D,$01,$04,$85                                         ; made
+ $69F9 DEFB $0D,$01,$0B,$85                                         ; make
+ $69FD DEFB $0D,$01,$12,$07,$09,$8E                                 ; margin
+ $6A03 DEFB $0D,$01,$12,$16,$05,$0C,$0C,$0F,$15,$93                 ; marvellous
+ $6A0D DEFB $0D,$01,$99                                             ; may
+ $6A10 DEFB $0D,$01,$19,$02,$85                                     ; maybe
+ $6A15 DEFB $0D,$85,$AE,$84                                         ; mend
+                                                                    ; (other,
+                                                                    ; +ing)
+ $6A19 DEFB $0D,$09,$04,$04,$0C,$85                                 ; middle
+ $6A1F DEFB $0D,$09,$04,$04,$01,$99                                 ; midday
+ $6A25 DEFB $0D,$89,$33,$93                                         ; miss
+                                                                    ; (other,
+                                                                    ; +es)
+ $6A29 DEFB $0D,$0F,$0D,$05,$0E,$94                                 ; moment
+ $6A2F DEFB $0D,$0F,$0D,$05,$0E,$14,$01,$12,$09,$0C,$99             ; momentarily
+ $6A3A DEFB $0D,$8F,$B2,$8E                                         ; morn
+                                                                    ; (other,
+                                                                    ; +ing)
+ $6A3E DEFB $0D,$0F,$15,$14,$08,$06,$15,$0C,$8C                     ; mouthfull
+ $6A47 DEFB $0D,$0F,$16,$85                                         ; move
+ $6A4B DEFB $0D,$15,$03,$88                                         ; much
+ $6A4F DEFB $0D,$19,$80                                             ; my
+ $6A52 DEFB $0E,$0F,$80                                             ; no
+ $6A55 DEFB $0E,$0F,$09,$13,$85                                     ; noise
+ $6A5A DEFB $0E,$0F,$94                                             ; not
+ $6A5D DEFB $0E,$0F,$14,$08,$09,$0E,$87                             ; nothing
+ $6A64 DEFB $0E,$0F,$97                                             ; now
+ $6A67 DEFB $0F,$0E,$03,$85                                         ; once
+ $6A6B DEFB $0F,$14,$08,$05,$92                                     ; other
+ $6A70 DEFB $10,$01,$0C,$85                                         ; pale
+ $6A74 DEFB $10,$01,$13,$13,$05,$93                                 ; passes
+ $6A7A DEFB $10,$01,$13,$94                                         ; past
+ $6A7E DEFB $10,$8C,$81,$03,$85                                     ; place
+                                                                    ; (other,
+                                                                    ; +d)
+ $6A83 DEFB $10,$8F,$03,$0B,$05,$94                                 ; pocket
+                                                                    ; (other,
+                                                                    ; +s)
+ $6A89 DEFB $10,$92,$05,$03,$09,$0F,$15,$93                         ; precious
+                                                                    ; (other,
+                                                                    ; +s)
+ $6A91 DEFB $10,$12,$05,$10,$01,$12,$85                             ; prepare
+ $6A98 DEFB $10,$12,$05,$13,$05,$0E,$94                             ; present
+ $6A9F DEFB $12,$05,$01,$03,$88                                     ; reach
+ $6AA4 DEFB $12,$85,$03,$0F,$16,$05,$92                             ; recover
+                                                                    ; (other,
+                                                                    ; +s)
+ $6AAB DEFB $13,$81,$09,$8C                                         ; sail
+                                                                    ; (other,
+                                                                    ; +s)
+ $6AAF DEFB $13,$05,$85                                             ; see
+ $6AB2 DEFB $13,$85,$05,$8D                                         ; seem
+                                                                    ; (other,
+                                                                    ; +s)
+ $6AB6 DEFB $13,$08,$01,$04,$0F,$97                                 ; shadow
+ $6ABC DEFB $13,$08,$01,$10,$85                                     ; shape
+ $6AC1 DEFB $13,$88,$01,$14,$14,$05,$92                             ; shatter
+                                                                    ; (other,
+                                                                    ; +s)
+ $6AC8 DEFB $13,$89,$AE,$87                                         ; sing
+                                                                    ; (other,
+                                                                    ; +ing)
+ $6ACC DEFB $13,$89,$AE,$8B                                         ; sink
+                                                                    ; (other,
+                                                                    ; +ing)
+ $6AD0 DEFB $13,$89,$14,$80                                         ; sit
+                                                                    ; (other,
+                                                                    ; +s)
+ $6AD4 DEFB $13,$8C,$09,$04,$85                                     ; slide
+                                                                    ; (other,
+                                                                    ; +s)
+ $6AD9 DEFB $13,$0D,$05,$0C,$8C                                     ; smell
+ $6ADE DEFB $13,$0D,$05,$0C,$94                                     ; smelt
+ $6AE3 DEFB $13,$0F,$0D,$05,$0F,$0E,$85                             ; someone
+ $6AEA DEFB $13,$0F,$0D,$05,$17,$08,$05,$12,$85                     ; somewhere
+ $6AF3 DEFB $13,$0F,$0F,$8E                                         ; soon
+ $6AF7 DEFB $13,$10,$05,$03,$09,$01,$8C                             ; special
+ $6AFE DEFB $13,$90,$0F,$15,$94                                     ; spout
+                                                                    ; (other,
+                                                                    ; +s)
+ $6B03 DEFB $13,$94,$01,$07,$07,$05,$92                             ; stagger
+                                                                    ; (other,
+                                                                    ; +s)
+ $6B0A DEFB $13,$94,$A1,$0E,$84                                     ; stand
+                                                                    ; (other,
+                                                                    ; +ing)
+ $6B0F DEFB $13,$94,$01,$92                                         ; star
+                                                                    ; (other,
+                                                                    ; +s)
+ $6B13 DEFB $13,$94,$A1,$92                                         ; star
+                                                                    ; (other,
+                                                                    ; +ing)
+ $6B17 DEFB $13,$94,$01,$12,$94                                     ; start
+                                                                    ; (other,
+                                                                    ; +s)
+ $6B1C DEFB $13,$14,$09,$0C,$8C                                     ; still
+ $6B21 DEFB $13,$94,$09,$0E,$87                                     ; sting
+                                                                    ; (other,
+                                                                    ; +s)
+ $6B26 DEFB $13,$94,$12,$01,$0E,$07,$0C,$85                         ; strangle
+                                                                    ; (other,
+                                                                    ; +s)
+ $6B2E DEFB $13,$14,$12,$05,$0E,$07,$14,$88                         ; strength
+ $6B36 DEFB $13,$15,$12,$12,$0F,$15,$0E,$04,$05,$84                 ; surrounded
+ $6B40 DEFB $13,$17,$05,$05,$10,$93                                 ; sweeps
+ $6B46 DEFB $13,$17,$05,$10,$94                                     ; swept
+ $6B4B DEFB $13,$97,$09,$0E,$87                                     ; swing
+                                                                    ; (other,
+                                                                    ; +s)
+ $6B50 DEFB $14,$05,$12,$12,$09,$06,$09,$83                         ; terrific
+ $6B58 DEFB $14,$08,$01,$0E,$8B                                     ; thank
+ $6B5D DEFB $14,$08,$05,$8D                                         ; them
+ $6B61 DEFB $14,$08,$05,$12,$85                                     ; there
+ $6B66 DEFB $14,$08,$09,$0E,$87                                     ; thing
+ $6B6B DEFB $14,$08,$09,$93                                         ; this
+ $6B6F DEFB $14,$08,$12,$01,$09,$0E,$93                             ; thrains
+ $6B76 DEFB $14,$08,$12,$05,$85                                     ; three
+ $6B7B DEFB $14,$08,$12,$0F,$17,$8E                                 ; thrown
+ $6B81 DEFB $14,$88,$12,$15,$13,$94                                 ; thrust
+                                                                    ; (other,
+                                                                    ; +s)
+ $6B87 DEFB $14,$09,$0D,$85                                         ; time
+ $6B8B DEFB $14,$09,$12,$05,$84                                     ; tired
+ $6B90 DEFB $14,$12,$99                                             ; try
+ $6B93 DEFB $14,$0F,$15,$03,$88                                     ; touch
+ $6B98 DEFB $14,$17,$8F                                             ; two
+ $6B9B DEFB $15,$0E,$04,$05,$92                                     ; under
+ $6BA0 DEFB $15,$13,$80                                             ; us
+ $6BA3 DEFB $16,$81,$2E,$09,$13,$88                                 ; vanish
+                                                                    ; (other,
+                                                                    ; +es)
+ $6BA9 DEFB $16,$05,$12,$82                                         ; verb
+ $6BAD DEFB $16,$09,$13,$09,$02,$0C,$85                             ; visible
+ $6BB4 DEFB $17,$81,$12,$8E                                         ; warn
+                                                                    ; (other,
+                                                                    ; +s)
+ $6BB8 DEFB $17,$01,$93                                             ; was
+ $6BBB DEFB $17,$01,$13,$14,$05,$84                                 ; wasted
+ $6BC1 DEFB $17,$05,$80                                             ; we
+ $6BC4 DEFB $17,$05,$0C,$8C                                         ; well
+ $6BC8 DEFB $17,$08,$01,$94                                         ; what
+ $6BCC DEFB $17,$08,$05,$12,$85                                     ; where
+ $6BD1 DEFB $17,$08,$09,$03,$88                                     ; which
+ $6BD6 DEFB $17,$09,$0C,$8C                                         ; will
+ $6BDA DEFB $17,$09,$0E,$84                                         ; wind
+ $6BDE DEFB $17,$0F,$12,$84                                         ; word
+ $6BE2 DEFB $17,$0F,$15,$0C,$84                                     ; would
+ $6BE7 DEFB $19,$05,$92                                             ; yer
+ $6BEA DEFB $19,$0F,$15,$92                                         ; your

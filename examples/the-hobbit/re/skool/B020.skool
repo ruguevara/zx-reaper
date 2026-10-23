@@ -1,0 +1,3 @@
+; Message: Visible exits are:
+@label=MsgVisibleExits
+b$B020 DEFB $8B,$AD,$88,$F1,$62,$3A,$16 ; visible exits are ":" <end>

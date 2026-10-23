@@ -1,4 +1,0 @@
-; Data block at AFA2
-b$AFA2 DEFB $B5,$A6,$7E,$60,$89,$B5,$78,$80
- $AFAA DEFB $B8,$89,$54,$80,$43,$78,$85,$4A
- $AFB2 DEFB $61,$02,$B9,$07

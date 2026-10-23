@@ -1,2 +1,0 @@
-; Data block at B4D8
-b$B4D8 DEFB $B0,$FD

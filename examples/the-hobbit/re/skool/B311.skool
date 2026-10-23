@@ -1,0 +1,4 @@
+; Message: <subj> see some pale bulbous eyes staring at <subj>.
+@label=MsgSeeSomePaleBulbous
+b$B311 DEFB $06,$76,$77,$8A,$70,$88,$54 ; <subj> see some pale bulbous
+ $B318 DEFB $82,$4B,$CB,$13,$63,$06,$15 ; eyes star:4 at <subj> <end,.nl>

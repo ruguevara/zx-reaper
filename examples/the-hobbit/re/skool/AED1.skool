@@ -1,0 +1,7 @@
+; Message: <subj> hit <obj1> with a glancing blow and leave <...
+;
+; <subj> hit <obj1> with a glancing blow and leave <obj1> momentarily stunned.
+@label=MsgHitWithGlancingBlow
+b$AED1 DEFB $06,$83,$47,$07,$7E,$60,$89,$4C ; <subj> hit <obj1> with a glancing
+ $AED9 DEFB $65,$61,$83,$C4,$07,$8A,$2F     ; blow and leave <obj1> momentarily
+ $AEE0 DEFB $B6,$70                         ; stunned:3

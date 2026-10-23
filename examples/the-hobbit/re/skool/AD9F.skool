@@ -1,0 +1,3 @@
+; Message: What ?
+@label=MsgWhat
+b$AD9F DEFB $7D,$20,$3F,$14 ; what " ?" <end,nl>

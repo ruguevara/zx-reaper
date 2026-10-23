@@ -1,4 +1,0 @@
-; Data block at B201
-b$B201 DEFB $8A,$DE,$2E,$0D,$F3,$9E,$C9,$DB
- $B209 DEFB $88,$25,$CB,$0F,$61,$8B,$9B,$83
- $B211 DEFB $42,$2C,$0D,$F0,$5B,$D2,$28,$83

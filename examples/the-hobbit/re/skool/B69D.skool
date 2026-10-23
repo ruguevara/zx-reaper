@@ -1,0 +1,3 @@
+; Message: The halls where the dragon sleeps
+b$B69D DEFB $78,$83,$0D,$8B,$CC,$78,$6B ; the halls where the dragon
+ $B6A4 DEFB $C5,$CA,$16                 ; sleep:4 <end>

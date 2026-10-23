@@ -1,0 +1,3 @@
+; Message: Lands in the boat.
+@label=MsgLandsBoat
+b$AF8B DEFB $83,$BB,$53,$70,$78,$B0,$B8 ; land "S" in the boat:3

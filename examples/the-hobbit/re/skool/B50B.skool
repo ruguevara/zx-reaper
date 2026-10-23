@@ -1,2 +1,0 @@
-; Data block at B50B
-b$B50B DEFB $7B,$83,$C4

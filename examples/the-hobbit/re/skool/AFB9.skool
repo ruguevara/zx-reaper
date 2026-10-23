@@ -1,2 +1,0 @@
-; Data block at AFB9
-b$AFB9 DEFB $09,$15,$04,$71,$01,$15

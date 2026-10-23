@@ -1,2 +1,0 @@
-; Data block at B479
-b$B479 DEFB $15,$60,$86,$FD,$81,$C0

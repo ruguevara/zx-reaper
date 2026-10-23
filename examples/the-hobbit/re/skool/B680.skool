@@ -1,0 +1,3 @@
+; Message: The ruins of the town of dale
+b$B680 DEFB $78,$85,$67,$74,$78,$86,$DC,$74 ; the ruins of the town of
+ $B688 DEFB $A1,$81                         ; dale:2

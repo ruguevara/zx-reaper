@@ -1,0 +1,10 @@
+; Message: <subj> thrust <obj1> back- <obj1> lose <his_obj1>...
+;
+; <subj> thrust <obj1> back- <obj1> lose <his_obj1> footing but recover
+; quickly.
+@label=MsgThrustBackLoseFooting
+b$AEE2 DEFB $06,$8B,$81,$07,$80,$7C,$2D,$07 ; <subj> thrust <obj1> back "-"
+                                            ; <obj1>
+ $AEEA DEFB $99,$E8,$0E,$89,$35,$66,$9A,$A4 ; lose:1 <his_obj1> footing but
+                                            ; recover:1
+ $AEF2 DEFB $B5,$0C                         ; quickly:3

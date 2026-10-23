@@ -1,2 +1,0 @@
-; Data block at AD80
-b$AD80 DEFB $83,$47,$8B,$EA

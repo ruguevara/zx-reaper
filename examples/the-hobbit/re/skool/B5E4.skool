@@ -1,0 +1,4 @@
+; Message: The brink of a deep dark under ground lake
+@label=MsgBrinkDeepDarkUnder
+b$B5E4 DEFB $78,$88,$46,$74,$60,$81,$96     ; the brink of a deep
+ $B5EB DEFB $81,$8E,$8B,$9B,$89,$65,$A3,$B7 ; dark under ground lake:2

@@ -1,0 +1,3 @@
+; Message: A forest of tangled smothering trees
+b$B619 DEFB $60,$82,$A0,$74,$86,$94,$85,$F3 ; a forest of tangled smothering
+ $B621 DEFB $C6,$EC,$16                     ; tree:4 <end>

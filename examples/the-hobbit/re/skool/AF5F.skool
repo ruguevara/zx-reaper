@@ -1,0 +1,3 @@
+; Message: You cannot kill with <obj2>.
+@label=MsgCannotKillWith
+b$AF5F DEFB $7F,$67,$83,$A8,$7E,$09,$15 ; you cannot kill with <obj2> <end,.nl>

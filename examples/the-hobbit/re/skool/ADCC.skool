@@ -1,0 +1,3 @@
+; Message: Which <word> ?
+@label=MsgWhich
+b$ADCC DEFB $8B,$D1,$01,$20,$3F,$20,$16 ; which <word> " ? " <end>

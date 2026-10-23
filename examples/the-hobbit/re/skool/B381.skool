@@ -1,2 +1,8 @@
-; Message at B381
-t$B381 DEFM "TAPE ERROR -    "
+; Message: Tape error -     hit any key to continue.
+@label=MsgTapeErrorHitAnyKey2
+b$B381 DEFM "TAPE ERROR -    "
+ $B391 DEFB $83,$47            ; hit
+ $B393 DEFM " ANY"
+ $B397 DEFB $83,$A5,$7B        ; key to
+ $B39A DEFM " CONTINUE"
+ $B3A3 DEFB $15                ; <end,.nl>

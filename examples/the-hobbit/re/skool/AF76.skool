@@ -1,0 +1,4 @@
+; Message: Falls just short of the other side.
+@label=MsgFallsJustShortOther
+b$AF76 DEFB $C2,$4F,$89,$B1,$85,$99,$74,$78 ; fall:4 just short of the
+ $AF7E DEFB $8A,$6B,$B5,$A6                 ; other side:3

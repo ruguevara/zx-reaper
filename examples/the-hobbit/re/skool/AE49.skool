@@ -1,0 +1,6 @@
+; Message: <his_subj> violent attack almost kills <subj>.
+@label=MsgViolentAttackAlmost
+b$AE49 DEFB $0C                             ; <his_subj>
+ $AE4A DEFM " VIOLENT"
+ $AE52 DEFB $80,$73,$87,$D9,$C3,$A8,$06,$15 ; attack almost kill:4 <subj>
+                                            ; <end,.nl>

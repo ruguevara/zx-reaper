@@ -1,0 +1,3 @@
+; Message: It sails across and
+@label=MsgSailsAcross
+b$AF66 DEFB $72,$CA,$AB,$80,$43,$A0,$5B ; it sail:4 across and:2

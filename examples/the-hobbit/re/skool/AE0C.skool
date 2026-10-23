@@ -1,0 +1,3 @@
+; Message: <subj_is> carrying too much.
+@label=MsgCarryingTooMuch
+b$AE0C DEFB $10,$68,$7C,$BA,$4B ; <subj_is> carrying too much:3

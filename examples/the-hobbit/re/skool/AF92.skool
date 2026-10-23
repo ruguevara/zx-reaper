@@ -1,0 +1,7 @@
+; Message: The boat glides across the river and lands on this...
+;
+; The boat glides across the river and lands on this side.
+@label=MsgBoatGlidesAcrossRiver
+b$AF92 DEFB $78,$80,$B8,$89,$54,$80,$43,$78 ; the boat glides across the
+ $AF9A DEFB $85,$4A,$61,$83,$BB,$53,$75,$7A ; river and land "S" on this
+ $AFA2 DEFB $B5,$A6                         ; side:3

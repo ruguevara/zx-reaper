@@ -1,2 +1,0 @@
-; Data block at ADCB
-b$ADCB DEFB $16,$8B,$D1,$01

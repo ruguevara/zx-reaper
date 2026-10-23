@@ -1,0 +1,2 @@
+; Message: The goblins gate
+b$B5F3 DEFB $78,$82,$E8,$A2,$C4 ; the goblins gate:2

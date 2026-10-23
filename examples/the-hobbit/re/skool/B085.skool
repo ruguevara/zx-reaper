@@ -1,0 +1,4 @@
+; Message: The vicious warg run around you and howls
+@label=MsgViciousWargRunAround
+b$B085 DEFB $78,$87,$41,$87,$9A,$85,$6C ; the vicious warg run
+ $B08C DEFB $87,$F8,$7F,$61,$A9,$96     ; around you and howls:2

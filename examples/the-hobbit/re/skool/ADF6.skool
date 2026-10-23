@@ -1,0 +1,3 @@
+; Message: <subj_is> carrying.
+@label=MsgCarrying
+b$ADF6 DEFB $10,$68,$15 ; <subj_is> carrying <end,.nl>

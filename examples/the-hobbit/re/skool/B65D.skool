@@ -1,0 +1,6 @@
+; Message: A strong river: the current is now too strong to m...
+;
+; A strong river: the current is now too strong to move against
+b$B65D DEFB $60,$86,$64,$85,$4A,$3A,$78     ; a strong river ":" the
+ $B664 DEFB $88,$8F,$71,$8A,$64,$7C,$86,$64 ; current is now too strong
+ $B66C DEFB $7B,$8A,$47,$A7,$C8             ; to move against:2

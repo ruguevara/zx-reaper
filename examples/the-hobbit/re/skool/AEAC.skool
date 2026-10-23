@@ -1,0 +1,4 @@
+; Message: A fast blow knocks the wind out of <obj1>.
+@label=MsgFastBlowKnocksWindOut
+b$AEAC DEFB $60,$82,$53,$65,$89,$BF,$78 ; a fast blow knocks the
+ $AEB3 DEFB $8B,$DA,$84,$BF,$74,$07,$15 ; wind out of <obj1> <end,.nl>

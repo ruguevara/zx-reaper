@@ -1,0 +1,5 @@
+; Message: Yer can try, but he wouldn't make above a mouthfull
+@label=MsgYerCanTryButHe
+b$B24C DEFB $8B,$E7,$80,$EB,$8B,$90,$2C,$66 ; yer can try "," but
+ $B254 DEFB $89,$82,$8B,$E2,$4E,$27,$54     ; he would "N'T"
+ $B25B DEFB $89,$F9,$87,$B5,$60,$AA,$3E     ; make above a mouthfull:2

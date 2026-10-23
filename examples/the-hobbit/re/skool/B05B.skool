@@ -1,0 +1,3 @@
+; Message: Hurry up
+@label=MsgHurryUp
+b$B05B DEFB $89,$9B,$A7,$25 ; hurry up:2

@@ -1,0 +1,4 @@
+; Message: <obj1> falls down a hole and vanishes.
+@label=MsgFallsDownHoleVanishes
+b$B068 DEFB $07,$C2,$4F,$81,$C4,$60,$83,$5D ; <obj1> fall:4 down a hole
+ $B070 DEFB $61,$CB,$A3,$15                 ; and vanish:4 <end,.nl>

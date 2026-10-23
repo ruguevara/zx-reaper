@@ -1,0 +1,3 @@
+; Message: <subj> see
+@label=MsgSee
+b$B000 DEFB $06,$76,$16 ; <subj> see <end>

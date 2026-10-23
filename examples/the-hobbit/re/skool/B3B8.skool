@@ -1,2 +1,0 @@
-; Data block at B3B8
-b$B3B8 DEFB $82,$8F

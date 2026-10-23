@@ -1,0 +1,3 @@
+; Message: <subj_is> dead.
+@label=MsgDead
+b$AFF1 DEFB $10,$B1,$92 ; <subj_is> dead:3

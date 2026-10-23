@@ -1,2 +1,4 @@
-; Message at AD93
-t$AD93 DEFM "ois"
+; Message: I do not know the word "
+@label=MsgIDoNotKnow
+b$AD93 DEFB $6F,$69,$73,$89,$C5,$78,$8B,$DE ; i do not know the word
+ $AD9B DEFB $20,$22,$20,$16                 ; " " " <end>

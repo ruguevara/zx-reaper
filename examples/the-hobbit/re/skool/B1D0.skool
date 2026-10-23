@@ -1,0 +1,4 @@
+; Message: Go <word> from <thing> to get to <thing>
+@label=MsgGoFromGet
+b$B1D0 DEFB $D2,$DE,$01,$6D,$00,$7B,$D2,$CE ; go <word> from <thing> to get
+ $B1D8 DEFB $7B,$00,$16                     ; to <thing> <end>

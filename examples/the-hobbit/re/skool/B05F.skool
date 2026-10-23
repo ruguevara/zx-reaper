@@ -1,0 +1,3 @@
+; Message: Hello
+@label=MsgHello
+b$B05F DEFB $A3,$2C  ; hello:2

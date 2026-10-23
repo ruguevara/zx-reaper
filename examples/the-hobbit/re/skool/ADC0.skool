@@ -1,0 +1,8 @@
+; Message: <word> <word> <word> <thing> <word> <word> <word>...
+;
+; <word> <word> <word> <thing> <word> <word> <word> what ?
+@label=MsgWhat2
+b$ADC0 DEFB $01,$01,$01,$00                 ; <word> <word> <word> <thing>
+@label=MsgWhat3
+ $ADC4 DEFB $01,$01,$01,$7D,$20,$3F,$20,$16 ; <word> <word> <word> what " ? "
+                                            ; <end>

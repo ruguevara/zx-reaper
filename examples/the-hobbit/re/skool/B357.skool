@@ -1,2 +1,8 @@
-; Message at B357
-t$B357 DEFM "TAPE ERROR -    "
+; Message: Tape error -     hit any key to restart program.
+@label=MsgTapeErrorHitAnyKey
+b$B357 DEFM "TAPE ERROR -    "
+ $B367 DEFB $83,$47            ; hit
+ $B369 DEFM " ANY"
+ $B36D DEFB $83,$A5,$7B        ; key to
+ $B370 DEFM " RESTART PROGRAM"
+ $B380 DEFB $15                ; <end,.nl>

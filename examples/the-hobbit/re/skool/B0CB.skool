@@ -1,0 +1,4 @@
+; Message: Where's the thief ?
+@label=MsgWhereSThief
+b$B0CB DEFB $8B,$CC,$27,$53,$78,$86,$AB,$20 ; where "'S" the thief " "
+ $B0D3 DEFB $3F,$16                         ; "?" <end>

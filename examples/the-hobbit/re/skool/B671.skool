@@ -1,0 +1,3 @@
+; Message: A bleak barren land that was once green
+b$B671 DEFB $60,$80,$AA,$80,$8A,$83,$BB     ; a bleak barren land
+ $B678 DEFB $86,$9B,$8B,$B8,$8A,$67,$A3,$04 ; that was once green:2

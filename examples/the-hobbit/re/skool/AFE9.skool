@@ -1,0 +1,4 @@
+; Message: I cannot follow <obj1> from here.
+@label=MsgICannotFollowFromHere
+b$AFE9 DEFB $6F,$67,$82,$85,$07,$6D,$6E,$15 ; i cannot follow <obj1> from here
+                                            ; <end,.nl>

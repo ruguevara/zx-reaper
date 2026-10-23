@@ -1,0 +1,9 @@
+; Message: A fast stroke sweeps <obj1> off <his_obj1> feet, b...
+;
+; A fast stroke sweeps <obj1> off <his_obj1> feet, but <obj1_is> on guard in a
+; moment.
+@label=MsgFastStrokeSweepsOff
+b$AEBA DEFB $60,$82,$53,$86,$5E,$8B,$40,$07 ; a fast stroke sweeps <obj1>
+ $AEC2 DEFB $84,$9F,$0E,$82,$5D,$2C,$66,$11 ; off <his_obj1> feet "," but
+                                            ; <obj1_is>
+ $AECA DEFB $75,$89,$6F,$70,$60,$BA,$29     ; on guard in a moment:3

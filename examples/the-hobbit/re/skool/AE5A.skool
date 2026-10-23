@@ -1,0 +1,8 @@
+; Message: <subj> give <obj1> a vicious cut in the ribs- <his...
+;
+; <subj> give <obj1> a vicious cut in the ribs- <his_obj1> strength is failing
+; fast.
+@label=MsgGiveViciousCutRibs
+b$AE5A DEFB $06,$82,$D4,$07,$60,$87,$41     ; <subj> give <obj1> a vicious
+ $AE61 DEFB $D1,$78,$70,$78,$85,$39,$2D,$0E ; cut in the ribs "-" <his_obj1>
+ $AE69 DEFB $8B,$2E,$71,$89,$02,$B2,$53     ; strength is failing fast:3

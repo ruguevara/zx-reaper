@@ -1,2 +1,0 @@
-; Data block at B52A
-b$B52A DEFB $84,$13,$7B,$B0,$80

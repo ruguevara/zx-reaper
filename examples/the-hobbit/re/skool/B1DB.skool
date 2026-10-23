@@ -1,0 +1,4 @@
+; Message: Someone strangles you from behind.
+@label=MsgSomeoneStranglesFrom
+b$B1DB DEFB $8A,$E3,$CB,$26,$7F,$6D,$B8,$25 ; someone strangle:4 you from
+                                            ; behind:3

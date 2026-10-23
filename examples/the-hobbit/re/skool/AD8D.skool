@@ -1,2 +1,0 @@
-; Data block at AD8D
-b$AD8D DEFB $85,$E6,$8B,$EA,$B5,$BE

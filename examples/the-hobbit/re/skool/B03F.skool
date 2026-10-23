@@ -1,0 +1,4 @@
+; Message: The magic door closes.
+@label=MsgMagicDoorCloses
+b$B03F DEFB $78,$84,$24,$6A,$C1,$34,$2E,$14 ; the magic door close:4 "."
+                                            ; <end,nl>

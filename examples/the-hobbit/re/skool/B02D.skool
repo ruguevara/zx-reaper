@@ -1,0 +1,4 @@
+; Message: <obj2> does not fit this lock.
+@label=MsgDoesNotFitThisLock
+b$B02D DEFB $09,$69,$45,$53,$73,$89,$19,$7A ; <obj2> do "ES" not fit this
+ $B035 DEFB $B3,$F2                         ; lock:3

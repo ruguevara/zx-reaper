@@ -1,0 +1,4 @@
+; Message: <obj2> is already tied.
+@label=MsgAlreadyTied
+b$B07D DEFB $09,$71,$80,$51,$86,$CD,$44,$15 ; <obj2> is already tie "D"
+                                            ; <end,.nl>

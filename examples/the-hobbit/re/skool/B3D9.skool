@@ -1,0 +1,23 @@
+; Message: a cheering crowd of dwarves, hobbits and elves app...
+;
+; a cheering crowd of dwarves, hobbits and elves appears. Led by gandalf they
+; carry you off into the sunset, proclaiming you  hero of heroes and master
+; adventurer !!!.
+@label=MsgCheeringCrowdDwarves
+b$B3D9 DEFB $0D,$0D,$0D,$60                 ; <nl> <nl> <nl> a
+ $B3DD DEFM " CHEERING CROWD"
+ $B3EC DEFB $74                             ; of
+ $B3ED DEFM " DWARVES, HOBBITS"
+ $B3FE DEFB $61,$82,$1D,$C7,$EA             ; and elves appear:4
+ $B403 DEFM ". LED"
+ $B408 DEFB $88,$5B,$82,$BD                 ; by gandalf
+ $B40C DEFM " THEY"
+ $B411 DEFB $81,$0D,$7F,$84,$9F,$83,$8E,$78 ; carry you off into the
+ $B419 DEFM " SUNSET, PROCLAIMING"
+ $B42D DEFB $7F                             ; you
+ $B42E DEFM "  HERO"
+ $B434 DEFB $74                             ; of
+ $B435 DEFM " HEROES"
+ $B43C DEFB $61                             ; and
+ $B43D DEFM " MASTER ADVENTURER !!!"
+ $B453 DEFB $15                             ; <end,.nl>

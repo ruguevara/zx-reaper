@@ -1,0 +1,4 @@
+; Message: Get us out of this one, thief !
+@label=MsgGetUsOutThisOne
+b$B0D5 DEFB $82,$CE,$8B,$A0,$84,$BF,$74,$7A ; get us out of this
+ $B0DD DEFB $84,$AD,$2C,$86,$AB,$20,$21,$16 ; one "," thief " !" <end>

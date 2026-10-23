@@ -1,0 +1,3 @@
+; Message: Day dawns.
+@label=MsgDayDawns
+b$B30B DEFB $88,$9F,$C8,$9B,$B0,$00 ; day dawn:4 (none):3

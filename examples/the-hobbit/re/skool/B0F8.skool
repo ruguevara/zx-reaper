@@ -1,0 +1,3 @@
+; Message: <subj> fall asleep.
+@label=MsgFallAsleep
+b$B0F8 DEFB $06,$6C,$88,$0D,$15 ; <subj> fall asleep <end,.nl>

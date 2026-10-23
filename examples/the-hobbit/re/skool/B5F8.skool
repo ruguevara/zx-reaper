@@ -1,0 +1,2 @@
+; Message: The gate to mirkwood
+b$B5F8 DEFB $78,$82,$C4,$7B,$A4,$38 ; the gate to mirkwood:2

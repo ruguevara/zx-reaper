@@ -1,0 +1,4 @@
+; Message: The arrow misses <obj2> by a wide margin.
+@label=MsgArrowMissesByWide
+b$B127 DEFB $78,$80,$6B,$8A,$25,$45,$53,$09 ; the arrow miss "ES" <obj2>
+ $B12F DEFB $88,$5B,$60,$87,$7D,$B9,$FD     ; by a wide margin:3

@@ -1,0 +1,7 @@
+; Message: <subj> seem tired- <subj> stagger but valiantly at...
+;
+; <subj> seem tired- <subj> stagger but valiantly attempt another blow.
+@label=MsgSeemTiredStaggerBut
+b$AF3C DEFB $06,$8A,$B2,$8B,$8B,$2D,$06 ; <subj> seem tired "-" <subj>
+ $AF43 DEFB $8B,$03,$66,$87,$28,$4C,$59 ; stagger but valiant "LY"
+ $AF4A DEFB $88,$13,$80,$5E,$B0,$AF     ; attempt another blow:3

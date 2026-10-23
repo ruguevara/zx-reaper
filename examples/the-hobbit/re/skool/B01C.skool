@@ -1,0 +1,3 @@
+; Message: <thing> appears.
+@label=MsgAppears
+b$B01C DEFB $00,$C7,$EA,$15 ; <thing> appear:4 <end,.nl>

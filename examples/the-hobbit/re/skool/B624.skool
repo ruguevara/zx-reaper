@@ -1,0 +1,3 @@
+; Message: An elvish clearing with levelled ground and logs
+b$B624 DEFB $60,$4E,$82,$22,$81,$27,$7E ; a "N" elvish clearing with
+ $B62B DEFB $83,$CC,$89,$65,$61,$A3,$FC ; levelled ground and logs:2

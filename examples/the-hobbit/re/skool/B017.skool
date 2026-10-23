@@ -1,0 +1,5 @@
+; Message: <thing> enters.
+@label=MsgEnters
+b$B017 DEFB $00             ; <thing>
+@label=MsgEnters2
+ $B018 DEFB $C2,$2D,$2E,$14 ; enter:4 "." <end,nl>

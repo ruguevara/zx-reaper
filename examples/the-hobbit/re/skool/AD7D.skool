@@ -1,2 +1,23 @@
-; Message at AD7D
-t$AD7D DEFM "fla"
+; Message: But fall and hit your head.
+;
+; Messages, from here to $B6D9: a bytecode printed by $72DD (HL = start).
+; $20-$5F a letter or sign (capitals print as lower case); $60-$7F a common
+; word from $AD3D; $80-$FF + next byte a dictionary word: bits 4-6 of the first
+; byte are its print mode (0 plain, 1 verb suffix if object 1 is not you, 4
+; suffix always, 5 never, 7 capital first, 2 3 6 end the message after the
+; word: nothing, full stop + new line, new line), bits 0-3 and the second byte
+; its offset; $00-$16 control codes (jump table $7295); $14 end + new line, $15
+; end with full stop + new line, $16 end. Words get a space in front; a suffix
+; comes from $B71F. text.py decodes them.
+; .
+; Codes that take a byte: 2 jumps and 11 calls the message at (address of the
+; byte) + signed byte. 13 line break (no capital after it), 8 back-space.
+; State-dependent: 0 a thing named by a pointer on the stack, 1 and 4 a word
+; token on the stack (4 with article), 3 the word at $B6FC, 6 the name of $B6EA
+; (the subject), 7 and 9 the name of $B6E8 and $B6E9 with article, 12 and 14
+; "his" / "your" for $B6EA and $B6E8, 16 17 19 the same name plus "is"/"are"
+; ("You are").
+@label=MsgButFallHitHead
+b$AD7D DEFB $66,$6C,$61,$83,$47,$8B,$EA ; but fall and hit your
+ $AD84 DEFM " HEAD"
+ $AD89 DEFB $15                         ; <end,.nl>

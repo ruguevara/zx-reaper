@@ -1,0 +1,8 @@
+; Message: My birthday present " how did we lose it. / my pre...
+;
+; My birthday present " how did we lose it. / my precious "
+@label=MsgMyBirthdayPresentHow
+b$B2E7 DEFB $8A,$4F,$88,$30,$8A,$98,$20,$22 ; my birthday present " ""
+ $B2EF DEFB $89,$93,$88,$B4,$8B,$C1,$89,$E8 ; how did we lose
+ $B2F7 DEFB $72,$2E,$0D,$8A,$4F,$8A,$89,$20 ; it "." <nl> my precious " "
+ $B2FF DEFB $22,$16                         ; """ <end>

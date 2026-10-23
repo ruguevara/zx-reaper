@@ -1,0 +1,4 @@
+; Message: In a clearing with two stone trolls
+@label=MsgClearingWithTwoStone
+b$B262 DEFB $70,$60,$81,$27,$7E,$8B,$98 ; in a clearing with two
+ $B269 DEFB $86,$41,$A6,$FD             ; stone trolls:2

@@ -1,0 +1,3 @@
+; Message: I see nothing here.
+@label=MsgISeeNothingHere
+b$AFC4 DEFB $6F,$76,$8A,$5D,$B9,$89 ; i see nothing here:3

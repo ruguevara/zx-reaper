@@ -1,3 +1,0 @@
-; Data block at B551
-b$B551 DEFB $15,$79,$DA,$B2,$7B,$64,$77,$86
- $B559 DEFB $85

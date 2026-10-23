@@ -1,0 +1,4 @@
+; Message: The magic door warns of elves approaching.
+@label=MsgMagicDoorWarnsElves
+b$B2AA DEFB $F6,$9F,$84,$24,$6A,$CB,$B4,$74 ; the:7 magic door warn:4 of
+ $B2B2 DEFB $82,$1D,$C7,$F0,$15             ; elves approach:4 <end,.nl>

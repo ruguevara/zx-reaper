@@ -1,0 +1,3 @@
+; Message: This was Thrains key
+@label=MsgThisWasThrainsKey
+b$B061 DEFB $7A,$8B,$B8,$FB,$6F,$A3,$A5 ; this was thrains:7 key:2

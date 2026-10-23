@@ -1,0 +1,4 @@
+; Message: <the_arg> is too full for <subj> to enter.
+@label=MsgTooFullForEnter
+b$AE2E DEFB $04,$71,$7C,$82,$B9,$82,$8F,$06 ; <the_arg> is too full for <subj>
+ $AE36 DEFB $7B,$D2,$2D,$15                 ; to enter <end,.nl>

@@ -1,0 +1,8 @@
+; Message: <subj> swing broadside at <his_obj1> body but at t...
+;
+; <subj> swing broadside at <his_obj1> body but at the last moment <obj1> jump
+; aside.
+@label=MsgSwingBroadsideAtBody
+b$AEF4 DEFB $06,$8B,$4B,$88,$4B,$63,$0E ; <subj> swing broadside at <his_obj1>
+ $AEFB DEFB $80,$BF,$66,$63,$78,$89,$C9 ; body but at the last
+ $AF02 DEFB $8A,$29,$07,$93,$A1,$B8,$08 ; moment <obj1> jump:1 aside:3

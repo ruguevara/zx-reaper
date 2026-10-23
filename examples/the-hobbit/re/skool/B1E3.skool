@@ -1,0 +1,4 @@
+; Message: <obj1> says " No "
+@label=MsgSaysNo
+b$B1E3 DEFB $07,$85,$84,$53,$20,$22,$FA,$52 ; <obj1> say "S "" no:7
+ $B1EB DEFB $20,$22,$14                     ; " "" <end,nl>

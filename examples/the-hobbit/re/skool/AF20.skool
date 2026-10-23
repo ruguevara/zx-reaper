@@ -1,0 +1,7 @@
+; Message: <subj> brandish <his_subj> <word2>, but <obj1_is>...
+;
+; <subj> brandish <his_subj> <word2>, but <obj1_is> on guard.
+@label=MsgBrandishButOnGuard
+b$AF20 DEFB $06,$88,$3E,$0C,$03,$2C,$66,$11 ; <subj> brandish <his_subj>
+                                            ; <word2> "," but <obj1_is>
+ $AF28 DEFB $75,$B9,$6F                     ; on guard:3

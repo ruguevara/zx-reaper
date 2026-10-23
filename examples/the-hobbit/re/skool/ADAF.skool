@@ -1,2 +1,0 @@
-; Data block at ADAF
-b$ADAF DEFB $15

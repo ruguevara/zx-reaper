@@ -1,0 +1,10 @@
+; Message: A window should be no obstacle to a thief with fri...
+;
+; A window should be no obstacle to a thief with friends.
+b$B49A DEFB $60,$87,$8C         ; a window
+ $B49D DEFM " SHOULD"
+ $B4A4 DEFB $64,$8A,$52         ; be no
+ $B4A7 DEFM " OBSTACLE"
+ $B4B0 DEFB $7B,$60,$86,$AB,$7E ; to a thief with
+ $B4B5 DEFM " FRIENDS"
+ $B4BD DEFB $15                 ; <end,.nl>

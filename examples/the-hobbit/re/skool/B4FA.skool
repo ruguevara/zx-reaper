@@ -1,0 +1,4 @@
+; Message: Wait a while.
+b$B4FA DEFB $87,$56,$60 ; wait a
+ $B4FD DEFM " WHILE"
+ $B503 DEFB $15         ; <end,.nl>

@@ -1,4 +1,0 @@
-; Data block at B4BD
-b$B4BD DEFB $15,$80,$B8,$53,$80,$EB,$83,$1E
- $B4C5 DEFB $2E,$F4,$13,$B0,$FD,$87,$56,$87
- $B4CD DEFB $F8,$61,$8B,$87,$8B,$EA

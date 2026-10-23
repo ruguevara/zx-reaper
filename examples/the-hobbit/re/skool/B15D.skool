@@ -1,0 +1,11 @@
+; Message: The dragon says " Well thief your cunning has fail...
+;
+; The dragon says " Well thief your cunning has failed you this time. Prepare
+; to die " .
+@label=MsgDragonSaysWellThief
+b$B15D DEFB $78,$6B,$C5,$84,$20,$22,$FB,$C4 ; the dragon say:4 " "" well:7
+ $B165 DEFB $86,$AB,$8B,$EA,$81,$71,$89,$7B ; thief your cunning has
+ $B16D DEFB $88,$FC,$7F,$7A,$8B,$87,$2E     ; failed you this time "."
+ $B174 DEFB $8A,$91,$7B,$88,$B1             ; prepare to die
+ $B179 DEFM " \" ."
+ $B17D DEFB $14                             ; <end,nl>

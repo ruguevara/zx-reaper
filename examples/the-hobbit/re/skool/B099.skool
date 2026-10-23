@@ -1,0 +1,4 @@
+; Message: Some spiders start mending the broken web.
+@label=MsgSomeSpidersStart
+b$B099 DEFB $77,$86,$23,$53,$8B,$17,$CA,$15 ; some spider "S" start mend:4
+ $B0A1 DEFB $78,$80,$CD,$B7,$76             ; the broken web:3

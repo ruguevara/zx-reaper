@@ -1,0 +1,5 @@
+; Message: <subj_is> swept forcefully against the portcullis.
+@label=MsgSweptForcefully
+b$B26D DEFB $10,$8B,$46,$82,$92,$87,$C8,$78 ; <subj_is> swept forcefully
+                                            ; against the
+ $B275 DEFB $B4,$F1                         ; portcullis:3

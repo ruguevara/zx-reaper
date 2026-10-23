@@ -1,0 +1,4 @@
+; Message: You are thrown onto the bank of the long lake.
+@label=MsgThrownOntoBankLong
+b$B32C DEFB $7F,$62,$8B,$7B,$84,$B0,$78     ; you are thrown onto the
+ $B333 DEFB $88,$1E,$74,$78,$84,$0F,$B3,$B7 ; bank of the long lake:3

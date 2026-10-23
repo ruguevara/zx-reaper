@@ -1,0 +1,6 @@
+; Message: A narrow place with a dreadful drop into a dim val...
+;
+; A narrow place with a dreadful drop into a dim valley
+b$B5AC DEFB $60,$84,$64,$D4,$E6,$7E,$60 ; a narrow place with a
+ $B5B3 DEFB $81,$D5,$81,$E8,$83,$8E,$60 ; dreadful drop into a
+ $B5BA DEFB $88,$B7,$A7,$2F             ; dim valley:2

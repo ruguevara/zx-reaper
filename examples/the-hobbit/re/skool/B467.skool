@@ -1,2 +1,4 @@
-; Message at B467
-t$B467 DEFM " YOU'RE DOING FINE"
+; Message: You're doing fine.
+@label=MsgReDoingFine
+b$B467 DEFM " YOU'RE DOING FINE"
+ $B479 DEFB $15                  ; <end,.nl>

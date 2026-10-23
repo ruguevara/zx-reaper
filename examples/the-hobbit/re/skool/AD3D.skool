@@ -1,0 +1,14 @@
+; Common words
+;
+; 32 word offsets for the bytes $60-$7F in a message ($7493): a and are at be
+; blow but cannot carrying do door dragon fall from here i in is it not of on
+; see some the there this to too what with you. The high nibble of each is 0.
+@label=CommonWordTable
+w$AD3D DEFW $0040,$005B,$0065,$0070
+ $AD45 DEFW $0822,$00AF,$00D7,$00EE
+ $AD4D DEFW $085E,$08C2,$01C0,$01C8
+ $AD55 DEFW $024F,$02B5,$0989,$0373
+ $AD5D DEFW $0378,$039B,$039E,$0A5A
+ $AD65 DEFW $049C,$04AA,$0AAF,$0603
+ $AD6D DEFW $069F,$0B61,$0B6B,$06D1
+ $AD75 DEFW $06D4,$0BC8,$0796,$07A8

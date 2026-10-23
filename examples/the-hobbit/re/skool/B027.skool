@@ -1,0 +1,3 @@
+; Message: You hear a noise.
+@label=MsgHearNoise
+b$B027 DEFB $7F,$D9,$85,$60,$BA,$55 ; you hear a noise:3

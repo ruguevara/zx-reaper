@@ -1,0 +1,7 @@
+; Message: Start tape then press any key.
+@label=MsgStartTapeThenPressAny
+b$B342 DEFB $8B,$17      ; start
+ $B344 DEFM " TAPE"
+ $B349 DEFB $86,$A2      ; then
+ $B34B DEFM " PRESS ANY"
+ $B355 DEFB $B3,$A5      ; key:3

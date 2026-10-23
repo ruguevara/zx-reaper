@@ -1,0 +1,4 @@
+; Message: The small curious key shatters.
+@label=MsgSmallCuriousKey
+b$B109 DEFB $78,$85,$E1,$81,$63,$83,$A5 ; the small curious key
+ $B110 DEFB $CA,$C1,$15                 ; shatter:4 <end,.nl>

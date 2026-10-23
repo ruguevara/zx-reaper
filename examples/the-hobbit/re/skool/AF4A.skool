@@ -1,6 +1,0 @@
-; Data block at AF4A
-b$AF4A DEFB $88,$13,$80,$5E,$B0,$AF,$66,$78
- $AF52 DEFB $88,$CF,$71,$8B,$BB,$2E,$0E,$88
- $AF5A DEFB $A2,$71,$7C,$B6,$64,$7F,$67,$83
- $AF62 DEFB $A8,$7E,$09,$15,$72,$CA,$AB,$80
- $AF6A DEFB $43,$A0,$5B,$83,$BB

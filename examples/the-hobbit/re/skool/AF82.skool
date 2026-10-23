@@ -1,0 +1,4 @@
+; Message: Lands in the boat. / But slides out again.
+@label=MsgLandsBoatButSlidesOut
+b$AF82 DEFB $0B,$08,$66,$CA,$D4,$84,$BF ; <call $AF8B> but slide:4 out
+ $AF89 DEFB $B7,$C3                     ; again:3

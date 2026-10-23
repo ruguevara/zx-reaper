@@ -1,0 +1,3 @@
+; Message: <subj> see nothing special here.
+@label=MsgSeeNothingSpecialHere
+b$AFF4 DEFB $06,$76,$8A,$5D,$8A,$F7,$B9,$89 ; <subj> see nothing special here:3

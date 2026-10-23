@@ -1,0 +1,7 @@
+; Message: <his_subj> <word2> sweeps past close to <his_obj1>...
+;
+; <his_subj> <word2> sweeps past close to <his_obj1> ear.
+@label=MsgSweepsPastCloseEar
+b$AF09 DEFB $0C,$03,$8B,$40,$8A,$7A,$81,$34 ; <his_subj> <word2> sweeps past
+                                            ; close
+ $AF11 DEFB $7B,$0E,$B1,$FB                 ; to <his_obj1> ear:3

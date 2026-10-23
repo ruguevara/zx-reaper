@@ -1,0 +1,6 @@
+; Message: Wait for the new day dawning.
+b$B53E DEFB $87,$56,$82,$8F,$78 ; wait for the
+ $B543 DEFM " NEW"
+ $B547 DEFB $88,$9F             ; day
+ $B549 DEFM " DAWNING"
+ $B551 DEFB $15                 ; <end,.nl>

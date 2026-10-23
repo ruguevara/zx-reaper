@@ -1,2 +1,3 @@
-; Message at B00F
-t$B00F DEFM " \"."
+; Message: ".
+@label=MsgB00F
+b$B00F DEFB $20,$22,$2E,$14 ; " "." <end,nl>

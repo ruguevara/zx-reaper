@@ -1,0 +1,3 @@
+; Message: <the_arg> is carrying <the_arg>.
+@label=MsgCarrying3
+b$AFE4 DEFB $04,$71,$68,$04,$15 ; <the_arg> is carrying <the_arg> <end,.nl>

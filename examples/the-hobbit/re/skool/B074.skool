@@ -1,0 +1,4 @@
+; Message: <subj_is> not wearing <obj1>.
+@label=MsgNotWearing
+b$B074 DEFB $10,$73,$87,$72,$49,$4E,$47,$07 ; <subj_is> not wear "ING" <obj1>
+ $B07C DEFB $15                             ; <end,.nl>

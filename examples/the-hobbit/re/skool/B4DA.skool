@@ -1,2 +1,5 @@
-; Message at B4DA
-t$B4DA DEFM " TIMINGq CRITICAL, REMEMBER"
+; Message: Timing is critical, remember barrels float.
+b$B4DA DEFM " TIMING"
+ $B4E1 DEFB $71                   ; is
+ $B4E2 DEFM " CRITICAL, REMEMBER"
+ $B4F5 DEFB $80,$84,$53,$B9,$26   ; barrel "S" float:3

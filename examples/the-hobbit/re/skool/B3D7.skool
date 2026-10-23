@@ -1,2 +1,0 @@
-; Data block at B3D7
-b$B3D7 DEFB $B3,$A5,$0D,$0D,$0D,$60

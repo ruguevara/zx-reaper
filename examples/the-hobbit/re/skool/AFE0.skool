@@ -1,0 +1,3 @@
+; Message: <word> there <word>
+@label=MsgThere
+b$AFE0 DEFB $01,$79,$01,$14 ; <word> there <word> <end,nl>

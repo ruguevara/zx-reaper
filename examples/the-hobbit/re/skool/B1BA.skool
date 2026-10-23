@@ -1,0 +1,7 @@
+; Message: The dragon descends and in a terrific spout of fla...
+;
+; The dragon descends and in a terrific spout of flames burns you to a crisp.
+@label=MsgDragonDescends
+b$B1BA DEFB $78,$6B,$88,$A9,$61,$70,$60     ; the dragon descends and in a
+ $B1C1 DEFB $8B,$50,$DA,$FE,$74,$82,$6F     ; terrific spout of flames
+ $B1C8 DEFB $C0,$D3,$7F,$7B,$60,$88,$96,$15 ; burn:4 you to a crisp <end,.nl>

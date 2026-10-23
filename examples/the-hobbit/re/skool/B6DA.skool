@@ -1,0 +1,31 @@
+; Input and parse variables
+;
+; Words and bytes the parser and the command matcher keep (inferred from $6E9F,
+; $7873, $79B6, $7A14).
+@label=InputLinePtr
+g$B6DA DEFW $0000                   ; pointer into the typed line, set by $6E9F
+@label=WordListPtr
+ $B6DC DEFW $0000                   ; pointer into the parsed word list ($7873
+                                    ; reads it)
+@label=WordFlags
+ $B6DE DEFB $00                     ; high nibble of the last word read from
+                                    ; the list
+@label=PhraseMatched
+ $B6DF DEFB $00                     ; set by $71F3 when a command record
+                                    ; matched in part
+@label=PhraseBuffer
+ $B6E0 DEFB $00,$00,$00,$00,$00,$00 ; six bytes copied from $7942 by $7C80
+@label=SavedCommandId
+ $B6E6 DEFB $00                     ; copy of the command id
+@label=CommandId
+ $B6E7 DEFB $00                     ; id (1-59) of the matched command record,
+                                    ; looked up in the table at $C730
+@label=FirstObject
+ $B6E8 DEFB $00                     ; first object of the command (id), used by
+                                    ; the message codes 7, 14, 17
+@label=SecondObject
+ $B6E9 DEFB $00                     ; second object, used by the codes 9
+@label=Subject
+ $B6EA DEFB $00                     ; who acts: 0 the player, $FF nobody
+                                    ; (prints "someone"); used by the codes 6,
+                                    ; 12, 16 and the verb suffix

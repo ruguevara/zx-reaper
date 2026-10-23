@@ -1,41 +1,146 @@
-; Data block at A9E5
-b$A9E5 DEFB $3A,$F6,$B6,$21,$F5,$B6,$BE,$C0
- $A9ED DEFB $DD,$21,$63,$C6,$DD,$7E,$10,$FE
- $A9F5 DEFB $00,$28,$06,$3E,$41,$DD,$BE,$01
- $A9FD DEFB $C0,$CD,$44,$9D,$3A,$F6,$B6,$DD
- $AA05 DEFB $77,$10,$DD,$36,$01,$41,$01,$26
- $AA0D DEFB $00,$ED,$43,$E8,$B6,$3E,$1D,$32
- $AA15 DEFB $E7,$B6,$DD,$22,$08,$B7,$21,$1B
- $AA1D DEFB $C1,$22,$0A,$B7,$CD,$76,$9F,$C3
- $AA25 DEFB $9E,$93,$FD,$2A,$08,$B7,$FD,$7E
- $AA2D DEFB $10,$47,$CD,$2D,$9F,$FE,$FF,$21
- $AA35 DEFB $01,$B3,$CA,$DD,$72,$DD,$7E,$00
- $AA3D DEFB $FE,$0A,$C2,$01,$B3,$CD,$44,$9D
- $AA45 DEFB $3A,$E8,$B6,$DD,$2A,$0C,$B7,$DD
- $AA4D DEFB $77,$01,$CD,$DD,$9B,$3A,$EA,$B6
- $AA55 DEFB $FE,$00,$C0,$78,$C3,$30,$96,$DD
- $AA5D DEFB $21,$05,$C2,$DD,$CB,$07,$9E,$DD
- $AA65 DEFB $CB,$07,$AE,$DD,$CB,$05,$26,$11
- $AA6D DEFB $23,$06,$ED,$53,$0F,$C2,$C9,$21
- $AA75 DEFB $BC,$C2,$CB,$6E,$C0,$3A,$C3,$CA
- $AA7D DEFB $32,$C4,$CA,$21,$BC,$C2,$CB,$BE
- $AA85 DEFB $3A,$2B,$C1,$FE,$2A,$C0,$21,$A4
- $AA8D DEFB $B2,$C3,$DD,$72,$21,$BC,$C2,$CB
- $AA95 DEFB $FE,$3A,$2B,$C1,$FE,$2A,$C0,$21
- $AA9D DEFB $77,$B2,$C3,$DD,$72,$CD,$FF,$97
- $AAA5 DEFB $3E,$06,$32,$C4,$CA,$21,$BC,$C2
- $AAAD DEFB $CB,$C6,$CB,$BE,$18,$D8,$21,$88
- $AAB5 DEFB $C3,$CB,$EE,$21,$37,$B0,$CD,$C7
- $AABD DEFB $AA,$21,$13,$B1,$CD,$C7,$AA,$C3
- $AAC5 DEFB $E0,$AA,$3A,$2B,$C1,$FE,$1E,$CA
- $AACD DEFB $DD,$72,$FE,$1C,$CA,$DD,$72,$C9
- $AAD5 DEFB $21,$88,$C3,$CB,$AE,$21,$3F,$B0
- $AADD DEFB $C3,$C7,$AA,$DD,$21,$1A,$C3,$DD
- $AAE5 DEFB $7E,$01,$FE,$FF,$C8,$CD,$CA,$9B
- $AAED DEFB $DD,$22,$0C,$B7,$DD,$CB,$07,$7E
- $AAF5 DEFB $CA,$BC,$A3,$C9,$3A,$EA,$B6,$FE
- $AAFD DEFB $00,$C0,$3E,$01,$32,$00,$B7,$3A
- $AB05 DEFB $B5,$CA,$32,$B6,$CA,$C9,$97,$32
- $AB0D DEFB $00,$B7,$C9,$3A,$2B,$C1,$FE,$1A
- $AB15 DEFB $C0,$21,$FD,$B0,$CD,$DD,$72,$C3
- $AB1D DEFB $D2,$90,$21,$11,$B3,$CD,$DD
+; Handlers (via $C9A1): $A9E5 and following to the end of the code region
+c$A9E5 LD A,($B6F6)    ;
+ $A9E8 LD HL,$B6F5     ;
+ $A9EB CP (HL)         ;
+ $A9EC RET NZ          ;
+ $A9ED LD IX,$C663     ;
+ $A9F1 LD A,(IX+$10)   ;
+ $A9F4 CP $00          ;
+ $A9F6 JR Z,$A9FE      ;
+ $A9F8 LD A,$41        ;
+ $A9FA CP (IX+$01)     ;
+ $A9FD RET NZ          ;
+*$A9FE CALL $9D44      ;
+ $AA01 LD A,($B6F6)    ;
+ $AA04 LD (IX+$10),A   ;
+ $AA07 LD (IX+$01),$41 ;
+ $AA0B LD BC,$0026     ;
+ $AA0E LD ($B6E8),BC   ;
+ $AA12 LD A,$1D        ;
+ $AA14 LD ($B6E7),A    ;
+ $AA17 LD ($B708),IX   ;
+ $AA1B LD HL,$C11B     ;
+ $AA1E LD ($B70A),HL   ;
+ $AA21 CALL $9F76      ;
+ $AA24 JP $939E        ;
+ $AA27 LD IY,($B708)   ;
+ $AA2B LD A,(IY+$10)   ;
+ $AA2E LD B,A          ;
+ $AA2F CALL $9F2D      ;
+ $AA32 CP $FF          ;
+ $AA34 LD HL,$B301     ;
+ $AA37 JP Z,$72DD      ;
+ $AA3A LD A,(IX+$00)   ;
+ $AA3D CP $0A          ;
+ $AA3F JP NZ,$B301     ;
+ $AA42 CALL $9D44      ;
+ $AA45 LD A,($B6E8)    ;
+ $AA48 LD IX,($B70C)   ;
+ $AA4C LD (IX+$01),A   ;
+ $AA4F CALL $9BDD      ;
+ $AA52 LD A,($B6EA)    ;
+ $AA55 CP $00          ;
+ $AA57 RET NZ          ;
+ $AA58 LD A,B          ;
+ $AA59 JP $9630        ;
+ $AA5C LD IX,$C205     ;
+ $AA60 RES 3,(IX+$07)  ;
+ $AA64 RES 5,(IX+$07)  ;
+ $AA68 SLA (IX+$05)    ;
+ $AA6C LD DE,$0623     ;
+ $AA6F LD ($C20F),DE   ;
+ $AA73 RET             ;
+ $AA74 LD HL,$C2BC     ;
+ $AA77 BIT 5,(HL)      ;
+ $AA79 RET NZ          ;
+ $AA7A LD A,($CAC3)    ;
+ $AA7D LD ($CAC4),A    ;
+ $AA80 LD HL,$C2BC     ;
+ $AA83 RES 7,(HL)      ;
+ $AA85 LD A,($C12B)    ;
+ $AA88 CP $2A          ;
+ $AA8A RET NZ          ;
+*$AA8B LD HL,$B2A4     ;
+ $AA8E JP $72DD        ;
+ $AA91 LD HL,$C2BC     ;
+ $AA94 SET 7,(HL)      ;
+ $AA96 LD A,($C12B)    ;
+ $AA99 CP $2A          ;
+ $AA9B RET NZ          ;
+ $AA9C LD HL,$B277     ;
+ $AA9F JP $72DD        ;
+ $AAA2 CALL $97FF      ;
+ $AAA5 LD A,$06        ;
+ $AAA7 LD ($CAC4),A    ;
+ $AAAA LD HL,$C2BC     ;
+ $AAAD SET 0,(HL)      ;
+ $AAAF RES 7,(HL)      ;
+ $AAB1 JR $AA8B        ;
+ $AAB3 LD HL,$C388     ;
+ $AAB6 SET 5,(HL)      ;
+ $AAB8 LD HL,$B037     ;
+ $AABB CALL $AAC7      ;
+ $AABE LD HL,$B113     ;
+ $AAC1 CALL $AAC7      ;
+ $AAC4 JP $AAE0        ;
+*$AAC7 LD A,($C12B)    ;
+ $AACA CP $1E          ;
+ $AACC JP Z,$72DD      ;
+ $AACF CP $1C          ;
+ $AAD1 JP Z,$72DD      ;
+ $AAD4 RET             ;
+ $AAD5 LD HL,$C388     ;
+ $AAD8 RES 5,(HL)      ;
+ $AADA LD HL,$B03F     ;
+ $AADD JP $AAC7        ;
+*$AAE0 LD IX,$C31A     ;
+ $AAE4 LD A,(IX+$01)   ;
+ $AAE7 CP $FF          ;
+ $AAE9 RET Z           ;
+ $AAEA CALL $9BCA      ;
+ $AAED LD ($B70C),IX   ;
+ $AAF1 BIT 7,(IX+$07)  ;
+ $AAF5 JP Z,$A3BC      ;
+ $AAF8 RET             ;
+ $AAF9 LD A,($B6EA)    ;
+ $AAFC CP $00          ;
+ $AAFE RET NZ          ;
+ $AAFF LD A,$01        ;
+ $AB01 LD ($B700),A    ;
+ $AB04 LD A,($CAB5)    ;
+ $AB07 LD ($CAB6),A    ;
+ $AB0A RET             ;
+ $AB0B SUB A           ;
+ $AB0C LD ($B700),A    ;
+ $AB0F RET             ;
+ $AB10 LD A,($C12B)    ;
+ $AB13 CP $1A          ;
+ $AB15 RET NZ          ;
+ $AB16 LD HL,$B0FD     ;
+ $AB19 CALL $72DD      ;
+ $AB1C JP $90D2        ;
+ $AB1F LD HL,$B311     ;
+ $AB22 CALL $72DD      ;
+ $AB25 LD A,($C12B)    ;
+ $AB28 LD C,A          ;
+ $AB29 LD HL,$B6F3     ;
+ $AB2C CP (HL)         ;
+ $AB2D RET Z           ;
+ $AB2E LD B,(HL)       ;
+ $AB2F LD A,$02        ;
+ $AB31 CP B            ;
+ $AB32 JR NZ,$AB36     ;
+ $AB34 LD A,$03        ;
+*$AB36 CP C            ;
+ $AB37 RET Z           ;
+ $AB38 JR $AB4A        ;
+ $AB3A LD A,($C12B)    ;
+ $AB3D CP $02          ;
+ $AB3F JR Z,$AB44      ;
+ $AB41 CP $03          ;
+ $AB43 RET NZ          ;
+*$AB44 LD HL,$B311     ;
+ $AB47 CALL $72DD      ;
+*$AB4A LD HL,$B31F     ;
+ $AB4D CALL $72DD      ;
+ $AB50 JP $90D2        ;

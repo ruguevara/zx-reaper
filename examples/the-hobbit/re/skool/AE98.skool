@@ -1,0 +1,7 @@
+; Message: <subj> hit <obj1> hard on the shoulder- <obj1> sta...
+;
+; <subj> hit <obj1> hard on the shoulder- <obj1> stagger and almost fall.
+@label=MsgHitHardOnShoulder
+b$AE98 DEFB $06,$83,$47,$07,$83,$16,$75,$78 ; <subj> hit <obj1> hard on the
+ $AEA0 DEFB $85,$9E,$2D,$07,$9B,$03,$61     ; shoulder "-" <obj1> stagger:1 and
+ $AEA7 DEFB $87,$D9,$92,$4F,$15             ; almost fall:1 <end,.nl>

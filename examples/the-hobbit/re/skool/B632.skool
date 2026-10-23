@@ -1,0 +1,3 @@
+; Message: A dark dungeon in the elvenkings halls
+b$B632 DEFB $60,$81,$8E,$81,$EF,$70,$78 ; a dark dungeon in the
+ $B639 DEFB $82,$13,$A3,$0D             ; elvenkings halls:2

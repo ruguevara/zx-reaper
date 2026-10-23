@@ -1,0 +1,4 @@
+; Message: <subj_is> slowly sinking into the bog.
+@label=MsgSlowlySinkingIntoBog
+b$B153 DEFB $10,$85,$DB,$CA,$CC,$83,$8E,$78 ; <subj_is> slowly sink:4 into the
+ $B15B DEFB $B0,$BC                         ; bog:3

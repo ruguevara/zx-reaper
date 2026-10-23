@@ -1,0 +1,6 @@
+; Message: A little steep bay, still and quiet, with an over...
+;
+; A little steep bay, still and quiet, with an over hanging cliff
+b$B6A7 DEFB $60,$83,$E3,$86,$3C,$80,$90,$2C ; a little steep bay ","
+ $B6AF DEFB $8B,$1C,$61,$85,$13,$2C,$7E     ; still and quiet "," with
+ $B6B6 DEFB $80,$58,$84,$C9,$89,$74,$A8,$6C ; an over hanging cliff:2

@@ -1,0 +1,3 @@
+; Message: Boats can help. Look carefully.
+b$B4BE DEFB $80,$B8,$53,$80,$EB,$83,$1E,$2E ; boat "S" can help "."
+ $B4C6 DEFB $F4,$13,$B0,$FD                 ; look:7 carefully:3

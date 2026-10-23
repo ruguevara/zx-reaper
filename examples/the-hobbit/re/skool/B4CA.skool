@@ -1,0 +1,5 @@
+; Message: Wait around and time your exit carefully.
+b$B4CA DEFB $87,$56,$87,$F8,$61,$8B,$87 ; wait around and time
+ $B4D1 DEFB $8B,$EA                     ; your
+ $B4D3 DEFM " EXIT"
+ $B4D8 DEFB $B0,$FD                     ; carefully:3

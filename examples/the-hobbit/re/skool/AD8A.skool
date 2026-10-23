@@ -1,2 +1,4 @@
-; Message at AD8A
-t$AD8A DEFM "fla"
+; Message: But fall and smash your skull.
+@label=MsgButFallSmashSkull
+b$AD8A DEFB $66,$6C,$61,$85,$E6,$8B,$EA ; but fall and smash your
+ $AD91 DEFB $B5,$BE                     ; skull:3

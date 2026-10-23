@@ -1,0 +1,3 @@
+; Message: <obj1> is not tied.
+@label=MsgNotTied
+b$B092 DEFB $07,$71,$73,$86,$CD,$44,$15 ; <obj1> is not tie "D" <end,.nl>

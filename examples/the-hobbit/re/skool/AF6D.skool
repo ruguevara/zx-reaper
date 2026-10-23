@@ -1,0 +1,4 @@
+; Message: Lands on the other side.
+@label=MsgLandsOnOtherSide
+b$AF6D DEFB $83,$BB,$53,$75,$78,$8A,$6B ; land "S" on the other
+ $AF74 DEFB $B5,$A6                     ; side:3

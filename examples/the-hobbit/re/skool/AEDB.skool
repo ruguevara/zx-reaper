@@ -1,6 +1,0 @@
-; Data block at AEDB
-b$AEDB DEFB $83,$C4,$07,$8A,$2F,$B6,$70,$06
- $AEE3 DEFB $8B,$81,$07,$80,$7C,$2D,$07,$99
- $AEEB DEFB $E8,$0E,$89,$35,$66,$9A,$A4,$B5
- $AEF3 DEFB $0C,$06,$8B,$4B,$88,$4B,$63,$0E
- $AEFB DEFB $80,$BF

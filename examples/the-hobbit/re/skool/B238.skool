@@ -1,0 +1,6 @@
+; Message: Blimey, look at this!! Can yer cook'em?
+@label=MsgBlimeyLookAtThisCan
+b$B238 DEFB $88,$38,$2C,$84,$13,$63,$7A,$21 ; blimey "," look at this "!"
+ $B240 DEFB $21,$F0,$EB,$8B,$E7,$88,$8B     ; "!" can:7 yer cook
+ $B247 DEFM "'EM?"
+ $B24B DEFB $16                             ; <end>

@@ -1,2 +1,0 @@
-; Data block at ADD2
-b$ADD2 DEFB $16

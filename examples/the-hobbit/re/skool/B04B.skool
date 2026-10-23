@@ -1,0 +1,3 @@
+; Message: What's this ?
+@label=MsgWhatSThis
+b$B04B DEFB $7D,$27,$53,$7A,$20,$3F,$16 ; what "'S" this " ?" <end>

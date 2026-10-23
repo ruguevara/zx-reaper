@@ -1,0 +1,4 @@
+; Message: A big cavern with torches along the walls
+b$B5D3 DEFB $60,$80,$A2,$81,$16,$7E,$86,$D7 ; a big cavern with torch
+ $B5DB DEFB $45,$53,$87,$DF,$78,$87,$5A,$53 ; "ES" along the wall "S"
+ $B5E3 DEFB $16                             ; <end>

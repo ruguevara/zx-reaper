@@ -1,0 +1,4 @@
+; Message: Some thing drops from above and stings.
+@label=MsgSomeDropsFromAbove
+b$B31F DEFB $77,$86,$B0,$47,$C1,$E8,$6D ; some thin "G" drop:4 from
+ $B326 DEFB $87,$B5,$61,$CB,$21,$15     ; above and sting:4 <end,.nl>

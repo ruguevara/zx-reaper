@@ -1,0 +1,4 @@
+; Message: A trolls door needs a trolls key.
+b$B47A DEFB $60,$86,$FD,$81,$C0 ; a trolls door
+ $B47F DEFM " NEEDS"
+ $B485 DEFB $60,$86,$FD,$B3,$A5 ; a trolls key:3

@@ -1,0 +1,3 @@
+; Message: <subj_is> not carrying the bow.
+@label=MsgNotCarryingBow
+b$B121 DEFB $10,$73,$68,$78,$B0,$C3 ; <subj_is> not carrying the bow:3

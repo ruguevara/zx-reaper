@@ -1,0 +1,4 @@
+; Message: What has it got in its pockets ?
+@label=MsgWhatHasGotPockets
+b$B2D9 DEFB $7D,$89,$7B,$72,$89,$62,$70 ; what has it got in
+ $B2E0 DEFB $89,$AB,$CA,$83,$20,$3F,$16 ; its pocket:4 " ?" <end>

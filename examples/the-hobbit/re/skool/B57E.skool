@@ -1,0 +1,3 @@
+; Message: A gloomy empty land with dreary hills ahead
+b$B57E DEFB $60,$82,$D8,$82,$28,$83,$BB,$7E ; a gloomy empty land with
+ $B586 DEFB $81,$DD,$83,$42,$A7,$CF         ; dreary hills ahead:2

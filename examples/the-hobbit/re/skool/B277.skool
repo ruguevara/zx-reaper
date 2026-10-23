@@ -1,0 +1,11 @@
+; Message: There is a loud crack and a hole appears about thr...
+;
+; There is a loud crack and a hole appears about three feet from the ground. /
+; You are standing in front of the side door to the Lonely Mountain.
+@label=MsgThereLoudCrackHole
+b$B277 DEFB $79,$71,$60,$89,$EC,$81,$51,$61 ; there is a loud crack and
+ $B27F DEFB $60,$83,$5D,$C7,$EA,$87,$B0     ; a hole appear:4 about
+ $B286 DEFB $8B,$76,$82,$5D,$6D,$78,$89,$65 ; three feet from the ground
+ $B28E DEFB $2E,$0D,$F7,$A8,$62,$CB,$0A,$70 ; "." <nl> you:7 are stand:4 in
+ $B296 DEFB $89,$40,$74,$78,$85,$A6,$6A,$7B ; front of the side door to
+ $B29E DEFB $78,$F4,$09,$F4,$4E,$15         ; the lonely:7 mountain:7 <end,.nl>

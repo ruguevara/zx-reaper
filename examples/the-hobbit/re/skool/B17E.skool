@@ -1,0 +1,12 @@
+; Message: The dragon says " I may not be able to see you thi...
+;
+; The dragon says " I may not be able to see you thief but I can still burn
+; you. Prepare to die " .
+@label=MsgDragonSaysIMayNot
+b$B17E DEFB $78,$6B,$C5,$84,$20,$22,$F3,$73 ; the dragon say:4 " "" i:7
+ $B186 DEFB $8A,$0D,$73,$64,$87,$AC,$7B,$76 ; may not be able to see
+ $B18E DEFB $7F,$86,$AB,$66,$F3,$73,$80,$EB ; you thief but i:7 can
+ $B196 DEFB $8B,$1C,$80,$D3,$7F,$2E,$8A,$91 ; still burn you "." prepare
+ $B19E DEFB $7B,$88,$B1                     ; to die
+ $B1A1 DEFM " \" ."
+ $B1A5 DEFB $14                             ; <end,nl>

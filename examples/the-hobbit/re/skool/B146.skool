@@ -1,0 +1,4 @@
+; Message: <his_subj> foul gluttony has killed <subj>.
+@label=MsgFoulGluttonyHasKilled
+b$B146 DEFB $0C,$82,$B1,$89,$5A,$89,$7B ; <his_subj> foul gluttony has
+ $B14D DEFB $D3,$A8,$45,$44,$06,$15     ; kill "ED" <subj> <end,.nl>

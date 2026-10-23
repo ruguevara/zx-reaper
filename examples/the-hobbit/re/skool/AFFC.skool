@@ -1,0 +1,3 @@
+; Message: <subj_is> in
+@label=MsgSubjIsIn
+b$AFFC DEFB $10,$83,$78,$16 ; <subj_is> in <end>

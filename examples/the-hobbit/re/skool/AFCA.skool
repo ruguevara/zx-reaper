@@ -1,0 +1,7 @@
+; Message: In the
+@label=MsgInThe
+b$AFCA DEFB $83,$78,$02,$11,$84,$AA,$02,$0D ; in <jump to $AFDE> on <jump to
+                                            ; $AFDE>
+ $AFD2 DEFB $88,$25,$02,$09,$8B,$9B,$02,$05 ; behind <jump to $AFDE> under
+                                            ; <jump to $AFDE>
+ $AFDA DEFB $86,$CD,$44,$7B,$78,$16         ; tie "D" to the <end>

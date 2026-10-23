@@ -1,0 +1,7 @@
+; Message: In the distance you see the shape of a monstrous d...
+;
+; In the distance you see the shape of a monstrous dragon flying after you.
+@label=MsgDistanceSeeShape
+b$B1A6 DEFB $70,$78,$88,$BA,$7F,$76,$78 ; in the distance you see the
+ $B1AD DEFB $8A,$BC,$74,$60,$84,$45,$6B ; shape of a monstrous dragon
+ $B1B4 DEFB $89,$2B,$80,$49,$B7,$A8     ; flying after you:3

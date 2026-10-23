@@ -1,0 +1,7 @@
+; Message: You <word>. / Time passes...
+;
+; You <word>. / Time passes...
+@label=MsgTimePasses
+b$ADA3 DEFB $0D,$F7,$A8,$01,$2E,$0D     ; <nl> you:7 <word> "." <nl>
+@label=MsgTimePasses2
+ $ADA9 DEFB $FB,$87,$8A,$74,$2E,$2E,$15 ; time:7 passes ".." <end,.nl>

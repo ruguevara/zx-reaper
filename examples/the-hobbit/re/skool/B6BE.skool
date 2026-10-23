@@ -1,0 +1,2 @@
+; Message: A smooth straight passage
+b$B6BE DEFB $60,$85,$ED,$86,$46,$A4,$CD ; a smooth straight passage:2

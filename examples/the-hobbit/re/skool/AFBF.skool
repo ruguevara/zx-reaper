@@ -1,2 +1,3 @@
-; Message at AFBF
-t$AFBF DEFM "ogi"
+; Message: I cannot do that.
+@label=MsgICannotDoThat
+b$AFBF DEFB $6F,$67,$69,$B6,$9B ; i cannot do that:3

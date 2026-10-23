@@ -1,0 +1,6 @@
+; Message: A living dragon is deadly, look to bard.
+b$B518 DEFB $60                 ; a
+ $B519 DEFM " LIVING"
+ $B520 DEFB $6B,$71             ; dragon is
+ $B522 DEFM " DEADLY,"
+ $B52A DEFB $84,$13,$7B,$B0,$80 ; look to bard:3

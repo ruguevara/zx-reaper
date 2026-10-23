@@ -1,0 +1,4 @@
+; Message: A bewitched gloomy place surrounded by thick trees
+b$B5FE DEFB $60,$80,$99,$82,$D8,$84,$E6     ; a bewitched gloomy place
+ $B605 DEFB $8B,$36,$88,$5B,$86,$A6,$C6,$EC ; surrounded by thick tree:4
+ $B60D DEFB $A0,$00                         ; (none):2

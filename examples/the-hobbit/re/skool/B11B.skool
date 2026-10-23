@@ -1,0 +1,3 @@
+; Message: You cannot reach <obj1>.
+@label=MsgCannotReach
+b$B11B DEFB $7F,$67,$8A,$9F,$07,$15 ; you cannot reach <obj1> <end,.nl>

@@ -1,5 +1,0 @@
-; Data block at B0B3
-b$B0B3 DEFB $16,$88,$05,$8A,$F3,$88,$05,$06
- $B0BB DEFB $8B,$93,$78,$85,$4A,$06,$6C,$88
- $B0C3 DEFB $0D,$61,$82,$C8,$89,$26,$B8,$1A
- $B0CB DEFB $8B,$CC

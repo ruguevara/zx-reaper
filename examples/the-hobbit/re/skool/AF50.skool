@@ -1,0 +1,7 @@
+; Message: But the effort is wasted. <his_obj1> defense is to...
+;
+; But the effort is wasted. <his_obj1> defense is too strong.
+@label=MsgButEffortWasted
+b$AF50 DEFB $66,$78,$88,$CF,$71,$8B,$BB,$2E ; but the effort is wasted "."
+ $AF58 DEFB $0E,$88,$A2,$71,$7C,$B6,$64     ; <his_obj1> defense is too
+                                            ; strong:3

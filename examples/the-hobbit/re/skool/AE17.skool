@@ -1,0 +1,3 @@
+; Message: To the
+@label=MsgToThe
+b$AE17 DEFB $7B,$78,$16 ; to the <end>

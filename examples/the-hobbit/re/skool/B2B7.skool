@@ -1,0 +1,9 @@
+; Message: Which is the animal that has four feet in the morn...
+;
+; Which is the animal that has four feet in the morning, two at midday and
+; three in the evening ?
+b$B2B7 DEFB $8B,$D1,$71,$78,$87,$E4,$86,$9B ; which is the animal that
+ $B2BF DEFB $89,$7B,$89,$3C,$82,$5D,$70,$78 ; has four feet in the
+ $B2C7 DEFB $CA,$3A,$2C,$8B,$98,$63,$8A,$1F ; morn:4 "," two at midday
+ $B2CF DEFB $61,$8B,$76,$70,$78,$88,$EA,$20 ; and three in the evening " "
+ $B2D7 DEFB $3F,$16                         ; "?" <end>

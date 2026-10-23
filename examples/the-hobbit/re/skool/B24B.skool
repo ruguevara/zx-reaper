@@ -1,3 +1,0 @@
-; Data block at B24B
-b$B24B DEFB $16,$8B,$E7,$80,$EB,$8B,$90,$2C
- $B253 DEFB $66,$89,$82,$8B,$E2

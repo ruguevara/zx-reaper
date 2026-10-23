@@ -1,0 +1,4 @@
+; Message: The cellar where the king keeps his barrels of wine
+b$B63D DEFB $78,$81,$1C,$8B,$CC,$78,$83,$AE ; the cellar where the king
+ $B645 DEFB $89,$BA,$89,$90,$80,$84,$53,$74 ; keeps his barrel "S" of
+ $B64D DEFB $A7,$92                         ; wine:2

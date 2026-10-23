@@ -1,0 +1,3 @@
+; Message: A place of black spiders
+b$B60F DEFB $60,$84,$E6,$74,$80,$A5,$86,$23 ; a place of black spider
+ $B617 DEFB $53,$16                         ; "S" <end>

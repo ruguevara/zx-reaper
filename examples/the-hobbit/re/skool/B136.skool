@@ -1,0 +1,4 @@
+; Message: The arrow hits <obj1>.
+@label=MsgArrowHits
+b$B136 DEFB $78,$80,$6B,$D3,$47,$53,$07,$15 ; the arrow hit "S" <obj1>
+                                            ; <end,.nl>

@@ -1,0 +1,5 @@
+; Message: You have mastered
+@label=MsgHaveMastered
+b$B454 DEFB $7F,$89,$7E  ; you have
+ $B457 DEFM " MASTERED "
+ $B461 DEFB $16          ; <end>

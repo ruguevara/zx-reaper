@@ -1,2 +1,3 @@
-; Message at B52F
-t$B52F DEFM " DON'T STAYn"
+; Message: Don't stay here too long.
+b$B52F DEFM " DON'T STAY"
+ $B53A DEFB $6E,$7C,$B4,$0F ; here too long:3

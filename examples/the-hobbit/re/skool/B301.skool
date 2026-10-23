@@ -1,0 +1,7 @@
+; Message: <subj> cannot jump onto <obj1> from here.
+;
+; Used by the routine at #R$A9E5.
+@label=MsgCannotJumpOntoFrom
+b$B301 DEFB $06,$67,$83,$A1,$84,$B0,$07,$6D ; <subj> cannot jump onto <obj1>
+                                            ; from
+ $B309 DEFB $6E,$15                         ; here <end,.nl>

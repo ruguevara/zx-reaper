@@ -1,0 +1,7 @@
+; Message: <subj> swing feebly at <obj1> but miss by a wide m...
+;
+; <subj> swing feebly at <obj1> but miss by a wide margin.
+@label=MsgSwingFeeblyAtButMiss
+b$AF2B DEFB $06,$8B,$4B,$82,$57,$63,$07,$66 ; <subj> swing feebly at <obj1> but
+ $AF33 DEFB $8A,$25,$88,$5B,$60,$87,$7D     ; miss by a wide
+ $AF3A DEFB $B9,$FD                         ; margin:3

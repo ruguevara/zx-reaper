@@ -1,0 +1,6 @@
+; Message: You see a fast flowing black river not very wide a...
+;
+; You see a fast flowing black river not very wide across.
+b$B563 DEFB $7F,$76,$60,$82,$53,$82,$7E ; you see a fast flowing
+ $B56A DEFB $80,$A5,$85,$4A,$73,$87,$3D ; black river not very
+ $B571 DEFB $87,$7D,$B0,$43             ; wide across:3

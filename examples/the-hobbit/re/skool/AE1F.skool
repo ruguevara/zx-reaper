@@ -1,0 +1,3 @@
+; Message: It is dark.
+@label=MsgDark
+b$AE1F DEFB $72,$71,$B1,$8E ; it is dark:3

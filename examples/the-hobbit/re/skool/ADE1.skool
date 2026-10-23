@@ -1,0 +1,4 @@
+; Message: I see nothing to <word> <word> <word>
+@label=MsgISeeNothing
+b$ADE1 DEFB $0B,$F9,$01,$01,$01,$14 ; <call $ADDB> <word> <word> <word>
+                                    ; <end,nl>

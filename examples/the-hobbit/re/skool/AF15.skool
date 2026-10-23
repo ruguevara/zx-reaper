@@ -1,0 +1,5 @@
+; Message: <subj> slash at <obj1> but the blow is ineffective.
+@label=MsgSlashAtButBlow
+b$AF15 DEFB $06,$85,$C3,$63,$07,$66,$78,$65 ; <subj> slash at <obj1> but the
+                                            ; blow
+ $AF1D DEFB $71,$B9,$A0                     ; is ineffective:3

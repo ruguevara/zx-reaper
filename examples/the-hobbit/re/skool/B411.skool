@@ -1,2 +1,0 @@
-; Data block at B411
-b$B411 DEFB $81,$0D,$7F,$84,$9F,$83,$8E

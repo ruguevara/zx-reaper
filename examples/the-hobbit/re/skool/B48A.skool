@@ -1,0 +1,4 @@
+; Message: Elves are good at reading symbols.
+b$B48A DEFB $82,$1D,$62                     ; elves are
+ $B48D DEFM " GOOD"
+ $B492 DEFB $63,$85,$30,$49,$4E,$47,$B6,$85 ; at read "ING" symbols:3

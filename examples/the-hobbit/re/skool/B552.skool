@@ -1,0 +1,6 @@
+; Message: There seem to be some symbols on it but <subj> can...
+;
+; There seem to be some symbols on it but <subj> cannot read them.
+b$B552 DEFB $79,$DA,$B2,$7B,$64,$77,$86,$85 ; there seem to be some symbols
+ $B55A DEFB $75,$72,$66,$06,$67,$85,$30     ; on it but <subj> cannot read
+ $B561 DEFB $BB,$5D                         ; them:3

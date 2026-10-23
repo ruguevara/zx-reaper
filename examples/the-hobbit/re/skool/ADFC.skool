@@ -1,0 +1,3 @@
+; Message: And it gets swept away.
+@label=MsgGetsSweptAway
+b$ADFC DEFB $61,$72,$C2,$CE,$8B,$46,$B8,$1A ; and it get:4 swept away:3

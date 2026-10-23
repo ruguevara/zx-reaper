@@ -1,0 +1,3 @@
+; Message: <subj_is> too big.
+@label=MsgTooBig
+b$B13E DEFB $10,$7C,$B0,$A2 ; <subj_is> too big:3

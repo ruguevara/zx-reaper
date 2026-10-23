@@ -1,0 +1,4 @@
+; Message: What do you expect me to do with this ?
+@label=MsgWhatDoExpectMeDo
+b$B0A6 DEFB $7D,$69,$7F,$88,$F6,$84,$2F,$7B ; what do you expect me to
+ $B0AE DEFB $69,$7E,$7A,$20,$3F,$16         ; do with this " ?" <end>

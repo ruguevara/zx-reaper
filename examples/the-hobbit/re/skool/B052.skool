@@ -1,0 +1,4 @@
+; Message: You are doing a great job
+@label=MsgDoingGreatJob
+b$B052 DEFB $7F,$62,$C8,$C6,$60,$82,$FF ; you are do:4 a great
+ $B059 DEFB $A9,$AE                     ; job:2

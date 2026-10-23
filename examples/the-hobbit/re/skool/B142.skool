@@ -1,0 +1,5 @@
+; Message: <thing> evaporates.
+@label=MsgEvaporates
+b$B142 DEFB $00         ; <thing>
+@label=MsgEvaporates2
+ $B143 DEFB $C8,$E1,$15 ; evaporate:4 <end,.nl>

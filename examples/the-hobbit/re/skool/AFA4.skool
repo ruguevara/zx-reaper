@@ -1,0 +1,9 @@
+; Message: With a lurch the boat glides across the river and...
+;
+; With a lurch the boat glides across the river and lands on the other side.
+@label=MsgWithLurchBoatGlides
+b$AFA4 DEFB $7E,$60,$89,$B5,$78,$80,$B8     ; with a lurch the boat
+ $AFAB DEFB $89,$54,$80,$43,$78,$85,$4A,$61 ; glides across the river and
+ $AFB3 DEFB $02,$B9                         ; <jump to $AF6D>
+@label=MsgNot
+ $AFB5 DEFB $07,$71,$73,$70,$09,$15         ; <obj1> is not in <obj2> <end,.nl>

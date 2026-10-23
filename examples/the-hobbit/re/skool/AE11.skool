@@ -1,0 +1,4 @@
+; Message: <subj_is> already carrying <obj1>.
+@label=MsgAlreadyCarrying
+b$AE11 DEFB $10,$80,$51,$68,$07,$15 ; <subj_is> already carrying <obj1>
+                                    ; <end,.nl>

@@ -1,0 +1,8 @@
+; Message: As soon as <subj> touch the river <subj> fall asle...
+;
+; As soon as <subj> touch the river <subj> fall asleep and gently float away.
+@label=MsgAsSoonAsTouchRiver
+b$B0B4 DEFB $88,$05,$8A,$F3,$88,$05,$06 ; as soon as <subj>
+ $B0BB DEFB $8B,$93,$78,$85,$4A,$06,$6C ; touch the river <subj> fall
+ $B0C2 DEFB $88,$0D,$61,$82,$C8,$89,$26 ; asleep and gently float
+ $B0C9 DEFB $B8,$1A                     ; away:3

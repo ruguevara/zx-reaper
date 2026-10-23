@@ -1,2 +1,4 @@
-; Message at B33B
-t$B33B DEFM "     "
+; Message: Nothing
+@label=MsgNothing
+b$B33B DEFM "     "
+ $B340 DEFB $EA,$5D  ; nothing:6

@@ -1,0 +1,3 @@
+; Message: An elf sweeps past.
+@label=MsgElfSweepsPast
+b$B113 DEFB $80,$58,$82,$0A,$8B,$40,$BA,$7A ; an elf sweeps past:3

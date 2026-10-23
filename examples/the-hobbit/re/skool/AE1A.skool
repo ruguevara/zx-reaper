@@ -1,0 +1,3 @@
+; Message: <obj2> is too full.
+@label=MsgTooFull
+b$AE1A DEFB $09,$71,$7C,$B2,$B9 ; <obj2> is too full:3

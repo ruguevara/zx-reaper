@@ -1,2 +1,0 @@
-; Data block at B408
-b$B408 DEFB $88,$5B,$82,$BD

@@ -1,0 +1,4 @@
+; Message: Thorin sits down and starts singing about gold
+@label=MsgThorinSitsDownStarts
+b$B0E5 DEFB $86,$B4,$CA,$D0,$81,$C4,$61     ; thorin sit:4 down and
+ $B0EC DEFB $CB,$17,$CA,$C8,$87,$B0,$A2,$EF ; start:4 sing:4 about gold:2

@@ -1,2 +1,0 @@
-; Data block at B1F6
-b$B1F6 DEFB $89,$15,$0D,$F0,$EE,$64,$C9,$85

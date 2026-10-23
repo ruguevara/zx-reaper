@@ -1,0 +1,3 @@
+; Message: There is <thing>
+@label=MsgThere2
+b$B013 DEFB $79,$71,$00,$14 ; there is <thing> <end,nl>

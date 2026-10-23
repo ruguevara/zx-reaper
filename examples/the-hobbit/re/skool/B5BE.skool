@@ -1,0 +1,2 @@
+; Message: A narrow dangerous path
+b$B5BE DEFB $60,$84,$64,$81,$85,$A4,$D4 ; a narrow dangerous path:2

@@ -1,0 +1,3 @@
+; Message: A hidden path with trolls foot prints
+b$B58C DEFB $60,$83,$31,$84,$D4,$7E,$86,$FD ; a hidden path with trolls
+ $B594 DEFB $89,$31,$84,$FB,$53,$16         ; foot print "S" <end>

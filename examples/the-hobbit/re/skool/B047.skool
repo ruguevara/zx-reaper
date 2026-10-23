@@ -1,0 +1,3 @@
+; Message: Thank you
+@label=MsgThank
+b$B047 DEFB $8B,$58,$A7,$A8 ; thank you:2

@@ -1,0 +1,7 @@
+; Message: <subj> slice <his_obj1>- hand blood drips slowly t...
+;
+; <subj> slice <his_obj1>- hand blood drips slowly to the ground.
+@label=MsgSliceHandBloodDrips
+b$AE7A DEFB $06,$85,$CF,$0E,$2D,$83,$12     ; <subj> slice <his_obj1> "-" hand
+ $AE81 DEFB $80,$B3,$88,$CA,$85,$DB,$7B,$78 ; blood drips slowly to the
+ $AE89 DEFB $B9,$65                         ; ground:3

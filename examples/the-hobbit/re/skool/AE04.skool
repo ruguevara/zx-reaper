@@ -1,0 +1,3 @@
+; Message: <obj1> is too heavy to lift.
+@label=MsgTooHeavyLift
+b$AE04 DEFB $07,$71,$7C,$83,$27,$7B,$B3,$D4 ; <obj1> is too heavy to lift:3
