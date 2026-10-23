@@ -1,6 +1,13 @@
-; Routine at 789F
+; Find the next newer phrase record
 ;
-; Used by the routine at #R$7892.
+; IX = the nearest record below IY on the phrase stack whose RECF_EXCEPT flag
+; (bit 6 of byte +1) is clear; falls into the search of #R$78A5 with the step
+; -PARSED_RECORD_SIZE.
+;
+; IY Current record
+; O:IX The next newer record
+@label=FindNewerRecord
 c$789F PUSH DE       ;
- $78A0 LD DE,$FFE8   ;
- $78A3 JR $78A9      ;
+@isub=LD DE,-PARSED_RECORD_SIZE
+ $78A0 LD DE,$FFE8   ; step down: newer
+ $78A3 JR $78A9      ; search

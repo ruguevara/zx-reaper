@@ -1,28 +1,53 @@
-; Routine at 6E4F
+; Turn a cursor key at the start of a line into a compass word
 ;
-; Used by the routine at #R$6DD6.
+; Called by #R$6DD6 for the first key of a new input line. If the key is a
+; cursor key, the line becomes the one-letter direction command: cursor up
+; types "N", down "S", right "E", left "W" (echoed in the input window), then
+; a carriage return is stored after it. The caller echoes that return and ends
+; the line, so one arrow key moves the player. Any other key is left alone.
+; .
+; Hardware: echoes the letter through #R$858B (input window).
+;
+; A Key code
+; HL Address in the input line buffer where the next character goes
+; B Free bytes left in the buffer ($80 for an empty line)
+; O:A Carriage return when a cursor key was converted, else the key unchanged
+; O:HL Address after the stored letter and return
+; O:B Free bytes left, 2 fewer when converted
+; O:F NZ
+@label=CursorKeyToWord
+@isub=CP KEY_RIGHT
 c$6E4F CP $09        ;
  $6E51 JR Z,$6E72    ;
+@isub=CP KEY_LEFT
  $6E53 CP $08        ;
  $6E55 JR Z,$6E76    ;
+@isub=CP KEY_DOWN
  $6E57 CP $0A        ;
  $6E59 JR Z,$6E6E    ;
+@isub=CP KEY_UP
  $6E5B CP $5B        ;
  $6E5D RET NZ        ;
- $6E5E LD A,$4E      ;
+@isub=LD A,"N"
+ $6E5E LD A,$4E      ; N for up
+@label=CursorKeyToWord_Store
 *$6E60 LD (HL),A     ;
  $6E61 INC HL        ;
  $6E62 CALL $858B    ;
  $6E65 DEC B         ;
+@isub=LD A,CHAR_CR
  $6E66 LD A,$0D      ;
- $6E68 LD (HL),A     ;
+ $6E68 LD (HL),A     ; end of line, not echoed here
  $6E69 INC HL        ;
  $6E6A DEC B         ;
  $6E6B OR $01        ;
  $6E6D RET           ;
-*$6E6E LD A,$53      ;
+@isub=LD A,"S"
+*$6E6E LD A,$53      ; S for down
  $6E70 JR $6E60      ;
-*$6E72 LD A,$45      ;
+@isub=LD A,"E"
+*$6E72 LD A,$45      ; E for right
  $6E74 JR $6E60      ;
-*$6E76 LD A,$57      ;
+@isub=LD A,"W"
+*$6E76 LD A,$57      ; W for left
  $6E78 JR $6E60      ;

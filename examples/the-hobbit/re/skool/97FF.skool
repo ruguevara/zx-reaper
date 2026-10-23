@@ -1,11 +1,17 @@
-; Routine at 97FF
+; Return from the caller unless the action is to be performed
 ;
-; Used by the routine at #R$A73B.
+; Reads ActionPerform (C) and ActionAllowed (B) and ANDs them. If the result is
+; non-zero the routine returns normally. If it is zero it discards its own
+; return address, so the handler that called it returns to its caller at once.
+; Handlers use it to skip their effects in the test pass and after a refusal.
+; .
+; Preserves BC.
+@label=AbortUnlessPerform
 c$97FF PUSH BC       ;
- $9800 LD BC,($B6FA) ;
+ $9800 LD BC,($B6FA) ; C = ActionPerform, B = ActionAllowed
  $9804 LD A,C        ;
  $9805 AND B         ;
  $9806 JR NZ,$9809   ;
- $9808 POP BC        ;
-*$9809 POP BC        ;
+ $9808 POP BC        ; restore BC, then drop the return address
+*$9809 POP BC        ; restore BC (or the dropped word)
  $980A RET           ;

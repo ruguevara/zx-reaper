@@ -1,39 +1,54 @@
-; Routine at 7EBA
+; Give pending order slots to an actor and free the rest
 ;
-; Used by the routine at #R$9034.
+; When the player gives orders to a character, the parser stores each parsed
+; command in a free order slot (OrderSlots, $B738) and marks the slot $FF,
+; counting them in OrderSlotCount ($B737; filled by #R$8315). This keeps the
+; first A of the pending slots (at most OrderSlotCount) by setting their owner
+; to FirstObject ($B6E8, the character addressed), and frees the others by
+; setting their owner to 0.
+;
+; A Number of orders the actor accepts
+; BC, DE, IX are preserved
+@label=ClaimOrderSlots
 c$7EBA PUSH BC         ;
  $7EBB PUSH IX         ;
  $7EBD PUSH DE         ;
- $7EBE LD B,A          ;
- $7EBF LD A,($B737)    ;
+ $7EBE LD B,A             ; B = A
+ $7EBF LD A,($B737)       ; C = OrderSlotCount
  $7EC2 LD C,A          ;
  $7EC3 CP B            ;
- $7EC4 JR NC,$7EC7     ;
+ $7EC4 JR NC,$7EC7        ; B = min(A, count)
  $7EC6 LD B,A          ;
 *$7EC7 LD A,C          ;
- $7EC8 SUB B           ;
+ $7EC8 SUB B              ; C = slots to free
  $7EC9 LD C,A          ;
- $7ECA LD IX,$B71F     ;
+@isub=LD IX,OrderSlots-ORDER_SLOT_SIZE
+ $7ECA LD IX,$B71F        ; the slot before slot 0
+@isub=LD DE,ORDER_SLOT_SIZE
  $7ECE LD DE,$0019     ;
  $7ED1 XOR A           ;
  $7ED2 CP B            ;
  $7ED3 JR Z,$7EE6      ;
-*$7ED5 ADD IX,DE       ;
+@label=ClaimOrderSlots_Next
+*$7ED5 ADD IX,DE          ; next slot ...
  $7ED7 LD A,(IX+$00)   ;
+@isub=CP FLAG_SLOT_PENDING
  $7EDA CP $FF          ;
- $7EDC JR NZ,$7ED5     ;
+ $7EDC JR NZ,$7ED5        ; ... that is pending
  $7EDE LD A,($B6E8)    ;
- $7EE1 LD (IX+$00),A   ;
+ $7EE1 LD (IX+$00),A      ; it belongs to the addressed actor
  $7EE4 DJNZ $7ED5      ;
-*$7EE6 LD B,C          ;
+*$7EE6 LD B,C             ; the remaining pending slots
  $7EE7 XOR A           ;
  $7EE8 CP B            ;
  $7EE9 JR Z,$7EFA      ;
+@label=ClaimOrderSlots_Free
 *$7EEB ADD IX,DE       ;
  $7EED LD A,(IX+$00)   ;
+@isub=CP FLAG_SLOT_PENDING
  $7EF0 CP $FF          ;
  $7EF2 JR NZ,$7EEB     ;
- $7EF4 LD (IX+$00),$00 ;
+ $7EF4 LD (IX+$00),$00    ; become free
  $7EF8 DJNZ $7EEB      ;
 *$7EFA POP DE          ;
  $7EFB POP IX          ;

@@ -1,13 +1,24 @@
-; Routine at 9C78
+; Test whether an object is held by the subject
 ;
-; Used by the routines at #R$8C9B, #R$8D33, #R$939E and #R$950F.
-c$9C78 LD A,($B6E8)  ;
-; This entry point is used by the routines at #R$950F and #R$9728.
-*$9C7B LD HL,$B6EA   ;
- $9C7E CP $FF        ;
- $9C80 SCF           ;
- $9C81 RET Z         ;
- $9C82 PUSH IX       ;
- $9C84 CALL $9C8A    ;
- $9C87 POP IX        ;
- $9C89 RET           ;
+; Tests the chain of holders of an object: is it carried by the subject
+; (#R$B6EA: 0 is the player), directly or inside something the subject
+; carries. $9C78 takes the object from the first object slot (#R$B6E8); $9C7B
+; takes the id in A. The id $FF (no object) counts as held. Objects lying at a
+; location (holder $FF) are not held.
+; .
+; Part of the walk is #R$9C8A.
+;
+; A Object id ($9C7B only; $9C78 loads it from $B6E8)
+; O:F Carry set when the object is held by the subject, or A was $FF; carry clear when not
+; O:HL $B6EA, the address of the subject id
+@label=CheckObject1Held
+c$9C78 LD A,($B6E8)
+@label=CheckHeldBySubject
+*$9C7B LD HL,$B6EA
+ $9C7E CP $FF           ; no object: counts as held
+ $9C80 SCF
+ $9C81 RET Z
+ $9C82 PUSH IX          ; IX is not preserved by #R$9C8A
+ $9C84 CALL $9C8A       
+ $9C87 POP IX
+ $9C89 RET

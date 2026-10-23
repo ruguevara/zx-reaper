@@ -1,15 +1,24 @@
-; Routine at A18C
+; Mark an object or actor as broken or dead
 ;
-; Used by the routines at #R$92ED, #R$977F and #R$A73B.
-c$A18C PUSH IX         ;
- $A18E CALL $9BCA      ;
- $A191 LD (IX+$0C),$00 ;
- $A195 LD (IX+$0D),$00 ;
- $A199 LD DE,$00CD     ;
- $A19C BIT 6,(IX+$07)  ;
- $A1A0 JR Z,$A1A5      ;
- $A1A2 LD DE,$0192     ;
-*$A1A5 LD (IX+$0A),E   ;
- $A1A8 LD (IX+$0B),D   ;
- $A1AB POP IX          ;
- $A1AD RET             ;
+; Replaces the second name phrase (+10) of the record with the word "broken"
+; (an object) or "dead" (a character, flag bit 6), and clears the third (+12),
+; so its name prints as "broken sword", "dead goblin". Used after a fight
+; (#R$92ED, #R$977F, #R$A73B).
+;
+; A Object or actor id
+@label=MarkBrokenOrDead
+c$A18C PUSH IX
+ $A18E CALL $9BCA
+ $A191 LD (IX+$0C),$00  ; clear the third name phrase
+ $A195 LD (IX+$0D),$00
+@isub=LD DE,PHRASE_BROKEN
+ $A199 LD DE,$00CD
+@isub=BIT FLAG_CHARACTER,(IX+$07)
+ $A19C BIT 6,(IX+$07)
+ $A1A0 JR Z,$A1A5
+@isub=LD DE,PHRASE_DEAD
+ $A1A2 LD DE,$0192
+*$A1A5 LD (IX+$0A),E
+ $A1A8 LD (IX+$0B),D
+ $A1AB POP IX
+ $A1AD RET

@@ -1,6 +1,13 @@
-; Routine at 84B3
+; Copy the three script bytes
 ;
-; Used by the routines at #R$8451 and #R$84CC.
-c$84B3 LD BC,$0003   ;
- $84B6 LDIR          ;
- $84B8 RET           ;
+; Copies 3 bytes from HL to DE: the command bytes at $C9E2 (not part of the
+; saved state) to SavedScriptBytes before SAVE, and back after LOAD.
+; .
+; Hardware: none.
+;
+; HL Source
+; DE Destination
+@label=CopyScriptBytes
+c$84B3 LD BC,$0003
+ $84B6 LDIR
+ $84B8 RET

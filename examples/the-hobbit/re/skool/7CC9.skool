@@ -1,4 +1,10 @@
-; Routine at 7CC9
+; Jump to the routine in IY
 ;
-; Used by the routines at #R$7CFC and #R$7D54.
+; A trampoline: the noun lookup #R$7CFC and #R$7D54 set IY to #R$9DD9 (look
+; among objects) or #R$9EA0 (look among exits) and call this. The registers
+; pass through to that routine, which returns to the caller of this one.
+;
+; IY Address of the routine to run
+; HL Noun phrase words (RecBuf1 or RecBuf2) for that routine
+@label=CallIY
 c$7CC9 JP (IY)       ;

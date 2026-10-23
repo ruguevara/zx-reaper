@@ -1,14 +1,31 @@
-; Routine at 6F30
+; Turn punctuation in the typed line into a word token
 ;
-; Used by the routine at #R$6E97.
+; Looks at the character at HL in the typed line: a full stop gives the word
+; token for "then" ($B0, class 11), a comma gives "and" ($A0, class 10), a
+; double quote gives $90 (class 9). Called by #R$6E97 before it tries a
+; dictionary lookup.
+;
+; A Character from the typed line
+; HL Address of that character
+; O:F Z when the character was punctuation, NZ otherwise
+; O:A Word token (when Z), else the character
+; O:HL Address after the punctuation (when Z)
+; O:BC 0 (when Z)
+@label=ScanPunctuation
+@isub=LD B,TOKEN_THEN
 c$6F30 LD B,$B0      ;
+@isub=CP "."
  $6F32 CP $2E        ;
  $6F34 JR Z,$6F41    ;
+@isub=LD B,TOKEN_AND
  $6F36 LD B,$A0      ;
+@isub=CP ","
  $6F38 CP $2C        ;
  $6F3A JR Z,$6F41    ;
+@isub=CP '"'
  $6F3C CP $22        ;
  $6F3E RET NZ        ;
+@isub=LD B,TOKEN_QUOTE
  $6F3F LD B,$90      ;
 *$6F41 INC HL        ;
  $6F42 LD A,B        ;

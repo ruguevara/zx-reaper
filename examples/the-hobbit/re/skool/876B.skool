@@ -1,64 +1,79 @@
-; Routine at 876B
+; Scroll the story window up one line
 ;
-; Used by the routine at #R$86A1.
-c$876B PUSH AF       ;
- $876C PUSH BC       ;
- $876D PUSH HL       ;
- $876E PUSH DE       ;
- $876F LD HL,$4020   ;
- $8772 LD DE,$4000   ;
- $8775 LD A,$11      ;
- $8777 LD B,$00      ;
-*$8779 PUSH HL       ;
- $877A PUSH DE       ;
- $877B LD C,$08      ;
-*$877D PUSH HL       ;
- $877E PUSH DE       ;
- $877F PUSH BC       ;
- $8780 LD C,$20      ;
- $8782 LDIR          ;
- $8784 POP BC        ;
- $8785 POP DE        ;
- $8786 POP HL        ;
- $8787 INC H         ;
- $8788 INC D         ;
- $8789 DEC C         ;
- $878A JR NZ,$877D   ;
- $878C POP DE        ;
- $878D POP HL        ;
- $878E LD C,$20      ;
- $8790 ADD HL,BC     ;
- $8791 EX DE,HL      ;
- $8792 ADD HL,BC     ;
- $8793 EX DE,HL      ;
- $8794 PUSH AF       ;
- $8795 LD A,D        ;
- $8796 AND $07       ;
- $8798 JR Z,$879E    ;
- $879A LD A,D        ;
- $879B ADD A,$07     ;
- $879D LD D,A        ;
-*$879E LD A,H        ;
- $879F AND $07       ;
- $87A1 JR Z,$87A7    ;
- $87A3 LD A,H        ;
- $87A4 ADD A,$07     ;
- $87A6 LD H,A        ;
-*$87A7 POP AF        ;
- $87A8 DEC A         ;
- $87A9 JR NZ,$8779   ;
- $87AB LD HL,$5820   ;
- $87AE LD DE,$5800   ;
- $87B1 LD BC,$0220   ;
- $87B4 LDIR          ;
- $87B6 LD B,$2A      ;
- $87B8 LD HL,$5020   ;
- $87BB LD C,$01      ;
- $87BD LD A,$20      ;
-*$87BF CALL $87C9    ;
- $87C2 DJNZ $87BF    ;
- $87C4 POP DE        ;
- $87C5 POP HL        ;
- $87C6 POP BC        ;
- $87C7 POP AF        ;
- $87C8 RET           ;
+; The story window is character rows 0-17 of the screen (a picture is drawn
+; over rows 0-15 and scrolls away with the text). Moves rows 1-17 up to 0-16,
+; bitmap and attributes, then clears row 17 by printing 42 spaces with #R$87C9
+; from pixel offset 1. All registers are kept.
+; .
+; Hardware: copies the screen bitmap of rows 1-17 and the attributes
+; $5820-$5A3F, and writes row 17 (STORY_LAST_ROW).
+@label=ScrollStoryUp
+c$876B PUSH AF
+ $876C PUSH BC
+ $876D PUSH HL
+ $876E PUSH DE
+@isub=LD HL,SCREEN+ROW_BYTES
+ $876F LD HL,$4020      ; source: row 1
+ $8772 LD DE,$4000      ; destination: row 0
+@isub=LD A,STORY_SCROLL_ROWS
+ $8775 LD A,$11
+ $8777 LD B,$00
+*$8779 PUSH HL
+ $877A PUSH DE
+ $877B LD C,$08         ; 8 pixel lines of one character row
+*$877D PUSH HL
+ $877E PUSH DE
+ $877F PUSH BC
+@isub=LD C,ROW_BYTES
+ $8780 LD C,$20
+ $8782 LDIR
+ $8784 POP BC
+ $8785 POP DE
+ $8786 POP HL
+ $8787 INC H
+ $8788 INC D
+ $8789 DEC C
+ $878A JR NZ,$877D
+ $878C POP DE
+ $878D POP HL
+@isub=LD C,ROW_BYTES
+ $878E LD C,$20         ; next character row
+ $8790 ADD HL,BC
+ $8791 EX DE,HL
+ $8792 ADD HL,BC
+ $8793 EX DE,HL
+ $8794 PUSH AF          ; a step into the next third must add 7 to the high byte
+ $8795 LD A,D
+ $8796 AND $07
+ $8798 JR Z,$879E
+ $879A LD A,D
+ $879B ADD A,$07
+ $879D LD D,A
+*$879E LD A,H
+ $879F AND $07
+ $87A1 JR Z,$87A7
+ $87A3 LD A,H
+ $87A4 ADD A,$07
+ $87A6 LD H,A
+*$87A7 POP AF
+ $87A8 DEC A
+ $87A9 JR NZ,$8779
+@isub=LD HL,ATTRS+ROW_BYTES
+ $87AB LD HL,$5820      ; attributes of rows 1-17 up one row
+ $87AE LD DE,$5800
+@isub=LD BC,STORY_SCROLL_ROWS*ROW_BYTES
+ $87B1 LD BC,$0220
+ $87B4 LDIR
+@isub=LD B,STORY_COLUMNS
+ $87B6 LD B,$2A         ; clear the new bottom row
+ $87B8 LD HL,$5020
+ $87BB LD C,$01         ; pixel offset 1
+@isub=LD A,CHAR_SPACE
+ $87BD LD A,$20
+*$87BF CALL $87C9
+ $87C2 DJNZ $87BF
+ $87C4 POP DE
+ $87C5 POP HL
+ $87C6 POP BC
+ $87C7 POP AF
+ $87C8 RET

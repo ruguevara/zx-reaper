@@ -32,7 +32,7 @@ g$B6EB DEFB $00,$00,$00
  $B6F9 DEFB $00
 @label=ActionPerform
  $B6FA DEFB $00
-@label=ActionBlocked
+@label=ActionAllowed
  $B6FB DEFB $00
 @label=TargetNamePtr
  $B6FC DEFW $0000
@@ -48,7 +48,7 @@ g$B6EB DEFB $00,$00,$00
  $B702 DEFB $00
 @label=PhraseMode
  $B703 DEFB $00
-@label=OutputColumn
+@label=CapitalNext
  $B704 DEFB $00
 @label=ParserFlag
  $B705 DEFB $00

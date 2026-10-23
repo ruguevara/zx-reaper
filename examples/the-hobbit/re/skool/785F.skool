@@ -1,6 +1,11 @@
-; Routine at 785F
+; Clear the ALL/EXCEPT stage
 ;
-; Used by the routines at #R$7585 and #R$772F.
+; Sets AllStage to 0. That byte is 0 for a normal command, 1 after ALL
+; (#R$82D2) and 2 after EXCEPT (#R$82BA); it is cleared at the start of every
+; parse (#R$7585) and when the parser leaves the EXCEPT nouns.
+;
+; O:A 0
+@label=ClearAllStage
 c$785F XOR A         ;
- $7860 LD ($B719),A  ;
+ $7860 LD ($B719),A  ; AllStage
  $7863 RET           ;

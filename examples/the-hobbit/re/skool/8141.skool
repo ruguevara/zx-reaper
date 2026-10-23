@@ -1,6 +1,12 @@
-; Routine at 8141
+; Move the picture pen right one pixel
 ;
-; Used by the routines at #R$8071 and #R$8151.
+; Adds 1 to the pen x. At the right edge (x 255) the pen stays and Z is
+; returned. H is used as scratch on that path; A is kept.
+;
+; D Pen x
+; O:D New pen x
+; O:F Z if the pen was at the edge and did not move
+@label=MovePenRight
 c$8141 INC D         ;
  $8142 RET NZ        ;
  $8143 DEC D         ;

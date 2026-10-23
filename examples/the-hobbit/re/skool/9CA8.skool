@@ -1,34 +1,49 @@
-; Routine at 9CA8
+; Random number from -A to A
 ;
-; Used by the routines at #R$9213, #R$92ED and #R$9C9F.
-c$9CA8 PUSH IX        ;
- $9CAA PUSH BC        ;
- $9CAB LD C,A         ;
- $9CAC SLA A          ;
- $9CAE JR NC,$9CB2    ;
- $9CB0 LD A,$FF       ;
-*$9CB2 LD B,A         ;
-*$9CB3 LD IX,$B712    ;
- $9CB7 INC (IX+$01)   ;
- $9CBA JR NZ,$9CBF    ;
- $9CBC INC (IX+$00)   ;
-*$9CBF LD IX,($B712)  ;
- $9CC3 LD A,($B70E)   ;
- $9CC6 ADC A,(IX+$00) ;
- $9CC9 ADD IX,DE      ;
- $9CCB XOR (IX+$01)   ;
- $9CCE PUSH HL        ;
- $9CCF LD HL,$B70E    ;
- $9CD2 CP (HL)        ;
- $9CD3 POP HL         ;
- $9CD4 JR Z,$9CB3     ;
- $9CD6 LD ($B70E),A   ;
-*$9CD9 CP B           ;
- $9CDA JR C,$9CE3     ;
- $9CDC JR Z,$9CE3     ;
- $9CDE SRL A          ;
- $9CE0 JP $9CD9       ;
-*$9CE3 SUB C          ;
- $9CE4 POP BC         ;
- $9CE5 POP IX         ;
- $9CE7 RET            ;
+; The game's random number routine. It keeps a seed ($B70E) and a pointer into
+; memory ($B712: its high byte at $B713 is stepped by one page per call, the
+; low byte when that wraps), and mixes the seed with two bytes read from
+; memory at the pointer and at the pointer plus DE plus 1. A repeated seed is
+; discarded. The 8-bit result is halved until it is at most 2*A (or 255 when A
+; is 128 or more), then A is subtracted, giving a signed value from -A to A
+; (not evenly spread).
+; .
+; The seed starts from the R register at the first key press (#R$6C00).
+;
+; A Largest absolute value wanted
+; DE Any value; added to the memory pointer, so callers' leftovers add noise
+; O:A Random number from -A to A (two's complement)
+@label=RandomSigned
+c$9CA8 PUSH IX
+ $9CAA PUSH BC
+ $9CAB LD C,A
+ $9CAC SLA A
+ $9CAE JR NC,$9CB2
+ $9CB0 LD A,$FF
+*$9CB2 LD B,A
+@label=RandomSigned_Retry
+*$9CB3 LD IX,$B712      ; step the pointer: page counter, then its low byte
+ $9CB7 INC (IX+$01)
+ $9CBA JR NZ,$9CBF
+ $9CBC INC (IX+$00)
+*$9CBF LD IX,($B712)
+ $9CC3 LD A,($B70E)     ; seed + byte at the pointer
+ $9CC6 ADC A,(IX+$00)
+ $9CC9 ADD IX,DE        ; second byte comes from pointer + DE + 1
+ $9CCB XOR (IX+$01)
+ $9CCE PUSH HL
+ $9CCF LD HL,$B70E
+ $9CD2 CP (HL)
+ $9CD3 POP HL
+ $9CD4 JR Z,$9CB3
+ $9CD6 LD ($B70E),A
+@label=RandomSigned_Halve
+*$9CD9 CP B             ; halve until not above 2*A
+ $9CDA JR C,$9CE3
+ $9CDC JR Z,$9CE3
+ $9CDE SRL A
+ $9CE0 JP $9CD9
+*$9CE3 SUB C            ; range -A..A
+ $9CE4 POP BC
+ $9CE5 POP IX
+ $9CE7 RET

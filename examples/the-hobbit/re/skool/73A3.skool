@@ -1,8 +1,20 @@
-; Routine at 73A3
+; Control code 6: print the name of the subject
+;
+; Prints the name of the actor in $B6EA ("you" for the player, "someone" when
+; $FF) without an article. The second entry leaves the article flag as the
+; caller set it (used by #R$712B).
+; .
+; The printer calls this handler with IX at the code byte. Return Z when there
+; is nothing to print; NZ with a word token in DE and the printer prints it.
+;
+; O:A 0
+; O:F Z
+@label=PrintSubjectName
 c$73A3 XOR A         ;
- $73A4 LD ($B703),A  ;
+ $73A4 LD ($B703),A  ; PhraseMode: no article
 ; This entry point is used by the routine at #R$712B.
-*$73A7 LD A,($B6EA)  ;
+@label=PrintSubjectNameAsIs
+*$73A7 LD A,($B6EA)  ; Subject
  $73AA CALL $7488    ;
  $73AD XOR A         ;
  $73AE RET           ;

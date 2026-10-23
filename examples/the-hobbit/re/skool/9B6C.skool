@@ -1,6 +1,12 @@
-; Routine at 9B6C
+; Call a handler address if it is not zero
 ;
-; Used by the routines at #R$8D9D, #R$950F, #R$96B3 and #R$9928.
+; Calls the routine at HL (through #R$9B80) when HL is not zero, and does
+; nothing when it is. All registers except AF are preserved, so the handler can
+; not hand values back in registers. Used for the handler words in records,
+; timers and NPC scripts.
+; .
+; HL Address of the handler, or 0 for none
+@label=CallHandler
 c$9B6C PUSH IX       ;
  $9B6E PUSH IY       ;
  $9B70 PUSH DE       ;
@@ -8,7 +14,7 @@ c$9B6C PUSH IX       ;
  $9B72 PUSH HL       ;
  $9B73 LD A,L        ;
  $9B74 OR H          ;
- $9B75 CALL NZ,$9B80 ;
+ $9B75 CALL NZ,$9B80 ; JP (HL) trampoline
  $9B78 POP HL        ;
  $9B79 POP BC        ;
  $9B7A POP DE        ;

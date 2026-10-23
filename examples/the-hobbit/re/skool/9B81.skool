@@ -1,11 +1,22 @@
-; Routine at 9B81
+; Find a verb entry in an object's verb table
 ;
-; Used by the routines at #R$92ED, #R$94D6 and #R$950F.
+; Skips the fixed part of the object record in IX (RECORD_HEADER_SIZE bytes plus
+; one per location, record +0 N) and searches the verb table that follows:
+; (verb id, handler address) entries, ending with $FF. An entry with id 0
+; chains to the next table; #R$9DBD does not follow it.
+; .
+; A Verb id
+; IX Record of the object
+; O:IX Address of the matching entry, or of the $FF that ends the table
+; O:A The id found, or END_MARK
+; O:F Z set when not found
+@label=FindVerbEntry
 c$9B81 PUSH DE       ;
  $9B82 LD D,A        ;
  $9B83 LD A,(IX+$00) ;
+@isub=ADD A,RECORD_HEADER_SIZE
  $9B86 ADD A,$10     ;
- $9B88 LD E,A        ;
+ $9B88 LD E,A        ; E: offset of the verb table
  $9B89 LD A,D        ;
  $9B8A LD D,$00      ;
  $9B8C ADD IX,DE     ;

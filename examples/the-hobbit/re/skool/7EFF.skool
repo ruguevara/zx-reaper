@@ -1,9 +1,19 @@
-; Routine at 7EFF
+; Find the order slot of the acting character
 ;
-; Used by the routines at #R$7F10 and #R$7F1A.
+; Looks through the 8 order slots for one whose owner is Subject ($B6EA, the
+; actor now acting).
+;
+; O:F Z if found
+; O:HL Address of the slot (its owner byte) if found, otherwise past the table
+; (OrderSlots+8*25)
+; O:A Subject
+; O:B, DE Destroyed
+@label=FindOrderSlot
 c$7EFF LD HL,$B738   ;
+@isub=LD DE,ORDER_SLOT_SIZE
  $7F02 LD DE,$0019   ;
  $7F05 LD A,($B6EA)  ;
+@isub=LD B,ORDER_SLOTS
  $7F08 LD B,$08      ;
 *$7F0A CP (HL)       ;
  $7F0B RET Z         ;

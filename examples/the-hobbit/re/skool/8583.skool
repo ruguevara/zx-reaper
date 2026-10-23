@@ -1,9 +1,13 @@
-; Routine at 8583
+; Print a new line
 ;
-; Used by the routines at #R$6C00, #R$712B, #R$7348, #R$74BA, #R$8C4B, #R$93DA,
-; #R$965B, #R$96A8, #R$97F4, #R$9FC7, #R$A050 and #R$A138.
-c$8583 PUSH AF       ;
- $8584 LD A,$0D      ;
- $8586 CALL $858B    ;
- $8589 POP AF        ;
- $858A RET           ;
+; Sends a carriage return (CHAR_CR) through #R$858B, which prints it in the
+; story window or the input window as RawOutputFlag says. Keeps AF.
+; .
+; Hardware: none directly (see #R$858B).
+@label=PrintNewLine
+c$8583 PUSH AF
+@isub=LD A,CHAR_CR
+ $8584 LD A,$0D
+ $8586 CALL $858B
+ $8589 POP AF
+ $858A RET

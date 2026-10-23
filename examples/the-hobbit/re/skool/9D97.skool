@@ -1,21 +1,27 @@
-; Routine at 9D97
+; Count the present records held by a holder
 ;
-; Used by the routines at #R$90EB, #R$910E and #R$A050.
-c$9D97 PUSH IX        ;
- $9D99 PUSH IY        ;
- $9D9B PUSH BC        ;
- $9D9C LD B,$00       ;
- $9D9E LD IX,$C060    ;
-*$9DA2 CALL $9BA9     ;
- $9DA5 JR Z,$9DB6     ;
- $9DA7 CP (IY+$01)    ;
- $9DAA JR NZ,$9DA2    ;
- $9DAC BIT 7,(IY+$07) ;
- $9DB0 JR Z,$9DA2     ;
- $9DB2 INC B          ;
- $9DB3 JP $9DA2       ;
-*$9DB6 LD A,B         ;
- $9DB7 POP BC         ;
- $9DB8 POP IY         ;
- $9DBA POP IX         ;
- $9DBC RET            ;
+; Counts the records whose holder (+1) is A and whose flag bit 7 (present) is
+; set; objects inside are not counted.
+;
+; A Holder id
+; O:A Number of present records held
+@label=CountHeldPresent
+c$9D97 PUSH IX
+ $9D99 PUSH IY
+ $9D9B PUSH BC
+ $9D9C LD B,$00
+ $9D9E LD IX,$C060      ; the walk steps before it reads: first entry is #R$C063
+*$9DA2 CALL $9BA9
+ $9DA5 JR Z,$9DB6
+ $9DA7 CP (IY+$01)
+ $9DAA JR NZ,$9DA2
+@isub=BIT FLAG_PRESENT,(IY+$07)
+ $9DAC BIT 7,(IY+$07)
+ $9DB0 JR Z,$9DA2
+ $9DB2 INC B
+ $9DB3 JP $9DA2
+*$9DB6 LD A,B
+ $9DB7 POP BC
+ $9DB8 POP IY
+ $9DBA POP IX
+ $9DBC RET

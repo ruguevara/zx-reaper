@@ -1,6 +1,15 @@
-; Routine at 7858
+; Go back to the previous phrase record
 ;
-; Used by the routines at #R$76EC and #R$7795.
-c$7858 CALL $78A5    ;
+; Makes the nearest older record without the EXCEPT flag (#R$78A5) the current
+; one and falls into #R$785F, which clears the ALL/EXCEPT stage. Used when the
+; nouns after EXCEPT have been stored in their own record and parsing returns
+; to the main command, or for a second command after SAY TO.
+;
+; IY Current phrase record
+; O:IY The previous phrase record
+; O:IX The same record
+; O:A 0
+@label=PreviousRecord
+c$7858 CALL $78A5    ; IX = older record
  $785B PUSH IX       ;
- $785D POP IY        ;
+ $785D POP IY        ; IY = IX

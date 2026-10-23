@@ -1,11 +1,23 @@
-; Routine at 9918
+; Step the NPC script pointer past the command just read
 ;
-; Used by the routines at #R$9928 and #R$9974.
+; Adds the command length to the script address and, when the command byte has
+; bit 4 set (it carries an extra word, the alternative target), two more bytes.
+; The result becomes the NPC's current script (IY+2, IY+3). Used by the script
+; interpreter's handlers for commands that run an order (#R$9928) and for verb-only
+; commands (#R$9974).
+; .
+; HL Address of the command (the current script)
+; DE Length of the command without the extra word: 4 (verb, noun1, noun2) or 2 (verb)
+; IX Address of the command (the same as HL)
+; IY NPC record
+; O:HL Address of the next command
+@label=AdvanceScript
 c$9918 ADD HL,DE      ;
- $9919 BIT 4,(IX+$00) ;
+ $9919 BIT 4,(IX+$00) ; extra word follows?
  $991D JR Z,$9921     ;
  $991F INC HL         ;
  $9920 INC HL         ;
-*$9921 LD (IY+$02),L  ;
+@label=AdvanceScript_Store
+*$9921 LD (IY+$02),L  ; IY+2: current script
  $9924 LD (IY+$03),H  ;
  $9927 RET            ;

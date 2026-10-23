@@ -1,72 +1,88 @@
-; Routine at 87C9
+; Print a character in the story window
 ;
-; Used by the routines at #R$86A1 and #R$876B.
-c$87C9 PUSH AF       ;
- $87CA PUSH BC       ;
- $87CB PUSH DE       ;
- $87CC PUSH HL       ;
- $87CD LD L,A        ;
- $87CE LD H,$00      ;
- $87D0 ADD HL,HL     ;
- $87D1 ADD HL,HL     ;
- $87D2 ADD HL,HL     ;
- $87D3 LD DE,$8722   ;
- $87D6 ADD HL,DE     ;
- $87D7 EX DE,HL      ;
- $87D8 POP HL        ;
- $87D9 PUSH HL       ;
- $87DA LD B,$08      ;
-*$87DC LD A,(DE)     ;
- $87DD PUSH BC       ;
- $87DE DEC C         ;
- $87DF INC C         ;
- $87E0 LD B,$FF      ;
- $87E2 JR Z,$87EB    ;
-*$87E4 SRL A         ;
- $87E6 SRL B         ;
- $87E8 DEC C         ;
- $87E9 JR NZ,$87E4   ;
-*$87EB LD C,A        ;
- $87EC LD A,B        ;
- $87ED CPL           ;
- $87EE AND (HL)      ;
- $87EF OR C          ;
- $87F0 LD (HL),A     ;
- $87F1 POP BC        ;
- $87F2 DEC C         ;
- $87F3 INC C         ;
- $87F4 JR Z,$880E    ;
- $87F6 PUSH BC       ;
- $87F7 LD A,$08      ;
- $87F9 SUB C         ;
- $87FA LD C,A        ;
- $87FB LD A,(DE)     ;
- $87FC LD B,$FF      ;
-*$87FE SLA A         ;
- $8800 SLA B         ;
- $8802 DEC C         ;
- $8803 JR NZ,$87FE   ;
- $8805 LD C,A        ;
- $8806 LD A,B        ;
- $8807 CPL           ;
- $8808 INC HL        ;
- $8809 AND (HL)      ;
- $880A OR C          ;
- $880B LD (HL),A     ;
- $880C DEC HL        ;
- $880D POP BC        ;
-*$880E INC DE        ;
- $880F INC H         ;
- $8810 DJNZ $87DC    ;
- $8812 POP HL        ;
- $8813 POP DE        ;
- $8814 POP BC        ;
- $8815 LD A,C        ;
- $8816 ADD A,$06     ;
- $8818 CP $08        ;
- $881A JR C,$881F    ;
- $881C SUB $08       ;
- $881E INC L         ;
-*$881F LD C,A        ;
- $8820 POP AF        ;
- $8821 RET           ;
+; Draws one character of the game font (#R$8822, 6 pixels wide, 8 lines) at
+; pixel offset C inside the cell at HL. The 8-bit window from bit 7-C down is
+; cleared and filled with the glyph; the part of it that falls over the right
+; edge goes into the next cell. Then the position moves on by GLYPH_WIDTH
+; pixels (42 characters of 6 pixels fill a 252-pixel line). AF, DE and B are kept.
+; .
+; Hardware: writes up to 16 bytes of the screen bitmap (8 lines in the cell
+; and the next one); attributes are not changed.
+;
+; A Character code $20-$7F
+; HL Screen address of the cell (top pixel line)
+; C Pixel offset of the glyph inside the cell, 0-7
+; O:HL Address of the cell for the next character
+; O:C Pixel offset for the next character
+@label=PrintStoryChar
+c$87C9 PUSH AF
+ $87CA PUSH BC
+ $87CB PUSH DE
+ $87CC PUSH HL
+ $87CD LD L,A
+ $87CE LD H,$00
+ $87D0 ADD HL,HL
+ $87D1 ADD HL,HL
+ $87D2 ADD HL,HL
+@isub=LD DE,Font-FONT_BASE_ADJUST
+ $87D3 LD DE,$8722      ; glyph = Font + (code-$20)*8
+ $87D6 ADD HL,DE
+ $87D7 EX DE,HL
+ $87D8 POP HL
+ $87D9 PUSH HL
+ $87DA LD B,$08         ; 8 pixel lines
+*$87DC LD A,(DE)
+ $87DD PUSH BC
+ $87DE DEC C            ; C = 0: no shift
+ $87DF INC C
+ $87E0 LD B,$FF         ; B = mask of the bits to replace
+ $87E2 JR Z,$87EB
+*$87E4 SRL A            ; shift glyph and mask right by C
+ $87E6 SRL B
+ $87E8 DEC C
+ $87E9 JR NZ,$87E4
+*$87EB LD C,A
+ $87EC LD A,B
+ $87ED CPL
+ $87EE AND (HL)
+ $87EF OR C
+ $87F0 LD (HL),A
+ $87F1 POP BC
+ $87F2 DEC C
+ $87F3 INC C
+ $87F4 JR Z,$880E       ; C = 0: nothing spills into the next cell
+ $87F6 PUSH BC
+ $87F7 LD A,$08         ; spill: shift the glyph left by 8-C
+ $87F9 SUB C
+ $87FA LD C,A
+ $87FB LD A,(DE)
+ $87FC LD B,$FF
+*$87FE SLA A
+ $8800 SLA B
+ $8802 DEC C
+ $8803 JR NZ,$87FE
+ $8805 LD C,A
+ $8806 LD A,B
+ $8807 CPL
+ $8808 INC HL           ; next cell
+ $8809 AND (HL)
+ $880A OR C
+ $880B LD (HL),A
+ $880C DEC HL
+ $880D POP BC
+*$880E INC DE
+ $880F INC H            ; next pixel line
+ $8810 DJNZ $87DC
+ $8812 POP HL
+ $8813 POP DE
+ $8814 POP BC
+ $8815 LD A,C
+@isub=ADD A,GLYPH_WIDTH
+ $8816 ADD A,$06
+ $8818 CP $08           ; over the cell edge?
+ $881A JR C,$881F
+ $881C SUB $08
+ $881E INC L            ; next cell
+*$881F LD C,A
+ $8820 POP AF
+ $8821 RET

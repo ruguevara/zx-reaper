@@ -1,6 +1,22 @@
-; Routine at 6F47
+; Look up the typed word in the dictionary
 ;
-; Used by the routine at #R$6E97.
+; Copies the letters of the word at HL (characters $40 and up, 5 bits each)
+; into #R$707A and counts them in #R$708A, then picks the first dictionary
+; entry for its first letter from the index at #R$6000. Falls into the loop
+; that tests entries one at a time.
+; .
+; The entry points after the first test one entry (IX) against the typed
+; word: if its first letter differs, return NZ (the words of one letter are
+; contiguous, so the caller stops). Otherwise the entry's letters are decoded
+; into #R$708B (count in #R$709B), skipping the suffix bits that are not
+; letters, IX is moved past the entry (and past its two synonym bytes when bit
+; 6 of its last byte is set, in which case A=0), and Z is returned. The caller
+; (#R$6E97) then compares the two words with #R$6FBA.
+;
+; HL Address of the first character of the typed word
+; O:HL Address after the typed word
+; O:IX Address of the first dictionary entry for its first letter
+; O:F NZ when the first letter has no entry
 c$6F47 LD DE,$707A    ;
  $6F4A LD B,$00       ;
 *$6F4C LD A,(HL)      ;
@@ -15,26 +31,28 @@ c$6F47 LD DE,$707A    ;
 *$6F59 LD A,B         ;
  $6F5A LD ($708A),A   ;
  $6F5D PUSH HL        ;
- $6F5E LD HL,($707A)  ;
- $6F61 LD H,$00       ;
+ $6F5E LD HL,($707A)  ; first letter in L
+ $6F61 LD H,$00       ; H=0, HL=first letter
  $6F63 LD DE,$6000    ;
- $6F66 ADD HL,HL      ;
+ $6F66 ADD HL,HL      ; two bytes per index entry
  $6F67 ADD HL,DE      ;
  $6F68 LD E,(HL)      ;
  $6F69 INC HL         ;
  $6F6A LD D,(HL)      ;
- $6F6B LD IX,$6000    ;
+ $6F6B LD IX,$6000    ; IX=entry address
  $6F6F ADD IX,DE      ;
  $6F71 POP HL         ;
 ; This entry point is used by the routine at #R$6E97.
-*$6F72 LD ($B717),IX  ;
+@label=TestWordEntry
+*$6F72 LD ($B717),IX  ; remember the entry being tried for the caller
 ; This entry point is used by the routine at #R$6E97.
+@label=TestWordEntry_Compare
 *$6F76 LD A,(IX+$00)  ;
  $6F79 AND $1F        ;
  $6F7B LD B,A         ;
- $6F7C LD A,($707A)   ;
+ $6F7C LD A,($707A)   ; first typed letter
  $6F7F CP B           ;
- $6F80 RET NZ         ;
+ $6F80 RET NZ         ; different first letter: no more candidates
  $6F81 PUSH HL        ;
  $6F82 LD HL,$708B    ;
  $6F85 LD BC,$0000    ;
@@ -48,17 +66,17 @@ c$6F47 LD DE,$707A    ;
  $6F94 INC C          ;
  $6F95 BIT 7,(IX-$01) ;
  $6F99 JR Z,$6F88     ;
- $6F9B LD A,C         ;
- $6F9C CP $02         ;
+ $6F9B LD A,C         ; C counts bytes read
+ $6F9C CP $02         ; byte 2 is never the last
  $6F9E JR Z,$6F88     ;
  $6FA0 CP $03         ;
  $6FA2 JR NZ,$6FAA    ;
- $6FA4 BIT 7,(IX-$02) ;
+ $6FA4 BIT 7,(IX-$02) ; byte 3 goes on when byte 2 had bit 7
  $6FA8 JR NZ,$6F88    ;
 *$6FAA POP HL         ;
  $6FAB LD A,B         ;
- $6FAC LD ($709B),A   ;
- $6FAF BIT 6,(IX-$01) ;
+ $6FAC LD ($709B),A   ; MatchLength
+ $6FAF BIT 6,(IX-$01) ; bit 6 of the last byte: synonym
  $6FB3 RET Z          ;
  $6FB4 INC IX         ;
  $6FB6 INC IX         ;

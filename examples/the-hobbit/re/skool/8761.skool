@@ -1,11 +1,22 @@
-; Routine at 8761
+; Move the story-window cursor back one character
 ;
-; Used by the routine at #R$86A1.
-c$8761 LD A,C        ;
- $8762 SUB $06       ;
- $8764 LD C,A        ;
- $8765 RET NC        ;
- $8766 ADD A,$08     ;
- $8768 LD C,A        ;
- $8769 DEC L         ;
- $876A RET           ;
+; The story window packs 42 characters of 6 pixels into 32 cells, so a character
+; starts at pixel offset C (0-7) inside a cell. Subtracts GLYPH_WIDTH from C;
+; when that goes below 0, adds 8 and moves to the cell on the left.
+; .
+; Hardware: none.
+;
+; C Pixel offset of the character inside its cell, 0-7
+; HL Screen address of the cell
+; O:C New pixel offset
+; O:L Low byte of the cell address, one less when C wrapped
+@label=StepCursorBack
+c$8761 LD A,C
+@isub=SUB GLYPH_WIDTH
+ $8762 SUB $06
+ $8764 LD C,A
+ $8765 RET NC
+ $8766 ADD A,$08        ; borrow: 8 pixels per cell
+ $8768 LD C,A
+ $8769 DEC L
+ $876A RET

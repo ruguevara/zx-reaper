@@ -1,14 +1,24 @@
-; Routine at 84B9
+; Wait for a key press
 ;
-; Used by the routines at #R$843A and #R$84CC.
-c$84B9 XOR A         ;
- $84BA IN A,($FE)    ;
- $84BC AND $1F       ;
- $84BE CP $1F        ;
- $84C0 JR NZ,$84B9   ;
-*$84C2 XOR A         ;
- $84C3 IN A,($FE)    ;
- $84C5 AND $1F       ;
- $84C7 CP $1F        ;
- $84C9 JR Z,$84C2    ;
- $84CB RET           ;
+; Waits until no key is down, then until any key is down. Reads all eight
+; keyboard half-rows at once (A = 0 selects them all).
+; .
+; Hardware: reads the keyboard port $FE.
+@label=WaitForKey
+c$84B9 XOR A
+@isub=IN A,(PORT_ULA)
+ $84BA IN A,($FE)
+@isub=AND KEY_BITS
+ $84BC AND $1F
+@isub=CP KEY_BITS
+ $84BE CP $1F
+ $84C0 JR NZ,$84B9      ; a key is down: wait for release
+*$84C2 XOR A
+@isub=IN A,(PORT_ULA)
+ $84C3 IN A,($FE)
+@isub=AND KEY_BITS
+ $84C5 AND $1F
+@isub=CP KEY_BITS
+ $84C7 CP $1F
+ $84C9 JR Z,$84C2       ; no key down: wait for a press
+ $84CB RET

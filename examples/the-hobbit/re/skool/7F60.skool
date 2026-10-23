@@ -1,11 +1,17 @@
-; Routine at 7F60
+; Free the order slots of an actor
 ;
-; Used by the routines at #R$7F1A and #R$977F.
+; Sets the owner of every order slot owned by A to 0 (free). HL, DE, BC are
+; preserved.
+;
+; A Actor id
+@label=FreeOrderSlots
 c$7F60 PUSH HL       ;
  $7F61 PUSH DE       ;
  $7F62 PUSH BC       ;
  $7F63 LD HL,$B738   ;
+@isub=LD DE,ORDER_SLOT_SIZE
  $7F66 LD DE,$0019   ;
+@isub=LD B,ORDER_SLOTS
  $7F69 LD B,$08      ;
 *$7F6B CP (HL)       ;
  $7F6C JR NZ,$7F70   ;

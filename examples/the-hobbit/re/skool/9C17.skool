@@ -1,20 +1,30 @@
-; Routine at 9C17
+; Move an object's contents to a location
 ;
-; Used by the routine at #R$9BDD.
+; Sets the first location slot (record +$10) to B for every object whose
+; holder is A, then does the same for the contents of each of those objects (it
+; calls itself). Used by #R$9BDD when a carrier changes place. If the walk meets
+; table id 0 (the player) it clears MoveFlag, which tells #R$9BDD that the player
+; moved with the load (inferred).
+; .
+; A Holder id
+; B New location
+@label=MoveContents
 c$9C17 PUSH IY       ;
  $9C19 PUSH IX       ;
+@isub=LD IX,ObjectTable-ID_ENTRY_SIZE
  $9C1B LD IX,$C060   ;
+@label=MoveContents_Next
 *$9C1F CALL $9BA9    ;
  $9C22 JR Z,$9C3C    ;
- $9C24 CP (IY+$01)   ;
+ $9C24 CP (IY+$01)   ; holder = A?
  $9C27 JR NZ,$9C1F   ;
- $9C29 LD (IY+$10),B ;
+ $9C29 LD (IY+$10),B ; location slot 0
  $9C2C PUSH AF       ;
  $9C2D LD A,(IX+$00) ;
  $9C30 AND A         ;
- $9C31 JR NZ,$9C36   ;
+ $9C31 JR NZ,$9C36   ; id 0 (the player)?
  $9C33 LD ($9BDC),A  ;
-*$9C36 CALL $9C17    ;
+*$9C36 CALL $9C17    ; its contents too
  $9C39 POP AF        ;
  $9C3A JR $9C1F      ;
 *$9C3C POP IX        ;

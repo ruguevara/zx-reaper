@@ -1,18 +1,40 @@
-; Routine at 7C23
+; Split a matched phrase into its two noun phrases
 ;
-; Used by the routine at #R$7B9E.
-c$7C23 AND A         ;
+; Called by #R$7B9E when a command record has matched the parsed phrase. First,
+; if A is not 0, swaps the two words collected in $795A and $795C. Then #R$70F3
+; builds the flags $B71D/$B71E from the command record in IX.
+; .
+; The parsed record (24 bytes, IY) holds two noun phrases of three words, at
+; +$08 and +$12. Bit 5 of $B71D decides which is noun phrase 1: clear gives
+; +$12 for phrase 1 and +$08 for phrase 2, set the other way round. That bit is
+; flipped when the first collected word ($795A) equals the word at +$0E or +$10
+; of the record; with no collected word, bit 5 of $B71E is taken and flipped.
+; The two offsets go to RecWork6/7 ($7954/$7955). Phrase 1 is copied to RecBuf1
+; ($7942) with bit 0 of RecWork ($793D) set if it has any word; it is copied on
+; to PhraseBuffer ($B6E0). Phrase 2 goes to RecBuf2 ($7948), flag in RecWork1
+; ($793E).
+; .
+; The part from $7C91 is a routine of its own (copy one phrase): A offset in the
+; record, IY the record, DE the destination, HL the flag byte.
+;
+; A Not 0: the command matched with its two words in the other order (#R$71F3)
+; IX Command record that matched
+; IY Parsed phrase record
+; O:A Offset of noun phrase 2 in the record
+@label=SplitNounPhrases
+c$7C23 AND A              ; A not 0: swap the two collected words
  $7C24 JR Z,$7C34    ;
  $7C26 LD HL,($795A) ;
  $7C29 LD DE,($795C) ;
  $7C2D LD ($795A),DE ;
  $7C31 LD ($795C),HL ;
-*$7C34 CALL $70F3    ;
+@label=SplitNounPhrases_Flags
+*$7C34 CALL $70F3         ; build $B71D/$B71E from IX
  $7C37 LD HL,$795A   ;
  $7C3A LD A,(HL)     ;
  $7C3B INC HL        ;
  $7C3C OR (HL)       ;
- $7C3D JR NZ,$7C44   ;
+ $7C3D JR NZ,$7C44        ; no word collected: use $B71E
  $7C3F LD A,($B71E)  ;
  $7C42 JR $7C63      ;
 *$7C44 DEC HL        ;
@@ -32,42 +54,26 @@ c$7C23 AND A         ;
  $7C5B CP (IY+$11)   ;
 *$7C5E LD A,($B71D)  ;
  $7C61 JR NZ,$7C65   ;
-*$7C63 XOR $20       ;
+*$7C63 XOR $20            ; flip bit 5
 *$7C65 BIT 5,A       ;
- $7C67 LD BC,$1208   ;
+@isub=LD BC,REC_PHRASE_B*256+REC_PHRASE_A
+ $7C67 LD BC,$1208        ; bit 5 clear: phrase 1 at +$12, 2 at +$08
  $7C6A JR Z,$7C6F    ;
+@isub=LD BC,REC_PHRASE_A*256+REC_PHRASE_B
  $7C6C LD BC,$0812   ;
 *$7C6F LD HL,$7954   ;
- $7C72 LD (HL),B     ;
+ $7C72 LD (HL),B          ; RecWork6: offset of phrase 1
  $7C73 INC HL        ;
- $7C74 LD (HL),C     ;
+ $7C74 LD (HL),C          ; RecWork7: offset of phrase 2
  $7C75 LD A,B        ;
  $7C76 LD DE,$7942   ;
  $7C79 LD HL,$793D   ;
- $7C7C CALL $7C91    ;
+ $7C7C CALL $7C91         ; phrase 1 to RecBuf1
  $7C7F LD A,C        ;
  $7C80 LD HL,$7942   ;
- $7C83 LD DE,$B6E0   ;
+ $7C83 LD DE,$B6E0        ; and to PhraseBuffer
+@isub=LD BC,PHRASE_WORDS_SIZE
  $7C86 LD BC,$0006   ;
  $7C89 LDIR          ;
- $7C8B LD DE,$7948   ;
+ $7C8B LD DE,$7948        ; phrase 2 to RecBuf2
  $7C8E LD HL,$793E   ;
-*$7C91 PUSH BC       ;
- $7C92 LD C,A        ;
- $7C93 LD B,$00      ;
- $7C95 PUSH HL       ;
- $7C96 PUSH IY       ;
- $7C98 POP HL        ;
- $7C99 ADD HL,BC     ;
- $7C9A LD BC,$0006   ;
- $7C9D LDIR          ;
- $7C9F XOR A         ;
- $7CA0 LD B,$06      ;
-*$7CA2 DEC HL        ;
- $7CA3 OR (HL)       ;
- $7CA4 DJNZ $7CA2    ;
- $7CA6 POP HL        ;
- $7CA7 POP BC        ;
- $7CA8 RET Z         ;
- $7CA9 SET 0,(HL)    ;
- $7CAB RET           ;

@@ -30,7 +30,7 @@ g$B708 DEFW $0000
  $B716 DEFB $00
 @label=SourceTextPtr
  $B717 DEFW $0000
-@label=StateB719
+@label=AllStage
  $B719 DEFB $00
 @label=StateB71A
  $B71A DEFB $00

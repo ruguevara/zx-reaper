@@ -1,3 +1,12 @@
-; Routine at 7790
-c$7790 RES 4,E       ;
- $7792 JP $75BE      ;
+; Parse an article or auxiliary word (class 8)
+;
+; Handler for the words of class 8 (a, an, the, is, can ...) in the table
+; ActionTable. The word is ignored: it clears bit 4 of the flags (the article
+; that is allowed at the start of a phrase has been seen) and goes on with the
+; next word.
+;
+; E Parser flags (bit 4 is cleared)
+; IY Current phrase record
+@label=ParseArticle
+c$7790 RES 4,E       ; an article has been seen
+ $7792 JP $75BE      ; read the next word

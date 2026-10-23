@@ -1,6 +1,13 @@
-; Routine at 71D5
+; Address of a location's name phrase
 ;
-; Used by the routines at #R$73C2 and #R$7B63.
+; Looks up the location record of location A (#R$9BB1) and returns the address
+; of its first phrase code (record +2). For an id of $50 or more the lookup
+; leaves IX alone and the result is not meaningful.
+;
+; A Location id
+; O:HL Address of the phrase codes of the location
+; O:IX Preserved
+@label=LocationNamePtr
 c$71D5 PUSH IX       ;
  $71D7 CALL $9BB1    ;
  $71DA PUSH IX       ;

@@ -1,6 +1,12 @@
-; Routine at 75F1
+; Test for the player's own line being parsed (Z set)
 ;
-; Used by the routines at #R$75F6, #R$772F, #R$7924 and #R$7929.
+; Z when InputFromOrder ($B71B) is 0: the words come from the line the player
+; typed, so a syntax error is reported ("What ?"). NZ while the order after SAY
+; TO is parsed, which ignores errors.
+;
+; O:A InputFromOrder
+; O:F Z set for the typed line
+@label=TestTypedLine
 c$75F1 LD A,($B71B)  ;
  $75F4 AND A         ;
  $75F5 RET           ;

@@ -1,45 +1,57 @@
-; Routine at 860D
+; Scroll the input window up one line
 ;
-; Used by the routine at #R$85B7.
-c$860D PUSH HL       ;
- $860E PUSH DE       ;
- $860F PUSH BC       ;
- $8610 PUSH AF       ;
- $8611 LD HL,$5080   ;
- $8614 LD DE,$5060   ;
- $8617 LD A,$04      ;
- $8619 LD B,$00      ;
-*$861B PUSH HL       ;
- $861C PUSH DE       ;
- $861D LD C,$08      ;
-*$861F PUSH HL       ;
- $8620 PUSH DE       ;
- $8621 PUSH BC       ;
- $8622 LD C,$20      ;
- $8624 LDIR          ;
- $8626 POP BC        ;
- $8627 POP DE        ;
- $8628 POP HL        ;
- $8629 INC H         ;
- $862A INC D         ;
- $862B DEC C         ;
- $862C JR NZ,$861F   ;
- $862E POP DE        ;
- $862F POP HL        ;
- $8630 LD C,$20      ;
- $8632 ADD HL,BC     ;
- $8633 EX DE,HL      ;
- $8634 ADD HL,BC     ;
- $8635 EX DE,HL      ;
- $8636 DEC A         ;
- $8637 JR NZ,$861B   ;
- $8639 LD B,$20      ;
- $863B LD HL,$50E0   ;
- $863E LD A,$20      ;
-*$8640 CALL $867A    ;
- $8643 DJNZ $8640    ;
- $8645 POP AF        ;
- $8646 POP BC        ;
- $8647 POP DE        ;
- $8648 POP HL        ;
- $8649 RET           ;
+; The input window is character rows 19-23 (5 lines of 32 columns). Moves
+; rows 20-23 up to 19-22 one pixel line at a time, then clears row 23 by
+; printing 32 spaces with #R$867A. All registers are kept.
+; .
+; Hardware: copies the screen bitmap of rows 19-23; attributes
+; are not touched.
+@label=ScrollInputUp
+c$860D PUSH HL
+ $860E PUSH DE
+ $860F PUSH BC
+ $8610 PUSH AF
+ $8611 LD HL,$5080      ; source: row 20
+ $8614 LD DE,$5060      ; destination: row 19
+@isub=LD A,INPUT_SCROLL_ROWS
+ $8617 LD A,$04
+ $8619 LD B,$00         ; B=0 for the 16-bit adds below
+*$861B PUSH HL
+ $861C PUSH DE
+ $861D LD C,$08         ; 8 pixel lines of one character row
+*$861F PUSH HL
+ $8620 PUSH DE
+ $8621 PUSH BC
+@isub=LD C,ROW_BYTES
+ $8622 LD C,$20         ; one pixel line = 32 bytes
+ $8624 LDIR
+ $8626 POP BC
+ $8627 POP DE
+ $8628 POP HL
+ $8629 INC H
+ $862A INC D
+ $862B DEC C
+ $862C JR NZ,$861F
+ $862E POP DE
+ $862F POP HL
+@isub=LD C,ROW_BYTES
+ $8630 LD C,$20         ; next character row
+ $8632 ADD HL,BC
+ $8633 EX DE,HL
+ $8634 ADD HL,BC
+ $8635 EX DE,HL
+ $8636 DEC A
+ $8637 JR NZ,$861B
+@isub=LD B,INPUT_COLUMNS
+ $8639 LD B,$20
+ $863B LD HL,$50E0
+@isub=LD A,CHAR_SPACE
+ $863E LD A,$20         ; blank the bottom row
+@label=ScrollInputUp_Clear
+*$8640 CALL $867A
+ $8643 DJNZ $8640
+ $8645 POP AF
+ $8646 POP BC
+ $8647 POP DE
+ $8648 POP HL
+ $8649 RET

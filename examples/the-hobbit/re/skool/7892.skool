@@ -1,10 +1,23 @@
-; Routine at 7892
+; Step IY to the next newer phrase record
 ;
-; Used by the routine at #R$75F6.
+; Moves IY to the next record below it on the phrase stack that is not an
+; EXCEPT record (#R$789F) and leaves the old IY in IX (the swap is #R$7896).
+; #R$7892 also counts the record down in B (the number of records still to
+; visit); #R$7893 does not. Records are created downwards, so "newer" is a
+; lower address.
+;
+; B Records left to visit (#R$7892 only)
+; IY Current record
+; O:B Decreased by one (#R$7892 only)
+; O:IY The next newer record
+; O:IX The old IY
+@label=StepNewerCount
 c$7892 DEC B         ;
 ; This entry point is used by the routine at #R$75F6.
+@label=StepNewer
 *$7893 CALL $789F    ;
 ; This entry point is used by the routine at #R$788C.
+@label=SwapRecordPtrs
 *$7896 PUSH IX       ;
  $7898 PUSH IY       ;
  $789A POP IX        ;

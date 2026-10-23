@@ -1,11 +1,25 @@
-; Routine at 842E
+; Next decimal digit by repeated subtraction
 ;
-; Used by the routine at #R$83F5.
-c$842E LD A,$2F      ;
-*$8430 INC A         ;
- $8431 AND A         ;
- $8432 SBC HL,DE     ;
- $8434 JR NC,$8430   ;
- $8436 ADD HL,DE     ;
- $8437 CP $30        ;
- $8439 RET           ;
+; Divides HL by DE with a loop of subtractions and returns the quotient as an
+; ASCII digit (the quotient must be below 10). The caller prints the digit
+; with #R$858B, skipping it when it is "0" for the leading hundreds place of
+; the score.
+; .
+; Hardware: none.
+;
+; HL Number
+; DE Divisor (100, then 10)
+; O:A ASCII digit "0"-"9"
+; O:HL Remainder
+; O:F Z set when the digit is "0"
+@label=DecimalDigit
+@isub=LD A,'0'-1
+c$842E LD A,$2F
+*$8430 INC A
+ $8431 AND A
+ $8432 SBC HL,DE
+ $8434 JR NC,$8430
+ $8436 ADD HL,DE
+@isub=CP '0'
+ $8437 CP $30
+ $8439 RET

@@ -1,7 +1,17 @@
-; Routine at 742D
-c$742D POP DE        ;
- $742E POP HL        ;
- $742F POP AF        ;
- $7430 PUSH HL       ;
- $7431 PUSH DE       ;
+; Print a name with its article and "is"/"are", the id from the stack
+;
+; Message control code 19. The caller of the message printer pushed AF (A = id
+; of the thing) before it, below one more word that the printer keeps; this
+; takes the AF off the stack, leaves the other word in place and continues in
+; #R$7428.
+;
+; (stack) Id of the thing in the A of a pushed AF, below the return address and one saved word
+; O:DE Word code: "is" or "are" (see #R$7428)
+; O:F NZ
+@label=PrintNameIsFromStack
+c$742D POP DE        ; return address
+ $742E POP HL        ; the word the printer keeps
+ $742F POP AF        ; A = id
+ $7430 PUSH HL       ; put the kept word back
+ $7431 PUSH DE       ; and the return address
  $7432 JR $7428      ;

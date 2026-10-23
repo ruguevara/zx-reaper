@@ -1,38 +1,50 @@
-; Routine at 81DE
+; Convert a picture pen position to a screen byte address and bit mask
 ;
-; Used by the routines at #R$80EE and #R$81B5.
-c$81DE LD A,$7F      ;
- $81E0 SUB E         ;
- $81E1 LD L,A        ;
- $81E2 AND $07       ;
- $81E4 OR $40        ;
- $81E6 LD H,A        ;
- $81E7 LD A,L        ;
- $81E8 AND $C0       ;
- $81EA RRCA          ;
- $81EB RRCA          ;
- $81EC RRCA          ;
- $81ED OR H          ;
- $81EE LD H,A        ;
- $81EF LD A,L        ;
- $81F0 AND $38       ;
- $81F2 RLCA          ;
- $81F3 RLCA          ;
- $81F4 LD L,A        ;
- $81F5 LD A,D        ;
- $81F6 RRCA          ;
- $81F7 RRCA          ;
- $81F8 RRCA          ;
- $81F9 AND $1F       ;
- $81FB OR L          ;
- $81FC LD L,A        ;
- $81FD LD A,D        ;
- $81FE AND $07       ;
- $8200 PUSH BC       ;
- $8201 LD B,A        ;
- $8202 INC B         ;
- $8203 LD A,$01      ;
-*$8205 RRC A         ;
- $8207 DJNZ $8205    ;
- $8209 POP BC        ;
- $820A RET           ;
+; The picture area is 256x128 pixels with y growing upward, so the pixel row
+; from the top is $7F-y. Builds the Spectrum screen address of the byte
+; holding the pixel (third, character row and pixel line from the row; column
+; from x/8) and the mask of the pixel in that byte (bit 7 for x mod 8 = 0).
+; Used by the line, plot and fill routines of the picture drawer.
+; .
+; Hardware: none (computes an address in the screen bitmap only).
+;
+; D Pen x, 0-255
+; E Pen y, 0-127 (0 is the bottom row of the picture area)
+; O:HL Screen address of the byte
+; O:A Bit mask of the pixel in that byte
+@label=PenToScreen
+c$81DE LD A,$7F
+ $81E0 SUB E            ; pixel row from the top
+ $81E1 LD L,A
+ $81E2 AND $07
+ $81E4 OR $40           ; $40 + pixel line within the character row
+ $81E6 LD H,A
+ $81E7 LD A,L
+ $81E8 AND $C0
+ $81EA RRCA             ; row bits 6-7 (the third) to bits 3-4 of H
+ $81EB RRCA
+ $81EC RRCA
+ $81ED OR H
+ $81EE LD H,A
+ $81EF LD A,L
+ $81F0 AND $38          ; row bits 3-5 (character row in the third) to bits 5-7 of L
+ $81F2 RLCA
+ $81F3 RLCA
+ $81F4 LD L,A
+ $81F5 LD A,D
+ $81F6 RRCA             ; x/8 is the column
+ $81F7 RRCA
+ $81F8 RRCA
+ $81F9 AND $1F
+ $81FB OR L
+ $81FC LD L,A
+ $81FD LD A,D
+ $81FE AND $07
+ $8200 PUSH BC
+ $8201 LD B,A
+ $8202 INC B
+ $8203 LD A,$01         ; mask: $80 rotated right (x mod 8)+1 times
+*$8205 RRC A
+ $8207 DJNZ $8205
+ $8209 POP BC
+ $820A RET

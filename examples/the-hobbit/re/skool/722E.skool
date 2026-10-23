@@ -1,18 +1,28 @@
-; Routine at 722E
+; Compare a parsed word with a command record word
 ;
-; Used by the routine at #R$71F3.
+; HL points at a 16-bit word token of the parsed phrase, IY at a 16-bit word
+; of a command table record. They match when the low 12 bits (the dictionary
+; offset) are equal; the class and flag nibbles are ignored. A parsed token of
+; 0 (no word given) matches anything. Both pointers move on by one word.
+;
+; HL Parsed word token
+; IY Record word
+; O:F Z when they match
+; O:HL Address of the next parsed word
+; O:IY Address of the next record word
+@label=MatchWord
 c$722E PUSH HL       ;
  $722F LD A,(HL)     ;
  $7230 INC HL        ;
  $7231 OR (HL)       ;
- $7232 JR Z,$7241    ;
+ $7232 JR Z,$7241    ; no word given: Z
  $7234 LD A,(IY+$01) ;
  $7237 XOR (HL)      ;
- $7238 AND $0F       ;
+ $7238 AND $0F       ; offset bits 8-11
  $723A JR NZ,$7241   ;
  $723C DEC HL        ;
  $723D LD A,(HL)     ;
- $723E CP (IY+$00)   ;
+ $723E CP (IY+$00)   ; offset low byte
 *$7241 POP HL        ;
  $7242 INC HL        ;
  $7243 INC HL        ;

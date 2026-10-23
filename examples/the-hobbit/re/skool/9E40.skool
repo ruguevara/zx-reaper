@@ -1,34 +1,47 @@
-; Routine at 9E40
+; Test whether an object is within an observer's reach
 ;
-; Used by the routines at #R$9E25 and #R$9E34.
-c$9E40 BIT 7,(IY+$07) ;
- $9E44 RET Z          ;
- $9E45 PUSH IY        ;
- $9E47 PUSH IX        ;
- $9E49 PUSH BC        ;
- $9E4A LD B,A         ;
- $9E4B LD C,(IX+$10)  ;
- $9E4E PUSH IY        ;
- $9E50 CALL $9E7A     ;
- $9E53 CP B           ;
- $9E54 LD B,A         ;
- $9E55 POP IX         ;
- $9E57 JR Z,$9E72     ;
- $9E59 CALL $9E7A     ;
- $9E5C CP B           ;
- $9E5D JR NZ,$9E6F    ;
- $9E5F INC A          ;
- $9E60 JR NZ,$9E72    ;
- $9E62 LD B,(IY+$00)  ;
- $9E65 LD A,C         ;
-*$9E66 CP (IY+$10)    ;
- $9E69 JR Z,$9E72     ;
- $9E6B INC IY         ;
- $9E6D DJNZ $9E66     ;
-*$9E6F XOR A          ;
- $9E70 JR $9E74       ;
-*$9E72 OR $01         ;
-*$9E74 POP BC         ;
- $9E75 POP IX         ;
- $9E77 POP IY         ;
- $9E79 RET            ;
+; The object (IY, id in A) must be present (flag bit 7). It is within reach when
+; the observer (IX) is itself inside that object (the first holder in the
+; observer's chain that is not open or alive, see #R$9E7A, is the object), or
+; when both have the same such closed holder: if that holder is a real one
+; they are inside it together, and if it is $FF (both out in the open) the
+; observer's first location must be one of the object's locations.
+;
+; A Id of the object at IY
+; IX Record of the observer (an actor or the player)
+; IY Record of the object
+; O:F NZ when the object is within reach, Z when not (or when it is not present)
+@label=CanReach
+@isub=BIT FLAG_PRESENT,(IY+$07)
+c$9E40 BIT 7,(IY+$07)
+ $9E44 RET Z
+ $9E45 PUSH IY
+ $9E47 PUSH IX
+ $9E49 PUSH BC
+ $9E4A LD B,A           ; B = object id
+ $9E4B LD C,(IX+$10)    ; C = location of the observer
+ $9E4E PUSH IY
+ $9E50 CALL $9E7A       ; closed holder of the observer
+ $9E53 CP B             ; the object itself? then reachable
+ $9E54 LD B,A
+ $9E55 POP IX
+ $9E57 JR Z,$9E72
+ $9E59 CALL $9E7A       ; closed holder of the object
+ $9E5C CP B             ; must be the observer's
+ $9E5D JR NZ,$9E6F
+ $9E5F INC A            ; $FF + 1 = 0: both in the open
+ $9E60 JR NZ,$9E72
+ $9E62 LD B,(IY+$00)    ; B = number of locations of the object
+ $9E65 LD A,C
+@label=CanReach_Location
+*$9E66 CP (IY+$10)
+ $9E69 JR Z,$9E72
+ $9E6B INC IY
+ $9E6D DJNZ $9E66
+*$9E6F XOR A
+ $9E70 JR $9E74
+*$9E72 OR $01
+*$9E74 POP BC
+ $9E75 POP IX
+ $9E77 POP IY
+ $9E79 RET

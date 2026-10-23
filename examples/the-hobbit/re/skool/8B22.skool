@@ -1,21 +1,36 @@
-; Routine at 8B22
+; Print a story line on the ZX printer
 ;
-; Used by the routine at #R$86A1.
+; Called by the story window routine #R$86A1 when it ends a line (carriage
+; return). When PrinterFlag is non-zero, sends the bottom text row of the story
+; window (character row 17, 8 pixel lines of 32 bytes, from STORY_LAST_ROW) to the
+; ZX printer, one dot line at a time, then stops the motor. Does nothing when
+; PrinterFlag is zero. Stops at once when no printer answers (the port reads
+; with bit 7 set). The dot loop is the ROM's COPY routine, including the
+; stylus-speed bit for the first dot lines.
+; .
+; Hardware: ZX printer port $FB (waits for the printer status bits, sends the
+; dots); reads the screen bitmap. Registers HL, DE and BC are preserved.
+; .
+; Reads PrinterFlag.
+@label=PrintStoryLine
 c$8B22 LD A,($B6F2)  ;
  $8B25 AND A         ;
- $8B26 RET Z         ;
+ $8B26 RET Z         ; printer off: nothing to do
  $8B27 PUSH HL       ;
  $8B28 PUSH DE       ;
  $8B29 PUSH BC       ;
  $8B2A LD D,$01      ;
- $8B2C LD HL,$5020   ;
+ $8B2C LD HL,$5020   ; HL: first byte of the story row, E: dot line 0-7
  $8B2F XOR A         ;
  $8B30 LD E,A        ;
+@label=PrintStoryLine_Dots
+@isub=OUT (PORT_PRINTER),A
 *$8B31 OUT ($FB),A   ;
+@isub=IN A,(PORT_PRINTER)
 *$8B33 IN A,($FB)    ;
  $8B35 ADD A,A       ;
- $8B36 JP M,$8B74    ;
- $8B39 JR NC,$8B33   ;
+ $8B36 JP M,$8B74    ; bit 7: no printer, give up
+ $8B39 JR NC,$8B33   ; bit 6 clear: wait for the motor
  $8B3B PUSH HL       ;
  $8B3C PUSH DE       ;
  $8B3D LD A,D        ;
@@ -32,10 +47,12 @@ c$8B22 LD A,($B6F2)  ;
  $8B4A RLC C         ;
  $8B4C RRA           ;
  $8B4D LD H,A        ;
+@isub=IN A,(PORT_PRINTER)
 *$8B4E IN A,($FB)    ;
  $8B50 RRA           ;
- $8B51 JR NC,$8B4E   ;
+ $8B51 JR NC,$8B4E   ; wait until the stylus can take a dot
  $8B53 LD A,H        ;
+@isub=OUT (PORT_PRINTER),A
  $8B54 OUT ($FB),A   ;
  $8B56 DJNZ $8B49    ;
  $8B58 POP HL        ;
@@ -43,19 +60,23 @@ c$8B22 LD A,($B6F2)  ;
  $8B5A LD A,L        ;
  $8B5B AND $1F       ;
  $8B5D JR NZ,$8B45   ;
+@isub=IN A,(PORT_PRINTER)
 *$8B5F IN A,($FB)    ;
  $8B61 RRA           ;
  $8B62 JR NC,$8B5F   ;
  $8B64 LD A,D        ;
  $8B65 RRCA          ;
+@isub=OUT (PORT_PRINTER),A
  $8B66 OUT ($FB),A   ;
  $8B68 POP DE        ;
  $8B69 POP HL        ;
- $8B6A INC H         ;
+ $8B6A INC H         ; next pixel line of the row
  $8B6B INC E         ;
  $8B6C BIT 3,E       ;
- $8B6E JR Z,$8B31    ;
+ $8B6E JR Z,$8B31    ; 8 dot lines done?
+@isub=LD A,PRINTER_STOP_MOTOR
  $8B70 LD A,$04      ;
+@isub=OUT (PORT_PRINTER),A
  $8B72 OUT ($FB),A   ;
 *$8B74 POP BC        ;
  $8B75 POP DE        ;

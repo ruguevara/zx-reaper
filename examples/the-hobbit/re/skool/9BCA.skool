@@ -1,8 +1,13 @@
-; Routine at 9BCA
+; Find an object or character record
 ;
-; Used by the routines at #R$71E2, #R$8C4B, #R$8D33, #R$8D9D, #R$8E85, #R$8ED2,
-; #R$8EEC, #R$93DA, #R$94D6, #R$950F, #R$9728, #R$977F, #R$9ACD, #R$9B16,
-; #R$9C8A, #R$9D50, #R$9E7A, #R$9F82, #R$A050, #R$A0C8 and #R$A18C.
+; Looks the id up in ObjectTable (id, record address) with #R$9DBD and puts the
+; record address into IX. HL is preserved.
+; .
+; A Object or character id
+; O:IX Address of the record (garbage when the id is not in the table)
+; O:A The id, or END_MARK when it is not in the table
+; O:F Z set when not found
+@label=FindObject
 c$9BCA LD IX,$C063   ;
  $9BCE CALL $9DBD    ;
  $9BD1 PUSH HL       ;

@@ -1,10 +1,20 @@
-; Routine at 9E25
+; Test reach with the two records exchanged
 ;
-; Used by the routines at #R$980E and #R$A73B.
-c$9E25 CALL $9E2B    ;
- $9E28 CALL $9E40    ;
-*$9E2B PUSH IX       ;
- $9E2D PUSH IY       ;
- $9E2F POP IX        ;
- $9E31 POP IY        ;
- $9E33 RET           ;
+; Exchanges IX and IY, runs #R$9E40, and exchanges them back, so the caller can
+; hold the object in IX and the observer in IY. #R$980E asks it whether the
+; player (IY) can reach the NPC being run (IX); #R$A73B asks it for the small
+; curious key.
+;
+; A Object id
+; IX Record of the object
+; IY Record of the observer
+; O:F As #R$9E40: NZ when the object is within reach
+@label=CanReachSwapped
+c$9E25 CALL $9E2B
+ $9E28 CALL $9E40       ; IX = observer, IY = object
+@label=SwapIXIY
+*$9E2B PUSH IX          ; falls through from above: swaps them back
+ $9E2D PUSH IY
+ $9E2F POP IX
+ $9E31 POP IY
+ $9E33 RET

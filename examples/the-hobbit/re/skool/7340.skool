@@ -1,3 +1,11 @@
-; Routine at 7340
+; Control code $14: end the message with a new line
+;
+; Sets D to $60 (print mode 6 of a word token: end the message with a new
+; line) and goes to the ending in #R$7348.
+;
+; Reached with a jump, so the return goes to the caller of the message printer.
+; .
+; Hardware: prints through #R$8583 (story window).
+@label=EndNewLine
 c$7340 LD D,$60      ;
  $7342 JR $734B      ;

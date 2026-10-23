@@ -1,6 +1,16 @@
-; Routine at 70F3
+; Pack the flag nibbles of a command record
 ;
-; Used by the routines at #R$712B, #R$7AF5 and #R$7C23.
+; Takes the top nibbles of the four high bytes of the record's words (verb
+; word +1, first preposition +3, second preposition +5, flags word +7) and
+; packs them into two bytes: #R$B71D = (nibble of +3 << 4) + nibble of +1,
+; #R$B71E = (nibble of +7 << 4) + nibble of +5. Later code tests the single
+; bits (for example bit 7 of #R$B71D: the first noun is a location; bit 6 of
+; #R$B71E). Meaning of the bits is only partly known.
+;
+; IX Command table record
+; O:A Value stored in #R$B71D
+; O:C Nibble of +1
+@label=PackCommandFlags
 c$70F3 LD A,(IX+$05) ;
  $70F6 RRCA          ;
  $70F7 RRCA          ;

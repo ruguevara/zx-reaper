@@ -1,7 +1,13 @@
-; Routine at 9F25
+; Find the exit that has the first object as its obstacle
 ;
-; Used by the routine at #R$8EEC.
-c$9F25 LD A,($B6E8)  ;
- $9F28 PUSH AF       ;
- $9F29 LD A,$01      ;
- $9F2B JR $9F30      ;
+; Loads the first object (#R$B6E8) and joins the exit walk of #R$9F2D with its
+; field selector set to 1, the obstacle byte of the exit record. Used to find the
+; exit a door, web or river blocks.
+;
+; O:A The obstacle id, $FF when the actor's location has no such exit
+; O:IX The exit record (direction, obstacle, destination) found
+@label=FindExitByObstacle
+c$9F25 LD A,($B6E8)
+ $9F28 PUSH AF
+ $9F29 LD A,$01         ; 1 = field +1 (the obstacle), stored by #R$9F30 into the displacement at #R$9F42
+ $9F2B JR $9F30

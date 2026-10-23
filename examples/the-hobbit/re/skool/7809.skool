@@ -1,18 +1,27 @@
-; Routine at 7809
+; Store a word in the first free slot of a pair
 ;
-; Used by the routine at #R$7795.
-c$7809 LD HL,$7581   ;
+; Stores the word BC in the first of two consecutive word slots at HL that is
+; still empty (0). Entered at #R$7809 it fills the adjective slots of
+; ActionSlots ($7581, $7583); #R$781C enters at #R$780C for the two preposition
+; slots. Both full: the phrase is rejected through #R$7924.
+;
+; BC Word to store (dictionary offset)
+; HL First slot of the pair (#R$780C only; #R$7809 uses ActionSlots+6)
+@label=StoreAdjective
+@isub=LD HL,ActionSlots+6
+c$7809 LD HL,$7581   ; adjective slots
 ; This entry point is used by the routine at #R$781C.
-*$780C LD A,(HL)     ;
+@label=StoreWordInPair
+*$780C LD A,(HL)     ; first slot empty?
  $780D INC HL        ;
  $780E OR (HL)       ;
  $780F JR Z,$7818    ;
- $7811 INC HL        ;
+ $7811 INC HL        ; second slot
  $7812 LD A,(HL)     ;
  $7813 INC HL        ;
  $7814 OR (HL)       ;
- $7815 JP NZ,$7924   ;
-*$7818 LD (HL),B     ;
+ $7815 JP NZ,$7924   ; both full: reject the phrase
+*$7818 LD (HL),B     ; store BC
  $7819 DEC HL        ;
  $781A LD (HL),C     ;
  $781B RET           ;

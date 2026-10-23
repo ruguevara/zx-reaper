@@ -1,10 +1,18 @@
-; Routine at 9BB1
+; Find a location record
 ;
-; Used by the routines at #R$71D5, #R$8E85, #R$8EEC, #R$9630, #R$965B, #R$96A8,
-; #R$9C41, #R$9D37, #R$9EA0, #R$A0AE and #R$A7C4.
+; Looks the location id up in the table of 80 record addresses (LocationTable
+; at $B9E0, 2 bytes each). An id of $50 or more gives A = 0 and leaves IX as it
+; was.
+; .
+; A Location id
+; O:IX Address of the location record
+; O:A The id (unchanged), or 0 when the id is out of range
+; Preserves DE and HL.
+@label=FindLocation
+@isub=CP LOCATION_COUNT
 c$9BB1 CP $50        ;
  $9BB3 JR C,$9BB7    ;
- $9BB5 XOR A         ;
+ $9BB5 XOR A         ; out of range: A := 0
  $9BB6 RET           ;
 *$9BB7 PUSH DE       ;
  $9BB8 LD DE,$B9E0   ;

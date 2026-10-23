@@ -1,14 +1,23 @@
-; Routine at A0BA
+; Get the dictionary word for an id
 ;
-; Used by the routines at #R$A0C8, #R$A138 and #R$A7C4.
-c$A0BA LD HL,$A20E   ;
-; This entry point is used by the routine at #R$A16C.
-*$A0BD LD E,A        ;
- $A0BE RES 7,E       ;
- $A0C0 LD D,$00      ;
- $A0C2 ADD HL,DE     ;
- $A0C3 ADD HL,DE     ;
- $A0C4 LD E,(HL)     ;
- $A0C5 INC HL        ;
- $A0C6 LD D,(HL)     ;
- $A0C7 RET           ;
+; Reads the word offset for id A (bit 7 ignored) from the table #R$A20E (words,
+; index from 1): 1-10 are the directions north .. down, 11 and up the object
+; state words (unlocked, empty, off, closed, dead, locked, full, broken, on,
+; open, alive). $A0BD does the same for another table in HL (the state word
+; tables #R$A224 and #R$A234).
+;
+; A Id (bit 7 ignored)
+; HL Table of words ($A0BD only; $A0BA uses #R$A20E)
+; O:DE Word offset in the dictionary (print with #R$74C1); 0 for an id with no word
+@label=GetIdWord
+c$A0BA LD HL,$A20E
+@label=GetTableWord
+*$A0BD LD E,A
+ $A0BE RES 7,E
+ $A0C0 LD D,$00
+ $A0C2 ADD HL,DE
+ $A0C3 ADD HL,DE
+ $A0C4 LD E,(HL)
+ $A0C5 INC HL
+ $A0C6 LD D,(HL)
+ $A0C7 RET

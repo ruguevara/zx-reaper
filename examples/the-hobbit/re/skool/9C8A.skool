@@ -1,16 +1,26 @@
-; Routine at 9C8A
+; Walk up the holder chain of an object
 ;
-; Used by the routine at #R$9C78.
-c$9C8A CALL $9BCA    ;
- $9C8D PUSH AF       ;
- $9C8E LD A,(IX+$01) ;
- $9C91 CP $FF        ;
- $9C93 JR Z,$9C9C    ;
- $9C95 POP IX        ;
- $9C97 CP (HL)       ;
- $9C98 JR NZ,$9C8A   ;
- $9C9A SCF           ;
- $9C9B RET           ;
-*$9C9C POP AF        ;
- $9C9D AND A         ;
- $9C9E RET           ;
+; Looks up the record of the object in A, takes its holder and compares it with
+; the id at (HL); if different, repeats with the holder as the object, so an
+; object inside a bag inside the subject's hands is found. Stops with carry
+; clear when a holder is $FF (the object lies at a location). The first CALL
+; trashes IX (the POP IX throws away the saved AF; callers save IX).
+;
+; A Object id whose holders are followed
+; HL Address of the id looked for (#R$B6EA, the subject)
+; O:F Carry set when the id at (HL) is a holder in the chain; clear when the chain ends at a location
+@label=WalkHolderChain
+c$9C8A CALL $9BCA
+ $9C8D PUSH AF
+ $9C8E LD A,(IX+$01)
+@isub=CP AT_LOCATION
+ $9C91 CP $FF           ; holder $FF: lies at a location
+ $9C93 JR Z,$9C9C
+ $9C95 POP IX           ; drops the saved AF into IX (unused)
+ $9C97 CP (HL)
+ $9C98 JR NZ,$9C8A
+ $9C9A SCF
+ $9C9B RET
+*$9C9C POP AF
+ $9C9D AND A
+ $9C9E RET

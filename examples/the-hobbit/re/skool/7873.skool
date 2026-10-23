@@ -1,10 +1,23 @@
-; Routine at 7873
+; Read the next word of the parsed line
 ;
-; Used by the routines at #R$7585, #R$770B, #R$772F and #R$7795.
+; Takes the next token of the list the line editor built at $709C (pairs: class
+; in the high nibble of the first byte, dictionary offset in the other 12 bits)
+; from WordListPtr. The class of the word is returned in A and D; BC is the
+; word (its offset). The previous token's address is saved in InputLinePtr (so
+; the word can be put back, as #R$7795 does) and the D passed in, the class of
+; the word before, in WordFlags.
+;
+; D Class of the previous word (stored in WordFlags)
+; O:A Class of this word, as a high nibble (0, $10 ... $C0 for the end)
+; O:D The same
+; O:B Bits 8-11 of the word offset
+; O:C Bits 0-7 of the word offset
+; O:HL Address after the token
+@label=ReadWord
 c$7873 LD HL,($B6DC) ;
- $7876 LD ($B6DA),HL ;
+ $7876 LD ($B6DA),HL ; InputLinePtr: this token, for putting it back
  $7879 LD A,D        ;
- $787A LD ($B6DE),A  ;
+ $787A LD ($B6DE),A  ; WordFlags: previous class
  $787D LD A,(HL)     ;
  $787E AND $0F       ;
  $7880 LD B,A        ;
@@ -12,7 +25,7 @@ c$7873 LD HL,($B6DC) ;
  $7882 AND $F0       ;
  $7884 LD D,A        ;
  $7885 INC HL        ;
- $7886 LD C,(HL)     ;
+ $7886 LD C,(HL)     ; C = low byte of the offset
  $7887 INC HL        ;
  $7888 LD ($B6DC),HL ;
  $788B RET           ;

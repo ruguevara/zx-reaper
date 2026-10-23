@@ -1,11 +1,17 @@
-; Routine at 7EA8
+; Report a verb that matched only in part
 ;
-; Used by the routine at #R$7B9E.
+; Reached from #R$7B9E when a command record matched the start of the phrase
+; but not the whole (PhraseMatched, $B6DF, is set). Pushes the three words of
+; the phrase (RecWord1 the verb, RecWord2, RecWord3) and prints message $ADB0:
+; "I do not know the verb "{WORD} {WORD} {WORD}"" through #R$7D90.
+;
+; O:A 0 (from #R$7D90)
+@label=ReportUnknownVerb
 c$7EA8 LD HL,($795C) ;
  $7EAB PUSH HL       ;
  $7EAC LD HL,($795A) ;
  $7EAF PUSH HL       ;
  $7EB0 LD HL,($7958) ;
  $7EB3 PUSH HL       ;
- $7EB4 LD HL,$ADB0   ;
+ $7EB4 LD HL,$ADB0        ; the message
  $7EB7 JP $7D90      ;

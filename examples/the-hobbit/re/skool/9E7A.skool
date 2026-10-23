@@ -1,16 +1,25 @@
-; Routine at 9E7A
+; Find the closed holder of an object
 ;
-; Used by the routines at #R$95ED and #R$9E40.
-c$9E7A PUSH IX       ;
-*$9E7C LD A,(IX+$01) ;
- $9E7F CP $FF        ;
- $9E81 JR Z,$9E92    ;
- $9E83 EX AF,AF'     ;
- $9E84 LD A,(IX+$01) ;
- $9E87 CALL $9BCA    ;
- $9E8A LD A,(IX+$07) ;
- $9E8D AND $28       ;
- $9E8F JR NZ,$9E7C   ;
- $9E91 EX AF,AF'     ;
-*$9E92 POP IX        ;
- $9E94 RET           ;
+; Climbs the holder chain of the record in IX: takes its holder, and while that
+; holder has flag bit 5 or 3 set (active/open/alive, or dead/disabled: not a
+; shut container), continues with the holder's own holder. Stops at a holder
+; with neither bit and returns its id, or returns $FF when the chain reaches
+; a location. IX is kept.
+;
+; IX Record of the object or actor
+; O:A Id of the closed holder, $FF when none
+@label=FindClosedHolder
+c$9E7A PUSH IX
+*$9E7C LD A,(IX+$01)
+@isub=CP AT_LOCATION
+ $9E7F CP $FF
+ $9E81 JR Z,$9E92
+ $9E83 EX AF,AF'        ; keep the holder id
+ $9E84 LD A,(IX+$01)
+ $9E87 CALL $9BCA
+ $9E8A LD A,(IX+$07)
+ $9E8D AND $28          ; bits 5 and 3: active/open/alive, dead/disabled
+ $9E8F JR NZ,$9E7C
+ $9E91 EX AF,AF'
+*$9E92 POP IX
+ $9E94 RET

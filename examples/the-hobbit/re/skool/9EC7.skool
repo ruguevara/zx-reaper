@@ -1,11 +1,15 @@
-; Routine at 9EC7
+; Print the name of an object
 ;
-; Used by the routines at #R$93DA, #R$9D50 and #R$9FC7.
-c$9EC7 PUSH IY       ;
- $9EC9 PUSH DE       ;
- $9ECA LD DE,$0008   ;
- $9ECD ADD IY,DE     ;
- $9ECF CALL $9ED6    ;
- $9ED2 POP DE        ;
- $9ED3 POP IY        ;
- $9ED5 RET           ;
+; Prints the name phrases of the record in IY (its words at +8, +10, +12: see
+; #R$9ED6).
+;
+; IY Record of the object
+@label=PrintObjectName
+c$9EC7 PUSH IY
+ $9EC9 PUSH DE
+ $9ECA LD DE,$0008      ; DE = 8, the name phrase codes
+ $9ECD ADD IY,DE
+ $9ECF CALL $9ED6
+ $9ED2 POP DE
+ $9ED3 POP IY
+ $9ED5 RET

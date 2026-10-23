@@ -1,8 +1,22 @@
-; Routine at 73AF
+; Control code 7: print the name of the first object with an article
+;
+; Sets the article flag ($B703) and prints the name of the first object of the
+; command ($B6E8). If $B6FE (first noun is a location) is set it is a location
+; id and its name is found with #R$71D5, otherwise an object with #R$71E2; the
+; name is printed by #R$7434. The second entry leaves the article flag as the
+; caller set it (used by #R$712B). Shares the lookup in #R$73C2.
+; .
+; The printer calls this handler with IX at the code byte. Return Z when there
+; is nothing to print; NZ with a word token in DE and the printer prints it.
+;
+; O:A 0
+; O:F Z
+@label=PrintFirstObjectName
 c$73AF LD A,$01      ;
- $73B1 LD ($B703),A  ;
+ $73B1 LD ($B703),A  ; PhraseMode: with article
 ; This entry point is used by the routine at #R$712B.
-*$73B4 LD A,($B6FE)  ;
+@label=PrintFirstObjectNameAsIs
+*$73B4 LD A,($B6FE)  ; Noun1Kind
  $73B7 AND A         ;
- $73B8 LD A,($B6E8)  ;
+ $73B8 LD A,($B6E8)  ; FirstObject
  $73BB JR $73CE      ;

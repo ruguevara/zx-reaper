@@ -1,9 +1,13 @@
-; Routine at 9D37
+; Find the record of the location of the current actor
 ;
-; Used by the routines at #R$95ED and #R$9E95.
-c$9D37 PUSH AF       ;
- $9D38 LD IX,($B70C) ;
- $9D3C LD A,(IX+$10) ;
- $9D3F CALL $9BB1    ;
- $9D42 POP AF        ;
- $9D43 RET           ;
+; Takes the first location (+$10) of the actor record at (#R$B70C) and looks up
+; the location record.
+;
+; O:IX Record of the actor's location (#R$9BB1: unchanged when the id is not a location)
+@label=GetActorLocationRec
+c$9D37 PUSH AF
+ $9D38 LD IX,($B70C)
+ $9D3C LD A,(IX+$10)
+ $9D3F CALL $9BB1
+ $9D42 POP AF
+ $9D43 RET

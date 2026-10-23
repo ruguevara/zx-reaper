@@ -1,30 +1,41 @@
-; Routine at 9D00
+; Add a field of all records held by a holder
 ;
-; Used by the routine at #R$9CED.
-c$9D00 PUSH IX        ;
- $9D02 LD IX,$C063    ;
-*$9D06 CALL $9BA9     ;
- $9D09 JR Z,$9D2F     ;
- $9D0B CP (IY+$01)    ;
- $9D0E JR NZ,$9D06    ;
- $9D10 PUSH AF        ;
- $9D11 SUB A          ;
- $9D12 CP B           ;
- $9D13 LD A,C         ;
- $9D14 JR Z,$9D1F     ;
- $9D16 ADD A,(IY+$02) ;
- $9D19 JP PE,$9D32    ;
- $9D1C LD C,A         ;
- $9D1D JR $9D2C       ;
-*$9D1F ADD A,(IY+$03) ;
- $9D22 JP PE,$9D32    ;
- $9D25 LD C,A         ;
- $9D26 LD A,(IX+$00)  ;
- $9D29 CALL $9D00     ;
-*$9D2C POP AF         ;
- $9D2D JR $9D06       ;
-*$9D2F POP IX         ;
- $9D31 RET            ;
-*$9D32 POP AF         ;
- $9D33 LD C,$FF       ;
- $9D35 JR $9D2F       ;
+; Walks the object table #R$C063 and, for each record whose holder (+1) is A,
+; adds its size (+3) to C and calls itself for that record, or, when B is not 0,
+; adds its weight (+2) and does not recurse. A signed overflow sets C to $FF and
+; ends the walk. The walk starts at the second table entry: the player record is
+; never held.
+;
+; A Holder id
+; B 0: add the size (+3) and recurse; not 0: add the weight (+2) only
+; C Total so far
+; O:C Total, $FF on overflow
+@label=SumHeldRecords
+c$9D00 PUSH IX
+ $9D02 LD IX,$C063
+@label=SumHeld_Next
+*$9D06 CALL $9BA9
+ $9D09 JR Z,$9D2F
+ $9D0B CP (IY+$01)
+ $9D0E JR NZ,$9D06
+ $9D10 PUSH AF
+ $9D11 SUB A            ; Z when B = 0
+ $9D12 CP B
+ $9D13 LD A,C
+ $9D14 JR Z,$9D1F
+ $9D16 ADD A,(IY+$02)
+ $9D19 JP PE,$9D32      ; overflow: C = $FF
+ $9D1C LD C,A
+ $9D1D JR $9D2C
+*$9D1F ADD A,(IY+$03)
+ $9D22 JP PE,$9D32
+ $9D25 LD C,A
+ $9D26 LD A,(IX+$00)
+ $9D29 CALL $9D00       ; the held record may hold more
+*$9D2C POP AF
+ $9D2D JR $9D06
+*$9D2F POP IX
+ $9D31 RET
+*$9D32 POP AF
+ $9D33 LD C,$FF         ; overflow marker
+ $9D35 JR $9D2F

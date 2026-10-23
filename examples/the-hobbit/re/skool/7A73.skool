@@ -1,25 +1,40 @@
-; Routine at 7A73
+; Test whether EXCEPT removes the current object
 ;
-; Used by the routine at #R$79B6.
+; Used while ALL is processed (#R$79B6). Walks the EXCEPT records, those with
+; RECF_EXCEPT set, that follow the record at IY (lower addresses). For each,
+; #R$9DD9 lists the objects its noun phrase (REC_PHRASE_A) can mean; if one of
+; them is FirstObject ($B6E8) the object is excluded. IY is kept; IX is not.
+;
+; IY Current (main) phrase record
+; O:F NZ when FirstObject is named after EXCEPT, Z when it is not
+; O:IX Destroyed (the table walked by #R$9DD9)
+@label=IsExcluded
 c$7A73 PUSH IY        ;
  $7A75 PUSH DE        ;
  $7A76 PUSH HL        ;
-*$7A77 LD DE,$FFE8    ;
+@label=IsExcluded_Record
+@isub=LD DE,-PARSED_RECORD_SIZE
+*$7A77 LD DE,$FFE8   ; next newer record
  $7A7A ADD IY,DE      ;
- $7A7C BIT 6,(IY+$01) ;
- $7A80 JR Z,$7A9C     ;
- $7A82 LD IX,$C060    ;
+@isub=BIT RECF_EXCEPT,(IY+1)
+ $7A7C BIT 6,(IY+$01) ; an EXCEPT record?
+ $7A80 JR Z,$7A9C    ; no: not excluded
+@isub=LD IX,ObjectTable-3
+ $7A82 LD IX,$C060   ; ObjectTable-3, walked by #R$9DD9
+@label=IsExcluded_Object
 *$7A86 PUSH IY        ;
  $7A88 POP HL         ;
- $7A89 LD DE,$0008    ;
+@isub=LD DE,REC_PHRASE_A
+ $7A89 LD DE,$0008   ; its noun phrase
  $7A8C ADD HL,DE      ;
- $7A8D CALL $9DD9     ;
- $7A90 CP $FF         ;
+ $7A8D CALL $9DD9    ; A = id of the next object that phrase can mean
+@isub=CP END_MARK
+ $7A90 CP $FF        ; no more: next record
  $7A92 JR Z,$7A77     ;
- $7A94 LD HL,$B6E8    ;
+ $7A94 LD HL,$B6E8   ; FirstObject
  $7A97 CP (HL)        ;
  $7A98 JR NZ,$7A86    ;
- $7A9A OR $01         ;
+ $7A9A OR $01        ; NZ: excluded
 *$7A9C POP HL         ;
  $7A9D POP DE         ;
  $7A9E POP IY         ;

@@ -1,12 +1,20 @@
-; Routine at 8576
+; Test whether text output is enabled
 ;
-; Used by the routine at #R$858B.
-c$8576 PUSH HL       ;
- $8577 LD L,A        ;
- $8578 LD A,($B6FA)  ;
- $857B LD H,A        ;
- $857C LD A,($B702)  ;
- $857F AND H         ;
- $8580 LD A,L        ;
- $8581 POP HL        ;
- $8582 RET           ;
+; Output is enabled when ActionPerform and MessagesVisible have a bit in
+; common; both are set for what the player does or sees, and zero when an
+; action is only being tried or happens out of sight. #R$858B skips the
+; character when this returns Z. Registers and A are kept.
+; .
+; Hardware: none.
+;
+; O:F Z set when nothing is to be printed
+@label=OutputEnabled
+c$8576 PUSH HL
+ $8577 LD L,A
+ $8578 LD A,($B6FA)
+ $857B LD H,A
+ $857C LD A,($B702)
+ $857F AND H
+ $8580 LD A,L
+ $8581 POP HL
+ $8582 RET

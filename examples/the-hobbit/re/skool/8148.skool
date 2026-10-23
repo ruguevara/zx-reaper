@@ -1,6 +1,13 @@
-; Routine at 8148
+; Move the picture pen left one pixel
 ;
-; Used by the routines at #R$8071 and #R$8151.
+; Subtracts 1 from the pen x. At the left edge (x 0) the pen stays and Z is
+; returned. H is used as scratch; A is kept.
+;
+; D Pen x
+; O:D New pen x
+; O:F Z if the pen was at the edge and did not move
+; O:H Destroyed
+@label=MovePenLeft
 c$8148 DEC D         ;
  $8149 LD H,A        ;
  $814A LD A,D        ;

@@ -1,14 +1,25 @@
-; Routine at 9A85
+; Find an NPC record by id
 ;
-; Used by the routines at #R$9034, #R$977F and #R$9AA0.
+; Searches the 17 NPC records (NpcStates, 7 bytes each) for the id in A. The
+; search stops at the id or at the $FF that ends the table.
+; .
+; A Character id
+; O:A The id found, or END_MARK when the character has no record
+; O:HL Address of the record (or of the end mark)
+; O:IY Address of the record (or of the end mark)
+@label=FindNpcState
 c$9A85 PUSH DE       ;
  $9A86 PUSH BC       ;
  $9A87 LD B,A        ;
+@isub=LD HL,NpcStates
  $9A88 LD HL,$CACB   ;
+@isub=LD DE,NPC_RECORD_SIZE
  $9A8B LD DE,$0007   ;
+@label=FindNpcState_Loop
 *$9A8E LD A,(HL)     ;
  $9A8F CP B          ;
  $9A90 JR Z,$9A9A    ;
+@isub=CP END_MARK
  $9A92 CP $FF        ;
  $9A94 JR Z,$9A9A    ;
  $9A96 ADD HL,DE     ;

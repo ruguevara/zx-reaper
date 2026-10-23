@@ -1,6 +1,19 @@
-; Routine at 7CAC
+; Collect one word of the parsed record
 ;
-; Used by the routine at #R$7B9E.
+; Copies the word at offset E of the parsed record to the word list at HL. If
+; the word is not zero, a slot is used up: B is decremented and HL moves on to
+; the next slot. A zero word is stored but not counted. Does nothing when B is 0.
+; #R$7B9E calls it four times to collect up to two words of the phrase into
+; $795A-$795D.
+;
+; B Free slots in the list
+; E Offset of the word in the parsed record
+; HL Where to store the word
+; IY Parsed phrase record
+; O:B B-1 if a word was stored
+; O:HL Next slot if a word was stored
+; O:F Z when the word was zero or B was 0
+@label=CollectWord
 c$7CAC XOR A         ;
  $7CAD CP B          ;
  $7CAE RET Z         ;

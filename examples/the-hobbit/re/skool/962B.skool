@@ -1,5 +1,10 @@
-; Routine at 962B
+; Describe a location with the "see" message
 ;
-; Used by the routine at #R$8EEC.
+; Prints MsgSee ("<subject> see") followed by the location's description and
+; picture through #R$964D. #R$8EEC calls it while it has temporarily put the
+; same id into the first location slot of the subject's record.
+; .
+; A Location id
+@label=DescribeSeen
 c$962B LD HL,$B000   ;
  $962E JR $964D      ;

@@ -1,6 +1,15 @@
-; Routine at 80EE
+; Test a picture pixel
 ;
-; Used by the routine at #R$8071.
+; Reads the pixel at the pen position and tells whether it is lit.
+;
+; Hardware: reads the screen bitmap.
+;
+; D Pen x, 0-255
+; E Pen y, 0-127 (0 is the bottom row of the picture area)
+; O:F Z if the pixel is clear, NZ if it is lit
+; O:A Pixel mask ANDed with the screen byte
+; HL is preserved
+@label=TestPixel
 c$80EE PUSH HL       ;
  $80EF CALL $81DE    ;
  $80F2 AND (HL)      ;

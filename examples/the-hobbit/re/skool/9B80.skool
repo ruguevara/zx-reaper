@@ -1,4 +1,7 @@
-; Routine at 9B80
+; Jump to the address in HL
 ;
-; Used by the routine at #R$9B6C.
+; Entered by CALL from #R$9B6C, so that the JP (HL) behaves as a call to HL.
+; .
+; HL Address to run
+@label=JumpHL
 c$9B80 JP (HL)       ;

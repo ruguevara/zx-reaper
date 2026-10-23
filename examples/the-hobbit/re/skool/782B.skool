@@ -1,22 +1,41 @@
-; Routine at 782B
+; Copy the collected phrase slots into the record
 ;
-; Used by the routine at #R$7795.
-c$782B BIT 6,E       ;
+; Copies the ten bytes of ActionSlots (two prepositions, noun, two adjectives)
+; into one of the two phrase blocks of the record at IY. Flag bit 6 of E
+; selects the first block (+4) and is cleared; otherwise bit 7 selects the
+; second block (+$0E) and is cleared; with neither set there is no room for
+; another phrase and the line is rejected (#R$7924). The slots are not cleared
+; here (#R$75B4 does that).
+; .
+; #R$7850 is the entry for the first block alone, used for the nouns after
+; EXCEPT.
+;
+; E Parser flags: bit 6 first block free, bit 7 second block free
+; IY Phrase record to fill
+; O:E Flags with the used bit cleared
+; O:A 0
+; O:F Z set
+@label=StorePhraseBlock
+c$782B BIT 6,E       ; first block free?
  $782D JR NZ,$7850   ;
- $782F BIT 7,E       ;
+ $782F BIT 7,E       ; second block free?
  $7831 JR NZ,$7838   ;
- $7833 CALL $7924    ;
+ $7833 CALL $7924    ; neither: reject the phrase
  $7836 XOR A         ;
  $7837 RET           ;
-*$7838 RES 7,E       ;
+*$7838 RES 7,E       ; second block used
+@isub=PUSH DE
  $783A PUSH DE       ;
- $783B LD DE,$000E   ;
+@isub=LD DE,REC_BLOCK_B
+ $783B LD DE,$000E   ; offset of the second block
+@label=StorePhraseBlock_Copy
 *$783E PUSH BC       ;
  $783F PUSH IY       ;
  $7841 POP HL        ;
- $7842 ADD HL,DE     ;
+ $7842 ADD HL,DE     ; HL = IY + offset
  $7843 EX DE,HL      ;
- $7844 LD HL,$757B   ;
+ $7844 LD HL,$757B   ; ActionSlots
+@isub=LD BC,PHRASE_BLOCK_SIZE
  $7847 LD BC,$000A   ;
  $784A LDIR          ;
  $784C POP BC        ;
@@ -24,7 +43,9 @@ c$782B BIT 6,E       ;
  $784E XOR A         ;
  $784F RET           ;
 ; This entry point is used by the routine at #R$7795.
-*$7850 RES 6,E       ;
+@label=StoreFirstPhraseBlock
+*$7850 RES 6,E       ; first block used
  $7852 PUSH DE       ;
- $7853 LD DE,$0004   ;
+@isub=LD DE,REC_BLOCK_A
+ $7853 LD DE,$0004   ; offset of the first block
  $7856 JR $783E      ;

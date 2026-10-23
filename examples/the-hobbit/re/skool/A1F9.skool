@@ -1,10 +1,21 @@
-; Routine at A1F9
+; Say why the first object cannot be opened, or that it can
 ;
-; Used by the routine at #R$910E.
-c$A1F9 LD IX,($B708)  ;
- $A1FD BIT 0,(IX+$07) ;
- $A201 LD A,$80       ;
- $A203 RET NZ         ;
- $A204 BIT 5,(IX+$07) ;
- $A208 LD A,$85       ;
- $A20A RET            ;
+; For command handler #R$910E (open). Looks at the first object (#R$B708): if
+; its flag bit 0 (locked) is set it returns the reason "locked" in A with NZ; else it
+; returns "open" in A, NZ when the object is already open (flag bit 5) and Z
+; when it is closed and can be opened. A is the state id for #R$A16C.
+;
+; O:A State id: $80 locked, $85 open
+; O:F NZ: refused (locked or already open); Z: may be opened
+@label=CheckOpenable
+c$A1F9 LD IX,($B708)
+@isub=BIT FLAG_LOCKED,(IX+$07)
+ $A1FD BIT 0,(IX+$07)
+@isub=LD A,REASON_LOCKED
+ $A201 LD A,$80
+ $A203 RET NZ
+@isub=BIT FLAG_ACTIVE,(IX+$07)
+ $A204 BIT 5,(IX+$07)
+@isub=LD A,REASON_OPEN
+ $A208 LD A,$85
+ $A20A RET

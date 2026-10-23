@@ -1,14 +1,27 @@
-; Routine at 8ED2
+; Test whether an object is shut in by a closed holder
 ;
-; Used by the routine at #R$8EEC.
+; Follows the chain of holders (record +1) upward from the object in A through
+; holders whose flag bit 5 (active, open, alive) is set. Reaching an object
+; that lies at a location (holder AT_LOCATION) means it is in the open. A
+; holder with bit 5 clear stops the chain. #R$8EEC calls it for the subject
+; (an actor) and returns when the answer is NZ.
+; .
+; A Object id
+; O:F Z set when the chain ends at a location, NZ when a holder with bit 5 clear is met
+; O:A AT_LOCATION when Z; the id of that holder OR 1 when NZ
+; Preserves IX.
+@label=CheckEnclosed
 c$8ED2 PUSH IX        ;
- $8ED4 CALL $9BCA     ;
-*$8ED7 LD A,(IX+$01)  ;
+ $8ED4 CALL $9BCA     ; IX := record of A
+@label=CheckEnclosed_Next
+*$8ED7 LD A,(IX+$01)  ; holder id
+@isub=CP AT_LOCATION
  $8EDA CP $FF         ;
  $8EDC JR Z,$8EE9     ;
- $8EDE CALL $9BCA     ;
+ $8EDE CALL $9BCA     ; IX := record of the holder
+@isub=BIT FLAG_ACTIVE,(IX+$07)
  $8EE1 BIT 5,(IX+$07) ;
  $8EE5 JR NZ,$8ED7    ;
- $8EE7 OR $01         ;
+ $8EE7 OR $01         ; make A non-zero: NZ
 *$8EE9 POP IX         ;
  $8EEB RET            ;

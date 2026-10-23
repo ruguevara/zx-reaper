@@ -1,16 +1,25 @@
-; Routine at 9213
+; Roll a strength with a random spread
 ;
-; Used by the routine at #R$9171.
+; Adds a random signed spread (#R$9CA8 with range ROLL_SPREAD) to the strength
+; in A, for the fight in #R$9171. Observed over 64 rolls: the result is the strength
+; plus 0 to 10 (mostly), saturated at $FF; a negative spread that does not
+; underflow gives 0, and one that does underflow wraps (strength 0 gave 252 and
+; 255). Looks like a bug in the original (inferred).
+; .
+; A Strength
+; O:A Strength with the spread added
+@label=RollStrength
 c$9213 PUSH BC       ;
  $9214 LD B,A        ;
+@isub=LD A,ROLL_SPREAD
  $9215 LD A,$0A      ;
  $9217 CALL $9CA8    ;
- $921A LD C,A        ;
+ $921A LD C,A        ; C: spread (signed)
  $921B ADD A,B       ;
- $921C JR NC,$9224   ;
- $921E XOR A         ;
+ $921C JR NC,$9224   ; no carry: result in A
+ $921E XOR A         ; carry: A := 0 ...
  $921F BIT 7,C       ;
  $9221 JR NZ,$9224   ;
- $9223 DEC A         ;
+ $9223 DEC A         ; ... or $FF when the spread was positive
 *$9224 POP BC        ;
  $9225 RET           ;

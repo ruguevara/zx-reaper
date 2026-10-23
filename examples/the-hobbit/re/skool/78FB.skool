@@ -1,4 +1,4 @@
-; Copy 6 bytes of record field IY+DE to IX+DE (entry for C=6; $78FF copies 10,
+; Copy 6 bytes of record field IX+DE to IY+DE (entry for C=6; $78FF copies 10,
 ; $7903 copies 2)
 c$78FB LD C,$06      ;
  $78FD JR $7905      ;

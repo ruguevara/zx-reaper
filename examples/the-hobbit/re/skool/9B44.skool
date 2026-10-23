@@ -1,25 +1,36 @@
-; Routine at 9B44
+; Check that a command does not use the same object twice
 ;
-; Used by the routines at #R$94D6 and #R$950F.
+; Rejects commands that act on themselves: the subject (the actor), the first
+; object and the second object must differ where it matters. Returns NZ when
+; the first object is not given (FirstObject is $FF). Otherwise, unless
+; Noun1Kind is set, Z when the subject or the second object equals the first
+; object; then, unless Noun2Kind is set, Z when the second object equals the
+; subject. The callers (#R$94D6 and #R$950F) end the command when the answer is Z.
+; Noun1Kind and Noun2Kind are set by #R$7B78 from bits 7 and 6 of $B71D; what
+; they stand for is not decoded.
+; .
+; O:F Z set when the command is rejected
+; O:A Non-zero when FirstObject is $FF
+@label=CheckNounsDistinct
 c$9B44 LD A,($B6E8)  ;
- $9B47 INC A         ;
+ $9B47 INC A         ; FF + 1 = 0: no first object
  $9B48 JR NZ,$9B4C   ;
- $9B4A INC A         ;
+ $9B4A INC A         ; A := 1, NZ
  $9B4B RET           ;
-*$9B4C LD A,($B6FE)  ;
+*$9B4C LD A,($B6FE)  ; Noun1Kind
  $9B4F AND A         ;
  $9B50 JR NZ,$9B5F   ;
  $9B52 LD HL,$B6E8   ;
  $9B55 LD A,($B6EA)  ;
- $9B58 CP (HL)       ;
+ $9B58 CP (HL)       ; Subject = first object
  $9B59 RET Z         ;
  $9B5A LD A,($B6E9)  ;
- $9B5D CP (HL)       ;
+ $9B5D CP (HL)       ; second object = first object
  $9B5E RET Z         ;
-*$9B5F LD A,($B6FF)  ;
+*$9B5F LD A,($B6FF)  ; Noun2Kind
  $9B62 AND A         ;
  $9B63 RET NZ        ;
  $9B64 LD A,($B6E9)  ;
  $9B67 LD HL,$B6EA   ;
- $9B6A CP (HL)       ;
+ $9B6A CP (HL)       ; second object = subject
  $9B6B RET           ;

@@ -1,9 +1,19 @@
-; Routine at 7D83
+; Ask "Which ...?" about noun phrase 1
 ;
-; Used by the routine at #R$7DBC.
-c$7D83 LD A,($7954)  ;
- $7D86 LD HL,($7942) ;
+; Several objects matched the first noun phrase and ALL was not typed. Takes the
+; first word of the phrase (RecBuf1) and the offset RecWork6, saves the record
+; with #R$7D74, then prints message $ADCC ("Which {WORD} ?") with the word
+; pushed for its {WORD} code. The second entry takes A and HL from its caller
+; (HL is pushed as the word; #R$7D98 passes the address $7948 there, not the
+; word; see the open question). Continues in #R$7D90.
+;
+; O:A 0 (from #R$7D90)
+; O:F Z
+@label=AskWhichNoun1
+c$7D83 LD A,($7954)       ; offset of phrase 1
+ $7D86 LD HL,($7942)      ; its first word
 ; This entry point is used by the routine at #R$7D98.
-*$7D89 PUSH HL       ;
- $7D8A CALL $7D74    ;
- $7D8D LD HL,$ADCC   ;
+@label=AskWhich
+*$7D89 PUSH HL            ; the word for the message
+ $7D8A CALL $7D74         ; save the record
+ $7D8D LD HL,$ADCC        ; "Which {WORD} ?"

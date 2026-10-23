@@ -1,11 +1,18 @@
-; Routine at 70E8
+; Address of a command table record
 ;
-; Used by the routines at #R$712B and #R$7AF5.
+; HL = #R$AB53 + 8 * (A - 1): the 8-byte record of command id A in the command
+; table (ids start at 1).
+;
+; A Command id (1-59)
+; O:HL Address of the record
+; O:DE Destroyed
+@label=CommandRecordAddr
 c$70E8 LD L,A        ;
  $70E9 LD H,$00      ;
  $70EB ADD HL,HL     ;
  $70EC ADD HL,HL     ;
  $70ED ADD HL,HL     ;
+@isub=LD DE,CommandTable-COMMAND_RECORD_SIZE
  $70EE LD DE,$AB4B   ;
  $70F1 ADD HL,DE     ;
  $70F2 RET           ;

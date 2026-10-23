@@ -1,13 +1,22 @@
-; Routine at A124
+; Step to the next listable exit
 ;
-; Used by the routine at #R$A138.
-c$A124 ADD IX,BC     ;
- $A126 LD A,$FF      ;
- $A128 CP (IX+$00)   ;
- $A12B RET Z         ;
- $A12C XOR A         ;
- $A12D CP (IX+$01)   ;
- $A130 JR NZ,$A124   ;
- $A132 CP (IX+$00)   ;
- $A135 JR Z,$A124    ;
- $A137 RET           ;
+; Adds BC to IX and skips exit records that are not shown: an exit with an
+; obstacle (door, web, river) or an erased one (direction 0, a blocked exit
+; whose record was zeroed). Stops at the end mark.
+;
+; BC Size of an exit record (3)
+; IX Previous exit record
+; O:IX The next listable exit
+; O:F Z set when the end mark was reached, NZ with an exit
+@label=NextListedExit
+c$A124 ADD IX,BC
+@isub=LD A,END_MARK
+ $A126 LD A,$FF
+ $A128 CP (IX+$00)
+ $A12B RET Z
+ $A12C XOR A            ; obstacle must be 0
+ $A12D CP (IX+$01)
+ $A130 JR NZ,$A124
+ $A132 CP (IX+$00)      ; direction must not be 0
+ $A135 JR Z,$A124
+ $A137 RET

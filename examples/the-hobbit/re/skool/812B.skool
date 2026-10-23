@@ -1,6 +1,15 @@
-; Routine at 812B
+; Move the picture pen up one pixel
 ;
-; Used by the routines at #R$8071 and #R$8151.
+; Adds 1 to the pen y. At the top edge (y would become 128) the pen stays and
+; Z is returned. H is used as scratch and the other registers are kept. The
+; four pen moves (#R$812B, #R$813A, #R$8141, #R$8148) are used by the line and
+; fill routines.
+;
+; E Pen y
+; O:E New pen y
+; O:F Z if the pen was at the edge and did not move
+; O:H Destroyed
+@label=MovePenUp
 c$812B INC E         ;
  $812C BIT 7,E       ;
  $812E JR Z,$8135    ;
@@ -10,7 +19,8 @@ c$812B INC E         ;
  $8133 LD A,H        ;
  $8134 RET           ;
 ; This entry point is used by the routine at #R$813A.
-*$8135 LD H,A        ;
+@label=MovePen_Moved
+*$8135 LD H,A             ; moved: clear Z (A is kept)
  $8136 OR $01        ;
  $8138 LD A,H        ;
  $8139 RET           ;

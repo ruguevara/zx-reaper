@@ -1,2 +1,4 @@
-; Unused
+; Unused zero fill after the last word
+;
+; Eighteen zero bytes at the end of the vocabulary block, up to $6BFF.
 s$6BEE DEFS $12

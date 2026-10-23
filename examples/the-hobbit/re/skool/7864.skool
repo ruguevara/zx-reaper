@@ -1,10 +1,20 @@
-; Routine at 7864
+; Clear a phrase record and the head of the next one
 ;
-; Used by the routines at #R$7585 and #R$7795.
+; Zeroes the 24 bytes of the record at IY and the first word of the record
+; below it (the next one to be started), so a record in use always ends with an
+; empty one. Records are PARSED_RECORD_SIZE bytes, kept on the phrase stack
+; that grows down from $B9C8.
+;
+; IY Phrase record to clear
+; O:B 0
+@label=ClearRecord
 c$7864 PUSH IY       ;
  $7866 POP HL        ;
+@isub=LD B,PARSED_RECORD_SIZE
  $7867 LD B,$18      ;
- $7869 CALL $70E2    ;
- $786C LD (IY-$18),B ;
+ $7869 CALL $70E2    ; zero fill
+@isub=LD (IY-PARSED_RECORD_SIZE),B
+ $786C LD (IY-$18),B ; empty first word of the next record
+@isub=LD (IY-PARSED_RECORD_SIZE+1),B
  $786F LD (IY-$17),B ;
  $7872 RET           ;

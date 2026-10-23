@@ -1,6 +1,13 @@
-; Routine at 7924
+; Reject the phrase
 ;
-; Used by the routines at #R$7795, #R$7809, #R$781C and #R$782B.
+; Called (or jumped to) when the words do not fit the grammar. While an order
+; after SAY TO is being parsed (#R$75F1 gives NZ) the error is ignored and the
+; routine just returns. For the player's own line it discards one return
+; address and falls into #R$7929, which prints "What ?" and returns NZ to the
+; caller's caller, so parsing stops.
+;
+; O:F NZ (order text: returns to the caller)
+@label=RejectPhrase
 c$7924 CALL $75F1    ;
- $7927 RET NZ        ;
- $7928 POP HL        ;
+ $7927 RET NZ        ; an order: ignore the error
+ $7928 POP HL        ; drop the caller: end the parse

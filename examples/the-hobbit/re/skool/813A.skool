@@ -1,6 +1,13 @@
-; Routine at 813A
+; Move the picture pen down one pixel
 ;
-; Used by the routines at #R$8071 and #R$8151.
+; Subtracts 1 from the pen y. At the bottom edge (y 0) the pen stays and Z is
+; returned. Uses the exit at #R$8135 when it moved.
+;
+; E Pen y
+; O:E New pen y
+; O:F Z if the pen was at the edge and did not move
+; O:H Destroyed on the moved path
+@label=MovePenDown
 c$813A DEC E         ;
  $813B BIT 7,E       ;
  $813D JR Z,$8135    ;

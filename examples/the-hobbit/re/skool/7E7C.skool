@@ -1,22 +1,44 @@
-; Routine at 7E7C
+; Push the command's words that precede the noun
 ;
-; Used by the routines at #R$7DBC and #R$7E4D.
-c$7E7C LD A,$20       ;
+; The command record at (RecPtr3, $795E) may hold two extra words (+2 and +4, the
+; prepositions, e.g. the "up" of "pick up"). A word is pushed when its flag says
+; it comes before the noun: bit 5 of the high byte of the word at +2, bit 7 of
+; (IX+7) for the word at +4; otherwise 0 is pushed. The test is self-modified:
+; the entry at $7E7C stores JR NZ ($20) into the two JR opcodes SmcKeepWord4 and
+; SmcKeepWord2, #R$7E78 stores JR Z ($28) so that the other words are pushed.
+; .
+; It does not return in the usual way: it swaps the words in under its own
+; return address and jumps to it, so the caller finds the word of +2 on top of
+; the stack, then the word of +4. The callers push one more word (the verb,
+; RecWord1) and print a message such as $ADE1 ("I see nothing to {WORD} {WORD}
+; {WORD}"), whose {WORD} codes take the three words from the stack.
+;
+; O:stack The word at +2 (or 0), then the word at +4 (or 0), under the return
+; address's place
+@label=PushWordsBefore
+c$7E7C LD A,$20           ; $20 = JR NZ
 ; This entry point is used by the routine at #R$7E78.
-*$7E7E LD ($7E92),A   ;
- $7E81 LD ($7EA1),A   ;
- $7E84 LD IX,($795E)  ;
- $7E88 LD L,(IX+$04)  ;
+@label=PushWords_SetTests
+@isub=LD (SmcKeepWord4),A
+*$7E7E LD ($7E92),A       ; modify the JR at SmcKeepWord4
+@isub=LD (SmcKeepWord2),A
+ $7E81 LD ($7EA1),A       ; and the JR at SmcKeepWord2
+ $7E84 LD IX,($795E)      ; command record
+ $7E88 LD L,(IX+$04)      ; word at +4
  $7E8B LD H,(IX+$05)  ;
- $7E8E BIT 7,(IX+$07) ;
+ $7E8E BIT 7,(IX+$07)     ; flag of the word at +4
+@label=SmcKeepWord4
  $7E92 JR NZ,$7E97    ;
- $7E94 LD HL,$0000    ;
-*$7E97 EX (SP),HL     ;
+ $7E94 LD HL,$0000        ; flag says skip: no word
+@label=PushWords_Word4Done
+*$7E97 EX (SP),HL         ; word under the return address
  $7E98 PUSH HL        ;
- $7E99 LD L,(IX+$02)  ;
+ $7E99 LD L,(IX+$02)      ; word at +2
  $7E9C LD H,(IX+$03)  ;
- $7E9F BIT 5,H        ;
+ $7E9F BIT 5,H            ; flag of the word at +2
+@label=SmcKeepWord2
  $7EA1 JR NZ,$7EA6    ;
- $7EA3 LD HL,$0000    ;
-*$7EA6 EX (SP),HL     ;
- $7EA7 JP (HL)        ;
+ $7EA3 LD HL,$0000        ; flag says skip: no word
+@label=PushWords_Word2Done
+*$7EA6 EX (SP),HL         ; word 2 on top; HL = return address
+ $7EA7 JP (HL)            ; return

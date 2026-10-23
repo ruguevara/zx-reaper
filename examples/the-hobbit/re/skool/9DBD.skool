@@ -1,22 +1,32 @@
-; Routine at 9DBD
+; Find a record by id in a table of records that start with an id
 ;
-; Used by the routines at #R$6C00, #R$7F78, #R$83A0, #R$8D9D, #R$94D6, #R$950F,
-; #R$9AA0, #R$9B81 and #R$9BCA.
-c$9DBD EXX           ;
- $9DBE PUSH IX       ;
- $9DC0 POP HL        ;
- $9DC1 LD B,A        ;
- $9DC2 LD E,$03      ;
- $9DC4 LD D,$00      ;
-*$9DC6 LD A,(HL)     ;
- $9DC7 CP B          ;
- $9DC8 JR Z,$9DD2    ;
- $9DCA CP $FF        ;
- $9DCC JR Z,$9DD2    ;
- $9DCE ADD HL,DE     ;
- $9DCF JP $9DC6      ;
-*$9DD2 PUSH HL       ;
- $9DD3 POP IX        ;
- $9DD5 CP $FF        ;
- $9DD7 EXX           ;
- $9DD8 RET           ;
+; Steps through records of 3 bytes from IX until the first byte equals A or is
+; $FF (the end mark). Used on #R$C063 (objects), the picture table, the verb
+; tables and others. HL, DE and BC are kept (the alternate set is used).
+;
+; A Id looked for
+; IX Start of the table
+; O:IX Address of the matching record, or of the end mark
+; O:F Z set when the id was not found (end mark reached)
+@label=FindIdRecord
+c$9DBD EXX
+ $9DBE PUSH IX
+ $9DC0 POP HL
+ $9DC1 LD B,A
+@isub=LD E,ID_ENTRY_SIZE
+ $9DC2 LD E,$03
+ $9DC4 LD D,$00
+*$9DC6 LD A,(HL)
+ $9DC7 CP B
+ $9DC8 JR Z,$9DD2
+@isub=CP END_MARK
+ $9DCA CP $FF
+ $9DCC JR Z,$9DD2
+ $9DCE ADD HL,DE
+ $9DCF JP $9DC6
+*$9DD2 PUSH HL
+ $9DD3 POP IX
+@isub=CP END_MARK
+ $9DD5 CP $FF           ; Z: not found
+ $9DD7 EXX
+ $9DD8 RET

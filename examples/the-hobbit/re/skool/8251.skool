@@ -1,23 +1,35 @@
-; Routine at 8251
-c$8251 LD HL,$8271   ;
- $8254 PUSH DE       ;
- $8255 LD D,$0D      ;
-*$8257 LD A,(HL)     ;
- $8258 INC HL        ;
- $8259 CP C          ;
- $825A JR NZ,$8260   ;
- $825C LD A,(HL)     ;
- $825D CP B          ;
- $825E JR Z,$8267    ;
-*$8260 INC HL        ;
- $8261 DEC D         ;
- $8262 JR NZ,$8257   ;
- $8264 JP $75A0      ;
-*$8267 LD DE,$0019   ;
- $826A ADD HL,DE     ;
- $826B LD E,(HL)     ;
- $826C INC HL        ;
- $826D LD D,(HL)     ;
- $826E EX DE,HL      ;
- $826F POP DE        ;
- $8270 JP (HL)       ;
+; Run the handler of a special typed word (all, except, it, load, save...)
+;
+; The dispatcher #R$75B4 sends the words of class 9 here. Looks the word's
+; dictionary offset up in #R$8271 (13 pairs) and jumps to the matching handler
+; in #R$828B. A word that is not in the table goes on with the ordinary
+; processing at #R$75A0.
+; .
+; Hardware: none.
+;
+; C Low byte of the word's dictionary offset (from #R$7873)
+; B High byte of the word's dictionary offset
+; DE Kept for the handler
+@label=DispatchSpecialWord
+c$8251 LD HL,$8271
+ $8254 PUSH DE          ; kept for the handler
+ $8255 LD D,$0D         ; 13 pairs
+*$8257 LD A,(HL)
+ $8258 INC HL
+ $8259 CP C
+ $825A JR NZ,$8260
+ $825C LD A,(HL)
+ $825D CP B
+ $825E JR Z,$8267
+*$8260 INC HL
+ $8261 DEC D
+ $8262 JR NZ,$8257
+ $8264 JP $75A0         ; not a special word (not executed with the inputs in re/maps)
+*$8267 LD DE,$0019      ; HL is at the pair's second byte; +$19 reaches ActionHandlerTable+2n
+ $826A ADD HL,DE
+ $826B LD E,(HL)
+ $826C INC HL
+ $826D LD D,(HL)
+ $826E EX DE,HL
+ $826F POP DE
+ $8270 JP (HL)          ; run the handler; it ends with JP #R$75B4 or its own exit

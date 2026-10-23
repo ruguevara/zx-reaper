@@ -1,35 +1,49 @@
-; Routine at 81B5
+; Plot a picture pixel and colour its cell
 ;
-; Used by the routines at #R$8071 and #R$8151.
+; Sets the pixel at the pen position and sets the ink of its attribute cell to
+; the picture's current ink colour (PicVar1, $824E). The cell keeps its paper;
+; BRIGHT and FLASH are cleared. If the ink would equal the paper, it is inverted
+; (7 minus the colour) so that the pixel can be seen. Used by the line, fill
+; and paint routines.
+;
+; Hardware: writes the screen bitmap and the attribute area.
+;
+; D Pen x, 0-255
+; E Pen y, 0-127
+; PicVar1 Ink colour 0-7
+; HL is preserved
+@label=PlotPixel
 c$81B5 PUSH HL       ;
- $81B6 CALL $81DE    ;
+ $81B6 CALL $81DE         ; HL = bitmap byte, A = mask
  $81B9 PUSH AF       ;
  $81BA PUSH HL       ;
  $81BB LD A,H        ;
- $81BC AND $18       ;
+ $81BC AND $18            ; third of the screen ...
  $81BE RRCA          ;
  $81BF RRCA          ;
  $81C0 RRCA          ;
- $81C1 ADD A,$58     ;
+ $81C1 ADD A,$58          ; ... to the attribute page ($58-$5A)
  $81C3 LD H,A        ;
  $81C4 LD A,(HL)     ;
- $81C5 AND $38       ;
+@isub=AND 7*PAPER
+ $81C5 AND $38            ; keep the paper only
  $81C7 LD (HL),A     ;
  $81C8 LD A,($824E)  ;
  $81CB RLCA          ;
  $81CC RLCA          ;
- $81CD RLCA          ;
+ $81CD RLCA               ; ink colour in the paper position
  $81CE CP (HL)       ;
- $81CF JR NZ,$81D3   ;
- $81D1 XOR $38       ;
+ $81CF JR NZ,$81D3        ; ink equals paper?
+@isub=XOR 7*PAPER
+ $81D1 XOR $38            ; then invert it
 *$81D3 RRCA          ;
  $81D4 RRCA          ;
  $81D5 RRCA          ;
- $81D6 OR (HL)       ;
+ $81D6 OR (HL)            ; ink | paper
  $81D7 LD (HL),A     ;
  $81D8 POP HL        ;
  $81D9 POP AF        ;
- $81DA OR (HL)       ;
+ $81DA OR (HL)            ; set the pixel
  $81DB LD (HL),A     ;
  $81DC POP HL        ;
  $81DD RET           ;

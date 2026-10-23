@@ -1,56 +1,84 @@
-; Routine at 8B93
+; Scan the keyboard and return a newly pressed key
 ;
-; Used by the routine at #R$7249.
+; The game's own keyboard scanner (the ROM's is never used). Reads the 8 keyboard
+; half-rows and compares each with the previous scan (KeyPrevious), after OR-ing
+; the shift bits out through KeyMasks. A key that is down now and was up in the
+; previous scan is the key found (the last such key in half-row order wins).
+; Its index 5*half-row+column picks the ASCII code from KeyTable, or from
+; ShiftKeyTable while CAPS SHIFT or SYMBOL SHIFT is held. Keys held down from
+; before give nothing, so each press is returned once.
+; .
+; Used by the idle wait #R$7249, which calls it in a loop.
+; .
+; Hardware: keyboard port $FE (all 8 half-rows, then CAPS SHIFT and SYMBOL
+; SHIFT again); starts with a delay loop. Registers other than A and the flags
+; are preserved.
+; .
+; O:A ASCII code of the newly pressed key, 0 when there is none
+; O:F Z set when there is no key
+@label=ReadKey
 c$8B93 PUSH HL       ;
  $8B94 PUSH IX       ;
  $8B96 PUSH BC       ;
- $8B97 CALL $8B78    ;
+ $8B97 CALL $8B78    ; clears BC; BC := 0 for KeyFound
  $8B9A LD ($8B89),BC ;
  $8B9E LD HL,$8B8B   ;
  $8BA1 LD IX,$8B81   ;
- $8BA5 LD BC,$FEFE   ;
+@isub=LD BC,KB_ROW_CAPS_V*256+PORT_ULA
+ $8BA5 LD BC,$FEFE   ; B: half-row select, rotated each pass; C: port $FE
+@label=ReadKey_HalfRow
+@isub=IN A,(C)
 *$8BA8 IN A,(C)      ;
+@isub=AND KEY_BITS
  $8BAA AND $1F       ;
- $8BAC OR (IX+$00)   ;
- $8BAF PUSH AF       ;
- $8BB0 CPL           ;
+ $8BAC OR (IX+$00)   ; ignore the shift bits of the row
+ $8BAF PUSH AF       ; keep this scan for KeyPrevious
+ $8BB0 CPL           ; new key bits = now down AND up before
  $8BB1 AND (HL)      ;
  $8BB2 CPL           ;
- $8BB3 JR Z,$8BBC    ;
+ $8BB3 JR Z,$8BBC    ; Z: no new key in this row
  $8BB5 LD ($8B89),BC ;
- $8BB9 LD ($8B89),A  ;
+ $8BB9 LD ($8B89),A  ; low byte: key bits, 0 = the new key
 *$8BBC POP AF        ;
  $8BBD LD (HL),A     ;
  $8BBE INC HL        ;
  $8BBF INC IX        ;
- $8BC1 RLC B         ;
+ $8BC1 RLC B         ; next half-row; carry out after the 8th
  $8BC3 JR C,$8BA8    ;
  $8BC5 LD BC,($8B89) ;
  $8BC9 LD A,B        ;
  $8BCA OR C          ;
- $8BCB JR Z,$8BF6    ;
+ $8BCB JR Z,$8BF6    ; nothing found: A = 0
+@isub=LD A,256-KEYS_PER_ROW
  $8BCD LD A,$FB      ;
-*$8BCF ADD A,$05     ;
+@isub=ADD A,KEYS_PER_ROW
+*$8BCF ADD A,$05     ; A = 5 * half-row index (B has a 0 bit at the row)
  $8BD1 RRC B         ;
  $8BD3 JR C,$8BCF    ;
  $8BD5 DEC A         ;
-*$8BD6 INC A         ;
+*$8BD6 INC A         ; A + column index (C has a 0 bit at the key)
  $8BD7 RRC C         ;
  $8BD9 JR C,$8BD6    ;
  $8BDB LD C,A        ;
  $8BDC LD B,$00      ;
- $8BDE LD HL,$8BFB   ;
+ $8BDE LD HL,$8BFB   ; HL: KeyTable
+@isub=LD A,KB_ROW_CAPS_V
  $8BE1 LD A,$FE      ;
+@isub=IN A,(PORT_ULA)
  $8BE3 IN A,($FE)    ;
+@isub=AND KEY_CAPS_SHIFT
  $8BE5 AND $01       ;
- $8BE7 JR Z,$8BF1    ;
+ $8BE7 JR Z,$8BF1    ; CAPS SHIFT down: shifted table
+@isub=LD A,KB_ROW_SPACE_B
  $8BE9 LD A,$7F      ;
+@isub=IN A,(PORT_ULA)
  $8BEB IN A,($FE)    ;
+@isub=AND KEY_SYMBOL_SHIFT
  $8BED AND $02       ;
- $8BEF JR NZ,$8BF4   ;
-*$8BF1 LD HL,$8C23   ;
+ $8BEF JR NZ,$8BF4   ; SYMBOL SHIFT up: plain table
+*$8BF1 LD HL,$8C23   ; HL: ShiftKeyTable
 *$8BF4 ADD HL,BC     ;
- $8BF5 LD A,(HL)     ;
+ $8BF5 LD A,(HL)     ; ASCII code
 *$8BF6 POP BC        ;
  $8BF7 POP IX        ;
  $8BF9 POP HL        ;

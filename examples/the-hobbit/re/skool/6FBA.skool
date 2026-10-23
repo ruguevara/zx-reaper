@@ -1,13 +1,20 @@
-; Routine at 6FBA
+; Compare the typed word with the dictionary word
 ;
-; Used by the routine at #R$6E97.
+; Compares the letters of the typed word (#R$707A) with the letters of the
+; dictionary entry just decoded (#R$708B) over the length of the shorter of
+; the two. Z means the shorter one is a prefix of the other.
+;
+; O:F Z when the letters match, NZ otherwise
+; O:A Last letter compared
+; O:B Remaining count (0 when Z)
+@label=CompareWords
 c$6FBA LD A,($708A)  ;
  $6FBD LD B,A        ;
  $6FBE LD A,($709B)  ;
  $6FC1 CP B          ;
- $6FC2 JR NC,$6FC5   ;
+ $6FC2 JR NC,$6FC5   ; B = shorter length
  $6FC4 LD B,A        ;
-*$6FC5 LD HL,$707A   ;
+*$6FC5 LD HL,$707A   ; typed letters
  $6FC8 LD DE,$708B   ;
 *$6FCB LD A,(DE)     ;
  $6FCC CP (HL)       ;

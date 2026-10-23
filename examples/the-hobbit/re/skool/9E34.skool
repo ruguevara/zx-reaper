@@ -1,8 +1,13 @@
-; Routine at 9E34
+; Test whether the current actor can reach an object
 ;
-; Used by the routines at #R$95ED, #R$9DD9 and #R$9FC7.
-c$9E34 PUSH IX       ;
- $9E36 LD IX,($B70C) ;
- $9E3A CALL $9E40    ;
- $9E3D POP IX        ;
- $9E3F RET           ;
+; Runs #R$9E40 with IX set to the actor record at (#R$B70C); IX is kept.
+;
+; A Object id
+; IY Record of the object
+; O:F NZ when the object is within reach of the actor
+@label=ActorCanReach
+c$9E34 PUSH IX
+ $9E36 LD IX,($B70C)
+ $9E3A CALL $9E40
+ $9E3D POP IX
+ $9E3F RET

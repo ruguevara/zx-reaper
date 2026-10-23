@@ -1,8 +1,17 @@
-; Routine at A0AE
+; Point IX at the exits of a location
 ;
-; Used by the routines at #R$A0C8 and #R$A138.
-c$A0AE CALL $9BB1    ;
- $A0B1 LD BC,$0007   ;
- $A0B4 ADD IX,BC     ;
- $A0B6 LD BC,$0003   ;
- $A0B9 RET           ;
+; Looks up the location record (#R$9BB1) and sets IX to its exit list minus one
+; exit record, and BC to the size of an exit record, ready for the exit walkers
+; #R$A124 and #R$A0C8, which add BC before reading.
+;
+; A Location id
+; O:IX Location record + 7
+; O:BC 3
+@label=SeekExitsOfLocation
+c$A0AE CALL $9BB1
+@isub=LD BC,EXITS_BIAS
+ $A0B1 LD BC,$0007
+ $A0B4 ADD IX,BC
+@isub=LD BC,EXIT_SIZE
+ $A0B6 LD BC,$0003
+ $A0B9 RET

@@ -1,6 +1,14 @@
-; Routine at 7AD8
+; Decide whether the second noun phrase must be matched next
 ;
-; Used by the routines at #R$7A14 and #R$7DBC.
+; Z (no) when bit 2 of the command flags StateB71D ($B71D) is clear. NZ (yes)
+; when the typed sentence has a second noun phrase (bit 0 of RecWork1, $793E).
+; Otherwise bit 1 of $B71D decides: set gives Z, clear gives NZ. Used by the
+; noun matching loop #R$7A14 and by #R$7DBC. The meaning of the bits is inferred
+; from these tests only (see finding on the command flags).
+;
+; O:F Z when the second noun phrase is not to be matched
+; O:A Destroyed
+@label=NeedSecondNoun
 c$7AD8 LD A,($B71D)  ;
  $7ADB BIT 2,A       ;
  $7ADD RET Z         ;

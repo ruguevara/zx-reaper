@@ -1,6 +1,14 @@
-; Routine at 9BA9
+; Step to the next object, keeping A
 ;
-; Used by the routines at #R$9C17, #R$9D00, #R$9D50, #R$9D97 and #R$9FC7.
+; Like #R$9B93 but A and BC come back as they went in, so a loop can keep an id
+; in A. Only IX, IY and Z are results.
+; .
+; A Value to keep
+; IX Current entry of ObjectTable (or its base minus 3)
+; O:IX Next entry
+; O:IY Record of the next object
+; O:F Z set at the $FF that ends the table
+@label=NextObjectKeepA
 c$9BA9 PUSH BC       ;
  $9BAA LD B,A        ;
  $9BAB CALL $9B93    ;

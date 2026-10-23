@@ -1,8 +1,16 @@
-; Routine at 7ACC
+; Choose where an object scan starts
 ;
-; Used by the routines at #R$7AA1 and #R$7ABA.
+; Sets IX to the entry of the object table (#R$C063) in front of the first one a
+; scan is to look at, because #R$9B93 steps IX on by 3 before it reads. A noun
+; class of 0 starts at object 1 (the player's own entry is skipped); any other
+; class starts at the player (id 0).
+;
+; A Noun class; only bits 0-1 are used (from the command flags $B71E)
+; O:IX Scan start: ObjectTable for class 0, ObjectTable-3 otherwise
+@label=PickScanStart
 c$7ACC LD IX,$C063   ;
  $7AD0 AND $03       ;
  $7AD2 RET Z         ;
+@isub=LD IX,ObjectTable-3
  $7AD3 LD IX,$C060   ;
  $7AD7 RET           ;

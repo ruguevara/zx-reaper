@@ -1,15 +1,20 @@
-; Routine at A1D0
+; Test whether the command puts an object somewhere
 ;
-; Used by the routines at #R$94D6 and #R$950F.
-c$A1D0 PUSH HL       ;
- $A1D1 PUSH BC       ;
- $A1D2 LD B,$05      ;
- $A1D4 LD HL,$A20B   ;
- $A1D7 LD A,($B6E7)  ;
-*$A1DA CP (HL)       ;
- $A1DB JR Z,$A1E0    ;
- $A1DD INC HL        ;
- $A1DE DJNZ $A1DA    ;
-*$A1E0 POP BC        ;
- $A1E1 POP HL        ;
- $A1E2 RET           ;
+; Compares the command id (#R$B6E7) with the five verbs of the table at #R$A20B:
+; $0E drop in, $11 put in, $12 put on, $14 take out of, $2C throw through. These
+; are the commands whose second object is a place for the first.
+;
+; O:F Z set when the command is one of them
+@label=IsPlacingCommand
+c$A1D0 PUSH HL
+ $A1D1 PUSH BC
+ $A1D2 LD B,$05
+ $A1D4 LD HL,$A20B
+ $A1D7 LD A,($B6E7)
+*$A1DA CP (HL)
+ $A1DB JR Z,$A1E0
+ $A1DD INC HL
+ $A1DE DJNZ $A1DA
+*$A1E0 POP BC
+ $A1E1 POP HL
+ $A1E2 RET

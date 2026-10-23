@@ -1,13 +1,22 @@
-; Routine at 78A5
+; Find the previous (older) phrase record
 ;
-; Used by the routines at #R$7858 and #R$788C.
+; IX = the nearest record above IY on the phrase stack whose RECF_EXCEPT flag
+; (bit 6 of byte +1) is clear. The search loop is shared with #R$789F, which
+; enters at #R$78A9 with the downward step in DE.
+;
+; IY Current record
+; O:IX The next older record
+@label=FindOlderRecord
 c$78A5 PUSH DE        ;
- $78A6 LD DE,$0018    ;
+@isub=LD DE,PARSED_RECORD_SIZE
+ $78A6 LD DE,$0018   ; step up: older
 ; This entry point is used by the routine at #R$789F.
+@label=FindRecordStep
 *$78A9 PUSH IY        ;
  $78AB POP IX         ;
-*$78AD ADD IX,DE      ;
- $78AF BIT 6,(IX+$01) ;
+*$78AD ADD IX,DE     ; next record in the direction of DE
+@isub=BIT RECF_EXCEPT,(IX+1)
+ $78AF BIT 6,(IX+$01) ; skip the EXCEPT records
  $78B3 JR NZ,$78AD    ;
  $78B5 POP DE         ;
  $78B6 RET            ;

@@ -1,19 +1,30 @@
-; Routine at 914A
+; Refuse an attack between actors that share a side bit
 ;
-; Used by the routine at #R$9171.
+; The victim is the record in Noun1Record, the attacker the record in
+; ActorRecord (both loaded here). If the subject is the player (Subject = 0) and the
+; victim has state bit 4 set, that bit is cleared first. Then the state bytes
+; (+4) of the victim and the attacker are ANDed over bits 4-6: if they share a
+; bit the attack is refused: the routine drops its own return address (so its
+; caller returns to its own caller) and clears ActionAllowed. With no shared
+; bit it returns normally, Z set. Used by the attack handler #R$9171 and by the
+; handler at #R$9065.
+; .
+; O:F Z set when the attack may go on (otherwise it does not return)
+@label=CheckAttackAllowed
 c$914A LD IX,($B708)  ;
- $914E LD A,($B6EA)   ;
+ $914E LD A,($B6EA)   ; Subject: 0 = the player
  $9151 AND A          ;
  $9152 JR NZ,$915E    ;
- $9154 BIT 4,(IX+$04) ;
- $9158 JR Z,$915E     ;
+ $9154 BIT 4,(IX+$04) ; state bit 4 of the victim
+ $9158 JR Z,$915E     ; only the player clears it
  $915A RES 4,(IX+$04) ;
 *$915E LD A,(IX+$04)  ;
+@isub=AND STATE_SIDE_BITS
  $9161 AND $70        ;
- $9163 LD IX,($B70C)  ;
+ $9163 LD IX,($B70C)  ; IX := attacker
  $9167 AND (IX+$04)   ;
  $916A RET Z          ;
- $916B POP HL         ;
+ $916B POP HL         ; refused: return to the caller's caller
  $916C XOR A          ;
- $916D LD ($B6FB),A   ;
+ $916D LD ($B6FB),A   ; ActionAllowed := 0
  $9170 RET            ;

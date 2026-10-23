@@ -1,36 +1,60 @@
-; Routine at 78B7
+; Let a phrase record inherit from the one before it
 ;
-; Used by the routine at #R$75F6.
-c$78B7 EXX           ;
- $78B8 LD A,(IX+$01) ;
+; Used for the second and later parts of a list ("take map and key", "look in
+; chest and map"). The record at IY copies the first command word of the older
+; record at IX (and its flags except ALL), so "key" becomes "take key".
+; .
+; When the older record's first phrase block has a word at +4 (a preposition)
+; and bit 7 of E (second block free) is set, the record's own noun phrase moves
+; to the second block and the older first block is copied over it: "look in
+; chest and map" becomes look in chest, with map as the second noun. #R$78EA is
+; the common tail, which copies a 10-byte block from IX to IY (DE = offset, 4
+; or $0E) and then the second command word when the record has none; #R$75F6
+; enters it with DE = REC_BLOCK_B to pass a second block back to an older
+; record. BC, DE and HL are preserved (EXX).
+;
+; IX Older phrase record
+; IY Phrase record to complete
+; E Parser flags (bit 7: second phrase block free)
+@label=InheritRecord
+c$78B7 EXX           ; keep BC, DE, HL
+ $78B8 LD A,(IX+$01) ; flags of the older word, without ALL...
  $78BB AND $7F       ;
- $78BD OR (IY+$01)   ;
+ $78BD OR (IY+$01)   ; ...added to our own flags
  $78C0 LD (IY+$01),A ;
- $78C3 LD A,(IX+$00) ;
+ $78C3 LD A,(IX+$00) ; first command word
  $78C6 LD (IY+$00),A ;
  $78C9 EXX           ;
- $78CA LD A,(IY+$1C) ;
+@isub=LD A,(IY+PARSED_RECORD_SIZE+REC_BLOCK_A)
+ $78CA LD A,(IY+$1C) ; older record: first block has a preposition?
+@isub=OR (IY+PARSED_RECORD_SIZE+REC_BLOCK_A+1)
  $78CD OR (IY+$1D)   ;
  $78D0 RET Z         ;
- $78D1 BIT 7,E       ;
+ $78D1 BIT 7,E       ; second block free?
  $78D3 RET Z         ;
  $78D4 EXX           ;
  $78D5 PUSH IY       ;
  $78D7 POP HL        ;
- $78D8 LD DE,$0012   ;
+@isub=LD DE,REC_PHRASE_B
+ $78D8 LD DE,$0012   ; move our noun phrase (REC_PHRASE_A) ...
  $78DB ADD HL,DE     ;
  $78DC PUSH HL       ;
+@isub=LD DE,-PHRASE_BLOCK_SIZE
  $78DD LD DE,$FFF6   ;
  $78E0 ADD HL,DE     ;
  $78E1 POP DE        ;
- $78E2 LD BC,$0006   ;
+@isub=LD BC,PHRASE_WORDS_SIZE
+ $78E2 LD BC,$0006   ; ... to the second block
  $78E5 LDIR          ;
- $78E7 LD DE,$0004   ;
+@isub=LD DE,REC_BLOCK_A
+ $78E7 LD DE,$0004   ; then copy the older first block
 ; This entry point is used by the routine at #R$75F6.
-*$78EA CALL $78FF    ;
- $78ED LD A,(IY+$02) ;
+@label=CopyBlockFromIX
+*$78EA CALL $78FF    ; 10 bytes IX+DE to IY+DE
+ $78ED LD A,(IY+$02) ; no second command word yet?
  $78F0 OR (IY+$03)   ;
- $78F3 LD DE,$0002   ;
+@isub=LD DE,REC_WORD2
+ $78F3 LD DE,$0002   ; copy it as well
  $78F6 CALL Z,$7903  ;
  $78F9 EXX           ;
  $78FA RET           ;

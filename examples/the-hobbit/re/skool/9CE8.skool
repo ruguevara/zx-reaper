@@ -1,6 +1,12 @@
-; Routine at 9CE8
+; Sum the weights of what a holder directly holds
 ;
-; Used by the routines at #R$8D9D and #R$924F.
-c$9CE8 PUSH BC       ;
- $9CE9 LD B,$01      ;
- $9CEB JR $9CF0      ;
+; Adds up the weight (+2) of every record whose holder is the id in A, without
+; looking inside them. Sets B to 1 and joins #R$9CF0. Used for the weight an
+; actor already carries or a container already holds.
+;
+; A Holder id (the player, an actor or a container)
+; O:A Total weight, $FF when it overflows
+@label=SumHeldWeight
+c$9CE8 PUSH BC          ; B=1: sum weights, do not recurse
+ $9CE9 LD B,$01
+ $9CEB JR $9CF0

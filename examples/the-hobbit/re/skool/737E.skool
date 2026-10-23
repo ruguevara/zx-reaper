@@ -1,9 +1,22 @@
-; Routine at 737E
+; Control code 2: jump inside the message data
+;
+; The byte after the code is a signed displacement. IX moves by it from the
+; code byte; the printer's next step passes the displacement byte, so the
+; message goes on at (address of the displacement byte) + displacement. Many
+; messages end by jumping into the middle of another.
+; .
+; The printer calls this handler with IX at the code byte. Return Z when there
+; is nothing to print; NZ with a word token in DE and the printer prints it.
+;
+; IX Address of the code byte
+; O:IX Address one before where the message continues
+; O:F Z
+@label=MessageJump
 c$737E LD E,(IX+$01) ;
- $7381 LD D,$00      ;
+ $7381 LD D,$00      ; signed displacement
  $7383 BIT 7,E       ;
  $7385 JR Z,$7389    ;
  $7387 LD D,$FF      ;
 *$7389 ADD IX,DE     ;
- $738B XOR A         ;
+ $738B XOR A         ; nothing to print
  $738C RET           ;

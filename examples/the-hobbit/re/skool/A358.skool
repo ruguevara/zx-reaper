@@ -1,3 +1,7 @@
-; Routine at A358
-c$A358 LD HL,$B02D   ;
- $A35B JP $72DD      ;
+; Print that the key does not fit
+;
+; Message "<object 2> does not fit this lock." Reached by the key and lock
+; handlers (#R$A244) when the second object is not the right key.
+@label=PrintNoFit
+c$A358 LD HL,$B02D
+ $A35B JP $72DD

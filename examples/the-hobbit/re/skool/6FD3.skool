@@ -1,17 +1,30 @@
-; Routine at 6FD3
+; Clear the screen to black ink on white paper
 ;
-; Used by the routine at #R$6C00.
+; Sets the border white, zeroes the whole bitmap and fills the attributes
+; with black ink on white paper. The second fill runs one byte past the
+; attributes and sets $5B00 as well.
+; .
+; Hardware: writes the border (port $FE), the screen bitmap and the attributes.
+;
+; O:BC, DE, HL Preserved
+@label=ClearScreen
 c$6FD3 PUSH HL       ;
  $6FD4 PUSH DE       ;
  $6FD5 PUSH BC       ;
+@isub=LD A,BORDER_WHITE
  $6FD6 LD A,$07      ;
+@isub=OUT (PORT_ULA),A
  $6FD8 OUT ($FE),A   ;
  $6FDA LD HL,$4000   ;
+@isub=LD DE,SCREEN+1
  $6FDD LD DE,$4001   ;
+@isub=LD BC,SCREEN_BITMAP_SIZE
  $6FE0 LD BC,$1800   ;
  $6FE3 LD (HL),$00   ;
  $6FE5 LDIR          ;
+@isub=LD BC,ATTRS_SIZE
  $6FE7 LD BC,$0300   ;
+@isub=LD (HL),WHITE*PAPER+BLACK
  $6FEA LD (HL),$38   ;
  $6FEC LDIR          ;
  $6FEE POP BC        ;

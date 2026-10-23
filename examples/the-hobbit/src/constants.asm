@@ -149,3 +149,82 @@ DIR_SOUTHEAST            EQU $07 ; direction, also the command id for moving tha
 DIR_SOUTHWEST            EQU $08 ; direction, also the command id for moving that way
 DIR_UP                   EQU $09 ; direction, also the command id for moving that way
 DIR_DOWN                 EQU $0A ; direction, also the command id for moving that way
+PORT_PRINTER             EQU 0xFB ; ZX printer port
+PORT_ULA                 EQU 0xFE ; ULA port: keyboard half-rows, border
+KEY_BITS                 EQU 0x1F ; keyboard port bits 0-4: key lines; all set = no key down
+CHAR_CR                  EQU 0x0D ; carriage return: new line
+CHAR_SPACE               EQU 0x20 ; space, the first printable character
+STORY_SCROLL_ROWS        EQU 17 ; story window: character rows moved up by one scroll (rows 1-17 to 0-16)
+STORY_COLUMNS            EQU 42 ; story window: characters per line
+GLYPH_WIDTH              EQU 6 ; story window: pixels per character (42 x 6 = 252)
+INPUT_COLUMNS            EQU 32 ; input window: characters per line
+BORDER_GREEN             EQU 4 ; border colour green
+BORDER_WHITE             EQU 7 ; border colour white
+FONT_BASE_ADJUST         EQU 0x100 ; game font base is Font-$100 so that character code x indexes at 8*x
+KEY_LEFT                 EQU 0x08 ; code of cursor left (5), also back-space
+KEY_RIGHT                EQU 0x09 ; code of cursor right (8)
+KEY_DOWN                 EQU 0x0A ; code of cursor down (6)
+KEY_UP                   EQU 0x5B ; code of cursor up (7)
+TOKEN_THEN               EQU 0xB0 ; word token of a full stop in the typed line: class 11 then
+TOKEN_AND                EQU 0xA0 ; word token of a comma in the typed line: class 10 and
+TOKEN_QUOTE              EQU 0x90 ; word token of a double quote in the typed line: class 9
+WHITE                    EQU 0x07 ; colour white   
+BLACK                    EQU 0x00 ; colour black   
+PAPER                    EQU 0x08 ; multiplier of the paper colour in an attribute
+SCREEN_BITMAP_SIZE       EQU 0x1800 ; bytes of screen bitmap
+ATTRS_SIZE               EQU 0x0300 ; bytes of screen attributes
+COMMAND_RECORD_SIZE      EQU 0x08 ; bytes in a command table record
+ATTR_ROW                 EQU 0x20 ; bytes in one row of screen attributes (32 cells)
+ORDER_SLOT_SIZE          EQU 25 ; bytes in an order slot: owner id + a 24-byte parsed command
+ORDER_SLOTS              EQU 8 ; number of order slots at OrderSlots
+PARSED_RECORD_SIZE       EQU 24 ; bytes in a parsed phrase record (the parser stack records)
+PHRASE_WORDS_SIZE        EQU 6 ; bytes of a noun phrase: 3 dictionary words
+REC_PHRASE_A             EQU 0x08 ; offset in a parsed phrase record of its first noun phrase (3 words)
+REC_PHRASE_B             EQU 0x12 ; offset in a parsed phrase record of its second noun phrase (3 words)
+FLAG_SLOT_PENDING        EQU 0xFF ; order slot owner value: slot is being filled
+CHAR_BACKSPACE           EQU 0x08 ; back-space: moves the cursor one cell left and blanks it
+KB_ROW_CAPS_V            EQU 0xFE ; keyboard half-row select: CAPS SHIFT Z X C V
+KB_ROW_SPACE_B           EQU 0x7F ; keyboard half-row select: SPACE SYMBOL-SHIFT M N B
+KEY_CAPS_SHIFT           EQU 0x01 ; keyboard port bit of CAPS SHIFT in its half-row
+KEY_SYMBOL_SHIFT         EQU 0x02 ; keyboard port bit of SYMBOL SHIFT in its half-row
+KEYS_PER_ROW             EQU 5 ; keys in one keyboard half-row
+PRINTER_STOP_MOTOR       EQU 0x04 ; ZX printer port value that stops the motor
+AT_LOCATION              EQU 0xFF ; holder id of an object that lies at its location instead of in a holder
+RECORD_HEADER_SIZE       EQU 0x10 ; object/character record: bytes before the location list (+0 N .. +15)
+ID_ENTRY_SIZE            EQU 3 ; bytes in an (id, word) table entry
+NPC_RECORD_SIZE          EQU 7 ; bytes in an NPC record
+LOCATION_COUNT           EQU 0x50 ; location ids are 0 to LOCATION_COUNT-1
+ROLL_SPREAD              EQU 10 ; random spread added to a strength in a fight
+END_MARK                 EQU 0xFF ; end byte of an (id, word) table
+STATE_SIDE_BITS          EQU 0x70 ; object state byte (+4): bits 4-6, tested for a shared bit by the attack check
+FLAG_CHARACTER           EQU 6 ; record flag (+7) bit: a character
+FLAG_ACTIVE              EQU 5 ; record flag (+7) bit: active, open or alive
+FLAG_DEAD                EQU 3 ; record flag (+7) bit: dead or disabled
+PHRASE_BROKEN            EQU 0x00CD ; name phrase code: the word 'broken' (dictionary offset)
+PHRASE_DEAD              EQU 0x0192 ; name phrase code: the word 'dead' (dictionary offset)
+EXIT_SIZE                EQU 3 ; bytes in an exit record of a location (direction, obstacle, destination)
+EXITS_BIAS               EQU 7 ; offset of the exit list in a location record minus one exit record (walkers step before reading)
+REASON_CLOSED            EQU 5 ; reason id 5 of the object state words: closed (bit 7 set: open)
+REASON_LOCKED            EQU 0x80 ; reason id 0 with bit 7: locked
+REASON_OPEN              EQU 0x85 ; reason id 5 with bit 7: open
+FLAG_PRESENT             EQU 7 ; record flag (+7) bit: present in the game (counted, can be seen)
+FLAG_LOCKED              EQU 0 ; record flag (+7) bit: locked (door, chest)
+WORD_SUFFIX_OBJ1         EQU 0x10 ; word print mode (high nibble of a word code): ending added when the first object (B6E8) is not 0
+WORD_SUFFIX              EQU 0x40 ; word print mode: ending always added (verb words that take one)
+WORD_PLAIN               EQU 0x50 ; word print mode: never an ending
+WORD_CAPITAL             EQU 0x70 ; word print mode: first letter capital, ending when the subject is not the player
+WORD_YOU                 EQU 0x07A8 ; dictionary offset of the word 'you' (name phrase code of the player; with bit 15 set)
+WORD_ENDING_SIZE         EQU 4 ; bytes in a word ending record (WordEndings)
+LETTER_BASE              EQU 0x60 ; dictionary letter n (1=a) prints as character LETTER_BASE+n
+REC_WORD1                EQU 0 ; offset in a parsed phrase record of the first command word (verb, or the direction)
+REC_WORD2                EQU 2 ; offset in a parsed phrase record of the second command word (e.g. go)
+REC_BLOCK_A              EQU 4 ; offset in a parsed phrase record of the first phrase block (2 prepositions + noun phrase)
+REC_BLOCK_B              EQU 0x0E ; offset in a parsed phrase record of the second phrase block
+PHRASE_BLOCK_SIZE        EQU 10 ; bytes in a phrase block: 2 prepositions, noun, 2 adjectives (the dispatcher's ActionSlots)
+RECF_EXCEPT              EQU 6 ; bit of byte +1 of a parsed phrase record: record only holds the nouns after except
+RECF_ALL                 EQU 7 ; bit of byte +1 of a parsed phrase record: all was typed
+ALL_STATE_ALL            EQU 1 ; AllStage after the word ALL
+ALL_STATE_EXCEPT         EQU 2 ; AllStage after EXCEPT following ALL
+ROW_BYTES                EQU 32 ; bytes in one pixel line of a screen character row
+INPUT_SCROLL_ROWS        EQU 4 ; input window: character rows moved up by one scroll (rows 20-23 to 19-22)
+ITEM_COMMON_WORD         EQU 0x60 ; message item byte: first of the 32 common words ($60-$7F), index into CommonWordTable

@@ -1,6 +1,18 @@
-; Routine at 7367
+; Control code 0: print a name phrase passed on the stack
+;
+; The caller of the message printer pushed the address of a name phrase (as
+; returned by #R$71E2, 0 for none) below its return address. This takes it off
+; the stack, closing the gap, clears the article flag ($B703) and, if it is not
+; 0, prints the name with #R$7434.
+; .
+; The printer calls this handler with IX at the code byte. Return Z when there
+; is nothing to print; NZ with a word token in DE and the printer prints it.
+;
+; O:A 0 (nothing more to print)
+; O:F Z
+@label=PrintStackedName
 c$7367 XOR A         ;
- $7368 LD ($B703),A  ;
+ $7368 LD ($B703),A  ; PhraseMode: no article
  $736B POP DE        ;
  $736C POP HL        ;
  $736D EX (SP),HL    ;

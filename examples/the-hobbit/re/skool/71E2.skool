@@ -1,12 +1,18 @@
-; Routine at 71E2
+; Address of an object's name phrases
 ;
-; Used by the routines at #R$73C2, #R$7B63 and #R$7E4D.
+; Looks up the record of object or character A (#R$9BCA) and returns the
+; address of its name phrase codes (record +8).
+;
+; A Object or character id
+; O:HL Address of the name phrase codes
+; O:DE, IX Preserved
+@label=ObjectNamePtr
 c$71E2 PUSH DE       ;
  $71E3 PUSH IX       ;
  $71E5 CALL $9BCA    ;
  $71E8 PUSH IX       ;
  $71EA POP HL        ;
- $71EB LD DE,$0008   ;
+ $71EB LD DE,$0008   ; record +8: first name phrase
  $71EE ADD HL,DE     ;
  $71EF POP IX        ;
  $71F1 POP DE        ;

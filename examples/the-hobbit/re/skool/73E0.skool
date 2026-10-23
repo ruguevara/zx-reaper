@@ -1,6 +1,18 @@
-; Routine at 73E0
+; Control code 11: print another message, then go on
+;
+; The byte after the code is a signed displacement; the message at (address of
+; that byte) + displacement is printed through #R$72F1 until its ending code,
+; then this message continues after the displacement byte.
+; .
+; The printer calls this handler with IX at the code byte. Return Z when there
+; is nothing to print; NZ with a word token in DE and the printer prints it.
+;
+; IX Address of the code byte
+; O:IX Address of the displacement byte
+; O:F Z
+@label=MessageCall
 c$73E0 INC IX        ;
- $73E2 PUSH IX       ;
+ $73E2 PUSH IX       ; IX = displacement byte
  $73E4 POP HL        ;
  $73E5 PUSH HL       ;
  $73E6 LD E,(IX+$00) ;
@@ -9,7 +21,7 @@ c$73E0 INC IX        ;
  $73ED JR Z,$73F1    ;
  $73EF LD D,$FF      ;
 *$73F1 ADD HL,DE     ;
- $73F2 CALL $72F1    ;
+ $73F2 CALL $72F1    ; print the other message
  $73F5 POP IX        ;
  $73F7 XOR A         ;
  $73F8 RET           ;

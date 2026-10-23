@@ -1,0 +1,23 @@
+; Copy a noun phrase out of the parsed record
+@label=CopyPhrase
+c$7C91 PUSH BC            ; copy a phrase: A = offset in the record
+ $7C92 LD C,A        ;
+ $7C93 LD B,$00      ;
+ $7C95 PUSH HL       ;
+ $7C96 PUSH IY       ;
+ $7C98 POP HL        ;
+ $7C99 ADD HL,BC     ;
+@isub=LD BC,PHRASE_WORDS_SIZE
+ $7C9A LD BC,$0006   ;
+ $7C9D LDIR          ;
+ $7C9F XOR A         ;
+@isub=LD B,PHRASE_WORDS_SIZE
+ $7CA0 LD B,$06      ;
+*$7CA2 DEC HL             ; OR the six bytes copied
+ $7CA3 OR (HL)       ;
+ $7CA4 DJNZ $7CA2    ;
+ $7CA6 POP HL        ;
+ $7CA7 POP BC        ;
+ $7CA8 RET Z              ; no words: leave the flag clear
+ $7CA9 SET 0,(HL)         ; phrase has words
+ $7CAB RET           ;

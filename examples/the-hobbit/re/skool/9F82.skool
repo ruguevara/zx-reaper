@@ -1,12 +1,19 @@
-; Routine at 9F82
+; Get the one location of a record
 ;
-; Used by the routines at #R$980E, #R$99C6, #R$9ACD and #R$9B02.
-c$9F82 CP $FF        ;
- $9F84 RET Z         ;
- $9F85 CALL $9BCA    ;
- $9F88 LD A,$01      ;
- $9F8A CP (IX+$00)   ;
- $9F8D LD A,$FF      ;
- $9F8F RET NZ        ;
- $9F90 LD A,(IX+$10) ;
- $9F93 RET           ;
+; For an object or actor that has exactly one location in its list (+0 is 1),
+; returns that location (+$10). The NPC loop #R$980E uses it to find where an
+; NPC is.
+;
+; A Object or actor id, $FF for none
+; O:A Its location, or $FF when the id is $FF or it has several locations
+; O:IX Record of the object (when A was not $FF)
+@label=GetSingleLocation
+c$9F82 CP $FF
+ $9F84 RET Z
+ $9F85 CALL $9BCA
+ $9F88 LD A,$01         ; exactly one location?
+ $9F8A CP (IX+$00)
+ $9F8D LD A,$FF
+ $9F8F RET NZ
+ $9F90 LD A,(IX+$10)
+ $9F93 RET

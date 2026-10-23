@@ -1,3 +1,13 @@
-; Routine at 7407
-c$7407 LD A,($B6E8)  ;
+; Control code 14: "his" or "your" for the first object
+;
+; Prints the word for the actor in $B6E8 (the first object of the command)
+; with #R$73FC.
+; .
+; The printer calls this handler with IX at the code byte. Return Z when there
+; is nothing to print; NZ with a word token in DE and the printer prints it.
+;
+; O:DE Word token
+; O:F NZ
+@label=HisYourFirstObject
+c$7407 LD A,($B6E8)  ; FirstObject
  $740A JR $73FC      ;

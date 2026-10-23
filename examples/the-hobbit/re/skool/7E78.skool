@@ -1,5 +1,10 @@
-; Routine at 7E78
+; Push the command's words that follow the noun
 ;
-; Used by the routine at #R$7E4D.
-c$7E78 LD A,$28      ;
+; Same as #R$7E7C but with the opposite test: a word of the command record is
+; pushed when its "before the noun" flag is clear. Sets the two JR opcodes of
+; #R$7E7C to JR Z ($28) and continues there.
+;
+; O:stack Two words for the message printer's {WORD} codes, see #R$7E7C
+@label=PushWordsAfter
+c$7E78 LD A,$28           ; $28 = JR Z
  $7E7A JR $7E7E      ;

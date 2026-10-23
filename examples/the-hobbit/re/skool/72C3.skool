@@ -1,9 +1,17 @@
-; Routine at 72C3
+; Print a message character
 ;
-; Used by the routine at #R$72D3.
+; Prints character A with #R$858B. A carriage return also clears the output
+; column byte ($B704), so the next word starts a fresh line. The printer calls
+; it for every literal character ($20-$5F) of a message, and it is the handler
+; of control code 13 (line break).
+;
+; A Character
+; O:F Z for a carriage return (nothing more to print), NZ otherwise
+@label=PrintMessageChar
 c$72C3 CALL $858B    ;
+@isub=CP CHAR_CR
  $72C6 CP $0D        ;
  $72C8 RET NZ        ;
  $72C9 XOR A         ;
- $72CA LD ($B704),A  ;
+ $72CA LD ($B704),A  ; CapitalNext: at line start
  $72CD RET           ;

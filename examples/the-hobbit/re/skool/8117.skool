@@ -1,6 +1,14 @@
-; Routine at 8117
+; Step an attribute address left one cell
 ;
-; Used by the routine at #R$7FA7.
+; Subtracts 1; keeps the old address if that would pass $5800. It does not stop
+; at the start of a row: from column 0 it goes to the end of the row above.
+;
+; Hardware: none (address arithmetic on the attribute area).
+;
+; HL Attribute address
+; O:HL New attribute address
+; AF is preserved
+@label=AttrLeft
 c$8117 PUSH AF       ;
  $8118 DEC HL        ;
  $8119 LD A,H        ;

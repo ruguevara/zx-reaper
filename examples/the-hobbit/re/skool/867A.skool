@@ -1,30 +1,40 @@
-; Routine at 867A
+; Print a character in the input window
 ;
-; Used by the routines at #R$85B7 and #R$860D.
-c$867A PUSH AF       ;
- $867B PUSH BC       ;
- $867C PUSH DE       ;
- $867D PUSH HL       ;
- $867E SUB $20       ;
- $8680 LD L,A        ;
- $8681 LD H,$00      ;
- $8683 ADD HL,HL     ;
- $8684 ADD HL,HL     ;
- $8685 ADD HL,HL     ;
- $8686 LD DE,$3D00   ;
- $8689 ADD HL,DE     ;
- $868A EX DE,HL      ;
- $868B POP HL        ;
- $868C PUSH HL       ;
- $868D LD B,$08      ;
-*$868F LD A,(DE)     ;
- $8690 LD (HL),A     ;
- $8691 INC DE        ;
- $8692 INC H         ;
- $8693 DJNZ $868F    ;
- $8695 POP HL        ;
- $8696 POP DE        ;
- $8697 POP BC        ;
- $8698 POP AF        ;
- $8699 INC L         ;
- $869A RET           ;
+; Draws one 8x8 character from the ROM font (32 columns) into the screen cell
+; at HL, one pixel line per screen row ($100 apart), and returns HL moved one
+; cell to the right. The cell attribute is not changed. AF, BC and DE are kept.
+; .
+; Hardware: writes 8 bytes of the screen bitmap; reads the ROM font.
+;
+; A Character code $20-$7F
+; HL Screen address of the cell (top pixel line)
+; O:HL Address of the next cell (L + 1)
+@label=PrintInputChar
+c$867A PUSH AF
+ $867B PUSH BC
+ $867C PUSH DE
+ $867D PUSH HL
+@isub=SUB CHAR_SPACE
+ $867E SUB $20          ; the font starts at space
+ $8680 LD L,A
+ $8681 LD H,$00
+ $8683 ADD HL,HL        ; x8 bytes per character
+ $8684 ADD HL,HL
+ $8685 ADD HL,HL
+ $8686 LD DE,$3D00      ; ROM font ($3D00 is the space)
+ $8689 ADD HL,DE
+ $868A EX DE,HL
+ $868B POP HL
+ $868C PUSH HL
+ $868D LD B,$08         ; 8 pixel lines
+*$868F LD A,(DE)
+ $8690 LD (HL),A
+ $8691 INC DE
+ $8692 INC H
+ $8693 DJNZ $868F
+ $8695 POP HL
+ $8696 POP DE
+ $8697 POP BC
+ $8698 POP AF
+ $8699 INC L            ; next column
+ $869A RET

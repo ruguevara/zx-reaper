@@ -1,6 +1,15 @@
-; Routine at A5CA
+; Test whether the object is open
 ;
-; Used by the routines at #R$8EEC and #R$9138.
-c$A5CA BIT 5,(IX+$07) ;
- $A5CE LD A,$05       ;
- $A5D0 RET            ;
+; Reports the state of the object at IX: A is the state id 5 ("closed") and Z
+; is set when the open flag (bit 5) is clear. Callers jump to #R$A16C to say
+; "<it> is closed" on Z.
+;
+; IX Record of the object
+; O:A 5, state id of "closed" (bit 7 clear)
+; O:F Z set when the object is closed
+@label=CheckOpen
+@isub=BIT FLAG_ACTIVE,(IX+$07)
+c$A5CA BIT 5,(IX+$07)
+@isub=LD A,REASON_CLOSED
+ $A5CE LD A,$05
+ $A5D0 RET

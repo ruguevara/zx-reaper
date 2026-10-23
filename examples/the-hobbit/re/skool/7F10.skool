@@ -1,6 +1,9 @@
-; Routine at 7F10
+; Find the acting character's order slot, keeping registers
 ;
-; Used by the routine at #R$980E.
+; #R$7EFF with HL, DE and BC preserved: only the flag comes back.
+;
+; O:F Z if Subject ($B6EA) owns an order slot
+@label=FindOrderSlotKeep
 c$7F10 PUSH HL       ;
  $7F11 PUSH DE       ;
  $7F12 PUSH BC       ;

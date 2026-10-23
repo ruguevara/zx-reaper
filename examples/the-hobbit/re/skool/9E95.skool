@@ -1,9 +1,16 @@
-; Routine at 9E95
+; Point IX at the exits of the actor's location
 ;
-; Used by the routines at #R$7AA1, #R$7ABA, #R$7DBC, #R$9F08 and #R$9F2D.
-c$9E95 PUSH DE       ;
- $9E96 CALL $9D37    ;
- $9E99 LD DE,$0007   ;
- $9E9C ADD IX,DE     ;
- $9E9E POP DE        ;
- $9E9F RET           ;
+; Takes the location record of the current actor (#R$9D37) and sets IX to its
+; exit list minus one exit record (+7), the starting position for walkers that
+; step IX by 3 before reading (#R$9B93). The exit records are direction,
+; obstacle object, destination.
+;
+; O:IX Location record + 7
+@label=SeekActorExits
+c$9E95 PUSH DE
+ $9E96 CALL $9D37
+@isub=LD DE,EXITS_BIAS
+ $9E99 LD DE,$0007
+ $9E9C ADD IX,DE
+ $9E9E POP DE
+ $9E9F RET

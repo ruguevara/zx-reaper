@@ -1,11 +1,22 @@
-; Routine at 969A
+; Wait for a key after a picture
 ;
-; Used by the routine at #R$965B.
+; Waits until any key is down (reading all 8 keyboard half-rows at once), then
+; sets the border to white. #R$965B calls it after drawing a location's picture,
+; so the picture stays on the screen until a key is pressed. Does not wait for
+; the key to be released.
+; .
+; Hardware: keyboard port $FE (all half-rows); border colour via port $FE.
+@label=WaitKeyAfterPicture
 c$969A XOR A         ;
- $969B IN A,($FE)    ;
+@isub=IN A,(PORT_ULA)
+ $969B IN A,($FE)    ; A = 0 selects every half-row
+@isub=AND KEY_BITS
  $969D AND $1F       ;
+@isub=CP KEY_BITS
  $969F CP $1F        ;
- $96A1 JR Z,$969A    ;
+ $96A1 JR Z,$969A    ; no key: keep waiting
+@isub=LD A,BORDER_WHITE
  $96A3 LD A,$07      ;
- $96A5 OUT ($FE),A   ;
+@isub=OUT (PORT_ULA),A
+ $96A5 OUT ($FE),A   ; border white
  $96A7 RET           ;

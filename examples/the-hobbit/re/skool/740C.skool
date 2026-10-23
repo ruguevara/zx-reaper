@@ -1,16 +1,31 @@
-; Routine at 740C
-c$740C LD A,($B6EA)  ;
+; Control code 16: print the subject's name and "is" or "are"
+;
+; Prints the name of the actor in $B6EA ("you" for the player, "someone" when
+; $FF; no article), then returns the word token for "are" when the actor is
+; the player and "is" otherwise. The second entry takes the article flag in A
+; and the actor in A' (used by #R$7428 for codes 17 and 19).
+; .
+; The printer calls this handler with IX at the code byte. Return Z when there
+; is nothing to print; NZ with a word token in DE and the printer prints it.
+;
+; A' Actor id (second entry only)
+; A Article flag $B703 (second entry only)
+; O:DE Word token: $039B "is" or $0065 "are"
+; O:F NZ
+@label=PrintSubjectIs
+c$740C LD A,($B6EA)  ; Subject
  $740F EX AF,AF'     ;
  $7410 XOR A         ;
 ; This entry point is used by the routine at #R$7428.
-*$7411 LD ($B703),A  ;
+@label=PrintActorIs
+*$7411 LD ($B703),A  ; PhraseMode
  $7414 EX AF,AF'     ;
  $7415 PUSH AF       ;
  $7416 CALL $7488    ;
  $7419 POP AF        ;
  $741A AND A         ;
- $741B LD DE,$039B   ;
+ $741B LD DE,$039B   ; "is"
  $741E RET NZ        ;
- $741F LD DE,$0065   ;
+ $741F LD DE,$0065   ; "are"
  $7422 OR $01        ;
  $7424 RET           ;

@@ -1,21 +1,36 @@
-; Routine at 7B78
+; Unpack the command flags into the matcher's variables
 ;
-; Used by the routines at #R$79B6 and #R$7AF5.
+; StateB71D and StateB71E ($B71D, $B71E) were built by #R$70F3 from the four flag
+; nibbles of the command record. Copies single bits into separate variables:
+; .
+; $B711 = $B71E & $40 (read by #R$950F: with no light the command is refused
+; with "I see nothing here.")
+; $B70F = $B71D & 1 (AllActive; #R$9DD9 then accepts a name match without the
+; further test #R$9E34)
+; Noun1Kind ($B6FE) = 1 if bit 7 of $B71D, else 0
+; Noun2Kind ($B6FF) = 1 if bit 6 of $B71D, else 0
+; .
+; A noun kind of 1 makes #R$7CCB and #R$7D17 look the noun up among the places
+; reachable by an exit (#R$9EA0) instead of among objects (#R$9DD9).
+;
+; O:A Noun2Kind
+; O:B StateB71D
+@label=UnpackFlags
 c$7B78 LD A,($B71E)  ;
- $7B7B AND $40       ;
- $7B7D LD ($B711),A  ;
+ $7B7B AND $40            ; bit 6 of the second flag byte
+ $7B7D LD ($B711),A       ; B711: needs light
  $7B80 LD A,($B71D)  ;
  $7B83 LD B,A        ;
  $7B84 AND $01       ;
- $7B86 LD ($B70F),A  ;
+ $7B86 LD ($B70F),A       ; B70F: bit 0 of the first flag byte
  $7B89 LD A,B        ;
  $7B8A AND $80       ;
- $7B8C JR Z,$7B90    ;
+ $7B8C JR Z,$7B90         ; Noun1Kind: bit 7 -> 1
  $7B8E LD A,$01      ;
 *$7B90 LD ($B6FE),A  ;
  $7B93 LD A,B        ;
  $7B94 AND $40       ;
- $7B96 JR Z,$7B9A    ;
+ $7B96 JR Z,$7B9A         ; Noun2Kind: bit 6 -> 1
  $7B98 LD A,$01      ;
 *$7B9A LD ($B6FF),A  ;
  $7B9D RET           ;

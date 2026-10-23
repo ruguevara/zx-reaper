@@ -1,14 +1,24 @@
-; Routine at 82FD
+; Start the second pass over a stored order
 ;
-; Used by the routine at #R$8315.
-c$82FD LD A,D        ;
- $82FE LD ($824F),A  ;
- $8301 PUSH DE       ;
- $8302 PUSH BC       ;
- $8303 PUSH IY       ;
- $8305 LD A,($B706)  ;
- $8308 LD ($8250),A  ;
- $830B LD DE,$FFE8   ;
- $830E ADD IY,DE     ;
- $8310 LD A,$01      ;
- $8312 JP $758A      ;
+; Reached from #R$8315 when the end of a phrase is met while InputFromOrder
+; is 0 (seen with SAY TO THORIN "GIVE MAP TO ME", frame 14895 of verbs.txt).
+; Keeps D, DE, BC, IY and ParserWordCount, moves IY back one phrase record
+; ($18 bytes) and re-enters the dispatcher at #R$758A with InputFromOrder = 1.
+; #R$8315 then stores the phrases parsed since in the order slots at $B738.
+; .
+; Hardware: none.
+;
+; D Class nibble of the last word, kept in PicVar2 ($824F)
+; IY Phrase record being built
+@label=BeginOrderPass
+c$82FD LD A,D
+ $82FE LD ($824F),A     ; kept in PicVar2 ($824F)
+ $8301 PUSH DE
+ $8302 PUSH BC
+ $8303 PUSH IY
+ $8305 LD A,($B706)
+ $8308 LD ($8250),A     ; ParserWordCount kept in PicVar3 ($8250)
+ $830B LD DE,$FFE8      ; IY back one phrase record
+ $830E ADD IY,DE
+ $8310 LD A,$01         ; A=1 becomes InputFromOrder at #R$758A
+ $8312 JP $758A

@@ -1,7 +1,16 @@
-; Routine at 82D2
-c$82D2 LD A,($B719)  ;
- $82D5 CP $02        ;
- $82D7 JP Z,$75B4    ;
- $82DA LD A,$01      ;
- $82DC LD ($B719),A  ;
- $82DF JP $75B4      ;
+; Handler of the word "all" (also "everything")
+;
+; Records that ALL was typed: AllStage becomes 1, unless "except" has been
+; seen already (2). The state is cleared at the start of each phrase (#R$785F).
+; Then goes on with the next word.
+; .
+; Hardware: none.
+@label=WordAll
+c$82D2 LD A,($B719)
+@isub=CP ALL_STATE_EXCEPT
+ $82D5 CP $02
+ $82D7 JP Z,$75B4
+@isub=LD A,ALL_STATE_ALL
+ $82DA LD A,$01
+ $82DC LD ($B719),A
+ $82DF JP $75B4

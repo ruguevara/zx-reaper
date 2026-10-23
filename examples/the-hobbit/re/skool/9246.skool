@@ -1,7 +1,14 @@
-; Routine at 9246
+; Test whether the first object has a single place
 ;
-; Used by the routine at #R$8CF1.
+; Looks at the record of Noun1Record: its field +0 (N, the number of locations
+; it lists) minus 1. Things with several places (doors, rivers, webs) have N > 1;
+; ordinary portable objects and characters have N = 1. The attack handler
+; #R$9171 uses the same test on the second object ("you cannot kill with X").
+; .
+; O:F Z set when N is 1
+; O:IX Record of the first object
+@label=CheckSinglePlace
 c$9246 LD IX,($B708) ;
  $924A LD A,(IX+$00) ;
- $924D DEC A         ;
+ $924D DEC A         ; Z when N = 1
  $924E RET           ;

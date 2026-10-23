@@ -173,7 +173,7 @@ top nibble = style (bit 7 proper name; $87A8 = "you"); printed adjectives first,
 
 ### Object / character record (in $C11B, ids in $C063: $00 player, $01-$2B objects, $3C-$4C characters)
 +0 N | +1 holder id ($FF: lies at the location) (O) | +2 weight, as container/actor the capacity ($9CE8 sums) |
-+3 bulk/capacity ($9CED) | +4 state bits (bit 7, bit 4; bits 2-5 select a state message, $A0A0) | +5,+6 strengths
++3 bulk/capacity ($9CED) | +4 state byte: the low nibble picks the relation message at $AFCA+4n ("In the", "On the"...), bits 4-6 a "side" tested by the attack check $914A | +5,+6 strengths
 (combat $9171, $92BA) | +7 flags: bit 7 present, 6 character, 5 active/open/alive, 3 dead/disabled, 1 consumable
 (O: door $C14C 80->A0 when opened) | +8,+10,+12 name phrase codes (up to 3) | +14,+15 spare |
 +$10..+$10+N-1 location ids (O: NPC ids change as they walk; doors/rivers/webs list their 2+ places) |

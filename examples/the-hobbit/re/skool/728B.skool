@@ -1,6 +1,10 @@
-; Routine at 728B
+; Compare HL with DE
 ;
-; Used by the routine at #R$7249.
+; HL Value
+; DE Value to compare with
+; O:F Z when equal, carry when HL is less than DE
+; O:A Destroyed
+@label=CompareHLDE
 c$728B LD A,H        ;
  $728C SUB D         ;
  $728D RET NZ        ;

@@ -1,9 +1,18 @@
-; Routine at 95DF
+; Let a living character react to a command
 ;
-; Used by the routine at #R$950F.
+; If the record at IX is a character (flag bit 6) that is not dead (flag bit 3)
+; hands the command to #R$9AA0, which switches the character's script to its
+; behaviour for that command. Other records are ignored.
+; .
+; A Object id of the record
+; B Command id (verb)
+; IX Record of object A
+@label=NotifyCharacter
+@isub=BIT FLAG_CHARACTER,(IX+$07)
 c$95DF BIT 6,(IX+$07) ;
- $95E3 RET Z          ;
+ $95E3 RET Z          ; not a character
+@isub=BIT FLAG_DEAD,(IX+$07)
  $95E4 BIT 3,(IX+$07) ;
- $95E8 RET NZ         ;
+ $95E8 RET NZ         ; dead or disabled
  $95E9 CALL $9AA0     ;
  $95EC RET            ;

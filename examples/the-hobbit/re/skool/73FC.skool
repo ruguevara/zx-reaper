@@ -1,9 +1,16 @@
-; Routine at 73FC
+; Choose "his" or "your" for an actor
 ;
-; Used by the routine at #R$7407.
-c$73FC LD DE,$0990   ;
+; Gives the word token for "his" when the actor is not the player and "your"
+; when it is. Control codes 12 (subject) and 14 (first object) get here, from
+; #R$73F9 and #R$7407.
+;
+; A Actor id (0 = the player)
+; O:DE Word token: $0990 "his" or $0BEA "your"
+; O:F NZ
+@label=HisOrYour
+c$73FC LD DE,$0990   ; "his"
  $73FF AND A         ;
  $7400 RET NZ        ;
- $7401 LD DE,$0BEA   ;
+ $7401 LD DE,$0BEA   ; "your"
  $7404 OR $01        ;
  $7406 RET           ;

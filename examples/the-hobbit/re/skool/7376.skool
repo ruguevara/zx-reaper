@@ -1,4 +1,14 @@
-; Routine at 7376
+; Control code 1: print a word token passed on the stack
+;
+; Takes the word token the caller of the message printer pushed below its
+; return address (closing the gap) and returns it in DE.
+; .
+; The printer calls this handler with IX at the code byte. Return Z when there
+; is nothing to print; NZ with a word token in DE and the printer prints it.
+;
+; O:DE Word token
+; O:F NZ
+@label=PrintStackedWord
 c$7376 POP DE        ;
  $7377 POP HL        ;
  $7378 EX (SP),HL    ;

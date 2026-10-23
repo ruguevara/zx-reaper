@@ -1,6 +1,13 @@
-; Routine at 8B78
+; Short delay loop
 ;
-; Used by the routine at #R$8B93.
+; Counts BC down from 1000 to 0. The keyboard scanner calls it before each scan
+; and uses the zero it leaves in BC to clear KeyFound.
+; .
+; Hardware: timing loop, about 1000 iterations of 4 instructions.
+; .
+; O:BC 0
+@label=DelayShort
+@isub=LD BC,1000
 c$8B78 LD BC,$03E8   ;
 *$8B7B DEC BC        ;
  $8B7C LD A,B        ;

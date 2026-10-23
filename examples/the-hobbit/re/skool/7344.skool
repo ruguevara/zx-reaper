@@ -1,3 +1,12 @@
-; Routine at 7344
+; Control code $15: end the message with a full stop and a new line
+;
+; Sets D to $30 (print mode 3 of a word token) and goes to the ending in
+; #R$7348: prints ".", a new line, restores the registers and returns to the
+; caller of the message printer.
+;
+; Reached with a jump.
+; .
+; Hardware: prints through #R$858B and #R$8583 (story window).
+@label=EndFullStop
 c$7344 LD D,$30      ;
  $7346 JR $734B      ;

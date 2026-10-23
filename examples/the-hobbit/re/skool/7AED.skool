@@ -1,6 +1,14 @@
-; Routine at 7AED
+; Run the command check and fetch its result
 ;
-; Used by the routines at #R$7960, #R$7A14, #R$7D54 and #R$7F1A.
+; Calls #R$950F, the check of the command (with ActionPerform, $B6FA, at 0 the
+; verb handlers only check and ActionAllowed is set; see #R$9D44), then reads
+; ActionAllowed ($B6FB). #R$9D44 sets it to 1 when a check passes and #R$72DD sets
+; it to 0 when a message is printed in a check, so 0 here means the command is
+; refused (finding F10: the name is inverted).
+;
+; O:A ActionAllowed ($B6FB)
+; O:F Z when it is 0
+@label=RunCheck
 c$7AED CALL $950F    ;
  $7AF0 LD A,($B6FB)  ;
  $7AF3 AND A         ;

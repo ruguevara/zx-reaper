@@ -1,15 +1,25 @@
-; Routine at 7493
+; Print a common word of a message
 ;
-; Used by the routine at #R$72D3.
-c$7493 SUB $60       ;
+; Message item $60-$7F: the word at index item-$60 of CommonWordTable (a, and,
+; are, ... you). Builds its word code in DE with print mode WORD_PLAIN (no
+; ending) and jumps into the message loop at #R$7311, which prints it with
+; #R$74C1 and goes on to the next item.
+;
+; A Message item byte ($60-$7F)
+; IX Address of the item in the message (kept for the loop)
+; O:DE Word code to print
+@label=PrintCommonWord
+@isub=SUB ITEM_COMMON_WORD
+c$7493 SUB $60       ; index 0-31
  $7495 LD E,A        ;
  $7496 LD D,$00      ;
  $7498 LD HL,$AD3D   ;
- $749B ADD HL,DE     ;
+ $749B ADD HL,DE     ; 2 bytes per entry
  $749C ADD HL,DE     ;
  $749D LD E,(HL)     ;
  $749E INC HL        ;
  $749F LD A,(HL)     ;
- $74A0 ADD A,$50     ;
+@isub=ADD A,WORD_PLAIN
+ $74A0 ADD A,$50     ; high byte + print mode 5: no ending
  $74A2 LD D,A        ;
- $74A3 JP $7311      ;
+ $74A3 JP $7311      ; print DE, next item

@@ -1,6 +1,18 @@
-; Routine at 7428
+; Print a name with its article, then "is" or "are"
 ;
-; Used by the routine at #R$742D.
-c$7428 EX AF,AF'     ;
- $7429 LD A,$01      ;
- $742B JR $7411      ;
+; Message control codes 17 (after #R$7425 loads the first object) and 19
+; (#R$742D takes the id from the stack). Like #R$740C, but PhraseMode is set to
+; 1, so the name is printed with its article (#R$7478 calls #R$743F). The id
+; goes to A', the shared tail #R$7411 prints the name and returns the word for
+; "are" (the player) or "is" (anyone else).
+; .
+; The printer calls this handler with IX at the code byte; NZ with a word code
+; in DE means print that word.
+;
+; A Id of the thing named (PLAYER prints "you", $FF "someone")
+; O:DE Word code: "is" ($039B) or "are" ($0065)
+; O:F NZ
+@label=PrintNameIs
+c$7428 EX AF,AF'     ; id of the thing to A'
+ $7429 LD A,$01      ; PhraseMode 1: print with an article
+ $742B JR $7411      ; #R$7411 stores PhraseMode, prints the name

@@ -1,9 +1,14 @@
-; Routine at 7434
+; Print the name phrase at HL
 ;
-; Used by the routines at #R$7367 and #R$73C2.
+; Points IY at the name phrase (three word codes: noun, then up to two
+; adjectives) and has #R$9ED6 print it, then restores IY. Used by the message
+; control codes 0 and 9 for a phrase address kept in a record.
+;
+; HL Address of the name phrase (6 bytes, noun first)
+@label=PrintPhraseAtHL
 c$7434 PUSH IY       ;
  $7436 PUSH HL       ;
  $7437 POP IY        ;
- $7439 CALL $9ED6    ;
+ $7439 CALL $9ED6    ; prints adjectives, then the noun
  $743C POP IY        ;
  $743E RET           ;

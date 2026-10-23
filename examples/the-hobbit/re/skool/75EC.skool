@@ -1,6 +1,12 @@
-; Routine at 75EC
+; Test for an order being parsed (Z set)
 ;
-; Used by the routine at #R$75F6.
+; InputFromOrder ($B71B) is 1 while the text after SAY TO is parsed as an order
+; for a character (#R$82FD starts it, #R$8315 ends it), 0 for the player's own
+; line. Returns Z when it is 1.
+;
+; O:A InputFromOrder - 1
+; O:F Z set while an order is parsed
+@label=TestOrderText
 c$75EC LD A,($B71B)  ;
  $75EF DEC A         ;
  $75F0 RET           ;

@@ -1,9 +1,16 @@
-; Routine at 79A9
+; Clear the record workspace
 ;
-; Used by the routines at #R$79B6 and #R$7AF5.
+; Sets B701 to 0 (output to the story window) and zeroes the first 17 bytes of
+; the record workspace, RecWork to RecBuf2 inclusive. First step of matching a
+; command (#R$79B6, #R$7AF5).
+;
+; O:A 0
+@label=ResetRecWork
 c$79A9 XOR A         ;
- $79AA LD ($B701),A  ;
+ $79AA LD ($B701),A  ; B701: story window
+@isub=LD HL,RecWork
  $79AD LD HL,$793D   ;
+@isub=LD B,RecPtr1-RecWork
  $79B0 LD B,$11      ;
  $79B2 CALL $70E2    ;
  $79B5 RET           ;

@@ -1,6 +1,14 @@
-; Routine at 82A5
-c$82A5 IN A,($FB)    ;
- $82A7 BIT 6,A       ;
- $82A9 JR NZ,$82B3   ;
- $82AB LD A,$01      ;
- $82AD JR $82B0      ;
+; Handler of the word "print": switch the ZX printer on
+;
+; Sets PrinterFlag to 1 when a printer answers on port $FB (bit 6 clear). An
+; open bus reads $FF, so with no printer the flag stays as it was. Then goes
+; on with the next word. The word "noprint" is #R$82AF.
+; .
+; Hardware: reads the ZX printer port $FB.
+@label=WordPrint
+@isub=IN A,(PORT_PRINTER)
+c$82A5 IN A,($FB)
+ $82A7 BIT 6,A          ; the ROM tests this bit for "no printer" too
+ $82A9 JR NZ,$82B3
+ $82AB LD A,$01         ; A=1 stored by the code at #R$82AF+1
+ $82AD JR $82B0         ; into PrinterFlag

@@ -1,8 +1,19 @@
-; Routine at 6E8B
+; Erase the typed line from the input window
 ;
-; Used by the routines at #R$6DD6 and #R$7249.
+; Backs up over every character typed so far: prints a back-space for each and
+; steps the buffer pointer back, until the line is empty (bit 7 of B set).
+; Used for the cancel key of the line editor and before the idle "WAIT" is typed.
+; .
+; Hardware: echoes through #R$858B (input window).
+;
+; HL Address after the last typed character in the input line buffer
+; B Free bytes left in the buffer ($80 means empty)
+; O:HL Start of the input line buffer
+; O:B $80
+@label=EraseInputLine
 c$6E8B BIT 7,B       ;
  $6E8D RET NZ        ;
+@isub=LD A,CHAR_BACKSPACE
  $6E8E LD A,$08      ;
  $6E90 CALL $858B    ;
  $6E93 INC B         ;

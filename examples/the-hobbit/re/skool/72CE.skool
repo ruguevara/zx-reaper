@@ -1,5 +1,9 @@
-; Routine at 72CE
+; Print "I cannot do that."
 ;
-; Used by the routines at #R$924F and #R$950F.
-c$72CE LD HL,$AFBF   ;
+; Prints the message at $AFBF with #R$72DD: the reply when an action cannot be
+; done.
+;
+; O:A, DE, HL As #R$72DD
+@label=PrintCannotDoThat
+c$72CE LD HL,$AFBF   ; "I cannot do that."
  $72D1 JR $72DD      ;

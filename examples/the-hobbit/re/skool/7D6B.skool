@@ -1,6 +1,12 @@
-; Routine at 7D6B
+; Switch to performing and printing mode
 ;
-; Used by the routines at #R$7D90 and #R$7DBC.
+; Sets ActionPerform ($B6FA) and RawOutputFlag ($B701) to 1. The first makes the
+; handlers carry the command out and #R$72DD leave ActionAllowed alone; the
+; second is the flag that makes the message printer take its second article
+; table (see notes). Done before printing a question or an error message.
+;
+; O:A 1
+@label=SetPerformMode
 c$7D6B LD A,$01      ;
  $7D6D LD ($B6FA),A  ;
  $7D70 LD ($B701),A  ;

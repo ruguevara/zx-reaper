@@ -1,10 +1,13 @@
-; Routine at 9F76
+; Refuse the command
 ;
-; Used by the routines at #R$8CF1, #R$8D33, #R$8D9D, #R$8EEC, #R$8F3E, #R$92ED,
-; #R$A368 and #R$A3E6.
-c$9F76 LD A,($B6FA)  ;
- $9F79 DEC A         ;
- $9F7A JP Z,$712B    ;
- $9F7D SUB A         ;
- $9F7E LD ($B6FB),A  ;
- $9F81 RET           ;
+; End of a command that cannot be carried out. When the command is really
+; performed (#R$B6FA is 1) it jumps to #R$712B, which prints "<subject> cannot
+; <the command>."; when it is only being tried it clears the "possible" flag
+; (#R$B6FB) and returns.
+@label=RefuseCommand
+c$9F76 LD A,($B6FA)
+ $9F79 DEC A
+ $9F7A JP Z,$712B
+ $9F7D SUB A
+ $9F7E LD ($B6FB),A
+ $9F81 RET

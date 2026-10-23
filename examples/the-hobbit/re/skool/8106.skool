@@ -1,13 +1,23 @@
-; Routine at 8106
+; Step an attribute address down one row
 ;
-; Used by the routine at #R$7FA7.
+; Adds 32 to the attribute address and keeps the old one if that would pass the
+; picture's 16 attribute rows ($5A00). The JR NZ at $810F jumps to $8113, the
+; second byte of the SBC HL,DE: it is $52, LD D,D, a no-op.
+;
+; Hardware: none (address arithmetic on the attribute area).
+;
+; HL Attribute address
+; O:HL New attribute address
+; AF and DE are preserved
+@label=AttrDown
 c$8106 PUSH AF       ;
  $8107 PUSH DE       ;
+@isub=LD DE,ATTR_ROW
  $8108 LD DE,$0020   ;
  $810B ADD HL,DE     ;
  $810C LD A,H        ;
- $810D CP $5A        ;
- $810F JR NZ,$8113   ;
+ $810D CP $5A             ; past $59FF?
+ $810F JR NZ,$8113        ; no: jumps into SBC HL,DE (LD D,D)
  $8111 AND A         ;
  $8112 SBC HL,DE     ;
  $8114 POP DE        ;

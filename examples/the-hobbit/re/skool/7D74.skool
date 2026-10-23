@@ -1,10 +1,18 @@
-; Routine at 7D74
+; Save the parsed record for the player's reply
 ;
-; Used by the routines at #R$7D83, #R$7DBC and #R$7E4D.
+; Stores A in StateB71A ($B71A) and copies the 24-byte parsed record at IY to
+; $B9C8, the top record of the phrase stack. #R$7960 tests StateB71A first and
+; when it is not 0 goes on with the reply; the callers pass the offset of the
+; noun phrase (RecWork6/7) the question is about ("Which ...?", "... what?").
+;
+; A Offset of the noun phrase being asked about, from RecWork6/7
+; IY Parsed phrase record to keep
+@label=SaveParsedRecord
 c$7D74 LD ($B71A),A  ;
  $7D77 PUSH IY       ;
  $7D79 POP HL        ;
- $7D7A LD DE,$B9C8   ;
+ $7D7A LD DE,$B9C8        ; top of the phrase stack
+@isub=LD BC,PARSED_RECORD_SIZE
  $7D7D LD BC,$0018   ;
  $7D80 LDIR          ;
  $7D82 RET           ;

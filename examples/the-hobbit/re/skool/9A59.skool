@@ -1,27 +1,35 @@
-; Routine at 9A59
+; Choose a random script from the NPC's behaviour table
 ;
-; Used by the routine at #R$980E.
+; For script op $F ("random entry 0..arg"): takes the smaller of the argument
+; (command byte +1) and the NPC's highest random index (IY+1), draws a random
+; number up to it with #R$9C9F (absolute value) and falls into the selection.
+; The second entry point takes the entry number directly.
+; .
+; IX Address of the script command (its +1 is the highest entry to draw)
+; IY NPC record (+1 highest index, +4 behaviour table)
+@label=ChooseRandomScript
 c$9A59 LD A,(IX+$01) ;
- $9A5C CP (IY+$01)   ;
+ $9A5C CP (IY+$01)   ; smaller of the two limits
  $9A5F JR C,$9A64    ;
  $9A61 LD A,(IY+$01) ;
-*$9A64 CALL $9C9F    ;
+*$9A64 CALL $9C9F    ; random 0..A
  $9A67 LD E,A        ;
 ; This entry point is used by the routine at #R$980E.
+@label=SelectScript
 *$9A68 LD A,(IY+$01) ;
  $9A6B CP E          ;
- $9A6C JR NC,$9A6F   ;
+ $9A6C JR NC,$9A6F   ; E = min(E, highest index)
  $9A6E LD E,A        ;
-*$9A6F LD L,(IY+$04) ;
+*$9A6F LD L,(IY+$04) ; HL: behaviour table
  $9A72 LD H,(IY+$05) ;
  $9A75 LD D,$00      ;
  $9A77 ADD HL,DE     ;
  $9A78 ADD HL,DE     ;
  $9A79 ADD HL,DE     ;
- $9A7A INC HL        ;
+ $9A7A INC HL        ; entry = 3 bytes (id, script word); skip the id
  $9A7B LD E,(HL)     ;
  $9A7C INC HL        ;
  $9A7D LD D,(HL)     ;
- $9A7E LD (IY+$02),E ;
+ $9A7E LD (IY+$02),E ; IY+2: current script
  $9A81 LD (IY+$03),D ;
  $9A84 RET           ;

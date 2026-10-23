@@ -1,11 +1,16 @@
-; Routine at 711A
+; Start performing a command
 ;
-; Used by the routine at #R$7DBC.
+; Sets the "perform" flag ($B6FA) and clears the "blocked" flag ($B6FB), then
+; calls #R$712B unless the command comes from a stored order ($B71B set), to
+; print the command as a sentence.
+;
+; O:A 0
+@label=StartPerform
 c$711A XOR A         ;
  $711B LD ($B6FB),A  ;
  $711E INC A         ;
  $711F LD ($B6FA),A  ;
- $7122 LD A,($B71B)  ;
+ $7122 LD A,($B71B)  ; InputFromOrder
  $7125 AND A         ;
  $7126 CALL Z,$712B  ;
  $7129 XOR A         ;

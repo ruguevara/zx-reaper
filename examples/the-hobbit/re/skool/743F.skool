@@ -1,27 +1,42 @@
-; Routine at 743F
+; Print the article of a name phrase
 ;
-; Used by the routines at #R$7478 and #R$9ED6.
-c$743F BIT 7,D       ;
+; DE is the noun code of a name phrase (D bits 4-7 are its style). A proper
+; name (bit 15 set, "you" included) has no article: the routine only
+; sets the capital flag (CapitalNext, $B704) so that the name starts with a
+; capital, and does nothing at all for "you". For any other noun it prints
+; "the", "a", "an" or "some", chosen by bits 12-13 of DE from ArticleTable;
+; ArticleTableInput ("the" for the first three) is used while the input window
+; is the output (B701) or while the command echo is built (#R$712B sets $70DF).
+; .
+; The common path destroys E (it holds B701 when D is pushed), so callers
+; reload or save DE (#R$7478 does).
+;
+; DE Noun code of the phrase (bit 15 proper name, bits 12-13 article)
+; O:D Unchanged
+; O:E Destroyed on the common path
+@label=PrintArticle
+c$743F BIT 7,D       ; proper name?
  $7441 JR Z,$7455    ;
- $7443 LD A,E        ;
- $7444 LD HL,$07A8   ;
+ $7443 LD A,E        ; low byte of "you"...
+@isub=LD HL,WORD_YOU
+ $7444 LD HL,$07A8   ; ...and the code of "you" (bit 15 stripped)
  $7447 CP L          ;
  $7448 JR NZ,$744F   ;
  $744A LD A,D        ;
  $744B AND $0F       ;
  $744D CP H          ;
- $744E RET Z         ;
-*$744F LD A,$01      ;
- $7451 LD ($B704),A  ;
+ $744E RET Z         ; "you": nothing at all
+*$744F LD A,$01      ; capital flag: the name starts with a capital
+ $7451 LD ($B704),A  ; CapitalNext is the capital flag (set after a new line)
  $7454 RET           ;
-*$7455 LD HL,$AD2D   ;
- $7458 LD A,($B701)  ;
+*$7455 LD HL,$AD2D   ; article words: the, a, an, some
+ $7458 LD A,($B701)  ; B701: output to the input window
  $745B LD E,A        ;
- $745C LD A,($70DF)  ;
+ $745C LD A,($70DF)  ; $70DF: command echo being built
  $745F OR E          ;
  $7460 JR Z,$7465    ;
- $7462 LD HL,$AD35   ;
-*$7465 LD A,D        ;
+ $7462 LD HL,$AD35   ; the, the, the, some
+*$7465 LD A,D        ; style bits 4-7 of D as a word index
  $7466 RRCA          ;
  $7467 RRCA          ;
  $7468 RRCA          ;
@@ -30,9 +45,10 @@ c$743F BIT 7,D       ;
  $746C LD E,A        ;
  $746D LD D,$00      ;
  $746F ADD HL,DE     ;
- $7470 LD E,(HL)     ;
+ $7470 LD E,(HL)     ; article word code
  $7471 INC HL        ;
  $7472 LD D,(HL)     ;
- $7473 CALL $74C1    ;
+@label=PrintArticle_Word
+ $7473 CALL $74C1    ; print it
  $7476 POP DE        ;
  $7477 RET           ;

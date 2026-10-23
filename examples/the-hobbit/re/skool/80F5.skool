@@ -1,13 +1,23 @@
-; Routine at 80F5
+; Step an attribute address up one row
 ;
-; Used by the routine at #R$7FA7.
+; Used by the picture paint command: subtracts 32 from the attribute address
+; and keeps the old address if that would leave the picture's 16 attribute rows
+; ($5800-$59FF).
+;
+; Hardware: none (address arithmetic on the attribute area).
+;
+; HL Attribute address
+; O:HL New attribute address
+; AF and DE are preserved
+@label=AttrUp
 c$80F5 PUSH AF       ;
  $80F6 PUSH DE       ;
+@isub=LD DE,ATTR_ROW
  $80F7 LD DE,$0020   ;
  $80FA AND A         ;
  $80FB SBC HL,DE     ;
  $80FD LD A,H        ;
- $80FE CP $57        ;
+ $80FE CP $57             ; above $5800?
  $8100 JR NZ,$8103   ;
  $8102 ADD HL,DE     ;
 *$8103 POP DE        ;

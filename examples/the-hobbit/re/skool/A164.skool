@@ -1,6 +1,12 @@
-; Routine at A164
+; Print "<object> is <state>" for the object in IY
 ;
-; Used by the routine at #R$924F.
-c$A164 LD L,(IY+$08) ;
- $A167 LD H,(IY+$09) ;
- $A16A JR $A172      ;
+; Loads the first name phrase (+8) of the record in IY and joins #R$A172, which
+; prints a message such as "The door is closed." with the state word chosen by
+; the id in A (see #R$A16C).
+;
+; A State id (bit 7 selects the second word table)
+; IY Record of the object
+@label=PrintStateIY
+c$A164 LD L,(IY+$08)
+ $A167 LD H,(IY+$09)
+ $A16A JR $A172

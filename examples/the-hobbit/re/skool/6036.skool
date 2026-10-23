@@ -1,2 +1,4 @@
-; Unused
+; Unused zero fill after the vocabulary index
+;
+; Ten zero bytes between the index ($6000-$6035) and the first word ($6040).
 s$6036 DEFS $0A

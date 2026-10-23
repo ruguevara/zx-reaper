@@ -1,41 +1,70 @@
-; Routine at 74BA
+; Print a word of the dictionary
 ;
-; Used by the routine at #R$712B.
-c$74BA LD E,(HL)     ;
+; PrintWordAtHL reads a two-byte word code at HL (offset low byte, then high
+; byte with the print mode cleared) and advances HL. PrintWord takes the code
+; in DE: bits 0-11 are the offset of the word in the dictionary at $6000
+; (offset 0 prints nothing), bits 12-15 the print mode.
+; .
+; The letters (5 bits each, +$60 to make lower-case characters) are copied to
+; WordBuffer. A verb whose byte 2 has bit 7 set may then get an ending from
+; WordEndings (4 bytes each, index = bits 5-7 of byte 3), depending on the
+; mode: WORD_SUFFIX_OBJ1 when FirstObject ($B6E8) is not 0, WORD_SUFFIX always,
+; WORD_PLAIN never, every other mode (0, 2, 3, 6, 7) when Subject ($B6EA) is
+; not 0 (so a verb gets its "s" for anyone but the player).
+; .
+; The word is then printed through #R$858B, one character at a time, to the
+; story window, or to the input window when B701 is not 0. A space goes before
+; it, except at the start of a line of the story window. When the word is
+; longer than the columns left (the column counter at $869B or $85B3) a new
+; line is started first, keeping the capital flag (CapitalNext, $B704). Mode
+; WORD_CAPITAL sets that flag before the word, so its first letter is a
+; capital.
+; .
+; Hardware: none directly; the characters go to the screen through #R$858B.
+;
+; DE Word code (PrintWord)
+; HL Address of a word code (PrintWordAtHL)
+; O:HL Address after the code (PrintWordAtHL); otherwise unchanged
+; O:DE Unchanged (PrintWord)
+@label=PrintWordAtHL
+c$74BA LD E,(HL)     ; offset, low byte
  $74BB INC HL        ;
- $74BC LD A,(HL)     ;
+ $74BC LD A,(HL)     ; high byte...
  $74BD INC HL        ;
- $74BE AND $0F       ;
+ $74BE AND $0F       ; ...without the print mode
  $74C0 LD D,A        ;
 ; This entry point is used by the routines at #R$712B, #R$72D3, #R$7348,
 ; #R$743F, #R$7478, #R$7488, #R$8C4B, #R$9ED6, #R$A0C8, #R$A138 and #R$A448.
+@label=PrintWord
 *$74C1 LD A,D        ;
- $74C2 AND $0F       ;
+ $74C2 AND $0F       ; offset 0: nothing to print
  $74C4 OR E          ;
  $74C5 RET Z         ;
  $74C6 PUSH HL       ;
  $74C7 PUSH BC       ;
  $74C8 PUSH DE       ;
- $74C9 LD C,D        ;
+ $74C9 LD C,D        ; C keeps the print mode
  $74CA LD A,D        ;
  $74CB AND $0F       ;
  $74CD LD D,A        ;
- $74CE LD HL,$6000   ;
+ $74CE LD HL,$6000   ; HL = the word in the dictionary
  $74D1 ADD HL,DE     ;
- $74D2 LD DE,$74A6   ;
- $74D5 PUSH HL       ;
- $74D6 LD B,$00      ;
+ $74D2 LD DE,$74A6   ; DE = WordBuffer
+ $74D5 PUSH HL       ; keep the start of the word
+ $74D6 LD B,$00      ; B counts the letters
+@label=PrintWord_Letter
 *$74D8 LD A,(HL)     ;
- $74D9 AND $1F       ;
+ $74D9 AND $1F       ; letter 1-26; 0 ends the word
  $74DB JR Z,$74F9    ;
  $74DD INC B         ;
- $74DE ADD A,$60     ;
+@isub=ADD A,LETTER_BASE
+ $74DE ADD A,$60     ; to lower-case ASCII
  $74E0 LD (DE),A     ;
  $74E1 INC DE        ;
- $74E2 BIT 7,(HL)    ;
+ $74E2 BIT 7,(HL)    ; last byte of the word?
  $74E4 INC HL        ;
  $74E5 JR Z,$74D8    ;
- $74E7 LD A,B        ;
+ $74E7 LD A,B        ; byte 2 (and byte 3 after a verb flag) has bit 7 without ending
  $74E8 CP $02        ;
  $74EA JR Z,$74D8    ;
  $74EC CP $03        ;
@@ -47,25 +76,29 @@ c$74BA LD E,(HL)     ;
  $74F4 INC HL        ;
  $74F5 BIT 7,A       ;
  $74F7 JR NZ,$74D8   ;
-*$74F9 POP HL        ;
- $74FA LD A,C        ;
+*$74F9 POP HL        ; HL = start of the word again
+ $74FA LD A,C        ; print mode
  $74FB AND $F0       ;
- $74FD CP $50        ;
+@isub=CP WORD_PLAIN
+ $74FD CP $50        ; never an ending
  $74FF JR Z,$7530    ;
- $7501 CP $40        ;
+@isub=CP WORD_SUFFIX
+ $7501 CP $40        ; always
  $7503 JR Z,$7512    ;
- $7505 CP $10        ;
- $7507 LD A,($B6E8)  ;
+@isub=CP WORD_SUFFIX_OBJ1
+ $7505 CP $10        ; if the first object is set...
+ $7507 LD A,($B6E8)  ; FirstObject
  $750A JR Z,$750F    ;
- $750C LD A,($B6EA)  ;
-*$750F AND A         ;
+ $750C LD A,($B6EA)  ; ...otherwise (other modes) if Subject is set
+*$750F AND A         ; 0: no ending
  $7510 JR Z,$7530    ;
-*$7512 INC HL        ;
- $7513 BIT 7,(HL)    ;
+@label=PrintWord_Ending
+*$7512 INC HL        ; byte 2
+ $7513 BIT 7,(HL)    ; bit 7: the word takes an ending
  $7515 JR Z,$7530    ;
- $7517 INC HL        ;
+ $7517 INC HL        ; byte 3
  $7518 LD A,(HL)     ;
- $7519 AND $E0       ;
+ $7519 AND $E0       ; bits 5-7 times 4 = offset in WordEndings
  $751B RRCA          ;
  $751C RRCA          ;
  $751D RRCA          ;
@@ -73,45 +106,50 @@ c$74BA LD E,(HL)     ;
  $751F LD H,$00      ;
  $7521 LD BC,$B71F   ;
  $7524 ADD HL,BC     ;
+@isub=LD B,WORD_ENDING_SIZE
  $7525 LD B,$04      ;
-*$7527 LD A,(HL)     ;
+*$7527 LD A,(HL)     ; copy the ending up to its 0 byte
  $7528 AND A         ;
  $7529 JR Z,$7530    ;
  $752B INC HL        ;
  $752C LD (DE),A     ;
  $752D INC DE        ;
  $752E DJNZ $7527    ;
-*$7530 LD HL,$74A6   ;
+@label=PrintWord_Place
+*$7530 LD HL,$74A6   ; HL = WordBuffer, DE = end of the text
  $7533 EX DE,HL      ;
  $7534 AND A         ;
  $7535 SBC HL,DE     ;
- $7537 LD B,L        ;
- $7538 LD A,($B701)  ;
+ $7537 LD B,L        ; B = length with the ending
+ $7538 LD A,($B701)  ; B701: input window?
  $753B AND A         ;
  $753C PUSH AF       ;
  $753D JR NZ,$7543   ;
- $753F LD A,($86A0)  ;
+ $753F LD A,($86A0)  ; story window: is the line empty?
  $7542 AND A         ;
-*$7543 LD A,$20      ;
- $7545 CALL NZ,$858B ;
+@isub=LD A,CHAR_SPACE
+*$7543 LD A,$20      ; a space before the word...
+ $7545 CALL NZ,$858B ; ...except at the start of a story line
  $7548 POP AF        ;
- $7549 LD A,($85B3)  ;
+ $7549 LD A,($85B3)  ; columns left in the line (input or story window)
  $754C JR NZ,$7551   ;
  $754E LD A,($869B)  ;
-*$7551 LD HL,$B704   ;
- $7554 CP B          ;
+*$7551 LD HL,$B704   ; capital flag
+ $7554 CP B          ; does the word fit?
  $7555 JR NC,$755C   ;
- $7557 LD A,(HL)     ;
- $7558 CALL $8583    ;
+ $7557 LD A,(HL)     ; no: keep the capital flag over the new line
+ $7558 CALL $8583    ; new line
  $755B LD (HL),A     ;
-*$755C POP DE        ;
+*$755C POP DE        ; the word code
  $755D LD A,D        ;
  $755E AND $F0       ;
- $7560 CP $70        ;
+@isub=CP WORD_CAPITAL
+ $7560 CP $70        ; mode 7: first letter capital
  $7562 LD A,$01      ;
  $7564 JR NZ,$7567   ;
  $7566 LD (HL),A     ;
-*$7567 LD HL,$74A6   ;
+@label=PrintWord_Print
+*$7567 LD HL,$74A6   ; print the letters
 *$756A LD A,(HL)     ;
  $756B CALL $858B    ;
  $756E INC HL        ;
