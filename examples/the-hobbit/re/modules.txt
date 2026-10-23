@@ -1,0 +1,18 @@
+# START module   (one asm file per range, in address order)
+$6000 dictionary  # the vocabulary: letter index and 562 words in 5-bit letters
+$6C00 main        # start, restart, the main loop, the line editor
+$6E4F input       # typed words to tokens, the command table helpers, WaitKey and the WAIT time-out
+$7291 printer     # the message interpreter: control codes, names, articles, dictionary words
+$7585 parser      # sentences: word classes, phrase records, nouns, questions, orders (SAY TO)
+$7F77 drawing     # location pictures: the command interpreter, lines, flood fill, attributes
+$8251 system      # special words (ALL, EXCEPT, PRINT, QUIT, HELP, SCORE, PAUSE), SAVE and LOAD
+$8576 screen      # the story and input windows: characters, scrolling, the font
+$8B22 devices     # the ZX printer and the keyboard scanner
+$8C4B verbs       # look, take, drop, move, run, follow, inventory, open, attack, put, give, examine
+$94D6 engine      # command dispatch, describing locations, the end of a turn, timers, NPC scripts
+$9B16 objects     # object and location records: lookups, holders, weights, reach, exits, lists, random numbers
+$A1D0 handlers    # handlers of particular objects and characters, the victory check
+$AB53 commands    # the command table, articles, common words
+$AD7D messages    # the 177 messages
+$B6EB world       # variables, locations, objects, characters, handler tables, NPC scripts, timers
+$CC00 pictures    # the picture table and the 22 pictures; the state backup area
