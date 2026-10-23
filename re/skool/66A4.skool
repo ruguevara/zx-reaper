@@ -1,0 +1,114 @@
+; Check whether Horace has met a guard
+;
+; Called once per pass of the main loop at #R$6000, after the guards have been drawn (#R$6622) and before Horace is
+; drawn at his new place (#R$6821). The 2x2 block where Horace is about to be (#R$7C6D) is searched with #R$6C20 for
+; the guard's attribute (ATTR_GUARD); nothing found: return. The test is on the attribute cells of the screen, so any
+; overlap of Horace's block and a guard's block counts.
+; .
+; Bell timer (#R$6DAE) zero: the guard wins. Control passes to #R$673A (Horace dies), which drops this routine's
+; return address and never comes back.
+; .
+; Bell timer running: Horace eats the guard. SCORE_GUARD points are added and shown (#R$65C7), the bell timer is
+; cleared (so the guards are dangerous again at once), a falling buzz is played, and then every guard that is out in
+; the maze is sent back to the cell where the guards wait at the start of a maze (word at $6FD5, which is also
+; Horace's start cell), where it waits GUARD_WAIT passes before it is drawn again. The guard that was touched is not
+; singled out: all released guards go home. The loop that does this ends in #R$672F, which is code, not a table.
+; .
+; Hardware: reads the attribute area; writes the screen through #R$65C7, #R$6568 and #R$6C68; plays the buzz by
+; writing port $FE (speaker bit and white border) with busy-wait loops, about 0.25 s, silent when the sound mask
+; (#R$7C69) has been toggled off.
+@label=CheckGuardContact
+c$66A4 LD HL,($7C6D) ; where Horace is about to be
+ $66A7 CALL $6C20    ;
+@isub=CP ATTR_GUARD
+ $66AA CP $3B        ;
+ $66AC RET NZ        ; no guard there
+ $66AD LD HL,($6DAE) ; bell timer
+ $66B0 LD A,H        ;
+ $66B1 OR L          ;
+ $66B2 JP Z,$673A    ; not running: Horace dies
+ $66B5 LD HL,($7C73) ;
+@isub=LD BC,SCORE_GUARD
+ $66B8 LD BC,$0064   ; guard eaten
+ $66BB ADD HL,BC     ;
+ $66BC LD ($7C73),HL ;
+ $66BF CALL $65C7    ;
+ $66C2 LD HL,$0000   ; end of the bell effect
+ $66C5 LD ($6DAE),HL ;
+ $66C8 LD HL,$7C69   ; sound mask
+@isub=LD C,EATEN_TONE_STEPS
+ $66CB LD C,$0F      ; step number, 15 down to 1
+; The falling buzz: 15 steps of 8 square-wave cycles. Half period = 8 * (15 - C) loop passes, so the first step is
+; 0, which DJNZ turns into 256 passes (an accident: a long first note), and the others grow from 8 to 112, so the
+; pitch falls. A pass is not a plain DJNZ but a read and write of (IX+0), 51 T-states long.
+@label=CheckGuardContact_Tone
+*$66CD PUSH BC       ;
+ $66CE LD A,C        ;
+@isub=XOR EATEN_TONE_STEPS
+ $66CF XOR $0F       ; B = 15 - C
+ $66D1 LD B,A        ;
+ $66D2 SLA B         ; x 8
+ $66D4 SLA B         ;
+ $66D6 SLA B         ;
+ $66D8 LD E,B        ; E = half period
+@isub=LD D,EATEN_TONE_CYCLES
+ $66D9 LD D,$08      ; cycles in this step
+@label=CheckGuardContact_Cycle
+*$66DB LD B,E        ; speaker half
+@isub=LD A,ULA_OUT_MASK
+ $66DC LD A,$1F      ;
+ $66DE AND (HL)      ; speaker on unless muted
+@isub=OUT (ULA_PORT),A
+ $66DF OUT ($FE),A   ;
+*$66E1 LD A,(IX+$00) ; delay: IX is left in the tile graphics by #R$6B75; the byte is written back unchanged
+ $66E4 LD (IX+$00),A ;
+ $66E7 DJNZ $66E1    ;
+@isub=LD A,WHITE
+ $66E9 LD A,$07      ; speaker off, white border
+@isub=OUT (ULA_PORT),A
+ $66EB OUT ($FE),A   ;
+ $66ED LD B,E        ;
+*$66EE LD A,(IX+$00) ;
+ $66F1 LD (IX+$00),A ;
+ $66F4 DJNZ $66EE    ;
+ $66F6 DEC D         ;
+ $66F7 JR NZ,$66DB   ;
+ $66F9 POP BC        ;
+ $66FA DEC C         ;
+ $66FB JR NZ,$66CD   ;
+; Send every released guard home. Guard B (4 = first record, see #R$6A3F) is released when its timer is zero.
+ $66FD LD HL,$6DA6   ; guard release timers (words)
+@isub=LD B,GUARD_COUNT
+ $6700 LD B,$04      ;
+; BUG: HL advances by one byte per guard, not by one timer word: the two bytes tested for guard k (0-3) are at
+; GuardTimers+k and +k+1, not at +2k. Every released guard is still found (its timer is zero, and so are the timers
+; of the guards before it), but a guard that is still waiting can be sent home too, e.g. the second one while the
+; low byte of its timer is zero (its test reads the high byte of the first timer and the low byte of the second;
+; seen in the simulator). No visible harm: the record only gets its start cell and the GUARD_WAIT.
+@label=CheckGuardContact_Reset
+ $6702 PUSH BC       ;
+ $6703 LD A,(HL)     ; timer word of this guard, low byte
+ $6704 INC HL        ;
+ $6705 OR (HL)       ; Z: timer is zero, the guard is out in the maze
+ $6706 PUSH HL       ; HL is one byte further on, see above
+ $6707 JR NZ,$6735   ; still waiting: leave it alone
+ $6709 CALL $6A3F    ; B = 4...1 selects the record
+ $670C CALL $6568    ; wipe the guard from the screen
+; The next three instructions have no effect: the block at Horace's next position is searched for the guard
+; attribute but the flags are never tested (the JR at $672D is unconditional).
+ $670F LD HL,($7C6D) ;
+ $6712 CALL $6C20    ;
+@isub=CP ATTR_GUARD
+ $6715 CP $3B        ;
+@isub=LD HL,(MazeHoraceStart)
+ $6717 LD HL,($6FD5) ; cell where the guards wait at the start of a maze
+ $671A LD ($6DB8),HL ; position
+ $671D LD ($6DBC),HL ; and next position
+ $6720 CALL $6C68    ; save the background under the guard at its new place
+@isub=LD A,DIR_RIGHT
+ $6723 LD A,$01      ; facing right
+ $6725 LD ($6DBA),A  ;
+@isub=LD A,GUARD_WAIT
+ $6728 LD A,$5A      ;
+ $672A LD ($6DBE),A  ; wait before it is drawn again
+ $672D JR $6732      ; skips the dead CALL at $672F

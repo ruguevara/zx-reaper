@@ -1,0 +1,7 @@
+; Previous state of the T key
+;
+; Bit 4 of the last Q-T half-row read: $10 = up, 0 = down. #R$698E toggles the sound (#R$7C69) on a key-down edge. Set
+; to $10 by #R$6000 at start-up; read and written only by #R$698E.
+;
+@label=SoundKeyState
+g$7C6A DEFB $10

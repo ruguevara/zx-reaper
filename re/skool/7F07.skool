@@ -1,0 +1,24 @@
+; Bell sprites (4 animation frames)
+;
+; The bonus bell, 16x16 pixels, 4 frames of 32 bytes in the same cell order as #R$7DC7. The bell swings: frame 0 and
+; frame 3 are the two extreme positions and frames 1 and 2 lie between them. #R$686A (UpdateBell) draws them in the
+; attribute ATTR_BELL (red), stepping every 8 passes through frames 0, 1, 2, 3, 3, 2, 1, 0 from the animation counter
+; #R$7CC6.
+;
+@label=BellSprites
+b$7F07 DEFB $00,$00,$00,$02,$01,$01,$01,$01 ; frame 0: top-left cell
+ $7F0F DEFB $00,$00,$00,$00,$E0,$F9,$FE,$FC ; top-right
+ $7F17 DEFB $00,$00,$00,$01,$01,$00,$00,$00 ; bottom-left
+ $7F1F DEFB $F0,$E0,$E0,$A0,$00,$00,$00,$00 ; bottom-right
+ $7F27 DEFB $00,$00,$00,$01,$01,$01,$03,$03 ; frame 1: top-left cell
+ $7F2F DEFB $00,$00,$00,$00,$00,$C0,$E0,$E0 ; top-right
+ $7F37 DEFB $03,$07,$07,$1D,$01,$00,$00,$00 ; bottom-left
+ $7F3F DEFB $F0,$FC,$E0,$00,$00,$00,$00,$00 ; bottom-right
+ $7F47 DEFB $00,$00,$00,$00,$00,$03,$07,$07 ; frame 2: top-left cell
+ $7F4F DEFB $00,$00,$00,$80,$80,$80,$C0,$C0 ; top-right
+ $7F57 DEFB $0F,$3F,$07,$00,$00,$00,$00,$00 ; bottom-left
+ $7F5F DEFB $C0,$E0,$E0,$B8,$80,$00,$00,$00 ; bottom-right
+ $7F67 DEFB $00,$00,$00,$00,$07,$9F,$7F,$3F ; frame 3: top-left cell
+ $7F6F DEFB $00,$00,$00,$40,$80,$80,$80,$80 ; top-right
+ $7F77 DEFB $0F,$07,$07,$05,$00,$00,$00,$00 ; bottom-left
+ $7F7F DEFB $00,$00,$00,$80,$80,$00,$00,$00 ; bottom-right

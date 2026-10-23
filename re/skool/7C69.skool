@@ -1,0 +1,8 @@
+; Sound mask (byte)
+;
+; $1F = sound on, $07 = sound off. Every routine that makes a noise ANDs the value it writes to port $FE with this mask:
+; $07 leaves only the border colour (white) and drops the speaker bit 4. Initial $1F (set by #R$6000); flipped by
+; #R$698E when the T key is pressed (XOR $18). Used by #R$6337, #R$65C7, #R$66A4, #R$673A, #R$69A4 and #R$6A77.
+;
+@label=SoundMask
+g$7C69 DEFB $1F

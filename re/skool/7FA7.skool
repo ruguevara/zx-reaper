@@ -1,0 +1,16 @@
+; Unused zero bytes at the end of the code block
+;
+; 89 bytes of zeroes ($7FA7-$7FFF) filling the last part of the code block. Nothing in the game reads or writes them.
+;
+u$7FA7 DEFB $00,$00,$00,$00,$00,$00,$00,$00
+ $7FAF DEFB $00,$00,$00,$00,$00,$00,$00,$00
+ $7FB7 DEFB $00,$00,$00,$00,$00,$00,$00,$00
+ $7FBF DEFB $00,$00,$00,$00,$00,$00,$00,$00
+ $7FC7 DEFB $00,$00,$00,$00,$00,$00,$00,$00
+ $7FCF DEFB $00,$00,$00,$00,$00,$00,$00,$00
+ $7FD7 DEFB $00,$00,$00,$00,$00,$00,$00,$00
+ $7FDF DEFB $00,$00,$00,$00,$00,$00,$00,$00
+ $7FE7 DEFB $00,$00,$00,$00,$00,$00,$00,$00
+ $7FEF DEFB $00,$00,$00,$00,$00,$00,$00,$00
+ $7FF7 DEFB $00,$00,$00,$00,$00,$00,$00,$00
+ $7FFF DEFB $00

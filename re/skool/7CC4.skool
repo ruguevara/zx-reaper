@@ -1,0 +1,9 @@
+; Bell position (word)
+;
+; Screen offset (address minus $4000) of the top-left cell of the bell's 2x2 sprite, or 0 when there is no bell. #R$6000
+; loads it from the bell position of the maze descriptor (#R$6FD1) when a maze starts; after a life is lost it is
+; reloaded only if it is not 0, so a bell that was already taken stays gone. #R$686A animates the bell at this position
+; every pass and sets the word to 0 when Horace picks it up; #R$69A4 rings the chime while it is non-zero.
+;
+@label=BellPos
+g$7CC4 DEFW $00FC

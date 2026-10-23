@@ -1,0 +1,63 @@
+; Save one cell of the background under a sprite
+;
+; Copies a character cell (attribute byte, then the 8 bitmap rows) from the
+; screen into the 9-byte save slot at DE, and moves on to the cell on the
+; right. A cell whose attribute is the guard colour is not saved as it is:
+; a blank floor cell (attribute $3E, empty bitmap) is stored instead, so a guard
+; is never remembered as part of the background.
+; Hardware: reads the screen bitmap and one attribute cell (through HL').
+;
+; DE Address of the 9-byte save slot
+; HL Screen bitmap address of the cell (first pixel row)
+; HL' Attribute address of the cell
+; O:DE Address after the slot
+; O:HL Screen address of the next cell on the right
+; O:HL' Attribute address of the next cell
+; O:A Corrupted
+; O:B 0
+@label=SaveBackgroundCell
+c$6C95 EXX           ;
+ $6C96 LD A,(HL)     ;
+ $6C97 INC HL        ;
+ $6C98 EXX           ;
+@isub=CP ATTR_GUARD
+ $6C99 CP $3B        ;
+ $6C9B JR Z,$6CAF    ;
+ $6C9D LD (DE),A     ;
+ $6C9E INC DE        ;
+@isub=LD B,CELL_BYTES
+ $6C9F LD B,$08      ;
+@label=SaveBackgroundCell_Row
+*$6CA1 LD A,(HL)     ;
+ $6CA2 LD (DE),A     ;
+ $6CA3 INC DE        ;
+ $6CA4 INC H         ;
+ $6CA5 DJNZ $6CA1    ;
+; H is now 8 pixel rows too far: undo that, unless L wraps, in which case the
+; next cell is in the next screen third and H is already right.
+ $6CA7 INC L         ;
+ $6CA8 JR Z,$6CAE    ;
+ $6CAA LD A,H        ;
+@isub=SUB THIRD_STEP
+ $6CAB SUB $08       ;
+ $6CAD LD H,A        ;
+*$6CAE RET           ;
+; Guard colour found: store a blank cell.
+@label=SaveBackgroundCell_Blank
+@isub=LD A,ATTR_BLANK
+*$6CAF LD A,$3E      ;
+ $6CB1 LD (DE),A     ;
+ $6CB2 INC DE        ;
+@isub=LD B,CELL_BYTES
+ $6CB3 LD B,$08      ;
+ $6CB5 LD A,$00      ;
+*$6CB7 LD (DE),A     ;
+ $6CB8 INC DE        ;
+ $6CB9 DJNZ $6CB7    ;
+ $6CBB INC L         ;
+ $6CBC RET NZ        ;
+ $6CBD LD A,H        ;
+@isub=ADD A,THIRD_STEP
+ $6CBE ADD A,$08     ;
+ $6CC0 LD H,A        ;
+ $6CC1 RET           ;

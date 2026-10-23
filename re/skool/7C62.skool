@@ -1,0 +1,10 @@
+; Game pace, also the level (byte)
+;
+; Initial 8 (set by #R$6000 at game start), lowered by 1 each time all four mazes have been played (#R$7C63 wraps from 3
+; to 0) down to a minimum of 1. Lower means faster and harder. It is the reload value of the step countdown #R$7C61 (the
+; figures move every n-th pass), the base of the guard release timers (#R$6A22: n*256 passes), the multiplier of the
+; bell timer (#R$686A: 128*n), the length of the main-loop delay in #R$69A4 ($015E + $1E*n loop passes), and a dead
+; reload in #R$63DA (#R$7C64).
+;
+@label=GuardInterval
+g$7C62 DEFB $08

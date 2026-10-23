@@ -1,0 +1,19 @@
+; Maze tile graphics (10 tiles of 8 bytes)
+;
+; The 8x8 pixel bitmaps of the maze tiles, one per tile code of the maze maps (#R$72F7, #R$6FF7, #R$75F7, #R$78F7), in
+; code order: 8 bytes per tile, one byte per pixel row from the top, bit 7 the leftmost pixel, so a tile's bitmap is
+; at #R$7BF7 + 8 * code. Codes 0 and 9 are both blank; they differ only in the attribute #R$6B75 gives them (yellow
+; ink versus white-on-white). Read by #R$6B75 (DrawMaze), which copies them into the screen bitmap; the attributes are
+; set there from the tile code.
+;
+@label=TileGraphics
+b$7BF7 DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; tile 0: empty floor
+ $7BFF DEFB $00,$FF,$FF,$00,$00,$FF,$FF,$00 ; tile 1: horizontal wall
+ $7C07 DEFB $00,$00,$00,$20,$F8,$50,$F8,$20 ; tile 2: flower
+ $7C0F DEFB $00,$18,$0C,$06,$7F,$06,$0C,$18 ; tile 3: arrow pointing right
+ $7C17 DEFB $66,$66,$66,$66,$66,$66,$66,$66 ; tile 4: vertical wall
+ $7C1F DEFB $00,$7F,$7F,$60,$60,$67,$67,$66 ; tile 5: corner, top-left
+ $7C27 DEFB $00,$FE,$FE,$06,$06,$E6,$E6,$66 ; tile 6: corner, top-right
+ $7C2F DEFB $66,$67,$67,$60,$60,$7F,$7F,$00 ; tile 7: corner, bottom-left
+ $7C37 DEFB $66,$E6,$E6,$06,$06,$FE,$FE,$00 ; tile 8: corner, bottom-right
+ $7C3F DEFB $00,$00,$00,$00,$00,$00,$00,$00 ; tile 9: wrap pad (blank)

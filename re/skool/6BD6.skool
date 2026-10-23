@@ -1,0 +1,45 @@
+; Draw a 16x16 sprite
+;
+; Draws a sprite of 2x2 character cells (graphic order top-left, top-right,
+; bottom-left, bottom-right, 8 bytes each) with one attribute for all four
+; cells. The caller must already have called #R$6C0F for HL so that HL'
+; points at the attribute of the top-left cell. Used for Horace, the guards and
+; the items, and to erase them with the blank sprite at #R$7F87.
+; Hardware: writes the screen bitmap and four attribute cells.
+;
+; C Attribute byte for all four cells
+; DE Address of the 32 sprite graphic bytes
+; HL Offset from the start of the screen of the top-left cell ($0000-$17FF)
+; O:DE Address after the sprite graphic
+; O:HL Screen address of the cell after the bottom-right one
+; O:HL' Attribute address after the bottom-right cell
+; O:AF' Corrupted
+@label=DrawSprite
+c$6BD6 EX AF,AF'     ;
+ $6BD7 LD A,C        ;
+ $6BD8 EX AF,AF'     ;
+ $6BD9 LD BC,$4000   ;
+ $6BDC ADD HL,BC     ;
+; BC was clobbered above, so C is restored from A'.
+ $6BDD EX AF,AF'     ;
+ $6BDE LD C,A        ;
+ $6BDF EX AF,AF'     ;
+ $6BE0 CALL $6BFA    ;
+ $6BE3 CALL $6BFA    ;
+; Move down to the left cell of the next cell row: HL is now two cells to the
+; right, so add one screen row of cells less two.
+ $6BE6 LD A,L        ;
+@isub=ADD A,SCREEN_COLS-2
+ $6BE7 ADD A,$1E     ;
+ $6BE9 LD L,A        ;
+ $6BEA JR NC,$6BF0   ;
+ $6BEC LD A,H        ;
+@isub=ADD A,THIRD_STEP
+ $6BED ADD A,$08     ;
+ $6BEF LD H,A        ;
+; The attribute pointer must be recomputed for the new cell row.
+@label=DrawSprite_Row2
+*$6BF0 CALL $6C0F    ;
+ $6BF3 CALL $6BFA    ;
+ $6BF6 CALL $6BFA    ;
+ $6BF9 RET           ;

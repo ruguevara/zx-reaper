@@ -1,0 +1,8 @@
+; Horace's animation counter (byte)
+;
+; Incremented by #R$6821 (entry DrawHorace_Sprite) each time Horace is drawn, including the death sequence. Bit 4
+; chooses between the two walking frames (#R$7CC7 when set, #R$7D47 when clear), so the frame changes every 16 draws.
+; Never reset; starts at 0.
+;
+@label=HoraceAnim
+g$7C72 DEFB $00

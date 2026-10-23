@@ -1,0 +1,8 @@
+; Bell animation counter (byte)
+;
+; Incremented on every pass by #R$686A while the bell is lying in the maze. Bits 3-5 select the animation frame at
+; #R$7F07 (a new step every 8 passes, running 0-3 and back 3-0); #R$69A4 rings the chime when its low six bits are 0 or
+; $20. Never reset; starts at 0.
+;
+@label=BellTick
+g$7CC6 DEFB $00

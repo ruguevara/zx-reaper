@@ -1,0 +1,10 @@
+; Bell timer: guards can be eaten while non-zero (word)
+;
+; Set by #R$686A (TakeBell) when Horace takes the bell to 128 times the game pace #R$7C62 (128 to 1024). While it is
+; non-zero the guards are "scared": #R$663D draws the edible-guard sprites and decrements the timer once per drawn guard
+; (so it runs out faster the more guards are out), #R$63DA subtracts its chase bonus instead of adding it, and #R$66A4
+; treats Horace touching a guard as eating it (+100 points) instead of losing a life. #R$66A4 clears it when a guard is
+; eaten, and #R$6000 clears it at the start of each maze and after a new life. 0 = guards are dangerous.
+;
+@label=BellTimer
+g$6DAE DEFW $0000

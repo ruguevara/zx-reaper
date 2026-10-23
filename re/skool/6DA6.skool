@@ -1,0 +1,16 @@
+; Guard release timers: guard 1 (word); the table continues at 6DA8, 6DAA and 6DAC
+;
+; GuardTimers is an array of four words, one per guard, in the order of the guard records (guard 1 = #R$6DE3 up to guard
+; 4 = #R$6E64): $6DA6 guard 1, #R$6DA8 guard 2, #R$6DAA guard 3, #R$6DAC guard 4. The timer counts main-loop passes
+; until the guard is released; a guard whose timer is 0 is in the maze (moved by #R$6337, erased and drawn by #R$651E
+; and #R$6622, tested by #R$66A4 and #R$6907). #R$6A22 sets the timers at the start of a game and after Horace loses a
+; life (not when a maze is left through the exit arrows: the timers then run on) to 0, n*256, 2*n*256 and 4*n*256 where
+; n is the game pace #R$7C62 (0, 2048, 4096, 8192 passes at the start). #R$696C decrements every non-zero timer once per
+; pass.
+; .
+; The code walks the table with a pointer that moves two bytes per guard, with B = 4 down to 1 ($6DA6 up) or B = 1 up to
+; 4 ($6DAC down); B is the number #R$6A3F expects (4 = first record, 1 = last), so the timer and the record of a guard
+; always go together.
+;
+@label=GuardTimers
+g$6DA6 DEFW $0000

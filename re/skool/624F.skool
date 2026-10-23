@@ -1,0 +1,219 @@
+; Read the controls, or run the demo autopilot, and set Horace's direction
+;
+; Called once per pass of the main loop at #R$6000. It decides in which direction Horace walks; the walking itself is
+; done by #R$6337, which moves him one cell per game tick in the direction left in $7C70 (the current direction).
+; Nothing happens while Horace is frozen after going through a wrap pad ($7C79, WRAP_PAUSE passes, see #R$6337).
+; Otherwise the requested direction at $7C6F is first cleared to DIR_NONE and then the flag at #R$6B0B selects the
+; source of the input: zero (title screen countdown ended without a key, so this is the demo) runs the autopilot at
+; #R$626D, non-zero (a real game) reads the keyboard at #R$62C4.
+;
+; Demo mode ends on any key. All eight half-rows are read at once (port high byte $00); if any key bit is low the
+; routine drops its return address and jumps to #R$67E9, which flashes the screen with a rising tone and restarts
+; the title screen at #R$601A. (Measured: this path leaves SP two bytes higher after every demo abort, because the
+; return address popped here is followed by the POP HL at $6803 in #R$673A, which expects the caller's return address
+; of the death path from #R$66A4 instead.)
+;
+; Keyboard (real game): Q or 4 is up, Z or 3 is down, P or 2 is right, I or 1 is left (DIR_*). The keys are tested in
+; that order and the first one found wins; there is no joystick support. The wanted direction is probed with
+; #R$6CC2: if a wall is in the way the request is discarded (so Horace keeps going the way he is going), otherwise
+; it becomes the current direction at once. A direction is therefore only changed when the new way is open;
+; "exit" and "wrap" results count as open.
+;
+; Autopilot rule (demo): every pass, each of the four directions gets a weight. A direction whose probe result is
+; MOVE_EXIT or MOVE_BLOCKED (including the $82 "pads and arrows mixed" result) weighs 0, so the demo never leaves
+; through the arrows, and never walks into a wall. Every open direction (MOVE_FREE or MOVE_WRAP) weighs
+; AI_BASE_SCORE + a random 0-31 (AI_RANDOM_MASK; new random byte per direction from #R$6B12), then
+;   + AI_STRAIGHT_BONUS if it is the current direction ($7C70),
+;   - AI_REVERSE_PENALTY if it is the opposite of the current direction.
+; So going on straight (weight 65-96) always beats a turn (25-56) or a reversal (15-46) while the way ahead is open,
+; and when it is blocked the demo picks at random among the open turns, a reversal having a slightly lower chance.
+; The direction with the highest weight becomes the current direction directly ($7C70; $7C6F stays DIR_NONE in demo).
+; On equal weights the higher direction code wins (left, down, right, up) because the search runs from 3 down to 0
+; and only a strictly greater weight replaces the best one; if all four weigh 0 the result is DIR_UP. The pick is
+; renewed on every pass, but once a turn is chosen it is the new "straight on" and keeps winning. Flowers, guards and
+; the bell are ignored. The same constants and weights are used by the guards' direction choice. The four weights
+; are kept in the direction score table at $6DB2-$6DB5, which the guard code also uses; $6DB6 serves as its end.
+; Hardware: reads the keyboard through port $FE (half-rows Q-T, 1-5, CAPS SHIFT-V and P-Y; or all rows at once in
+; demo mode).
+;
+; O:A Autopilot: the new direction; keyboard: the requested direction or DIR_NONE
+@label=ReadControls
+c$624F LD A,($7C79)  ; frozen after a wrap: no input
+ $6252 AND A         ;
+ $6253 RET NZ        ;
+@isub=LD A,DIR_NONE
+ $6254 LD A,$FF      ;
+ $6256 LD ($7C6F),A  ; no direction requested yet
+ $6259 LD A,($6B0B)  ; 0 = demo, 1 = real game
+ $625C AND A         ;
+ $625D JR NZ,$62C4   ; real game: keyboard
+@isub=LD A,KB_ALL_ROWS
+ $625F LD A,$00      ; demo: any key ends it
+@isub=IN A,(ULA_PORT)
+ $6261 IN A,($FE)    ;
+@isub=AND KEY_BITS
+ $6263 AND $1F       ;
+@isub=CP KEY_BITS
+ $6265 CP $1F        ; all five key bits high = nothing pressed
+ $6267 JR Z,$626D    ;
+ $6269 POP HL        ; key pressed: forget the call to #R$624F...
+ $626A JP $67E9      ; ...and leave the demo
+; Demo autopilot: weigh the four directions, B = 3, 2, 1, 0.
+@label=Autopilot
+@isub=LD B,DIR_COUNT
+*$626D LD B,$04      ;
+@label=Autopilot_Loop
+*$626F DEC B         ; B = direction being weighed
+ $6270 LD HL,($7C6B) ; Horace's position
+ $6273 LD C,$00      ; C = weight, 0 unless the way is open
+ $6275 PUSH BC       ;
+ $6276 LD A,B        ;
+ $6277 CALL $6CC2    ; what is one step in direction B?
+ $627A POP BC        ;
+@isub=CP MOVE_EXIT
+ $627B CP $02        ; exit arrows or wall (or $82): weight stays 0
+ $627D JP NC,$629F   ;
+ $6280 CALL $6B12    ;
+@isub=AND AI_RANDOM_MASK
+ $6283 AND $1F       ;
+@isub=ADD A,AI_BASE_SCORE
+ $6285 ADD A,$19     ;
+ $6287 LD C,A        ; C = 25 + random 0-31
+ $6288 LD A,($7C70)  ; current direction
+ $628B CP B          ;
+ $628C JR NZ,$6294   ;
+@isub=LD A,AI_STRAIGHT_BONUS
+ $628E LD A,$28      ; same as the current direction: bonus
+ $6290 ADD A,C       ;
+ $6291 LD C,A        ;
+ $6292 JR $629F      ;
+@isub=ADD A,DIR_OPPOSITE
+*$6294 ADD A,$02     ; current direction + 2 (mod 4) is the opposite one
+@isub=AND DIR_MASK
+ $6296 AND $03       ;
+ $6298 CP B          ;
+ $6299 JR NZ,$629F   ;
+@isub=LD A,256-AI_REVERSE_PENALTY
+ $629B LD A,$F6      ; turning back: minus 10
+ $629D ADD A,C       ;
+ $629E LD C,A        ;
+; Store the weight of direction B in the table at $6DB2.
+*$629F PUSH BC       ;
+ $62A0 LD HL,$6DB2   ;
+ $62A3 LD C,B        ;
+ $62A4 LD B,$00      ;
+ $62A6 ADD HL,BC     ;
+ $62A7 POP BC        ;
+ $62A8 LD A,C        ;
+ $62A9 LD (HL),A     ;
+ $62AA INC B         ;
+ $62AB DEC B         ;
+ $62AC JR NZ,$626F   ; next direction down to 0
+; Pick the heaviest: scan from direction 3 down to 0, keep the first strictly greater weight.
+ $62AE XOR A         ;
+ $62AF LD HL,$6DB6   ; one past the table
+@isub=LD B,DIR_COUNT
+ $62B2 LD B,$04      ;
+@label=Autopilot_Pick
+*$62B4 DEC B         ;
+ $62B5 DEC HL        ;
+ $62B6 CP (HL)       ;
+ $62B7 JR NC,$62BB   ;
+ $62B9 LD A,(HL)     ;
+ $62BA LD C,B        ; C = best direction so far (left over from the loop above if all weights are 0: direction 0)
+*$62BB INC B         ;
+ $62BC DEC B         ;
+ $62BD JR NZ,$62B4   ;
+ $62BF LD A,C        ;
+ $62C0 LD ($7C70),A  ; new current direction
+ $62C3 RET           ;
+; Keyboard: Q/4 up, Z/3 down, P/2 right, I/1 left; the first pair found wins. The direction code is left in A
+; for the probe at #R$631E.
+@label=ReadKeys
+@isub=LD A,KB_Q_T
+*$62C4 LD A,$FB      ;
+@isub=IN A,(ULA_PORT)
+ $62C6 IN A,($FE)    ;
+@isub=AND KEY_Q
+ $62C8 AND $01       ; Q
+ $62CA JR Z,$62D4    ;
+@isub=LD A,KB_1_5
+ $62CC LD A,$F7      ;
+@isub=IN A,(ULA_PORT)
+ $62CE IN A,($FE)    ;
+@isub=AND KEY_4
+ $62D0 AND $08       ; 4
+ $62D2 JR NZ,$62DB   ;
+@isub=LD A,DIR_UP
+*$62D4 LD A,$00      ;
+ $62D6 LD ($7C6F),A  ;
+ $62D9 JR $631E      ;
+@isub=LD A,KB_CS_V
+*$62DB LD A,$FE      ;
+@isub=IN A,(ULA_PORT)
+ $62DD IN A,($FE)    ;
+@isub=AND KEY_Z
+ $62DF AND $02       ; Z
+ $62E1 JR Z,$62EB    ;
+@isub=LD A,KB_1_5
+ $62E3 LD A,$F7      ;
+@isub=IN A,(ULA_PORT)
+ $62E5 IN A,($FE)    ;
+@isub=AND KEY_3
+ $62E7 AND $04       ; 3
+ $62E9 JR NZ,$62F2   ;
+@isub=LD A,DIR_DOWN
+*$62EB LD A,$02      ;
+ $62ED LD ($7C6F),A  ;
+ $62F0 JR $631E      ;
+@isub=LD A,KB_P_Y
+*$62F2 LD A,$DF      ;
+@isub=IN A,(ULA_PORT)
+ $62F4 IN A,($FE)    ;
+@isub=BIT KEYBIT_P,A
+ $62F6 BIT 0,A       ; P
+ $62F8 JR Z,$6302    ;
+@isub=LD A,KB_1_5
+ $62FA LD A,$F7      ;
+@isub=IN A,(ULA_PORT)
+ $62FC IN A,($FE)    ;
+@isub=AND KEY_2
+ $62FE AND $02       ; 2
+ $6300 JR NZ,$6309   ;
+@isub=LD A,DIR_RIGHT
+*$6302 LD A,$01      ;
+ $6304 LD ($7C6F),A  ;
+ $6307 JR $631E      ;
+@isub=LD A,KB_P_Y
+*$6309 LD A,$DF      ;
+@isub=IN A,(ULA_PORT)
+ $630B IN A,($FE)    ;
+@isub=BIT KEYBIT_I,A
+ $630D BIT 2,A       ; I
+ $630F JR Z,$6319    ;
+@isub=LD A,KB_1_5
+ $6311 LD A,$F7      ;
+@isub=IN A,(ULA_PORT)
+ $6313 IN A,($FE)    ;
+@isub=AND KEY_1
+ $6315 AND $01       ; 1
+ $6317 JR NZ,$632D   ; no direction key at all
+@isub=LD A,DIR_LEFT
+*$6319 LD A,$03      ;
+ $631B LD ($7C6F),A  ;
+; A key was pressed: A = its direction. Cancel the request when a wall is in the way.
+@label=ReadKeys_Probe
+*$631E LD HL,($7C6B) ;
+ $6321 CALL $6CC2    ;
+@isub=CP MOVE_BLOCKED
+ $6324 CP $03        ;
+ $6326 JR NZ,$632D   ;
+@isub=LD A,DIR_NONE
+ $6328 LD A,$FF      ;
+ $632A LD ($7C6F),A  ;
+*$632D LD A,($7C6F)  ;
+@isub=CP DIR_NONE
+ $6330 CP $FF        ;
+ $6332 RET Z         ; nothing (valid) requested: keep the current direction
+ $6333 LD ($7C70),A  ; turn at once
+ $6336 RET           ;

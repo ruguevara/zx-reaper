@@ -1,0 +1,42 @@
+; Merge one cell's object colour into the block result
+;
+; Part of #R$6C20. Looks at one attribute byte and updates the running
+; answer in E: a guard colour always wins, then the bell, then a flower;
+; any other attribute (floor, wall, pads, arrows) changes nothing.
+; Hardware: reads an attribute cell (through the shadow register set).
+;
+; E' Best object attribute so far (0 = none)
+; HL' Attribute address of the cell
+; O:E' Updated best object attribute
+; O:D' Corrupted
+; O:A Corrupted
+@label=MergeObjectAttr
+c$6C46 LD A,(HL)     ;
+@isub=CP ATTR_GUARD
+ $6C47 CP $3B        ;
+ $6C49 JR Z,$6C55    ;
+@isub=CP ATTR_BELL
+ $6C4B CP $3A        ;
+ $6C4D JR Z,$6C58    ;
+@isub=CP ATTR_FLOWER
+ $6C4F CP $3C        ;
+ $6C51 JR Z,$6C61    ;
+ $6C53 JR $6C67      ;
+; Guard: always replaces the previous answer.
+*$6C55 LD E,A        ;
+ $6C56 JR $6C67      ;
+; Bell: replaces everything except a guard.
+*$6C58 LD D,A        ;
+ $6C59 LD A,E        ;
+@isub=CP ATTR_GUARD
+ $6C5A CP $3B        ;
+ $6C5C JR Z,$6C67    ;
+ $6C5E LD E,D        ;
+ $6C5F JR $6C67      ;
+; Flower: only taken when nothing else was found.
+*$6C61 LD D,A        ;
+ $6C62 LD A,E        ;
+ $6C63 AND A         ;
+ $6C64 JR NZ,$6C67   ;
+ $6C66 LD E,D        ;
+*$6C67 RET           ;

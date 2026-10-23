@@ -1,0 +1,181 @@
+; Horace dies: death animation, one pass less, then retry, next demo maze or game over
+;
+; Entered by JP from #R$66A4 when Horace touches a guard while the bell timer is zero; the return address of that
+; call (into the main loop at #R$6000) is still on the stack. The passes counter (#R$7C78) goes down by one and its
+; digit on the status line is redrawn (nothing is printed in the demo, see #R$6B4F), and the wrap pause (#R$7C79) is
+; cleared. Then 45 colour steps (DEATH_FLASHES): each draws Horace again with the next ink colour on white paper
+; (#R$7C71, through #R$6832, which also steps his walking animation), paints the label cells "PASSES" on the status
+; line in the same colour, and plays 20 cycles of noise whose high and low halves have random lengths (random bytes
+; from #R$6B12), about one second in all. Afterwards the label colour is restored, the guards that are out in the maze
+; are wiped from the screen (#R$6568) and Horace is wiped with the blank sprite. The records of the unreleased guards
+; are left alone: they were never drawn.
+; .
+; With no passes left the game is over (#R$67E9). Otherwise the return address is dropped, the guard release timers
+; are started again (#R$6A22) and the next try starts: in a real game (#R$6B0B non-zero) at #R$61AA, the same maze with
+; the flowers eaten so far, the guards and Horace back at their start cells; in the demo at #R$60E9, the next maze
+; (the maze number and the pace advance).
+; .
+; Hardware: writes the screen bitmap and attributes (the status line, Horace's sprite) and the speaker and border
+; through port $FE with busy-wait loops (silent when the sound mask #R$7C69 is toggled off); the noise is paced by
+; random ROM bytes.
+@label=HoraceDies
+c$673A LD A,($7C78)  ; one pass less
+ $673D DEC A         ;
+ $673E LD ($7C78),A  ;
+ $6741 XOR A         ; Horace is no longer in the wrap pause
+ $6742 LD ($7C79),A  ;
+; BUG? The working guard record is reloaded before it is used again, so this store has no effect.
+ $6745 LD ($6DBE),A  ; GuardWait
+@isub=LD HL,SCREEN+STATUS_PASSES_COL
+ $6748 LD HL,$4007   ; digit of the passes counter
+ $674B CALL $6C0F    ;
+ $674E LD A,($7C78)  ;
+@isub=ADD A,CHAR_0
+ $6751 ADD A,$30     ;
+ $6753 EX DE,HL      ; DE = its cell
+ $6754 CALL $6B4F    ;
+@isub=LD B,DEATH_FLASHES
+ $6757 LD B,$2D      ;
+@label=HoraceDies_Flash
+*$6759 PUSH BC       ;
+ $675A LD A,($7C71)  ; Horace's attribute: next ink, white paper
+ $675D INC A         ;
+@isub=AND INK_MASK
+ $675E AND $07       ;
+@isub=OR WHITE*PAPER
+ $6760 OR $38        ;
+ $6762 LD ($7C71),A  ;
+ $6765 PUSH AF       ;
+ $6766 CALL $6832    ; draw Horace in the new colour
+ $6769 LD HL,$5800   ; the cells of "PASSES" and its digit get it too
+@isub=LD B,PASSES_LABEL_CELLS
+ $676C LD B,$09      ;
+ $676E POP AF        ;
+@label=HoraceDies_Fill
+*$676F LD (HL),A     ;
+ $6770 INC HL        ;
+ $6771 DJNZ $676F    ;
+@isub=LD C,DEATH_NOISE_CYCLES
+ $6773 LD C,$14      ;
+@label=HoraceDies_Noise
+@isub=LD A,ULA_OUT_MASK
+*$6775 LD A,$1F      ; speaker on (unless muted) ...
+ $6777 LD HL,$7C69   ;
+ $677A AND (HL)      ;
+@isub=OUT (ULA_PORT),A
+ $677B OUT ($FE),A   ;
+ $677D CALL $6B12    ; ... for a random time of at least 64 loop passes
+@isub=OR NOISE_MIN_DELAY
+ $6780 OR $40        ;
+ $6782 LD B,A        ;
+*$6783 DJNZ $6783    ;
+@isub=LD A,WHITE
+ $6785 LD A,$07      ; speaker off, white border, for another random time
+@isub=OUT (ULA_PORT),A
+ $6787 OUT ($FE),A   ;
+ $6789 CALL $6B12    ;
+@isub=OR NOISE_MIN_DELAY
+ $678C OR $40        ;
+ $678E LD B,A        ;
+*$678F DJNZ $678F    ;
+ $6791 DEC C         ;
+ $6792 JR NZ,$6775   ;
+ $6794 POP BC        ;
+ $6795 DJNZ $6759    ;
+@isub=LD A,WHITE*PAPER+BLACK
+ $6797 LD A,$38      ; restore the label colour: one cell fewer than was painted (the last one is a blank)
+ $6799 LD HL,$5800   ;
+@isub=LD B,PASSES_LABEL_CELLS-1
+ $679C LD B,$08      ;
+*$679E LD (HL),A     ;
+ $679F INC HL        ;
+ $67A0 DJNZ $679E    ;
+@isub=LD A,ATTR_HORACE
+ $67A2 LD A,$39      ; Horace's normal attribute
+ $67A4 LD ($7C71),A  ;
+; Wipe the guards that are out in the maze (timer zero) from the screen. B counts 1, 2, 3, 4 (record 4 down to 1 for
+; #R$6A3F) and HL steps back one timer word at a time, from the last one.
+@isub=LD HL,GuardTimers+6
+ $67A7 LD HL,$6DAC   ; last guard's timer
+ $67AA LD B,$01      ; B = 1
+@label=HoraceDies_Erase
+*$67AC PUSH BC       ;
+ $67AD LD A,(HL)     ;
+ $67AE INC HL        ;
+ $67AF OR (HL)       ; Z: timer is zero
+ $67B0 DEC HL        ;
+ $67B1 DEC HL        ;
+ $67B2 DEC HL        ;
+ $67B3 PUSH HL       ;
+ $67B4 JR NZ,$67BF   ; waiting guards were never drawn
+ $67B6 CALL $6A3F    ; record B into the working buffer
+ $67B9 CALL $6568    ; wipe it
+ $67BC CALL $6A6A    ; save the buffer back
+@label=HoraceDies_Next
+*$67BF POP HL        ;
+ $67C0 POP BC        ;
+ $67C1 INC B         ;
+ $67C2 LD A,B        ;
+@isub=CP GUARD_COUNT+1
+ $67C3 CP $05        ;
+ $67C5 JR NZ,$67AC   ;
+ $67C7 LD HL,($7C6B) ; Horace's position
+ $67CA LD DE,$7F87   ; blank sprite
+ $67CD CALL $6C0F    ;
+@isub=LD C,ATTR_BLANK
+ $67D0 LD C,$3E      ;
+ $67D2 CALL $6BD6    ; wipe Horace from the screen
+ $67D5 LD A,($7C78)  ; passes left
+ $67D8 AND A         ;
+ $67D9 JR Z,$67E9    ; none: game over
+ $67DB POP HL        ; drop the return address into the main loop (see the start of this routine)
+ $67DC CALL $6A22    ; the guards start waiting again
+ $67DF LD A,($6B0B)  ; 1 = real game, 0 = demo
+ $67E2 AND A         ;
+ $67E3 JP NZ,$61AA   ; real game: try again in the same maze
+ $67E6 JP $60E9      ; demo: go on in the next maze
+; Game over, and restart of the title screen. Reached from #R$673A when the last pass is lost (the return address
+; of the call of #R$66A4 is still on the stack), and by the demo abort in #R$624F (any key during the demo). The
+; whole attribute area is flooded GAME_OVER_FLASHES times with a new ink colour on white paper (ink = loop counter
+; mod 8), each time with a rising tone (#R$6A77), which also paces the loop. The POP HL then drops the return
+; address of the death path; a real game (#R$6B0B non-zero) keeps the best score if the score is at least as high
+; (#R$7C75), and the title screen is restarted at #R$601A. The score is reset by the start of the next game.
+; Hardware: writes the attribute area and the speaker and border (through #R$6A77).
+; .
+; Stack quirk: #R$624F has already popped its own return address when it jumps here for the demo abort, so there
+; the POP HL at $6803 removes a word that belongs to no call and the stack pointer rises by two on every abort
+; (measured in the simulator: $5F9D at the main loop, $5F9F after the first abort, ...). From the 63rd abort
+; without a reset the stack pushes overwrite the title code from $601A and the 70th abort crashes. The death path
+; is balanced. A fix: skip the POP HL for the demo, or make #R$624F jump here without dropping its return address.
+@label=GameOver
+@isub=LD B,GAME_OVER_FLASHES
+*$67E9 LD B,$14      ; screen colour steps
+@label=GameOver_Flash
+*$67EB PUSH BC       ;
+ $67EC CALL $6A77    ; the tone; it preserves B
+ $67EF LD HL,$5800   ;
+@isub=LD DE,ATTRS+1
+ $67F2 LD DE,$5801   ;
+ $67F5 LD A,B        ; ink = B mod 8, white paper
+@isub=AND INK_MASK
+ $67F6 AND $07       ;
+@isub=ADD A,WHITE*PAPER
+ $67F8 ADD A,$38     ;
+ $67FA LD (HL),A     ;
+@isub=LD BC,ATTRS_SIZE-1
+ $67FB LD BC,$02FF   ; flood the attribute area
+ $67FE LDIR          ;
+ $6800 POP BC        ;
+ $6801 DJNZ $67EB    ;
+ $6803 POP HL        ; see the quirk above
+ $6804 LD A,($6B0B)  ; demo: no best score
+ $6807 AND A         ;
+ $6808 JP Z,$601A    ; title screen
+ $680B LD HL,($7C73) ; Score, BestScore: new best if Score >= BestScore
+ $680E LD BC,($7C75) ;
+ $6812 XOR A         ;
+ $6813 SBC HL,BC     ;
+ $6815 JP C,$601A    ; lower: keep the old best
+ $6818 LD HL,($7C73) ;
+ $681B LD ($7C75),HL ;
+ $681E JP $601A      ; title screen

@@ -1,0 +1,37 @@
+; Guard 2 state record (43 bytes)
+;
+; State of guard 2: position, direction, animation counter, wait counter and the screen contents hidden under its
+; sprite. It is the second of the four 43-byte records that start at #R$6DE3 (GUARD_RECORD_SIZE bytes each).
+; .
+; Fields (offsets from the start of the record):
+; +0 word: position, the screen offset (address minus $4000) of the top-left cell of the guard's 2x2-cell sprite
+; +2 byte: direction, 0 up, 1 right, 2 down, 3 left (DIR_*)
+; +3 byte: animation counter, incremented each time the guard is drawn (bit 5 picks the walking frame set, bit 3 the
+;   frame while the guard is scared)
+; +4 word: new position, where the guard is drawn next; planned by #R$63DA and made the position by #R$663D
+; +6 byte: wait counter, 90 after the guard has been eaten; while it is not zero the guard is neither moved nor drawn
+; +7 36 bytes: saved background, the four cells under the sprite in the order top-left, top-right, bottom-left,
+;   bottom-right, nine bytes each: the attribute and then the eight pixel rows (SAVED_CELL_SIZE); #R$655B puts it back
+;   when the guard moves on, and #R$6922 overwrites it to leave a bonus fruit behind
+; .
+; The release timer of guard 2 is the word at #R$6DA8. When a maze starts, or Horace loses a life, #R$6000 puts the
+; guard at the first guard position of the maze descriptor (#R$6FCF+4) if its timer is zero, otherwise at the second
+; one (#R$6FCF+6, where Horace enters). #R$6A3F copies the record into the working buffer #R$6DB8 and #R$6A6A writes
+; it back. The initial contents below are only a placeholder (position $0210, blank background): #R$6000 overwrites
+; both positions and clears the background whenever it places the guards.
+;
+@label=Guard2Record
+b$6E0E DEFW $0210 ; position
+@isub=DEFB DIR_UP
+ $6E10 DEFB $00 ; direction
+ $6E11 DEFB $00 ; animation counter
+ $6E12 DEFW $0210 ; new position
+ $6E14 DEFB $00 ; wait counter
+@isub=DEFB ATTR_BLANK,$00,$00,$00,$00,$00,$00,$00,$00
+ $6E15 DEFB $3E,$00,$00,$00,$00,$00,$00,$00,$00 ; saved cell top-left: attribute, then 8 pixel rows
+@isub=DEFB ATTR_BLANK,$00,$00,$00,$00,$00,$00,$00,$00
+ $6E1E DEFB $3E,$00,$00,$00,$00,$00,$00,$00,$00 ; saved cell top-right
+@isub=DEFB ATTR_BLANK,$00,$00,$00,$00,$00,$00,$00,$00
+ $6E27 DEFB $3E,$00,$00,$00,$00,$00,$00,$00,$00 ; saved cell bottom-left
+@isub=DEFB ATTR_BLANK,$00,$00,$00,$00,$00,$00,$00,$00
+ $6E30 DEFB $3E,$00,$00,$00,$00,$00,$00,$00,$00 ; saved cell bottom-right

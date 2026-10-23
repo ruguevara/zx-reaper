@@ -1,0 +1,8 @@
+; Horace's cell during the guard AI: L = column, H = row (word)
+;
+; Scratch word of #R$63DA (ChooseGuardMove), written once per planned guard: Horace's position #R$7C6B converted from a
+; screen offset to character-cell coordinates, low byte (+0) the column 0-31, high byte (+1) the row 0-23. Compared with
+; the guard's cell #R$6DB0 to decide which directions lead towards him. Not used elsewhere.
+;
+@label=HoraceCell
+g$7C7A DEFW $0000

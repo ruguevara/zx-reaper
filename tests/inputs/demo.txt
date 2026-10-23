@@ -1,0 +1,3 @@
+# no input: title, then demo mode
+0 -
+3000 END

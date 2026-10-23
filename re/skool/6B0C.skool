@@ -1,0 +1,16 @@
+; Busy-wait delay
+;
+; Spins BC times in a four-instruction loop (26 T-states per pass). Used by the
+; main loop of #R$69A4 to set the game speed: the larger BC, the slower the
+; game. BC=0 gives 65536 passes.
+; Hardware: timing loop, no screen or port access (the CPU speed sets the
+; delay).
+;
+; BC Number of loop passes
+; O:BC 0
+@label=Delay
+c$6B0C DEC BC        ;
+ $6B0D LD A,B        ;
+ $6B0E OR C          ;
+ $6B0F JR NZ,$6B0C   ;
+ $6B11 RET           ;

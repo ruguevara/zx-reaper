@@ -1,0 +1,9 @@
+; Guard's cell during the AI: L = column, H = row (word)
+;
+; Scratch word of #R$63DA (ChooseGuardMove): the working guard's position converted from a screen offset to a character
+; cell: the low byte (+0, L) is the column 0-31 and the high byte (+1, H) the row 0-23. Compared with Horace's cell
+; #R$7C7A to find which directions approach him. Rewritten for every guard on every planned step; meaningless between
+; calls.
+;
+@label=GuardCell
+g$6DB0 DEFW $0000

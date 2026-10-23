@@ -1,0 +1,112 @@
+; Score what Horace eats on his next step
+;
+; Called once per pass of the main loop at #R$6000, after Horace's next position ($7C6D) has been worked out by
+; #R$6337 and before he is drawn there. Does nothing while Horace is frozen after a wrap pad ($7C79 non-zero).
+; Otherwise the 2x2 block at the next position is searched with #R$6C20 for an object, which is recognised by its
+; attribute (guard, bell, flower, see #R$6C46). A flower scores SCORE_FLOWER; any other object found scores
+; SCORE_ITEM: in practice the bell (attribute $3A) and the fruit, whose red cells have the bell's attribute and are
+; found before the flower-green ones. Nothing found: nothing happens. The flower itself disappears when Horace is
+; drawn over it. The guard attribute would also take this branch (50 points), but no guard was seen to reach it;
+; guard contact is handled in #R$66A4 (which adds 100 points while the bell timer runs). The score is the word at
+; $7C73; the code then falls into #R$65C7.
+;
+; Hardware: reads the attribute area; the fall-through writes the screen and the speaker (see #R$65C7).
+@label=EatObject
+c$65A1 LD A,($7C79)  ; frozen after a wrap: nothing to eat
+ $65A4 AND A         ;
+ $65A5 RET NZ        ;
+ $65A6 LD HL,($7C6D) ; where Horace is about to be
+ $65A9 CALL $6C20    ;
+ $65AC RET Z         ; nothing there
+@isub=CP ATTR_FLOWER
+ $65AD CP $3C        ;
+ $65AF JR NZ,$65BD   ;
+ $65B1 LD HL,($7C73) ;
+@isub=LD BC,SCORE_FLOWER
+ $65B4 LD BC,$000A   ;
+ $65B7 ADD HL,BC     ;
+ $65B8 LD ($7C73),HL ;
+ $65BB JR $65C7      ;
+@label=EatObject_Item
+ $65BD LD HL,($7C73) ;
+@isub=LD BC,SCORE_ITEM
+ $65C0 LD BC,$0032   ;
+ $65C3 ADD HL,BC     ;
+ $65C4 LD ($7C73),HL ;
+; Show the score, award an extra pass, and play the sound
+;
+; Redraws the score on the status line, grants an extra pass each time the score passes a multiple of 10000, and
+; plays a short rising chirp. Called after every score change: by #R$65A1 above, by #R$66A4 after a guard is eaten,
+; by #R$686A (twice) for the bell, and at the start of a maze or a new life by #R$6000 (HL is ignored).
+; Printing is skipped in demo mode (see #R$6B21, #R$6B4F), but the sound is not.
+;
+; The ten-thousands counter in $7C77 holds score/10000 + 2 as it was at the last call (the +2 comes from the
+; counting loop below). When the new value differs, the passes counter $7C78 goes up by one and its digit is
+; reprinted at the first status line cell after "PASSES ". At the start of a game $7C77 is 0 (set by #R$6000) and the
+; first call finds 2, so a game starts with 4 passes although $7C78 was just set to 3 (the screen shows PASSES 4).
+; Hardware: writes the screen bitmap and attributes of the status line (row 0), and the beeper through port $FE
+; with busy-wait loops: 16 steps of one square-wave cycle, half period 8*C loop passes (C = 16 down to 1), so the
+; pitch rises; about 8 ms in all. The speaker bit is masked by the sound mask at $7C69.
+;
+; O:HL Address of the sound mask
+; O:C 0
+@label=ShowScore
+*$65C7 LD DE,$4000   ;
+ $65CA EX DE,HL      ;
+@isub=LD BC,STATUS_SCORE_COL
+ $65CB LD BC,$000F   ;
+ $65CE ADD HL,BC     ;
+ $65CF EX DE,HL      ; DE = status line cell of the first score digit
+ $65D0 CALL $6B21    ;
+ $65D3 LD HL,($7C73) ;
+ $65D6 XOR A         ;
+@isub=LD BC,EXTRA_PASS_SCORE
+ $65D7 LD BC,$2710   ;
+; A = number of times 10000 can be subtracted, + 1 ...
+*$65DA INC A         ;
+ $65DB SBC HL,BC     ;
+ $65DD JR NC,$65DA   ;
+ $65DF INC A         ; ... + 1 again
+ $65E0 LD B,A        ;
+ $65E1 LD A,($7C77)  ;
+ $65E4 CP B          ;
+ $65E5 JR Z,$6601    ; same ten-thousands as before: no extra pass
+ $65E7 LD A,B        ;
+ $65E8 LD ($7C77),A  ;
+ $65EB LD A,($7C78)  ;
+ $65EE INC A         ; one more pass (no upper limit)
+ $65EF LD ($7C78),A  ;
+@isub=LD HL,SCREEN+STATUS_PASSES_COL
+ $65F2 LD HL,$4007   ;
+ $65F5 CALL $6C0F    ;
+ $65F8 LD A,($7C78)  ;
+@isub=ADD A,CHAR_0
+ $65FB ADD A,$30     ;
+ $65FD EX DE,HL      ;
+ $65FE CALL $6B4F    ;
+; The chirp. B = half period = 8*C; one cycle per step, C = 16 ... 1.
+*$6601 LD HL,$7C69   ;
+@isub=LD C,EAT_TONE_STEPS
+ $6604 LD C,$10      ;
+*$6606 PUSH BC       ;
+ $6607 LD B,C        ;
+ $6608 SLA B         ;
+ $660A SLA B         ;
+ $660C SLA B         ;
+ $660E PUSH BC       ;
+@isub=LD A,ULA_OUT_MASK
+ $660F LD A,$1F      ;
+ $6611 AND (HL)      ; speaker on unless muted
+@isub=OUT (ULA_PORT),A
+ $6612 OUT ($FE),A   ;
+*$6614 DJNZ $6614    ;
+@isub=LD A,WHITE
+ $6616 LD A,$07      ; speaker off, white border
+@isub=OUT (ULA_PORT),A
+ $6618 OUT ($FE),A   ;
+ $661A POP BC        ;
+*$661B DJNZ $661B    ;
+ $661D POP BC        ;
+ $661E DEC C         ;
+ $661F JR NZ,$6606   ;
+ $6621 RET           ;

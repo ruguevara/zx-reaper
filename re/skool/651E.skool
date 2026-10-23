@@ -1,0 +1,47 @@
+; Erase Horace and the moved guards from their old positions
+;
+; First part of the per-frame sprite update (see #R$6000, which calls #R$6622 and #R$6821 afterwards to draw the
+; guards and Horace at their new places). If Horace's next position (#R$7C6D) differs from his current one (#R$7C6B)
+; he is erased from the current position by drawing the blank sprite there. Then every guard that is in the maze
+; (release timer in #R$6DA6 is zero) is loaded into the working buffer (#R$6A3F), erased with #R$655B if it has moved
+; and written back (#R$6A6A). The guards are visited in the order 4, 3, 2, 1: B counts 1 to 4 while the timer pointer
+; walks down from the last timer.
+; Hardware: writes the screen bitmap and attributes.
+@label=EraseSprites
+c$651E LD HL,($7C6D) ; Horace's next position
+ $6521 LD DE,($7C6B) ; Horace's current position
+ $6525 XOR A         ;
+ $6526 SBC HL,DE     ;
+ $6528 LD A,H        ;
+ $6529 OR L          ;
+ $652A JR Z,$653A    ; did not move: nothing to erase
+ $652C LD HL,($7C6B) ;
+ $652F LD DE,$7F87   ; blank sprite
+ $6532 CALL $6C0F    ;
+@isub=LD C,ATTR_BLANK
+ $6535 LD C,$3E      ;
+ $6537 CALL $6BD6    ;
+@isub=LD HL,GuardTimers+(GUARD_COUNT-1)*2
+*$653A LD HL,$6DAC   ; timer of the last guard
+ $653D LD B,$01      ;
+@label=EraseSprites_Loop
+*$653F PUSH BC       ;
+ $6540 LD A,(HL)     ;
+ $6541 INC HL        ;
+ $6542 OR (HL)       ;
+ $6543 DEC HL        ;
+ $6544 DEC HL        ;
+ $6545 DEC HL        ;
+ $6546 PUSH HL       ; points at the timer of the next guard
+ $6547 JR NZ,$6552   ; timer still running: this guard is not in the maze yet
+ $6549 CALL $6A3F    ;
+ $654C CALL $655B    ;
+ $654F CALL $6A6A    ;
+*$6552 POP HL        ;
+ $6553 POP BC        ;
+ $6554 INC B         ;
+ $6555 LD A,B        ;
+@isub=CP GUARD_COUNT+1
+ $6556 CP $05        ;
+ $6558 JR NZ,$653F   ;
+ $655A RET           ;

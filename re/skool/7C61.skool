@@ -1,0 +1,9 @@
+; Step countdown: passes until the next move (byte)
+;
+; Counts main-loop passes. #R$6337 decrements it every pass and plans the movement of Horace and the guards only on the
+; pass where it reaches 0, then reloads it from the game pace #R$7C62, so figures advance one character cell every game-
+; pace passes (8 at the start, 1 at the fastest). #R$6000 loads it with the game pace at the start of a maze. The loaded
+; 9 is overwritten.
+;
+@label=StepCountdown
+g$7C61 DEFB $09

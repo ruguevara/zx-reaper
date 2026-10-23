@@ -1,0 +1,49 @@
+; Draw Horace
+;
+; Last part of the per-frame sprite update (after #R$651E and #R$6622). While the countdown in #R$7C79 is non-zero
+; (Horace is crossing the vertical wrap, see #R$6337) the countdown is decremented, Horace's current position
+; (#R$7C6B) is set to the next one (#R$7C6D) and nothing is drawn. Otherwise Horace is drawn at the next position
+; (which becomes the current one). The entry at #R$6832 skips the countdown test (the death sequence of #R$673A
+; uses it). The animation counter #R$7C72 is incremented on each draw; its bit 4 selects the set of four sprites at
+; #R$7CC7 (set) or #R$7D47 (clear), the direction in #R$7C70 (0-3) selects the sprite in the set (32 bytes each) and
+; #R$7C71 is the attribute (normally $39; the death sequence of #R$673A cycles it).
+; Hardware: writes the screen bitmap and four attribute cells (through #R$6BD6).
+@label=DrawHorace
+c$6821 LD A,($7C79)  ; wrap countdown
+ $6824 AND A         ;
+ $6825 JR Z,$6832    ;
+ $6827 DEC A         ;
+ $6828 LD ($7C79),A  ;
+ $682B LD HL,($7C6D) ;
+ $682E LD ($7C6B),HL ;
+ $6831 RET           ;
+; This entry point is used by the routine at #R$673A.
+@label=DrawHorace_Sprite
+*$6832 LD A,($7C72)  ;
+ $6835 INC A         ;
+ $6836 LD ($7C72),A  ;
+@isub=AND HORACE_FRAME_BIT
+ $6839 AND $10       ;
+ $683B CP $00        ;
+ $683D JR NZ,$6844   ;
+ $683F LD HL,$7D47   ; second set, direction 0
+ $6842 JR $6847      ;
+*$6844 LD HL,$7CC7   ; first set, direction 0
+; Direction * 32 (RLC five times) is the offset of the direction's sprite.
+*$6847 LD A,($7C70)  ;
+ $684A RLC A         ;
+ $684C RLC A         ;
+ $684E RLC A         ;
+ $6850 RLC A         ;
+ $6852 RLC A         ;
+ $6854 LD B,$00      ;
+ $6856 LD C,A        ;
+ $6857 ADD HL,BC     ;
+ $6858 EX DE,HL      ; DE = sprite
+ $6859 LD HL,($7C6D) ;
+ $685C LD ($7C6B),HL ; next position becomes current
+ $685F CALL $6C0F    ;
+ $6862 LD A,($7C71)  ; attribute
+ $6865 LD C,A        ;
+ $6866 CALL $6BD6    ;
+ $6869 RET           ;

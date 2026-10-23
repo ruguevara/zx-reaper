@@ -1,0 +1,9 @@
+; Score (word)
+;
+; The score as a 16-bit binary number (not BCD), shown as five digits on the status line by #R$65C7 and #R$6B21. Cleared
+; by #R$6000 at the start of a game; raised by #R$65A1 (flower +10, bell or fruit +50), #R$66A4 (guard +100) and #R$686A
+; (bell +60 and +150). There is no cap: it wraps at 65536. At game over it replaces the best score #R$7C75 if it is not
+; lower.
+;
+@label=Score
+g$7C73 DEFW $0000

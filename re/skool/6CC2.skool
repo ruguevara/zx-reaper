@@ -1,0 +1,59 @@
+; Probe what is in the way of a one-cell move
+;
+; Used by the Horace and guard movement code to ask "what would I run into if
+; the 16x16 sprite at HL took one step in direction A?". The 2x2-cell block one
+; cell away is examined through its attributes (top-left, top-right,
+; bottom-left, bottom-right, see #R$6CFA): any wall cell blocks the move;
+; otherwise at least two pad cells give MOVE_WRAP and at least two arrow cells
+; give MOVE_EXIT. The sprite is not moved; HL is preserved.
+; Hardware: reads the attribute area; nothing is written.
+;
+; A Direction (0 up, 1 right, 2 down, 3 left); only the low two bits are used
+; HL Screen offset of the sprite's top-left cell (a screen address without the $4000 base)
+; O:A 0 nothing in the way (move allowed), 1 vertical wrap pad ahead
+; (Horace is carried to the opposite edge, see #R$6337), 2 edge arrows ahead
+; (the right-hand ones leave the maze), 3 wall ahead (blocked). Mixed
+; pads and arrows give $82, which callers treat as blocked.
+; O:F Corrupted
+; O:BC' Corrupted
+; O:DE' Corrupted
+; O:HL' Corrupted
+@label=ProbeMove
+c$6CC2 PUSH BC       ;
+ $6CC3 PUSH DE       ;
+ $6CC4 PUSH HL       ;
+ $6CC5 LD BC,$4000   ;
+ $6CC8 ADD HL,BC     ;
+ $6CC9 CALL $6D17    ;
+ $6CCC CALL $6C0F    ;
+ $6CCF EXX           ;
+ $6CD0 LD E,$00      ;
+ $6CD2 CALL $6CFA    ;
+ $6CD5 INC HL        ;
+ $6CD6 CALL $6CFA    ;
+@isub=LD BC,SCREEN_COLS-1
+ $6CD9 LD BC,$001F   ;
+ $6CDC ADD HL,BC     ;
+ $6CDD CALL $6CFA    ;
+ $6CE0 INC HL        ;
+ $6CE1 CALL $6CFA    ;
+ $6CE4 LD A,E        ;
+ $6CE5 EXX           ;
+ $6CE6 POP HL        ;
+ $6CE7 POP DE        ;
+ $6CE8 POP BC        ;
+@isub=CP PROBE_BLOCKED
+ $6CE9 CP $FF        ;
+ $6CEB JR NZ,$6CF0   ;
+@isub=LD A,MOVE_BLOCKED
+ $6CED LD A,$03      ;
+ $6CEF RET           ;
+; E = pads + 4*arrows. Bit 1 (2 or 3 pads) -> 1, bit 3 (2 or 3 arrows) -> 2.
+@isub=AND PROBE_MANY_BITS
+*$6CF0 AND $0A       ;
+ $6CF2 RRC A         ;
+@isub=CP MOVE_WRAP
+ $6CF4 CP $01        ;
+ $6CF6 RET Z         ;
+ $6CF7 RRC A         ;
+ $6CF9 RET           ;

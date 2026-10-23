@@ -1,0 +1,14 @@
+# START module   (one asm file per range, in address order)
+$5FB5 main        # entry point, title screen, demo, maze setup, main loop
+$624F movement    # controls, demo autopilot, move planning, guard AI
+$651E sprites     # erasing and drawing Horace and the guards, eating
+$66A4 events      # guard contact, death, game over, bell, fruit, timers, sound, pacing
+$6A22 guards      # guard timers and records, tones, maze descriptor
+$6AA7 texts       # title and demo texts, title-screen variables
+$6B0C library     # delay, random numbers, printing, sprite/cell drawing, probes
+$6DA6 state       # guard timers, AI scratch, working guard record, guard records
+$6E8F title_gfx   # HUNGRY / HORACE block bitmaps
+$6FCF mazes       # maze descriptors and maps
+$7BF7 tiles       # maze tile graphics
+$7C47 variables   # status text, game variables, fruit graphics
+$7CC7 sprite_gfx  # Horace, guard, bell sprites

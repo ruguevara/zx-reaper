@@ -1,0 +1,8 @@
+; Random pointer into the ROM (word)
+;
+; The address, kept within $0000-$1FFF, of the next ROM byte that #R$6B12 (GetRandom) returns; the pointer is advanced
+; by one and wrapped at every call. #R$6000 seeds it at start-up from FRAMES ($5C78): the ROM byte at address (F AND
+; $1F)*256 + F, F = low byte of FRAMES, gives A; the pointer becomes (A AND $1F)*256 + A. The loaded 0 is overwritten.
+;
+@label=RandomPtr
+g$7C67 DEFW $0000

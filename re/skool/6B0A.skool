@@ -1,0 +1,12 @@
+; Number of guards released (byte)
+;
+; Meant to be the count of guards that have left their start, used by #R$69A4 to shorten the delay of the main loop as
+; more guards are out. It is cleared to 0 by #R$6A22 (at the start of a game and whenever Horace has lost a life) and
+; incremented by #R$696C. The increment is guarded by OR C, with C left over from the caller, so it only fires when C is
+; 0: that happens after Horace has taken the bell (#R$686A leaves BC = 0 when the bell position #R$7CC4 is 0). Then the
+; value counts 1, 2 ... 255, 0 during the last 256 ticks of each waiting guard's timer and ends at 0 again. While the
+; bell is lying in the maze (C = $3A) the byte stays 0 (verified in the simulator: no change in 6000 frames of demo, 256
+; increments after the bell was taken).
+;
+@label=GuardsReleased
+g$6B0A DEFB $00

@@ -1,0 +1,91 @@
+; Draw a maze map
+;
+; Draws a map of tile codes (one byte per character cell) on the screen. First every cell's attribute byte is set
+; from its tile code (empty yellow ink, flowers green, arrows black, tile 9 white on white,
+; every other tile - walls and corners - cyan; all on white paper), then the 8-byte bitmap of each tile is copied from the tile graphics table
+; (tile code * 8). Cells go left to right, then down. The game draws a whole maze with BC=$0300 (32x24 cells).
+; Hardware: writes the attribute area and the screen bitmap; the attribute address is derived from the screen address
+; with #R$6C0F, and the cell loop uses the alternate register set for it.
+;
+; HL Address of the map (tile codes)
+; DE Screen address of the first cell (its top pixel row)
+; BC Number of cells
+; O:HL Address after the map
+; O:DE Screen address after the last cell
+; O:BC 0
+@label=DrawMaze
+c$6B75 PUSH BC       ;
+ $6B76 PUSH HL       ;
+ $6B77 EX DE,HL      ;
+ $6B78 CALL $6C0F    ; HL' = attribute address of the first cell
+ $6B7B EX DE,HL      ;
+ $6B7C EXX           ; now HL=attributes, DE=map, BC=count
+ $6B7D POP DE        ;
+ $6B7E POP BC        ;
+*$6B7F LD A,(DE)     ; pass 1: attributes
+ $6B80 INC DE        ;
+@isub=CP TILE_EMPTY
+ $6B81 CP $00        ;
+ $6B83 JR Z,$6B9D    ;
+@isub=CP TILE_FLOWER
+ $6B85 CP $02        ;
+ $6B87 JR Z,$6BA1    ;
+@isub=CP TILE_ARROW
+ $6B89 CP $03        ;
+ $6B8B JR Z,$6B95    ;
+@isub=CP TILE_BLANK_WHITE
+ $6B8D CP $09        ;
+ $6B8F JR Z,$6B99    ;
+@isub=LD A,WHITE*PAPER+CYAN
+ $6B91 LD A,$3D      ; walls and corners
+ $6B93 JR $6BA3      ;
+@isub=LD A,WHITE*PAPER+BLACK
+*$6B95 LD A,$38      ; arrow
+ $6B97 JR $6BA3      ;
+@isub=LD A,WHITE*PAPER+WHITE
+*$6B99 LD A,$3F      ; invisible tile
+ $6B9B JR $6BA3      ;
+@isub=LD A,WHITE*PAPER+YELLOW
+*$6B9D LD A,$3E      ; empty
+ $6B9F JR $6BA3      ;
+@isub=LD A,WHITE*PAPER+GREEN
+*$6BA1 LD A,$3C      ; flower
+*$6BA3 LD (HL),A     ;
+ $6BA4 INC HL        ;
+ $6BA5 DEC BC        ;
+ $6BA6 LD A,B        ;
+ $6BA7 OR C          ;
+ $6BA8 JR NZ,$6B7F   ;
+ $6BAA EXX           ; back to HL=map, DE=screen, BC=count
+*$6BAB PUSH HL       ; pass 2: bitmaps, one cell per pass
+ $6BAC LD A,(HL)     ;
+ $6BAD LD H,$00      ;
+ $6BAF LD L,A        ;
+ $6BB0 ADD HL,HL     ;
+ $6BB1 ADD HL,HL     ;
+ $6BB2 ADD HL,HL     ; tile code * 8
+ $6BB3 LD IX,$7BF7   ;
+ $6BB7 EX DE,HL      ;
+ $6BB8 ADD IX,DE     ; IX = graphics of this tile
+ $6BBA EX DE,HL      ;
+@isub=LD L,CELL_BYTES
+ $6BBB LD L,$08      ;
+*$6BBD LD A,(IX+$00) ;
+ $6BC0 LD (DE),A     ;
+ $6BC1 INC D         ;
+ $6BC2 INC IX        ;
+ $6BC4 DEC L         ;
+ $6BC5 JR NZ,$6BBD   ;
+ $6BC7 INC E         ; next cell
+ $6BC8 JR Z,$6BCE    ; end of a screen third: D already points into the next one
+ $6BCA LD A,D        ;
+@isub=SUB CELL_BYTES
+ $6BCB SUB $08       ; back up the eight pixel rows just drawn
+ $6BCD LD D,A        ;
+*$6BCE POP HL        ;
+ $6BCF INC HL        ;
+ $6BD0 DEC BC        ;
+ $6BD1 LD A,B        ;
+ $6BD2 OR C          ;
+ $6BD3 JR NZ,$6BAB   ;
+ $6BD5 RET           ;

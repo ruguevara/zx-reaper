@@ -1,0 +1,10 @@
+format tzx 1.10
+tzx 0x30 1c4372656174656420776974682052616d736f6674204d616b65545a58
+pause=1008 header program "horace    " len=38 p1=2 p2=38
+pause=2059 data 0xff build/loader03.bin
+pause=990 header program "HORACE    " len=275 p1=2 p2=256
+pause=1875 data 0xff build/loader05.bin
+pause=993 header code "T         " len=6912 p1=16384 p2=32768
+pause=1887 data 0xff data/screen07.scr
+pause=991 header code "C         " len=8267 p1=24501 p2=32768
+pause=17242 data 0xff build/blk09.bin

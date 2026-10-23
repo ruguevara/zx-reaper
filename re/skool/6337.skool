@@ -1,0 +1,128 @@
+; Plan Horace's next move and every active guard's next move
+;
+; Called once per pass of the main loop (#R$6000). A countdown at #R$7C61 is reloaded from the game pace (#R$7C62: 8
+; at the start, lower and faster in later mazes) and everything below happens only on the pass where it reaches zero,
+; so Horace and the guards advance one character cell per "step" of 1-8 passes. The routine only decides where each
+; figure wants to go and draws nothing: the new position of Horace is left in #R$7C6D (the current one is #R$7C6B), the
+; new position of each guard in the +4 field of its record.
+; .
+; Horace is planned unless he is frozen after a wrap (#R$7C79 non-zero). The cell block one step ahead in his
+; current direction (#R$7C70, set from the keys by #R$624F) is probed with #R$6CC2:
+; - Free: the new position is one cell on (#R$6D17).
+; - Wall, or the left-hand arrows: he stays where he is.
+; - Wrap pad (invisible pads at the top and bottom of the maze): he leaves at one edge and re-enters at the other. The
+; new position is the current one plus (moving up) or minus (moving down) the vertical wrap delta, the first word of
+; #R$6FCF. A short rising tone is played and #R$7C79 is set to 90, which freezes Horace for 90 passes: no key reading
+; (#R$624F), no pickups (#R$65A1), and #R$6821 only copies the new position over the current one.
+; - Edge arrows: only the right-hand ones are an exit, so only when moving right. The routine then jumps to #R$6A1E,
+; which drops this routine's return address and starts the next maze at #R$60E9; the guards are not planned.
+; .
+; The guards come next: the four release timers (#R$6DA6) are scanned and every guard whose timer is zero is loaded
+; into the working record (#R$6A3F), planned by #R$63DA and saved back (#R$6A6A). Guards still waiting are skipped.
+; Hardware: the wrap tone writes port $FE (speaker and border) with busy-wait loops, so the game stops for about
+; 0.07 s; it is muted through the sound mask #R$7C69.
+;
+; O:A Corrupted
+@label=PlanMoves
+c$6337 LD A,($7C61)  ; game step countdown
+ $633A DEC A         ;
+ $633B LD ($7C61),A  ;
+ $633E RET NZ        ; not this pass
+ $633F LD A,($7C62)  ; reload from the game pace
+ $6342 LD ($7C61),A  ;
+; Frozen after a wrap: skip Horace, plan only the guards.
+ $6345 LD A,($7C79)  ; wrap freeze counter
+ $6348 AND A         ;
+ $6349 JR NZ,$63BF   ;
+; Ask what lies one step ahead of Horace in his current direction.
+ $634B LD A,($7C70)  ; Horace direction
+ $634E LD HL,($7C6B) ;
+ $6351 CALL $6CC2    ;
+@isub=CP MOVE_FREE
+ $6354 CP $00        ;
+ $6356 JR Z,$63AB    ;
+@isub=CP MOVE_WRAP
+ $6358 CP $01        ;
+ $635A JR Z,$636A    ;
+@isub=CP MOVE_EXIT
+ $635C CP $02        ;
+ $635E JR NZ,$63B9   ;
+ $6360 LD A,($7C70)  ; moving right?
+@isub=CP DIR_RIGHT
+ $6363 CP $01        ;
+ $6365 JP Z,$6A1E    ;
+ $6368 JR $63B9      ;
+@label=PlanMoves_Wrap
+@isub=LD A,WRAP_PAUSE
+*$636A LD A,$5A      ;
+ $636C LD ($7C79),A  ;
+ $636F LD BC,($6FCF) ;
+ $6373 LD HL,($7C6B) ;
+ $6376 LD A,($7C70)  ;
+; Up: add the wrap delta (jump to the bottom), otherwise (down) subtract it.
+ $6379 AND A         ; direction 0 is up
+ $637A JR Z,$6380    ;
+ $637C SBC HL,BC     ;
+ $637E JR $6381      ;
+*$6380 ADD HL,BC     ;
+*$6381 PUSH HL       ;
+ $6382 LD HL,$7C69   ;
+@isub=LD C,SWEEP_STEPS
+; The tone is the one of #R$6A77 with 8 instead of 10 cycles per pitch step; the new position waits on the stack.
+ $6385 LD C,$10      ;
+*$6387 PUSH BC       ;
+ $6388 LD B,C        ;
+ $6389 SLA B         ;
+ $638B SLA B         ;
+ $638D SLA B         ;
+ $638F LD E,B        ;
+@isub=LD D,WRAP_TONE_CYCLES
+ $6390 LD D,$08      ;
+*$6392 LD B,E        ;
+@isub=LD A,ULA_OUT_MASK
+ $6393 LD A,$1F      ;
+ $6395 AND (HL)      ;
+@isub=OUT (ULA_PORT),A
+ $6396 OUT ($FE),A   ;
+*$6398 DJNZ $6398    ;
+@isub=LD A,WHITE
+ $639A LD A,$07      ;
+@isub=OUT (ULA_PORT),A
+ $639C OUT ($FE),A   ;
+ $639E LD B,E        ;
+*$639F DJNZ $639F    ;
+ $63A1 DEC D         ;
+ $63A2 JR NZ,$6392   ;
+ $63A4 POP BC        ;
+ $63A5 DEC C         ;
+ $63A6 JR NZ,$6387   ;
+ $63A8 POP HL        ;
+ $63A9 JR $63B4      ;
+; Free: step one cell in the current direction.
+*$63AB LD HL,($7C6B) ;
+ $63AE LD A,($7C70)  ;
+ $63B1 CALL $6D17    ;
+*$63B4 LD ($7C6D),HL ;
+ $63B7 JR $63BF      ;
+; Blocked: the new position is the current one.
+*$63B9 LD HL,($7C6B) ;
+ $63BC LD ($7C6D),HL ;
+@label=PlanMoves_Guards
+; Plan the guards: HL walks the four release timers, B counts 4 down to 1 (the guard number #R$6A3F expects).
+*$63BF LD HL,$6DA6   ;
+@isub=LD B,GUARD_COUNT
+ $63C2 LD B,$04      ;
+*$63C4 PUSH BC       ;
+ $63C5 LD A,(HL)     ; timer low byte
+ $63C6 INC HL        ;
+ $63C7 OR (HL)       ; both bytes zero: the guard is active
+ $63C8 INC HL        ;
+ $63C9 PUSH HL       ;
+ $63CA JR NZ,$63D5   ; timer running: skip this guard
+ $63CC CALL $6A3F    ;
+ $63CF CALL $63DA    ;
+ $63D2 CALL $6A6A    ;
+*$63D5 POP HL        ;
+ $63D6 POP BC        ;
+ $63D7 DJNZ $63C4    ;
+ $63D9 RET           ;

@@ -1,0 +1,58 @@
+; Erase a guard that has moved and save the background at its new place
+;
+; Works on the guard record in the working buffer (#R$6DB8), which holds the guard's old screen offset (+0) and the
+; offset it is about to move to (+4). If both are equal the guard has not moved and the routine returns at once.
+; Otherwise the four character cells saved from under the guard (#R$6DBF) are drawn back at the old position, which
+; removes the old image, and the cells under the new position are saved with #R$6C68 so that the next call can
+; remove the guard from there. The guard itself is drawn afterwards by #R$663D, which also copies the new position
+; into the old one.
+; Hardware: writes the screen bitmap and attributes (four cells); #R$6C68 reads them.
+;
+; O:Z Set if the guard had not moved (the entry at #R$655B only)
+@label=EraseGuard
+c$655B LD HL,($6DBC) ; new position
+ $655E LD DE,($6DB8) ; old position
+ $6562 XOR A         ;
+ $6563 SBC HL,DE     ;
+ $6565 LD A,H        ;
+ $6566 OR L          ;
+ $6567 RET Z         ; did not move: the screen is up to date
+; Entry point without the "has it moved" test, for the guards that must be wiped from the screen in any case.
+; This entry point is used by the routines at #R$66A4 and #R$673A.
+@label=EraseGuard_Always
+*$6568 LD HL,($6DB8) ; old position
+ $656B LD BC,$4000   ;
+ $656E ADD HL,BC     ;
+ $656F CALL $6C0F    ;
+ $6572 LD DE,$6DBF   ;
+ $6575 LD A,(DE)     ; top-left cell: attribute, then ...
+ $6576 INC DE        ;
+ $6577 LD C,A        ;
+ $6578 CALL $6BFA    ; ... its 8 bitmap rows
+ $657B LD A,(DE)     ; top-right cell
+ $657C INC DE        ;
+ $657D LD C,A        ;
+ $657E CALL $6BFA    ;
+; Move to the left cell of the next cell row: HL is two cells along already, so add 30, carrying into the next
+; screen third.
+ $6581 LD A,L        ;
+@isub=ADD A,SCREEN_COLS-2
+ $6582 ADD A,$1E     ;
+ $6584 LD L,A        ;
+ $6585 JR NC,$658B   ;
+ $6587 LD A,H        ;
+@isub=ADD A,THIRD_STEP
+ $6588 ADD A,$08     ;
+ $658A LD H,A        ;
+*$658B LD A,(DE)     ; bottom-left cell
+ $658C INC DE        ;
+ $658D LD C,A        ;
+ $658E CALL $6C0F    ; the attribute pointer must be recomputed for the new cell row
+ $6591 CALL $6BFA    ;
+ $6594 LD A,(DE)     ; bottom-right cell
+ $6595 INC DE        ;
+ $6596 LD C,A        ;
+ $6597 CALL $6BFA    ;
+ $659A LD HL,($6DBC) ; save the background under the new position
+ $659D CALL $6C68    ;
+ $65A0 RET           ;

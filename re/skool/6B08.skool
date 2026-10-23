@@ -1,0 +1,10 @@
+; Title screen countdown (word)
+;
+; Counts the passes of the title-screen loop in #R$6000 that remain before the demo starts. #R$6000 sets it to 140
+; ($008C) when the title screen is drawn and decrements it once per pass of the colour-cycling loop (each pass takes
+; about 4 frames: the rising tone of #R$6A77 is the delay). When it reaches 0 the demo starts, with #R$6B0B left at 0; a
+; key pressed before that sets #R$6B0B to 1 and starts a real game at once. Not used outside the title loop; the loaded
+; value 0 is never read.
+;
+@label=TitleCountdown
+g$6B08 DEFW $0000

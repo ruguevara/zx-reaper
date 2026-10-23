@@ -1,0 +1,33 @@
+; Load a guard record into the working buffer
+;
+; The four guards have a 43-byte state record each, stored one after another from #R$6DE3. To work on one of them
+; the game copies it into the working buffer at #R$6DB8, remembers where it came from in #R$6DB6, and writes the
+; buffer back with #R$6A6A when done. B counts down 4, 3, 2, 1 in the callers' loops, so B=4 selects the first
+; record (at #R$6DE3) and B=1 the last (at #R$6E64); any value other than 4, 3 or 2 selects the last.
+;
+; B Guard number 4 (first record) down to 1 (last record)
+; O:HL Address after the working buffer's source record
+@label=LoadGuardRecord
+c$6A3F LD A,B        ;
+ $6A40 CP $04        ;
+ $6A42 JR NZ,$6A49   ;
+ $6A44 LD HL,$6DE3   ;
+ $6A47 JR $6A5E      ;
+*$6A49 CP $03        ;
+ $6A4B JR NZ,$6A52   ;
+@isub=LD HL,GuardRecords+GUARD_RECORD_SIZE
+ $6A4D LD HL,$6E0E   ;
+ $6A50 JR $6A5E      ;
+*$6A52 CP $02        ;
+ $6A54 JR NZ,$6A5B   ;
+@isub=LD HL,GuardRecords+GUARD_RECORD_SIZE*2
+ $6A56 LD HL,$6E39   ;
+ $6A59 JR $6A5E      ;
+@isub=LD HL,GuardRecords+GUARD_RECORD_SIZE*3
+*$6A5B LD HL,$6E64   ;
+*$6A5E LD ($6DB6),HL ; remember the source record for #R$6A6A
+ $6A61 LD DE,$6DB8   ;
+@isub=LD BC,GUARD_RECORD_SIZE
+ $6A64 LD BC,$002B   ;
+ $6A67 LDIR          ;
+ $6A69 RET           ;

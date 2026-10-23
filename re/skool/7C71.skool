@@ -1,0 +1,8 @@
+; Horace's attribute (byte)
+;
+; The attribute byte (white paper, ink 1 = blue: $39, ATTR_*) with which Horace is drawn by #R$6821; it is also the
+; colour that identifies him on the screen. #R$6000 and #R$673A set it to $39; during the death animation #R$673A cycles
+; it through $38-$3F.
+;
+@label=HoraceAttr
+g$7C71 DEFB $39

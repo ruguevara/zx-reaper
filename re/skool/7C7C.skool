@@ -1,0 +1,16 @@
+; Bonus fruit A graphic (4 saved-background cells)
+;
+; One of the two shapes of the bonus fruit, a stalk with a leaf above a single round body (a cherry or apple). A 16x16
+; picture of 2x2 character cells in the same format as the saved background of a guard record (#R$6DEA): four cells of
+; 9 bytes each in the order top-left, top-right, bottom-left, bottom-right, every cell being its attribute byte (the
+; top two cells are green, ATTR_FLOWER; the bottom two red, ATTR_BELL) followed by its 8 pixel rows.
+; .
+; #R$6922 (MaybeDropFruit) copies it over the saved background of a guard record, so that the fruit appears on the
+; floor where the guard stood once the guard walks on; it picks #R$7C7C or #R$7CA0 at random. Horace scores 50 points
+; for eating it.
+;
+@label=FruitCellsA
+b$7C7C DEFB $3C,$00,$00,$01,$01,$02,$02,$02,$01 ; top-left (green): attribute, then 8 pixel rows
+ $7C85 DEFB $3C,$60,$C0,$E0,$60,$20,$00,$00,$00 ; top-right (green): attribute, then 8 pixel rows
+ $7C8E DEFB $3A,$06,$0E,$0F,$0F,$07,$03,$00,$00 ; bottom-left (red): attribute, then 8 pixel rows
+ $7C97 DEFB $3A,$C0,$E0,$E0,$E0,$C0,$80,$00,$00 ; bottom-right (red): attribute, then 8 pixel rows

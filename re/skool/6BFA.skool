@@ -1,0 +1,41 @@
+; Draw one 8x8 character cell
+;
+; Copies 8 bytes to the eight pixel rows of the cell at HL, stores an attribute
+; byte at the attribute address held in HL' (set up with #R$6C0F) and moves both
+; pointers to the next cell on the right. At the end of a screen row HL moves to
+; the first row of the next screen third instead of wrapping.
+; Hardware: writes the screen bitmap and one attribute cell.
+;
+; C Attribute byte (flash, bright, paper, ink)
+; DE Address of the 8 graphic bytes
+; HL Screen bitmap address of the cell (first pixel row)
+; HL' Attribute address of the cell
+; O:DE Address after the 8 graphic bytes
+; O:HL Screen address of the next cell
+; O:HL' Attribute address of the next cell
+; O:A Corrupted
+; O:B 0
+@label=DrawCell
+c$6BFA LD A,C        ;
+ $6BFB EXX           ;
+ $6BFC LD (HL),A     ;
+ $6BFD INC HL        ;
+ $6BFE EXX           ;
+@isub=LD B,CELL_BYTES
+ $6BFF LD B,$08      ;
+@label=DrawCell_Row
+*$6C01 LD A,(DE)     ;
+ $6C02 LD (HL),A     ;
+ $6C03 INC H         ;
+ $6C04 INC DE        ;
+ $6C05 DJNZ $6C01    ;
+; H is now 8 rows down. If L wraps to 0 the cell was the last one in the
+; screen row of a third, and the extra 8 in H already is the next third.
+ $6C07 INC L         ;
+ $6C08 RET Z         ;
+@isub=LD B,THIRD_STEP
+ $6C09 LD B,$08      ;
+ $6C0B LD A,H        ;
+ $6C0C SUB B         ;
+ $6C0D LD H,A        ;
+ $6C0E RET           ;

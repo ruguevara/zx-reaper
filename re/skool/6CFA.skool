@@ -1,0 +1,40 @@
+; Classify one cell for a move probe
+;
+; Part of #R$6CC2. Looks at the attribute of one cell ahead of a moving sprite
+; and updates a running total in E: a wall sets E to $FF (blocked, and the
+; later cells are skipped), a pad cell adds 1, an arrow cell adds 4. Any other
+; attribute leaves E alone. Two or more pad cells (E bit 1) or two or more
+; arrow cells (E bit 3) in the 2x2 block are what #R$6CC2 later recognises.
+; Hardware: reads an attribute cell (through the shadow register set).
+;
+; E' Running total ($FF = wall seen)
+; HL' Attribute address of the cell
+; O:E' Updated total
+; O:A Corrupted
+@label=ProbeCell
+c$6CFA LD A,E        ;
+@isub=CP PROBE_BLOCKED
+ $6CFB CP $FF        ;
+ $6CFD RET Z         ;
+ $6CFE LD A,(HL)     ;
+@isub=CP ATTR_WALL
+ $6CFF CP $3D        ;
+ $6D01 JR NZ,$6D06   ;
+@isub=LD E,PROBE_BLOCKED
+ $6D03 LD E,$FF      ;
+ $6D05 RET           ;
+@isub=CP ATTR_PAD
+*$6D06 CP $3F        ;
+ $6D08 JR NZ,$6D0F   ;
+ $6D0A LD A,$01      ;
+ $6D0C ADD A,E       ;
+ $6D0D LD E,A        ;
+ $6D0E RET           ;
+@isub=CP ATTR_ARROW
+*$6D0F CP $38        ;
+ $6D11 RET NZ        ;
+@isub=LD A,PROBE_ARROW_WEIGHT
+ $6D12 LD A,$04      ;
+ $6D14 ADD A,E       ;
+ $6D15 LD E,A        ;
+ $6D16 RET           ;

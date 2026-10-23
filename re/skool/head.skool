@@ -1,0 +1,8 @@
+@start
+@equ=ROM_BEEPER=$03B5
+@equ=FRAMES=$5C78
+@equ=SCREEN=$4000
+@equ=ATTRS=$5800
+@equ=ROM_CHARSET=$3D00
+
+

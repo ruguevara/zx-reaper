@@ -1,0 +1,23 @@
+; Horace sprites, walking frame B (4 directions)
+;
+; The second walking frame of Horace, 4 sprites of 32 bytes in the order up, right, down, left, in the same layout as
+; #R$7CC7. #R$6821 (DrawHorace) uses it when bit 4 of the animation counter #R$7C72 is clear. It differs from frame A
+; in the legs.
+;
+@label=HoraceSprites2
+b$7D47 DEFB $07,$1F,$7F,$7F,$FF,$8F,$F1,$7E ; up (no face): top-left cell
+ $7D4F DEFB $F0,$F8,$FE,$FE,$FF,$F9,$E7,$1E ; top-right
+ $7D57 DEFB $1B,$1B,$38,$24,$3E,$00,$00,$00 ; bottom-left
+ $7D5F DEFB $FE,$DC,$18,$18,$1C,$3C,$22,$3E ; bottom-right
+ $7D67 DEFB $07,$1F,$7F,$7C,$F8,$F8,$F8,$9D ; right: top-left cell
+ $7D6F DEFB $F8,$FC,$FE,$33,$73,$62,$EE,$FC ; top-right
+ $7D77 DEFB $9F,$0F,$07,$03,$03,$07,$0C,$07 ; bottom-left
+ $7D7F DEFB $F8,$70,$30,$B8,$A8,$3C,$80,$C0 ; bottom-right
+ $7D87 DEFB $0F,$1F,$7F,$63,$C3,$C3,$C7,$7F ; down (facing the player): top-left cell
+ $7D8F DEFB $E0,$F8,$FE,$86,$03,$07,$CF,$FE ; top-right
+ $7D97 DEFB $7F,$3B,$18,$18,$38,$2C,$44,$7C ; bottom-left
+ $7D9F DEFB $D8,$D8,$1C,$24,$7C,$00,$00,$00 ; bottom-right
+ $7DA7 DEFB $1F,$3F,$7F,$CE,$CE,$C6,$67,$77 ; left: top-left cell
+ $7DAF DEFB $F0,$FC,$FE,$3F,$1F,$1D,$19,$B9 ; top-right
+ $7DB7 DEFB $3F,$3D,$79,$71,$30,$38,$48,$FC ; bottom-left
+ $7DBF DEFB $F0,$C4,$FC,$CC,$78,$40,$00,$00 ; bottom-right

@@ -1,0 +1,26 @@
+; Toggle the sound when T is pressed
+;
+; Called once per pass of the main loop at #R$6000. Reads the T key and acts on the key-down edge only: the
+; previous reading is kept in #R$7C6A (bit 4 set = T up; initialised to $10), so holding the key down flips the
+; sound just once. Each press flips the sound mask at #R$7C69 between $1F (sound on) and $07 (sound off); every
+; routine that makes a noise ANDs its port $FE output with that mask.
+; Hardware: reads port $FBFE (keyboard half-row Q-T, bit 4 = T).
+@label=CheckSoundKey
+@isub=LD A,KB_Q_T
+c$698E LD A,$FB      ; high byte of the port address: half-row Q,W,E,R,T
+@isub=IN A,(ULA_PORT)
+ $6990 IN A,($FE)    ;
+@isub=AND KEY_T_BIT
+ $6992 AND $10       ; bit 4 = T, 0 when pressed
+ $6994 LD HL,$7C6A   ;
+ $6997 CP (HL)       ;
+ $6998 RET Z         ; no change since last pass
+ $6999 LD (HL),A     ;
+ $699A AND A         ;
+ $699B RET NZ        ; T was released: nothing to do
+ $699C LD HL,$7C69   ;
+ $699F LD A,(HL)     ;
+@isub=XOR SOUND_TOGGLE
+ $69A0 XOR $18       ; $1F <-> $07
+ $69A2 LD (HL),A     ;
+ $69A3 RET           ;

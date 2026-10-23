@@ -1,0 +1,14 @@
+; Game mode flag: 0 title or demo, 1 real game (byte)
+;
+; 0 while the title screen is shown and during the demo; 1 once the player has pressed a key at the title screen and a
+; real game is played. Set to 0 by #R$6000 when the title screen is drawn, and to 1 at $60C4 when a key is pressed
+; before the countdown #R$6B08 runs out. #R$6000 briefly sets it to 1 to print the title texts and the "DEMO MODE"
+; banner and restores the old value.
+; .
+; Readers: #R$6B4F (PrintChar, and through it #R$6B21 and #R$6B48) draws only when bit 0 is set, so the status line and
+; score are not printed in the demo; #R$624F reads the keyboard when it is non-zero and runs the autopilot when it is
+; zero; #R$673A (death) restarts the same maze in a real game (JP $61AA) but goes on to the next one in the demo, and
+; updates the best score (#R$7C75) at game over only in a real game.
+;
+@label=GameActive
+g$6B0B DEFB $00

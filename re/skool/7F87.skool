@@ -1,0 +1,10 @@
+; Blank sprite (32 zero bytes)
+;
+; An empty 16x16 sprite (four cells of 8 zero bytes). It is drawn with #R$6BD6 over a sprite to erase it: by #R$651E
+; (EraseSprites), by #R$686A when Horace takes the bell and by #R$673A.
+;
+@label=BlankSprite
+b$7F87 DEFB $00,$00,$00,$00,$00,$00,$00,$00
+ $7F8F DEFB $00,$00,$00,$00,$00,$00,$00,$00
+ $7F97 DEFB $00,$00,$00,$00,$00,$00,$00,$00
+ $7F9F DEFB $00,$00,$00,$00,$00,$00,$00,$00

@@ -1,0 +1,28 @@
+; Horace sprites, walking frame A (4 directions)
+;
+; Horace, the blue creature, 16x16 pixels, one sprite per direction in the order of the direction codes 0 up, 1 right,
+; 2 down, 3 left (HoraceDir, #R$7C70): the sprite for direction d is at #R$7CC7 + SPRITE_BYTES * d. Each sprite is 32
+; bytes: four 8x8 cells in the order top-left, top-right, bottom-left, bottom-right, each cell being 8 bytes of pixel
+; rows from the top (bit 7 leftmost); #R$6BD6 (DrawSprite) draws it with an attribute colour of the caller's choice.
+; .
+; This is the first of two walking frames. #R$6821 (DrawHorace) uses it when bit 4 of the animation counter #R$7C72 is
+; set and the second frame #R$7D47 when it is clear, so the legs change every 16 draws. It draws Horace with attribute
+; $39 (blue ink on white).
+;
+@label=HoraceSprites
+b$7CC7 DEFB $0F,$1F,$7F,$7F,$FF,$9F,$E7,$78 ; up (no face): top-left cell
+ $7CCF DEFB $E0,$F8,$FE,$FE,$FF,$F1,$8F,$7E ; top-right
+ $7CD7 DEFB $7F,$3B,$18,$18,$38,$3C,$44,$7C ; bottom-left
+ $7CDF DEFB $D8,$D8,$1C,$24,$7C,$00,$00,$00 ; bottom-right
+ $7CE7 DEFB $0F,$3F,$7F,$FC,$F8,$B8,$98,$9D ; right: top-left cell
+ $7CEF DEFB $F8,$FC,$FE,$73,$73,$63,$E6,$EE ; top-right
+ $7CF7 DEFB $0F,$23,$3F,$33,$1E,$02,$00,$00 ; bottom-left
+ $7CFF DEFB $FC,$BC,$9E,$8E,$0C,$1C,$12,$3F ; bottom-right
+ $7D07 DEFB $07,$1F,$7F,$61,$C0,$E0,$F3,$7F ; down (facing the player): top-left cell
+ $7D0F DEFB $F0,$F8,$FE,$C6,$C3,$C3,$E3,$FE ; top-right
+ $7D17 DEFB $1B,$1B,$38,$24,$3E,$00,$00,$00 ; bottom-left
+ $7D1F DEFB $FE,$DC,$18,$18,$1C,$34,$22,$3E ; bottom-right
+ $7D27 DEFB $1F,$3F,$7F,$CC,$CE,$46,$77,$3F ; left: top-left cell
+ $7D2F DEFB $E0,$F8,$FE,$3E,$1F,$1F,$1F,$B9 ; top-right
+ $7D37 DEFB $1F,$0E,$0C,$1D,$15,$3C,$01,$03 ; bottom-left
+ $7D3F DEFB $F9,$F0,$E0,$C0,$C0,$E0,$30,$E0 ; bottom-right

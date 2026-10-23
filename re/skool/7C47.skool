@@ -1,0 +1,11 @@
+; Status line text
+;
+; The fixed words of the status line in the top character row (screen address $4000): "PASSES   SCORE       BEST" (25
+; characters). Printed by #R$6000 with #R$6B4F when a maze is drawn during a real game; the number of passes (lives),
+; the score and the best score are then drawn into the gaps by #R$6000 and #R$65C7 with #R$6B21.
+; .
+; Format: plain ASCII characters, terminated by $FF.
+;
+@label=StatusText
+t$7C47 DEFM "PASSES   SCORE       BEST"
+ $7C60 DEFB $FF

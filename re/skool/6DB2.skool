@@ -1,0 +1,9 @@
+; Direction scores of the AI (4 bytes)
+;
+; Scratch table filled by #R$63DA (guard AI) with the score of each direction, indexed by direction code: +0 up, +1
+; right, +2 down, +3 left (0 = blocked or never chosen). The best-scoring direction becomes the guard's new direction.
+; The Horace autopilot of the demo (#R$624F) uses the same table for its weights. Both scan the table backwards from
+; #R$6DB6, which therefore marks the end; the scores are not kept between calls.
+;
+@label=GuardDirScores
+g$6DB2 DEFB $00,$00,$00,$00

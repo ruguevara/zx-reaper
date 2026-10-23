@@ -1,0 +1,8 @@
+; Horace's current direction (byte)
+;
+; Direction code 0 up, 1 right, 2 down, 3 left (DIR_*) in which Horace walks. #R$6000 sets it to 1 (right) when a maze
+; starts or a life is lost; #R$624F changes it (keys or demo autopilot); #R$6337 moves him one cell in that direction on
+; every step; #R$6821 uses it to select his sprite.
+;
+@label=HoraceDir
+g$7C70 DEFB $01

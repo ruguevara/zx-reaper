@@ -1,0 +1,9 @@
+; Bonus fruit timer (word)
+;
+; Countdown to the next bonus fruit. #R$6000 sets it to 2000 ($07D0) when a maze starts; #R$6922 decrements it once per
+; call, that is once per pass for each released guard that is not waiting and has no red cell in its saved background
+; (so it runs faster with more guards out). When it reaches 0 it is re-armed with 800 plus a random 0-1023 and a fruit
+; is planted under the guard.
+;
+@label=FruitTimer
+g$7C65 DEFW $0000

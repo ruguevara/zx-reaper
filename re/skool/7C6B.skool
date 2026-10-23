@@ -1,0 +1,12 @@
+; Horace's current position (word)
+;
+; Where Horace is drawn now. Positions are screen offsets: the screen address minus $4000 of the top-left cell of the
+; 2x2-cell sprite, with the pixel row bits 0, i.e. %000TT000 RRRCCCCC with TT the screen third, RRR the character row in
+; the third and CCCCC the column (row 8*TT+RRR, column CCCCC, 24 rows by 32 columns). Set to Horace's start position
+; (#R$6FD5) when a maze starts or after a life is lost (#R$6000); #R$6821 makes it equal to the next position #R$7C6D
+; whenever it draws him (or, while he is frozen after a wrap pad, without drawing). Read by the control code (#R$624F),
+; the planner (#R$6337), the guard AI (#R$63DA: chase), the eraser (#R$651E), the bell (#R$686A) and the death sequence
+; (#R$673A). The loaded value is a placeholder.
+;
+@label=HoracePos
+g$7C6B DEFW $014C

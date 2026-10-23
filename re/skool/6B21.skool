@@ -1,0 +1,40 @@
+; Print a 5-digit decimal number
+;
+; Prints HL as exactly five decimal digits (leading zeros are printed) in the
+; character cells starting at DE, using #R$6B48 and #R$6B4F. Used for the
+; score and the best score on the status line. Nothing is drawn while bit 0 of
+; the flag at #R$6B0B is clear (demo mode).
+; Hardware: writes the screen bitmap and attributes (via #R$6C0F and
+; #R$6B4F).
+;
+; DE Screen address of the first digit (first pixel row of the cell)
+; HL Number to print (0-65535)
+; O:DE Screen address of the cell after the last digit
+; O:HL Units digit (0-9)
+; O:A ASCII "0" when printing is enabled
+; O:BC 10
+@label=PrintNumber
+c$6B21 EX DE,HL      ;
+ $6B22 CALL $6C0F    ;
+ $6B25 EX DE,HL      ;
+@isub=LD A,CHAR_0
+ $6B26 LD A,$30      ;
+ $6B28 AND A         ;
+@isub=LD BC,10000
+ $6B29 LD BC,$2710   ;
+ $6B2C CALL $6B48    ;
+@isub=LD BC,1000
+ $6B2F LD BC,$03E8   ;
+ $6B32 CALL $6B48    ;
+@isub=LD BC,100
+ $6B35 LD BC,$0064   ;
+ $6B38 CALL $6B48    ;
+@isub=LD BC,10
+ $6B3B LD BC,$000A   ;
+ $6B3E CALL $6B48    ;
+; The remainder is the units digit
+ $6B41 LD A,L        ;
+@isub=ADD A,CHAR_0
+ $6B42 ADD A,$30     ;
+ $6B44 CALL $6B4F    ;
+ $6B47 RET           ;

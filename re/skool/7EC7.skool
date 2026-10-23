@@ -1,0 +1,16 @@
+; Scared guard sprites (2 frames)
+;
+; The guard's head while it can be eaten (the bell timer #R$6DAE is running): a frightened face with hair standing up,
+; 2 frames of 32 bytes in the same cell order as #R$7DC7 (top-left, top-right, bottom-left, bottom-right). The two
+; frames alternate according to bit 3 of the guard's animation counter, and there is one pair for all directions. Used
+; by #R$663D (DrawGuard).
+;
+@label=ScaredGuardSprites
+b$7EC7 DEFB $88,$C8,$4C,$66,$37,$A4,$A0,$E6 ; frame 0: top-left cell
+ $7ECF DEFB $40,$60,$60,$C6,$CC,$3C,$09,$C7 ; top-right
+ $7ED7 DEFB $46,$60,$21,$23,$16,$0C,$06,$03 ; bottom-left
+ $7EDF DEFB $C2,$06,$84,$CC,$68,$30,$60,$C0 ; bottom-right
+ $7EE7 DEFB $C4,$44,$66,$26,$37,$B8,$A0,$E3 ; frame 1: top-left cell
+ $7EEF DEFB $10,$30,$60,$E7,$CE,$3C,$08,$67 ; top-right
+ $7EF7 DEFB $43,$60,$21,$23,$16,$0C,$06,$03 ; bottom-left
+ $7EFF DEFB $62,$06,$84,$CC,$68,$30,$60,$C0 ; bottom-right

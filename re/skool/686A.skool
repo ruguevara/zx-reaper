@@ -1,0 +1,121 @@
+; Animate the bell, or let Horace pick it up
+;
+; Called once per pass of the main loop at #R$6000, after Horace has been drawn at his new position (so $7C6B, his
+; position, is already the position he has just moved to). Does nothing when there is no bell in the maze (the bell
+; position #R$7CC4 is 0: before the bell is taken it holds the bell position from the maze descriptor, afterwards 0
+; until the next maze).
+;
+; Pick-up test: d = Horace's position minus the bell's position (both screen offsets of the top-left cell of a 2x2
+; block). Horace takes the bell when d is 0 (same place), -1 or +1 (a cell left or right), -32 (a cell above) or +33
+; (a cell below and a cell to the right). The other overlapping offsets (+32, +31, -31, -33) are not tested.
+; While the bell is not taken it is redrawn every pass as a 16x16 sprite in the colour ATTR_BELL, using one of the
+; four frames at $7F07 (32 bytes each). The animation counter #R$7CC6 is incremented on every pass; its bits 3-5
+; count 0-7 every 8 passes, mirrored into the frame sequence 0, 1, 2, 3, 3, 2, 1, 0.
+;
+; Taking the bell (#R$68BE, never reached in the coverage maps, read from the code and confirmed in the simulator):
+; the bell position is cleared and the bell erased with the blank sprite at $7F87, Horace is redrawn on top of it by
+; #R$6821, and the score is raised by SCORE_BELL_PICKUP and then SCORE_BELL_BONUS, each time through #R$65C7 (which
+; also chirps). Together with SCORE_ITEM already given by #R$65A1 for the bell attribute that is 260 points. The bell
+; timer at $6DAE is set to 128 * the game pace ($7C62), so that the guards stay edible for that long (the timer is
+; counted down elsewhere; a non-zero value makes #R$66A4 treat touching a guard as eating it).
+; The routine also tries to turn round one guard (adds 2 to the direction of the record in the working buffer #R$6DB8),
+; but the buffer is not saved and the next #R$6A3F overwrites it: in the simulator $6DBA went 3, 1 and back to 3 on the
+; next pass. This turn-round has no effect.
+; Hardware: writes the screen bitmap and attributes (the bell sprite); the score update chirps through port $FE.
+@label=UpdateBell
+c$686A LD HL,($7C6B) ; Horace
+ $686D LD BC,($7CC4) ; bell
+ $6871 LD A,B        ;
+ $6872 OR C          ;
+ $6873 RET Z         ; no bell
+ $6874 AND A         ;
+ $6875 SBC HL,BC     ; d = Horace - bell
+ $6877 LD A,H        ;
+ $6878 OR L          ;
+ $6879 JR Z,$68BE    ; d = 0
+ $687B INC HL        ;
+ $687C LD A,H        ;
+ $687D OR L          ;
+ $687E JR Z,$68BE    ; d = -1
+ $6880 DEC HL        ;
+ $6881 DEC HL        ;
+ $6882 LD A,H        ;
+ $6883 OR L          ;
+ $6884 JR Z,$68BE    ; d = +1
+@isub=LD BC,SCREEN_COLS+1
+ $6886 LD BC,$0021   ;
+ $6889 ADD HL,BC     ;
+ $688A LD A,H        ;
+ $688B OR L          ;
+ $688C JR Z,$68BE    ; d = -32
+ $688E XOR A         ;
+@isub=LD BC,2*SCREEN_COLS+1
+ $688F LD BC,$0041   ;
+ $6892 SBC HL,BC     ;
+ $6894 LD A,H        ;
+ $6895 OR L          ;
+ $6896 JR Z,$68BE    ; d = +33
+; Not taken: advance the animation and redraw the bell.
+ $6898 LD HL,($7CC4) ;
+ $689B LD A,($7CC6)  ;
+ $689E INC A         ;
+ $689F LD ($7CC6),A  ;
+@isub=AND BELL_FRAME_BITS
+ $68A2 AND $38       ; step 0-7 (times 8)
+@isub=CP BELL_MIRROR_LIMIT
+ $68A4 CP $1F        ;
+ $68A6 JR C,$68AA    ;
+@isub=XOR BELL_FRAME_BITS
+ $68A8 XOR $38       ; second half: 4-7 become 3-0
+*$68AA RLCA          ; frame * 8 * 4 = frame * SPRITE_BYTES
+ $68AB RLCA          ;
+ $68AC LD C,A        ;
+ $68AD LD B,$00      ;
+ $68AF LD DE,$7F07   ; first bell frame
+ $68B2 EX DE,HL      ;
+ $68B3 ADD HL,BC     ;
+ $68B4 EX DE,HL      ; DE = frame graphic, HL = bell position
+ $68B5 CALL $6C0F    ;
+@isub=LD C,ATTR_BELL
+ $68B8 LD C,$3A      ;
+ $68BA CALL $6BD6    ;
+ $68BD RET           ;
+; Horace takes the bell.
+@label=TakeBell
+*$68BE LD HL,$0000   ;
+ $68C1 LD ($7CC4),HL ; bell gone
+ $68C4 LD DE,$7F87   ; blank sprite
+@isub=LD HL,(MazeBellStart)
+ $68C7 LD HL,($6FD1) ; the bell's place in the maze descriptor (what #R$7CC4 held)
+ $68CA CALL $6C0F    ;
+@isub=LD C,ATTR_BLANK
+ $68CD LD C,$3E      ;
+ $68CF CALL $6BD6    ; erase the bell
+ $68D2 CALL $6821    ; draw Horace again over the spot
+ $68D5 LD HL,($7C73) ;
+@isub=LD BC,SCORE_BELL_PICKUP
+ $68D8 LD BC,$003C   ;
+ $68DB ADD HL,BC     ;
+ $68DC LD ($7C73),HL ;
+ $68DF CALL $65C7    ;
+ $68E2 LD A,($7C62)  ; game pace (8 at the start, 1 at the fastest)
+ $68E5 LD L,$00      ;
+ $68E7 LD H,A        ;
+ $68E8 SRA H         ;
+ $68EA RR L          ; HL = pace * 128
+ $68EC LD ($6DAE),HL ; start the bell timer: guards can be eaten
+@isub=LD A,(GuardDir)
+ $68EF LD A,($6DBA)  ; direction of the guard record in the working buffer
+@isub=ADD A,DIR_OPPOSITE
+ $68F2 ADD A,$02     ;
+@isub=AND DIR_MASK
+ $68F4 AND $03       ;
+@isub=LD (GuardDir),A
+ $68F6 LD ($6DBA),A  ; turn it round (lost, see the description)
+ $68F9 LD HL,($7C73) ;
+@isub=LD BC,SCORE_BELL_BONUS
+ $68FC LD BC,$0096   ;
+ $68FF ADD HL,BC     ;
+ $6900 LD ($7C73),HL ;
+ $6903 CALL $65C7    ;
+ $6906 RET           ;

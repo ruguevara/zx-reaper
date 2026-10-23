@@ -1,0 +1,63 @@
+; Plant a bonus fruit under a guard when the fruit timer runs out
+;
+; Works on the guard record in the working buffer (#R$6DB8), which #R$6907 has loaded for a released guard. A
+; fruit is a 16x16 sprite of four cells (attribute + 8 pixel rows each, 9 bytes per cell, like the saved
+; background): a green stalk above a red body, cherry-like; the two shapes are in #R$7C7C and #R$7CA0. Instead
+; of drawing it, the routine overwrites the guard's saved background (#R$6DBF, the four cells under the guard)
+; with the fruit. When the guard walks on, #R$655B restores that background, so the fruit is left lying on the
+; floor where the guard stood. Horace scores 50 points for it (#R$65A1: a red cell is any object but a flower,
+; worth 10).
+;
+; Nothing happens while the guard is waiting (#R$6DBE is not zero: #R$66A4 sets it to 90 when Horace, after
+; picking up the bell, touches a guard and the guards are sent back to their start position; #R$663D counts it
+; down) or while the saved background already holds a red cell (the bell, or a fruit). Otherwise the word at
+; #R$7C65 is counted down once per call; at zero it is re-armed with 800 plus a random 0-1023 and one of the two
+; fruit shapes (chosen at random) is planted. The timer is first set to 2000 by #R$6000 when a maze starts.
+; Hardware: none.
+;
+; O:HL Corrupted
+@label=MaybeDropFruit
+c$6922 LD A,($6DBE)  ;
+ $6925 AND A         ;
+ $6926 RET NZ        ; guard is paused
+@isub=LD E,SPRITE_CELLS
+ $6927 LD E,$04      ; look at the four saved cells
+ $6929 LD HL,$6DBF   ;
+*$692C LD A,(HL)     ; attribute of the cell
+@isub=CP ATTR_BELL
+ $692D CP $3A        ; red: the bell or a fruit is already there
+ $692F RET Z         ;
+@isub=LD BC,SAVED_CELL_SIZE
+ $6930 LD BC,$0009   ;
+ $6933 ADD HL,BC     ;
+ $6934 DEC E         ;
+ $6935 JR NZ,$692C   ;
+ $6937 LD HL,($7C65) ;
+ $693A DEC HL        ;
+ $693B LD ($7C65),HL ;
+ $693E LD A,H        ;
+ $693F OR L          ;
+ $6940 RET NZ        ; timer still running
+ $6941 CALL $6B12    ; L = random byte
+ $6944 LD L,A        ;
+ $6945 PUSH HL       ;
+ $6946 CALL $6B12    ;
+ $6949 POP HL        ;
+@isub=AND FRUIT_DELAY_MASK
+ $694A AND $03       ; H = random 0-3, so HL = random 0-1023
+ $694C LD H,A        ;
+@isub=LD BC,FRUIT_MIN_DELAY
+ $694D LD BC,$0320   ;
+ $6950 ADD HL,BC     ;
+ $6951 LD ($7C65),HL ; next fruit in 800-1823 calls
+ $6954 CALL $6B12    ;
+ $6957 AND $01       ; pick one of the two shapes
+ $6959 JR NZ,$6960   ;
+ $695B LD HL,$7C7C   ;
+ $695E JR $6963      ;
+*$6960 LD HL,$7CA0   ;
+*$6963 LD DE,$6DBF   ;
+@isub=LD BC,SPRITE_CELLS*SAVED_CELL_SIZE
+ $6966 LD BC,$0024   ; 4 cells of 9 bytes
+ $6969 LDIR          ;
+ $696B RET           ;

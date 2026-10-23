@@ -1,0 +1,2 @@
+; Unused code bytes (LD A,(IX+0); LD A,(IX+0); RET), never executed
+b$6A17 DEFB $DD,$7E,$00,$DD,$7E,$00,$C9
