@@ -1,0 +1,2 @@
+; Data block at DE7F
+b$DE7F DEFB $AA

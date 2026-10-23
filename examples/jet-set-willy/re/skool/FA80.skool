@@ -1,0 +1,2 @@
+; Message at FA80
+t$FA80 DEFM "            The Beach           "

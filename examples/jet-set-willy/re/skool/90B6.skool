@@ -1,0 +1,9 @@
+; Routine at 90B6
+;
+; Used by the routine at #R$961E.
+c$90B6 POP HL        ;
+; This entry point is used by the routines at #R$8DD3, #R$91BE and #R$9534.
+*$90B7 POP HL        ;
+ $90B8 LD A,$FF      ;
+ $90BA LD ($85D1),A  ;
+ $90BD JP $89F5      ;

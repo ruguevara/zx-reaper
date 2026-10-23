@@ -1,0 +1,13 @@
+; Routine at 9680
+;
+; Used by the routines at #R$86C3, #R$87CA, #R$88AE, #R$89AD and #R$8B07.
+c$9680 LD A,(IX+$00) ;
+ $9683 CALL $9691    ;
+ $9686 INC IX        ;
+ $9688 INC E         ;
+ $9689 LD A,D        ;
+ $968A SUB $08       ;
+ $968C LD D,A        ;
+ $968D DEC C         ;
+ $968E JR NZ,$9680   ;
+ $9690 RET           ;

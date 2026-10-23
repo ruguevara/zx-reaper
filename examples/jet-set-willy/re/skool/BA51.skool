@@ -1,0 +1,5 @@
+; Data block at BA51
+b$BA51 DEFB $8C,$5D,$FA,$8D,$B1,$9A,$59,$12
+ $BA59 DEFB $48,$18,$18,$2C,$34,$C7,$E3,$07
+ $BA61 DEFB $E0,$8F,$F1,$5F,$FA,$3F,$FC,$1F
+ $BA69 DEFB $F8,$11,$88

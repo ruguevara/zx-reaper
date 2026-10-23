@@ -1,0 +1,3 @@
+; Data block at EDB1
+b$EDB1 DEFB $00,$0C,$10,$2A,$55,$A0,$10,$20
+ $EDB9 DEFB $10,$08,$04,$18,$18,$14

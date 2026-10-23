@@ -1,0 +1,23 @@
+; Routine at 8400
+c$8400 DI            ;
+ $8401 LD HL,$5BFF   ;
+ $8404 LD (HL),$86   ;
+ $8406 DEC HL        ;
+ $8407 LD (HL),$9F   ;
+ $8409 LD SP,$5BFE   ;
+ $840C SUB A         ;
+ $840D LD L,A        ;
+ $840E XOR $0A       ;
+ $8410 LD B,A        ;
+ $8411 INC B         ;
+ $8412 LD H,B        ;
+ $8413 RRC H         ;
+*$8415 LD C,(HL)     ;
+ $8416 LD A,L        ;
+ $8417 XOR C         ;
+ $8418 XOR H         ;
+ $8419 LD (HL),C     ;
+ $841A INC HL        ;
+ $841B BIT 7,H       ;
+ $841D JR NZ,$8415   ;
+ $841F RET           ;

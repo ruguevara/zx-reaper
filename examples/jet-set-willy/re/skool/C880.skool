@@ -1,0 +1,2 @@
+; Message at C880
+t$C880 DEFM "      Inside the MegaTrunk      "

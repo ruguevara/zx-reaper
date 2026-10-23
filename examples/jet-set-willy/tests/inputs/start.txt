@@ -1,0 +1,24 @@
+# Colour code entry: grid location B3 at the simulator's fixed start frame,
+# code 4-2-3-2 (computed from $85E4), then ENTER; title screen and tune follow.
+0    -
+40   4
+50   -
+60   2
+70   -
+80   3
+90   -
+100  2
+110  -
+120  ENTER
+300  ENTER
+310  -
+# in the Bathroom: walk right, jump, walk left
+400  P
+460  P M
+470  P
+520  -
+560  O
+640  O M
+650  O
+760  -
+800  END

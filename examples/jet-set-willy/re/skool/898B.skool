@@ -1,0 +1,25 @@
+; Routine at 898B
+;
+; Used by the routine at #R$89AD.
+c$898B LD A,($85CC)  ;
+ $898E LD HL,$50A0   ;
+ $8991 OR A          ;
+ $8992 RET Z         ;
+ $8993 LD B,A        ;
+*$8994 LD C,$00      ;
+ $8996 PUSH HL       ;
+ $8997 PUSH BC       ;
+ $8998 LD A,($85E1)  ;
+ $899B RLCA          ;
+ $899C RLCA          ;
+ $899D RLCA          ;
+ $899E AND $60       ;
+ $89A0 LD E,A        ;
+ $89A1 LD D,$9D      ;
+ $89A3 CALL $9456    ;
+ $89A6 POP BC        ;
+ $89A7 POP HL        ;
+ $89A8 INC HL        ;
+ $89A9 INC HL        ;
+ $89AA DJNZ $8994    ;
+ $89AC RET           ;

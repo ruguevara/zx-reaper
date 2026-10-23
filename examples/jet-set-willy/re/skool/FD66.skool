@@ -1,0 +1,2 @@
+; Data block at FD66
+b$FD66 DEFB $06,$02,$CD,$9E

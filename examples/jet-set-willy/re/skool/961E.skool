@@ -1,0 +1,16 @@
+; Routine at 961E
+;
+; Used by the routine at #R$95C8.
+c$961E LD A,($80A0)  ;
+ $9621 CP (HL)       ;
+ $9622 JR NZ,$962F   ;
+ $9624 LD A,C        ;
+ $9625 AND $0F       ;
+ $9627 JR Z,$962F    ;
+ $9629 LD A,($80A0)  ;
+ $962C OR $07        ;
+ $962E LD (HL),A     ;
+*$962F LD A,($80BB)  ;
+ $9632 CP (HL)       ;
+ $9633 JP Z,$90B6    ;
+ $9636 RET           ;

@@ -1,0 +1,5 @@
+; Data block at B2D7
+b$B2D7 DEFB $5E,$2C,$3C,$16,$78,$0B,$F0,$03
+ $B2DF DEFB $C0,$03,$C0,$0D,$F0,$1A,$F8,$3F
+ $B2E7 DEFB $FC,$51,$8C,$64,$26,$C5,$A7,$B3
+ $B2EF DEFB $CF,$5D,$BB,$AA,$77,$5F,$FA

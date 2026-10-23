@@ -1,0 +1,48 @@
+; Routine at 9637
+;
+; Used by the routine at #R$95C8.
+c$9637 LD A,($85CF)  ;
+ $963A ADD A,B       ;
+ $963B LD IXh,$82    ;
+ $963E LD IXl,A      ;
+ $9640 LD A,($85D0)  ;
+ $9643 AND $01       ;
+ $9645 RRCA          ;
+ $9646 LD E,A        ;
+ $9647 LD A,($85D2)  ;
+ $964A AND $03       ;
+ $964C RRCA          ;
+ $964D RRCA          ;
+ $964E RRCA          ;
+ $964F OR E          ;
+ $9650 LD E,A        ;
+ $9651 LD D,$9D      ;
+ $9653 LD A,($8420)  ;
+ $9656 CP $1D        ;
+ $9658 JR NZ,$9660   ;
+ $965A LD D,$B6      ;
+ $965C LD A,E        ;
+ $965D XOR $80       ;
+ $965F LD E,A        ;
+*$9660 LD B,$10      ;
+ $9662 LD A,($85D3)  ;
+ $9665 AND $1F       ;
+ $9667 LD C,A        ;
+; This entry point is used by the routine at #R$959A.
+*$9668 LD A,(IX+$00) ;
+ $966B LD H,(IX+$01) ;
+ $966E OR C          ;
+ $966F LD L,A        ;
+ $9670 LD A,(DE)     ;
+ $9671 OR (HL)       ;
+ $9672 LD (HL),A     ;
+ $9673 INC HL        ;
+ $9674 INC DE        ;
+ $9675 LD A,(DE)     ;
+ $9676 OR (HL)       ;
+ $9677 LD (HL),A     ;
+ $9678 INC IX        ;
+ $967A INC IX        ;
+ $967C INC DE        ;
+ $967D DJNZ $9668    ;
+ $967F RET           ;

@@ -1,0 +1,21 @@
+; Routine at 8AEB
+;
+; Used by the routines at #R$88AE and #R$89AD.
+c$8AEB LD HL,$5800   ;
+ $8AEE LD A,(HL)     ;
+ $8AEF AND $07       ;
+ $8AF1 OUT ($FE),A   ;
+*$8AF3 LD A,(HL)     ;
+ $8AF4 ADD A,$03     ;
+ $8AF6 AND $07       ;
+ $8AF8 LD D,A        ;
+ $8AF9 LD A,(HL)     ;
+ $8AFA ADD A,$18     ;
+ $8AFC AND $B8       ;
+ $8AFE OR D          ;
+ $8AFF LD (HL),A     ;
+ $8B00 INC HL        ;
+ $8B01 LD A,H        ;
+ $8B02 CP $5B        ;
+ $8B04 JR NZ,$8AF3   ;
+ $8B06 RET           ;

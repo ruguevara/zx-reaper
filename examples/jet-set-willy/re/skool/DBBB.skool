@@ -1,0 +1,2 @@
+; Message at DBBB
+t$DBBB DEFM "B(T"

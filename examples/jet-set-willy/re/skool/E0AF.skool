@@ -1,0 +1,2 @@
+; Message at E0AF
+t$E0AF DEFM "Z<Z"

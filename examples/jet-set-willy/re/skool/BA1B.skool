@@ -1,0 +1,4 @@
+; Data block at BA1B
+b$BA1B DEFB $9A,$8C,$31,$07,$E0,$07,$E0,$0F
+ $BA23 DEFB $F0,$1F,$F8,$FF,$FF,$1F,$F8,$1F
+ $BA2B DEFB $F8,$31,$8C

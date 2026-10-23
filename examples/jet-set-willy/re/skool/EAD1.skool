@@ -1,0 +1,2 @@
+; Message at EAD1
+t$EAD1 DEFM "fffff"

@@ -1,0 +1,14 @@
+# Colour code entry: grid location B3 at the simulator's fixed start frame,
+# code 4-2-3-2 (computed from $85E4), then ENTER; title screen and tune follow.
+0    -
+40   4
+50   -
+60   2
+70   -
+80   3
+90   -
+100  2
+110  -
+120  ENTER
+130  -
+1500 END

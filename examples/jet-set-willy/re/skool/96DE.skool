@@ -1,0 +1,17 @@
+; Routine at 96DE
+;
+; Used by the routine at #R$88AE.
+c$96DE LD E,A        ;
+ $96DF LD C,$FE      ;
+*$96E1 LD D,A        ;
+ $96E2 RES 4,D       ;
+ $96E4 RES 3,D       ;
+ $96E6 LD B,E        ;
+*$96E7 CP B          ;
+ $96E8 JR NZ,$96EC   ;
+ $96EA LD D,$18      ;
+*$96EC OUT (C),D     ;
+ $96EE DJNZ $96E7    ;
+ $96F0 DEC A         ;
+ $96F1 JR NZ,$96E1   ;
+ $96F3 RET           ;

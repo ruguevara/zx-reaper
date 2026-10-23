@@ -1,0 +1,17 @@
+; Routine at 9691
+;
+; Used by the routines at #R$86C3 and #R$9680.
+c$9691 LD H,$07      ;
+ $9693 LD L,A        ;
+ $9694 SET 7,L       ;
+ $9696 ADD HL,HL     ;
+ $9697 ADD HL,HL     ;
+ $9698 ADD HL,HL     ;
+ $9699 LD B,$08      ;
+; This entry point is used by the routines at #R$87CA and #R$93D1.
+*$969B LD A,(HL)     ;
+ $969C LD (DE),A     ;
+ $969D INC HL        ;
+ $969E INC D         ;
+ $969F DJNZ $969B    ;
+ $96A1 RET           ;

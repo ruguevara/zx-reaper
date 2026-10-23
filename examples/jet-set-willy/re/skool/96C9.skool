@@ -1,0 +1,14 @@
+; Routine at 96C9
+;
+; Used by the routine at #R$96A2.
+c$96C9 LD A,($85CE)  ;
+ $96CC OR A          ;
+ $96CD JR Z,$96D4    ;
+ $96CF IN A,($1F)    ;
+ $96D1 BIT 4,A       ;
+ $96D3 RET NZ        ;
+*$96D4 LD BC,$AFFE   ;
+ $96D7 IN A,(C)      ;
+ $96D9 AND $01       ;
+ $96DB CP $01        ;
+ $96DD RET           ;

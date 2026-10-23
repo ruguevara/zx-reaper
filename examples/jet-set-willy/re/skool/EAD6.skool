@@ -1,0 +1,4 @@
+; Data block at EAD6
+b$EAD6 DEFB $01,$CC,$5E,$14,$01,$C4,$5E,$07
+ $EADE DEFB $02,$00,$00,$FF,$FF,$FF,$FF,$FF
+ $EAE6 DEFB $FF,$FF,$FF

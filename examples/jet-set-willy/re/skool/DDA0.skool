@@ -1,0 +1,3 @@
+; Data block at DDA0
+b$DDA0 DEFB $00,$00,$00,$00,$00,$00,$00,$00
+ $DDA8 DEFB $00,$44,$FF,$A5

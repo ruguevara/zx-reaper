@@ -1,0 +1,5 @@
+; Data block at AC4B
+b$AC4B DEFB $04,$3D,$BC,$00,$00,$1B,$70,$20
+ $AC53 DEFB $04,$3D,$BD,$A2,$45,$FB,$77,$A0
+ $AC5B DEFB $05,$3D,$ED,$20,$04,$20,$04,$3B
+ $AC63 DEFB $75,$A0,$05,$FD,$BF,$A0,$05

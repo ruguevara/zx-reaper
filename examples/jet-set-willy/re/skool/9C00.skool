@@ -1,0 +1,2 @@
+; Message at 9C00
+t$9C00 DEFM "NZ,ENDPAUSE"

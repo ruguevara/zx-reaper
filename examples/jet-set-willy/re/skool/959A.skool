@@ -1,0 +1,24 @@
+; Routine at 959A
+;
+; Used by the routine at #R$9534.
+c$959A LD A,($8420)  ;
+ $959D CP $21        ;
+ $959F RET NZ        ;
+ $95A0 LD A,($85CB)  ;
+ $95A3 AND $01       ;
+ $95A5 RRCA          ;
+ $95A6 RRCA          ;
+ $95A7 RRCA          ;
+ $95A8 LD E,A        ;
+ $95A9 LD A,($85DF)  ;
+ $95AC CP $03        ;
+ $95AE JR NZ,$95B2   ;
+ $95B0 SET 6,E       ;
+*$95B2 LD D,$A6      ;
+ $95B4 LD IX,$82D0   ;
+ $95B8 LD BC,$101C   ;
+ $95BB CALL $9668    ;
+ $95BE LD HL,$0707   ;
+ $95C1 LD ($5DBC),HL ;
+ $95C4 LD ($5DDC),HL ;
+ $95C7 RET           ;

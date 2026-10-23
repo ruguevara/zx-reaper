@@ -1,0 +1,14 @@
+; Routine at 9584
+;
+; Used by the routine at #R$89AD.
+c$9584 LD A,($8420)  ;
+ $9587 CP $21        ;
+ $9589 RET NZ        ;
+ $958A LD A,($85D3)  ;
+ $958D CP $BC        ;
+ $958F RET NZ        ;
+ $9590 XOR A         ;
+ $9591 LD ($85CB),A  ;
+ $9594 LD A,$03      ;
+ $9596 LD ($85DF),A  ;
+ $9599 RET           ;

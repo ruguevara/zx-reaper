@@ -1,0 +1,3 @@
+; Data block at DBA0
+b$DBA0 DEFB $00,$00,$00,$00,$00,$00,$00,$00
+ $DBA8 DEFB $00,$0D

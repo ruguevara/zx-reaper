@@ -1,0 +1,5 @@
+; Data block at B2B9
+b$B2B9 DEFB $1C,$1C,$38,$0B,$F0,$02,$C0,$03
+ $B2C1 DEFB $C0,$0B,$F0,$15,$78,$3F,$FC,$50
+ $B2C9 DEFB $0C,$65,$A6,$C7,$E7,$F1,$8F,$BE
+ $B2D1 DEFB $7F,$DD,$F7

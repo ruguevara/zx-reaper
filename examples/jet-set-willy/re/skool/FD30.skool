@@ -1,0 +1,4 @@
+; Data block at FD30
+b$FD30 DEFB $B7,$28,$10,$7B,$FE,$20,$38,$04
+ $FD38 DEFB $FE,$25,$38,$07,$3A,$06,$53,$B7
+ $FD40 DEFB $CA,$E4

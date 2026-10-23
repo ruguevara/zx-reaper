@@ -1,0 +1,10 @@
+; Routine at 949E
+;
+; Used by the routine at #R$8DD3.
+c$949E LD A,($80EA)  ;
+ $94A1 LD ($8420),A  ;
+ $94A4 LD A,($85D3)  ;
+ $94A7 AND $E0       ;
+ $94A9 LD ($85D3),A  ;
+ $94AC POP HL        ;
+ $94AD JP $8912      ;

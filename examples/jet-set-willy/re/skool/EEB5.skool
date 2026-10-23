@@ -1,0 +1,2 @@
+; Message at EEB5
+t$EEB5 DEFM "$$w"

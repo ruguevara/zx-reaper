@@ -1,0 +1,2 @@
+; Data block at DF6F
+b$DF6F DEFB $AA,$AA

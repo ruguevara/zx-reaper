@@ -8,4 +8,6 @@ original/*.tzx
 original/*.pzx
 re/tape/
 re/*.z80
+# RZX recordings embed a snapshot of the game
+re/rzx/*.rzx
 re/tap2sna.log

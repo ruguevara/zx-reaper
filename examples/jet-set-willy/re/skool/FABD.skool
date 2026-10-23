@@ -1,0 +1,7 @@
+; Data block at FABD
+b$FABD DEFB $81,$E7,$81,$5A,$7E,$3C,$42,$0E
+ $FAC5 DEFB $01,$03,$07,$0F,$1E,$37,$7F,$FB
+ $FACD DEFB $2C,$4E,$AA,$00,$40,$40,$44,$AA
+ $FAD5 DEFB $FF,$00,$E0,$5F,$05,$01,$C5,$5F
+ $FADD DEFB $01,$02,$00,$00,$04,$05,$0B,$0B
+ $FAE5 DEFB $17,$37,$6F,$EF

@@ -1,0 +1,3 @@
+; Data block at CFA0
+b$CFA0 DEFB $08,$00,$00,$00,$00,$00,$00,$00
+ $CFA8 DEFB $00,$0C,$80,$40

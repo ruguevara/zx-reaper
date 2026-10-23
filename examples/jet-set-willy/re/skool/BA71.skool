@@ -1,0 +1,6 @@
+; Data block at BA71
+b$BA71 DEFB $8E,$5E,$FA,$8D,$F1,$1D,$B8,$12
+ $BA79 DEFB $48,$78,$1E,$8C,$31,$07,$E0,$15
+ $BA81 DEFB $03,$2A,$BE,$15,$5E,$4A,$A8,$35
+ $BA89 DEFB $5C,$8A,$AE,$6D,$5C,$99,$F9,$6E
+ $BA91 DEFB $BF,$DD

@@ -1,0 +1,16 @@
+; Routine at 8DC0
+;
+; Used by the routine at #R$8D6B.
+c$8DC0 AND $03       ;
+ $8DC2 LD C,A        ;
+ $8DC3 RLCA          ;
+ $8DC4 RLCA          ;
+ $8DC5 RLCA          ;
+ $8DC6 ADD A,C       ;
+ $8DC7 ADD A,$A0     ;
+ $8DC9 LD E,A        ;
+ $8DCA LD D,$80      ;
+ $8DCC LD A,(DE)     ;
+ $8DCD LD (IX+$00),A ;
+ $8DD0 INC IX        ;
+ $8DD2 RET           ;

@@ -1,0 +1,6 @@
+; Data block at FE91
+b$FE91 DEFB $0C,$D3,$C1,$E3,$E3,$DB,$CF,$FE
+ $FE99 DEFB $50,$20,$DF,$AF,$D3,$CE,$3E,$10
+ $FEA1 DEFB $D3,$CF,$06,$32,$CD,$60,$00,$DB
+ $FEA9 DEFB $CF,$CB,$7F,$20,$FA,$CB,$47,$20
+ $FEB1 DEFB $C9,$C9,$00,$00

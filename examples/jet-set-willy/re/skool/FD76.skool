@@ -1,0 +1,5 @@
+; Data block at FD76
+b$FD76 DEFB $80,$3C,$4F,$AF,$47,$ED,$42,$DF
+ $FD7E DEFB $30,$11,$21,$1C,$68,$E5,$3A,$12
+ $FD86 DEFB $53,$B7,$28,$03,$CD,$71,$77,$E1
+ $FD8E DEFB $C3,$92

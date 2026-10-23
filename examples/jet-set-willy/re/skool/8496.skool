@@ -1,0 +1,2 @@
+; Data block at 8496
+b$8496 DEFB $7F

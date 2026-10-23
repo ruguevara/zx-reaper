@@ -1,0 +1,2 @@
+; Message at CD80
+t$CD80 DEFM "        Out on a limb           "

@@ -1,0 +1,2 @@
+; Data block at 9C23
+b$9C23 DEFB $C4,$4A,$06,$09

@@ -1,0 +1,13 @@
+; Routine at 869F
+c$869F LD HL,$4000   ;
+ $86A2 LD DE,$4001   ;
+ $86A5 LD BC,$1AFF   ;
+ $86A8 LD (HL),$00   ;
+ $86AA LDIR          ;
+ $86AC LD IX,$858B   ;
+ $86B0 CALL $86C3    ;
+ $86B3 JP Z,$87CA    ;
+ $86B6 LD IX,$85AB   ;
+ $86BA CALL $86C3    ;
+ $86BD JP Z,$87CA    ;
+ $86C0 JP $0000      ;

@@ -1,0 +1,28 @@
+; Routine at 96A2
+;
+; Used by the routine at #R$87CA.
+c$96A2 LD A,(HL)     ;
+ $96A3 CP $FF        ;
+ $96A5 RET Z         ;
+ $96A6 LD BC,$0064   ;
+ $96A9 XOR A         ;
+ $96AA LD E,(HL)     ;
+ $96AB LD D,E        ;
+*$96AC OUT ($FE),A   ;
+ $96AE DEC D         ;
+ $96AF JR NZ,$96B4   ;
+ $96B1 LD D,E        ;
+ $96B2 XOR $18       ;
+*$96B4 DJNZ $96AC    ;
+ $96B6 EX AF,AF'     ;
+ $96B7 LD A,C        ;
+ $96B8 CP $32        ;
+ $96BA JR NZ,$96BE   ;
+ $96BC RL E          ;
+*$96BE EX AF,AF'     ;
+ $96BF DEC C         ;
+ $96C0 JR NZ,$96AC   ;
+ $96C2 CALL $96C9    ;
+ $96C5 RET NZ        ;
+ $96C6 INC HL        ;
+ $96C7 JR $96A2      ;

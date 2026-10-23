@@ -1,0 +1,4 @@
+; Data block at E36C
+b$E36C DEFB $40,$00,$00,$00,$AA,$AA,$AA,$AA
+ $E374 DEFB $A0,$00,$00,$00,$AA,$AA,$AA,$AA
+ $E37C DEFB $A9

@@ -1,0 +1,3 @@
+; Data block at DF77
+b$DF77 DEFB $AA,$AA,$AA,$AA,$AA,$AA,$AA,$AA
+ $DF7F DEFB $AA

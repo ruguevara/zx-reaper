@@ -1,0 +1,17 @@
+; Routine at 94B0
+;
+; Used by the routines at #R$89AD and #R$8DD3.
+c$94B0 LD A,($80EB)  ;
+ $94B3 LD ($8420),A  ;
+ $94B6 LD A,($85D3)  ;
+ $94B9 AND $1F       ;
+ $94BB ADD A,$A0     ;
+ $94BD LD ($85D3),A  ;
+ $94C0 LD A,$5D      ;
+ $94C2 LD ($85D4),A  ;
+ $94C5 LD A,$D0      ;
+ $94C7 LD ($85CF),A  ;
+ $94CA XOR A         ;
+ $94CB LD ($85D1),A  ;
+ $94CE POP HL        ;
+ $94CF JP $8912      ;

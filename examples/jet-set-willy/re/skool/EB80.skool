@@ -1,0 +1,2 @@
+; Message at EB80
+t$EB80 DEFM "        Conservatory Roof       "

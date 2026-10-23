@@ -1,0 +1,2 @@
+; Data block at 867F
+b$867F DEFB $40,$40,$40,$40

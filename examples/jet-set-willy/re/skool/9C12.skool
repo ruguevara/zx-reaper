@@ -1,0 +1,3 @@
+; Data block at 9C12
+b$9C12 DEFB $09,$45,$A3,$4A,$0C,$09,$4A,$52
+ $9C1A DEFB $09

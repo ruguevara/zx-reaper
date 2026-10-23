@@ -1,0 +1,2 @@
+; Message at F780
+t$F780 DEFM "    West Bedroom                "

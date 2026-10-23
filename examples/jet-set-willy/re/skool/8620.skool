@@ -1,0 +1,2 @@
+; Data block at 8620
+b$8620 DEFB $40

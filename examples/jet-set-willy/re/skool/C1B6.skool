@@ -1,0 +1,2 @@
+; Data block at C1B6
+b$C1B6 DEFB $88

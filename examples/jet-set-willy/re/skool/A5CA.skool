@@ -1,0 +1,5 @@
+; Data block at A5CA
+b$A5CA DEFB $A8,$06,$66,$C7,$C9,$22,$F3,$B3
+ $A5D2 DEFB $70,$96,$65,$EF,$6A,$9D,$49,$91
+ $A5DA DEFB $92,$94,$96,$97,$5A,$8B,$99,$9B
+ $A5E2 DEFB $7A,$C2,$25,$92

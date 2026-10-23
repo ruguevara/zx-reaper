@@ -1,0 +1,2 @@
+; Data block at FD60
+b$FD60 DEFB $D0,$E5,$F5

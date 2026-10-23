@@ -1,0 +1,3 @@
+; Data block at FE07
+b$FE07 DEFB $00,$7A,$44,$BD,$44,$45,$01,$00
+ $FE0F DEFB $43,$F5,$FE,$04,$4F,$00,$43,$89

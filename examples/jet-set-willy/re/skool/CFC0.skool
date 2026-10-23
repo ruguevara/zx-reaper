@@ -1,0 +1,2 @@
+; Data block at CFC0
+b$CFC0 DEFB $15

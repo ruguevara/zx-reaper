@@ -1,0 +1,2 @@
+; Message at C0E5
+t$C0E5 DEFM "bbb"

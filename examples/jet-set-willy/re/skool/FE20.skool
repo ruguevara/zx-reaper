@@ -1,0 +1,2 @@
+; Data block at FE20
+b$FE20 DEFB $00,$4C,$00

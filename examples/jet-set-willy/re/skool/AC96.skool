@@ -1,0 +1,2 @@
+; Message at AC96
+t$AC96 DEFM "$$3"

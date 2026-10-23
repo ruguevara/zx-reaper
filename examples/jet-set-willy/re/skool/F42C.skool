@@ -1,0 +1,2 @@
+; Message at F42C
+t$F42C DEFM "UUUU"

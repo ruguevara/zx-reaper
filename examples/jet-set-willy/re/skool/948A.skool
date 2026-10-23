@@ -1,0 +1,11 @@
+; Routine at 948A
+;
+; Used by the routine at #R$8DD3.
+c$948A LD A,($80E9)  ;
+ $948D LD ($8420),A  ;
+ $9490 LD A,($85D3)  ;
+ $9493 OR $1F        ;
+ $9495 AND $FE       ;
+ $9497 LD ($85D3),A  ;
+ $949A POP HL        ;
+ $949B JP $8912      ;

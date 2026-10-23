@@ -1,0 +1,2 @@
+; Data block at FA76
+b$FA76 DEFB $AA,$AA,$00,$15
