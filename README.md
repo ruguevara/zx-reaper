@@ -22,6 +22,7 @@ notes in the author's Obsidian vault, refreshed with `scripts/sync-method.py`.
 | `docs/` | the method and the reference run report (copies of the vault notes) |
 | `scripts/` | repository maintenance (`sync-method.py`) |
 | `examples/hungry-horace/` | the reference run: Hungry Horace (1982) taken through every stage, compared with the SkoolKit reference disassembly |
+| `examples/jet-set-willy/` | second run: Jet Set Willy (1984), compared with the SkoolKit reference; report in `re/comparison.md` |
 
 ## Setup
 
