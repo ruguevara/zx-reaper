@@ -5,9 +5,11 @@
 
 ADDR: first graphic; COUNT graphics of W x H character cells each.
 Options:
-  --layout cells|linear  cells: each 8x8 cell is 8 consecutive bytes, cells in
+  --layout cells|linear|attrcells
+                         cells: each 8x8 cell is 8 consecutive bytes, cells in
                          row order (TL, TR, BL, BR for 2x2; default);
-                         linear: pixel rows of W bytes, top to bottom
+                         linear: pixel rows of W bytes, top to bottom;
+                         attrcells: each cell is its attribute byte + 8 bytes
   --stride N             bytes from one graphic to the next (default W*H*8)
   --attr A               attribute for every graphic (default $38: black on white)
   --attrs A,B,...        one attribute per graphic (overrides --attr)
@@ -42,17 +44,23 @@ def colours(attr):
     return pal[attr & 7], pal[(attr >> 3) & 7]
 
 
-def graphic_pixels(mem, addr, w, h, layout):
-    """Rows of 0/1 pixels for one W x H cell graphic."""
+def graphic_pixels(mem, addr, w, h, layout, attr):
+    """Rows of (ink, paper) colour pixels for one W x H cell graphic."""
     rows = []
     for y in range(h * 8):
         row = []
         for cx in range(w):
+            cell = (y // 8) * w + cx
+            a = attr
             if layout == 'cells':
-                b = mem[addr + ((y // 8) * w + cx) * 8 + y % 8]
+                b = mem[addr + cell * 8 + y % 8]
+            elif layout == 'attrcells':
+                a = mem[addr + cell * 9]
+                b = mem[addr + cell * 9 + 1 + y % 8]
             else:
                 b = mem[addr + y * w + cx]
-            row += [(b >> (7 - k)) & 1 for k in range(8)]
+            ink, paper = colours(a)
+            row += [ink if (b >> (7 - k)) & 1 else paper for k in range(8)]
         rows.append(row)
     return rows
 
@@ -71,7 +79,7 @@ def write_png(path, rows):
 def sheet(a):
     snap = Snapshot.get(a.snapshot)
     mem = [0] * 16384 + list(snap.ram(-1))[:49152]
-    stride = a.stride or a.w * a.h * 8
+    stride = a.stride or a.w * a.h * (9 if a.layout == 'attrcells' else 8)
     attrs = [num(x) for x in a.attrs.split(',')] if a.attrs else [a.attr] * a.count
     cols = min(a.cols, a.count)
     nrows = (a.count + cols - 1) // cols
@@ -80,12 +88,10 @@ def sheet(a):
     height = nrows * (gh + 1) + 1
     canvas = [[GRID] * width for _ in range(height)]
     for n in range(a.count):
-        ink, paper = colours(attrs[n % len(attrs)])
-        px = graphic_pixels(mem, a.addr + n * stride, a.w, a.h, a.layout)
+        px = graphic_pixels(mem, a.addr + n * stride, a.w, a.h, a.layout, attrs[n % len(attrs)])
         ox, oy = 1 + (n % cols) * (gw + 1), 1 + (n // cols) * (gh + 1)
         for y in range(gh):
-            for x in range(gw):
-                canvas[oy + y][ox + x] = ink if px[y][x] else paper
+            canvas[oy + y][ox:ox + gw] = px[y]
     rows = [[p for p in row for _ in range(a.scale)] for row in canvas for _ in range(a.scale)]
     write_png(a.out, rows)
     print('wrote %s: %d graphics, %dx%d px' % (a.out, a.count, width * a.scale, height * a.scale))
@@ -101,7 +107,7 @@ def main():
     ap.add_argument('w', type=num)
     ap.add_argument('h', type=num)
     ap.add_argument('out')
-    ap.add_argument('--layout', choices=['cells', 'linear'], default='cells')
+    ap.add_argument('--layout', choices=['cells', 'linear', 'attrcells'], default='cells')
     ap.add_argument('--stride', type=num, default=0)
     ap.add_argument('--attr', type=num, default=0x38)
     ap.add_argument('--attrs')
