@@ -54,6 +54,17 @@ def test_memory():
         pass
 
 
+def test_display_pixels():
+    d = Display()
+    d.plot(9, 13)                                   # cell column 1, pixel row 13
+    assert d.pixel(9, 13) == 1 and d.pixel(8, 13) == 0
+    assert d.byte(1, 13) == 0x40 and d.glyph(1, 1)[5] == 0x40
+    d.set_byte(31, 191, 0xFF)
+    assert d.data[6143] == 0xFF                     # the last byte of the display file
+    d.set_attr(31, 23, 0x38)
+    assert d.attr(31, 23) == 0x38 and d == d and d != Display()
+
+
 def test_display():
     d = Display()
     d.cls(attr(0, 7))

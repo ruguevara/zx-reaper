@@ -20,10 +20,18 @@ def _row(col, row, line):
     return (row & 0x18) << 8 | line << 8 | (row & 7) << 5 | col
 
 
+def _line(col, y):
+    """Offset in the display file of the 8 pixels of cell column `col` on pixel row `y`."""
+    return _row(col, y >> 3, y & 7)
+
+
 class Display:
     def __init__(self):
         self.data = bytearray(6912)
         self.border = 7
+
+    def __eq__(self, other):
+        return isinstance(other, Display) and self.data == other.data and self.border == other.border
 
     def cls(self, a):
         self.data[:6144] = bytes(6144)
@@ -52,3 +60,20 @@ class Display:
         for i, ch in enumerate(s):
             c = FONT + (ord(ch) - 32) * 8
             self.cell(col + i, row, ROM[c:c + 8], a)
+
+    def byte(self, col, y):
+        """The 8 pixels of cell column `col` (0-31) on pixel row `y` (0-191), bit 7 leftmost."""
+        return self.data[_line(col, y)]
+
+    def set_byte(self, col, y, v):
+        self.data[_line(col, y)] = v
+
+    def set_attr(self, col, row, a):
+        self.data[6144 + row * COLS + col] = a
+
+    def pixel(self, x, y):
+        """1 when the pixel at (x, y) is set (x 0-255, y 0-191 from the top)."""
+        return self.data[_line(x >> 3, y)] >> (7 - (x & 7)) & 1
+
+    def plot(self, x, y):
+        self.data[_line(x >> 3, y)] |= 0x80 >> (x & 7)
