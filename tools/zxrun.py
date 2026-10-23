@@ -165,6 +165,8 @@ def main():
                     help='load a binary into memory before running')
     ap.add_argument('--pc', type=parse_int, help='set PC before running')
     ap.add_argument('--clear', metavar='A-B', help='zero memory A..B-1 before --load')
+    ap.add_argument('--poke', action='append', default=[], metavar='ADDR,VALUE',
+                    help='set a byte before running (after --load); repeatable')
     ap.add_argument('--cls', type=parse_int, metavar='ATTR', help='clear the screen to ATTR first')
     ap.add_argument('--call', type=parse_int, metavar='ADDR', help='call a routine and stop on return')
     ap.add_argument('--reg', action='append', default=[], metavar='R=V', help='register for --call')
@@ -196,6 +198,9 @@ def main():
         a = parse_int(addr)
         sim.memory[a:a + len(data)] = list(data)
 
+    for spec in args.poke:
+        addr, value = (parse_int(x) for x in spec.split(','))
+        sim.memory[addr] = value & 0xFF
     if args.cls is not None:
         sim.memory[0x4000:0x5800] = [0] * 0x1800
         sim.memory[0x5800:0x5B00] = [args.cls] * 0x300

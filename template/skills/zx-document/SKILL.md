@@ -44,6 +44,21 @@ docs/img/                 PNGs (committed)
 - Numbers: hex with `$`, decimal in parentheses where it helps (`$0300` (768)).
 - No filler, no marketing tone, no metaphors.
 
+## Bug hunt before writing `06-tricks.md`
+
+Annotation finds bugs on the paths it reads; bugs at the edges need a
+deliberate pass. For every counter and timer variable (lives, level, speed,
+score digits, timers, list indexes):
+- what happens at its minimum, maximum and on overflow (e.g. 10 lives, the
+  last level, the fastest speed, a score past 99999);
+- force it in the simulator: `tools/zxrun.py re/orig.z80 --poke ADDR,VALUE
+  --input tests/inputs/play.txt --shot F:/tmp/x.png` and look at the result;
+- check printing of multi-digit values, delay formulas for negative or
+  wrapped results, and interactions of two actors (two enemies on top of each
+  other, an enemy over an item).
+Record each finding with the evidence (frame, screenshot, value) and mark it
+verified or inferred.
+
 ## Graphics
 
 All images come from the game's bytes, never redrawn by hand:

@@ -132,7 +132,10 @@ def main():
     print('# Disassembly comparison\n')
     print('Ours: `%s`, reference: `%s`, range $%04X-$%04X.\n' % (a.ours, a.ref, lo, hi - 1))
 
-    so, sr = po.snapshot, pr.snapshot
+    # bytes from the plain instructions: @isub text may use symbols SkoolKit
+    # cannot evaluate (constants defined in the assembler source)
+    so = SkoolParser(a.ours, asm_mode=0).snapshot
+    sr = SkoolParser(a.ref, asm_mode=0).snapshot
     diff = [x for x in range(lo, hi) if so[x] != sr[x]]
     print('## Bytes\n')
     print('%s\n' % ('identical' if not diff else '%d bytes differ, first at $%04X' % (len(diff), diff[0])))
