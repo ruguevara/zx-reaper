@@ -1,2 +1,0 @@
-; Data block at DAD7
-b$DAD7 DEFB $5E

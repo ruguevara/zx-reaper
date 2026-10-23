@@ -1,5 +1,0 @@
-; Data block at C7AD
-b$C7AD DEFB $E7,$CA,$CB,$FE,$C9,$3A,$92,$CA
- $C7B5 DEFB $32,$93,$CA,$C9,$3A,$A0,$CA,$32
- $C7BD DEFB $A1,$CA,$C9,$3E,$03,$32,$C4,$CA
- $C7C5 DEFB $21,$3A,$C1,$CB,$5E,$20,$05

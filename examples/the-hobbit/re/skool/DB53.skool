@@ -1,3 +1,0 @@
-; Data block at DB53
-b$DB53 DEFB $08,$40,$51,$89,$C6,$08,$40,$57
- $DB5B DEFB $AA,$D7

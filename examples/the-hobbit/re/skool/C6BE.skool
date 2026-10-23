@@ -1,4 +1,0 @@
-; Data block at C6BE
-b$C6BE DEFB $60,$E0,$E2,$02,$37,$03,$00,$00
- $C6C6 DEFB $00,$00,$3A,$0F,$71,$91,$00,$48
- $C6CE DEFB $A4,$FF,$01,$FF,$40

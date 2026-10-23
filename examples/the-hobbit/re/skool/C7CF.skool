@@ -1,2 +1,0 @@
-; Data block at C7CF
-b$C7CF DEFB $03,$CB,$21,$CA,$C4,$CB,$5E,$C0
