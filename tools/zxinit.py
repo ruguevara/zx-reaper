@@ -112,7 +112,8 @@ def main():
                 text = zxbasic.list_program(payload, header['p2'])
                 open(os.path.join(p, bas), 'w').write(text)
                 new = 'build/%s.bin' % os.path.splitext(os.path.basename(bas))[0]
-            elif header['type'] == 'code' and header['p1'] == 16384 and len(payload) == 6912:
+            elif header['type'] == 'code' and len(payload) == 6912:
+                # a screen: LOAD "" SCREEN$ ignores the header address
                 shutil.copy(os.path.join(p, path), os.path.join(p, 'data/screen%s.scr' % nn))
                 new = 'data/screen%s.scr' % nn
             elif header['type'] == 'code':

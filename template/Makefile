@@ -45,9 +45,12 @@ build:
 build/game.skool: $(SKOOL) | build
 	$(T)/zxq.py join re/skool > $@
 
-# ORG lines get +SHIFT so the shift test can move the code
+# ORG lines get +SHIFT so the shift test can move the code;
+# IXl/IXh/IYl/IYh (skool2asm) become IXL/IXH/IYL/IYH (sjasmplus)
 build/game.asm: build/game.skool
-	skool2asm.py -q -w -H -c $< | sed -E 's/^( +ORG +)(\$$[0-9A-Fa-f]+)\s*$$/\1\2+SHIFT/' > $@
+	skool2asm.py -q -w -H -c $< | sed -E \
+	  -e 's/^( +ORG +)(\$$[0-9A-Fa-f]+)\s*$$/\1\2+SHIFT/' \
+	  -e 's/\b(I[XY])([hl])\b/\1\U\2/g' > $@
 
 build/blocks.stamp: src/build.asm $(GAME_ASM) $(SRC) | build
 	sjasmplus --nologo --msg=war -Ibuild --sym=build/game.sym --lst=build/game.lst src/build.asm
