@@ -1,2 +1,23 @@
-; Game status buffer entry at 85D7
+; Saved copy of Willy's state: the position he returns to after a death
+;
+; 7 bytes, a copy of $85CF-$85D5 made at every room entry (#R$88AE, $894A), before the room is built:
+; +0 Y index #R$85CF
+; .
+; +1 move state #R$85D0
+; .
+; +2 air state #R$85D1
+; .
+; +3 walk frame #R$85D2
+; .
+; +4 attribute address #R$85D3 (word, low byte first)
+; .
+; +6 jump step #R$85D5
+; .
+; When Willy is killed and a life is left, #R$8B07 ($8C3C) copies the 7 bytes back and enters the room
+; again, so he restarts from the state in which he entered it (a room entered by falling in restarts
+; the fall). The rope variable #R$85D6 is not part of the copy.
+; .
+; Observed: after entering a room with Willy in the middle of a walk (state 3, frame 2, jump step 5)
+; and a fatal fall, all seven variables came back with the saved values.
+@label=WillySavedState
 g$85D7 DEFB $00,$00,$00,$00,$00,$00,$00

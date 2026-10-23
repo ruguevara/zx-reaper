@@ -1,2 +1,13 @@
-; Game status buffer entry at 85D5
+; Willy's jump step: 0-18
+;
+; The step of the jump arc, meaningful while the air state #R$85D1 is 1: set to 0 when a jump starts
+; (#R$8F8F), incremented once per pass, and at 18 the jump becomes a fall of state 6. The Y change of a
+; pass is (step AND $FE) - 8 index units, for steps 0-17: -8 -8 -6 -6 -4 -4 -2 -2 0 0 +2 +2 +4 +4 +6 +6
+; +8 +8, a rise of 40 units (20 pixel rows) and a return to the take-off height. After steps 13 and
+; 16 the ground test is made. It keeps the value 18 after the jump until the next one starts.
+; Saved at room entry in #R$85D7 (byte +6 of the copy).
+; .
+; Observed with a jump from the Bathroom floor: Y $D0 -> $C8 $C0 $BA $B4 $B0 $AC $AA $A8 $A8 $A8 $AA $AC
+; $B0 $B4 $BA $C0 $C8 $D0 over 18 passes.
+@label=WillyJumpStep
 g$85D5 DEFB $00

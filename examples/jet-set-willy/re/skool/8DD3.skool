@@ -1,381 +1,553 @@
-; Routine at 8DD3
+; Move Willy by one pass: jump, fall, keys, walking, ramps, conveyors, walls
 ;
-; Used by the routine at #R$89AD.
-c$8DD3 LD A,($85D6)  ;
- $8DD6 DEC A         ;
+; Called once per pass of the frame loop #R$89AD (not in ending stage 3), after the entities have been
+; moved and before Willy is drawn (#R$95C8). It changes only Willy's variables: Y #R$85CF, move state
+; #R$85D0, air state #R$85D1, walk frame #R$85D2, attribute address #R$85D3, jump step #R$85D5 and, when
+; he walks off the room, the room itself (the #R$948A routines never return). It is one long routine
+; whose parts are reached by JP and fall-through; the entry points are labelled and could be split
+; (see the comments at each label). Order of work in a pass:
+; .
+; 1. Rope. If #R$85D6 says Willy holds a rope (1-$80) the jump and ground code is skipped and the
+; pass goes straight to the keys ($8ED4, which then skips the ground logic as well).
+; .
+; 2. Jump (air state 1, MoveWilly). The step counter #R$85D5 counts 0-17. In every pass Y changes by
+; (step AND $FE) - 8 index units: -8 -8 -6 -6 -4 -4 -2 -2 0 0 +2 +2 +4 +4 +6 +6 +8 +8, so he rises 40 units
+; (20 pixel rows, 2.5 character rows) in 8 passes, hangs for 3 and comes down again; at step 18 he is
+; back at his take-off height and the state becomes 6 (a fall). If either of the two cells of his
+; top row now holds the wall tile he bumps his head: Y becomes the row boundary below Y + 16 and a
+; fall (state 2) starts. Walking goes on during the jump but the keys are not read again, so the direction at
+; take-off cannot be changed. Each pass clicks the speaker (pitch follows the distance from the apex).
+; The ground test is made only after steps 13 and 16, which is how Willy can land on a platform that
+; is 2 or 1 character rows above his take-off floor; a platform 3 rows up cannot be landed on.
+; .
+; 3. Ground test (MoveWilly_Ground), for every state other than a jump in progress (and after jump
+; steps 13 and 16): while Y is between two character rows there is no ground; otherwise the two
+; cells below Willy's feet (two rows down from #R$85D3) are ground when neither holds the nasty tile
+; and at least one is not background (any wall, floor, ramp or conveyor attribute counts). Below the
+; bottom of the room he leaves through #R$94D2.
+; .
+; 4. No ground (MoveWilly_Air). Walking is switched off (bit 1 of #R$85D0 cleared). State 0 becomes 2
+; (a fall starts, nothing moves yet); in a fall the state counts up once per pass (2, 3, ... $0F, then
+; back to $0C), Willy drops 8 index units (4 pixel rows) per pass and the speaker clicks with a falling
+; pitch. Falling has no horizontal movement.
+; .
+; 5. Ground found (MoveWilly_Supported). A fall state of $0C or more kills Willy (#R$90B7). From
+; standing at the top of a fall that means a drop of 5 character rows or more (4 rows is survived);
+; after a jump that ended over a gap (state 6) a drop of 3 rows kills. The state becomes 0. Then
+; the input is collected as one byte of key bits (bits 0, 2, 4 mean right, bits 1, 3, 5 mean left,
+; 0 = pressed): the conveyor under his feet, the keys, the Kempston joystick (only if #R$85CE) and,
+; in ending stages 2 and 3, a forced right key. Left keys: Q E T U O 5 6 and joystick left. Right
+; keys: W R Y I P 7 8 and joystick right. Jump keys: CAPS SHIFT Z X C V B N M SYMBOL SHIFT SPACE, 0
+; and joystick fire (ignored in ending stages 2 and 3). The key bits and the old move state
+; select the new state in #R$8421 (both directions together, which includes a key held against a
+; conveyor, leave the state unchanged). A jump key starts the jump (air state 1, step 0) and the
+; pass goes on to the walking code, with the move state just computed.
+; .
+; 6. Walking (MoveWilly_Walk). Only if bit 1 of #R$85D0 is set and no rope is held. Willy takes one
+; cell (8 pixels) every 4 passes: the frame #R$85D2 counts 3 down to 0 when facing left and 0 up to 3
+; when facing right, and the step is taken in the pass that finds the frame at the end of its count
+; (the frame is then reset). On the ground the step follows a ramp: a ramp cell next to his feet (the
+; cell depends on the ramp direction #R$80DA) moves Willy one row up or down together with the
+; sideways step. The cells he steps into must not hold the wall tile: the cell beside his lower row
+; (and beside a third row while he straddles three rows in a jump), for a step right also the cell
+; beside his head row. A step left from column 0 or a step right from column 30 leaves the room
+; through #R$948A or #R$949E.
+; .
+; Quirk (observed): a step to the right also tests the cell at his head level, a step to the left
+; does not, so a wall cell that is only at head height blocks him when he walks right but not when
+; he walks left.
+; .
+; Hardware: reads the keyboard half rows with IN (ports $DFFE, $FBFE, $E7FE, $EFFE, $7EFE), the
+; Kempston port $1F when #R$85CE is set, and writes port $FE (speaker bits and the room's border
+; colour) for the jump and fall clicks.
+@label=MoveWilly
+c$8DD3 LD A,($85D6)  ; rope variable
+ $8DD6 DEC A         ; bit 7 clear only for 1-$80: a rope is held
  $8DD7 BIT 7,A       ;
- $8DD9 JP Z,$8ED4    ;
- $8DDC LD A,($85D1)  ;
+ $8DD9 JP Z,$8ED4    ; holding a rope: read the keys, no jump or fall
+ $8DDC LD A,($85D1)  ; air state
+@isub=CP AIR_JUMPING
  $8DDF CP $01        ;
- $8DE1 JR NZ,$8E36   ;
- $8DE3 LD A,($85D5)  ;
- $8DE6 AND $FE       ;
- $8DE8 SUB $08       ;
- $8DEA LD HL,$85CF   ;
+ $8DE1 JR NZ,$8E36   ; not in a jump: ground test
+ $8DE3 LD A,($85D5)  ; jump step
+ $8DE6 AND $FE       ; steps 2n and 2n+1 give the same change
+@isub=SUB JUMP_APEX_STEP
+ $8DE8 SUB $08       ; -8 at the start, 0 at the apex, +8 at the end
+ $8DEA LD HL,$85CF   ; Y index
  $8DED ADD A,(HL)    ;
- $8DEE LD (HL),A     ;
+ $8DEE LD (HL),A     ; Y after the rise or fall of the jump
+@isub=CP Y_WRAPPED_MIN
  $8DEF CP $F0        ;
- $8DF1 JP NC,$94B0   ;
- $8DF4 CALL $8E9C    ;
- $8DF7 LD A,($80B2)  ;
+ $8DF1 JP NC,$94B0   ; Y wrapped below 0: through the top of the room
+ $8DF4 CALL $8E9C    ; new attribute address; HL = top-left cell
+ $8DF7 LD A,($80B2)  ; wall attribute: is his head in a wall?
  $8DFA CP (HL)       ;
- $8DFB JP Z,$8EBC    ;
+ $8DFB JP Z,$8EBC    ; left cell of the top row: head bump
  $8DFE INC HL        ;
  $8DFF CP (HL)       ;
- $8E00 JP Z,$8EBC    ;
- $8E03 LD A,($85D5)  ;
+ $8E00 JP Z,$8EBC    ; right cell of the top row: head bump
+ $8E03 LD A,($85D5)  ; no bump: next jump step
  $8E06 INC A         ;
  $8E07 LD ($85D5),A  ;
- $8E0A SUB $08       ;
+@isub=SUB JUMP_APEX_STEP
+ $8E0A SUB $08       ; click delay from the distance to the apex
  $8E0C JP P,$8E11    ;
- $8E0F NEG           ;
-*$8E11 INC A         ;
+ $8E0F NEG           ; absolute value
+*$8E11 INC A         ; delay = (distance + 1) * 8
  $8E12 RLCA          ;
  $8E13 RLCA          ;
  $8E14 RLCA          ;
  $8E15 LD D,A        ;
+@isub=LD C,STEP_SOUND_TOGGLES
  $8E16 LD C,$20      ;
- $8E18 LD A,($80DE)  ;
-*$8E1B OUT ($FE),A   ;
+ $8E18 LD A,($80DE)  ; border colour of the room
+@isub=OUT (ULA_PORT),A
+*$8E1B OUT ($FE),A   ; click: speaker bits and border
+@isub=XOR BEEPER_BITS
  $8E1D XOR $18       ;
  $8E1F LD B,D        ;
 *$8E20 DJNZ $8E20    ;
  $8E22 DEC C         ;
  $8E23 JR NZ,$8E1B   ;
- $8E25 LD A,($85D5)  ;
+ $8E25 LD A,($85D5)  ; jump step after this pass
+@isub=CP JUMP_END_STEP
  $8E28 CP $12        ;
- $8E2A JP Z,$8EB0    ;
+ $8E2A JP Z,$8EB0    ; step 18: the jump is over, fall
+@isub=CP JUMP_LAND_SECOND
  $8E2D CP $10        ;
- $8E2F JR Z,$8E36    ;
+ $8E2F JR Z,$8E36    ; step 16: test for ground
+@isub=CP JUMP_LAND_FIRST
  $8E31 CP $0D        ;
- $8E33 JP NZ,$8FBC   ;
-*$8E36 LD A,($85CF)  ;
- $8E39 AND $0E       ;
- $8E3B JR NZ,$8E62   ;
- $8E3D LD HL,($85D3) ;
- $8E40 LD DE,$0040   ;
+ $8E33 JP NZ,$8FBC   ; other steps: skip the ground test and walk
+; Ground test: is there something to stand on? (reached from #R$8DD3 for every air state but a jump
+; in progress, and falls through from the jump steps 13 and 16). While Y is between two character
+; rows there is no ground. The jump code falls into this part.
+@label=MoveWilly_Ground
+*$8E36 LD A,($85CF)  ; Y index
+@isub=AND Y_BETWEEN_MASK
+ $8E39 AND $0E       ; Y between two character rows?
+ $8E3B JR NZ,$8E62   ; yes: no ground
+ $8E3D LD HL,($85D3) ; attribute address of the top-left cell
+@isub=LD DE,2*SCREEN_COLS
+ $8E40 LD DE,$0040   ; two rows down: the cells under his feet
  $8E43 ADD HL,DE     ;
- $8E44 BIT 1,H       ;
- $8E46 JP NZ,$94D2   ;
- $8E49 LD A,($80BB)  ;
+ $8E44 BIT 1,H       ; $5E00 or more: below the room
+ $8E46 JP NZ,$94D2   ; falls out of the bottom of the room
+ $8E49 LD A,($80BB)  ; nasty attribute: not ground
  $8E4C CP (HL)       ;
- $8E4D JR Z,$8E62    ;
+ $8E4D JR Z,$8E62    ; nasty under the left foot: no ground
  $8E4F INC HL        ;
  $8E50 LD A,($80BB)  ;
  $8E53 CP (HL)       ;
- $8E54 JR Z,$8E62    ;
- $8E56 LD A,($80A0)  ;
- $8E59 CP (HL)       ;
+ $8E54 JR Z,$8E62    ; nasty under the right foot: no ground
+ $8E56 LD A,($80A0)  ; background attribute
+ $8E59 CP (HL)       ; right cell
  $8E5A DEC HL        ;
- $8E5B JP NZ,$8ED4   ;
- $8E5E CP (HL)       ;
- $8E5F JP NZ,$8ED4   ;
-*$8E62 LD A,($85D1)  ;
+ $8E5B JP NZ,$8ED4   ; right cell is not background: ground
+ $8E5E CP (HL)       ; left cell
+ $8E5F JP NZ,$8ED4   ; left cell is not background: ground
+; No ground under Willy (or a jump between its ground tests): continue the jump walking, or start or
+; continue a fall.
+@label=MoveWilly_Air
+*$8E62 LD A,($85D1)  ; air state
+@isub=CP AIR_JUMPING
  $8E65 CP $01        ;
- $8E67 JP Z,$8FBC    ;
- $8E6A LD HL,$85D0   ;
- $8E6D RES 1,(HL)    ;
+ $8E67 JP Z,$8FBC    ; jumping: walk
+ $8E6A LD HL,$85D0   ; move state
+@isub=RES MOVE_WALK_BIT,(HL)
+ $8E6D RES 1,(HL)    ; no walking in a fall
  $8E6F LD A,($85D1)  ;
  $8E72 OR A          ;
- $8E73 JP Z,$8EB6    ;
- $8E76 INC A         ;
+ $8E73 JP Z,$8EB6    ; was on the ground: start falling, nothing moves yet
+ $8E76 INC A         ; next fall state
+@isub=CP AIR_FALL_WRAP
  $8E77 CP $10        ;
  $8E79 JR NZ,$8E7D   ;
- $8E7B LD A,$0C      ;
-*$8E7D LD ($85D1),A  ;
+@isub=LD A,AIR_FATAL_FALL
+ $8E7B LD A,$0C      ; states cycle 12-15 in a long fall
+@label=MoveWilly_Fall
+*$8E7D LD ($85D1),A  ; store the fall state
  $8E80 RLCA          ;
  $8E81 RLCA          ;
  $8E82 RLCA          ;
- $8E83 RLCA          ;
+ $8E83 RLCA          ; click delay = state * 16: lower pitch the longer he falls
  $8E84 LD D,A        ;
+@isub=LD C,STEP_SOUND_TOGGLES
  $8E85 LD C,$20      ;
- $8E87 LD A,($80DE)  ;
+ $8E87 LD A,($80DE)  ; border colour of the room
+@isub=OUT (ULA_PORT),A
 *$8E8A OUT ($FE),A   ;
+@isub=XOR BEEPER_BITS
  $8E8C XOR $18       ;
  $8E8E LD B,D        ;
 *$8E8F DJNZ $8E8F    ;
  $8E91 DEC C         ;
  $8E92 JR NZ,$8E8A   ;
- $8E94 LD A,($85CF)  ;
- $8E97 ADD A,$08     ;
- $8E99 LD ($85CF),A  ;
-; This entry point is used by the routine at #R$91BE.
-*$8E9C AND $F0       ;
- $8E9E LD L,A        ;
+ $8E94 LD A,($85CF)  ; Y index
+@isub=ADD A,Y_FALL_STEP
+ $8E97 ADD A,$08     ; 4 pixel rows down per pass
+ $8E99 LD ($85CF),A  ; and fall into SetWillyCell
+; Entry point: put Willy's attribute address in step with his Y. In: A = Y index (the low bits are
+; dropped). Sets #R$85D3/#R$85D4 to the cell of his top-left corner: attribute page $5C (rows 0-7)
+; or $5D (rows 8-15), row = Y / 16, the column of #R$85D3 kept. Out: HL = the new address. Also
+; called by the rope code #R$91BE after it moves Willy. A separate routine (it is reached only by
+; falling through from the fall code).
+@label=SetWillyCell
+@isub=AND Y_ROW_MASK
+*$8E9C AND $F0       ; Y / 16 = character row, times 16
+ $8E9E LD L,A        ; L = row * 16
  $8E9F XOR A         ;
- $8EA0 RL L          ;
- $8EA2 ADC A,$5C     ;
+ $8EA0 RL L          ; row * 32; carry = row 8-15
+@isub=ADC A,SCREEN_ATTRS_BUF/256
+ $8EA2 ADC A,$5C     ; attribute page $5C or $5D
  $8EA4 LD H,A        ;
- $8EA5 LD A,($85D3)  ;
+ $8EA5 LD A,($85D3)  ; old address: keep its column
+@isub=AND COLUMN_MASK
  $8EA8 AND $1F       ;
  $8EAA OR L          ;
  $8EAB LD L,A        ;
- $8EAC LD ($85D3),HL ;
+ $8EAC LD ($85D3),HL ; new attribute address
  $8EAF RET           ;
+; The jump has reached step 18: it becomes a fall of state 6 from the take-off height.
+@label=MoveWilly_EndJump
+@isub=LD A,AIR_FALL_AFTER_JUMP
 *$8EB0 LD A,$06      ;
  $8EB2 LD ($85D1),A  ;
  $8EB5 RET           ;
+; Willy stands on nothing: start a fall (state 2); he does not move in this pass.
+@label=MoveWilly_StartFall
+@isub=LD A,AIR_FALL_START
 *$8EB6 LD A,$02      ;
  $8EB8 LD ($85D1),A  ;
  $8EBB RET           ;
-*$8EBC LD A,($85CF)  ;
+; Head bump in a jump: round Y up to the next character row boundary, start a fall (state 2) and
+; stop walking.
+@label=MoveWilly_HitHead
+*$8EBC LD A,($85CF)  ; Y index
+@isub=ADD A,Y_ROW_STEP
  $8EBF ADD A,$10     ;
- $8EC1 AND $F0       ;
+@isub=AND Y_ROW_MASK
+ $8EC1 AND $F0       ; row boundary below
  $8EC3 LD ($85CF),A  ;
- $8EC6 CALL $8E9C    ;
+ $8EC6 CALL $8E9C    ; attribute address from the new Y
+@isub=LD A,AIR_FALL_START
  $8EC9 LD A,$02      ;
  $8ECB LD ($85D1),A  ;
- $8ECE LD HL,$85D0   ;
- $8ED1 RES 1,(HL)    ;
+ $8ECE LD HL,$85D0   ; move state
+@isub=RES MOVE_WALK_BIT,(HL)
+ $8ED1 RES 1,(HL)    ; stop walking
  $8ED3 RET           ;
-*$8ED4 LD E,$FF      ;
- $8ED6 LD A,($85D6)  ;
+; Willy stands on ground or holds a rope: land, collect the key bits, update the move state and
+; start a jump if asked. Reached by JP from the ground test and from the rope test at the top. A
+; separate routine could start here (it is preceded by a RET). The key bits go into E (0 = pressed;
+; bits 0, 2, 4 = right, bits 1, 3, 5 = left), starting as $FF.
+@label=MoveWilly_Supported
+*$8ED4 LD E,$FF      ; E = key bits, nothing pressed
+ $8ED6 LD A,($85D6)  ; rope variable
  $8ED9 DEC A         ;
  $8EDA BIT 7,A       ;
- $8EDC JR Z,$8EFA    ;
- $8EDE LD A,($85D1)  ;
+ $8EDC JR Z,$8EFA    ; holding a rope: skip landing and conveyor
+ $8EDE LD A,($85D1)  ; air state
+@isub=CP AIR_FATAL_FALL
  $8EE1 CP $0C        ;
- $8EE3 JP NC,$90B7   ;
+ $8EE3 JP NC,$90B7   ; landed from a fall of state $0C or more: killed
  $8EE6 XOR A         ;
- $8EE7 LD ($85D1),A  ;
- $8EEA LD A,($80CD)  ;
- $8EED CP (HL)       ;
+ $8EE7 LD ($85D1),A  ; state 0: standing
+ $8EEA LD A,($80CD)  ; conveyor attribute
+ $8EED CP (HL)       ; left cell under his feet (HL) is conveyor?
  $8EEE JR Z,$8EF4    ;
  $8EF0 INC HL        ;
- $8EF1 CP (HL)       ;
+ $8EF1 CP (HL)       ; right cell under his feet is conveyor?
  $8EF2 JR NZ,$8EFA   ;
-*$8EF4 LD A,($80D6)  ;
- $8EF7 SUB $03       ;
- $8EF9 LD E,A        ;
-*$8EFA LD BC,$DFFE   ;
+@label=MoveWilly_Conveyor
+*$8EF4 LD A,($80D6)  ; conveyor direction 0 or 1
+ $8EF7 SUB $03       ; direction 0: $FD (left bit clear), 1: $FE (right bit clear)
+ $8EF9 LD E,A        ; conveyor as a pressed key
+@label=MoveWilly_Keys
+@isub=LD BC,KEYROW_P_Y
+*$8EFA LD BC,$DFFE   ; P O I U Y: right left right left right
  $8EFD IN A,(C)      ;
+@isub=AND KEYS_MASK
  $8EFF AND $1F       ;
- $8F01 OR $20        ;
- $8F03 AND E         ;
+ $8F01 OR $20        ; bit 5 is not a key here
+ $8F03 AND E         ; combine with E
  $8F04 LD E,A        ;
- $8F05 LD A,($85DF)  ;
- $8F08 AND $02       ;
- $8F0A RRCA          ;
- $8F0B XOR E         ;
+ $8F05 LD A,($85DF)  ; ending stage
+@isub=AND 1<<ENDING_AUTORUN_BIT
+ $8F08 AND $02       ; stages 2 and 3: bit 1
+ $8F0A RRCA          ; to bit 0
+ $8F0B XOR E         ; flips the P bit: the right key is forced on in the ending run
  $8F0C LD E,A        ;
- $8F0D LD BC,$FBFE   ;
+@isub=LD BC,KEYROW_Q_T
+ $8F0D LD BC,$FBFE   ; Q W E R T: shifted to bits 1-5: left right left right left
  $8F10 IN A,(C)      ;
+@isub=AND KEYS_MASK
  $8F12 AND $1F       ;
- $8F14 RLC A         ;
+ $8F14 RLC A         ; bit 0 is left free
  $8F16 OR $01        ;
  $8F18 AND E         ;
  $8F19 LD E,A        ;
- $8F1A LD B,$E7      ;
+@isub=LD B,KEYROWS_5_6_HI
+ $8F1A LD B,$E7      ; half rows 1-5 and 6-0 together
  $8F1C IN A,(C)      ;
- $8F1E RRCA          ;
- $8F1F OR $F7        ;
+ $8F1E RRCA          ; keys 5 and 6 (bit 4) to bit 3: left
+ $8F1F OR $F7        ; keep only bit 3
  $8F21 AND E         ;
  $8F22 LD E,A        ;
- $8F23 LD B,$EF      ;
- $8F25 IN A,(C)      ;
- $8F27 OR $FB        ;
+@isub=LD B,KEYROW_0_9>>8
+ $8F23 LD B,$EF      ; 0 9 8 7 6
+ $8F25 IN A,(C)      ; key 8 (bit 2): right
+ $8F27 OR $FB        ; keep only bit 2
  $8F29 AND E         ;
  $8F2A LD E,A        ;
- $8F2B IN A,(C)      ;
- $8F2D RRCA          ;
- $8F2E OR $FB        ;
+ $8F2B IN A,(C)      ; same row again
+ $8F2D RRCA          ; key 7 (bit 3) to bit 2: right
+ $8F2E OR $FB        ; keep only bit 2
  $8F30 AND E         ;
  $8F31 LD E,A        ;
- $8F32 LD A,($85CE)  ;
+ $8F32 LD A,($85CE)  ; Kempston joystick present?
  $8F35 OR A          ;
- $8F36 JR Z,$8F42    ;
+ $8F36 JR Z,$8F42    ; no
+@isub=LD BC,KEMPSTON_PORT
  $8F38 LD BC,$001F   ;
- $8F3B IN A,(C)      ;
+ $8F3B IN A,(C)      ; bit 0 right, bit 1 left, 1 = pressed
+@isub=AND KEMPSTON_LR_MASK
  $8F3D AND $03       ;
- $8F3F CPL           ;
+ $8F3F CPL           ; 0 = pressed, as the keys
  $8F40 AND E         ;
  $8F41 LD E,A        ;
-*$8F42 LD C,$00      ;
- $8F44 LD A,E        ;
+@label=MoveWilly_State
+*$8F42 LD C,$00      ; C = row of the state table: no direction
+ $8F44 LD A,E        ; left bits
+@isub=AND KEYBITS_LEFT
  $8F45 AND $2A       ;
+@isub=CP KEYBITS_LEFT
  $8F47 CP $2A        ;
- $8F49 JR Z,$8F51    ;
- $8F4B LD C,$04      ;
- $8F4D XOR A         ;
- $8F4E LD ($85E0),A  ;
-*$8F51 LD A,E        ;
+ $8F49 JR Z,$8F51    ; no left key
+@isub=LD C,STATE_ROW_LEFT
+ $8F4B LD C,$04      ; left row
+ $8F4D XOR A         ; a direction key resets the idle counter
+ $8F4E LD ($85E0),A  ; clear the idle counter
+*$8F51 LD A,E        ; right bits
+@isub=AND KEYBITS_RIGHT
  $8F52 AND $15       ;
+@isub=CP KEYBITS_RIGHT
  $8F54 CP $15        ;
- $8F56 JR Z,$8F5E    ;
- $8F58 SET 3,C       ;
+ $8F56 JR Z,$8F5E    ; no right key
+@isub=SET STATE_ROW_RIGHT_BIT,C
+ $8F58 SET 3,C       ; adds 8: right row (12 when both)
  $8F5A XOR A         ;
- $8F5B LD ($85E0),A  ;
-*$8F5E LD A,($85D0)  ;
- $8F61 ADD A,C       ;
+ $8F5B LD ($85E0),A  ; clear the idle counter
+*$8F5E LD A,($85D0)  ; old move state
+ $8F61 ADD A,C       ; index = old state + key row
  $8F62 LD C,A        ;
  $8F63 LD B,$00      ;
+@isub=LD HL,MoveStateTable
  $8F65 LD HL,$8421   ;
  $8F68 ADD HL,BC     ;
- $8F69 LD A,(HL)     ;
+ $8F69 LD A,(HL)     ; new move state
  $8F6A LD ($85D0),A  ;
- $8F6D LD BC,$7EFE   ;
+@label=MoveWilly_JumpKeys
+@isub=LD BC,KEYROWS_BOTTOM
+ $8F6D LD BC,$7EFE   ; half rows CAPS SHIFT-V and B-SPACE
  $8F70 IN A,(C)      ;
+@isub=AND KEYS_MASK
  $8F72 AND $1F       ;
+@isub=CP NO_KEYS
  $8F74 CP $1F        ;
- $8F76 JR NZ,$8F8F   ;
- $8F78 LD B,$EF      ;
+ $8F76 JR NZ,$8F8F   ; any of them: jump
+@isub=LD B,KEYROW_0_9>>8
+ $8F78 LD B,$EF      ; key 0
  $8F7A IN A,(C)      ;
- $8F7C BIT 0,A       ;
- $8F7E JR Z,$8F8F    ;
- $8F80 LD A,($85CE)  ;
+ $8F7C BIT 0,A       ; key 0 is bit 0
+ $8F7E JR Z,$8F8F    ; pressed: jump
+ $8F80 LD A,($85CE)  ; Kempston joystick present?
  $8F83 OR A          ;
- $8F84 JR Z,$8FBC    ;
+ $8F84 JR Z,$8FBC    ; no joystick: no jump key
+@isub=LD BC,KEMPSTON_PORT
  $8F86 LD BC,$001F   ;
  $8F89 IN A,(C)      ;
+@isub=BIT KEMPSTON_FIRE_BIT,A
  $8F8B BIT 4,A       ;
- $8F8D JR Z,$8FBC    ;
-*$8F8F LD A,($85DF)  ;
- $8F92 BIT 1,A       ;
+ $8F8D JR Z,$8FBC    ; fire not pressed: no jump
+@label=MoveWilly_Jump
+*$8F8F LD A,($85DF)  ; ending stage
+@isub=BIT ENDING_AUTORUN_BIT,A
+ $8F92 BIT 1,A       ; stage 2 or 3: jump ignored
  $8F94 JR NZ,$8FBC   ;
  $8F96 XOR A         ;
- $8F97 LD ($85D5),A  ;
- $8F9A LD ($85E0),A  ;
+ $8F97 LD ($85D5),A  ; jump step 0
+ $8F9A LD ($85E0),A  ; clear the idle counter
  $8F9D INC A         ;
- $8F9E LD ($85D1),A  ;
- $8FA1 LD A,($85D6)  ;
+ $8F9E LD ($85D1),A  ; air state 1: jumping
+ $8FA1 LD A,($85D6)  ; rope variable
  $8FA4 DEC A         ;
  $8FA5 BIT 7,A       ;
- $8FA7 JR NZ,$8FBC   ;
- $8FA9 LD A,$F0      ;
+ $8FA7 JR NZ,$8FBC   ; no rope held: walk in this pass
+@isub=LD A,ROPE_LET_GO
+ $8FA9 LD A,$F0      ; jumping off a rope: let go, cannot grab for 16 passes
  $8FAB LD ($85D6),A  ;
- $8FAE LD A,($85CF)  ;
- $8FB1 AND $F0       ;
+ $8FAE LD A,($85CF)  ; Y index
+@isub=AND Y_ROW_MASK
+ $8FB1 AND $F0       ; to a row boundary
  $8FB3 LD ($85CF),A  ;
- $8FB6 LD HL,$85D0   ;
- $8FB9 SET 1,(HL)    ;
+ $8FB6 LD HL,$85D0   ; move state
+@isub=SET MOVE_WALK_BIT,(HL)
+ $8FB9 SET 1,(HL)    ; he leaves the rope walking in the direction he faces
  $8FBB RET           ;
-*$8FBC LD A,($85D0)  ;
+; Walking: take a step when the move state asks for one. Reached by JP from several places. A
+; separate routine could start here (it is preceded by a RET).
+@label=MoveWilly_Walk
+*$8FBC LD A,($85D0)  ; move state
+@isub=AND MOVE_WALK_MASK
  $8FBF AND $02       ;
- $8FC1 RET Z         ;
- $8FC2 LD A,($85D6)  ;
+ $8FC1 RET Z         ; not walking: done
+ $8FC2 LD A,($85D6)  ; rope variable
  $8FC5 DEC A         ;
  $8FC6 BIT 7,A       ;
- $8FC8 RET Z         ;
- $8FC9 LD A,($85D0)  ;
+ $8FC8 RET Z         ; holding a rope: no walking
+ $8FC9 LD A,($85D0)  ; move state
+@isub=AND MOVE_FACING_LEFT
  $8FCC AND $01       ;
- $8FCE JP Z,$9042    ;
- $8FD1 LD A,($85D2)  ;
+ $8FCE JP Z,$9042    ; facing right
+ $8FD1 LD A,($85D2)  ; walk frame
  $8FD4 OR A          ;
- $8FD5 JR Z,$8FDC    ;
+ $8FD5 JR Z,$8FDC    ; left: the step is taken when the frame is 0
  $8FD7 DEC A         ;
  $8FD8 LD ($85D2),A  ;
  $8FDB RET           ;
-*$8FDC LD A,($85D1)  ;
- $8FDF LD BC,$0000   ;
+; Step left (frame 0 reached). With the air state 0 first look for a ramp cell: BC = Y/address
+; change (-32 up, +32 down, 0 level).
+@label=MoveWilly_Left
+*$8FDC LD A,($85D1)  ; air state
+ $8FDF LD BC,$0000   ; BC = 0: level step
  $8FE2 CP $00        ;
- $8FE4 JR NZ,$900A   ;
- $8FE6 LD HL,($85D3) ;
+ $8FE4 JR NZ,$900A   ; jumping: no ramp
+ $8FE6 LD HL,($85D3) ; attribute address of the top-left cell
  $8FE9 LD BC,$0000   ;
- $8FEC LD A,($80DA)  ;
- $8FEF DEC A         ;
- $8FF0 OR $A1        ;
- $8FF2 XOR $E0       ;
+ $8FEC LD A,($80DA)  ; ramp direction: 0 rises left, 1 rises right
+ $8FEF DEC A         ; $FF or 0
+ $8FF0 OR $A1        ; $FF or $A1
+ $8FF2 XOR $E0       ; $1F or $41: cell one row down and one left (direction 0) or two rows down and one right (direction 1)
  $8FF4 LD E,A        ;
  $8FF5 LD D,$00      ;
- $8FF7 ADD HL,DE     ;
- $8FF8 LD A,($80C4)  ;
- $8FFB CP (HL)       ;
- $8FFC JR NZ,$900A   ;
- $8FFE LD BC,$0020   ;
- $9001 LD A,($80DA)  ;
+ $8FF7 ADD HL,DE     ; cell to test
+ $8FF8 LD A,($80C4)  ; ramp attribute
+ $8FFB CP (HL)       ; ramp cell?
+ $8FFC JR NZ,$900A   ; no: level step
+@isub=LD BC,SCREEN_COLS
+ $8FFE LD BC,$0020   ; a row down
+ $9001 LD A,($80DA)  ; ramp direction
  $9004 OR A          ;
- $9005 JR NZ,$900A   ;
- $9007 LD BC,$FFE0   ;
-*$900A LD HL,($85D3) ;
- $900D LD A,L        ;
+ $9005 JR NZ,$900A   ; direction 1: ramp rises right, the step goes down
+@isub=LD BC,-SCREEN_COLS
+ $9007 LD BC,$FFE0   ; direction 0: ramp rises left, the step goes up
+@label=MoveWilly_LeftStep
+*$900A LD HL,($85D3) ; attribute address of the top-left cell
+ $900D LD A,L        ; column
+@isub=AND COLUMN_MASK
  $900E AND $1F       ;
- $9010 JP Z,$948A    ;
- $9013 ADD HL,BC     ;
- $9014 DEC HL        ;
+ $9010 JP Z,$948A    ; column 0: through the left of the room
+ $9013 ADD HL,BC     ; row change of the ramp
+ $9014 DEC HL        ; one column left
+@isub=LD DE,SCREEN_COLS
  $9015 LD DE,$0020   ;
- $9018 ADD HL,DE     ;
- $9019 LD A,($80B2)  ;
- $901C CP (HL)       ;
+ $9018 ADD HL,DE     ; second row of Willy: the cell left of his lower body
+ $9019 LD A,($80B2)  ; wall attribute
+ $901C CP (HL)       ; wall: blocked
  $901D RET Z         ;
- $901E LD A,($85CF)  ;
- $9021 SRA C         ;
+ $901E LD A,($85CF)  ; Y index
+ $9021 SRA C         ; half the row change in Y units: -16, 0 or +16
  $9023 ADD A,C       ;
- $9024 LD B,A        ;
+ $9024 LD B,A        ; B = new Y
+@isub=AND Y_CELL_MASK
  $9025 AND $0F       ;
- $9027 JR Z,$9032    ;
- $9029 LD A,($80B2)  ;
+ $9027 JR Z,$9032    ; on a row boundary: two rows only
+ $9029 LD A,($80B2)  ; third row of a jump
  $902C ADD HL,DE     ;
- $902D CP (HL)       ;
+ $902D CP (HL)       ; wall: blocked
  $902E RET Z         ;
  $902F OR A          ;
- $9030 SBC HL,DE     ;
-*$9032 OR A          ;
+ $9030 SBC HL,DE     ; back to row 2
+*$9032 OR A          ; row 1: the cell at his head level is not tested
  $9033 SBC HL,DE     ;
- $9035 LD ($85D3),HL ;
+ $9035 LD ($85D3),HL ; new attribute address
  $9038 LD A,B        ;
- $9039 LD ($85CF),A  ;
+ $9039 LD ($85CF),A  ; new Y
+@isub=LD A,WALK_LAST_FRAME
  $903C LD A,$03      ;
- $903E LD ($85D2),A  ;
+ $903E LD ($85D2),A  ; frame restarts at 3 when facing left
  $9041 RET           ;
-*$9042 LD A,($85D2)  ;
+; Facing right: count the frame up 0-3 and step in the pass that finds it at 3.
+@label=MoveWilly_Right
+*$9042 LD A,($85D2)  ; walk frame
+@isub=CP WALK_LAST_FRAME
  $9045 CP $03        ;
- $9047 JR Z,$904E    ;
+ $9047 JR Z,$904E    ; frame 3: step
  $9049 INC A         ;
  $904A LD ($85D2),A  ;
  $904D RET           ;
-*$904E LD A,($85D1)  ;
- $9051 LD BC,$0000   ;
+; Step right (frame 3 reached), with the ramp test as for #R$8FDC.
+@label=MoveWilly_RightStep
+*$904E LD A,($85D1)  ; air state
+ $9051 LD BC,$0000   ; BC = 0: level step
  $9054 OR A          ;
- $9055 JR NZ,$9078   ;
+ $9055 JR NZ,$9078   ; jumping: no ramp
  $9057 LD HL,($85D3) ;
- $905A LD A,($80DA)  ;
- $905D DEC A         ;
- $905E OR $9D        ;
- $9060 XOR $BF       ;
+ $905A LD A,($80DA)  ; ramp direction
+ $905D DEC A         ; $FF or 0
+ $905E OR $9D        ; $FF or $9D
+ $9060 XOR $BF       ; $40 or $22: two rows down (direction 0, under the left foot) or one row down and two right (direction 1)
  $9062 LD E,A        ;
  $9063 LD D,$00      ;
- $9065 ADD HL,DE     ;
- $9066 LD A,($80C4)  ;
- $9069 CP (HL)       ;
- $906A JR NZ,$9078   ;
- $906C LD BC,$0020   ;
- $906F LD A,($80DA)  ;
+ $9065 ADD HL,DE     ; cell to test
+ $9066 LD A,($80C4)  ; ramp attribute
+ $9069 CP (HL)       ; ramp cell?
+ $906A JR NZ,$9078   ; no: level step
+@isub=LD BC,SCREEN_COLS
+ $906C LD BC,$0020   ; a row down
+ $906F LD A,($80DA)  ; ramp direction
  $9072 OR A          ;
- $9073 JR Z,$9078    ;
- $9075 LD BC,$FFE0   ;
-*$9078 LD HL,($85D3) ;
- $907B ADD HL,BC     ;
- $907C INC HL        ;
+ $9073 JR Z,$9078    ; direction 0: ramp rises left, the step goes down
+@isub=LD BC,-SCREEN_COLS
+ $9075 LD BC,$FFE0   ; direction 1: ramp rises right, the step goes up
+@label=MoveWilly_RightStep_Cell
+*$9078 LD HL,($85D3) ; attribute address
+ $907B ADD HL,BC     ; row change of the ramp
+ $907C INC HL        ; two columns right: the column beyond Willy
  $907D INC HL        ;
  $907E LD A,L        ;
+@isub=AND COLUMN_MASK
  $907F AND $1F       ;
- $9081 JP Z,$949E    ;
+ $9081 JP Z,$949E    ; column 0: through the right of the room
+@isub=LD DE,SCREEN_COLS
  $9084 LD DE,$0020   ;
- $9087 LD A,($80B2)  ;
- $908A ADD HL,DE     ;
- $908B CP (HL)       ;
+ $9087 LD A,($80B2)  ; wall attribute
+ $908A ADD HL,DE     ; second row of Willy
+ $908B CP (HL)       ; wall: blocked
  $908C RET Z         ;
- $908D LD A,($85CF)  ;
- $9090 SRA C         ;
+ $908D LD A,($85CF)  ; Y index
+ $9090 SRA C         ; half the row change in Y units
  $9092 ADD A,C       ;
- $9093 LD B,A        ;
+ $9093 LD B,A        ; B = new Y
+@isub=AND Y_CELL_MASK
  $9094 AND $0F       ;
- $9096 JR Z,$90A1    ;
- $9098 LD A,($80B2)  ;
+ $9096 JR Z,$90A1    ; on a row boundary: skip the third row
+ $9098 LD A,($80B2)  ; third row of a jump
  $909B ADD HL,DE     ;
- $909C CP (HL)       ;
+ $909C CP (HL)       ; wall: blocked
  $909D RET Z         ;
  $909E OR A          ;
- $909F SBC HL,DE     ;
-*$90A1 LD A,($80B2)  ;
+ $909F SBC HL,DE     ; back to row 2
+*$90A1 LD A,($80B2)  ; wall attribute
  $90A4 OR A          ;
- $90A5 SBC HL,DE     ;
- $90A7 CP (HL)       ;
- $90A8 RET Z         ;
+ $90A5 SBC HL,DE     ; row 1: the cell at head level
+ $90A7 CP (HL)       ; wall: blocked (unlike the left step)
+ $90A8 RET Z         ; one column left: Willy's new left cell
  $90A9 DEC HL        ;
- $90AA LD ($85D3),HL ;
+ $90AA LD ($85D3),HL ; new attribute address
  $90AD XOR A         ;
- $90AE LD ($85D2),A  ;
+ $90AE LD ($85D2),A  ; frame restarts at 0 when facing right
  $90B1 LD A,B        ;
- $90B2 LD ($85CF),A  ;
+ $90B2 LD ($85CF),A  ; new Y
  $90B5 RET           ;

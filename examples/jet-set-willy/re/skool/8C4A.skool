@@ -1,0 +1,131 @@
+; Game over scene
+@label=ShowGameOver
+c$8C4A LD HL,$4000       ; clear the top two thirds of the bitmap
+ $8C4D LD DE,$4001 ;
+@isub=LD BC,ROOM_BITMAP_SIZE-1
+ $8C50 LD BC,$0FFF ;
+ $8C53 LD (HL),$00 ;
+ $8C55 LDIR ;
+ $8C57 XOR A ;
+ $8C58 LD ($85E4),A      ; step counter 0
+ $8C5B LD DE,$9D40       ; Willy, facing right (frame 2)
+ $8C5E LD HL,$488F       ; row 12, column 15
+ $8C61 LD C,$00          ; DrawSprite mode 0: replace
+ $8C63 CALL $9456 ;
+ $8C66 LD DE,$9C60       ; barrel
+ $8C69 LD HL,$48CF       ; row 14, column 15 (below Willy)
+ $8C6C LD C,$00 ;
+ $8C6E CALL $9456 ;
+@label=ShowGameOver_Step
+*$8C71 LD A,($85E4)      ; counter 0, 4, 8 ... $C0
+ $8C74 LD C,A            ; BC = $8200 + counter: pixel row counter/2 in the row table
+ $8C75 LD B,$82 ;
+ $8C77 LD A,(BC)         ; low byte of the row address
+ $8C78 OR $0F            ; column 15
+ $8C7A LD L,A ;
+ $8C7B INC BC ;
+ $8C7C LD A,(BC) ;
+ $8C7D SUB $20           ; buffer address to screen address
+ $8C7F LD H,A ;
+ $8C80 LD DE,$9C40       ; foot sprite
+ $8C83 LD C,$00 ;
+ $8C85 CALL $9456 ;
+ $8C88 LD A,($85E4) ;
+ $8C8B CPL               ; E = $FF - counter: delay, shorter every step (rising whistle)
+ $8C8C LD E,A ;
+ $8C8D XOR A ;
+ $8C8E LD BC,$0040       ; 64 toggles
+@label=ShowGameOver_Buzz
+*$8C91 OUT ($FE),A ;
+@isub=XOR BEEPER_BITS
+ $8C93 XOR $18 ;
+ $8C95 LD B,E ;
+*$8C96 DJNZ $8C96 ;
+ $8C98 DEC C ;
+ $8C99 JR NZ,$8C91 ;
+ $8C9B LD HL,$5800       ; flood the screen attributes ...
+ $8C9E LD DE,$5801 ;
+@isub=LD BC,ROOM_ATTRS_SIZE-1
+ $8CA1 LD BC,$01FF ;
+ $8CA4 LD A,($85E4) ;
+ $8CA7 AND $0C           ; ... paper = (counter AND $0C) / 4: 0, 1, 2, 3 ...
+ $8CA9 RLCA ;
+@isub=OR BRIGHT+WHITE
+ $8CAA OR $47            ; ... with bright white ink
+ $8CAC LD (HL),A ;
+ $8CAD LDIR ;
+@isub=AND $FF-5
+ $8CAF AND $FA           ; barrel: ink red, keep the rest
+@isub=OR RED
+ $8CB1 OR $02 ;
+@isub=LD (BARREL_ATTRS),A
+ $8CB3 LD ($59CF),A ;
+@isub=LD (BARREL_ATTRS+1),A
+ $8CB6 LD ($59D0),A ;
+@isub=LD (BARREL_ATTRS+32),A
+ $8CB9 LD ($59EF),A ;
+@isub=LD (BARREL_ATTRS+33),A
+ $8CBC LD ($59F0),A ;
+ $8CBF LD A,($85E4) ;
+ $8CC2 ADD A,$04         ; next foot position
+ $8CC4 LD ($85E4),A ;
+@isub=CP GAME_OVER_STEPS
+ $8CC7 CP $C4            ; after $C0: the foot has landed
+ $8CC9 JR NZ,$8C71 ;
+ $8CCB LD IX,$8574       ; "Game" ...
+ $8CCF LD C,$04 ;
+ $8CD1 LD DE,$40CA ;
+ $8CD4 CALL $9680 ;
+ $8CD7 LD IX,$8578       ; "Over" ...
+ $8CDB LD C,$04 ;
+ $8CDD LD DE,$40D2 ;
+ $8CE0 CALL $9680 ;
+ $8CE3 LD BC,$0000       ; C counts 256 loops, D = 6 times 256
+ $8CE6 LD D,$06 ;
+@label=ShowGameOver_Flash
+*$8CE8 DJNZ $8CE8 ;
+ $8CEA LD A,C            ; ink = C mod 8 on the first letter, +1 on each next letter, bright
+ $8CEB AND $07 ;
+ $8CED OR $40 ;
+@isub=LD (GAME_TEXT_ATTRS),A
+ $8CEF LD ($58CA),A ;
+ $8CF2 INC A ;
+ $8CF3 AND $07 ;
+ $8CF5 OR $40 ;
+@isub=LD (GAME_TEXT_ATTRS+1),A
+ $8CF7 LD ($58CB),A ;
+ $8CFA INC A ;
+ $8CFB AND $07 ;
+ $8CFD OR $40 ;
+@isub=LD (GAME_TEXT_ATTRS+2),A
+ $8CFF LD ($58CC),A ;
+ $8D02 INC A ;
+ $8D03 AND $07 ;
+ $8D05 OR $40 ;
+@isub=LD (GAME_TEXT_ATTRS+3),A
+ $8D07 LD ($58CD),A ;
+ $8D0A INC A ;
+ $8D0B AND $07 ;
+ $8D0D OR $40 ;
+@isub=LD (GAME_TEXT_ATTRS+8),A
+ $8D0F LD ($58D2),A ;
+ $8D12 INC A ;
+ $8D13 AND $07 ;
+ $8D15 OR $40 ;
+@isub=LD (GAME_TEXT_ATTRS+9),A
+ $8D17 LD ($58D3),A ;
+ $8D1A INC A ;
+ $8D1B AND $07 ;
+ $8D1D OR $40 ;
+@isub=LD (GAME_TEXT_ATTRS+10),A
+ $8D1F LD ($58D4),A ;
+ $8D22 INC A ;
+ $8D23 AND $07 ;
+ $8D25 OR $40 ;
+@isub=LD (GAME_TEXT_ATTRS+11),A
+ $8D27 LD ($58D5),A ;
+ $8D2A DEC C ;
+ $8D2B JR NZ,$8CE8 ;
+ $8D2D DEC D ;
+ $8D2E JR NZ,$8CE8 ;
+ $8D30 JP $87CA          ; back to the title screen

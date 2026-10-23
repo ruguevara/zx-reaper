@@ -1,0 +1,100 @@
+; Show the title screen, play the title tune and scroll the message
+;
+; This entry point is used by the routine at #R$88AE.
+; Redraw the title screen: clear the bitmap, copy the attributes, draw the title graphic (alternative entry, from #R$88AE after a scroll of the message).
+; Redraw the title screen: clear the bitmap, copy the attributes, draw the title
+; graphic (alternative entry, from #R$88AE after a scroll of the message).
+; Redraw the title screen: clear the bitmap, copy the attributes, draw the title
+; graphic (alternative entry, from #R$88AE after a scroll of the message).
+@label=ShowTitleScreen
+c$8813 LD HL,$4000         ; clear the bitmap: first byte, then fill the rest
+@isub=LD DE,SCREEN+1
+ $8816 LD DE,$4001         ;
+@isub=LD BC,BITMAP_SIZE-1
+ $8819 LD BC,$17FF         ;
+ $881C LD (HL),$00         ;
+ $881E LDIR                ;
+ $8820 LD HL,$9800         ; title attributes (#R$9800) to the screen: 3 thirds, the last third is the status bar colours
+@isub=LD BC,ATTRS_SIZE
+ $8823 LD BC,$0300         ;
+ $8826 LDIR                ;
+@isub=LD HL,TEXT_LINE_ATTR
+ $8828 LD HL,$5A60         ; row 19: bright yellow ink on black
+@isub=LD DE,TEXT_LINE_ATTR+1
+ $882B LD DE,$5A61         ;
+@isub=LD BC,SCREEN_COLS-1
+ $882E LD BC,$001F         ;
+@isub=LD (HL),BRIGHT+YELLOW
+ $8831 LD (HL),$46         ;
+ $8833 LDIR                ;
+ $8835 LD IX,$8454         ; first 32 characters of the message "+++++ Press ENTER to Start +++++"
+@isub=LD DE,TEXT_LINE_SCREEN
+ $8839 LD DE,$5060         ; row 19
+@isub=LD C,SCREEN_COLS
+ $883C LD C,$20            ;
+ $883E CALL $9680          ;
+@isub=LD DE,ATTRS
+ $8841 LD DE,$5800         ; walk the attribute cells of the upper two thirds
+@label=ShowTitleScreen_Cell
+*$8844 LD A,(DE)           ; A = attribute of the cell
+ $8845 OR A                ;
+ $8846 JR Z,$888E          ; attributes $00, $D3, $09, $2D, $24: solid colour cells, no pixels to draw
+ $8848 CP $D3              ;
+ $884A JR Z,$888E          ;
+ $884C CP $09              ;
+ $884E JR Z,$888E          ;
+ $8850 CP $2D              ;
+ $8852 JR Z,$888E          ;
+ $8854 CP $24              ;
+ $8856 JR Z,$888E          ;
+ $8858 LD C,$00            ; C selects the piece: 0 or $10 by attribute ...
+ $885A CP $08              ; $08, $29, $05 (and $2C, replaced by $25 below): C = 0
+ $885C JR Z,$8871          ;
+ $885E CP $29              ;
+ $8860 JR Z,$8871          ;
+ $8862 CP $2C              ;
+ $8864 JR Z,$886E          ;
+ $8866 CP $05              ;
+ $8868 JR Z,$8871          ;
+ $886A LD C,$10            ; any other attribute: C = $10
+ $886C JR $8871            ;
+*$886E LD A,$25            ; attribute $2C is stored back as $25 and drawn with C = 0
+ $8870 LD (DE),A           ;
+*$8871 LD A,E              ; piece index = C + 8 for odd columns: pieces at #R$8431 (4 pieces of 8 bytes)
+ $8872 AND $01             ;
+ $8874 RLCA                ;
+ $8875 RLCA                ;
+ $8876 RLCA                ;
+ $8877 OR C                ;
+ $8878 LD C,A              ;
+ $8879 LD B,$00            ;
+ $887B LD HL,$8431         ; HL = piece address
+ $887E ADD HL,BC           ;
+ $887F PUSH DE             ;
+ $8880 BIT 0,D             ; cell in the first third ($58xx) or the second ($59xx) of the screen: bitmap page $40 or $48
+ $8882 LD D,$40            ;
+ $8884 JR Z,$8888          ;
+ $8886 LD D,$48            ;
+*$8888 LD B,$08            ;
+ $888A CALL $969B          ; draw the 8 rows with #R$969B; DE = $40/$48 + attribute address low byte
+ $888D POP DE              ;
+*$888E INC DE              ;
+ $888F LD A,D              ;
+ $8890 CP $5A              ; stop at $5A00: only the upper two thirds hold the picture
+ $8892 JP NZ,$8844         ;
+@label=ShowTitleScreen_Joystick
+@isub=LD BC,KEMPSTON_PORT
+ $8895 LD BC,$001F         ; B = 0: 256 reads of port $1F
+ $8898 DI                  ; interrupts stay off from here to the start of the game
+ $8899 XOR A               ;
+*$889A IN E,(C)            ; OR together 256 readings
+ $889C OR E                ;
+ $889D DJNZ $889A          ;
+@isub=AND KEMPSTON_UNUSED_MASK
+ $889F AND $20             ;
+ $88A1 JR NZ,$88A8         ;
+ $88A3 LD A,$01            ; bit 5 never set: treat as a Kempston interface (fire starts the game)
+ $88A5 LD ($85CE),A        ; joystick flag #R$85CE = 1
+@label=ShowTitleScreen_Tune
+*$88A8 LD HL,$85FB         ; title tune; returns NZ if stopped by fire, 0 or ENTER
+ $88AB CALL $96A2          ; falls into #R$88AE, which tests the flag

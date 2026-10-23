@@ -1,2 +1,12 @@
-; Game status buffer entry at 85D2
+; Willy's walk frame: step counter and sprite frame
+;
+; Bits 0-1 only (0-3): the frame of the Willy sprite within the half chosen by the facing bit of
+; #R$85D0 (#R$9637 adds frame * 32 to the sprite address), and the step timer of #R$8DD3. While he
+; walks, the frame counts 3 down to 0 when facing left and 0 up to 3 when facing right, one count per
+; pass, and the cell step is taken in the pass that finds it at 0 (left) or 3 (right): after the
+; step it is reloaded with 3 (left) or 0 (right). So a step takes 4 passes and the four frames
+; are shown once per step. It keeps its value when he stops, so a new walk resumes in the middle of
+; the cycle. In the ending stages 2 and 3 the frame loop sets bit 0 in every pass (#R$89AD, $8A00)
+; which speeds the animation up. Saved at room entry in #R$85D7.
+@label=WillyFrame
 g$85D2 DEFB $00

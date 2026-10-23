@@ -1,2 +1,22 @@
-; Game status buffer entry at 85D1
+; Willy's air state: on the ground, jumping, falling or killed
+;
+; 0: standing or walking on ground, or holding a rope (#R$85D6)
+; .
+; 1: in a jump; #R$85D5 counts the steps 0-17 (the arc is described at #R$8DD3)
+; .
+; 2-$0F: falling. 2 when he walks off an edge or bumps his head, 6 at the end of a jump; it counts up by
+; 1 in every pass of the fall and from $10 returns to $0C, so a long fall cycles through $0C-$0F. A
+; landing with a state of $0C or more kills him (#R$8EE3). Standing at the take-off point that
+; means a drop of 5 character rows (40 pixel rows) or more; after a jump that ended over a gap
+; (state 6) a drop of 3 rows or more. Drops of 4 and 2 rows respectively are survived.
+; .
+; $FF: killed (set by #R$90B7, see WILLY_KILLED); the frame loop then plays the death flash (#R$8B17)
+; and either restarts the room from #R$85D7 or ends the game.
+; .
+; Set to 0 at a new game and by the exit up (#R$94B0); exit down (#R$94D2) makes it 2 when it was
+; below $0B. Saved at room entry in #R$85D7.
+; .
+; Observed: falls from each height checked in the Bathroom with Willy poked into the air, see
+; findings F92-F94.
+@label=WillyAirState
 g$85D1 DEFB $00

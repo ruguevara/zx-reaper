@@ -1,2 +1,11 @@
-; Game status buffer entry at 85D6
+; Rope state: 0 = no rope, 1-$20 = rope segment held, $F0-$FF = let go a moment ago
+;
+; Shared by the rope code #R$91BE (which sets it when Willy touches a rope point, moves it while he
+; climbs, and counts the release value up) and #R$8DD3, which tests it at the start of the pass: with
+; a value of 1-$80 (that is, ((value - 1) AND $80) = 0) he holds a rope: there is no jump or
+; fall logic, no walking and no landing, only the keys are read (the move state then drives the
+; climbing in #R$91BE). A jump key on a rope sets it to $F0 ($8FA9, ROPE_LET_GO), sets the walking bit of
+; #R$85D0 and starts a jump from the row boundary above. It is not saved with Willy's other state: it is
+; cleared to 0 whenever a room is entered (#R$898B, $8985). See findings F87-F89.
+@label=WillyRope
 g$85D6 DEFB $00

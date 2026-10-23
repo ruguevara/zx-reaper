@@ -1,265 +1,126 @@
-; Routine at 8B07
+; Rest of the frame loop: resume, death check, tune, cheat, death, game over
 ;
-; Used by the routine at #R$89AD.
-c$8B07 LD HL,$9A00   ;
- $8B0A LD DE,$5A00   ;
- $8B0D LD BC,$0100   ;
- $8B10 LDIR          ;
- $8B12 LD A,($80DE)  ;
- $8B15 OUT ($FE),A   ;
+; The second half of the pass started by #R$89AD, with five independent parts.
+; All of them end by jumping back to #R$89AD (#R$8912 after a teleport or a
+; death, #R$87CA after the game over), so none of them returns. Proposed split
+; points are the entry labels below.
+; .
+; 1. $8B07 (ResumeAfterPause): entered when the pause wait of #R$89AD sees a
+; key. Restores the status bar attributes (the pause cycled every colour on the
+; screen) and the room's border colour, then goes on at $8B17.
+; .
+; 2. $8B17 (CheckDeath): if Willy was killed in this pass (#R$85D1 = $FF) jump
+; to the death scene at $8C01. Then the tune: any key of the H J K L ENTER half
+; row toggles it (#R$85E2). With the tune on, the idle counter #R$85E0 is cleared,
+; #R$85E1 is incremented and one note is played as a short beep of 768 loop
+; passes (about 9 ms, so the tune is a series of blips, one per pass): the note
+; is #R$865F[(#R$85E1 AND $7E) / 2] plus 28 - 4 * lives (#R$85CC), a count of
+; loop passes per half period, so the pitch drops as lives are lost. The
+; border keeps the room colour during the beep.
+; .
+; 3. $8B70 (CheckTeleport) and $8B97 (CheckCheatKeys): the WRITETYPER cheat.
+; Teleport, only with #R$85E3 = 10: key 9 held together with keys 1-5 (1, 2, 4,
+; 8, 16) and 6 (32) sets the room number to that sum (0-63) and enters it at
+; once (#R$8912), keeping Willy's position. Typing the sequence: in room $1C
+; (First Landing) with Willy's Y index $D0, #R$85E3 counts the letters W R I T E T
+; Y P E R (#R$85E5) typed one at a time; see #R$85E3.
+; .
+; 4. $8C01 (PlayDeath): the death scene, about 6 frames: eight rounds, each
+; filling the whole room area (top 16 rows) of the screen attributes with one
+; bright colour with black paper, from ink 7 (white) down to ink 0 (black), and
+; a buzz whose half-period grows round by round (a falling note, from about
+; 14 kHz to 2 kHz, 232 toggles in the first round and 8 in the last; the
+; border turns black). Then, at $8C33
+; (RestartAfterDeath), if #R$85CC is not 0 it is decremented, Willy's seven
+; saved state bytes (#R$85D7, copied when the room was entered) are copied back
+; to #R$85CF and the room is entered again (#R$8912) at its entry position.
+; .
+; 5. $8C4A (ShowGameOver): when #R$85CC is 0 the death is the game over. The top
+; two thirds of the bitmap are cleared; Willy (#R$9D40) is drawn standing on a
+; barrel (#R$9C60) in the middle, and a foot (#R$9C40) is drawn 49 times at
+; column 15 on its way down from the top of the screen in steps of 2 pixel rows,
+; landing on Willy, each time with a rising whistle (64 toggles, the
+; half-period shrinks from 3,350 to 850 T states: 520 Hz up to 2 kHz)
+; and a flood of the room attributes with bright white ink on a paper colour
+; that runs 0-3 (the barrel stays red). #R$8574 and #R$8578 ("Game" and "Over")
+; are printed on screen row 6 to the left and right of the foot's path. For about
+; 80 frames the eight letters then cycle through the colours (ink (counter + n)
+; mod 8, bright; at ink 0 a letter is black on black and blinks out), after which the game restarts at the title screen (#R$87CA).
+; The scene lasts about 184 frames (3.7 seconds). The counter is #R$85E4.
+; .
+; Hardware: reads keyboard ports $BFFE (tune key), $EFFE, $F7FE (teleport),
+; $FBFE, $DFFE (cheat), writes the beeper and border (port $FE), writes the
+; screen bitmap and attributes.
+@equ=GAME_OVER_WILLY=$488F
+@equ=GAME_OVER_BARREL=$48CF
+@equ=GAME_OVER_TEXT_1=$40CA
+@equ=GAME_OVER_TEXT_2=$40D2
+@equ=GAME_TEXT_ATTRS=$58CA
+@equ=BARREL_ATTRS=$59CF
+@label=ResumeAfterPause
+c$8B07 LD HL,$9A00       ; status bar attributes ...
+ $8B0A LD DE,$5A00       ; ... back to the screen
+@isub=LD BC,THIRD_ATTRS_SIZE
+ $8B0D LD BC,$0100 ;
+ $8B10 LDIR ;
+ $8B12 LD A,($80DE)      ; room border colour
+ $8B15 OUT ($FE),A       ; restore the border
 ; This entry point is used by the routine at #R$89AD.
-*$8B17 LD A,($85D1)  ;
- $8B1A CP $FF        ;
- $8B1C JP Z,$8C01    ;
- $8B1F LD B,$BF      ;
- $8B21 LD HL,$85E2   ;
- $8B24 IN A,(C)      ;
- $8B26 AND $1F       ;
- $8B28 CP $1F        ;
- $8B2A JR Z,$8B36    ;
- $8B2C BIT 0,(HL)    ;
- $8B2E JR NZ,$8B38   ;
- $8B30 LD A,(HL)     ;
- $8B31 XOR $03       ;
- $8B33 LD (HL),A     ;
- $8B34 JR $8B38      ;
-*$8B36 RES 0,(HL)    ;
-*$8B38 BIT 1,(HL)    ;
- $8B3A JR NZ,$8B70   ;
- $8B3C XOR A         ;
- $8B3D LD ($85E0),A  ;
- $8B40 LD A,($85E1)  ;
- $8B43 INC A         ;
- $8B44 LD ($85E1),A  ;
- $8B47 AND $7E       ;
- $8B49 RRCA          ;
- $8B4A LD E,A        ;
- $8B4B LD D,$00      ;
- $8B4D LD HL,$865F   ;
- $8B50 ADD HL,DE     ;
- $8B51 LD A,($85CC)  ;
- $8B54 RLCA          ;
- $8B55 RLCA          ;
- $8B56 SUB $1C       ;
- $8B58 NEG           ;
- $8B5A ADD A,(HL)    ;
- $8B5B LD D,A        ;
- $8B5C LD A,($80DE)  ;
- $8B5F LD E,D        ;
- $8B60 LD BC,$0003   ;
-*$8B63 OUT ($FE),A   ;
- $8B65 DEC E         ;
- $8B66 JR NZ,$8B6B   ;
- $8B68 LD E,D        ;
- $8B69 XOR $18       ;
-*$8B6B DJNZ $8B63    ;
- $8B6D DEC C         ;
- $8B6E JR NZ,$8B63   ;
-*$8B70 LD BC,$EFFE   ;
- $8B73 IN A,(C)      ;
- $8B75 BIT 1,A       ;
- $8B77 JP NZ,$8B97   ;
- $8B7A AND $10       ;
- $8B7C XOR $10       ;
- $8B7E RLCA          ;
- $8B7F LD D,A        ;
- $8B80 LD A,($85E3)  ;
- $8B83 CP $0A        ;
- $8B85 JP NZ,$8B97   ;
- $8B88 LD BC,$F7FE   ;
- $8B8B IN A,(C)      ;
- $8B8D CPL           ;
- $8B8E AND $1F       ;
- $8B90 OR D          ;
- $8B91 LD ($8420),A  ;
- $8B94 JP $8912      ;
-*$8B97 LD A,($85E3)  ;
- $8B9A CP $0A        ;
- $8B9C JP Z,$89AD    ;
- $8B9F LD A,($8420)  ;
- $8BA2 CP $1C        ;
- $8BA4 JP NZ,$89AD   ;
- $8BA7 LD A,($85CF)  ;
- $8BAA CP $D0        ;
- $8BAC JP NZ,$89AD   ;
- $8BAF LD A,($85E3)  ;
- $8BB2 RLCA          ;
- $8BB3 LD E,A        ;
- $8BB4 LD D,$00      ;
- $8BB6 LD IX,$85E7   ;
- $8BBA ADD IX,DE     ;
- $8BBC LD BC,$FBFE   ;
- $8BBF IN A,(C)      ;
- $8BC1 AND $1F       ;
- $8BC3 CP (IX+$00)   ;
- $8BC6 JR Z,$8BDA    ;
- $8BC8 CP $1F        ;
- $8BCA JP Z,$89AD    ;
- $8BCD CP (IX-$02)   ;
- $8BD0 JP Z,$89AD    ;
- $8BD3 XOR A         ;
- $8BD4 LD ($85E3),A  ;
- $8BD7 JP $89AD      ;
-*$8BDA LD B,$DF      ;
- $8BDC IN A,(C)      ;
- $8BDE AND $1F       ;
- $8BE0 CP (IX+$01)   ;
- $8BE3 JR Z,$8BF7    ;
- $8BE5 CP $1F        ;
- $8BE7 JP Z,$89AD    ;
- $8BEA CP (IX-$01)   ;
- $8BED JP Z,$89AD    ;
- $8BF0 XOR A         ;
- $8BF1 LD ($85E3),A  ;
- $8BF4 JP $89AD      ;
-*$8BF7 LD A,($85E3)  ;
- $8BFA INC A         ;
- $8BFB LD ($85E3),A  ;
- $8BFE JP $89AD      ;
-*$8C01 LD A,$47      ;
-*$8C03 LD HL,$5800   ;
- $8C06 LD DE,$5801   ;
- $8C09 LD BC,$01FF   ;
- $8C0C LD (HL),A     ;
- $8C0D LDIR          ;
- $8C0F LD E,A        ;
- $8C10 CPL           ;
- $8C11 AND $07       ;
- $8C13 RLCA          ;
- $8C14 RLCA          ;
- $8C15 RLCA          ;
- $8C16 OR $07        ;
- $8C18 LD D,A        ;
- $8C19 LD C,E        ;
- $8C1A RRC C         ;
- $8C1C RRC C         ;
- $8C1E RRC C         ;
- $8C20 OR $10        ;
- $8C22 XOR A         ;
-*$8C23 OUT ($FE),A   ;
- $8C25 XOR $18       ;
- $8C27 LD B,D        ;
-*$8C28 DJNZ $8C28    ;
- $8C2A DEC C         ;
- $8C2B JR NZ,$8C23   ;
- $8C2D LD A,E        ;
- $8C2E DEC A         ;
- $8C2F CP $3F        ;
- $8C31 JR NZ,$8C03   ;
- $8C33 LD HL,$85CC   ;
- $8C36 LD A,(HL)     ;
- $8C37 OR A          ;
- $8C38 JP Z,$8C4A    ;
- $8C3B DEC (HL)      ;
- $8C3C LD HL,$85D7   ;
- $8C3F LD DE,$85CF   ;
- $8C42 LD BC,$0007   ;
- $8C45 LDIR          ;
- $8C47 JP $8912      ;
-*$8C4A LD HL,$4000   ;
- $8C4D LD DE,$4001   ;
- $8C50 LD BC,$0FFF   ;
- $8C53 LD (HL),$00   ;
- $8C55 LDIR          ;
- $8C57 XOR A         ;
- $8C58 LD ($85E4),A  ;
- $8C5B LD DE,$9D40   ;
- $8C5E LD HL,$488F   ;
- $8C61 LD C,$00      ;
- $8C63 CALL $9456    ;
- $8C66 LD DE,$9C60   ;
- $8C69 LD HL,$48CF   ;
- $8C6C LD C,$00      ;
- $8C6E CALL $9456    ;
-*$8C71 LD A,($85E4)  ;
- $8C74 LD C,A        ;
- $8C75 LD B,$82      ;
- $8C77 LD A,(BC)     ;
- $8C78 OR $0F        ;
- $8C7A LD L,A        ;
- $8C7B INC BC        ;
- $8C7C LD A,(BC)     ;
- $8C7D SUB $20       ;
- $8C7F LD H,A        ;
- $8C80 LD DE,$9C40   ;
- $8C83 LD C,$00      ;
- $8C85 CALL $9456    ;
- $8C88 LD A,($85E4)  ;
- $8C8B CPL           ;
- $8C8C LD E,A        ;
- $8C8D XOR A         ;
- $8C8E LD BC,$0040   ;
-*$8C91 OUT ($FE),A   ;
- $8C93 XOR $18       ;
- $8C95 LD B,E        ;
-*$8C96 DJNZ $8C96    ;
- $8C98 DEC C         ;
- $8C99 JR NZ,$8C91   ;
- $8C9B LD HL,$5800   ;
- $8C9E LD DE,$5801   ;
- $8CA1 LD BC,$01FF   ;
- $8CA4 LD A,($85E4)  ;
- $8CA7 AND $0C       ;
- $8CA9 RLCA          ;
- $8CAA OR $47        ;
- $8CAC LD (HL),A     ;
- $8CAD LDIR          ;
- $8CAF AND $FA       ;
- $8CB1 OR $02        ;
- $8CB3 LD ($59CF),A  ;
- $8CB6 LD ($59D0),A  ;
- $8CB9 LD ($59EF),A  ;
- $8CBC LD ($59F0),A  ;
- $8CBF LD A,($85E4)  ;
- $8CC2 ADD A,$04     ;
- $8CC4 LD ($85E4),A  ;
- $8CC7 CP $C4        ;
- $8CC9 JR NZ,$8C71   ;
- $8CCB LD IX,$8574   ;
- $8CCF LD C,$04      ;
- $8CD1 LD DE,$40CA   ;
- $8CD4 CALL $9680    ;
- $8CD7 LD IX,$8578   ;
- $8CDB LD C,$04      ;
- $8CDD LD DE,$40D2   ;
- $8CE0 CALL $9680    ;
- $8CE3 LD BC,$0000   ;
- $8CE6 LD D,$06      ;
-*$8CE8 DJNZ $8CE8    ;
- $8CEA LD A,C        ;
- $8CEB AND $07       ;
- $8CED OR $40        ;
- $8CEF LD ($58CA),A  ;
- $8CF2 INC A         ;
- $8CF3 AND $07       ;
- $8CF5 OR $40        ;
- $8CF7 LD ($58CB),A  ;
- $8CFA INC A         ;
- $8CFB AND $07       ;
- $8CFD OR $40        ;
- $8CFF LD ($58CC),A  ;
- $8D02 INC A         ;
- $8D03 AND $07       ;
- $8D05 OR $40        ;
- $8D07 LD ($58CD),A  ;
- $8D0A INC A         ;
- $8D0B AND $07       ;
- $8D0D OR $40        ;
- $8D0F LD ($58D2),A  ;
- $8D12 INC A         ;
- $8D13 AND $07       ;
- $8D15 OR $40        ;
- $8D17 LD ($58D3),A  ;
- $8D1A INC A         ;
- $8D1B AND $07       ;
- $8D1D OR $40        ;
- $8D1F LD ($58D4),A  ;
- $8D22 INC A         ;
- $8D23 AND $07       ;
- $8D25 OR $40        ;
- $8D27 LD ($58D5),A  ;
- $8D2A DEC C         ;
- $8D2B JR NZ,$8CE8   ;
- $8D2D DEC D         ;
- $8D2E JR NZ,$8CE8   ;
- $8D30 JP $87CA      ;
+@label=CheckDeath
+*$8B17 LD A,($85D1)      ; Willy killed in this pass?
+@isub=CP WILLY_KILLED
+ $8B1A CP $FF ;
+ $8B1C JP Z,$8C01        ; yes: death scene
+@isub=LD B,KEYROW_H_ENTER_HI
+ $8B1F LD B,$BF          ; H J K L ENTER row (C is still $FE)
+ $8B21 LD HL,$85E2       ; tune flags
+ $8B24 IN A,(C) ;
+@isub=AND KEYS_MASK
+ $8B26 AND $1F ;
+@isub=CP NO_KEYS
+ $8B28 CP $1F ;
+ $8B2A JR Z,$8B36        ; no key down
+ $8B2C BIT 0,(HL)        ; key down: was it down last pass too?
+ $8B2E JR NZ,$8B38       ; yes: do not toggle again
+ $8B30 LD A,(HL) ;
+ $8B31 XOR $03           ; flip bit 1 (tune off) and set bit 0
+ $8B33 LD (HL),A ;
+ $8B34 JR $8B38 ;
+*$8B36 RES 0,(HL)        ; no key: clear the key-held flag
+@label=PlayGameTune
+*$8B38 BIT 1,(HL)        ; bit 1 set: tune is off
+ $8B3A JR NZ,$8B70 ;
+ $8B3C XOR A ;
+ $8B3D LD ($85E0),A      ; idle counter cleared while the tune plays
+ $8B40 LD A,($85E1) ;
+ $8B43 INC A ;
+ $8B44 LD ($85E1),A      ; step counter
+@isub=AND TUNE_LENGTH_MASK
+ $8B47 AND $7E ;
+ $8B49 RRCA              ; note index 0-63
+ $8B4A LD E,A ;
+ $8B4B LD D,$00 ;
+ $8B4D LD HL,$865F       ; game tune
+ $8B50 ADD HL,DE ;
+ $8B51 LD A,($85CC)      ; lives
+ $8B54 RLCA ;
+ $8B55 RLCA ;
+@isub=SUB LIVES_FULL_PITCH
+ $8B56 SUB $1C ;
+ $8B58 NEG               ; A = 28 - 4 * lives
+ $8B5A ADD A,(HL)        ; plus the note: D = half-period count
+ $8B5B LD D,A ;
+ $8B5C LD A,($80DE)      ; room border colour (bits 3 and 4 are 0)
+ $8B5F LD E,D            ; E counts down to the next speaker toggle
+@isub=LD BC,TUNE_BEEP_LOOPS
+ $8B60 LD BC,$0003       ; B = 0: 256 passes of the inner loop, C = 3 times
+@label=PlayGameTune_Loop
+*$8B63 OUT ($FE),A       ; speaker/MIC state with the border
+ $8B65 DEC E ;
+ $8B66 JR NZ,$8B6B ;
+ $8B68 LD E,D ;
+@isub=XOR BEEPER_BITS
+ $8B69 XOR $18           ; toggle the speaker and MIC
+*$8B6B DJNZ $8B63 ;
+ $8B6D DEC C ;
+ $8B6E JR NZ,$8B63 ;

@@ -139,3 +139,32 @@ GAME_OVER_BARREL_INK     EQU 2 ; game over: ink (red) of the barrel cells
 THIRD_ATTRS_SIZE         EQU 0x100 ; bytes of attributes of one third of the screen (8 character rows)
 ROOM_FIRST_LANDING       EQU 0x1C ; room number of First Landing, where the cheat sequence is typed
 CHEAT_Y                  EQU 0xD0 ; Willy Y index required to type the cheat sequence (standing on the lowest floor)
+Y_ROW_MASK               EQU 0xF0 ; Willy Y index bits that select the character row (16 Y units per row, 2 per pixel row)
+Y_ROW_STEP               EQU 0x10 ; Y index units in one character row (8 pixel rows)
+Y_FALL_STEP              EQU 8 ; Y index units Willy falls per pass (4 pixel rows)
+Y_BETWEEN_MASK           EQU 0x0E ; Y index bits that are non-zero while Willy is between two character rows (jump or fall in progress)
+JUMP_APEX_STEP           EQU 8 ; jump step at which the arc is highest: the Y change of a pass is (step AND $FE) - 8 index units
+JUMP_LAND_FIRST          EQU 0x0D ; jump step after which Willy may land on ground two rows above his take-off row
+JUMP_LAND_SECOND         EQU 0x10 ; jump step after which Willy may land on ground one row above his take-off row
+JUMP_END_STEP            EQU 0x12 ; jump step (18 passes) at which the jump ends in a fall
+AIR_ON_GROUND            EQU 0 ; Willy air state: standing or walking on ground (or holding a rope)
+AIR_JUMPING              EQU 1 ; Willy air state: in the arc of a jump (the step is in WillyJumpStep)
+AIR_FALL_START           EQU 2 ; Willy air state: first state of a fall; the state counts up once per pass of the fall
+AIR_FALL_AFTER_JUMP      EQU 6 ; Willy air state at the end of a jump: a fall that counts as already four passes old
+AIR_FATAL_FALL           EQU 0x0C ; Willy air state from which a landing kills him (a fall of 5 character rows or more from standing)
+AIR_FALL_WRAP            EQU 0x10 ; fall state that wraps back to AIR_FATAL_FALL, so a long fall cycles through 12-15
+STEP_SOUND_TOGGLES       EQU 0x20 ; speaker toggles of the click played in every pass of a jump or fall
+WALK_LAST_FRAME          EQU 3 ; last frame of Willy's 4-frame walk cycle: he moves one cell when the cycle wraps
+KEYBITS_LEFT             EQU 0x2A ; bits of the key-bit byte that mean left (keys Q E T U O 5 6, joystick left, conveyor left): bits 1, 3, 5
+KEYBITS_RIGHT            EQU 0x15 ; bits of the key-bit byte that mean right (keys W R Y I P 7 8, joystick right, conveyor right): bits 0, 2, 4
+STATE_ROW_LEFT           EQU 4 ; offset of the left row in the move state table (index = old state + 4 * left + 8 * right)
+STATE_ROW_RIGHT_BIT      EQU 3 ; bit of the move state table index set when a right key is down (adds 8)
+MOVE_FACING_LEFT         EQU 1 ; bit mask of WillyMoveState: 1 = facing left (and walking left when the walk bit is set)
+MOVE_WALK_BIT            EQU 1 ; bit number in WillyMoveState: 1 = Willy walks this pass
+MOVE_WALK_MASK           EQU 2 ; bit mask of WillyMoveState: Willy walks this pass
+ENDING_AUTORUN_BIT       EQU 1 ; bit of EndingStage set in stages 2 and 3: the right key is forced on and the jump key is ignored
+KEYROWS_5_6_HI           EQU 0xE7 ; high byte of the port that reads half rows 1-5 and 6-0 together (a zero bit selects the row)
+KEYROWS_BOTTOM           EQU 0x7EFE ; port that reads half rows CAPS SHIFT-V and B-SPACE together: the jump keys
+KEMPSTON_LR_MASK         EQU 3 ; Kempston bits 0 (right) and 1 (left)
+KEY_0_BIT                EQU 0 ; bit of the 0-9 half row that is key 0
+Y_WRAPPED_MIN            EQU 0xF0 ; smallest Y index after a rise that means Willy has gone above the top of the room (Y wrapped below 0)

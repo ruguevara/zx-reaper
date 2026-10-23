@@ -1,2 +1,17 @@
-; Game status buffer entry at 85D0
+; Willy's move state: facing and walking bits
+;
+; bit 0: 1 = facing left (the sprite half of #R$9637 and the direction of the walking step in #R$8DD3)
+; .
+; bit 1: 1 = Willy walks in this pass (one cell every 4 passes in the facing direction)
+; .
+; Values 0-3. Every pass in which Willy is on the ground or on a rope #R$8DD3 replaces it with
+; #R$8421[old state + 4 * left + 8 * right] (see there); the walking bit is cleared in a fall and by
+; a head bump, and set when he jumps off a rope. During a jump the keys are not read, so the state
+; at take-off (and with it the sideways direction) is kept until he lands. Saved at room entry in
+; #R$85D7. Also used by the rope code #R$91BE, which reads it to climb: walking (bit 1) moves him
+; along the rope, facing (bit 0) decides up or down.
+; .
+; Observed: P pressed from standing: 0 -> 2 (walks right at once); O pressed: 0 -> 1 (turns, no step)
+; -> 3; released: 3 -> 1, 2 -> 0.
+@label=WillyMoveState
 g$85D0 DEFB $00

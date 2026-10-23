@@ -13,6 +13,8 @@ The agent should read the disassembly through this tool, never whole.
   zxq.py reclassify FRAG.ctl [-f]   regenerate the entries a control-file fragment
                                     covers (ends with `i $END`); -f also replaces
                                     annotated entries
+  zxq.py cut ADDR TITLE             split the entry containing ADDR there; the new
+                                    entry keeps the annotations of its instructions
   zxq.py peek ADDR [LEN]            hex + text dump of the image
   zxq.py strings [MIN [START END]]  text runs (plain or bit-7 terminated), default
                                     $5B00-$FFFF
@@ -640,6 +642,32 @@ def cmd_audit():
     return 1 if count(qs, 'open') or count(fs, 'unknown') else 0
 
 
+def cmd_cut(addr, title):
+    """Split an entry at ADDR into a new entry titled TITLE, keeping every
+    annotation (comments, @label, @isub) with the instruction it belongs to."""
+    e = next((e for e in load() if e.addr < addr <= e.end), None)
+    if e is None:
+        sys.exit('$%04X is not inside an entry (or already starts one)' % addr)
+    lines = e.text.rstrip('\n').split('\n')
+    i = next((n for n, l in enumerate(lines)
+              if (m := INSTR.match(l)) and int(m.group(2), 16) == addr), None)
+    if i is None:
+        sys.exit('no instruction at $%04X in %s' % (addr, e.fname))
+    j = i
+    while j > 0 and lines[j - 1].startswith(('@', ';')):
+        j -= 1
+    pre = lines[j:i]
+    first = e.ctype + lines[i][1:]
+    new = ['; ' + title]
+    comments = [l for l in pre if l.startswith(';')]
+    if comments:
+        new += [';'] + comments
+    new += [l for l in pre if l.startswith('@')] + [first] + lines[i + 1:]
+    open(e.fname, 'w').write('\n'.join(lines[:j]) + '\n')
+    open(os.path.join(SKOOL_DIR, '%04X.skool' % addr), 'w').write('\n'.join(new) + '\n')
+    print('%s -> $%04X-$%04X and $%04X-$%04X' % (e.name, e.addr, addr - 1, addr, e.end))
+
+
 def cmd_reclassify(frag, force):
     import subprocess
     addrs = []
@@ -772,6 +800,8 @@ def main():
         cmd_status(a[1:])
     elif cmd == 'unexec' and len(a) > 1:
         cmd_unexec(a[1:])
+    elif cmd == 'cut' and len(a) == 3:
+        cmd_cut(parse_addr(a[1]), a[2])
     elif cmd == 'reclassify' and len(a) in (2, 3):
         cmd_reclassify(a[1], a[2:] == ['-f'])
     elif cmd == 'peek' and len(a) in (2, 3):

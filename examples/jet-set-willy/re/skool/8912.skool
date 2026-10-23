@@ -1,0 +1,65 @@
+; Enter a room: build its entities and buffers and start the frame loop
+;
+; This entry point is used by the routines at #R$8B07, #R$948A, #R$949E,
+; #R$94B0 and #R$94D2.
+; Enter the room whose number is in #R$8420 (alternative entry, used by every
+; room change and by the restart after a death).
+@label=EnterRoom
+c$8912 LD A,($8420)        ; room number
+@isub=OR ROOM_TABLE_PAGE
+ $8915 OR $C0              ; high byte of the room address: $C0 OR room
+ $8917 LD H,A              ;
+ $8918 LD L,$00            ; HL = $C000 + 256 * room
+ $891A LD DE,$8000         ;
+@isub=LD BC,ROOM_SIZE
+ $891D LD BC,$0100         ; copy the room to the room buffer #R$8000
+ $8920 LDIR                ;
+ $8922 LD IX,$80F0         ; IX = the room's 8 entity slots (2 bytes each)
+ $8926 LD DE,$8100         ; DE = entity buffer
+@isub=LD A,ROOM_SLOTS
+ $8929 LD A,$08            ;
+@label=EnterRoom_Slot
+*$892B LD L,(IX+$00)       ; L = definition index of the slot
+ $892E RES 7,L             ; bit 7 is ignored
+ $8930 LD H,$14            ; HL = $1400, times 8 below: $A000 + 8 * index
+ $8932 ADD HL,HL           ;
+ $8933 ADD HL,HL           ;
+ $8934 ADD HL,HL           ;
+ $8935 LD BC,$0002         ; copy definition bytes 0-1 to the entity buffer
+ $8938 LDIR                ;
+ $893A LD C,(IX+$01)       ; slot start byte replaces byte 2 of the definition (HL points to it) ...
+ $893D LD (HL),C           ;
+ $893E LD BC,$0006         ; ... and the copy continues with bytes 2-7
+ $8941 LDIR                ;
+ $8943 INC IX              ; next slot
+ $8945 INC IX              ;
+ $8947 DEC A               ;
+ $8948 JR NZ,$892B         ;
+ $894A LD HL,$85CF         ; save Willy's state $85CF-$85D5 at $85D7: position to restart from after a death (#R$8C3C copies it back)
+ $894D LD DE,$85D7         ;
+ $8950 LD BC,$0007         ;
+ $8953 LDIR                ;
+ $8955 CALL $8D33          ; expand the room into the empty-room buffers
+@isub=LD HL,BOTTOM_THIRD_SCREEN
+ $8958 LD HL,$5000         ; clear the bottom third of the bitmap (room name, status line and lives)
+@isub=LD DE,BOTTOM_THIRD_SCREEN+1
+ $895B LD DE,$5001         ;
+@isub=LD BC,THIRD_SIZE-1
+ $895E LD BC,$07FF         ;
+ $8961 LD (HL),$00         ;
+ $8963 LDIR                ;
+ $8965 LD IX,$8080         ;
+@isub=LD C,SCREEN_COLS
+ $8969 LD C,$20            ;
+ $896B LD DE,$5000         ;
+ $896E CALL $9680          ; room name on row 16
+ $8971 LD IX,$8554         ;
+ $8975 LD DE,$5060         ; status line text on row 19
+ $8978 LD C,$20            ;
+ $897A CALL $9680          ;
+ $897D LD A,($80DE)        ; border colour of the room
+ $8980 LD C,$FE            ;
+ $8982 OUT (C),A           ;
+ $8984 XOR A               ;
+ $8985 LD ($85D6),A        ; clear #R$85D6
+ $8988 JP $89AD            ; start the game loop

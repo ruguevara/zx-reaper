@@ -1,0 +1,83 @@
+; Teleport cheat and WRITETYPER key check
+@label=CheckTeleport
+@isub=LD BC,KEYROW_0_9
+c$8B70 LD BC,$EFFE       ; 0 9 8 7 6 row
+ $8B73 IN A,(C) ;
+@isub=BIT KEY_9_BIT,A
+ $8B75 BIT 1,A           ; key 9 down?
+ $8B77 JP NZ,$8B97       ; no: skip the teleport
+@isub=AND 1<<KEY_6_BIT
+ $8B7A AND $10           ; key 6
+@isub=XOR 1<<KEY_6_BIT
+ $8B7C XOR $10 ;
+ $8B7E RLCA              ; $20 if key 6 is down, else 0 (room bit 5)
+ $8B7F LD D,A ;
+ $8B80 LD A,($85E3)      ; cheat progress
+@isub=CP CHEAT_ACTIVE
+ $8B83 CP $0A            ; cheat not typed yet: no teleport
+ $8B85 JP NZ,$8B97 ;
+@isub=LD BC,KEYROW_1_5
+ $8B88 LD BC,$F7FE       ; keys 1-5
+ $8B8B IN A,(C) ;
+ $8B8D CPL               ; 1 = down: room bits 0-4
+@isub=AND KEYS_MASK
+ $8B8E AND $1F ;
+ $8B90 OR D ;
+ $8B91 LD ($8420),A      ; new room number
+ $8B94 JP $8912          ; enter it
+@label=CheckCheatKeys
+*$8B97 LD A,($85E3)      ; cheat progress
+@isub=CP CHEAT_ACTIVE
+ $8B9A CP $0A ;
+ $8B9C JP Z,$89AD        ; cheat already on: nothing to type
+ $8B9F LD A,($8420)      ; room number
+@isub=CP ROOM_FIRST_LANDING
+ $8BA2 CP $1C ;
+ $8BA4 JP NZ,$89AD       ; only in First Landing ...
+ $8BA7 LD A,($85CF) ;
+@isub=CP CHEAT_Y
+ $8BAA CP $D0 ;
+ $8BAC JP NZ,$89AD       ; ... with Willy at Y = $D0
+ $8BAF LD A,($85E3) ;
+ $8BB2 RLCA              ; 2 * step
+ $8BB3 LD E,A ;
+ $8BB4 LD D,$00 ;
+@isub=LD IX,CheatKeyTable+2
+ $8BB6 LD IX,$85E7       ; pair of step 0; IX-2 is the previous step pair
+ $8BBA ADD IX,DE ;
+@isub=LD BC,KEYROW_Q_T
+ $8BBC LD BC,$FBFE       ; Q W E R T row
+ $8BBF IN A,(C) ;
+@isub=AND KEYS_MASK
+ $8BC1 AND $1F ;
+ $8BC3 CP (IX+$00)       ; the letter of this step in this row? ($1F matches no key)
+ $8BC6 JR Z,$8BDA        ; yes: check the P-Y row
+@isub=CP NO_KEYS
+ $8BC8 CP $1F            ; no key: wait
+ $8BCA JP Z,$89AD ;
+ $8BCD CP (IX-$02)       ; previous letter still held: wait
+ $8BD0 JP Z,$89AD ;
+ $8BD3 XOR A             ; anything else: back to step 0
+ $8BD4 LD ($85E3),A ;
+ $8BD7 JP $89AD ;
+@label=CheckCheatKeys_Row2
+@isub=LD B,KEYROW_P_Y>>8
+*$8BDA LD B,$DF          ; P O I U Y row
+ $8BDC IN A,(C) ;
+@isub=AND KEYS_MASK
+ $8BDE AND $1F ;
+ $8BE0 CP (IX+$01)       ; the letter of this step in this row?
+ $8BE3 JR Z,$8BF7 ;
+@isub=CP NO_KEYS
+ $8BE5 CP $1F ;
+ $8BE7 JP Z,$89AD ;
+ $8BEA CP (IX-$01) ;
+ $8BED JP Z,$89AD ;
+ $8BF0 XOR A             ; anything else: back to step 0
+ $8BF1 LD ($85E3),A ;
+ $8BF4 JP $89AD ;
+@label=CheckCheatKeys_Next
+*$8BF7 LD A,($85E3)      ; both rows matched: next step
+ $8BFA INC A ;
+ $8BFB LD ($85E3),A ;
+ $8BFE JP $89AD ;

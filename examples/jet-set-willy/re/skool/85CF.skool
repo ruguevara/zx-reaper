@@ -1,2 +1,17 @@
-; Game status buffer entry at 85CF
+; Willy's Y index: twice the pixel row of the top of his sprite
+;
+; Index into the row address table #R$8200 (2 bytes per pixel row), so Y / 2 is the pixel row (0-127)
+; and Y / 16 the character row (0-15) of the top of his 16x16 sprite. Standing on the floor of
+; character row 15 gives $D0 (pixel row 104, character row 13), the value at a new game. The attribute
+; address #R$85D3 is always the cell of row Y / 16 (kept in step by #R$8E9C). Y is unsigned: a rise
+; through the top wraps it to $F0 or more and the frame loop leaves the room upwards (#R$94B0, which
+; sets $D0 in the new room); a fall past the bottom leaves it downwards (#R$94D2, which sets 0).
+; .
+; Changed by #R$8DD3 (jump: -8 to +8 per pass; fall: +8 per pass; ramp step: 16 up or down), by the
+; rope code #R$91BE (while he holds a rope Y is the rope point's Y index minus $10), by the room exits,
+; by #R$87CA and by the death restore from #R$85D7. Read by #R$9637 and #R$95C8 (drawing, with the
+; ramp offset added) and by the Master Bedroom guard (#R$9534).
+; .
+; Observed in the simulator: jump arc and fall steps, see findings F92-F95.
+@label=WillyY
 g$85CF DEFB $00

@@ -1,2 +1,15 @@
-; Game status buffer entry at 85D3
+; Willy's attribute address: his top-left cell in the attribute buffer
+;
+; Word (low byte first): address of the attribute cell at the top-left of Willy's 2 x 2 cells in the
+; room attribute buffer #R$5C00. Low 5 bits of the low byte = screen column (0-31) of the left
+; cell; the other bits of the word give the row: $5C00 + 32 * row + column, so the high byte is $5C
+; for rows 0-7 and $5D for rows 8-15. The row is Y / 16 of #R$85CF; #R$8E9C recomputes the word from
+; Y. Willy covers this cell and the one to the right in the top row (and two more in the next
+; row, two more again when Y is between rows); the cells below are what he stands on.
+; .
+; A step changes the column by 1 (and the row by 1 on a ramp); the room exits wrap the column (#R$948A,
+; #R$949E) or set the row and the page (#R$94B0, #R$94D2). Set to $5DB4 (row 13, column 20) at a new
+; game. Read by #R$9637 (column), #R$95C8, the room events (#R$9534, #R$9584) and the rope code.
+; Saved at room entry in #R$85D7 (bytes +4 and +5 of the copy).
+@label=WillyAttrAddr
 g$85D3 DEFW $0000
