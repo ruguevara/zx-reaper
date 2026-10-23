@@ -150,3 +150,12 @@ corresponding entry. The demo-abort stack leak disappears in such a port.
 
 Bugs to decide on (keep for fidelity or fix) are listed in
 [Tricks and bugs](06-tricks.md#bugs).
+
+## The Python port
+
+[`port/`](../port) is the whole game in Python on zxpyxel, one module per
+asm module and one function per routine, with the memory layout of the
+original. `python port/play.py` plays it; `make port-test` replays the three
+runs of `tests/inputs/` recorded on the Z80 and checks every pass of the
+main loop against them, byte for byte. The non-local exits are `Goto`
+exceptions that `Start` dispatches, and the quirks above are kept.

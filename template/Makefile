@@ -31,7 +31,8 @@ else
   GAME_ASM := build/game.asm
 endif
 
-.PHONY: all verify test expected coverage status labels html shift-test export clean help restore diff audit doctor
+.DELETE_ON_ERROR:
+.PHONY: all verify test expected coverage status labels html shift-test export clean help restore diff audit doctor port-test
 all: verify
 
 # The tape and everything copied from it (re/tape/, re/*.z80) stay out of git;
@@ -56,6 +57,7 @@ help:
 	@echo "make export     freeze re/skool into src/*.asm modules (src becomes the master)"
 	@echo "make restore    recreate re/tape, re/orig.z80, re/image.z80 from original/"
 	@echo "make diff       differential tests: Z80 routines against tests/models/*.py"
+	@echo "make port-test  stage 3: the Python port in port/ replays the Z80 runs of tests/inputs"
 	@echo "make audit      open questions (re/questions.md) and unverified findings (re/findings.md)"
 	@echo "make doctor     check tools and what this project is missing"
 	@echo "sources: $(MASTER)"
@@ -125,6 +127,31 @@ export: build/game.asm
 
 diff: build/blocks.stamp
 	@$(T)/zxdiff.py
+
+# Stage 3 (skill zx-port): set PORT_ENTRY (module.Routine in port/) and
+# PORT_CHECKPOINT (the main loop's label) in re/layout.mk
+PORT_STATE ?= --state 0x4000-0x5B00 --state $(REGION_START)-$(REGION_END)
+RECORDS := $(INPUTS:tests/inputs/%.txt=build/record/%.rec)
+
+port/labels.py: build/blocks.stamp
+	$(T)/zxport.py labels > $@
+
+port/variables.py: build/blocks.stamp
+	$(T)/zxport.py variables $(or $(GAME_ASM),$(wildcard src/*.asm)) > $@
+
+port/image.bin: re/orig.z80
+	$(T)/zxport.py image $< $@
+
+build/record/%.rec: tests/inputs/%.txt re/orig.z80 build/blocks.stamp
+	@test -n "$(PORT_CHECKPOINT)" || { echo "set PORT_CHECKPOINT in re/layout.mk"; exit 1; }
+	@mkdir -p build/record
+	@a=$$(sed -n 's/^$(PORT_CHECKPOINT): EQU //p' build/game.sym); \
+	test -n "$$a" || { echo "no label $(PORT_CHECKPOINT) in build/game.sym"; exit 1; }; \
+	$(T)/zxrun.py re/orig.z80 --input $< --record $@ --checkpoint $$a $(PORT_STATE) > /dev/null
+
+port-test: port/labels.py port/variables.py port/image.bin $(RECORDS)
+	@test -n "$(PORT_ENTRY)" || { echo "set PORT_ENTRY in re/layout.mk"; exit 1; }
+	@$(T)/zxport.py check $(PORT_ENTRY) $(RECORDS)
 
 audit:
 	@$(T)/zxq.py audit; true

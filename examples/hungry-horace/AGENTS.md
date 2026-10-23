@@ -29,12 +29,13 @@ states (`git commit -m "re: <what>"`). Never edit `original/`.
 | `tape/tape.txt` | tape manifest: block order, headers, timings, payload files |
 | `tests/inputs/*.txt` | input scripts; `tests/expected/*.hash` their recorded frame hashes |
 | `scripts/rules.mk` | extra build steps (encryption, compression), optional |
+| `port/` | stage 3: the game in Python on `port/zxpyxel/`, checked by `make port-test` (skill `zx-port`) |
 
 ## Tools (run from the project root)
 
 ```
 make / make test / make status / make labels / make shift-test / make export / make help
-make doctor / make diff / make audit
+make doctor / make diff / make audit / make port-test
 tools/zxq.py next 20                 what to annotate next (dependencies first)
 tools/zxq.py show $8000              one entry + its callers and callees
 tools/zxq.py refs $5C00              who reads, writes, calls an address

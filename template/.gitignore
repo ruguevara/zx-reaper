@@ -11,3 +11,4 @@ re/*.z80
 # RZX recordings embed a snapshot of the game
 re/rzx/*.rzx
 re/tap2sna.log
+port/image.bin

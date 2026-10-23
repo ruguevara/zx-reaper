@@ -1,6 +1,6 @@
 ---
 name: zx-port
-description: Check annotations with executable models and port ZX Spectrum routines to C or Python routine by routine, each one tested against the original Z80 code on generated cases. Use when a routine's description needs proof, or when porting the game to another language or platform library.
+description: Check annotations with executable models and port ZX Spectrum routines to C or Python routine by routine, each one tested against the original Z80 code on generated cases; stage 3, the whole game in Python on zxpyxel checked by replaying Z80 runs. Use when a routine's description needs proof, or when porting the game to another language or platform library.
 ---
 
 # zx-port
@@ -64,6 +64,105 @@ the original (document it as such, keep the model faithful to the Z80).
 5. `tests/models/STATUS.md` (written by `make diff`) is the progress table:
    routine, cases per kind, pass/fail. A pass covers only the generated cases:
    cite the kinds when you report it.
-6. Whole-game check: the port's frame output for `tests/inputs/*.txt` against
-   `tests/expected/*.hash` when the platform library can produce the same
-   screen bytes.
+6. Whole-game check of a Python port: stage 3 below.
+
+## Stage 3: the game in Python on zxpyxel
+
+The port runs the same game in Python: same memory layout, same screens,
+same behaviour under the same input, one function per routine. It runs on
+`port/zxpyxel/` (a stand-in for the 48K machine, design in zx-reaper's
+`docs/port.md`). Setup, once: `make port/labels.py port/variables.py
+port/image.bin` (again after a change to `src/`); set
+`PORT_ENTRY` (`main.Start`) and `PORT_CHECKPOINT` (the main loop's label) in
+`re/layout.mk`, and `PORT_STATE` if the game keeps state outside the screen
+and its code region (a system variable it reads, such as FRAMES:
+`PORT_STATE := --state 0x4000-0x5B00 --state 0x5C78-0x5C7B --state ...`).
+`python port/play.py` plays it; `make port-test` is the check.
+
+### Code
+
+- `port/<module>.py` per `src/<module>.asm`; `from labels import *` first,
+  then imports from the other port modules, `from variables import v` and
+  `from zxpyxel import mem, mem16, zx`.
+- One function per routine, named as the label. Registers become arguments
+  and return values (in the order of the `R`/`O` lines of the header), a
+  flag the caller branches on becomes a returned bool. Return only the
+  outputs some caller uses (check the callers), and say what is returned in
+  the docstring.
+- Memory, three ways onto the same 64K, all wrapping like the Z80:
+  `v.Name` for a data label with the width the asm declares (`v.Passes -= 1`
+  a DEFB, `v.Score = 0` a DEFW, `v.GuardTimers[i]` a table; generated
+  `port/variables.py`); `mem[a]` (byte) and `mem16[a]` (word) for a computed
+  address: the screen, a pointer, a walk past a table's end; `mem[Label + 1]`
+  for a self-modified operand. Data stays in memory: never copy a table into
+  Python. Register arithmetic is plain ints: mask it (`& 0xFF`) where the
+  register would wrap.
+- Write exactly the bytes the asm writes, including scratch variables and
+  values that look dead: the check compares all of the code region.
+- Fall-through into the next label: call it as the last statement. A jump
+  that drops return addresses (`POP HL` + `JP Label`): `raise Goto(Label)`
+  (from zxpyxel); the entry routine runs `await dispatch(...)`, which goes on
+  at the target. Keep the asm's quirks (a wrong mask, an off-by-one): they
+  are the behaviour; a comment names them.
+- An inline loop the asm repeats in several places becomes one lower-case
+  helper (`print_text`), not a routine.
+- Hardware only through `zx`: `zx.inp(port)` with the full 16-bit port
+  address the asm uses (`A << 8 | $FE` for `IN A,($FE)`), `zx.out(port, v)`,
+  `zx.tone(...)` for a beeper loop, `zxpyxel.rom` for ROM calls, `zx.di()`,
+  `zx.ei()`.
+- Time: no CPU is emulated, so the port charges it. Delay and sound loops
+  exactly (`zx.spend(passes * 26)`, `djnz_t(b)`, `zx.tone`); other routines
+  with `zx.spend(T)`, T from the `T-states` that `zxdiff.py` prints for the
+  routine (a typical value; charge per call, per loop pass where the cost
+  depends on a count). `make port-test` prints the drift of the port's clock
+  against the Z80's; keep it within a few per cent.
+- A routine that waits or plays a sound longer than a frame is `async def`,
+  ends with (or contains, per wait) `await zx.sync()`, and its callers
+  `await` it. The main loop awaits `zx.sync()` once per pass; HALT is
+  `await zx.halt()`.
+- Charging: the T-states zxdiff prints include the callees (not the final
+  RET). A routine charges its own part: its T minus what its callees charge;
+  each CALL and RET it makes is 27 more. `zxdiff.py --tstates` prints the
+  mean per case kind, the Z80 next to what the port charged: with case kinds
+  that follow the branches, the difference per kind is what each branch
+  still has to charge.
+
+### Checks
+
+1. Per routine, while porting: add `port(regs)` to the routine's file in
+   `tests/models/` (or write one: same `ROUTINE`, `OUTPUTS`, `KINDS`,
+   `cases` as a model). zxdiff loads the case into `zx.mem`, calls `port`,
+   and compares registers and memory with the Z80:
+
+   ```python
+   import library
+   def port(regs):
+       return {'HL': library.StepCell(regs['A'], regs['HL'])}
+   ```
+
+   A routine that only writes memory returns `{}`; its memory is compared
+   through `OUTPUTS['mem']`. A word in a case's `mem` is `[lo, hi]`.
+
+   Read the inputs from the routine's instructions, not only its header (a
+   header's `E'`/`HL'` can describe the state after the caller's EXX), and
+   put every register and flag the instructions read into the case, even
+   one the port does not take (A = "0", `F` with carry clear). Keep cases
+   inside the inputs the game passes. A mismatch shows only the registers
+   and bytes that differ. Helpers shared by several test files go into
+   `tests/models/_name.py` and take their names from `labels` (port/ is on
+   the path).
+   Async routines and routines whose cost is the whole game state are left
+   to the whole-game check.
+2. Whole game, the stage's gate: `make port-test`. It records each
+   `tests/inputs/*.txt` on the Z80 (`build/record/*.rec`: every value an IN
+   of the game reads, and the state at every pass through PORT_CHECKPOINT)
+   and runs the port from `PORT_ENTRY` with those values replayed; the port
+   calls `zx.checkpoint('MainLoop')` at the top of its main loop. Input is
+   matched by read order, so the port's frames need not match the Z80's.
+   The first difference stops it: a read on another port or at another time
+   (control flow differs before that point), or the bytes that differ at a
+   checkpoint, named by label or screen cell, with the Z80 frame. Look at
+   that frame (`tools/zxrun.py re/orig.z80 --input ... --shot F:z80.png`),
+   find the routine that writes the bytes (`--watch`), fix, repeat.
+3. By eye: `python port/play.py` next to the original in an emulator; speed
+   and sound are judged there.

@@ -1,8 +1,10 @@
 # Stage 3: a Python port on a Spectrum stand-in library
 
-Status: the library's core and its Pyxel host exist (`zxpyxel/`), and a spike
-ported Hungry Horace's title and first maze (`examples/hungry-horace/port/`;
-results under "Spike"). The rest is design; the next steps are at the end.
+Status: the library's core and its Pyxel host exist (`zxpyxel/`), and Hungry
+Horace is ported whole and passes the stage's check (`examples/hungry-horace/
+port/`; results under "Hungry Horace"). How to port: the `zx-port` skill.
+The drawing layer for new games is still design; the next steps are at the
+end.
 
 Stage 3 turns the annotated asm into Python that runs the same game: the same
 screens, the same behaviour under the same input, and code that follows the
@@ -85,20 +87,27 @@ is shared, so a new game can mix in routines ported from an old one.
 ### Machine
 
 ```python
-from zxpyxel import zx, mem      # one machine, like the hardware it stands for
+from zxpyxel import zx, mem, mem16   # one machine, like the hardware it stands for
+from variables import v              # the game's data labels, generated from the asm
 
-mem[0x5C78]                      # memory is a bytearray; the 48K ROM at $0000-$3FFF
-zx.peek16(a); zx.poke16(a, v)
+mem[a]; mem16[a]                 # a byte, a little-endian word; the 48K ROM at $0000-$3FFF
+v.Score; v.GuardTimers[i]        # a DEFB/DEFW/table at its address, with its width
 zx.out(port, v)                  # $FE: border bits 0-2, speaker bit 4 (MIC ignored)
 zx.inp(port)                     # $xxFE: half-rows selected by the high byte, bits 0-4, 0 = pressed
                                  # $1F: Kempston
-zx.r()                           # LD A,R: from the clock when playing, recorded values in a replay
 zx.spend(t)                      # charge T-states
 await zx.sync()                  # hand the host every frame the clock has passed
 await zx.halt()                  # clock to the next frame boundary, then sync
 zx.di(); zx.ei(); zx.im2(fn)     # interrupts; the IM1 default only counts FRAMES
-zx.checkpoint('MainLoop')        # test hook: hash game-state memory; nothing when playing
+zx.checkpoint('MainLoop')        # test hook: compared with the Z80 in a replay; nothing when playing
+raise Goto(NextMaze)             # a jump that drops return addresses; dispatch(entry) goes on there
 ```
+
+All three views of memory are the same 64K and wrap like the Z80 on a
+store, so a byte is never written as a word by mistake and the port needs no
+`& 0xFF` on memory. `v` is the seam for stage 4: its fields can move into a
+Python object while the routines keep saying `v.Score`. Not built yet:
+`zx.r()` for `LD A,R` (recorded values in a replay), until a game needs it.
 
 `sync` gives the host one frame for each frame boundary the clock has
 crossed: fifty for a one-second blocking sound, none when a main-loop pass is
@@ -175,11 +184,13 @@ one function per routine, named as the label.
 
 - Registers become arguments and return values; a flag the caller branches on
   becomes a returned bool; alternate registers become extra arguments.
-- Variables stay in memory: `mem[Lives]`, `zx.peek16(PlayerPos)`. A
-  self-modified operand is memory at `Label+1`, written where the asm writes
-  it.
-- A jump that drops a return address (`POP HL` then `JP NextMaze`) becomes an
-  exception caught at the entry point it jumps to.
+- Variables stay in memory: `v.Lives`, `v.PlayerPos`, at the addresses
+  and widths of the asm. A self-modified operand is `mem[Label + 1]`,
+  written where the asm writes it.
+- Fall-through into the next label is a call; a jump that drops a return
+  address (`POP HL` then `JP NextMaze`) is `raise Goto(NextMaze)`, and
+  `dispatch` in the entry routine goes on there, so the Python stack does not
+  grow with every maze.
 - The `Hardware:` sentence of a routine says which `zx` calls its port needs.
 - A loop the asm repeats inline (a print loop, the step to the next cell)
   becomes one lower-case helper, so it does not read as a routine of the
@@ -189,7 +200,7 @@ one function per routine, named as the label.
 
 ```python
 async def Pause():                       # illustrative: a DJNZ delay loop
-    zx.spend(mem[PauseLength] * 256 * 13)
+    zx.spend(v.PauseLength * 256 * 13)
     await zx.sync()
 ```
 
@@ -198,7 +209,8 @@ Layout in a game project:
 ```
 port/
   zxpyxel/      the library, copied from zx-reaper by zxinit.py, like tools/
-  labels.py     tools/zxport.py labels > port/labels.py
+  labels.py     labels and constants (make port/labels.py)
+  variables.py  the data labels as typed fields of `v` (make port/variables.py)
   image.bin     tools/zxport.py image re/orig.z80 port/image.bin: the 48K RAM
                 at handover (game data, never committed)
   *.py          one per src/*.asm module (main.asm → main.py)
@@ -210,23 +222,27 @@ and `pyxel app2html` make the desktop and web builds from it as it is.
 
 ## Tests: identical behaviour
 
-1. **Routines.** `zxdiff.py` as in the `zx-port` skill: the port function
-   runs on a machine whose memory holds the case's memory, and the same
-   registers and memory are compared. Needs: zxdiff accepting a port that
-   takes the machine.
-2. **The whole game, by checkpoint replay.** The Z80 run records every value
-   an IN instruction reads, with its port address, in order (and the values
-   `LD A,R` reads), and at every pass through a checkpoint address a hash of
-   the game-state memory: screen, attributes and the variable ranges, not
-   the stack. The port runs headless with those values replayed in the same
-   order and hashes the same ranges at `zx.checkpoint`. The two hash
-   sequences must be equal; the first difference is reported by label, and a
-   read the port does differently is caught at the read. Input is matched by
-   read order, not by frame, so the port's timing does not have to match the
-   Z80's. Needs: `zxrun.py --record-in FILE` and `--checkpoint ADDR`.
-   Limit: an interrupt handler that changes variables in mid-pass runs at a
-   different point in the port; in such games, put the checkpoints at HALTs,
-   where both are in step.
+How to run them: the `zx-port` skill. Why they look like this:
+
+1. **Routines.** `zxdiff.py` with a `port(regs)` function: the port runs on
+   `zx.mem` loaded with the case's memory, and registers and memory are
+   compared with the Z80. It also prints the routine's T-states, which is
+   where the port's `zx.spend` figures come from.
+2. **The whole game, by checkpoint replay** (`make port-test`). The Z80 run
+   (`zxrun.py --record`) writes every value an IN by the game reads, with
+   its port address, in order, and at every pass through one checkpoint
+   address the clock and the game state: the screen, the code region and
+   any system variable the game uses, not the stack. The state is stored,
+   not hashed (the first pass in full, then the changes), so a mismatch
+   names the bytes, by label or screen cell. The port runs headless with the
+   reads replayed and compares at `zx.checkpoint`; a read on another port,
+   or a read where the Z80 was at the checkpoint, stops it at once. Input is
+   matched by read order, not by frame, so the port's timing does not have
+   to match; the drift of its clock is reported instead. Records are build
+   files (`build/record/`): they hold game data. Limit: an interrupt
+   handler that changes variables in mid-pass runs at a different point in
+   the port; in such games, put the checkpoint at a HALT, where both are in
+   step.
 3. **By eye.** The Pyxel host next to Fuse. Speed and sound are judged here,
    not tested.
 
@@ -292,12 +308,42 @@ Not checked: how the beeper sounds (needs ears), the seams between WAV chunks,
 and why the web build runs 3% slow (frame pacing under a 60 Hz display is the
 likely cause).
 
+## Hungry Horace (2026-10-23)
+
+The whole game in about 1,100 lines of Python (six modules, one per asm
+module), ported by the method of the `zx-port` skill: the lead wrote the
+tools and `main.py` (control flow), subagents on a cheaper model ported the
+modules, the leaf modules first (library, guards), then movement, sprites
+and events in parallel against a fixed contract (signatures, which routines
+are async, the Goto targets).
+
+| Check | Result |
+| --- | --- |
+| routines, `make diff` | 38 routines against the Z80, 0 mismatches (the async ones are left to the replay) |
+| whole game, `make port-test` | every main-loop pass identical to the Z80 in all game memory: demo 2,384 passes, play 5,536, bell 15,567 (11,000 frames of random play that take the bell, eat a guard and leave by the arrows) |
+| clock | the port runs 1.3-2.0% fast against the Z80 |
+| speed, headless | about 14,000 frames a second |
+
+The first replay of the integrated port matched 2,147 passes and stopped at
+FRAMES: the ROM's BEEPER returns with interrupts on, the game's DI comes one
+instruction later, and once in a few thousand chimes the Z80 takes an
+interrupt in between, whose handler counts FRAMES, which the guards' AI
+reads as a random source. The record now logs the interrupts the ROM handler
+takes, and the replay runs the port's handler at the same place in the order
+of events. No port code was fixed: every other difference would have been a
+porting error, and there were none.
+
+What the subagents found hard, now in the skill or the tools: inputs read
+from the instructions rather than the header (an `E'` in a header can mean
+E after the caller's EXX), flags and unused registers in the test cases,
+how to split T-states between a routine and its callees (`zxdiff.py
+--tstates`), whole-screen mismatches flooding the output (only the differing
+bytes are printed now), and words written as bytes (`mem16` and `v`).
+
 ## Next steps
 
-1. `zxrun.py --record-in` and `--checkpoint`, the headless replay, and the
-   Horace port, main loop included, passing it for `tests/inputs/*.txt`.
-2. `zxinit.py` copying the library; a Makefile target for `zxport.py labels`
-   and `image`; a stage 3 part in the `zx-port` skill; the selftest fixture
-   game ported in `selftest/`.
-3. The drawing, text and sprite layer over memory, with the prototype's
+1. The selftest fixture game ported in `selftest/`, so `selftest/run.sh`
+   checks stage 3 end to end.
+2. The drawing, text and sprite layer over memory, with the prototype's
    tests; hyperdream switches to it.
+3. Hear the port: the beeper through WAV chunks on the desktop and the web.

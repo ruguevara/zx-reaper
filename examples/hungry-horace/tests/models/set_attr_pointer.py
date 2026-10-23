@@ -18,3 +18,8 @@ def model(regs, mem):
     h, low = regs['HL'] >> 8, regs['HL'] & 255
     third = (h & const('THIRD_BITS')) >> 3
     return {'^HL': (sym('ATTRS') >> 8) + third << 8 | low, 'HL': regs['HL']}
+
+
+def port(regs):
+    import library
+    return {'^HL': library.SetAttrPointer(regs['HL']), 'HL': regs['HL']}

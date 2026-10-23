@@ -23,3 +23,8 @@ def model(regs, mem):
     nxt = (p + 1) & 0xFFFF
     nxt = ((nxt >> 8) & const('ROM_HIGH_MASK')) << 8 | (nxt & 255)
     return {'A': mem[p], 'mem': {ptr: nxt & 255, ptr + 1: nxt >> 8}}
+
+
+def port(regs):
+    import library
+    return {'A': library.GetRandom()}

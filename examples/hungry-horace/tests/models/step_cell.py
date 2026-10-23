@@ -38,3 +38,8 @@ def model(regs, mem):
     else:                           # left: wraps inside the third (carry is always clear)
         low = (low - 1) & 255
     return {'HL': (h & 255) << 8 | low}
+
+
+def port(regs):
+    import library
+    return {'HL': library.StepCell(regs['A'], regs['HL'])}

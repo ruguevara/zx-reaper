@@ -26,6 +26,14 @@ Examples:
   zxrun.py orig.z80 --frames 300 --watch 0x8000-0x80FF --watch-from 250
   zxrun.py orig.z80 --load build/code.bin@0x8100 --pc 0x8100 ...   (shift test)
 
+Record for a stage 3 port (zxpyxel/headless.py replays it):
+  zxrun.py orig.z80 --input play.txt --record play.rec --checkpoint 0x6229 \
+      --state 0x4000-0x5B00 --state 0x5FB5-0x8000
+  writes every value an IN by the game reads (not by the ROM), in order, each
+  interrupt the ROM's IM1 handler takes, and at every pass through
+  --checkpoint the clock (T-states since the start) and the --state ranges:
+  the first pass in full, then the bytes changed since.
+
 Calling a routine (render data with the game's own code, for docs):
   zxrun.py orig.z80 --cls 0x38 --call 0x6B75 --reg HL=0x6FF7 --reg DE=0x4000 \
       --reg BC=0x300 --png maze1.png [--crop X,Y,W,H]
@@ -46,6 +54,7 @@ from skoolkit.simutils import SP, from_snapshot, get_state
 from skoolkit.snapshot import Snapshot, write_snapshot
 
 PC, T, IFF = 24, 25, 26
+KEY_SCAN_IN = 0x0296      # the first IN of the ROM's KEY_SCAN (port $FEFE)
 
 # key name -> (half-row index for A8..A15, bit)
 ROWS = ['CS Z X C V', 'A S D F G', 'Q W E R T', '1 2 3 4 5',
@@ -99,6 +108,7 @@ class Tracer:
         self.out7ffd = self.outfffd = 0
         self.ay = [0] * 16
         self.io_log = []
+        self.record = None        # --record: lines of the reads and checkpoints
 
     def set_keys(self, keys):
         self.keyboard[:] = [0] * 8
@@ -111,6 +121,19 @@ class Tracer:
                 self.keyboard[r] |= 1 << b
 
     def read_port(self, registers, port):
+        v = self.port_value(port)
+        if self.record is not None:
+            pc = registers[PC]                       # the IN instruction
+            if pc >= 0x4000:
+                self.record.append('in %04X %02X' % (port, v))
+            elif pc == KEY_SCAN_IN and port == 0xFEFE:
+                # ponytail: the ROM's IM1 handler scans the keyboard once per
+                # interrupt; a game that calls KEY_SCAN itself would add false
+                # ones, and an IM2 handler is not seen
+                self.record.append('int')
+        return v
+
+    def port_value(self, port):
         if port & 0xFF == 0x1F:
             return self.kempston
         if port & 1 == 0:
@@ -176,7 +199,15 @@ def main():
     ap.add_argument('--watch', metavar='A[-B]', help='log writes to A..B (pure Python simulator)')
     ap.add_argument('--watch-from', type=int, default=0, metavar='FRAME',
                     help='run fast until FRAME, then start watching')
+    ap.add_argument('--record', help='write the game\'s IN reads and the checkpoint states')
+    ap.add_argument('--checkpoint', type=parse_int, metavar='ADDR',
+                    help='with --record: save the state at every pass through ADDR')
+    ap.add_argument('--state', action='append', default=[], metavar='A-B',
+                    help='with --record: memory A..B-1 that is game state (repeatable; '
+                         'default the screen, 0x4000-0x5B00)')
     args = ap.parse_args()
+    if args.record and (args.checkpoint is None or args.watch or args.stop is not None):
+        sys.exit('--record needs --checkpoint and excludes --watch and --stop')
 
     snap = Snapshot.get(args.snapshot)
     if snap is None:
@@ -300,6 +331,27 @@ def main():
             args.frames = frames
         sim = cur['sim'] = python_sim(sim, tracer, lo, hi, watch_log)
         run_python(sim, on_frame, exec_map, stop)
+    elif args.record:
+        ranges = [tuple(parse_int(x) for x in r.split('-')) for r in args.state or ['0x4000-0x5B00']]
+        tracer.record = ['# zxrun.py %s' % ' '.join(sys.argv[1:]),
+                         'checkpoint %04X' % args.checkpoint,
+                         'state ' + ' '.join('%04X-%04X' % r for r in ranges)]
+        seen = bytearray(0x10000)
+        first, t0 = True, sim.registers[T]
+        while True:
+            cond, _ = sim.trace(sim.registers[PC], args.checkpoint, 0, 0, 1,
+                                lambda scr, frame, border, kb: on_frame(scr, frame),
+                                exec_map, tracer.keyboard, None, None)
+            if cond != 3:
+                break
+            tracer.record.append(' '.join(['cp %d' % (sim.registers[T] - t0)] +
+                                          changes(seen, sim.memory, ranges, first)))
+            first = False
+        with open(args.record, 'w') as f:
+            f.write('\n'.join(tracer.record + ['end %d' % len(hashes)]) + '\n')
+        print('record %s: %d reads, %d checkpoints' % (
+            args.record, sum(r[:2] == 'in' for r in tracer.record),
+            sum(r[:2] == 'cp' for r in tracer.record)))
     else:
         sim.trace(sim.registers[PC], stop, 0, 0, 1,
                   lambda scr, frame, border, kb: on_frame(scr, frame),
@@ -336,6 +388,29 @@ def main():
             print('run ended at frame %d before the expected %d' % (len(hashes), len(expected)))
             sys.exit(1)
         print('matched %d frames' % len(hashes))
+
+
+def changes(state, mem, ranges, full):
+    """'ADDR:HEX' runs of the bytes in `ranges` that differ from `state` (all of
+    them when `full`), merged across gaps under 4 bytes; updates `state`."""
+    runs = []
+    for lo, hi in ranges:
+        new, old = bytes(mem[lo:hi]), bytes(state[lo:hi])
+        state[lo:hi] = new
+        if full:
+            runs.append('%04X:%s' % (lo, new.hex()))
+            continue
+        diff = [i for k in range(0, hi - lo, 64) if new[k:k + 64] != old[k:k + 64]
+                for i in range(k, min(k + 64, hi - lo)) if new[i] != old[i]]
+        start = prev = None
+        for i in diff + [None]:
+            if i is not None and prev is not None and i - prev < 4:
+                prev = i
+                continue
+            if start is not None:
+                runs.append('%04X:%s' % (lo + start, new[start:prev + 1].hex()))
+            start = prev = i
+    return runs
 
 
 def python_sim(csim, tracer, lo, hi, log):

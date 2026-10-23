@@ -7,6 +7,7 @@ the frames the clock has passed to the host (`await sync()`, `await halt()`).
 import os
 
 from . import keys, sound
+from .memory import Memory, Words
 
 T_FRAME = 69888          # T-states per 48K frame (224 x 312)
 FRAMES = 0x5C78          # system variable the IM1 handler counts
@@ -26,9 +27,29 @@ class _Frame:
 _FRAME = _Frame()
 
 
+class Goto(Exception):
+    """A jump that drops return addresses (`POP HL` then `JP Label`): raised
+    where the asm jumps; `dispatch` goes on at `target`, an async routine."""
+
+    def __init__(self, target):
+        super().__init__(target.__name__)
+        self.target = target
+
+
+async def dispatch(entry):
+    """Run the async routine `entry`, and the target of every Goto raised in
+    it, until one returns."""
+    while True:
+        try:
+            return await entry()
+        except Goto as g:
+            entry = g.target
+
+
 class Spectrum:
     def __init__(self):
-        self.mem = bytearray(0x10000)
+        self.mem = Memory(0x10000)
+        self.mem16 = Words(self.mem)
         self.reset()
 
     def reset(self, ram=b''):
@@ -45,13 +66,6 @@ class Spectrum:
         self.interrupts = False
         self.handler = self.count_frames
         self.on_checkpoint = None
-
-    def peek16(self, a):
-        return self.mem[a] | self.mem[(a + 1) & 0xFFFF] << 8
-
-    def poke16(self, a, v):
-        self.mem[a] = v & 0xFF
-        self.mem[(a + 1) & 0xFFFF] = v >> 8 & 0xFF
 
     def out(self, port, v):
         if port & 1 == 0:          # ULA: border bits 0-2, speaker bit 4
@@ -85,11 +99,15 @@ class Spectrum:
             await _FRAME
             self.frame_end += T_FRAME
             if self.interrupts:
-                self.handler()
+                self.interrupt()
 
     async def halt(self):
         self.t = max(self.t, self.frame_end)
         await self.sync()
+
+    def interrupt(self):
+        """The interrupt at a frame boundary: the handler (IM1: count FRAMES)."""
+        self.handler()
 
     def di(self):
         self.interrupts = False

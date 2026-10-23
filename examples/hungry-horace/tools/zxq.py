@@ -40,6 +40,8 @@ The agent should read the disassembly through this tool, never whole.
   zxq.py question set ID STATUS ANSWER   STATUS: open / partial / answered
   zxq.py audit                      open questions and unverified findings
   zxq.py cmp A.bin B.bin ORG        differing addresses and their entries
+  zxq.py asm GAME.skool             skool2asm output for sjasmplus: ORG +SHIFT (for
+                                    the shift test), IXl/IXh/IYl/IYh in upper case
   zxq.py export ASM MODULES OUTDIR  split skool2asm output into modules
 
 DIR defaults to $ZXQ_SKOOL or re/skool; the snapshot to $ZXQ_IMAGE or re/image.z80. Addresses: $8000, 0x8000 or 32768.
@@ -677,6 +679,21 @@ def cmd_reclassify(frag, force):
                                               ' '.join('$%04X' % e.addr for e in new)))
 
 
+def cmd_asm(skool):
+    """skool2asm for sjasmplus: ORG lines get +SHIFT so the shift test can move
+    the code; skool2asm writes IXl/IXh/IYl/IYh, which sjasmplus rejects in mixed
+    case (unless --syntax=i), so they become IXL/IXH/IYL/IYH."""
+    import subprocess
+    r = subprocess.run(['skool2asm.py', '-q', '-w', '-H', '-c', skool], capture_output=True, text=True)
+    if r.returncode:
+        sys.exit(r.stderr)
+    org = re.compile(r'^( +ORG +)(\$[0-9A-Fa-f]+)\s*$')
+    half = re.compile(r'\b(I[XY])([hl])\b')
+    for line in r.stdout.split('\n')[:-1] if r.stdout.endswith('\n') else r.stdout.split('\n'):
+        line = org.sub(r'\1\2+SHIFT', line)
+        print(half.sub(lambda m: m.group(1) + m.group(2).upper(), line))
+
+
 def cmd_export(asm_path, modules_path, outdir):
     """Split skool2asm output into modules by address ranges.
 
@@ -779,6 +796,8 @@ def main():
         sys.exit(cmd_audit())
     elif cmd == 'cmp' and len(a) == 4:
         cmd_cmp(a[1], a[2], parse_addr(a[3]))
+    elif cmd == 'asm' and len(a) == 2:
+        cmd_asm(a[1])
     elif cmd == 'export' and len(a) == 4:
         cmd_export(a[1], a[2], a[3])
     else:

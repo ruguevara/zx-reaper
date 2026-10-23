@@ -17,7 +17,7 @@ any stage is a place to stop, fork and ship.
 | --- | --- | --- | --- |
 | 1 | tape → automatic disassembly (SkoolKit) → tape | tape and snapshot byte-identical | built: `zx-init`, `zx-coverage`, `zx-classify` |
 | 2 | automatic disassembly → annotated, relocatable asm without magic numbers → tape | the same, plus `make shift-test` and routine models (`make diff`) | built: `zx-annotate` to `zx-document`, models in `zx-port` |
-| 3 | asm → Python on `zxpyxel`, a library that stands in for the 48K hardware on [Pyxel](https://github.com/kitao/pyxel): the original memory layout, the same screens and behaviour, code that follows the asm routine by routine | routines against the Z80 code (`zxdiff.py`); the whole game by replaying the Z80 run's input and comparing game memory at checkpoints | library and spike: [docs/port.md](docs/port.md) |
+| 3 | asm → Python on `zxpyxel`, a library that stands in for the 48K hardware on [Pyxel](https://github.com/kitao/pyxel): the original memory layout, the same screens and behaviour, code that follows the asm routine by routine | routines against the Z80 code (`zxdiff.py`); the whole game by replaying the Z80 run's input and comparing game memory at checkpoints (`make port-test`) | built: `zx-port`; Hungry Horace ported whole ([docs/port.md](docs/port.md)) |
 | 4 | Python on `zxpyxel` → game logic in plain Python plus graphics, input and sound subsystems with nothing Spectrum-specific, on the framework the user picks (Pyxel, pygame, SDL2, …) | the stage 3 checkpoints through an adapter, then its own golden runs | optional |
 | 5 | game logic → C/C++ with SDL2 or platform libraries, or JS for the web | the stage 4 golden runs | optional |
 
@@ -95,21 +95,21 @@ stays out of git: put it into `original/` and run `make restore`.
 | relocation | `zx-relocate` | `make shift-test` passes at an even and an odd shift |
 | export | `zx-export` | `src/*.asm` modules are the master, still `IDENTICAL` |
 | article | `zx-document` | `docs/` written, audit done, links resolve |
-| models, port | `zx-port` | routines pass `make diff` against the Z80 code |
+| models, port | `zx-port` | routines pass `make diff` against the Z80 code; a stage 3 port passes `make port-test` |
 
 ## Tools
 
 | Tool | Purpose |
 | --- | --- |
 | `tools/zxinit.py` | tape → project: split, simulated load, image, coverage, ctl, skool, build glue |
-| `tools/zxrun.py` | headless runner on SkoolKit's C simulator: scripted keys/Kempston, fuzz, execution map, per-frame hashes, screenshots, pokes, write watchpoints, shift test loading, `--call` a game routine and save the screen (renders levels for docs) |
+| `tools/zxrun.py` | headless runner on SkoolKit's C simulator: scripted keys/Kempston, fuzz, execution map, per-frame hashes, screenshots, pokes, write watchpoints, shift test loading, `--call` a game routine and save the screen (renders levels for docs), `--record` the reads, interrupts and checkpoint states a port replays |
 | `tools/zxq.py` | skool split into one file per entry; show/refs/next/status/unexec/peek/strings/gfx/reclassify/check/const/equs/export; question and finding registers, audit |
 | `tools/zxtape.py` | TAP/TZX ↔ text manifest + payloads, byte-exact rebuild, per-block diff |
 | `tools/zxbasic.py` | lossless BASIC ↔ text (hidden numbers, REM code, odd lines) |
 | `tools/zxgfx.py` | colour sprite/tile sheets from memory, for the docs gallery |
 | `tools/zxdiff.py` | differential tests: a Z80 routine against a Python model or port on generated cases by kind; `--dump` writes golden cases for a C port |
 | `tools/zxcompare.py` | compare a skool disassembly with a reference: bytes, classification, boundaries, documentation, magic numbers |
-| `tools/zxport.py` | inputs of a stage 3 port: `labels.py` from the symbol file, the 48K RAM image of a snapshot |
+| `tools/zxport.py` | stage 3: `labels.py` and `variables.py` (typed data labels) from the build, the 48K RAM image of a snapshot, and the whole-game check that replays `zxrun.py --record` runs |
 | `tools/zxdoctor.py` | readiness check: tools, versions, and what a project is missing, with the fixing command |
 
 Working registers in every project: `re/questions.md` (what the work must
@@ -122,9 +122,11 @@ projects built with it.
 
 ## Limits
 
-- Stage 3 of "Port everywhere" has its library and a spike (Hungry Horace's
-  title and first maze, on the desktop and in the browser); stages 4 and 5
-  are a design ([docs/port.md](docs/port.md)).
+- Stage 3 of "Port everywhere" is built and done on one game, Hungry Horace
+  (every main-loop pass identical to the Z80 under three recorded runs);
+  sound is not yet judged by ear, and stages 4 and 5 are a design
+  ([docs/port.md](docs/port.md)). The replay sees the ROM's IM1 interrupts
+  only; a game with its own IM2 handler needs its checkpoint at a HALT.
 - `zxrun.py` is 48K only and has no memory contention: frame hashes check
   logic, not cycle-exact effects (multicolour, border tricks). Check those in
   Fuse or ZEsarUX by eye.

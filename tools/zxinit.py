@@ -4,7 +4,8 @@
   zxinit.py ORIGINAL.tap|tzx PROJECTDIR [--frames N] [--rzx FILE ...]
 
 Steps (all mechanical, no judgement needed):
- 1. copy zx-reaper's template/ and tools/ into PROJECTDIR, the tape into original/
+ 1. copy zx-reaper's template/ and tools/ into PROJECTDIR, zxpyxel/ into port/,
+    the tape into original/
  2. split the tape into a manifest + payloads (re/tape/)
  3. simulated LOAD -> re/orig.z80 (machine state at handover to the game)
  4. BASIC blocks -> src/*.bas (lossless text), loading screen -> data/
@@ -60,6 +61,8 @@ def main():
     shutil.copytree(os.path.join(KIT, 'template'), p, dirs_exist_ok=True)
     shutil.copytree(os.path.join(KIT, 'tools'), os.path.join(p, 'tools'), dirs_exist_ok=True,
                     ignore=shutil.ignore_patterns('__pycache__', 'zxinit.py'))
+    shutil.copytree(os.path.join(KIT, 'zxpyxel'), os.path.join(p, 'port', 'zxpyxel'),
+                    dirs_exist_ok=True, ignore=shutil.ignore_patterns('__pycache__', 'test_*'))
     for d in ('original', 're/tape', 're/maps', 're/rzx', 'src', 'data', 'tape',
               'tests/inputs', 'tests/expected', 'scripts', '.claude'):
         os.makedirs(os.path.join(p, d), exist_ok=True)
