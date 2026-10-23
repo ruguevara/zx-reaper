@@ -101,20 +101,22 @@ def draw_text(canvas, font, text, ox, oy, colour=(0xFF, 0xFF, 0xFF)):
 
 def compose(graphics, cols, scale, labels=None):
     """Lay out graphics (rows of colour pixels, all the same size) in a grid,
-    scaled, with grid lines; labels (one string per graphic, lines split by
-    '/') are printed with the ROM font under each graphic."""
+    scaled, with grid lines as wide as one scaled pixel; labels (one string
+    per graphic, lines split by '/') are printed with the ROM font under each
+    graphic."""
     gh, gw = len(graphics[0]), len(graphics[0][0])
     cols = min(cols, len(graphics))
     nrows = (len(graphics) + cols - 1) // cols
     lines = [str(t).split('/') for t in labels] if labels else []
     nlines = max((len(x) for x in lines), default=0)
+    b = scale
     cw = max([gw * scale] + [8 * len(t) for x in lines for t in x])
     ch = gh * scale + (9 * nlines + 1 if nlines else 0)
-    width, height = cols * (cw + 1) + 1, nrows * (ch + 1) + 1
+    width, height = cols * (cw + b) + b, nrows * (ch + b) + b
     canvas = [[GRID] * width for _ in range(height)]
     font = load_font() if lines else None
     for n, px in enumerate(graphics):
-        ox, oy = 1 + (n % cols) * (cw + 1), 1 + (n // cols) * (ch + 1)
+        ox, oy = b + (n % cols) * (cw + b), b + (n // cols) * (ch + b)
         for y in range(oy, oy + ch):
             canvas[y][ox:ox + cw] = [(0, 0, 0)] * cw
         gx = ox + (cw - gw * scale) // 2
