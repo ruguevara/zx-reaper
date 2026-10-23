@@ -59,7 +59,7 @@ frame into a ramp offset of 4 * frame or 12 - 4 * frame.
 
 [ExpandRoomLayout](../src/roombuild.asm#L85) gets the ramp step -33 or -31 as `AND 1 / RLCA / ADD A,$DF`
 with D = $FF. [ReadWillyInput](../src/willy.asm#L255) turns the conveyor direction 0 or 1 into a
-pressed-key byte with `SUB 3` ($FD left, $FE right).
+pressed-key byte with `SUB 3` (&#36;FD left, $FE right).
 
 Counters that are shown are kept as ASCII and incremented digit by digit
 with a carry ([ItemsCollectedText](../src/variables.asm#L125), [ClockText](../src/variables.asm#L138)), so nothing converts
@@ -90,7 +90,7 @@ next entry is an arrow or the end marker, neither of which uses those bytes
 
 | Address | What | Status |
 | --- | --- | --- |
-| $8415 [StartProgram](../src/start.asm#L16) | a "decryption" loop over $8500-$FFFF that writes every byte back unchanged | observed: memory identical after it (F1); why it is there is Unknown |
+| $8415 [StartProgram](../src/start.asm#L16) | a "decryption" loop over $8500-&#36;FFFF that writes every byte back unchanged | observed: memory identical after it (F1); why it is there is Unknown |
 | $8451 [UnusedAirText](../src/variables.asm#L67) | "AIR" | observed unused: overwriting it changes no frame (F12) |
 | $85CD [FlashTimer](../src/variables.asm#L205) | room flash effect | only cleared and decremented, never set (F105) |
 | $93BB [FillAttrBlock](../src/entities.asm#L532) | tail of a routine that fills 2x3 attribute cells, after an unconditional jump | unreachable (F10, inferred) |
@@ -102,7 +102,7 @@ next entry is an arrow or the end marker, neither of which uses those bytes
 | sprite page $B1 | poles | no definition uses it (F59) |
 | $A600 frames 4-7 | filler next to the toilet | never drawn (F60) |
 | entity definitions $00, $2B, $3F, $70-$7E | $2B is a complete vertical guardian | no room uses them (F56) |
-| room bytes $DF-$E0, $ED-$EF | rooms 0-4 hold $A000, $A040, $A080, $A0C0, $A0C0 at $DF | never read (F32) |
+| room bytes $DF-&#36;E0, $ED-&#36;EF | rooms 0-4 hold $A000, $A040, $A080, $A0C0, $A0C0 at $DF | never read (F32) |
 | room 47 and pages 61-63 | an empty room named "[" and three pages of code bytes | 47 reachable only through a walled edge; 61-63 only by the cheat (F35, F41) |
 
 ## Bugs
@@ -115,7 +115,7 @@ address from [RowAddressTable](../src/buffers.asm#L138) at that index, half a wo
 byte of one entry and the high byte of the next. The attribute cell comes
 out as $5D6A + X, the upper fin row as $9F6A + X (unused zeros) and the
 solid centre row as $A06A + X, which is inside [EntityDefs](../src/entitydefs.asm#L88). As the arrow
-crosses the room (X $1B down to 0) it writes $FF into $A06A-$A085: bytes +2
+crosses the room (X $1B down to 0) it writes $FF into $A06A-&#36;A085: bytes +2
 to +7 of definition $0D, all of $0E and $0F, and bytes +0 to +5 of $10.
 
 The definitions are only read when a room is entered, and nothing restores
@@ -243,7 +243,7 @@ Willy until the clock or CAPS SHIFT + SPACE ends it; nothing is shown.
   the key removed is a guess).
 - What the bytes between the lines of [LeftoverSource](../src/charsprites.asm#L11) mean (a 2-byte
   prefix and a byte that grows by $21 per line).
-- What room bytes $DF-$E0 and $ED-$EF were for (F32).
+- What room bytes $DF-&#36;E0 and $ED-&#36;EF were for (F32).
 - What the loader's `POKE 23613,0` is for; not tested.
 - Which tunes the title and in-game music are (Unknown in the sources).
 - Still **inferred** in the finding register, not run: the unreachable

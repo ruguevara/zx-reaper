@@ -68,4 +68,4 @@ Tools: sjasmplus, Python 3 with SkoolKit 10.1 (`pip install -r ../../requirement
 - Where the bytes of the colour-code table come from (F9), the leftover
   fragments at $93BB and $9C00, and why the start routine has a decryption loop
   that changes nothing.
-- Room bytes $DF-$E0 and $ED-$EF are never read.
+- Room bytes $DF-&#36;E0 and $ED-&#36;EF are never read.

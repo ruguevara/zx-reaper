@@ -17,7 +17,7 @@ a harness that logs his variables pass by pass (F109-F118).
 | [WillyFrame](../src/variables.asm#L308) | 0-3: sprite frame and step timer |
 | [WillyAirState](../src/variables.asm#L293) | 0 on the ground or a rope, 1 jumping, 2-$0F falling, $FF killed |
 | [WillyJumpStep](../src/variables.asm#L344) | 0-18 during a jump |
-| [WillyRope](../src/variables.asm#L360) | 0 no rope, 1-$20 rope segment held, $F0-$FF just let go |
+| [WillyRope](../src/variables.asm#L360) | 0 no rope, 1-$20 rope segment held, $F0-&#36;FF just let go |
 
 ## Order of work in a pass
 
@@ -46,10 +46,10 @@ $FF, then:
 
 1. a conveyor under his feet enters as a pressed key: $FD (left, direction
    0) or $FE (right, direction 1);
-2. half row P-Y ($DFFE): P, I, Y right; O, U left;
-3. half row Q-T ($FBFE) shifted left by one: W, R right; Q, E, T left;
-4. half rows 1-5 and 6-0 together ($E7FE): bit 4 (keys 5 and 6) → left;
-5. half row 6-0 ($EFFE): keys 8 and 7 → right;
+2. half row P-Y (&#36;DFFE): P, I, Y right; O, U left;
+3. half row Q-T (&#36;FBFE) shifted left by one: W, R right; Q, E, T left;
+4. half rows 1-5 and 6-0 together (&#36;E7FE): bit 4 (keys 5 and 6) → left;
+5. half row 6-0 (&#36;EFFE): keys 8 and 7 → right;
 6. Kempston bits 0 (right) and 1 (left) if [JoystickFlag](../src/variables.asm#L219) is set;
 7. in ending stages 2 and 3 the P bit is inverted, so "right" is pressed
    by itself and a real right key cancels it (F64).

@@ -34,13 +34,13 @@ white where he marks background cells).
 
 ![The figure in the Master Bedroom, frames 0-3 ($9C80), in the colours the game gives it: bright cyan top row ($45), white bottom row ($07)](img/figure.png) ![The figure's frames 0 and 1 alternating, in its colours (cyan top cells, white bottom cells)](img/figure.gif)
 
-![The toilet ($A600): frames 0-1 in play, frames 2-3 in ending stage 3](img/toilet.gif)
+![The toilet (&#36;A600): frames 0-1 in play, frames 2-3 in ending stage 3](img/toilet.gif)
 
 ![Foot ($9C40) and barrel ($9C60)](img/foot-barrel.png)
 
 ## Sprite pages
 
-All 26 pages $A6-$BF, one page (8 frames) per row, in white on black. The
+All 26 pages $A6-&#36;BF, one page (8 frames) per row, in white on black. The
 colours in play come from the entity definitions. Which definitions and
 rooms use each page is in the comment of each page in
 [`src/sprites.asm`](../src/sprites.asm).
@@ -107,7 +107,7 @@ between its limits, the arrow crosses the room, the guardians move.
 
 ## Item pictures
 
-One per room (room bytes $E1-$E8), rooms 0-60 in rows of 16, in yellow,
+One per room (room bytes $E1-&#36;E8), rooms 0-60 in rows of 16, in yellow,
 with the room number and the number of items the item table puts in that
 room ("-" for none). In play they flash in magenta, green, cyan and yellow.
 A picture with "-" is never shown; room 28's item has a blank picture

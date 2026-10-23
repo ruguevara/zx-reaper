@@ -13,6 +13,9 @@ The agent should read the disassembly through this tool, never whole.
   zxq.py reclassify FRAG.ctl [-f]   regenerate the entries a control-file fragment
                                     covers (ends with `i $END`); -f also replaces
                                     annotated entries
+  zxq.py dollars [--check] FILE...  write a $ that GitHub could read as the end of
+                                    inline maths ("$A000-$A3FF") as &#36; in
+                                    markdown files (code spans are kept)
   zxq.py cut ADDR TITLE             split the entry containing ADDR there; the new
                                     entry keeps the annotations of its instructions
   zxq.py peek ADDR [LEN]            hex + text dump of the image
@@ -563,8 +566,47 @@ REGISTERS = {
 }
 
 
+# GitHub reads $...$ as inline math; a $ after a non-space character and
+# before a non-digit can close it ("$A000-$A3FF" shows "$A000-$" as maths).
+# Such a $ is written as &#36;, which renders as $ but is no delimiter.
+MATH_CLOSER = re.compile(r'(?<=\S)\$(?=[^\d\s])')
+
+
+def math_safe(line):
+    """A markdown line with every possible closing $ written as &#36;, except
+    in code spans and link destinations."""
+    out, i = [], 0
+    for m in re.finditer(r'(`+)(.+?)\1|\]\([^)]*\)', line):
+        out.append(MATH_CLOSER.sub('&#36;', line[i:m.start()]))
+        out.append(m.group(0))
+        i = m.end()
+    out.append(MATH_CLOSER.sub('&#36;', line[i:]))
+    return ''.join(out)
+
+
+def cmd_dollars(paths, check):
+    """Make markdown files safe from GitHub's inline maths (see math_safe);
+    with check, only report and exit 1 if a file would change."""
+    changed = 0
+    for path in paths:
+        lines = open(path).read().split('\n')
+        fence, new = False, []
+        for line in lines:
+            if line.lstrip().startswith('```'):
+                fence = not fence
+            new.append(line if fence or line.lstrip().startswith('```') else math_safe(line))
+        n = sum(a != b for a, b in zip(lines, new))
+        if n:
+            changed += 1
+            print('%s: %d lines%s' % (path, n, '' if check else ' fixed'))
+            if not check:
+                open(path, 'w').write('\n'.join(new))
+    if check and changed:
+        sys.exit(1)
+
+
 def table_cell(text):
-    return ' '.join(str(text).replace('|', '/').split())
+    return math_safe(' '.join(str(text).replace('|', '/').split()))
 
 
 def registry(kind, op, args):
@@ -622,7 +664,8 @@ def read_register(kind):
     if os.path.exists(path):
         for line in open(path):
             if re.match(r'^\| %s\d+ \|' % prefix, line):
-                out.append([c.strip() for c in line.strip().strip('|').split('|')])
+                out.append([c.strip().replace('&#36;', '$')
+                            for c in line.strip().strip('|').split('|')])
     return out
 
 
@@ -809,6 +852,8 @@ def main():
         cmd_status(a[1:])
     elif cmd == 'unexec' and len(a) > 1:
         cmd_unexec(a[1:])
+    elif cmd == 'dollars' and len(a) > 1:
+        cmd_dollars([x for x in a[1:] if x != '--check'], '--check' in a)
     elif cmd == 'cut' and len(a) == 3:
         cmd_cut(parse_addr(a[1]), a[2])
     elif cmd == 'reclassify' and len(a) in (2, 3):

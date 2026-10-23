@@ -37,8 +37,8 @@ flowchart TD
 | [CurrentRoom](../src/variables.asm#L10) | $21, The Bathroom ([START_ROOM](../src/constants.asm#L49)) |
 | [WillyAttrAddr](../src/variables.asm#L328) | $5DB4: row 13, column 20 ([WILLY_START_ATTR](../src/constants.asm#L52)) |
 | [ItemsCollectedText](../src/variables.asm#L125) | "000" |
-| [ItemCounter](../src/variables.asm#L401) | [FirstItemIndex](../src/itemtable.asm#L10) ($AD) |
-| item bytes $A4AD-$A4FF | bit 6 set (present) |
+| [ItemCounter](../src/variables.asm#L401) | [FirstItemIndex](../src/itemtable.asm#L10) (&#36;AD) |
+| item bytes $A4AD-&#36;A4FF | bit 6 set (present) |
 | [TuneFlags](../src/variables.asm#L474) | bit 0 set; bit 1 (tune off) kept |
 
 Not reset: [CheatProgress](../src/variables.asm#L489) (the cheat stays on across games, F106), the

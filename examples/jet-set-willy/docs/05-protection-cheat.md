@@ -67,7 +67,7 @@ out of the endless slot loop.
 
 ### The code table
 
-[CodeTable](../src/codetable.asm#L21) ($9E00) has 256 bytes; cells 0-$B2 are used. The stored value
+[CodeTable](../src/codetable.asm#L21) ($9E00) has 256 bytes; cells 0-&#36;B2 are used. The stored value
 is the code minus the cell index, so the table itself does not show the
 codes. Its bytes look like a piece of some other Z80 program (83 distinct
 values in the 180 used entries; they disassemble as code with variables at

@@ -47,7 +47,7 @@ flowchart TD
 | 2 | `LDIR` x2 | empty-room attributes $5E00 → $5C00, bitmap $7000 → $6000 | [Drawing](05-drawing.md) |
 | 3 | [MoveEntities](../src/entities.asm#L42) | guardians and ropes one step (arrows move when drawn) | [Entities](05-entities.md#movement) |
 | 4 | [MoveWilly](../src/willy.asm#L78) | rope, jump, ground test, fall, keys, walking; skipped in ending stage 3 | [Willy](05-willy.md) |
-| 5 | [ExitRoomUp](../src/exits.asm#L50) | when Y wrapped past the top ($E1 or more) | [Rooms](05-rooms.md#exits) |
+| 5 | [ExitRoomUp](../src/exits.asm#L50) | when Y wrapped past the top (&#36;E1 or more) | [Rooms](05-rooms.md#exits) |
 | 6 | [PlaceWilly](../src/specialrooms.asm#L161) | ramp offset, marks his cells ink 7 ([MarkWillyCell](../src/specialrooms.asm#L224)), nasty test, draws him ([DrawWilly](../src/output.asm#L23)); skipped in stage 3 | [Willy](05-willy.md#drawing-willy) |
 | 7 | [CheckToiletReached](../src/specialrooms.asm#L82) | stage 2 only: stage 3 at the toilet | [Ending](05-items-ending.md) |
 | 8 | [UpdateBedroom](../src/specialrooms.asm#L22) | figure in the Master Bedroom; otherwise [DrawToilet](../src/specialrooms.asm#L107) in the Bathroom | [Ending](05-items-ending.md) |

@@ -42,6 +42,9 @@ docs/img/                 PNGs (committed)
   in the code itself.
 - State what is verified and what is inferred. Mark guesses as such.
 - Numbers: hex with `$`, decimal in parentheses where it helps (`$0300` (768)).
+  GitHub reads `$...$` as inline maths, so `$A000-$A3FF` shows `$A000-$` as
+  a formula; `tools/zxq.py dollars docs/*.md` writes every such `$` as
+  `&#36;` (renders as `$`; code spans are left alone).
 - No filler, no marketing tone, no metaphors.
 
 ## Audit before writing
@@ -101,4 +104,4 @@ Check every image by looking at it before linking it.
 All sections exist, every subsystem routine of the main loop is mentioned
 with a link, every graphic and level is in the gallery, and the links resolve
 (`grep -o '](\.\./[^)#]*' docs/*.md | sed 's/.*](//' | sort -u | xargs ls`
-from `docs/`).
+from `docs/`), and `tools/zxq.py dollars --check docs/*.md` reports nothing.

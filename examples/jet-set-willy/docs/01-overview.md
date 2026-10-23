@@ -80,16 +80,16 @@ the printer buffer.
 | $9C40-$9DFF | 448 | sprites: foot, barrel, figure (4), Willy (8) | [SpriteFoot](../src/charsprites.asm#L25) |
 | $9E00-$9EFF | 256 | colour-code table | [CodeTable](../src/codetable.asm#L21) |
 | $9F00-$9FFF | 256 | unused (zeros) | [L9F00](../src/codetable.asm#L44) |
-| $A000-$A3FF | 1024 | 128 entity definitions of 8 bytes; the last byte is the first item index | [EntityDefs](../src/entitydefs.asm#L88), [FirstItemIndex](../src/itemtable.asm#L10) |
-| $A400-$A5FF | 512 | item table, two halves of 256 bytes | [ItemRoomTable](../src/itemtable.asm#L46), [ItemPositionTable](../src/itemtable.asm#L63) |
-| $A600-$BFFF | 6656 | 26 sprite pages of eight 16x16 sprites | [SpritesToilet](../src/sprites.asm#L16) |
-| $C000-$FFFF | 16384 | 64 room records of 256 bytes (rooms 0-60 and three stray pages) | [RoomOffLicence](../src/rooms.asm#L98) |
+| $A000-&#36;A3FF | 1024 | 128 entity definitions of 8 bytes; the last byte is the first item index | [EntityDefs](../src/entitydefs.asm#L88), [FirstItemIndex](../src/itemtable.asm#L10) |
+| $A400-&#36;A5FF | 512 | item table, two halves of 256 bytes | [ItemRoomTable](../src/itemtable.asm#L46), [ItemPositionTable](../src/itemtable.asm#L63) |
+| $A600-&#36;BFFF | 6656 | 26 sprite pages of eight 16x16 sprites | [SpritesToilet](../src/sprites.asm#L16) |
+| $C000-&#36;FFFF | 16384 | 64 room records of 256 bytes (rooms 0-60 and three stray pages) | [RoomOffLicence](../src/rooms.asm#L98) |
 
 The code and data from $8000 to $FFFF are one 32 KB block. The block from
 $8000 to $9EFF can be moved by $100 and still play the same (`make
-shift-test`); $A000-$FFFF must stay where it is because definitions, items,
+shift-test`); $A000-&#36;FFFF must stay where it is because definitions, items,
 sprites and rooms are found by page arithmetic (`$C0 OR room`, `$1400 +
-index` times 8, `H = $A4/$A5`), see [`re/notes.md`](../re/notes.md).
+index` times 8, `H = $A4/&#36;A5`), see [`re/notes.md`](../re/notes.md).
 
 ## How it loads
 
@@ -116,7 +116,7 @@ to BASIC). `RANDOMIZE USR 33792` calls $8400.
 
 At $8400 [StartProgram](../src/start.asm#L16) disables interrupts, writes the address of
 [RunCodeCheck](../src/protection.asm#L15) at $5BFE by hand and points SP at it, then runs a loop over
-$8500-$FFFF that looks like a decryptor but writes back every byte as it
+$8500-&#36;FFFF that looks like a decryptor but writes back every byte as it
 read it (observed: no byte differs afterwards, F1). The loop costs about 22
 frames. Its `RET` takes the planted word and enters [RunCodeCheck](../src/protection.asm#L15), the
 colour-code screen ([Protection](05-protection-cheat.md)). After a correct

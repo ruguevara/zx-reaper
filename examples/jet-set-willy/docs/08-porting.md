@@ -17,7 +17,7 @@ control flow does not map onto ordinary functions.
 | attributes via buffer | [FrameLoop_Attrs](../src/mainloop.asm#L151) copies $5C00 → $5800 (512 bytes) | present the work attributes |
 | border (port $FE bits 0-2) | [EnterRoom](../src/title.asm#L285), [CycleColours](../src/mainloop.asm#L250), [ResumeAfterPause](../src/mainloop.asm#L326); every sound routine rewrites it with the room's border colour (black for the tunes and the death) | a border colour call |
 | beeper (port $FE bits 3-4) | [PlayTune](../src/output.asm#L154), [PlayGameTune](../src/mainloop.asm#L352), [PlaySweepSound](../src/output.asm#L230), [MoveWilly](../src/willy.asm#L78) (jump and fall clicks), [UpdateItems](../src/items.asm#L33), [DrawEntities](../src/entities.asm#L245) (arrow chirp), [PlayDeath](../src/mainloop.asm#L456), [ShowGameOver](../src/mainloop.asm#L506) | square waves of the given half-periods (see below) |
-| keyboard (port $FE in) | [ReadCodeSlot](../src/protection.asm#L153) ($F7FE, $BFFE), [ReadStartInput](../src/output.asm#L196) and [ScrollTitleMessage](../src/title.asm#L217) ($AFFE), [ReadWillyInput](../src/willy.asm#L255) ($DFFE, $FBFE, $E7FE, $EFFE, $7EFE), [FrameLoop_Keys](../src/mainloop.asm#L200) ($FEFE, $7FFE, $FDFE, high byte $02), [CheckDeath](../src/mainloop.asm#L334) ($BFFE), [CheckTeleport](../src/mainloop.asm#L388) ($EFFE, $F7FE), [CheckCheatKeys](../src/mainloop.asm#L407) ($FBFE, $DFFE), [ShowAttrMap](../src/output.asm#L264) ($FEFE) | a key-matrix read returning active-low bits |
+| keyboard (port $FE in) | [ReadCodeSlot](../src/protection.asm#L153) (&#36;F7FE, $BFFE), [ReadStartInput](../src/output.asm#L196) and [ScrollTitleMessage](../src/title.asm#L217) (&#36;AFFE), [ReadWillyInput](../src/willy.asm#L255) (&#36;DFFE, $FBFE, $E7FE, $EFFE, $7EFE), [FrameLoop_Keys](../src/mainloop.asm#L200) (&#36;FEFE, $7FFE, $FDFE, high byte $02), [CheckDeath](../src/mainloop.asm#L334) (&#36;BFFE), [CheckTeleport](../src/mainloop.asm#L388) (&#36;EFFE, $F7FE), [CheckCheatKeys](../src/mainloop.asm#L407) (&#36;FBFE, $DFFE), [ShowAttrMap](../src/output.asm#L264) (&#36;FEFE) | a key-matrix read returning active-low bits |
 | Kempston (port $1F) | [ShowTitleScreen](../src/title.asm#L86) (detection), [ReadStartInput](../src/output.asm#L196), [ReadWillyInput](../src/willy.asm#L255) | joystick state; detection can be replaced by a setting |
 | ROM font $3D00 | [PrintChar](../src/output.asm#L114) | a copy of the 96 ROM glyphs (768 bytes) |
 | FRAMES $5C78 | [AskColourCode](../src/protection.asm#L63) reads and writes it | any seed; the code needs only a cell number |
@@ -56,13 +56,13 @@ game over, the title tune). The pitch formulas:
 ## Data formats used as they are
 
 All formats are in [Data structures](02-data.md). A port can load the
-32 KB block $8000-$FFFF and use these offsets:
+32 KB block $8000-&#36;FFFF and use these offsets:
 
 | Data | Address | Record |
 | --- | --- | --- |
 | rooms | $C000 + 256 * N | 256 bytes, layout + tiles + fields + slots |
 | entity definitions | $A000 + 8 * I | 8 bytes |
-| items | $A400 + i, $A500 + i, i = $AD-$FF | 2 bytes |
+| items | $A400 + i, $A500 + i, i = $AD-&#36;FF | 2 bytes |
 | sprites | page * 256 + 32 * frame | 32 bytes, 16 rows of 2 |
 | Willy | $9D00 + $80 * facing + $20 * frame | |
 | row table | $8200 | can be computed |

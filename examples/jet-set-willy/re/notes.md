@@ -36,18 +36,18 @@ routine or data block is annotated.
 | $9E00-$9EB3 | code table: grid location L -> code byte - L | data |
 | $9EB4-$9EFF | leftover bytes | unknown |
 | $9F00-$9FFF | unused (zeros) | unused |
-| $A000-$A3FE | entity definitions, 8 bytes each (index*8+$A000) | data |
+| $A000-&#36;A3FE | entity definitions, 8 bytes each (index*8+&#36;A000) | data |
 | $A3FF | index of the first item in the item table | data/var |
-| $A400-$A5FF | item table: two 256-byte halves | data |
-| $A600-$BFFF | sprites, 32 bytes each (toilet at $A600) | data:sprites |
-| $C000-$FFFF | 64 rooms, 256 bytes each | data:rooms |
+| $A400-&#36;A5FF | item table: two 256-byte halves | data |
+| $A600-&#36;BFFF | sprites, 32 bytes each (toilet at $A600) | data:sprites |
+| $C000-&#36;FFFF | 64 rooms, 256 bytes each | data:rooms |
 
 Room format (256 bytes, copied to $8000): $00-$7F layout, 2 bits per cell
-(512 cells); $80-$9F name; $A0-$D5 six tiles of 9 bytes (attribute + 8 pixel
+(512 cells); $80-$9F name; $A0-&#36;D5 six tiles of 9 bytes (attribute + 8 pixel
 rows: background, floor, wall, nasty, ramp, conveyor); $D6 conveyor direction,
 $D7 conveyor address (word), $D9 conveyor length; $DA ramp direction, $DB ramp
-address (word), $DD ramp length; $DE border colour; $DF-$E0 unknown; $E1-$E8
-item graphic; $E9-$EC exits (left, right, up, down); $ED-$EF unknown; $F0-$FF
+address (word), $DD ramp length; $DE border colour; $DF-&#36;E0 unknown; $E1-&#36;E8
+item graphic; $E9-&#36;EC exits (left, right, up, down); $ED-&#36;EF unknown; $F0-&#36;FF
 eight entity slots (2 bytes each: definition index, start data).
 
 ## Open questions
@@ -55,14 +55,14 @@ eight entity slots (2 bytes each: definition index, start data).
 ## Init (zxinit.py)
 
 - original: `original/game.tap`
-- code region: $8000-$FFFF
+- code region: $8000-&#36;FFFF
 - handover PC: $8400
 
 ## Loader and protection
 
 - Tape: BASIC "Jetset1" (autostart line 10) loads code "Jetset2" 32768 bytes at
   $8000 and jumps to $8400. Standard ROM blocks; no turbo, no encryption.
-- $8400 looks like a decryptor: it XORs each byte of $8500-$FFFF with L and H
+- $8400 looks like a decryptor: it XORs each byte of $8500-&#36;FFFF with L and H
   but stores the original byte back, so nothing changes. It then RETs to $869F
   through a stack word it planted at $5BFE.
 - Colour-code protection: $86C3 shows a grid location (from FRAMES at $5C78) and
@@ -92,15 +92,15 @@ The RZX speed run "jsw7.56am" is a different build (25 KB differ) and was not us
 
 `make shift-test` (SHIFT=0x100) passes on all input scripts (code, title,
 start, pause, play: 58,000 frames with room changes, deaths and game over).
-Only $8000-$9EFF moves (`SHIFT_END` in re/layout.mk); $A000-$FFFF stays at its
+Only $8000-$9EFF moves (`SHIFT_END` in re/layout.mk); $A000-&#36;FFFF stays at its
 address, and +$100 is the largest shift that fits:
 - memory is used up to $FFFF and $5C00-$7FFF holds the work buffers, so the
   region cannot grow upwards or move down; the only free page is $9F00
   (unused zeros, which the Attic arrow bug writes into, F92);
 - entity definitions are found as $1400+index, times 8 (= $A000+8*index), so
   the table must stay at $A000; rooms are found as page $C0 OR room, so the
-  room table must stay at $C000; items use H=$A4/$A5 and sprites are named by
-  page bytes in the definitions (pages $AB-$BF stay; page $9C moves and is
+  room table must stay at $C000; items use H=&#36;A4/&#36;A5 and sprites are named by
+  page bytes in the definitions (pages $AB-&#36;BF stay; page $9C moves and is
   written as SpriteFoot>>8 in the five definitions that use it);
 - the moved tables are page aligned (RowAddressTable, RopeStepTable, CodeTable,
   the sprite pages $9C/$9D and the room buffer are read with H or D set to the

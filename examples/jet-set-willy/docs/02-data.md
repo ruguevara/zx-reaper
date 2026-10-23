@@ -13,7 +13,7 @@ Three kinds of coordinates are used throughout.
 
 | Name | Meaning | Range |
 | --- | --- | --- |
-| Y index | twice the pixel row inside the playing area: an index into [RowAddressTable](../src/buffers.asm#L138), which holds 2 bytes per row. Y / 2 = pixel row, Y / 16 = character row | 0-$FE (rows 0-127) |
+| Y index | twice the pixel row inside the playing area: an index into [RowAddressTable](../src/buffers.asm#L138), which holds 2 bytes per row. Y / 2 = pixel row, Y / 16 = character row | 0-&#36;FE (rows 0-127) |
 | attribute address | address of a cell in the work attribute buffer, $5C00 + 32 * row + column. Low 5 bits = column, the rest = row; high byte $5C for rows 0-7, $5D for rows 8-15 | $5C00-$5DFF |
 | column | 0-31, the byte column of the bitmap | |
 
@@ -38,7 +38,7 @@ All at $8420 and $85CB-$85E4 ([`src/variables.asm`](../src/variables.asm)).
 | $85D2 | [WillyFrame](../src/variables.asm#L308) | walk frame 0-3 (also the step timer) |
 | $85D3 | [WillyAttrAddr](../src/variables.asm#L328) | word: attribute address of Willy's top-left cell |
 | $85D5 | [WillyJumpStep](../src/variables.asm#L344) | jump step 0-18 |
-| $85D6 | [WillyRope](../src/variables.asm#L360) | 0 no rope, 1-$20 segment held, $F0-$FF just let go |
+| $85D6 | [WillyRope](../src/variables.asm#L360) | 0 no rope, 1-$20 segment held, $F0-&#36;FF just let go |
 | $85D7-$85DD | [WillySavedState](../src/variables.asm#L386) | copy of $85CF-$85D5 made at room entry, restored after a death |
 | $85DE | [ItemCounter](../src/variables.asm#L401) | starts at $AD (first item index), wraps to 0 when all 83 are collected |
 | $85DF | [EndingStage](../src/variables.asm#L432) | 0 play, 1 all items, 2 running to the toilet, 3 at the toilet |
@@ -76,7 +76,7 @@ description is in the header of [RoomOffLicence](../src/rooms.asm#L98); F26-F33,
 | $DB | 2 | [RoomRampAddr](../src/buffers.asm#L61) | attribute address of the lowest ramp cell |
 | $DD | 1 | [RoomRampLen](../src/buffers.asm#L63) | ramp length in cells, 0 = none |
 | $DE | 1 | [RoomBorder](../src/buffers.asm#L65) | border colour (written whole to port $FE) |
-| $DF | 2 | | not read by any code; rooms 0-4 hold words $A000-$A0C0 (F32) |
+| $DF | 2 | | not read by any code; rooms 0-4 hold words $A000-&#36;A0C0 (F32) |
 | $E1 | 8 | [RoomItemGfx](../src/buffers.asm#L68) | the item picture of the room |
 | $E9 | 1 | [RoomExitLeft](../src/buffers.asm#L70) | room to the left |
 | $EA | 1 | [RoomExitRight](../src/buffers.asm#L72) | room to the right |
@@ -136,7 +136,7 @@ page and the rooms that use it.
 
 | Address | Contents |
 | --- | --- |
-| $A3FF [FirstItemIndex](../src/itemtable.asm#L10) | $AD: the first item index; items are indexes $AD-$FF (83) |
+| $A3FF [FirstItemIndex](../src/itemtable.asm#L10) | $AD: the first item index; items are indexes $AD-&#36;FF (83) |
 | $A400 + i [ItemRoomTable](../src/itemtable.asm#L46) | bits 0-5 room, bit 6 item still present, bit 7 bottom half of the room |
 | $A500 + i [ItemPositionTable](../src/itemtable.asm#L63) | bits 0-4 column, bits 5-7 row inside the half |
 
@@ -159,7 +159,7 @@ page * 256 + 32 * F.
 | $9C80-$9CFF [SpriteFigure0](../src/charsprites.asm#L80) | the figure of the Master Bedroom, 4 frames |
 | $9D00-$9D7F [SpriteWillyRight0](../src/charsprites.asm#L193) | Willy facing right, 4 frames |
 | $9D80-$9DFF [SpriteWillyLeft0](../src/charsprites.asm#L298) | Willy facing left, 4 frames |
-| $A600-$BFFF | 26 pages of guardian sprites; $A6 also holds the toilet; $A7-$AA and $B3 are zero, $B1 is not used (F59) |
+| $A600-&#36;BFFF | 26 pages of guardian sprites; $A6 also holds the toilet; $A7-&#36;AA and $B3 are zero, $B1 is not used (F59) |
 
 The page list with their pictures is in the [gallery](07-graphics.md#sprite-pages).
 

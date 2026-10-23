@@ -21,7 +21,7 @@ bedroom figure is "the figure", not "Maria").
   left in the ASM (most are `>>8`, `&$FF` and mask idioms).
 - Relocation: `$8000-$9EFF` assembled at +$100 plays frame-identical on five
   input scripts (58,000 frames, room changes, deaths, game over). The rest
-  ($A000-$FFFF) is reached by page arithmetic and memory is full, so it stays
+  (&#36;A000-&#36;FFFF) is reached by page arithmetic and memory is full, so it stays
   fixed; the limits are in `re/notes.md`.
 - Coverage 97% of code instructions (scripts, fuzz, the "Perfect JSW" RZX,
   pokes for the ending).
@@ -51,7 +51,7 @@ premise (a published Horace disassembly) failed; nothing else.
 
 Tool: `tools/zxcompare.py ours.skool jsw.skool --start 0x8000 --end 0x10000`.
 
-**Bytes:** identical over $8000-$FFED: same version of the game.
+**Bytes:** identical over $8000-&#36;FFED: same version of the game.
 
 **Classification by byte:**
 
@@ -66,7 +66,7 @@ Tool: `tools/zxcompare.py ours.skool jsw.skool --start 0x8000 --end 0x10000`.
 Code vs non-code: 99.8%. The differences are type letters for the same
 meaning: both call $93BB and $96F4 unused routines (ours `c`, reference `u`),
 both call $8141-$81FF and $9718-$97FF unused (ours `u`, reference `b`), the
-zero sprite pages $A680-$AAFF and room pages 61-63 are data described as
+zero sprite pages $A680-&#36;AAFF and room pages 61-63 are data described as
 unused in ours and `u` in the reference (which identifies 61-63 as TRS-DOS
 code; ours says "Z80 code, not a room"). The room buffer is `b` in ours and
 `g` in the reference.
