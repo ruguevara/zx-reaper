@@ -11,13 +11,13 @@
 ; reads the keyboard at ReadKeys.
 ;
 ; Demo mode ends on any key. All eight half-rows are read at once (port high
-;      byte $00); if any key bit is low the
+; byte $00); if any key bit is low the
 ; routine drops its return address and jumps to GameOver, which flashes the
-;         screen with a rising tone and restarts
+; screen with a rising tone and restarts
 ; the title screen at ShowTitle. (Measured: this path leaves SP two bytes
-;     higher after every demo abort, because the
+; higher after every demo abort, because the
 ; return address popped here is followed by the POP HL at $6803 in HoraceDies,
-;        which expects the caller's return address
+; which expects the caller's return address
 ; of the death path from CheckGuardContact instead.)
 ;
 ; Keyboard (real game): Q or 4 is up, Z or 3 is down, P or 2 is right, I or 1
@@ -385,7 +385,7 @@ PlanMoves_10:
 ; as a source of random numbers; touches no port or screen.
 ;
 ; O:HL New position of the guard, also stored in its record (not set when the
-;      wait counter is non-zero)
+; wait counter is non-zero)
 ChooseGuardMove:
   LD A,(GuardWait)        ; wait counter of the guard
   AND A

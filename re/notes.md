@@ -4,11 +4,6 @@ Facts that are not yet in the skool/asm comments: memory map, loader stages,
 open questions. Keep it short; move each fact into the source once its
 routine or data block is annotated.
 
-## Memory map
-
-| Range | What | Status |
-| --- | --- | --- |
-
 ## Open questions
 
 ## Init (zxinit.py)
@@ -73,13 +68,13 @@ $663D and $6337. Annotate those from the code.
 - Guard records: $6DE3/$6E0E/$6E39/$6E64 = guards 1-4 (43 bytes), working copy
   $6DB8 (LoadGuardRecord $6A3F / SaveGuardRecord $6A6A), $6DB6 = pointer to the
   source record. Fields: +0 position, +2 direction, +3 ?, +4 new position,
-  +6 non-zero = inactive, +7..+42 saved background under the sprite
+  +6 GuardWait (pause after being eaten), +7..+42 saved background under the sprite
   (4 cells x 9 bytes: attribute + 8 bitmap rows), not "objects".
 - $6DA6-$6DAD guard release timers (4 words); $6B0A number of released guards;
   $6DAE bell timer (guards edible while non-zero; inferred); $6DB2-$6DB5
   direction scores of the guard AI, $6DB6 doubles as their end marker.
-- $7C62 game pace (1-8, lower = faster); $7C63 maze number; $7C65 countdown
-  to the next bell; $7C67 random pointer into the ROM; $7C69 sound mask
+- $7C62 game pace (1-8, lower = faster); $7C63 maze number; $7C65 FruitTimer
+  (countdown to the next fruit drop); $7C67 random pointer into the ROM; $7C69 sound mask
   ($1F on, $07 off); $7CC4 bell position, $7CC6 bell animation counter.
 - $6B0B: 0 = title, 1 = playing/demo text enabled (PrintChar draws only if
   bit 0 set). $6B08 title-loop countdown.
@@ -101,8 +96,8 @@ $663D and $6337. Annotate those from the code.
   (pause countdown, 90 after being eaten). Eating: flower +10, anything else
   (fruit, bell) +50; guard +100 while the bell timer $6DAE runs.
   Bell: $7CC4 BellPos (0 = none), $7CC6 BellTick (bits 3-5 = frame at $7F07).
-  Possible bug: `OR C` at $697F (C is always $3A) makes the GuardsReleased
-  increment unreachable; verify before claiming it.
+  Bug: `OR C` at $697F (meant OR E). C is $3A while the bell is in the maze and
+  0 after it is taken, so GuardsReleased counts only then (see the routine).
 - Names now exist for all of these as @label; use them in comments as #R$XXXX.
 - Wave 2 group E: $651E EraseSprites, $655B EraseGuard (+$6568 EraseGuard_Always),
   $6622 DrawGuards, $663D DrawGuard, $6821 DrawHorace (+$6832 DrawHorace_Sprite).

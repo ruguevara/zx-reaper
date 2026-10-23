@@ -3,7 +3,7 @@
 ;
 ; GuardTimers is an array of four words, one per guard, in the order of the
 ; guard records (guard 1 = GuardRecords up to guard 4 = Guard4Record): $6DA6
-; guard 1, L6DA8 guard 2, L6DAA guard 3, L6DAC guard 4. The timer counts
+; guard 1, Guard2Timer guard 2, Guard3Timer guard 3, Guard4Timer guard 4. The timer counts
 ; main-loop passes until the guard is released; a guard whose timer is 0 is in
 ; the maze (moved by PlanMoves, erased and drawn by EraseSprites and
 ; DrawGuards, tested by CheckGuardContact and UpdateFruitDrops).
@@ -26,7 +26,7 @@ GuardTimers:
 ; (see there for the meaning and for who sets and counts it). It belongs to the
 ; guard whose record is at Guard2Record. Initial value after ResetGuardTimers:
 ; n*256 passes (n = game pace GuardInterval, 8 at the start of a game).
-L6DA8:
+Guard2Timer:
   DEFW $0000
 
 ; Guard release timer: guard 3 (word, part of GuardTimers)
@@ -35,7 +35,7 @@ L6DA8:
 ; (see there for the meaning and for who sets and counts it). It belongs to the
 ; guard whose record is at Guard3Record. Initial value after ResetGuardTimers:
 ; 2*n*256 passes (n = game pace GuardInterval, 8 at the start of a game).
-L6DAA:
+Guard3Timer:
   DEFW $0000
 
 ; Guard release timer: guard 4 (word, part of GuardTimers)
@@ -44,7 +44,7 @@ L6DAA:
 ; (see there for the meaning and for who sets and counts it). It belongs to the
 ; guard whose record is at Guard4Record. Initial value after ResetGuardTimers:
 ; 4*n*256 passes (n = game pace GuardInterval, 8 at the start of a game).
-L6DAC:
+Guard4Timer:
   DEFW $0000
 
 ; Bell timer: guards can be eaten while non-zero (word)
@@ -200,7 +200,7 @@ GuardRecords:
 ; guard moves on, and MaybeDropFruit overwrites it to leave a bonus fruit
 ; behind
 ;
-; The release timer of guard 2 is the word at L6DA8. When a maze starts, or
+; The release timer of guard 2 is the word at Guard2Timer. When a maze starts, or
 ; Horace loses a life, Start puts the guard at the first guard position of the
 ; maze descriptor (MazeDescriptor+4) if its timer is zero, otherwise at the
 ; second one (MazeDescriptor+6, where Horace enters). LoadGuardRecord copies
@@ -241,7 +241,7 @@ Guard2Record:
 ; guard moves on, and MaybeDropFruit overwrites it to leave a bonus fruit
 ; behind
 ;
-; The release timer of guard 3 is the word at L6DAA. When a maze starts, or
+; The release timer of guard 3 is the word at Guard3Timer. When a maze starts, or
 ; Horace loses a life, Start puts the guard at the first guard position of the
 ; maze descriptor (MazeDescriptor+4) if its timer is zero, otherwise at the
 ; second one (MazeDescriptor+6, where Horace enters). LoadGuardRecord copies
@@ -282,7 +282,7 @@ Guard3Record:
 ; guard moves on, and MaybeDropFruit overwrites it to leave a bonus fruit
 ; behind
 ;
-; The release timer of guard 4 is the word at L6DAC. When a maze starts, or
+; The release timer of guard 4 is the word at Guard4Timer. When a maze starts, or
 ; Horace loses a life, Start puts the guard at the first guard position of the
 ; maze descriptor (MazeDescriptor+4) if its timer is zero, otherwise at the
 ; second one (MazeDescriptor+6, where Horace enters). LoadGuardRecord copies

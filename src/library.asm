@@ -349,9 +349,9 @@ SetAttrPointer:
 ; the attribute area; nothing is written.
 ;
 ;   HL Screen offset of the top-left cell (a screen address without the $4000
-;      base)
+; base)
 ; O:A Attribute of the object found ($3B guard, $3A bell, $3C flower), 0 if
-;     none
+; none
 ; O:F Z set when nothing was found
 ; O:BC' Corrupted
 ; O:DE' Corrupted
@@ -435,9 +435,9 @@ MergeObjectAttr_3:
 ; Hardware: reads the screen bitmap and the attribute area.
 ;
 ;   HL Screen offset of the top-left cell (a screen address without the $4000
-;      base)
+; base)
 ; O:HL Corrupted: holds the original DE (the pops are in the wrong order; no
-;      caller uses it)
+; caller uses it)
 ; O:DE Corrupted: holds the original HL
 ; O:BC' Corrupted
 ; O:HL' Corrupted
@@ -544,11 +544,11 @@ SaveBackgroundCell_1:
 ;
 ;   A Direction (0 up, 1 right, 2 down, 3 left); only the low two bits are used
 ;   HL Screen offset of the sprite's top-left cell (a screen address without
-;      the $4000 base)
+; the $4000 base)
 ; O:A 0 nothing in the way (move allowed), 1 vertical wrap pad ahead
 ;   Horace is carried to the opposite edge, see PlanMoves , 2 edge arrows ahead
-;   the right-hand ones leave the maze , 3 wall ahead (blocked). Mixed
-;   pads and arrows give $82, which callers treat as blocked.
+; the right-hand ones leave the maze , 3 wall ahead (blocked). Mixed
+; pads and arrows give $82, which callers treat as blocked.
 ; O:F Corrupted
 ; O:BC' Corrupted
 ; O:DE' Corrupted

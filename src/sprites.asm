@@ -129,7 +129,7 @@ EraseGuard_0:
 ; score is the word at $7C73; the code then falls into ShowScore.
 ;
 ; Hardware: reads the attribute area; the fall-through writes the screen and
-;           the speaker (see ShowScore).
+; the speaker (see ShowScore).
 EatObject:
   LD A,(WrapPause)        ; frozen after a wrap: nothing to eat
   AND A

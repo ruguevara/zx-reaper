@@ -250,8 +250,8 @@ FruitCellsA:
 
 ; Bonus fruit B graphic (4 saved-background cells)
 ;
-; One of the two shapes of the bonus fruit, two round bodies on crossed stalks
-; (a pair of cherries). A 16x16 picture of 2x2 character cells in the same
+; One of the two shapes of the bonus fruit: a strawberry (the other, FruitCellsA,
+; is a cherry). A 16x16 picture of 2x2 character cells in the same
 ; format as the saved background of a guard record (6DEA): four cells of 9
 ; bytes each in the order top-left, top-right, bottom-left, bottom-right, every
 ; cell being its attribute byte (the top two cells are green, ATTR_FLOWER; the

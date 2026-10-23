@@ -389,17 +389,17 @@ DrawHorace_1:
 ; from the maze descriptor, afterwards 0 until the next maze).
 ;
 ; Pick-up test: d = Horace's position minus the bell's position (both screen
-;         offsets of the top-left cell of a 2x2
+; offsets of the top-left cell of a 2x2
 ; block). Horace takes the bell when d is 0 (same place), -1 or +1 (a cell left
-;         or right), -32 (a cell above) or +33
+; or right), -32 (a cell above) or +33
 ; a cell below and a cell to the right . The other overlapping offsets (+32,
 ;                                      +31, -31, -33) are not tested.
 ; While the bell is not taken it is redrawn every pass as a 16x16 sprite in the
-;       colour ATTR_BELL, using one of the
+; colour ATTR_BELL, using one of the
 ; four frames at $7F07 (32 bytes each). The animation counter BellTick is
-;      incremented on every pass; its bits 3-5
+; incremented on every pass; its bits 3-5
 ; count 0-7 every 8 passes, mirrored into the frame sequence 0, 1, 2, 3, 3, 2,
-;       1, 0.
+; 1, 0.
 ;
 ; Taking the bell (TakeBell, never reached in the coverage maps, read from the
 ; code and confirmed in the simulator): the bell position is cleared and the
@@ -544,14 +544,14 @@ UpdateFruitDrops_1:
 ;
 ;          Nothing happens while the guard is waiting (GuardWait is not zero:
 ;                  CheckGuardContact sets it to 90 when Horace, after
-;          picking up the bell, touches a guard and the guards are sent back to
-;                  their start position; DrawGuard counts it
-;          down) or while the saved background already holds a red cell (the
-;                bell, or a fruit). Otherwise the word at
-;          #R$7C65 is counted down once per call; at zero it is re-armed with
-;                  800 plus a random 0-1023 and one of the two
-;          fruit shapes (chosen at random) is planted. The timer is first set
-;                to 2000 by Start when a maze starts.
+; picking up the bell, touches a guard and the guards are sent back to
+; their start position; DrawGuard counts it
+; down) or while the saved background already holds a red cell (the
+; bell, or a fruit). Otherwise the word at
+; #R$7C65 is counted down once per call; at zero it is re-armed with
+; 800 plus a random 0-1023 and one of the two
+; fruit shapes (chosen at random) is planted. The timer is first set
+; to 2000 by Start when a maze starts.
 ; Hardware: none.
 ;
 ; O:HL Corrupted
@@ -608,15 +608,15 @@ MaybeDropFruit_2:
 ;
 ;          When a timer's high byte is zero and register C is zero,
 ;               GuardsReleased is incremented. C is not set here: it is
-;          left over from UpdateBell, which returns C=$3A while the bell is in
-;               the maze and C=0 after the bell has been
-;          taken. So the byte only counts once the bell is gone, and then it
-;                 counts every tick of every timer below
-;          $0100 (256 increments per guard, wrapping to 0) rather than released
-;                guards. The test was probably meant
-;          to be OR E ("timer reached zero"). Verified in the simulator: no
-;             change before the bell is taken, 256
-;          increments afterwards.
+; left over from UpdateBell, which returns C=$3A while the bell is in
+; the maze and C=0 after the bell has been
+; taken. So the byte only counts once the bell is gone, and then it
+; counts every tick of every timer below
+; $0100 (256 increments per guard, wrapping to 0) rather than released
+; guards. The test was probably meant
+; to be OR E ("timer reached zero"). Verified in the simulator: no
+; change before the bell is taken, 256
+; increments afterwards.
 ; Hardware: none.
 TickGuardTimers:
   LD HL,GuardTimers
@@ -635,7 +635,7 @@ TickGuardTimers_Loop:
   LD (HL),D
   DEC HL
   LD A,D
-  OR C                    ; BUG? C is not zero in practice (see above)
+  OR C                    ; BUG: meant OR E; C is 0 only after the bell is taken
   JR NZ,TickGuardTimers_0
   LD A,(GuardsReleased)
   INC A
@@ -683,7 +683,7 @@ CheckSoundKey:
 ; of $015E + $1E * level - 2 * 64 * (guards released) loop passes, where level
 ; is GuardInterval (8 at the start of a game, then lower, so the game gets
 ; faster) and the guards-released term (GuardsReleased, see TickGuardTimers) is
-; in practice zero. The rotation of that count uses RLA, so it is a multiply by
+; zero until the bell is taken; at paces 1-3 it can drive the count negative. The rotation of that count uses RLA, so it is a multiply by
 ; 64 only for counts 0-3. Hardware: the delay is a timing loop (Delay), so the
 ; CPU speed sets the game speed. The chime calls the ROM BEEPER routine, which
 ; drives the speaker through port $FE and re-enables interrupts when it returns
