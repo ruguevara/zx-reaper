@@ -1,12 +1,30 @@
-; Data block at 929C
-b$929C DEFB $CD,$44,$9D,$DD,$2A,$08,$B7,$DD
- $92A4 DEFB $7E,$01,$FE,$FF,$28,$0B,$CD,$CA
- $92AC DEFB $9B,$DD,$CB,$07,$96,$3E,$01,$18
- $92B4 DEFB $05,$CD,$44,$9D,$3E,$0A,$DD,$2A
- $92BC DEFB $0C,$B7,$DD,$86,$05,$FE,$80,$30
- $92C4 DEFB $17,$DD,$77,$05,$DD,$2A,$08,$B7
- $92CC DEFB $DD,$36,$01,$FF,$DD,$46,$00,$DD
- $92D4 DEFB $36,$10,$00,$DD,$23,$10,$F8,$C9
- $92DC DEFB $21,$46,$B1,$CD,$DD,$72,$3A,$EA
- $92E4 DEFB $B6,$C3,$7F,$97,$3E,$83,$C3,$64
- $92EC DEFB $A1
+; Command handler (via $C730)
+c$929C CALL $9D44      ;
+ $929F LD IX,($B708)   ;
+ $92A3 LD A,(IX+$01)   ;
+ $92A6 CP $FF          ;
+ $92A8 JR Z,$92B5      ;
+ $92AA CALL $9BCA      ;
+ $92AD RES 2,(IX+$07)  ;
+ $92B1 LD A,$01        ;
+ $92B3 JR $92BA        ;
+*$92B5 CALL $9D44      ;
+ $92B8 LD A,$0A        ;
+*$92BA LD IX,($B70C)   ;
+ $92BE ADD A,(IX+$05)  ;
+ $92C1 CP $80          ;
+ $92C3 JR NC,$92DC     ;
+ $92C5 LD (IX+$05),A   ;
+ $92C8 LD IX,($B708)   ;
+ $92CC LD (IX+$01),$FF ;
+ $92D0 LD B,(IX+$00)   ;
+*$92D3 LD (IX+$10),$00 ;
+ $92D7 INC IX          ;
+ $92D9 DJNZ $92D3      ;
+ $92DB RET             ;
+*$92DC LD HL,$B146     ;
+ $92DF CALL $72DD      ;
+ $92E2 LD A,($B6EA)    ;
+ $92E5 JP $977F        ;
+ $92E8 LD A,$83        ;
+ $92EA JP $A164        ;

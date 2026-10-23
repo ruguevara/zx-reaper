@@ -1,2 +1,5 @@
-; Data block at 73BD
-b$73BD DEFB $CD,$8B,$85,$AF,$C9
+; Control code 8 handler: print character A, return Z (jump table $7295, never
+; run)
+c$73BD CALL $858B    ;
+ $73C0 XOR A         ;
+ $73C1 RET           ;

@@ -1,2 +1,3 @@
-; Data block at 7425
-b$7425 DEFB $3A,$E8,$B6
+; Control code 17 handler: select by ($B6E8), then as $7428 (jump table $7295,
+; never run)
+c$7425 LD A,($B6E8)  ;

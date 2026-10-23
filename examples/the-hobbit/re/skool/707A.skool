@@ -1,0 +1,13 @@
+; Word lookup workspace
+;
+; Letters (5 bits each) of the word being looked up, its length ($708A), the
+; letters of the dictionary word found ($708B, up to 16) and their count
+; ($709B). Set by $6F47.
+@label=WordLetters
+g$707A DEFS $10
+@label=WordLength
+ $708A DEFB $00
+@label=MatchLetters
+ $708B DEFS $10
+@label=MatchLength
+ $709B DEFB $01

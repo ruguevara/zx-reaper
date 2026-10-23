@@ -1,2 +1,15 @@
-; Unused
-s$8BFB DEFS $01
+; Key table: 40 keys without shift
+;
+; Index = 5 x half-row + key position (half-rows $FEFE, $FDFE, $FBFE, $F7FE,
+; $EFFE, $DFFE, $BFFE, $7FFE, bit 0 first). Values: ASCII letters, $0D enter,
+; $20 space, $08 = key 5 and 0 (left, delete), $09 = 8 (right), $0A = 6 (down),
+; $5B = 7 (up), 0 = no character.
+@label=KeyTable
+b$8BFB DEFB $00,$5A,$58,$43,$56
+ $8C00 DEFB $41,$53,$44,$46,$47
+ $8C05 DEFB $51,$57,$45,$52,$54
+ $8C0A DEFB $00,$00,$00,$00,$08
+ $8C0F DEFB $08,$00,$09,$5B,$0A
+ $8C14 DEFB $50,$4F,$49,$55,$59
+ $8C19 DEFB $0D,$4C,$4B,$4A,$48
+ $8C1E DEFB $20,$00,$4D,$4E,$42

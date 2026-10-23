@@ -1,0 +1,11 @@
+; Message printer saved registers
+;
+; Set by $72DD on entry: A ($70DC), DE ($70DD), IX ($70E0); restored by control
+; codes ($735B).
+@label=SavedA
+g$70DC DEFB $00
+@label=SavedDE
+ $70DD DEFW $0000
+ $70DF DEFB $00
+@label=SavedIX
+ $70E0 DEFW $0000

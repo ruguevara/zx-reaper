@@ -1,6 +1,28 @@
-; Data block at 83CD
-b$83CD DEFB $06,$7A,$B4,$09,$8A,$B4,$0D,$9A
- $83D5 DEFB $B4,$42,$BE,$B4,$1F,$CA,$B4,$20
- $83DD DEFB $DA,$B4,$2A,$FA,$B4,$2E,$04,$B5
- $83E5 DEFB $29,$18,$B5,$1A,$2F,$B5,$05,$3E
- $83ED DEFB $B5,$FF,$CD,$F5,$83,$C3,$B3,$82
+; Table of messages by game state (11 records) and its end
+;
+; Records of 3 bytes: id, message address. FF ends. Looked up by $9DBD with
+; A=($C12B) at $83B0; the message is printed with $72DD.
+@label=StateMessageTable
+b$83CD DEFB $06
+ $83CE DEFW $B47A
+ $83D0 DEFB $09
+ $83D1 DEFW $B48A
+ $83D3 DEFB $0D
+ $83D4 DEFW $B49A
+ $83D6 DEFB $42
+ $83D7 DEFW $B4BE
+ $83D9 DEFB $1F
+ $83DA DEFW $B4CA
+ $83DC DEFB $20
+ $83DD DEFW $B4DA
+ $83DF DEFB $2A
+ $83E0 DEFW $B4FA
+ $83E2 DEFB $2E
+ $83E3 DEFW $B504
+ $83E5 DEFB $29
+ $83E6 DEFW $B518
+ $83E8 DEFB $1A
+ $83E9 DEFW $B52F
+ $83EB DEFB $05
+ $83EC DEFW $B53E
+ $83EE DEFB $FF

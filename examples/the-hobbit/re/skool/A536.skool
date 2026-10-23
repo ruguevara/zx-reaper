@@ -1,20 +1,53 @@
-; Data block at A536
-b$A536 DEFB $3A,$EA,$B6,$FE,$40,$C2,$76,$9F
- $A53E DEFB $C3,$0E,$91,$FD,$2A,$0C,$B7,$3A
- $A546 DEFB $E8,$B6,$FD,$BE,$01,$C2,$76,$9F
- $A54E DEFB $CD,$CA,$9B,$CD,$CA,$A5,$CA,$6C
- $A556 DEFB $A1,$CD,$44,$9D,$FD,$36,$01,$FF
- $A55E DEFB $C9,$FD,$2A,$0C,$B7,$3A,$E8,$B6
- $A566 DEFB $FD,$BE,$01,$CA,$76,$9F,$FD,$2A
- $A56E DEFB $08,$B7,$CD,$34,$9E,$CA,$76,$9F
- $A576 DEFB $3A,$E8,$B6,$CD,$CA,$9B,$DD,$7E
- $A57E DEFB $01,$FE,$FF,$28,$13,$3A,$EA,$B6
- $A586 DEFB $DD,$BE,$01,$DD,$7E,$01,$20,$EB
- $A58E DEFB $DD,$2A,$08,$B7,$DD,$36,$01,$FF
- $A596 DEFB $FD,$2A,$0C,$B7,$3A,$EA,$B6,$CD
- $A59E DEFB $E8,$9C,$FD,$86,$02,$38,$02,$3E
- $A5A6 DEFB $FF,$47,$DD,$2A,$08,$B7,$CD,$CA
- $A5AE DEFB $A5,$CA,$6C,$A1,$DD,$7E,$02,$FE
- $A5B6 DEFB $FF,$28,$07,$90,$21,$3E,$B1,$D2
- $A5BE DEFB $DD,$72,$CD,$44,$9D,$3A,$E8,$B6
- $A5C6 DEFB $FD,$77,$01,$C9
+; Command handlers ($A536, $A541, $A55F)
+c$A536 LD A,($B6EA)    ;
+ $A539 CP $40          ;
+ $A53B JP NZ,$9F76     ;
+ $A53E JP $910E        ;
+ $A541 LD IY,($B70C)   ;
+ $A545 LD A,($B6E8)    ;
+ $A548 CP (IY+$01)     ;
+ $A54B JP NZ,$9F76     ;
+ $A54E CALL $9BCA      ;
+ $A551 CALL $A5CA      ;
+ $A554 JP Z,$A16C      ;
+ $A557 CALL $9D44      ;
+ $A55A LD (IY+$01),$FF ;
+ $A55E RET             ;
+ $A55F LD IY,($B70C)   ;
+ $A563 LD A,($B6E8)    ;
+ $A566 CP (IY+$01)     ;
+ $A569 JP Z,$9F76      ;
+ $A56C LD IY,($B708)   ;
+ $A570 CALL $9E34      ;
+ $A573 JP Z,$9F76      ;
+ $A576 LD A,($B6E8)    ;
+*$A579 CALL $9BCA      ;
+ $A57C LD A,(IX+$01)   ;
+ $A57F CP $FF          ;
+ $A581 JR Z,$A596      ;
+ $A583 LD A,($B6EA)    ;
+ $A586 CP (IX+$01)     ;
+ $A589 LD A,(IX+$01)   ;
+ $A58C JR NZ,$A579     ;
+ $A58E LD IX,($B708)   ;
+ $A592 LD (IX+$01),$FF ;
+*$A596 LD IY,($B70C)   ;
+ $A59A LD A,($B6EA)    ;
+ $A59D CALL $9CE8      ;
+ $A5A0 ADD A,(IY+$02)  ;
+ $A5A3 JR C,$A5A7      ;
+ $A5A5 LD A,$FF        ;
+*$A5A7 LD B,A          ;
+ $A5A8 LD IX,($B708)   ;
+ $A5AC CALL $A5CA      ;
+ $A5AF JP Z,$A16C      ;
+ $A5B2 LD A,(IX+$02)   ;
+ $A5B5 CP $FF          ;
+ $A5B7 JR Z,$A5C0      ;
+ $A5B9 SUB B           ;
+ $A5BA LD HL,$B13E     ;
+ $A5BD JP NC,$72DD     ;
+*$A5C0 CALL $9D44      ;
+ $A5C3 LD A,($B6E8)    ;
+ $A5C6 LD (IY+$01),A   ;
+ $A5C9 RET             ;

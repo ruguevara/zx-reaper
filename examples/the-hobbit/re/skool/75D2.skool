@@ -1,2 +1,18 @@
-; Data block at 75D2
-b$75D2 DEFB $F2,$76,$95,$77,$EC
+; Action dispatch table: 13 handler addresses
+;
+; Indexed by A rotated right three times at $75C1 (value of $7873); jumped to
+; by $75D1.
+@label=ActionTable
+w$75D2 DEFW $76F2
+ $75D4 DEFW $7795
+ $75D6 DEFW $76EC
+ $75D8 DEFW $7733
+ $75DA DEFW $772F
+ $75DC DEFW $77D1
+ $75DE DEFW $77C9
+ $75E0 DEFW $77A2
+ $75E2 DEFW $7790
+ $75E4 DEFW $8251
+ $75E6 DEFW $770B
+ $75E8 DEFW $75FA
+ $75EA DEFW $75F6

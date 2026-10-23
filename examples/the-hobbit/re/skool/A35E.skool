@@ -1,3 +1,4 @@
-; Data block at A35E
-b$A35E DEFB $CD,$FF,$97,$DD,$2A,$08,$B7,$C3
- $A366 DEFB $17,$91
+; Command handler (via $C730): call $97FF, jump to $9117
+c$A35E CALL $97FF    ;
+ $A361 LD IX,($B708) ;
+ $A365 JP $9117      ;

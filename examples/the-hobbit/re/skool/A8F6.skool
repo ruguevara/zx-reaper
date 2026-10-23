@@ -1,7 +1,23 @@
-; Data block at A8F6
-b$A8F6 DEFB $CD,$44,$9D,$97,$32,$F9,$B6,$CD
- $A8FE DEFB $1A,$7F,$28,$13,$01,$18,$00,$ED
- $A906 DEFB $5B,$EE,$B6,$1A,$ED,$B1,$20,$07
- $A90E DEFB $13,$1A,$1B,$BE,$20,$F6,$C9,$CD
- $A916 DEFB $44,$9D,$3E,$01,$32,$02,$B7,$21
- $A91E DEFB $DB,$B1,$CD,$DD,$72,$C3,$D2,$90
+; Handler (via $C9FE)
+c$A8F6 CALL $9D44    ;
+ $A8F9 SUB A         ;
+ $A8FA LD ($B6F9),A  ;
+ $A8FD CALL $7F1A    ;
+ $A900 JR Z,$A915    ;
+ $A902 LD BC,$0018   ;
+ $A905 LD DE,($B6EE) ;
+ $A909 LD A,(DE)     ;
+*$A90A CPIR          ;
+ $A90C JR NZ,$A915   ;
+ $A90E INC DE        ;
+ $A90F LD A,(DE)     ;
+ $A910 DEC DE        ;
+ $A911 CP (HL)       ;
+ $A912 JR NZ,$A90A   ;
+ $A914 RET           ;
+*$A915 CALL $9D44    ;
+ $A918 LD A,$01      ;
+ $A91A LD ($B702),A  ;
+ $A91D LD HL,$B1DB   ;
+ $A920 CALL $72DD    ;
+ $A923 JP $90D2      ;

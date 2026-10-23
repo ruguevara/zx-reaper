@@ -1,15 +1,36 @@
-; Data block at A377
-b$A377 DEFB $DD,$2A,$08,$B7,$DD,$CB,$07,$5E
- $A37F DEFB $C8,$DD,$CB,$07,$EE,$3A,$8B,$CA
- $A387 DEFB $32,$8C,$CA,$21,$99,$B0,$C3,$DD
- $A38F DEFB $72,$CD,$44,$9D,$FD,$2A,$0C,$B7
- $A397 DEFB $DD,$21,$1A,$C3,$FD,$CB,$07,$BE
- $A39F DEFB $FD,$CB,$05,$3E,$FD,$CB,$05,$3E
- $A3A7 DEFB $DD,$CB,$07,$BE,$3A,$EA,$B6,$DD
- $A3AF DEFB $77,$01,$3E,$08,$CD,$9F,$9C,$C6
- $A3B7 DEFB $02,$32,$AF,$CA,$C9,$DD,$2A,$0C
- $A3BF DEFB $B7,$FD,$21,$1A,$C3,$FD,$CB,$07
- $A3C7 DEFB $7E,$21,$74,$B0,$C2,$DD,$72,$CD
- $A3CF DEFB $44,$9D,$FD,$CB,$07,$FE,$DD,$CB
- $A3D7 DEFB $07,$FE,$DD,$CB,$05,$26,$DD,$CB
- $A3DF DEFB $05,$26,$97,$32,$AF,$CA,$C9
+; Command handler (via $C730) with entry points $A390 and $A3BC
+c$A377 LD IX,($B708)  ;
+ $A37B BIT 3,(IX+$07) ;
+ $A37F RET Z          ;
+ $A380 SET 5,(IX+$07) ;
+ $A384 LD A,($CA8B)   ;
+ $A387 LD ($CA8C),A   ;
+ $A38A LD HL,$B099    ;
+ $A38D JP $72DD       ;
+ $A390 CALL $9D44     ;
+ $A393 LD IY,($B70C)  ;
+ $A397 LD IX,$C31A    ;
+ $A39B RES 7,(IY+$07) ;
+ $A39F SRL (IY+$05)   ;
+ $A3A3 SRL (IY+$05)   ;
+ $A3A7 RES 7,(IX+$07) ;
+ $A3AB LD A,($B6EA)   ;
+ $A3AE LD (IX+$01),A  ;
+ $A3B1 LD A,$08       ;
+ $A3B3 CALL $9C9F     ;
+ $A3B6 ADD A,$02      ;
+ $A3B8 LD ($CAAF),A   ;
+ $A3BB RET            ;
+ $A3BC LD IX,($B70C)  ;
+ $A3C0 LD IY,$C31A    ;
+ $A3C4 BIT 7,(IY+$07) ;
+ $A3C8 LD HL,$B074    ;
+ $A3CB JP NZ,$72DD    ;
+ $A3CE CALL $9D44     ;
+ $A3D1 SET 7,(IY+$07) ;
+ $A3D5 SET 7,(IX+$07) ;
+ $A3D9 SLA (IX+$05)   ;
+ $A3DD SLA (IX+$05)   ;
+ $A3E1 SUB A          ;
+ $A3E2 LD ($CAAF),A   ;
+ $A3E5 RET            ;

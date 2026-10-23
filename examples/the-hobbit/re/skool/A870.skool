@@ -1,4 +1,0 @@
-; Data block at A870
-b$A870 DEFB $CD,$9F,$9C,$FE,$32,$C9,$CD,$44
- $A878 DEFB $9D,$3A,$1C,$C6,$FE,$12,$C0,$21
- $A880 DEFB $92,$AF,$CD,$DD

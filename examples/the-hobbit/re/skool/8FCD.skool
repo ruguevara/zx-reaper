@@ -1,3 +1,4 @@
-; Data block at 8FCD
-b$8FCD DEFB $3A,$E8,$B6,$CD,$2D,$9F,$C3,$3E
- $8FD5 DEFB $8F
+; Command handler (via $C730): call $9F2D with ($B6E8), jump to $8F3E
+c$8FCD LD A,($B6E8)  ;
+ $8FD0 CALL $9F2D    ;
+ $8FD3 JP $8F3E      ;

@@ -1,2 +1,5 @@
-; Unused
-s$806F DEFS $02
+; Two bytes of the picture drawing routine ($8071)
+@label=DrawVar1
+g$806F DEFB $00
+@label=DrawVar2
+ $8070 DEFB $00

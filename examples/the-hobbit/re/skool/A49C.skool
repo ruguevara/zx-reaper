@@ -1,10 +1,23 @@
-; Data block at A49C
-b$A49C DEFB $3D,$18,$CB,$0F,$6A,$04,$45,$1F
- $A4A4 DEFB $CB,$3A,$37,$03,$49,$2D,$CB,$12
- $A4AC DEFB $61,$03,$4A,$34,$CB,$38,$34,$04
- $A4B4 DEFB $4B,$26,$CB,$40,$41,$07,$4C,$3B
- $A4BC DEFB $CB,$10,$B6,$01,$DD,$2A,$0C,$B7
- $A4C4 DEFB $DD,$7E,$10,$FE,$10,$C2,$76,$9F
- $A4CC DEFB $CD,$0E,$91,$CD,$FF,$97,$3A,$99
- $A4D4 DEFB $CA,$32,$9A,$CA,$C9,$21,$4B,$C3
- $A4DC DEFB $CB,$AE,$C9
+; Table of 6-byte records for the handler at $A448 (6 records)
+;
+; Record: id (compared with ($B6E8)), address of a game state byte, then three
+; bytes stored to IX+$10, IX+$0A, IX+$0B.
+@label=RecordTable
+b$A49C DEFB $3D
+ $A49D DEFW $CB18
+ $A49F DEFB $0F,$6A,$04
+ $A4A2 DEFB $45
+ $A4A3 DEFW $CB1F
+ $A4A5 DEFB $3A,$37,$03
+ $A4A8 DEFB $49
+ $A4A9 DEFW $CB2D
+ $A4AB DEFB $12,$61,$03
+ $A4AE DEFB $4A
+ $A4AF DEFW $CB34
+ $A4B1 DEFB $38,$34,$04
+ $A4B4 DEFB $4B
+ $A4B5 DEFW $CB26
+ $A4B7 DEFB $40,$41,$07
+ $A4BA DEFB $4C
+ $A4BB DEFW $CB3B
+ $A4BD DEFB $10,$B6,$01

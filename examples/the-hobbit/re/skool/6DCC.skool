@@ -1,3 +1,10 @@
-; Data block at 6DCC
-b$6DCC DEFB $C3,$C3,$2C,$34,$10,$08,$2C,$34
+; Border strip tile: 5 pixel rows of 2 bytes
+;
+; Drawn 16 times across five pixel rows at $5140 by the start code ($6CD3): the
+; line under the title.
+@label=BorderTile
+b$6DCC DEFB $C3,$C3
+ $6DCE DEFB $2C,$34
+ $6DD0 DEFB $10,$08
+ $6DD2 DEFB $2C,$34
  $6DD4 DEFB $C3,$C3

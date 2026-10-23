@@ -1,2 +1,3 @@
-; Unused
-s$7F77 DEFS $01
+; Picture id found by $7F78 (FF when pictures are off)
+@label=PictureFound
+g$7F77 DEFB $00

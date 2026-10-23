@@ -1,0 +1,7 @@
+; Variables of the take routine ($8D9D)
+@label=TakeObject
+g$8D99 DEFW $0000
+@label=TakeId
+ $8D9B DEFB $00
+@label=TakeWeight
+ $8D9C DEFB $00

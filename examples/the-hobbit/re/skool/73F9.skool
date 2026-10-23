@@ -1,2 +1,3 @@
-; Data block at 73F9
-b$73F9 DEFB $3A,$EA,$B6
+; Control code 12 handler: word reference by ($B6EA), return DE (jump table
+; $7295)
+c$73F9 LD A,($B6EA)  ;

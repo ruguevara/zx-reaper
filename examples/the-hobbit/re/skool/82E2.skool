@@ -1,5 +1,12 @@
-; Data block at 82E2
-b$82E2 DEFB $D5,$21,$E0,$B6,$11,$7F,$75,$01
- $82EA DEFB $06,$00,$ED,$B0,$D1,$CB,$7B,$CD
- $82F2 DEFB $F7,$82,$C3,$B4,$75,$CA,$38,$78
- $82FA DEFB $C3,$50,$78
+; Command handler: copy 6 bytes $B6E0 to $757F, then dispatch (table $828B)
+c$82E2 PUSH DE       ;
+ $82E3 LD HL,$B6E0   ;
+ $82E6 LD DE,$757F   ;
+ $82E9 LD BC,$0006   ;
+ $82EC LDIR          ;
+ $82EE POP DE        ;
+ $82EF BIT 7,E       ;
+ $82F1 CALL $82F7    ;
+ $82F4 JP $75B4      ;
+*$82F7 JP Z,$7838    ;
+ $82FA JP $7850      ;

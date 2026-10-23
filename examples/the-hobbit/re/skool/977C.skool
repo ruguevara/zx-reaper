@@ -1,2 +1,2 @@
-; Data block at 977C
-b$977C DEFB $3A,$E8,$B6
+; Wound/score helper: A=($B6E8), continues at $977F (called from $A30D)
+c$977C LD A,($B6E8)  ;

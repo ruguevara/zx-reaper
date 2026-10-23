@@ -1,4 +1,7 @@
-; Data block at 8CE0
-b$8CE0 DEFB $3A,$E8,$B6,$21,$E9,$B6,$CD,$7E
- $8CE8 DEFB $9C,$21,$B5,$AF,$C2,$DD,$72,$18
- $8CF0 DEFB $4B
+; Command handler (via $C730)
+c$8CE0 LD A,($B6E8)  ;
+ $8CE3 LD HL,$B6E9   ;
+ $8CE6 CALL $9C7E    ;
+ $8CE9 LD HL,$AFB5   ;
+ $8CEC JP NZ,$72DD   ;
+ $8CEF JR $8D3C      ;

@@ -1,3 +1,0 @@
-; Data block at 74AF
-b$74AF DEFB $23,$73,$23,$70,$18,$1C,$FE,$0B
- $74B7 DEFB $20,$1B,$CB

@@ -1,2 +1,9 @@
-; Message at 6FF2
-t$6FF2 DEFM "> LOOK"
+; Default first command text "> LOOK", CR
+;
+; Printed by the start code at $6CFA; the five bytes from $6FF4 ("LOOK", CR)
+; are copied to the input line.
+@label=StartCommand
+t$6FF2 DEFM "> "
+@label=LookCommand
+ $6FF4 DEFM "LOOK"
+ $6FF8 DEFB $0D

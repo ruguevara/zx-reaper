@@ -1,2 +1,2 @@
-; Data block at 8F3B
-b$8F3B DEFB $CD,$25,$9F
+; Command handler (via $C730): call $9F25
+c$8F3B CALL $9F25    ;

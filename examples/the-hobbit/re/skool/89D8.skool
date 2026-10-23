@@ -1,2 +1,0 @@
-; Data block at 89D8
-b$89D8 DEFB $10,$00,$00

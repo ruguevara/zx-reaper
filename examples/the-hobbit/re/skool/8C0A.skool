@@ -1,3 +1,0 @@
-; Data block at 8C0A
-b$8C0A DEFB $00,$00,$00,$00,$08,$08,$00,$09
- $8C12 DEFB $5B,$0A

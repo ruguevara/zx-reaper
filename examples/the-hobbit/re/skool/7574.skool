@@ -1,2 +1,16 @@
-; Unused
-s$7574 DEFS $11
+; Workspace of the action dispatcher ($770B, $772F, $7585)
+;
+; $7574 saved HL, $7576 saved A, $7577 saved IY, $7579 saved A; $757A flag;
+; $757B ten bytes cleared at $75B4 (read by $7795, $781C, $7809).
+@label=SavedHL
+g$7574 DEFW $0000
+@label=SavedA1
+ $7576 DEFB $00
+@label=SavedIY
+ $7577 DEFW $0000
+@label=SavedA2
+ $7579 DEFB $00
+@label=ActionFlag
+ $757A DEFB $00
+@label=ActionSlots
+ $757B DEFS $0A

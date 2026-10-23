@@ -1,5 +1,20 @@
-; Data block at 9226
-b$9226 DEFB $3C,$AF,$2B,$AF,$20,$AF,$15,$AF
- $922E DEFB $09,$AF,$F4,$AE,$E2,$AE,$D1,$AE
- $9236 DEFB $BA,$AE,$AC,$AE,$98,$AE,$8B,$AE
- $923E DEFB $7A,$AE,$70,$AE,$5A,$AE,$49,$AE
+; Wound messages: 16 message addresses
+;
+; Indexed by the damage ($91D2-$91DC), printed with $72DD.
+@label=WoundMessages
+b$9226 DEFW $AF3C
+ $9228 DEFW $AF2B
+ $922A DEFW $AF20
+ $922C DEFW $AF15
+ $922E DEFW $AF09
+ $9230 DEFW $AEF4
+ $9232 DEFW $AEE2
+ $9234 DEFW $AED1
+ $9236 DEFW $AEBA
+ $9238 DEFW $AEAC
+ $923A DEFW $AE98
+ $923C DEFW $AE8B
+ $923E DEFW $AE7A
+ $9240 DEFW $AE70
+ $9242 DEFW $AE5A
+ $9244 DEFW $AE49

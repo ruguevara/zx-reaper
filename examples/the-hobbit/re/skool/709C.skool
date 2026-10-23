@@ -1,0 +1,7 @@
+; Parsed command: up to 32 pairs (tag, word number)
+;
+; Built by $6E97 from the input line; read back by $7873 through the pointer
+; ($B6DC). Tag high nibble = word class, low nibble = count; zero tag byte =
+; end.
+@label=ParsedWords
+g$709C DEFS $40

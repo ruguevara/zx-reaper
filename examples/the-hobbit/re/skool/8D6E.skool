@@ -1,7 +1,35 @@
-; Data block at 8D6E
-b$8D6E DEFB $04,$19,$00,$07,$32,$00,$0B,$19
- $8D76 DEFB $00,$16,$19,$00,$0D,$4B,$00,$41
- $8D7E DEFB $32,$00,$1B,$19,$00,$1C,$19,$00
- $8D86 DEFB $1F,$32,$00,$22,$64,$00,$26,$19
- $8D8E DEFB $00,$2A,$19,$00,$2B,$32,$00,$29
- $8D96 DEFB $C8,$00,$FF,$00,$00,$00,$00
+; Treasure table: score value of each treasure object (14 records)
+;
+; Records of 3 bytes: object id, score value (word). FF ends. Found with $9DBD
+; at $8E51; the value is added to the score ($B6F7) when the object is first
+; taken.
+@label=TreasureScores
+b$8D6E DEFB $04
+ $8D6F DEFW $0019
+ $8D71 DEFB $07
+ $8D72 DEFW $0032
+ $8D74 DEFB $0B
+ $8D75 DEFW $0019
+ $8D77 DEFB $16
+ $8D78 DEFW $0019
+ $8D7A DEFB $0D
+ $8D7B DEFW $004B
+ $8D7D DEFB $41
+ $8D7E DEFW $0032
+ $8D80 DEFB $1B
+ $8D81 DEFW $0019
+ $8D83 DEFB $1C
+ $8D84 DEFW $0019
+ $8D86 DEFB $1F
+ $8D87 DEFW $0032
+ $8D89 DEFB $22
+ $8D8A DEFW $0064
+ $8D8C DEFB $26
+ $8D8D DEFW $0019
+ $8D8F DEFB $2A
+ $8D90 DEFW $0019
+ $8D92 DEFB $2B
+ $8D93 DEFW $0032
+ $8D95 DEFB $29
+ $8D96 DEFW $00C8
+ $8D98 DEFB $FF

@@ -1,2 +1,14 @@
-; Unused
-s$8C23 DEFS $01
+; Key table: 40 keys with caps shift or symbol shift
+;
+; Same layout as $8BFB; selected when caps shift or symbol shift is held
+; ($8BDE-$8BF1): punctuation, $40 "@", $22 quote, $2E ".", $2C ",", $18, $02
+; for shift + space.
+@label=ShiftKeyTable
+b$8C23 DEFB $00,$5A,$58,$43,$56
+ $8C28 DEFB $41,$53,$44,$46,$47
+ $8C2D DEFB $51,$57,$45,$52,$54
+ $8C32 DEFB $00,$40,$00,$00,$08
+ $8C37 DEFB $18,$00,$09,$5B,$0A
+ $8C3C DEFB $22,$4F,$49,$55,$59
+ $8C41 DEFB $0D,$4C,$4B,$4A,$48
+ $8C46 DEFB $02,$00,$2E,$2C,$42

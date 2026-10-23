@@ -1,2 +1,3 @@
-; Data block at 9BDC
-b$9BDC DEFB $FF
+; Flag set by $9BDD (starts FF)
+@label=MoveFlag
+g$9BDC DEFB $FF

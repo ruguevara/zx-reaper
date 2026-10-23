@@ -1,25 +1,76 @@
-; Data block at A67E
-b$A67E DEFB $DD,$2A,$0C,$B7,$DD,$7E,$10,$FE
- $A686 DEFB $20,$21,$1B,$B1,$C2,$DD,$72,$3A
- $A68E DEFB $E7,$B6,$FE,$0C,$CA,$38,$91,$C3
- $A696 DEFB $0E,$91,$3A,$2B,$C1,$FE,$27,$28
- $A69E DEFB $07,$FE,$2C,$28,$03,$FE,$29,$C0
- $A6A6 DEFB $CD,$44,$9D,$3A,$2B,$C1,$21,$43
- $A6AE DEFB $C1,$BE,$C8,$77,$3E,$01,$32,$02
- $A6B6 DEFB $B7,$21,$3B,$C1,$E5,$21,$17,$B0
- $A6BE DEFB $CD,$DD,$72,$C9,$3A,$2B,$C1,$21
- $A6C6 DEFB $F6,$B6,$BE,$C0,$CD,$44,$9D,$3A
- $A6CE DEFB $22,$C1,$E6,$80,$21,$7E,$B1,$28
- $A6D6 DEFB $03,$21,$5D,$B1,$18,$E2,$3A,$DD
- $A6DE DEFB $C5,$FE,$29,$C8,$3A,$2B,$C1,$CD
- $A6E6 DEFB $B1,$9B,$DD,$CB,$00,$7E,$C8,$CD
- $A6EE DEFB $44,$9D,$3E,$01,$32,$02,$B7,$21
- $A6F6 DEFB $A6,$B1,$3E,$64,$CD,$9F,$9C,$FE
- $A6FE DEFB $50,$38,$BD,$21,$BA,$B1,$CD,$DD
- $A706 DEFB $72,$C3,$D2,$90,$CD,$25,$9F,$FE
- $A70E DEFB $FF,$C8,$97,$DD,$36,$00,$00,$DD
- $A716 DEFB $36,$01,$00,$DD,$36,$02,$00,$C9
- $A71E DEFB $CD,$44,$9D,$DD,$2A,$0C,$B7,$DD
- $A726 DEFB $CB,$07,$7E,$21,$F4,$AF,$C2,$DD
- $A72E DEFB $72,$3A,$A7,$CA,$32,$A8,$CA,$21
- $A736 DEFB $AA,$B2,$C3,$DD,$72
+; Handlers (via $C2F0, $C2F3)
+c$A67E LD IX,($B70C)   ;
+ $A682 LD A,(IX+$10)   ;
+ $A685 CP $20          ;
+ $A687 LD HL,$B11B     ;
+ $A68A JP NZ,$72DD     ;
+ $A68D LD A,($B6E7)    ;
+ $A690 CP $0C          ;
+ $A692 JP Z,$9138      ;
+ $A695 JP $910E        ;
+ $A698 LD A,($C12B)    ;
+ $A69B CP $27          ;
+ $A69D JR Z,$A6A6      ;
+ $A69F CP $2C          ;
+ $A6A1 JR Z,$A6A6      ;
+ $A6A3 CP $29          ;
+ $A6A5 RET NZ          ;
+*$A6A6 CALL $9D44      ;
+ $A6A9 LD A,($C12B)    ;
+ $A6AC LD HL,$C143     ;
+ $A6AF CP (HL)         ;
+ $A6B0 RET Z           ;
+ $A6B1 LD (HL),A       ;
+ $A6B2 LD A,$01        ;
+ $A6B4 LD ($B702),A    ;
+ $A6B7 LD HL,$C13B     ;
+ $A6BA PUSH HL         ;
+ $A6BB LD HL,$B017     ;
+*$A6BE CALL $72DD      ;
+ $A6C1 RET             ;
+ $A6C2 LD A,($C12B)    ;
+ $A6C5 LD HL,$B6F6     ;
+ $A6C8 CP (HL)         ;
+ $A6C9 RET NZ          ;
+ $A6CA CALL $9D44      ;
+ $A6CD LD A,($C122)    ;
+ $A6D0 AND $80         ;
+ $A6D2 LD HL,$B17E     ;
+ $A6D5 JR Z,$A6DA      ;
+ $A6D7 LD HL,$B15D     ;
+*$A6DA JR $A6BE        ;
+ $A6DC LD A,($C5DD)    ;
+ $A6DF CP $29          ;
+ $A6E1 RET Z           ;
+ $A6E2 LD A,($C12B)    ;
+ $A6E5 CALL $9BB1      ;
+ $A6E8 BIT 7,(IX+$00)  ;
+ $A6EC RET Z           ;
+ $A6ED CALL $9D44      ;
+ $A6F0 LD A,$01        ;
+ $A6F2 LD ($B702),A    ;
+ $A6F5 LD HL,$B1A6     ;
+ $A6F8 LD A,$64        ;
+ $A6FA CALL $9C9F      ;
+ $A6FD CP $50          ;
+ $A6FF JR C,$A6BE      ;
+ $A701 LD HL,$B1BA     ;
+ $A704 CALL $72DD      ;
+ $A707 JP $90D2        ;
+ $A70A CALL $9F25      ;
+ $A70D CP $FF          ;
+ $A70F RET Z           ;
+ $A710 SUB A           ;
+ $A711 LD (IX+$00),$00 ;
+ $A715 LD (IX+$01),$00 ;
+ $A719 LD (IX+$02),$00 ;
+ $A71D RET             ;
+ $A71E CALL $9D44      ;
+ $A721 LD IX,($B70C)   ;
+ $A725 BIT 7,(IX+$07)  ;
+ $A729 LD HL,$AFF4     ;
+ $A72C JP NZ,$72DD     ;
+ $A72F LD A,($CAA7)    ;
+ $A732 LD ($CAA8),A    ;
+ $A735 LD HL,$B2AA     ;
+ $A738 JP $72DD        ;

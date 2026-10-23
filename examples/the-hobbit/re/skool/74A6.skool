@@ -1,2 +1,8 @@
-; Data block at 74A6
-b$74A6 DEFB $F1,$78,$36,$04,$CD
+; Word text buffer (20 bytes)
+;
+; The letters of the word being printed by $74C1 (dictionary letters + $60,
+; then up to 4 more); printed through $858B afterwards.
+@label=WordBuffer
+g$74A6 DEFB $F1,$78,$36,$04,$CD,$30,$79,$36
+ $74AE DEFB $36,$23,$73,$23,$70,$18,$1C,$FE
+ $74B6 DEFB $0B,$20,$1B,$CB

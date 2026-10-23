@@ -1,2 +1,0 @@
-; Data block at 8C19
-b$8C19 DEFB $0D

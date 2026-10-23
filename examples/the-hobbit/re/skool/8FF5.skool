@@ -1,5 +1,23 @@
-; Data block at 8FF5
-b$8FF5 DEFB $CD,$F1,$8C,$21,$71,$91,$3E,$0F
- $8FFD DEFB $DD,$2A,$0A,$B7,$DD,$CB,$07,$76
- $9005 DEFB $20,$05,$21,$ED,$92,$3E,$0B,$32
- $900D DEFB $E7,$B6,$CD,$4A,$9F
+; Command handler (via $C730)
+c$8FF5 CALL $8CF1      ;
+ $8FF8 LD HL,$9171     ;
+ $8FFB LD A,$0F        ;
+ $8FFD LD IX,($B70A)   ;
+ $9001 BIT 6,(IX+$07)  ;
+ $9005 JR NZ,$900C     ;
+ $9007 LD HL,$92ED     ;
+ $900A LD A,$0B        ;
+*$900C LD ($B6E7),A    ;
+ $900F CALL $9F4A      ;
+ $9012 LD A,$2A        ;
+ $9014 LD ($B6E7),A    ;
+ $9017 LD A,($B6FA)    ;
+ $901A CP $01          ;
+ $901C RET NZ          ;
+ $901D LD IX,($B708)   ;
+ $9021 LD (IX+$01),$FF ;
+ $9025 LD A,$0F        ;
+ $9027 LD ($B6E7),A    ;
+ $902A LD A,($B6E8)    ;
+ $902D JP $95DF        ;
+ $9030 LD (IX+$01),$FF ;

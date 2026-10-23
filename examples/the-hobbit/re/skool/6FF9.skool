@@ -1,3 +1,7 @@
-; Message at 6FF9
-t$6FF9 DEFM "                                                                 "
- $703A DEFM "                                                               "
+; Input line buffer: 128 characters and a CR ($6FF9-$7079)
+;
+; The command being typed, blank-filled; edited by $6E97 and the line editor,
+; parsed by $6E97 with $6F47.
+@label=InputLine
+g$6FF9 DEFS $80,$20
+ $7079 DEFB $0D

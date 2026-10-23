@@ -1,2 +1,0 @@
-; Data block at 8A4F
-b$8A4F DEFB $40,$3C,$00,$00,$18

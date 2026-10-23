@@ -1,2 +1,0 @@
-; Data block at A88D
-b$A88D DEFB $02

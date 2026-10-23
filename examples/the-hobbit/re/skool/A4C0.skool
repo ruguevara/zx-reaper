@@ -1,0 +1,13 @@
+; Handler: test (IX+$10)=$10, call $910E and $97FF
+c$A4C0 LD IX,($B70C) ;
+ $A4C4 LD A,(IX+$10) ;
+ $A4C7 CP $10        ;
+ $A4C9 JP NZ,$9F76   ;
+ $A4CC CALL $910E    ;
+ $A4CF CALL $97FF    ;
+ $A4D2 LD A,($CA99)  ;
+ $A4D5 LD ($CA9A),A  ;
+ $A4D8 RET           ;
+ $A4D9 LD HL,$C34B   ;
+ $A4DC RES 5,(HL)    ;
+ $A4DE RET           ;

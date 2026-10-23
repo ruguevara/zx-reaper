@@ -1,5 +1,0 @@
-; Data block at 9015
-b$9015 DEFB $E7,$B6,$3A,$FA,$B6,$FE,$01,$C0
- $901D DEFB $DD,$2A,$08,$B7,$DD,$36,$01,$FF
- $9025 DEFB $3E,$0F,$32,$E7,$B6,$3A,$E8,$B6
- $902D DEFB $C3,$DF,$95,$DD,$36,$01,$FF

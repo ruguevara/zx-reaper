@@ -1,15 +1,45 @@
-; Data block at A94E
-b$A94E DEFB $3A,$F6,$B6,$21,$F5,$B6,$BE,$C0
- $A956 DEFB $CD,$44,$9D,$3E,$1B,$32,$E7,$B6
- $A95E DEFB $3E,$00,$32,$E8,$B6,$3E,$FF,$32
- $A966 DEFB $E9,$B6,$CD,$76,$9F,$CD,$B5,$92
- $A96E DEFB $C3,$D2,$90,$CD,$44,$9D,$3E,$47
- $A976 DEFB $CD,$7F,$97,$3E,$48,$CD,$7F,$97
- $A97E DEFB $21,$46,$C6,$CB,$BE,$21,$58,$C6
- $A986 DEFB $CB,$BE,$21,$62,$B2,$22,$C4,$BA
- $A98E DEFB $21,$BC,$BA,$CB,$B6,$3E,$47,$CD
- $A996 DEFB $53,$9D,$3E,$48,$CD,$53,$9D,$21
- $A99E DEFB $0B,$B3,$3E,$01,$32,$02,$B7,$CD
- $A9A6 DEFB $DD,$72,$DD,$21,$00,$CC,$3E,$05
- $A9AE DEFB $CD,$BD,$9D,$DD,$6E,$01,$DD,$66
- $A9B6 DEFB $02,$36,$05,$23,$36,$28,$C9
+; Handlers (via $CA42-$CA54): $A94E, $A971
+c$A94E LD A,($B6F6)  ;
+ $A951 LD HL,$B6F5   ;
+ $A954 CP (HL)       ;
+ $A955 RET NZ        ;
+ $A956 CALL $9D44    ;
+ $A959 LD A,$1B      ;
+ $A95B LD ($B6E7),A  ;
+ $A95E LD A,$00      ;
+ $A960 LD ($B6E8),A  ;
+ $A963 LD A,$FF      ;
+ $A965 LD ($B6E9),A  ;
+ $A968 CALL $9F76    ;
+ $A96B CALL $92B5    ;
+ $A96E JP $90D2      ;
+ $A971 CALL $9D44    ;
+ $A974 LD A,$47      ;
+ $A976 CALL $977F    ;
+ $A979 LD A,$48      ;
+ $A97B CALL $977F    ;
+ $A97E LD HL,$C646   ;
+ $A981 RES 7,(HL)    ;
+ $A983 LD HL,$C658   ;
+ $A986 RES 7,(HL)    ;
+ $A988 LD HL,$B262   ;
+ $A98B LD ($BAC4),HL ;
+ $A98E LD HL,$BABC   ;
+ $A991 RES 6,(HL)    ;
+ $A993 LD A,$47      ;
+ $A995 CALL $9D53    ;
+ $A998 LD A,$48      ;
+ $A99A CALL $9D53    ;
+ $A99D LD HL,$B30B   ;
+ $A9A0 LD A,$01      ;
+ $A9A2 LD ($B702),A  ;
+ $A9A5 CALL $72DD    ;
+ $A9A8 LD IX,$CC00   ;
+ $A9AC LD A,$05      ;
+ $A9AE CALL $9DBD    ;
+ $A9B1 LD L,(IX+$01) ;
+ $A9B4 LD H,(IX+$02) ;
+ $A9B7 LD (HL),$05   ;
+ $A9B9 INC HL        ;
+ $A9BA LD (HL),$28   ;
+ $A9BC RET           ;

@@ -1,2 +1,14 @@
-; Unused
-s$869B DEFS $06
+; Story window cursor state
+;
+; Column counter ($869B), cursor address ($869C), character under it ($869E),
+; flags ($869F, $86A0). Set at the start ($6C8D-$6CB0) and by $86A1.
+@label=StoryColumn
+g$869B DEFB $00
+@label=StoryCursor
+ $869C DEFW $0000
+@label=StoryCursorChar
+ $869E DEFB $00
+@label=StoryFlag1
+ $869F DEFB $00
+@label=StoryFlag2
+ $86A0 DEFB $00

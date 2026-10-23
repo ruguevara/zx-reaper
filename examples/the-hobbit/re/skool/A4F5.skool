@@ -1,3 +1,4 @@
-; Data block at A4F5
-b$A4F5 DEFB $CD,$44,$9D,$21,$4B,$B0,$C3,$E3
- $A4FD DEFB $A1
+; Command handler (via $C8C9 table)
+c$A4F5 CALL $9D44    ;
+ $A4F8 LD HL,$B04B   ;
+ $A4FB JP $A1E3      ;

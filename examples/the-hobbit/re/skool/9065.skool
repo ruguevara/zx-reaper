@@ -1,8 +1,39 @@
-; Data block at 9065
-b$9065 DEFB $CD,$44,$9D,$DD,$2A,$08,$B7,$DD
- $906D DEFB $CB,$07,$6E,$CA,$17,$91,$C3,$45
- $9075 DEFB $91,$3E,$19,$CD,$7B,$9C,$21,$21
- $907D DEFB $B1,$D2,$DD,$72,$CD,$4A,$91,$CD
- $9085 DEFB $44,$9D,$3E,$0F,$32,$E7,$B6,$3A
- $908D DEFB $EA,$B6,$FE,$46,$28,$15,$3A,$E8
- $9095 DEFB $B6,$FE
+; Command handler (via $C730)
+c$9065 CALL $9D44      ;
+ $9068 LD IX,($B708)   ;
+ $906C BIT 5,(IX+$07)  ;
+ $9070 JP Z,$9117      ;
+ $9073 JP $9145        ;
+ $9076 LD A,$19        ;
+ $9078 CALL $9C7B      ;
+ $907B LD HL,$B121     ;
+ $907E JP NC,$72DD     ;
+ $9081 CALL $914A      ;
+ $9084 CALL $9D44      ;
+ $9087 LD A,$0F        ;
+ $9089 LD ($B6E7),A    ;
+ $908C LD A,($B6EA)    ;
+ $908F CP $46          ;
+ $9091 JR Z,$90A8      ;
+ $9093 LD A,($B6E8)    ;
+ $9096 CP $3C          ;
+ $9098 LD HL,$B127     ;
+ $909B JP Z,$72DD      ;
+ $909E LD A,$08        ;
+ $90A0 CALL $9C9F      ;
+ $90A3 CP $03          ;
+ $90A5 JP C,$72DD      ;
+*$90A8 LD IX,$C4EA     ;
+ $90AC LD A,($B6E8)    ;
+ $90AF CP $1A          ;
+ $90B1 JR Z,$90B7      ;
+ $90B3 LD (IX+$01),$FF ;
+*$90B7 LD HL,$B136     ;
+ $90BA CALL $72DD      ;
+ $90BD LD IX,($B708)   ;
+ $90C1 CALL $A1C8      ;
+ $90C4 JP NZ,$92ED     ;
+ $90C7 LD A,($B6E8)    ;
+ $90CA CALL $977F      ;
+ $90CD LD A,$06        ;
+ $90CF JP $A16C        ;

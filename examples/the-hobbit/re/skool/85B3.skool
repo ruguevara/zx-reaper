@@ -1,2 +1,10 @@
-; Unused
-s$85B3 DEFS $04
+; Input window cursor state
+;
+; Column counter ($85B3), cursor screen address ($85B4), character under the
+; cursor ($85B6). Set at the start ($6C82) and by the print routine $85B8.
+@label=InputColumn
+g$85B3 DEFB $00
+@label=InputCursor
+ $85B4 DEFW $0000
+@label=InputCursorChar
+ $85B6 DEFB $00

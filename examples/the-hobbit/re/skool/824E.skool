@@ -1,2 +1,7 @@
-; Data block at 824E
-b$824E DEFB $38,$00,$00
+; Three bytes of the picture routines ($8071, $82FD, $8315)
+@label=PicVar1
+g$824E DEFB $38
+@label=PicVar2
+ $824F DEFB $00
+@label=PicVar3
+ $8250 DEFB $00

@@ -1,2 +1,0 @@
-; Data block at A8CF
-b$A8CF DEFB $E2,$C9,$C9

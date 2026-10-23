@@ -1,2 +1,4 @@
-; Data block at 738D
-b$738D DEFB $ED,$5B,$FC,$B6,$F6,$01,$C9
+; Control code 3 handler: DE=($B6FC), return NZ (jump table $7295, never run)
+c$738D LD DE,($B6FC) ;
+ $7391 OR $01        ;
+ $7393 RET           ;

@@ -1,2 +1,38 @@
-; Unused
-s$793D DEFS $23
+; Workspace of the record routines ($79B6-$7E7C)
+;
+; Bytes and words kept between the routines at $7A14, $7AF5, $7B9E, $7C23,
+; $7DBC: $794E, $7950, $795E hold IX; $7958, $795A, $795C hold HL/DE.
+@label=RecWork
+g$793D DEFB $00
+@label=RecWork1
+ $793E DEFB $00
+@label=RecWork2
+ $793F DEFB $00
+@label=RecWork3
+ $7940 DEFB $00,$00
+@label=RecBuf1
+ $7942 DEFB $00,$00,$00,$00,$00,$00
+@label=RecBuf2
+ $7948 DEFB $00,$00,$00,$00,$00,$00
+@label=RecPtr1
+ $794E DEFW $0000
+@label=RecPtr2
+ $7950 DEFW $0000
+@label=RecWork4
+ $7952 DEFB $00
+@label=RecWork5
+ $7953 DEFB $00
+@label=RecWork6
+ $7954 DEFB $00,$00
+@label=RecWork7
+ $7956 DEFB $00
+@label=RecWork8
+ $7957 DEFB $00
+@label=RecWord1
+ $7958 DEFW $0000
+@label=RecWord2
+ $795A DEFW $0000
+@label=RecWord3
+ $795C DEFW $0000
+@label=RecPtr3
+ $795E DEFW $0000

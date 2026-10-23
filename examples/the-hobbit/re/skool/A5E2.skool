@@ -1,6 +1,37 @@
-; Data block at A5E2
-b$A5E2 DEFB $3A,$E8,$B6,$FE,$13,$C0,$CD,$FF
- $A5EA DEFB $97,$DD,$21,$EE,$C3,$DD,$7E,$10
- $A5F2 DEFB $FE,$21,$C0,$3E,$02,$32,$85,$CA
- $A5FA DEFB $C9,$97,$32,$F0,$B6,$3A,$1C,$C1
- $A602 DEFB $FE,$13,$21,$2C,$B3,$CC,$DD
+; Handlers: $A5E2 (via $C302), $A5FB
+c$A5E2 LD A,($B6E8)    ;
+ $A5E5 CP $13          ;
+ $A5E7 RET NZ          ;
+ $A5E8 CALL $97FF      ;
+ $A5EB LD IX,$C3EE     ;
+ $A5EF LD A,(IX+$10)   ;
+ $A5F2 CP $21          ;
+ $A5F4 RET NZ          ;
+ $A5F5 LD A,$02        ;
+ $A5F7 LD ($CA85),A    ;
+ $A5FA RET             ;
+ $A5FB SUB A           ;
+ $A5FC LD ($B6F0),A    ;
+ $A5FF LD A,($C11C)    ;
+ $A602 CP $13          ;
+ $A604 LD HL,$B32C     ;
+ $A607 CALL Z,$72DD    ;
+ $A60A LD A,$22        ;
+ $A60C LD ($C3FE),A    ;
+ $A60F LD B,A          ;
+ $A610 LD A,$13        ;
+ $A612 CALL $9BDD      ;
+ $A615 LD IX,$C3EE     ;
+ $A619 LD (IX+$10),$20 ;
+ $A61D RES 5,(IX+$07)  ;
+ $A621 SET 2,(IX+$07)  ;
+ $A625 SUB A           ;
+ $A626 LD ($B702),A    ;
+ $A629 LD A,$13        ;
+ $A62B CALL $9D53      ;
+ $A62E LD A,$01        ;
+ $A630 LD ($B702),A    ;
+ $A633 LD IY,$C418     ;
+ $A637 LD (IY+$10),$20 ;
+ $A63B LD (IY+$01),$13 ;
+ $A63F RET             ;

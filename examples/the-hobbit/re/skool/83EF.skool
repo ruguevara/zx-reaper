@@ -1,0 +1,3 @@
+; Command handler (via $828B): call $83F5, then $82B3
+c$83EF CALL $83F5    ;
+ $83F2 JP $82B3      ;

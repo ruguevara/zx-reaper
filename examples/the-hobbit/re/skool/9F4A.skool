@@ -1,7 +1,16 @@
-; Data block at 9F4A
-b$9F4A DEFB $ED,$5B,$08,$B7,$FD,$2A,$0A,$B7
- $9F52 DEFB $FD,$22,$08,$B7,$ED,$53,$0A,$B7
- $9F5A DEFB $ED,$4B,$E8,$B6,$78,$32,$E8,$B6
- $9F62 DEFB $79,$32,$E9,$B6,$CD,$6C,$9B,$ED
- $9F6A DEFB $43,$E8,$B6,$ED,$53,$08,$B7,$FD
- $9F72 DEFB $22,$0A,$B7,$C9
+; Swap the actor and target records ($B708/$B70A, $B6E8/$B6E9), run $9B6C, swap
+; back
+c$9F4A LD DE,($B708) ;
+ $9F4E LD IY,($B70A) ;
+ $9F52 LD ($B708),IY ;
+ $9F56 LD ($B70A),DE ;
+ $9F5A LD BC,($B6E8) ;
+ $9F5E LD A,B        ;
+ $9F5F LD ($B6E8),A  ;
+ $9F62 LD A,C        ;
+ $9F63 LD ($B6E9),A  ;
+ $9F66 CALL $9B6C    ;
+ $9F69 LD ($B6E8),BC ;
+ $9F6D LD ($B708),DE ;
+ $9F71 LD ($B70A),IY ;
+ $9F75 RET           ;

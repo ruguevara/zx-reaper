@@ -1,43 +1,37 @@
-; Data block at A20B
-b$A20B DEFB $0E,$11,$12,$14,$2C,$80,$04,$07
- $A213 DEFB $06,$FE,$01,$79,$07,$85,$04,$8E
- $A21B DEFB $04,$0C,$06,$15,$06,$25,$07,$C4
- $A223 DEFB $01,$18,$07,$00,$00,$28,$02,$00
- $A22B DEFB $00,$9F,$04,$39,$01,$92,$01,$00
- $A233 DEFB $00,$F6,$03,$00,$00,$B9,$02,$CD
- $A23B DEFB $00,$AA,$04,$B4,$04,$D4,$07,$00
- $A243 DEFB $00,$CD,$44,$9D,$C9,$3A,$E8,$B6
- $A24B DEFB $FE,$12,$28,$5F,$3A,$E9,$B6,$FE
- $A253 DEFB $12,$C2,$76,$9F,$DD,$2A,$08,$B7
- $A25B DEFB $DD,$CB,$07,$4E,$C2,$76,$9F,$CD
- $A263 DEFB $97,$9D,$FE,$00,$21,$7D,$B0,$C2
- $A26B DEFB $DD,$72,$DD,$CB,$07,$5E,$20,$07
- $A273 DEFB $DD,$CB,$07,$76,$C2,$76,$9F,$CD
- $A27B DEFB $44,$9D,$FD,$2A,$0A,$B7,$CD,$78
- $A283 DEFB $9C,$3A,$E9,$B6,$DD,$77,$01,$38
- $A28B DEFB $16,$97,$32,$FA,$B6,$CD,$33,$8D
- $A293 DEFB $3A,$FB,$B6,$FE,$00,$3E,$01,$32
- $A29B DEFB $FA,$B6,$32,$FB,$B6,$28,$07,$3A
- $A2A3 DEFB $EA,$B6,$FD,$77,$01,$C9,$FD,$36
- $A2AB DEFB $01,$FF,$C9,$21,$48,$A2,$C3,$4A
- $A2B3 DEFB $9F,$DD,$2A,$08,$B7,$DD,$7E,$01
- $A2BB DEFB $FE,$12,$21,$92,$B0,$C2,$DD,$72
- $A2C3 DEFB $CD,$44,$9D,$3A,$67,$C3,$DD,$77
- $A2CB DEFB $01,$C9,$CD,$25,$9F,$DD,$7E,$02
- $A2D3 DEFB $FE,$00,$20,$04,$CD,$44,$9D,$C9
- $A2DB DEFB $DD,$7E,$00,$2A,$E7,$B6,$E5,$32
- $A2E3 DEFB $E7,$B6,$DD,$2A,$08,$B7,$DD,$CB
- $A2EB DEFB $07,$EE,$DD,$E5,$3E,$FF,$32,$E8
- $A2F3 DEFB $B6,$CD,$AB,$8D,$DD,$E1,$DD,$CB
- $A2FB DEFB $07,$AE,$E1,$22,$E7,$B6,$C9,$3A
- $A303 DEFB $EA,$B6,$FE,$3C,$C2,$76,$9F,$CD
- $A30B DEFB $44,$9D,$C3,$7C,$97,$CD,$44,$9D
- $A313 DEFB $21,$B4,$B0,$CD,$DD,$72,$3A,$EA
- $A31B DEFB $B6,$F5,$A7,$21,$A9,$AD,$CC,$DD
- $A323 DEFB $72,$F1,$C3,$7F,$97,$CD,$44,$9D
- $A32B DEFB $21,$F8,$B0,$18,$E6,$06,$02,$18
- $A333 DEFB $06,$06,$0F,$18,$02,$06,$04,$3A
- $A33B DEFB $E9,$B6,$B8,$20,$0B,$3A,$E7,$B6
- $A343 DEFB $FE,$25,$CA,$6D,$94,$C3,$8D,$94
- $A34B DEFB $FE,$02,$28,$09,$FE,$04,$28,$05
- $A353 DEFB $FE,$0F,$C2,$CE,$72
+; Object name words, failure reason words and their lists
+;
+; $A20B: five record ids (checked by $A1D4). $A20E: table of dictionary word
+; references, one per id (indexed from 1, read by $A0BA). $A224 and $A234: 8
+; reason words each, chosen by $A172 (second table when bit 7 of A is set).
+@label=IdList
+b$A20B DEFB $0E,$11,$12
+@label=NameWordTable
+ $A20E DEFB $14,$2C
+ $A210 DEFB $80,$04
+ $A212 DEFB $07,$06
+ $A214 DEFB $FE,$01
+ $A216 DEFB $79,$07
+ $A218 DEFB $85,$04
+ $A21A DEFB $8E,$04
+ $A21C DEFB $0C,$06
+ $A21E DEFB $15,$06
+ $A220 DEFB $25,$07
+ $A222 DEFB $C4,$01
+@label=ReasonWords1
+ $A224 DEFB $18,$07
+ $A226 DEFB $00,$00
+ $A228 DEFB $28,$02
+ $A22A DEFB $00,$00
+ $A22C DEFB $9F,$04
+ $A22E DEFB $39,$01
+ $A230 DEFB $92,$01
+ $A232 DEFB $00,$00
+@label=ReasonWords2
+ $A234 DEFB $F6,$03
+ $A236 DEFB $00,$00
+ $A238 DEFB $B9,$02
+ $A23A DEFB $CD,$00
+ $A23C DEFB $AA,$04
+ $A23E DEFB $B4,$04
+ $A240 DEFB $D4,$07
+ $A242 DEFB $00,$00

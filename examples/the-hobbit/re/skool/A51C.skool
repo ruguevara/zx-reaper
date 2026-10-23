@@ -1,3 +1,4 @@
-; Data block at A51C
-b$A51C DEFB $CD,$44,$9D,$21,$61,$B0,$C3,$E3
- $A524 DEFB $A1
+; Command handler (via $C8FC table)
+c$A51C CALL $9D44    ;
+ $A51F LD HL,$B061   ;
+ $A522 JP $A1E3      ;

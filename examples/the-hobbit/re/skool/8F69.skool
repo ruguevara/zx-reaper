@@ -1,10 +1,24 @@
-; Data block at 8F69
-b$8F69 DEFB $DD,$2A,$08,$B7,$3A,$E9,$B6,$FE
- $8F71 DEFB $17,$28,$1E,$FE,$18,$28,$22,$FD
- $8F79 DEFB $2A,$0A,$B7,$FD,$CB,$07,$4E,$CA
- $8F81 DEFB $76,$9F,$DD,$CB,$07,$56,$3E,$82
- $8F89 DEFB $C2,$6C,$A1,$21,$4F,$92,$C3,$4A
- $8F91 DEFB $9F,$3E,$15,$FD,$21,$54,$C4,$18
- $8F99 DEFB $06,$3E,$16,$FD,$21,$69,$C4,$32
- $8FA1 DEFB $E9,$B6,$FD,$22,$0A,$B7,$FD,$36
- $8FA9 DEFB $01,$FF,$18,$CB
+; Command handler (via $C730)
+c$8F69 LD IX,($B708)   ;
+ $8F6D LD A,($B6E9)    ;
+ $8F70 CP $17          ;
+ $8F72 JR Z,$8F92      ;
+ $8F74 CP $18          ;
+ $8F76 JR Z,$8F9A      ;
+*$8F78 LD IY,($B70A)   ;
+ $8F7C BIT 1,(IY+$07)  ;
+ $8F80 JP Z,$9F76      ;
+ $8F83 BIT 2,(IX+$07)  ;
+ $8F87 LD A,$82        ;
+ $8F89 JP NZ,$A16C     ;
+ $8F8C LD HL,$924F     ;
+ $8F8F JP $9F4A        ;
+*$8F92 LD A,$15        ;
+ $8F94 LD IY,$C454     ;
+ $8F98 JR $8FA0        ;
+*$8F9A LD A,$16        ;
+ $8F9C LD IY,$C469     ;
+*$8FA0 LD ($B6E9),A    ;
+ $8FA3 LD ($B70A),IY   ;
+ $8FA7 LD (IY+$01),$FF ;
+ $8FAB JR $8F78        ;

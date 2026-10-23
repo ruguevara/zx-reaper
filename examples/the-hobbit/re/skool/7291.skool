@@ -1,2 +1,31 @@
-; Message at 7291
-t$7291 DEFM "WAITgsvs"
+; "WAIT" text and the message control code table
+;
+; "WAIT": typed by $7249 when no key is pressed for a long time. From $7295: 23
+; words, handler of control code 0-22 in a message (read by $7326; codes below
+; $14 are called, the rest jumped to).
+@label=WaitText
+b$7291 DEFM "WAIT"
+@label=ControlCodeTable
+ $7295 DEFW $7367
+ $7297 DEFW $7376
+ $7299 DEFW $737E
+ $729B DEFW $738D
+ $729D DEFW $7394
+ $729F DEFW $738B
+ $72A1 DEFW $73A3
+ $72A3 DEFW $73AF
+ $72A5 DEFW $73BD
+ $72A7 DEFW $73C2
+ $72A9 DEFW $738B
+ $72AB DEFW $73E0
+ $72AD DEFW $73F9
+ $72AF DEFW $72C3
+ $72B1 DEFW $7407
+ $72B3 DEFW $738B
+ $72B5 DEFW $740C
+ $72B7 DEFW $7425
+ $72B9 DEFW $738B
+ $72BB DEFW $742D
+ $72BD DEFW $7340
+ $72BF DEFW $7344
+ $72C1 DEFW $735B

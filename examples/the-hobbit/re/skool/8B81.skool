@@ -1,4 +1,12 @@
-; Data block at 8B81
-b$8B81 DEFB $01,$00,$00,$0D,$02,$00,$00,$02
- $8B89 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $8B91 DEFB $00,$00
+; Keyboard scanner ($8B93) tables and state
+;
+; $8B81: eight masks ORed to the eight half-rows read ($FEFE, $FDFE, ...,
+; $7FFE; keys masked out: caps shift, 1 3 4, 9, symbol shift... mask bit =
+; ignored key); constant. $8B89: key found (word BC at $8B89, byte A at $8B89).
+; $8B8B: the eight half-rows of the previous scan (edge detection).
+@label=KeyMasks
+g$8B81 DEFB $01,$00,$00,$0D,$02,$00,$00,$02
+@label=KeyFound
+ $8B89 DEFB $00,$00
+@label=KeyPrevious
+ $8B8B DEFS $08

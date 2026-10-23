@@ -1,5 +1,18 @@
-; Data block at 78FB
-b$78FB DEFB $0E,$06,$18,$06,$0E,$0A,$18,$02
-*$7903 DEFB $0E,$02,$FD,$E5,$E1,$19,$E5,$DD
- $790B DEFB $E5,$E1,$19,$D1,$06,$00,$ED,$B0
- $7913 DEFB $C9
+; Copy 6 bytes of record field IY+DE to IX+DE (entry for C=6; $78FF copies 10,
+; $7903 copies 2)
+c$78FB LD C,$06      ;
+ $78FD JR $7905      ;
+ $78FF LD C,$0A      ;
+ $7901 JR $7905      ;
+ $7903 LD C,$02      ;
+*$7905 PUSH IY       ;
+ $7907 POP HL        ;
+ $7908 ADD HL,DE     ;
+ $7909 PUSH HL       ;
+ $790A PUSH IX       ;
+ $790C POP HL        ;
+ $790D ADD HL,DE     ;
+ $790E POP DE        ;
+ $790F LD B,$00      ;
+ $7911 LDIR          ;
+ $7913 RET           ;

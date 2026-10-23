@@ -1,28 +1,77 @@
-; Data block at 9404
-b$9404 DEFB $DD,$2A,$08,$B7,$CD,$CA,$A5,$CA
- $940C DEFB $6C,$A1,$3A,$E8,$B6,$CD,$97,$9D
- $9414 DEFB $FE,$00,$28,$0B,$CD,$44,$9D,$CD
- $941C DEFB $50,$9D,$DD,$CB,$07,$96,$C9,$3E
- $9424 DEFB $02,$C3,$6C,$A1,$CD,$25,$8D,$CD
- $942C DEFB $44,$9D,$3A,$F6,$B6,$DD,$2A,$0A
- $9434 DEFB $B7,$DD,$46,$00,$DD,$BE,$10,$28
- $943C DEFB $07,$DD,$23,$10,$F7,$C3,$CE,$72
- $9444 DEFB $DD,$7E,$11,$05,$20,$01,$AF,$F5
- $944C DEFB $21,$FC,$AD,$CD,$DD,$72,$F1,$DD
- $9454 DEFB $2A,$08,$B7,$DD,$77,$10,$DD,$36
- $945C DEFB $01,$FF,$47,$3A,$E8,$B6,$CD,$DD
- $9464 DEFB $9B,$3A,$2B,$C1,$A7,$CA,$D2,$90
- $946C DEFB $C9,$CD,$F9,$A1,$C2,$6C,$A1,$3E
- $9474 DEFB $C6,$32,$8B,$94,$FD,$2A,$0A,$B7
- $947C DEFB $FD,$CB,$07,$5E,$3E,$83,$C2,$64
- $9484 DEFB $A1,$CD,$44,$9D,$DD,$CB,$07,$C6
- $948C DEFB $C9,$DD,$2A,$08,$B7,$DD,$CB,$07
- $9494 DEFB $46,$3E,$00,$CA,$6C,$A1,$CD,$04
- $949C DEFB $A2,$C2,$6C,$A1,$3E,$86,$18,$D1
- $94A4 DEFB $CD,$9B,$8C,$3A,$E9,$B6,$CD,$28
- $94AC DEFB $9F,$FE,$FF,$CA,$76,$9F,$FD,$2A
- $94B4 DEFB $0A,$B7,$FD,$CB,$07,$6E,$3E,$05
- $94BC DEFB $CA,$64,$A1,$CD,$44,$9D,$DD,$46
- $94C4 DEFB $02,$DD,$2A,$08,$B7,$DD,$36,$01
- $94CC DEFB $FF,$DD,$70,$10,$3A,$E8,$B6,$C3
- $94D4 DEFB $DD,$9B
+; Command handler (via $C730), with entry points $946D, $948D, $94A4
+c$9404 LD IX,($B708)   ;
+ $9408 CALL $A5CA      ;
+ $940B JP Z,$A16C      ;
+ $940E LD A,($B6E8)    ;
+ $9411 CALL $9D97      ;
+ $9414 CP $00          ;
+ $9416 JR Z,$9423      ;
+ $9418 CALL $9D44      ;
+ $941B CALL $9D50      ;
+ $941E RES 2,(IX+$07)  ;
+ $9422 RET             ;
+*$9423 LD A,$02        ;
+ $9425 JP $A16C        ;
+ $9428 CALL $8D25      ;
+ $942B CALL $9D44      ;
+ $942E LD A,($B6F6)    ;
+ $9431 LD IX,($B70A)   ;
+ $9435 LD B,(IX+$00)   ;
+*$9438 CP (IX+$10)     ;
+ $943B JR Z,$9444      ;
+ $943D INC IX          ;
+ $943F DJNZ $9438      ;
+ $9441 JP $72CE        ;
+*$9444 LD A,(IX+$11)   ;
+ $9447 DEC B           ;
+ $9448 JR NZ,$944B     ;
+ $944A XOR A           ;
+*$944B PUSH AF         ;
+ $944C LD HL,$ADFC     ;
+ $944F CALL $72DD      ;
+ $9452 POP AF          ;
+ $9453 LD IX,($B708)   ;
+ $9457 LD (IX+$10),A   ;
+ $945A LD (IX+$01),$FF ;
+ $945E LD B,A          ;
+ $945F LD A,($B6E8)    ;
+ $9462 CALL $9BDD      ;
+ $9465 LD A,($C12B)    ;
+ $9468 AND A           ;
+ $9469 JP Z,$90D2      ;
+ $946C RET             ;
+ $946D CALL $A1F9      ;
+ $9470 JP NZ,$A16C     ;
+ $9473 LD A,$C6        ;
+*$9475 LD ($948B),A    ;
+ $9478 LD IY,($B70A)   ;
+ $947C BIT 3,(IY+$07)  ;
+ $9480 LD A,$83        ;
+ $9482 JP NZ,$A164     ;
+ $9485 CALL $9D44      ;
+ $9488 SET 0,(IX+$07)  ;
+ $948C RET             ;
+ $948D LD IX,($B708)   ;
+ $9491 BIT 0,(IX+$07)  ;
+ $9495 LD A,$00        ;
+ $9497 JP Z,$A16C      ;
+ $949A CALL $A204      ;
+ $949D JP NZ,$A16C     ;
+ $94A0 LD A,$86        ;
+ $94A2 JR $9475        ;
+ $94A4 CALL $8C9B      ;
+ $94A7 LD A,($B6E9)    ;
+ $94AA CALL $9F28      ;
+ $94AD CP $FF          ;
+ $94AF JP Z,$9F76      ;
+ $94B2 LD IY,($B70A)   ;
+ $94B6 BIT 5,(IY+$07)  ;
+ $94BA LD A,$05        ;
+ $94BC JP Z,$A164      ;
+ $94BF CALL $9D44      ;
+ $94C2 LD B,(IX+$02)   ;
+ $94C5 LD IX,($B708)   ;
+ $94C9 LD (IX+$01),$FF ;
+ $94CD LD (IX+$10),B   ;
+ $94D0 LD A,($B6E8)    ;
+ $94D3 JP $9BDD        ;
