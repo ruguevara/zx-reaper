@@ -40,16 +40,20 @@ class Replay:
                 self.ranges = [tuple(int(x, 16) for x in r.split('-')) for r in w[1:]]
             elif w[0] == 'checkpoint':
                 self.addr = int(w[1], 16)
-            elif w[0] in ('in', 'cp', 'int'):
+            elif w[0] in ('in', 'cp', 'int', 'r'):
                 self.events.append(w)
             elif w[0] == 'end':
                 self.z80_frames = int(w[1])
         self.next = 0
+        self.left = 0                    # repeats left of the last 'in' line
         self.passes = 0                  # checkpoints matched
         self.z80_t = self.port_t = 0     # the clocks at the last checkpoint
         self.z80 = bytearray(0x10000)    # the Z80's state at the last checkpoint
 
     def take(self, kind, what):
+        if self.left:
+            raise Mismatch('%s, where the Z80 reads port %04X %d more times%s' % (
+                what, self.left_port, self.left, self.where()))
         while self.next < len(self.events) and self.events[self.next][0] == 'int':
             self.next += 1
             zx.handler()        # an interrupt the Z80 took since the last event
@@ -57,7 +61,7 @@ class Replay:
             raise _End
         e = self.events[self.next]
         if e[0] != kind:
-            z80 = ('reads port ' + e[1] if e[0] == 'in'
+            z80 = ('reads port ' + e[1] if e[0] == 'in' else 'reads R' if e[0] == 'r'
                    else 'is at the checkpoint (frame %d)' % (int(e[1]) // T_FRAME))
             raise Mismatch('%s, where the Z80 %s%s' % (what, z80, self.where()))
         self.next += 1
@@ -67,10 +71,20 @@ class Replay:
         return ' (after checkpoint %d, record event %d)' % (self.passes, self.next)
 
     def inp(self, port):
+        if self.left:                    # a run of repeated reads: 'in PORT VAL COUNT'
+            if port != self.left_port:
+                raise Mismatch('the port reads port %04X, the Z80 port %04X%s' % (
+                    port, self.left_port, self.where()))
+            self.left -= 1
+            return self.left_val
         e = self.take('in', 'the port reads port %04X' % port)
         if int(e[1], 16) != port:
             raise Mismatch('the port reads port %04X, the Z80 port %s%s' % (port, e[1], self.where()))
-        return int(e[2], 16)
+        self.left, self.left_port, self.left_val = (int(e[3]) - 1 if len(e) > 3 else 0), port, int(e[2], 16)
+        return self.left_val
+
+    def r(self):
+        return int(self.take('r', 'the port reads R')[1], 16)
 
     def checkpoint(self, label):
         if self.labels.get(label) != self.addr:
@@ -111,22 +125,22 @@ class Replay:
 
 
 def replay(main, path, labels):
-    """Run `main` against the record at `path`: each zx.inp gets the value the
-    Z80 read, each zx.checkpoint(label) must come where the Z80 passed its
+    """Run `main` against the record at `path`: each zx.inp and zx.r gets the
+    value the Z80 read, each zx.checkpoint(label) must come where the Z80 passed its
     checkpoint, with the same state, and the interrupt handler runs where the
     Z80 took an interrupt (at the port's next read or checkpoint) instead of
     by the port's clock. `labels` is the port's labels module.
     Returns (checkpoints matched, Z80 clock, port clock at the last one);
     raises Mismatch at the first difference."""
     r = Replay(path, labels)
-    zx.inp, zx.on_checkpoint = r.inp, r.checkpoint
+    zx.inp, zx.r, zx.on_checkpoint = r.inp, r.r, r.checkpoint
     zx.interrupt = lambda: None     # interrupts come from the record
     try:
         frames = run(main, frames=2 * r.z80_frames + 1000)
     except _End:
         return r.passes, r.z80_t, r.port_t
     finally:
-        del zx.inp, zx.interrupt
+        del zx.inp, zx.r, zx.interrupt
         zx.on_checkpoint = None
     raise Mismatch('the port ran %d frames and used %d of %d record events%s' % (
         frames, r.next, len(r.events), r.where()))

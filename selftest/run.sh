@@ -68,5 +68,10 @@ for i, ch in enumerate('HI'):
 for i, ch in enumerate('ok go'):
     put(6 * i + 1, 2, ch, 6)
 assert zxrun.screen_text(mem).split('\n')[:3] == ['HI', '', 'ok go'], zxrun.screen_text(mem)
+rec = ['checkpoint 8000', 'in 00FE BF 5', 'cp 900', 'in 7FFE BE', 'cp 2000', 'int', 'end 3']
+assert zxrun.merge_r(rec, [(2, 10, 0x15), (6, 1000, 0x16), (6, 2500, 0x17)]) == [
+    'checkpoint 8000', 'in 00FE BF 2', 'r 15', 'in 00FE BF 3', 'cp 900', 'in 7FFE BE',
+    'r 16', 'cp 2000', 'r 17', 'int', 'end 3']
 PY
+(cd "$kit" && python3 -m zxpyxel.test_zxpyxel)
 echo "SELFTEST PASSED"

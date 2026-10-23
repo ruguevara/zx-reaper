@@ -34,7 +34,7 @@ Record for a stage 3 port (zxpyxel/headless.py replays it):
   zxrun.py orig.z80 --input play.txt --record play.rec --checkpoint 0x6229 \
       --state 0x4000-0x5B00 --state 0x5FB5-0x8000
   writes every value an IN by the game reads (not by the ROM), in order, each
-  interrupt the ROM's IM1 handler takes, and at every pass through
+  interrupt the ROM's IM1 handler takes, each value an LD A,R reads, and at every pass through
   --checkpoint the clock (T-states since the start) and the --state ranges:
   the first pass in full, then the bytes changed since.
 
@@ -54,7 +54,7 @@ from skoolkit import CSimulator, SkoolKitError
 from skoolkit.graphics import Frame, scr_udgs
 from skoolkit.components import get_image_writer
 from skoolkit.simulator import Simulator
-from skoolkit.simutils import SP, from_snapshot, get_state
+from skoolkit.simutils import A, SP, from_snapshot, get_state
 from skoolkit.snapshot import Snapshot, write_snapshot
 
 PC, T, IFF = 24, 25, 26
@@ -159,6 +159,8 @@ class Tracer:
         self.ay = [0] * 16
         self.io_log = []
         self.record = None        # --record: lines of the reads and checkpoints
+        self.events = 0           # 'in' reads and 'int' lines recorded
+        self.run = None           # (port, value, count) of the last 'in' line
 
     def set_keys(self, keys):
         self.keyboard[:] = [0] * 8
@@ -174,13 +176,22 @@ class Tracer:
         v = self.port_value(port)
         if self.record is not None:
             pc = registers[PC]                       # the IN instruction
+            rec = self.record
             if pc >= 0x4000:
-                self.record.append('in %04X %02X' % (port, v))
+                self.events += 1
+                run = self.run
+                if run and run[0] == port and run[1] == v and rec[-1].startswith('in '):
+                    self.run = run = (port, v, run[2] + 1)   # repeats: 'in PORT VAL COUNT'
+                    rec[-1] = 'in %04X %02X %d' % run
+                else:
+                    self.run = (port, v, 1)
+                    rec.append('in %04X %02X' % (port, v))
             elif pc == KEY_SCAN_IN and port == 0xFEFE:
                 # ponytail: the ROM's IM1 handler scans the keyboard once per
                 # interrupt; a game that calls KEY_SCAN itself would add false
                 # ones, and an IM2 handler is not seen
-                self.record.append('int')
+                self.events += 1
+                rec.append('int')
         return v
 
     def port_value(self, port):
@@ -252,6 +263,92 @@ def short_hash(data):
     return hashlib.blake2b(bytes(data), digest_size=6).hexdigest()
 
 
+def setup(args, snap, regs):
+    """The simulator and its port tracer, as the options set them up."""
+    sim = from_snapshot(CSimulator or Simulator, snap, regs, None,
+                        {'fast_djnz': False, 'fast_ldir': False})
+    if len(sim.memory) != 0x10000:
+        sys.exit('48K snapshots only (extend Tracer/paging for 128K)')
+    if args.clear:
+        lo, hi = (parse_int(x) for x in args.clear.split('-'))
+        sim.memory[lo:hi] = [0] * (hi - lo)
+    for spec in args.load:
+        fname, addr = spec.rsplit('@', 1)
+        data = open(fname, 'rb').read()
+        a = parse_int(addr)
+        sim.memory[a:a + len(data)] = list(data)
+    for spec in args.poke:
+        addr, value = (parse_int(x) for x in spec.split(','))
+        sim.memory[addr] = value & 0xFF
+    if args.cls is not None:
+        sim.memory[0x4000:0x5800] = [0] * 0x1800
+        sim.memory[0x5800:0x5B00] = [args.cls] * 0x300
+    tracer = Tracer()
+    tracer.border = [(0, snap.border)]
+    tracer.outfe = snap.outfe
+    sim.set_tracer(tracer)
+    return sim, tracer
+
+
+def r_reads(args, snap, regs, events, t0):
+    """Every LD A,R the run executes, in order, as (events before it, clock,
+    value): `events` counts the record's 'in' and 'int' lines before the read.
+    The C simulator stops at one address only, so this is a second run of the
+    same input, stopping at each LD A,R in RAM (the bytes ED 5F; a site that
+    is data is never reached)."""
+    sim0, _ = setup(args, snap, regs)
+    sites = [a for a in range(0x4000, 0xFFFF) if sim0.memory[a] == 0xED and sim0.memory[a + 1] == 0x5F]
+    reads = []
+    for site in sites:
+        sim, tracer = setup(args, snap, regs)
+        tracer.record = []
+        f0, state = sim.registers[T] // sim.frame_duration, {'ev': 0}
+        if events and events[0][0] <= 0:
+            tracer.set_keys(events[0][1])
+
+        def frame(scr, frame, border, kb):
+            n = frame - f0 - 1
+            while state['ev'] < len(events) and events[state['ev']][0] <= n + 1:
+                tracer.set_keys(events[state['ev']][1])
+                state['ev'] += 1
+            return n + 1 < args.frames
+
+        while sim.trace(sim.registers[PC], site, 0, 0, 1, frame, None, tracer.keyboard,
+                        None, None)[0] == 3:
+            k, t = tracer.events, sim.registers[T] - t0
+            sim.trace(site, -1, 1, 0, 1, frame, None, tracer.keyboard, None, None)
+            reads.append((k, t, sim.registers[A]))
+    return sorted(reads)
+
+
+def merge_r(lines, reads):
+    """Insert 'r XX' lines into the record `lines` (header, then 'in'/'int'/'cp'
+    events): after as many reads ('in' with its count, 'int') as came before
+    it, splitting a run of repeated reads, and among the 'cp' lines there by
+    the clock."""
+    out, k, i = [], 0, 0
+    lines = list(lines)
+    for n, t, v in reads:
+        while i < len(lines):
+            w = lines[i].split()
+            if w[0] in ('in', 'int'):
+                c = int(w[3]) if len(w) > 3 else 1
+                if k == n:
+                    break
+                if k + c > n:                     # the read falls inside a run
+                    first, rest = n - k, k + c - n
+                    lines[i:i + 1] = [' '.join(w[:3] + ([str(first)] if first > 1 else [])),
+                                      ' '.join(w[:3] + ([str(rest)] if rest > 1 else []))]
+                    continue
+                k += c
+            elif w[0] == 'cp' and k == n and int(w[1]) >= t:
+                break
+            out.append(lines[i])
+            i += 1
+        out.append('r %02X' % v)
+    return out + lines[i:]
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split('\n')[0],
                                  epilog=__doc__.split('\n', 2)[2],
@@ -306,30 +403,7 @@ def main():
     for spec in args.reg:
         r, _, v = spec.partition('=')
         regs[r.upper()] = parse_int(v)
-    sim = from_snapshot(CSimulator or Simulator, snap, regs, None,
-                        {'fast_djnz': False, 'fast_ldir': False})
-    if len(sim.memory) != 0x10000:
-        sys.exit('48K snapshots only (extend Tracer/paging for 128K)')
-    if args.clear:
-        lo, hi = (parse_int(x) for x in args.clear.split('-'))
-        sim.memory[lo:hi] = [0] * (hi - lo)
-    for spec in args.load:
-        fname, addr = spec.rsplit('@', 1)
-        data = open(fname, 'rb').read()
-        a = parse_int(addr)
-        sim.memory[a:a + len(data)] = list(data)
-
-    for spec in args.poke:
-        addr, value = (parse_int(x) for x in spec.split(','))
-        sim.memory[addr] = value & 0xFF
-    if args.cls is not None:
-        sim.memory[0x4000:0x5800] = [0] * 0x1800
-        sim.memory[0x5800:0x5B00] = [args.cls] * 0x300
-
-    tracer = Tracer()
-    tracer.border = [(0, snap.border)]
-    tracer.outfe = snap.outfe
-    sim.set_tracer(tracer)
+    sim, tracer = setup(args, snap, regs)
 
     events = []
     if args.input:
@@ -439,10 +513,13 @@ def main():
             tracer.record.append(' '.join(['cp %d' % (sim.registers[T] - t0)] +
                                           changes(seen, sim.memory, ranges, first)))
             first = False
+        reads = r_reads(args, snap, regs, events, t0)
+        if reads:
+            tracer.record = merge_r(tracer.record, reads)
         with open(args.record, 'w') as f:
             f.write('\n'.join(tracer.record + ['end %d' % len(hashes)]) + '\n')
-        print('record %s: %d reads, %d checkpoints' % (
-            args.record, sum(r[:2] == 'in' for r in tracer.record),
+        print('record %s: %d reads, %d R reads, %d checkpoints' % (
+            args.record, tracer.events, len(reads),
             sum(r[:2] == 'cp' for r in tracer.record)))
     else:
         sim.trace(sim.registers[PC], stop, 0, 0, 1,

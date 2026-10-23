@@ -112,6 +112,7 @@ zx.out(port, v)                  # $FE: border bits 0-2, speaker bit 4 (MIC igno
 zx.inp(port)                     # $xxFE: half-rows selected by the high byte, bits 0-4, 0 = pressed
                                  # $1F: Kempston
 zx.spend(t)                      # charge T-states
+zx.r()                           # LD A,R: from the clock; in a replay the value the Z80 read
 await zx.sync()                  # hand the host every frame the clock has passed
 await zx.halt()                  # clock to the next frame boundary, then sync
 zx.di(); zx.ei(); zx.im2(fn)     # interrupts; the IM1 default only counts FRAMES
@@ -121,8 +122,9 @@ raise Goto(NextMaze)             # a jump that drops return addresses; dispatch(
 
 All three views of memory are the same 64K and wrap like the Z80 on a
 store, so a byte is never written as a word by mistake and the port needs no
-`& 0xFF` on memory. Not built yet: `zx.r()` for `LD A,R` (recorded values in
-a replay), until a game needs it.
+`& 0xFF` on memory. `zx.r()` stands for `LD A,R`: a port has no instruction
+fetches to count, so it takes the clock, and a replay gives the value the Z80
+read (The Hobbit seeds its random numbers this way).
 
 `sync` gives the host one frame for each frame boundary the clock has
 crossed: fifty for a one-second blocking sound, none when a main-loop pass is
@@ -248,7 +250,10 @@ How to run them: the `zx-port` skill. Why they look like this:
    where the port's `zx.spend` figures come from.
 2. **The whole game, by checkpoint replay** (`make port-test`). The Z80 run
    (`zxrun.py --record`) writes every value an IN by the game reads, with
-   its port address, in order, the interrupts the ROM's handler takes, and
+   its port address, in order (a run of the same read as one line with a
+   count: polling loops read millions of times), every value an `LD A,R`
+   read (a second run that stops at each `LD A,R`, merged by the order of
+   reads), the interrupts the ROM's handler takes, and
    at every pass through one checkpoint address the clock and the game
    state: the screen, the code region and any system variable the game
    uses, not the stack. The state is stored, not hashed (the first pass in

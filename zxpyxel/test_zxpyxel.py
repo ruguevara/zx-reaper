@@ -108,6 +108,26 @@ def test_goto():
     assert headless.run(main) == 0 and trail == ['a', 'b']
 
 
+def test_replay(path='/tmp/zxpyxel-test.rec'):
+    """Repeated reads ('in PORT VAL COUNT') and R reads come back in order."""
+    open(path, 'w').write('checkpoint 8000\nstate 9000-9001\nin 00FE BF 3\nr 15\n'
+                          'in 7FFE BE\ncp 100 9000:2a\nend 1\n')
+
+    class labels:
+        Loop = 0x8000
+
+    async def main():
+        for _ in range(3):
+            assert zx.inp(0x00FE) == 0xBF
+        zx.mem[0x9000] = zx.r() + 0x15
+        assert zx.inp(0x7FFE) == 0xBE
+        zx.checkpoint('Loop')
+        zx.inp(0x00FE)                       # past the end of the record: the replay stops
+
+    zx.reset()
+    assert headless.replay(main, path, labels)[0] == 1
+
+
 def test_render():
     zx.reset()
     zx.mem[0x4000], zx.mem[0x5800] = 0x80, 0xC7              # FLASH BRIGHT, white ink on black

@@ -85,6 +85,12 @@ class Spectrum:
     def spend(self, t):
         self.t += t
 
+    def r(self):
+        """LD A,R. The refresh register counts instruction fetches, which a
+        port does not have, so it is taken from the clock (a seed as random as
+        the original's); a replay gives the values the Z80 read."""
+        return self.t >> 2 & 0x7F
+
     def tone(self, half, cycles, on, off):
         """A beeper loop: OUT on, wait `half` T-states, OUT off, wait, `cycles` times."""
         for _ in range(cycles):
