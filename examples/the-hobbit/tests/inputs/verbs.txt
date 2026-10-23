@@ -1,0 +1,118 @@
+# Parser and verbs at Bag End: errors, ambiguity, ALL/EXCEPT, AND, SAY TO,
+# the @ repeat, arrow keys, DELETE, a long line, an empty line
+0 -
+50 SPACE
+53 -
+1453 SPACE
+1456 -
++300 TYPE examine chest
++500 TYPE open
++500 TYPE all
++500 TYPE look into chest
++500 TYPE examine map
++500 TYPE read map
++500 TYPE drop map
++500 TYPE take map
++500 TYPE put map in chest
++500 TYPE take map from chest
++500 TYPE close chest
++500 TYPE open the wooden chest
++500 TYPE take everything except chest
++500 TYPE drop all
++500 TYPE take all
++500 TYPE inventory
++500 TYPE i
++500 TYPE l
++500 TYPE score
++500 TYPE xyzzy
++500 TYPE the
++500 TYPE take
++500 TYPE map
++500 TYPE give map to thorin
++500 TYPE say to thorin "give map to me"
++500 TYPE say to thorin "read map"
++500 TYPE say to gandalf "help"
++500 TYPE say "hello"
++500 TYPE ask thorin
++500 TYPE help
++500 TYPE examine thorin
++500 TYPE kill thorin
++500 TYPE eat chest
++500 TYPE drink
++500 TYPE break chest
++500 TYPE climb chest
++500 TYPE swim
++500 TYPE dig
++500 TYPE wear map
++500 TYPE lock door
++500 TYPE unlock door
++500 TYPE close door
++500 TYPE open door
++500 TYPE look through door
++500 TYPE examine door
++500 TYPE quickly go north
++500 TYPE run
++500 TYPE carefully wait
++500 TYPE throw map at thorin
++500 TYPE take map
++500 TYPE fill chest
++500 TYPE empty chest
++500 TYPE light map
++500 TYPE turn chest
++500 TYPE pick up map and put it in the chest
++500 TYPE take map out of chest, examine it; read it. look
++500 TYPE take the map and the chest
++500 TYPE drop the short and the long swords
++500 TYPE take the money and run
++500 TYPE open all except the green bottle
++500 TYPE break all bottles except the green one
++500 TYPE with the sword carefully attack the troll
++500 TYPE take 3 things
++500 TYPE take the take the take the take the take the take the take the take the take the take the take the take the take the take the map
++500 TYPE
++500 TYPE ?
++500 TYPE map, chest; door: thorin! gandalf'
+# @ repeats the last command
++500 SS
++1 SS 2
++3 -
++500 SS
++1 SS 2
++3 -
+# DELETE (CAPS SHIFT + 0) while typing
++500 T
++2 -
++2 A
++2 -
++2 CS 0
++2 -
++2 CS 0
++2 -
++2 L
++2 -
++2 ENTER
++2 -
+# arrow keys 5 6 7 8 (no ENTER)
++500 8
++3 -
++600 SPACE
++3 -
++500 5
++3 -
++600 7
++3 -
++500 6
++3 -
++500 TYPE pause
++300 SPACE
++3 -
++500 TYPE print
++500 TYPE look
++600 TYPE noprint
++500 TYPE wait
++500 TYPE quit
++1500 SPACE
++3 -
++1500 SPACE
++3 -
++600 END

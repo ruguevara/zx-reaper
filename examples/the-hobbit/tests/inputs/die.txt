@@ -1,0 +1,22 @@
+# Killed by the hideous troll, the score line, a key restarts the game
+0 -
+50 SPACE
+53 -
+1453 SPACE
+1456 -
+1756 TYPE take chest
+2100 TYPE east
+3620 TYPE open door
+4060 TYPE e
+4668 SPACE
+4671 -
+5071 TYPE e
+5679 A
+5682 -
+6182 TYPE kill hideous troll
+7458 -
+7758 A
+7761 -
+9261 A
+9264 -
+9564 END

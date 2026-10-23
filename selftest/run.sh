@@ -47,4 +47,26 @@ python3 tools/zxq.py finding add observed "cellad returns ATTRS + 32*PY + PX" "z
 python3 tools/zxq.py question set Q6 answered "F1" > /dev/null
 python3 tools/zxq.py audit | head -2
 python3 tools/zxdoctor.py > /dev/null
+echo "== typed input and screen text"
+python3 - "$kit" <<'PY'
+import sys
+sys.path.insert(0, sys.argv[1] + '/tools')
+import zxrun
+ev, end = zxrun.type_events(10, 'a,')
+assert ev == [(10, ['A']), (12, []), (14, ['SS']), (15, ['SS', 'N']), (17, []),
+              (19, ['ENTER']), (21, [])] and end == 23, ev
+mem = bytearray(0x10000)
+mem[0x3D00:0x4000] = open(sys.argv[1] + '/zxpyxel/48.rom', 'rb').read()[0x3D00:]
+def put(x, y, ch, width):          # a glyph's left `width` columns at pixel x, cell row y
+    g = mem[0x3D00 + 8 * (ord(ch) - 32):][:8]
+    for r in range(8):
+        a = 0x4000 | (y & 0x18) << 8 | r << 8 | (y & 7) << 5
+        row = int.from_bytes(mem[a:a + 32], 'big') | (g[r] >> (8 - width)) << (256 - x - width)
+        mem[a:a + 32] = row.to_bytes(32, 'big')
+for i, ch in enumerate('HI'):
+    put(8 * i, 0, ch, 8)
+for i, ch in enumerate('ok go'):
+    put(6 * i + 1, 2, ch, 6)
+assert zxrun.screen_text(mem).split('\n')[:3] == ['HI', '', 'ok go'], zxrun.screen_text(mem)
+PY
 echo "SELFTEST PASSED"

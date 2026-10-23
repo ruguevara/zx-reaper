@@ -15,7 +15,11 @@ routine executed at least once; 100% instruction coverage is not needed.
    move, fire, die), `die-all` (lose every life, game over, high score entry),
    `pause`, `redefine-keys`.
    End each with `N END`. Check a script does what you think by viewing
-   `--shot` frames at its key moments.
+   `--shot` frames at its key moments. Games with typed commands (adventures):
+   `+500 TYPE take the lamp` types a line and ENTER, and `--text [FONT]`
+   prints the final screen as text (the ROM's font, and the game's at FONT),
+   cheaper to read than a PNG. Play step by step from a `--dump`ed snapshot:
+   a resumed run is identical to a continuous one.
 3. `make coverage` adds maps from all scripts and RZX files.
 4. Random play reaches odd paths cheaply:
    `tools/zxrun.py re/orig.z80 --frames 20000 --fuzz 2:3:O,P,Q,A,M,SPACE --map re/maps/fuzz2.map`

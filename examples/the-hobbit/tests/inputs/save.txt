@@ -1,0 +1,14 @@
+# SAVE: four blocks through the ROM's SA-BYTES, then the verify prompt;
+# verification waits for a tape the runner does not play (A, not SPACE:
+# SPACE held into the ROM's tape routine is BREAK and crashes the game)
+0 -
+50 SPACE
+53 -
+1453 SPACE
+1456 -
++300 TYPE save
++500 A
++3 -
++3000 A
++3 -
++500 END

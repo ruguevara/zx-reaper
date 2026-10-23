@@ -15,6 +15,9 @@ Input script (--input), one line per change, keys held until the next line:
   100  O SPACE      several keys at once
   140  KF KL        Kempston fire + left (KL KR KU KD KF)
   600  END          stop here (instead of --frames)
+  700  TYPE take all, e    types the text then ENTER, each key 2 frames down and
+                    2 up (punctuation with SS); +N on the next line counts
+                    from the end of the typing
 Key names: A-Z 0-9 ENTER SPACE CS (caps shift) SS (symbol shift).
 
 Examples:
@@ -62,21 +65,55 @@ ROWS = ['CS Z X C V', 'A S D F G', 'Q W E R T', '1 2 3 4 5',
         '0 9 8 7 6', 'P O I U Y', 'ENTER L K J H', 'SPACE SS M N B']
 KEYS = {k: (r, b) for r, row in enumerate(ROWS) for b, k in enumerate(row.split())}
 KEMPSTON = {'KR': 1, 'KL': 2, 'KD': 4, 'KU': 8, 'KF': 16}
+# TYPE: characters typed with SYMBOL SHIFT, as on the Spectrum's keys
+SYMBOLS = {'.': 'M', ',': 'N', '"': 'P', ';': 'O', ':': 'Z', '?': 'C', '!': '1',
+           "'": '7', '-': 'J', '@': '2', '+': 'K', '=': 'L', '/': 'V', '*': 'B'}
+TYPE_HOLD = 2           # frames a typed key is held, and released after it
 
 
 def parse_int(s):
     return int(s, 0)
 
 
+def type_events(frame, text):
+    """Key events typing `text` then ENTER from `frame`; returns them and the
+    frame after the last release. A symbol is SS a frame before its key."""
+    events = []
+    for ch in text.upper() + '\n':
+        if ch == '\n':
+            keys = ['ENTER']
+        elif ch == ' ':
+            keys = ['SPACE']
+        elif ch in SYMBOLS:
+            events.append((frame, ['SS']))
+            frame += 1
+            keys = ['SS', SYMBOLS[ch]]
+        elif ch in KEYS:
+            keys = [ch]
+        else:
+            raise ValueError('cannot type %r' % ch)
+        events += [(frame, keys), (frame + TYPE_HOLD, [])]
+        frame += 2 * TYPE_HOLD
+    return events, frame
+
+
 def parse_input(path):
     events = []
     frame = 0
     for lineno, line in enumerate(open(path), 1):
-        line = line.split('#')[0].split()
+        raw = line.split('#')[0]
+        line = raw.split()
         if not line:
             continue
         f = line[0]
         frame = frame + int(f[1:]) if f.startswith('+') else int(f)
+        if len(line) > 1 and line[1].upper() == 'TYPE':
+            try:
+                typed, frame = type_events(frame, raw.split(None, 2)[2].strip() if len(line) > 2 else '')
+            except ValueError as e:
+                sys.exit('%s:%d: %s' % (path, lineno, e))
+            events += typed
+            continue
         keys = [k.upper() for k in line[1:] if k != '-']
         if keys == ['END']:
             events.append((frame, None))
@@ -177,6 +214,40 @@ def png(scr, path, crop=(0, 0, 32, 24), scale=2):
         get_image_writer().write_image([frame], f)
 
 
+def screen_text(mem, font=None):
+    """The screen as 24 lines of text, each row read as 32 columns of 8-pixel
+    cells and as 42 columns of 6 pixels (the left six of each glyph, at the
+    offset that reads best); the reading with more characters wins. Glyphs
+    come from the ROM's font and the game's 96-character font at `font`,
+    normal or inverse; a cell that is not a character is '#' when set, ' '
+    when blank."""
+    def lookup(width):
+        d = {}
+        for base in (font, 0x3D00):
+            for i in range(96 if base is not None else 0):
+                g = tuple(mem[base + 8 * i + r] >> (8 - width) for r in range(8))
+                d.setdefault(g, chr(32 + i))
+                d.setdefault(tuple(b ^ (1 << width) - 1 for b in g), chr(32 + i))
+        return d
+
+    def read(rows, x0, width, chars):
+        out, hits = '', 0
+        for x in range(x0, 257 - width, width):
+            g = tuple((row >> (256 - x - width)) & (1 << width) - 1 for row in rows)
+            c = chars.get(g)
+            out += c or ('#' if any(g) else ' ')
+            hits += c is not None and c != ' '
+        return hits, out.rstrip()
+
+    cells, narrow = lookup(8), lookup(6)
+    lines = []
+    for y in range(24):
+        a = 0x4000 | (y & 0x18) << 8 | (y & 7) << 5
+        rows = [int.from_bytes(bytes(mem[a + 256 * r:a + 256 * r + 32]), 'big') for r in range(8)]
+        lines.append(max([read(rows, 0, 8, cells)] + [read(rows, x0, 6, narrow) for x0 in range(6)])[1])
+    return '\n'.join(lines)
+
+
 def short_hash(data):
     return hashlib.blake2b(bytes(data), digest_size=6).hexdigest()
 
@@ -207,6 +278,9 @@ def main():
     ap.add_argument('--call', type=parse_int, metavar='ADDR', help='call a routine and stop on return')
     ap.add_argument('--reg', action='append', default=[], metavar='R=V', help='register for --call')
     ap.add_argument('--png', help='write the final screen as PNG')
+    ap.add_argument('--text', nargs='?', const=-1, type=parse_int, metavar='FONT',
+                    help='print the final screen as text, 32 or 42 columns, matched against '
+                         'the ROM\'s font and the game\'s at FONT; # is a cell that is not a character')
     ap.add_argument('--crop', default='0,0,32,24', help='cells X,Y,W,H for --png (default whole screen)')
     ap.add_argument('--scale', type=int, default=2, help='--png scale (default 2)')
     ap.add_argument('--watch', metavar='A[-B]', help='log writes to A..B (pure Python simulator)')
@@ -399,6 +473,8 @@ def main():
     if args.png:
         png(sim.memory[0x4000:0x5B00], args.png, crop, args.scale)
         print('wrote %s' % args.png)
+    if args.text is not None:
+        print(screen_text(sim.memory, None if args.text < 0 else args.text))
     if expected is not None:
         if state['diverged'] is not None:
             sys.exit(1)

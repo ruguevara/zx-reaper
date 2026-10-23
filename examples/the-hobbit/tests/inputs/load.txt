@@ -1,0 +1,10 @@
+# LOAD: the prompt, then the ROM's LD-BYTES waits for a tape the runner does not play
+0 -
+50 SPACE
+53 -
+1453 SPACE
+1456 -
++300 TYPE load
++500 A
++3 -
++500 END
