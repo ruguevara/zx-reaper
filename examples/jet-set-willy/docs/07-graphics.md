@@ -32,7 +32,7 @@ white where he marks background cells).
 
 ![Willy: frames 0-3 facing right ($9D00), 0-3 facing left ($9D80)](img/willy.png) ![Willy walking: right frames 0-3, then left frames 3-0](img/willy-walk.gif)
 
-![The figure in the Master Bedroom, frames 0-3 ($9C80), in the cyan of its top cells](img/figure.png) ![The figure's frames 0 and 1 alternating, in its colours (cyan top cells, white bottom cells)](img/figure.gif)
+![The figure in the Master Bedroom, frames 0-3 ($9C80), in the colours the game gives it: bright cyan top row ($45), white bottom row ($07)](img/figure.png) ![The figure's frames 0 and 1 alternating, in its colours (cyan top cells, white bottom cells)](img/figure.gif)
 
 ![The toilet ($A600): frames 0-1 in play, frames 2-3 in ending stage 3](img/toilet.gif)
 

@@ -5,7 +5,8 @@
                                       with the room number and its item count
   docs-anim.py guardians OUT.gif      every guardian of rooms 0-60 cycling
                                       through its animation frames
-  docs-anim.py sprites OUTDIR         willy-walk.gif, figure.gif, toilet.gif
+  docs-anim.py sprites OUTDIR         willy-walk.gif, figure.gif, figure.png,
+                                      toilet.gif
   docs-anim.py room INGAME N OUT.gif  room N in play (entities moving, Willy
                                       hidden), one GIF frame per pass
 
@@ -111,9 +112,11 @@ def sprites(outdir):
     write_gif(os.path.join(outdir, 'willy-walk.gif'), [compose([g], 1, 4) for g in walk], DELAY * 2)
     figure = [two_tone(mem, FIGURE + 32 * f, 0x45, 0x07) for f in (0, 1)]
     write_gif(os.path.join(outdir, 'figure.gif'), [compose([g], 1, 4) for g in figure], DELAY * 2)
+    frames = [two_tone(mem, FIGURE + 32 * f, 0x45, 0x07) for f in range(4)]
+    write_png(os.path.join(outdir, 'figure.png'), compose(frames, 4, 4))
     toilet = [sprite(mem, TOILET >> 8, f, 0x07) for f in (0, 1) * 3 + (2, 3) * 3]
     write_gif(os.path.join(outdir, 'toilet.gif'), [compose([g], 1, 4) for g in toilet], DELAY * 2)
-    print('wrote willy-walk.gif, figure.gif, toilet.gif in %s' % outdir)
+    print('wrote willy-walk.gif, figure.gif, figure.png, toilet.gif in %s' % outdir)
 
 
 def screen_pixels(mem):

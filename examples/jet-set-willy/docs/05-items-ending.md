@@ -89,6 +89,11 @@ The frame depends on Willy's height (F63):
 
 ![The four frames of the figure](img/figure.png) ![Frames 0 and 1 alternating: the figure with Willy on the low floor](img/figure.gif)
 
+The figure stands with its top at a character row boundary (pixel row 88,
+row 11), and [UpdateBedroom](../src/specialrooms.asm#L22) colours its two rows differently: the
+top cells $45 (bright cyan), the bottom cells $07 (white, not bright). So it
+is cyan above its waist and white below it in play, as in the room picture.
+
 The title message names Maria as the one who must let Willy get to his bed;
 the sources call this sprite "the figure", and nothing in the code names it.
 

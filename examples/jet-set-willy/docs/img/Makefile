@@ -87,8 +87,6 @@ $(IMG)/attic-after-16.png: $(TMP)/attic.z80
 # 16x16 sprites: 16 rows of 2 bytes, so --layout linear
 $(IMG)/willy.png:
 	$(GFX) 0x9D00 8 2 2 $@ --layout linear --attr 0x47 --scale 4
-$(IMG)/figure.png:
-	$(GFX) 0x9C80 4 2 2 $@ --layout linear --attr 0x45 --scale 4
 $(IMG)/foot-barrel.png:
 	$(GFX) 0x9C40 2 2 2 $@ --layout linear --attr 0x47 --scale 4
 # all 26 sprite pages $A600-$BFFF, one page per row
@@ -109,9 +107,10 @@ $(IMG)/item-graphics.png: scripts/docs-anim.py
 # definition index and its rooms
 $(IMG)/guardians.gif: scripts/docs-anim.py
 	$(PY) scripts/docs-anim.py guardians $@
-# Willy walking right then left, the figure's arm, the toilet (frames 0-1,
-# then 2-3 of ending stage 3)
-$(IMG)/willy-walk.gif $(IMG)/figure.gif $(IMG)/toilet.gif &: scripts/docs-anim.py
+# Willy walking right then left, the figure's arm and its four frames (in the
+# game's colours: UpdateBedroom gives its top row $45, its bottom row $07),
+# the toilet (frames 0-1, then 2-3 of ending stage 3)
+$(IMG)/willy-walk.gif $(IMG)/figure.gif $(IMG)/figure.png $(IMG)/toilet.gif &: scripts/docs-anim.py
 	$(PY) scripts/docs-anim.py sprites $(IMG)
 # room 16 in play, Willy hidden: the rope swings, the arrow and guardians move
 $(IMG)/room-16.gif: $(INGAME) scripts/docs-anim.py
