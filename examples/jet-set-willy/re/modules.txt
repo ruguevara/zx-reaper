@@ -1,0 +1,22 @@
+# START module   (one asm file per range, in address order)
+$8000 buffers       # room buffer, entity buffer, pixel-row address table, rope table
+$8400 start         # program entry, fake decryption loop
+$8420 variables     # current room, movement table, title pieces, texts, game variables, cheat keys, tunes
+$869F protection    # colour-code check
+$87CA title         # new game, title screen, scroller, start game, enter room
+$898B mainloop      # lives, frame loop, colour cycling, pause, tune, cheat, death, game over
+$8D33 roombuild     # room attribute and pixel buffers from the room layout
+$8DD3 willy         # Willy's movement: jump, fall, keys, walking, ramps, conveyors; kill
+$90C0 entities      # guardians, arrows and ropes: movement, drawing, collisions
+$93D1 items         # drawing and collecting items
+$9456 sprite        # sprite drawing with collision test
+$948A exits         # moving between rooms, conveyor animation
+$9534 specialrooms  # Master Bedroom, Bathroom toilet, Willy's cells and drawing
+$9637 output        # Willy drawing, text printing, tunes, sounds, leftover test code
+$9718 screens       # title and status attributes, code-screen graphics
+$9C00 charsprites   # leftover source text, game-over and figure sprites, Willy
+$9E00 codetable     # colour-code table
+$A000 entitydefs    # entity definitions
+$A3FF itemtable     # item table
+$A600 sprites       # entity sprite pages
+$C000 rooms         # 64 room pages
