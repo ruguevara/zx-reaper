@@ -1,5 +1,11 @@
-; Data block at B300
-b$B300 DEFB $00,$00
+; Sprites: unused page, all zero
+;
+; Eight 16x16 sprites of 32 bytes, 16 pixel rows of 2 bytes each (left byte, right byte; bit 7 = leftmost pixel). Sprite
+; F of the page is at $B300+32*F. Entity definitions (#R$A000) name the page in byte +5 and pick F from the animation
+; phase, the direction and the slot data. The sprites are drawn with #R$9456 (#R$91BE) and have no colour of their own:
+; ink and bright come from the entity definition. This page holds only zero bytes and no entity definition uses it.
+@label=UnusedSpritesB3
+b$B300 DEFB $00,$00 ; frame 0: blank
  $B302 DEFB $00,$00
  $B304 DEFB $00,$00
  $B306 DEFB $00,$00
@@ -15,7 +21,7 @@ b$B300 DEFB $00,$00
  $B31A DEFB $00,$00
  $B31C DEFB $00,$00
  $B31E DEFB $00,$00
- $B320 DEFB $00,$00
+ $B320 DEFB $00,$00 ; frame 1: blank
  $B322 DEFB $00,$00
  $B324 DEFB $00,$00
  $B326 DEFB $00,$00
@@ -31,7 +37,7 @@ b$B300 DEFB $00,$00
  $B33A DEFB $00,$00
  $B33C DEFB $00,$00
  $B33E DEFB $00,$00
- $B340 DEFB $00,$00
+ $B340 DEFB $00,$00 ; frame 2: blank
  $B342 DEFB $00,$00
  $B344 DEFB $00,$00
  $B346 DEFB $00,$00
@@ -47,7 +53,7 @@ b$B300 DEFB $00,$00
  $B35A DEFB $00,$00
  $B35C DEFB $00,$00
  $B35E DEFB $00,$00
- $B360 DEFB $00,$00
+ $B360 DEFB $00,$00 ; frame 3: blank
  $B362 DEFB $00,$00
  $B364 DEFB $00,$00
  $B366 DEFB $00,$00
@@ -63,7 +69,7 @@ b$B300 DEFB $00,$00
  $B37A DEFB $00,$00
  $B37C DEFB $00,$00
  $B37E DEFB $00,$00
- $B380 DEFB $00,$00
+ $B380 DEFB $00,$00 ; frame 4: blank
  $B382 DEFB $00,$00
  $B384 DEFB $00,$00
  $B386 DEFB $00,$00
@@ -79,7 +85,7 @@ b$B300 DEFB $00,$00
  $B39A DEFB $00,$00
  $B39C DEFB $00,$00
  $B39E DEFB $00,$00
- $B3A0 DEFB $00,$00
+ $B3A0 DEFB $00,$00 ; frame 5: blank
  $B3A2 DEFB $00,$00
  $B3A4 DEFB $00,$00
  $B3A6 DEFB $00,$00
@@ -95,7 +101,7 @@ b$B300 DEFB $00,$00
  $B3BA DEFB $00,$00
  $B3BC DEFB $00,$00
  $B3BE DEFB $00,$00
- $B3C0 DEFB $00,$00
+ $B3C0 DEFB $00,$00 ; frame 6: blank
  $B3C2 DEFB $00,$00
  $B3C4 DEFB $00,$00
  $B3C6 DEFB $00,$00
@@ -111,7 +117,7 @@ b$B300 DEFB $00,$00
  $B3DA DEFB $00,$00
  $B3DC DEFB $00,$00
  $B3DE DEFB $00,$00
- $B3E0 DEFB $00,$00
+ $B3E0 DEFB $00,$00 ; frame 7: blank
  $B3E2 DEFB $00,$00
  $B3E4 DEFB $00,$00
  $B3E6 DEFB $00,$00

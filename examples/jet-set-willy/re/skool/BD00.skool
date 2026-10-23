@@ -1,5 +1,13 @@
-; Data block at BD00
-b$BD00 DEFB $18,$00
+; Sprites: hatted bird, left and right (8 frames)
+;
+; Eight 16x16 sprites of 32 bytes, 16 pixel rows of 2 bytes each (left byte, right byte; bit 7 = leftmost pixel). Sprite
+; F of the page is at $BD00+32*F. Entity definitions (#R$A000) name the page in byte +5 and pick F from the animation
+; phase, the direction and the slot data. The sprites are drawn with #R$9456 (#R$91BE) and have no colour of their own:
+; ink and bright come from the entity definition. An upright bird-like figure with a hat and a beak, walking. Frames 0-3
+; are used while moving left, 4-7 while moving right (bit 7 of entity byte +0). Used by entity definitions $36 $38 in
+; rooms $19 (The Cold Store).
+@label=SpritesHatBirds
+b$BD00 DEFB $18,$00 ; frame 0: hatted bird facing left, frame 0
  $BD02 DEFB $3C,$00
  $BD04 DEFB $D4,$00
  $BD06 DEFB $2E,$00
@@ -15,7 +23,7 @@ b$BD00 DEFB $18,$00
  $BD1A DEFB $14,$00
  $BD1C DEFB $13,$00
  $BD1E DEFB $3C,$00
- $BD20 DEFB $06,$00
+ $BD20 DEFB $06,$00 ; frame 1: hatted bird facing left, frame 1
  $BD22 DEFB $0F,$00
  $BD24 DEFB $3F,$00
  $BD26 DEFB $0B,$80
@@ -31,7 +39,7 @@ b$BD00 DEFB $18,$00
  $BD3A DEFB $02,$00
  $BD3C DEFB $02,$00
  $BD3E DEFB $07,$00
- $BD40 DEFB $01,$80
+ $BD40 DEFB $01,$80 ; frame 2: hatted bird facing left, frame 2
  $BD42 DEFB $0B,$C0
  $BD44 DEFB $05,$40
  $BD46 DEFB $0A,$E0
@@ -47,7 +55,7 @@ b$BD00 DEFB $18,$00
  $BD5A DEFB $01,$40
  $BD5C DEFB $06,$30
  $BD5E DEFB $01,$40
- $BD60 DEFB $00,$60
+ $BD60 DEFB $00,$60 ; frame 3: hatted bird facing left, frame 3
  $BD62 DEFB $00,$B0
  $BD64 DEFB $03,$50
  $BD66 DEFB $00,$B8
@@ -63,7 +71,7 @@ b$BD00 DEFB $18,$00
  $BD7A DEFB $00,$25
  $BD7C DEFB $00,$22
  $BD7E DEFB $00,$74
- $BD80 DEFB $06,$00
+ $BD80 DEFB $06,$00 ; frame 4: hatted bird facing right, frame 0
  $BD82 DEFB $0D,$00
  $BD84 DEFB $0A,$C0
  $BD86 DEFB $1D,$00
@@ -79,7 +87,7 @@ b$BD00 DEFB $18,$00
  $BD9A DEFB $A4,$00
  $BD9C DEFB $44,$00
  $BD9E DEFB $2E,$00
- $BDA0 DEFB $01,$80
+ $BDA0 DEFB $01,$80 ; frame 5: hatted bird facing right, frame 1
  $BDA2 DEFB $03,$D0
  $BDA4 DEFB $02,$A0
  $BDA6 DEFB $07,$50
@@ -95,7 +103,7 @@ b$BD00 DEFB $18,$00
  $BDBA DEFB $02,$80
  $BDBC DEFB $0C,$60
  $BDBE DEFB $02,$80
- $BDC0 DEFB $00,$60
+ $BDC0 DEFB $00,$60 ; frame 6: hatted bird facing right, frame 2
  $BDC2 DEFB $00,$F0
  $BDC4 DEFB $00,$FC
  $BDC6 DEFB $01,$D0
@@ -111,7 +119,7 @@ b$BD00 DEFB $18,$00
  $BDDA DEFB $00,$40
  $BDDC DEFB $00,$40
  $BDDE DEFB $00,$E0
- $BDE0 DEFB $00,$18
+ $BDE0 DEFB $00,$18 ; frame 7: hatted bird facing right, frame 3
  $BDE2 DEFB $00,$3C
  $BDE4 DEFB $00,$2B
  $BDE6 DEFB $00,$74

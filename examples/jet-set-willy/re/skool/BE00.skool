@@ -1,5 +1,13 @@
-; Data block at BE00
-b$BE00 DEFB $0C,$00
+; Sprites: head on a stalk (4 frames), dark ball (4 frames)
+;
+; Eight 16x16 sprites of 32 bytes, 16 pixel rows of 2 bytes each (left byte, right byte; bit 7 = leftmost pixel). Sprite
+; F of the page is at $BE00+32*F. Entity definitions (#R$A000) name the page in byte +5 and pick F from the animation
+; phase, the direction and the slot data. The sprites are drawn with #R$9456 (#R$91BE) and have no colour of their own:
+; ink and bright come from the entity definition. Frames 0-3 look like a head or flower (round, notched, bow-like) on a
+; stalk above a decorated base; frames 4-7 look like a dark round ball with a highlight. Used by entity definitions $0A
+; $0C $5B $69 $6B in rooms $00 $16 $30 $3C.
+@label=SpritesStalkHeadBall
+b$BE00 DEFB $0C,$00 ; frame 0: stalk head, round
  $BE02 DEFB $12,$00
  $BE04 DEFB $21,$00
  $BE06 DEFB $2D,$00
@@ -15,7 +23,7 @@ b$BE00 DEFB $0C,$00
  $BE1A DEFB $AC,$40
  $BE1C DEFB $40,$80
  $BE1E DEFB $2E,$00
- $BE20 DEFB $0E,$C0
+ $BE20 DEFB $0E,$C0 ; frame 1: stalk head, notched
  $BE22 DEFB $1D,$A0
  $BE24 DEFB $1F,$00
  $BE26 DEFB $1F,$E0
@@ -31,7 +39,7 @@ b$BE00 DEFB $0C,$00
  $BE3A DEFB $23,$50
  $BE3C DEFB $10,$60
  $BE3E DEFB $07,$00
- $BE40 DEFB $04,$08
+ $BE40 DEFB $04,$08 ; frame 2: stalk head, bow-like
  $BE42 DEFB $06,$18
  $BE44 DEFB $07,$38
  $BE46 DEFB $0F,$FC
@@ -47,7 +55,7 @@ b$BE00 DEFB $0C,$00
  $BE5A DEFB $0A,$C0
  $BE5C DEFB $00,$08
  $BE5E DEFB $03,$B0
- $BE60 DEFB $00,$DC
+ $BE60 DEFB $00,$DC ; frame 3: stalk head, notched (other side)
  $BE62 DEFB $01,$6E
  $BE64 DEFB $00,$3E
  $BE66 DEFB $01,$FE
@@ -63,7 +71,7 @@ b$BE00 DEFB $0C,$00
  $BE7A DEFB $00,$35
  $BE7C DEFB $01,$00
  $BE7E DEFB $00,$DC
- $BE80 DEFB $00,$00
+ $BE80 DEFB $00,$00 ; frame 4: dark ball, frame 0
  $BE82 DEFB $00,$00
  $BE84 DEFB $07,$E0
  $BE86 DEFB $1F,$B8
@@ -79,7 +87,7 @@ b$BE00 DEFB $0C,$00
  $BE9A DEFB $07,$E0
  $BE9C DEFB $00,$00
  $BE9E DEFB $00,$00
- $BEA0 DEFB $00,$00
+ $BEA0 DEFB $00,$00 ; frame 5: dark ball, frame 1
  $BEA2 DEFB $01,$80
  $BEA4 DEFB $07,$E0
  $BEA6 DEFB $0D,$70
@@ -95,7 +103,7 @@ b$BE00 DEFB $0C,$00
  $BEBA DEFB $07,$E0
  $BEBC DEFB $01,$80
  $BEBE DEFB $00,$00
- $BEC0 DEFB $01,$80
+ $BEC0 DEFB $01,$80 ; frame 6: dark ball, frame 2
  $BEC2 DEFB $07,$E0
  $BEC4 DEFB $0F,$F0
  $BEC6 DEFB $1E,$F8
@@ -111,7 +119,7 @@ b$BE00 DEFB $0C,$00
  $BEDA DEFB $0F,$F0
  $BEDC DEFB $07,$E0
  $BEDE DEFB $01,$80
- $BEE0 DEFB $00,$00
+ $BEE0 DEFB $00,$00 ; frame 7: dark ball, frame 3
  $BEE2 DEFB $01,$80
  $BEE4 DEFB $07,$E0
  $BEE6 DEFB $0F,$F0

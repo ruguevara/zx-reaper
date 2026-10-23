@@ -1,5 +1,14 @@
-; Data block at B400
-b$B400 DEFB $0E,$00
+; Sprites: hatted walker, left and right (8 frames)
+;
+; Eight 16x16 sprites of 32 bytes, 16 pixel rows of 2 bytes each (left byte, right byte; bit 7 = leftmost pixel). Sprite
+; F of the page is at $B400+32*F. Entity definitions (#R$A000) name the page in byte +5 and pick F from the animation
+; phase, the direction and the slot data. The sprites are drawn with #R$9456 (#R$91BE) and have no colour of their own:
+; ink and bright come from the entity definition. A figure in a hat and robe with an outstretched arm, walking. Frames
+; 0-3 are used while moving left, 4-7 while moving right (bit 7 of entity byte +0). Used by entity definitions $40 $41
+; $42 $43 $4A $4B $4C $4D $4E $4F $50 $51 $67 in rooms $13 $1B $1C $1F $31 (eight of them in The Forgotten Abbey, room
+; $13).
+@label=SpritesHatWalkers
+b$B400 DEFB $0E,$00 ; frame 0: walker facing left, frame 0
  $B402 DEFB $15,$00
  $B404 DEFB $2A,$80
  $B406 DEFB $17,$00
@@ -15,7 +24,7 @@ b$B400 DEFB $0E,$00
  $B41A DEFB $7F,$00
  $B41C DEFB $18,$00
  $B41E DEFB $38,$00
- $B420 DEFB $03,$80
+ $B420 DEFB $03,$80 ; frame 1: walker facing left, frame 1
  $B422 DEFB $05,$40
  $B424 DEFB $0A,$A0
  $B426 DEFB $05,$C0
@@ -31,7 +40,7 @@ b$B400 DEFB $0E,$00
  $B43A DEFB $1F,$C0
  $B43C DEFB $18,$80
  $B43E DEFB $38,$00
- $B440 DEFB $00,$E0
+ $B440 DEFB $00,$E0 ; frame 2: walker facing left, frame 2
  $B442 DEFB $01,$50
  $B444 DEFB $02,$A8
  $B446 DEFB $01,$70
@@ -47,7 +56,7 @@ b$B400 DEFB $0E,$00
  $B45A DEFB $07,$F0
  $B45C DEFB $06,$30
  $B45E DEFB $00,$60
- $B460 DEFB $00,$38
+ $B460 DEFB $00,$38 ; frame 3: walker facing left, frame 3
  $B462 DEFB $00,$54
  $B464 DEFB $00,$AA
  $B466 DEFB $00,$5C
@@ -63,7 +72,7 @@ b$B400 DEFB $0E,$00
  $B47A DEFB $01,$FC
  $B47C DEFB $01,$18
  $B47E DEFB $00,$38
- $B480 DEFB $1C,$00
+ $B480 DEFB $1C,$00 ; frame 4: walker facing right, frame 0
  $B482 DEFB $2A,$00
  $B484 DEFB $55,$00
  $B486 DEFB $3A,$00
@@ -79,7 +88,7 @@ b$B400 DEFB $0E,$00
  $B49A DEFB $3F,$80
  $B49C DEFB $18,$80
  $B49E DEFB $1C,$00
- $B4A0 DEFB $07,$00
+ $B4A0 DEFB $07,$00 ; frame 5: walker facing right, frame 1
  $B4A2 DEFB $0A,$80
  $B4A4 DEFB $15,$40
  $B4A6 DEFB $0E,$80
@@ -95,7 +104,7 @@ b$B400 DEFB $0E,$00
  $B4BA DEFB $0F,$E0
  $B4BC DEFB $0C,$60
  $B4BE DEFB $06,$00
- $B4C0 DEFB $01,$C0
+ $B4C0 DEFB $01,$C0 ; frame 6: walker facing right, frame 2
  $B4C2 DEFB $02,$A0
  $B4C4 DEFB $05,$50
  $B4C6 DEFB $03,$A0
@@ -111,7 +120,7 @@ b$B400 DEFB $0E,$00
  $B4DA DEFB $03,$F8
  $B4DC DEFB $01,$18
  $B4DE DEFB $00,$1C
- $B4E0 DEFB $00,$70
+ $B4E0 DEFB $00,$70 ; frame 7: walker facing right, frame 3
  $B4E2 DEFB $00,$A8
  $B4E4 DEFB $01,$54
  $B4E6 DEFB $00,$E8

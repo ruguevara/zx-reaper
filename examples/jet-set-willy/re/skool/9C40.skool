@@ -1,4 +1,10 @@
-; Data block at 9C40
+; Sprite: foot
+;
+; One 16x16 sprite of 32 bytes: 16 pixel rows of 2 bytes (left byte, right byte; bit 7 = leftmost pixel), drawn with
+; #R$9456. A foot (toe pointing right). It is frame 2 of sprite page $9C. Drawn at a falling position by the game-over
+; sequence #R$8B07 (position from #R$85E4, while the screen flashes), and used as entity sprite by definition $48 in The
+; Nightmare Room (room $1D), where it moves up and down.
+@label=SpriteFoot
 b$9C40 DEFB $10,$80
  $9C42 DEFB $10,$80
  $9C44 DEFB $10,$80

@@ -1,5 +1,15 @@
-; Data block at BF00
-b$BF00 DEFB $80,$00
+; Sprites: stick figure (4 frames), spear guard and plumed guard (2 + 2 frames)
+;
+; Eight 16x16 sprites of 32 bytes, 16 pixel rows of 2 bytes each (left byte, right byte; bit 7 = leftmost pixel). Sprite
+; F of the page is at $BF00+32*F. Entity definitions (#R$A000) name the page in byte +5 and pick F from the animation
+; phase, the direction and the slot data. The sprites are drawn with #R$9456 (#R$91BE) and have no colour of their own:
+; ink and bright come from the entity definition. Frames 0-3 look like a figure with raised arms and a diagonal stick
+; (entities $06-$09 and $0B, e.g. At the Foot of the MegaTree, room $03). Frames 4-5 look like a guard with a pointed
+; cap and an upright spear; frames 6-7 the same with a wider hat (entities $02-$05 in The Security Guard, room $05, and
+; rooms $0E, $0F, $11). Used by entity definitions $02 $03 $04 $05 $06 $07 $08 $09 $0B in rooms $03 $05 $08 $09 $0E $0F
+; $11 $28 $30 $39.
+@label=SpritesImpsGuards
+b$BF00 DEFB $80,$00 ; frame 0: stick figure, frame 0
  $BF02 DEFB $40,$00
  $BF04 DEFB $A3,$60
  $BF06 DEFB $53,$60
@@ -15,7 +25,7 @@ b$BF00 DEFB $80,$00
  $BF1A DEFB $03,$61
  $BF1C DEFB $03,$62
  $BF1E DEFB $07,$70
- $BF20 DEFB $00,$00
+ $BF20 DEFB $00,$00 ; frame 1: stick figure, frame 1
  $BF22 DEFB $00,$00
  $BF24 DEFB $06,$30
  $BF26 DEFB $56,$30
@@ -31,7 +41,7 @@ b$BF00 DEFB $80,$00
  $BF3A DEFB $17,$64
  $BF3C DEFB $0E,$60
  $BF3E DEFB $04,$70
- $BF40 DEFB $00,$00
+ $BF40 DEFB $00,$00 ; frame 2: stick figure, frame 2
  $BF42 DEFB $00,$00
  $BF44 DEFB $03,$60
  $BF46 DEFB $03,$60
@@ -47,7 +57,7 @@ b$BF00 DEFB $80,$00
  $BF5A DEFB $03,$60
  $BF5C DEFB $03,$60
  $BF5E DEFB $07,$70
- $BF60 DEFB $00,$00
+ $BF60 DEFB $00,$00 ; frame 3: stick figure, frame 3
  $BF62 DEFB $00,$00
  $BF64 DEFB $06,$30
  $BF66 DEFB $56,$30
@@ -63,7 +73,7 @@ b$BF00 DEFB $80,$00
  $BF7A DEFB $03,$74
  $BF7C DEFB $03,$38
  $BF7E DEFB $07,$10
- $BF80 DEFB $02,$04
+ $BF80 DEFB $02,$04 ; frame 4: spear guard, frame 0
  $BF82 DEFB $05,$0E
  $BF84 DEFB $0A,$84
  $BF86 DEFB $15,$C4
@@ -79,7 +89,7 @@ b$BF00 DEFB $80,$00
  $BF9A DEFB $AA,$84
  $BF9C DEFB $45,$00
  $BF9E DEFB $1D,$C0
- $BFA0 DEFB $02,$00
+ $BFA0 DEFB $02,$00 ; frame 5: spear guard, frame 1
  $BFA2 DEFB $05,$00
  $BFA4 DEFB $0A,$84
  $BFA6 DEFB $15,$CE
@@ -95,7 +105,7 @@ b$BF00 DEFB $80,$00
  $BFBA DEFB $AA,$84
  $BFBC DEFB $45,$04
  $BFBE DEFB $1D,$C4
- $BFC0 DEFB $00,$04
+ $BFC0 DEFB $00,$04 ; frame 6: plumed guard, frame 0
  $BFC2 DEFB $07,$06
  $BFC4 DEFB $2F,$A4
  $BFC6 DEFB $5F,$D4
@@ -111,7 +121,7 @@ b$BF00 DEFB $80,$00
  $BFDA DEFB $AA,$84
  $BFDC DEFB $45,$00
  $BFDE DEFB $0C,$C0
- $BFE0 DEFB $00,$00
+ $BFE0 DEFB $00,$00 ; frame 7: plumed guard, frame 1
  $BFE2 DEFB $07,$00
  $BFE4 DEFB $2F,$A4
  $BFE6 DEFB $50,$56

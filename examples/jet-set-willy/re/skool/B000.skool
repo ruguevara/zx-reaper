@@ -1,5 +1,14 @@
-; Data block at B000
-b$B000 DEFB $07,$C0
+; Sprites: ring on a stalk, chomping head, dressed figure, barred ornament
+;
+; Eight 16x16 sprites of 32 bytes, 16 pixel rows of 2 bytes each (left byte, right byte; bit 7 = leftmost pixel). Sprite
+; F of the page is at $B000+32*F. Entity definitions (#R$A000) name the page in byte +5 and pick F from the animation
+; phase, the direction and the slot data. The sprites are drawn with #R$9456 (#R$91BE) and have no colour of their own:
+; ink and bright come from the entity definition. Four unrelated pairs. Frames 0-1: a ring on a stalk (entities $52-$56
+; in The Attic, room $29). Frames 2-3: a round head with a wedge-shaped mouth (entity $57, The Attic). Frames 4-5: a
+; small figure with hair and a dress (entity $0F, in the room named "Rescue Esmerelda", room $0E). Frames 6-7: an
+; ornament with a vertical bar and arcs (entity $59, rooms $0B and $36).
+@label=SpritesRingChomper
+b$B000 DEFB $07,$C0 ; frame 0: ring on a stalk, frame 0
  $B002 DEFB $18,$30
  $B004 DEFB $23,$88
  $B006 DEFB $44,$44
@@ -15,7 +24,7 @@ b$B000 DEFB $07,$C0
  $B01A DEFB $03,$00
  $B01C DEFB $03,$00
  $B01E DEFB $03,$80
- $B020 DEFB $07,$C0
+ $B020 DEFB $07,$C0 ; frame 1: ring on a stalk, frame 1
  $B022 DEFB $18,$30
  $B024 DEFB $20,$08
  $B026 DEFB $43,$84
@@ -31,7 +40,7 @@ b$B000 DEFB $07,$C0
  $B03A DEFB $1D,$D0
  $B03C DEFB $08,$E0
  $B03E DEFB $04,$40
- $B040 DEFB $07,$C0
+ $B040 DEFB $07,$C0 ; frame 2: chomping head, frame 0
  $B042 DEFB $1F,$F0
  $B044 DEFB $3E,$78
  $B046 DEFB $7C,$3C
@@ -47,7 +56,7 @@ b$B000 DEFB $07,$C0
  $B05A DEFB $07,$C0
  $B05C DEFB $00,$00
  $B05E DEFB $00,$00
- $B060 DEFB $07,$C0
+ $B060 DEFB $07,$C0 ; frame 3: chomping head, frame 1
  $B062 DEFB $1F,$F0
  $B064 DEFB $3C,$F8
  $B066 DEFB $78,$7C
@@ -63,7 +72,7 @@ b$B000 DEFB $07,$C0
  $B07A DEFB $07,$C0
  $B07C DEFB $00,$00
  $B07E DEFB $00,$00
- $B080 DEFB $07,$C0
+ $B080 DEFB $07,$C0 ; frame 4: dressed figure, frame 0
  $B082 DEFB $08,$20
  $B084 DEFB $0A,$A0
  $B086 DEFB $08,$20
@@ -79,7 +88,7 @@ b$B000 DEFB $07,$C0
  $B09A DEFB $0F,$E0
  $B09C DEFB $14,$80
  $B09E DEFB $08,$C0
- $B0A0 DEFB $07,$C0
+ $B0A0 DEFB $07,$C0 ; frame 5: dressed figure, frame 1
  $B0A2 DEFB $08,$20
  $B0A4 DEFB $0A,$A0
  $B0A6 DEFB $08,$20
@@ -95,7 +104,7 @@ b$B000 DEFB $07,$C0
  $B0BA DEFB $0F,$E0
  $B0BC DEFB $02,$50
  $B0BE DEFB $06,$20
- $B0C0 DEFB $01,$80
+ $B0C0 DEFB $01,$80 ; frame 6: barred ornament, frame 0
  $B0C2 DEFB $00,$00
  $B0C4 DEFB $01,$80
  $B0C6 DEFB $45,$91
@@ -111,7 +120,7 @@ b$B000 DEFB $07,$C0
  $B0DA DEFB $12,$48
  $B0DC DEFB $0D,$B0
  $B0DE DEFB $00,$00
- $B0E0 DEFB $01,$80
+ $B0E0 DEFB $01,$80 ; frame 7: barred ornament, frame 1
  $B0E2 DEFB $00,$00
  $B0E4 DEFB $01,$80
  $B0E6 DEFB $89,$A2

@@ -1,5 +1,14 @@
-; Data block at BC00
-b$BC00 DEFB $00,$00
+; Sprites: small flyer, left and right (8 frames)
+;
+; Eight 16x16 sprites of 32 bytes, 16 pixel rows of 2 bytes each (left byte, right byte; bit 7 = leftmost pixel). Sprite
+; F of the page is at $BC00+32*F. Entity definitions (#R$A000) name the page in byte +5 and pick F from the animation
+; phase, the direction and the slot data. The sprites are drawn with #R$9456 (#R$91BE) and have no colour of their own:
+; ink and bright come from the entity definition. A small creature in side view, mostly 8 pixels high, that looks like a
+; bird or insect with changing wing positions. Frames 0-3 are used while moving left, 4-7 while moving right (bit 7 of
+; entity byte +0). Used by entity definitions $0D $14 $15 $16 $17 $18 $19 $1C $25 $5F $68 $6D in rooms $01 $04 $08 $0B
+; $0C $0D $0E $0F $10 $14 $16 $24 $26 $2D $30 $32 $36 $38: the most used page.
+@label=SpritesSmallFlyers
+b$BC00 DEFB $00,$00 ; frame 0: small flyer facing left, frame 0
  $BC02 DEFB $00,$00
  $BC04 DEFB $00,$00
  $BC06 DEFB $00,$00
@@ -15,7 +24,7 @@ b$BC00 DEFB $00,$00
  $BC1A DEFB $00,$00
  $BC1C DEFB $00,$00
  $BC1E DEFB $00,$00
- $BC20 DEFB $00,$00
+ $BC20 DEFB $00,$00 ; frame 1: small flyer facing left, frame 1
  $BC22 DEFB $00,$00
  $BC24 DEFB $00,$A0
  $BC26 DEFB $01,$40
@@ -31,7 +40,7 @@ b$BC00 DEFB $00,$00
  $BC3A DEFB $00,$00
  $BC3C DEFB $00,$00
  $BC3E DEFB $00,$00
- $BC40 DEFB $00,$00
+ $BC40 DEFB $00,$00 ; frame 2: small flyer facing left, frame 2
  $BC42 DEFB $00,$00
  $BC44 DEFB $00,$00
  $BC46 DEFB $00,$00
@@ -47,7 +56,7 @@ b$BC00 DEFB $00,$00
  $BC5A DEFB $00,$00
  $BC5C DEFB $00,$00
  $BC5E DEFB $00,$00
- $BC60 DEFB $00,$00
+ $BC60 DEFB $00,$00 ; frame 3: small flyer facing left, frame 3
  $BC62 DEFB $00,$00
  $BC64 DEFB $00,$00
  $BC66 DEFB $00,$00
@@ -63,7 +72,7 @@ b$BC00 DEFB $00,$00
  $BC7A DEFB $00,$00
  $BC7C DEFB $00,$00
  $BC7E DEFB $00,$00
- $BC80 DEFB $00,$00
+ $BC80 DEFB $00,$00 ; frame 4: small flyer facing right, frame 0
  $BC82 DEFB $00,$00
  $BC84 DEFB $00,$00
  $BC86 DEFB $00,$00
@@ -79,7 +88,7 @@ b$BC00 DEFB $00,$00
  $BC9A DEFB $00,$00
  $BC9C DEFB $00,$00
  $BC9E DEFB $00,$00
- $BCA0 DEFB $00,$00
+ $BCA0 DEFB $00,$00 ; frame 5: small flyer facing right, frame 1
  $BCA2 DEFB $00,$00
  $BCA4 DEFB $00,$00
  $BCA6 DEFB $00,$00
@@ -95,7 +104,7 @@ b$BC00 DEFB $00,$00
  $BCBA DEFB $00,$00
  $BCBC DEFB $00,$00
  $BCBE DEFB $00,$00
- $BCC0 DEFB $00,$00
+ $BCC0 DEFB $00,$00 ; frame 6: small flyer facing right, frame 2
  $BCC2 DEFB $00,$00
  $BCC4 DEFB $05,$00
  $BCC6 DEFB $02,$80
@@ -111,7 +120,7 @@ b$BC00 DEFB $00,$00
  $BCDA DEFB $00,$00
  $BCDC DEFB $00,$00
  $BCDE DEFB $00,$00
- $BCE0 DEFB $00,$00
+ $BCE0 DEFB $00,$00 ; frame 7: small flyer facing right, frame 3
  $BCE2 DEFB $00,$00
  $BCE4 DEFB $00,$00
  $BCE6 DEFB $00,$00

@@ -1,4 +1,10 @@
-; Data block at 9C60
+; Sprite: barrel
+;
+; One 16x16 sprite of 32 bytes: 16 pixel rows of 2 bytes (left byte, right byte; bit 7 = leftmost pixel), drawn with
+; #R$9456. A barrel with a dotted face. Frame 3 of sprite page $9C. Drawn by the game-over sequence #R$8B07 at $48CF
+; (two character rows below Willy, #R$9D40, who stands on it), and used as entity sprite by definition $13 (a vertical
+; mover in Ballroom East, room $14, and Top Landing, room $22).
+@label=SpriteBarrel
 b$9C60 DEFB $37,$EC
  $9C62 DEFB $77,$EE
  $9C64 DEFB $00,$00

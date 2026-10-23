@@ -1,5 +1,14 @@
-; Data block at B100
-b$B100 DEFB $16,$00
+; Sprites: poles (unused)
+;
+; Eight 16x16 sprites of 32 bytes, 16 pixel rows of 2 bytes each (left byte, right byte; bit 7 = leftmost pixel). Sprite
+; F of the page is at $B100+32*F. Entity definitions (#R$A000) name the page in byte +5 and pick F from the animation
+; phase, the direction and the slot data. The sprites are drawn with #R$9456 (#R$91BE) and have no colour of their own:
+; ink and bright come from the entity definition. No entity definition has page $B1 as its sprite page and no code loads
+; $B1 into a register (checked with the definitions and a search of the code), so this page is not displayed with the
+; inputs and rooms examined. Frames 0-3 look like a vertical pole above a base of dots; frames 4-7 look like a tall pole
+; with different tops (hook, round head, flag, diamond).
+@label=SpritesPolesUnused
+b$B100 DEFB $16,$00 ; frame 0: pole above dotted base, frame 0
  $B102 DEFB $16,$00
  $B104 DEFB $16,$00
  $B106 DEFB $16,$00
@@ -15,7 +24,7 @@ b$B100 DEFB $16,$00
  $B11A DEFB $B3,$40
  $B11C DEFB $08,$00
  $B11E DEFB $2D,$00
- $B120 DEFB $05,$80
+ $B120 DEFB $05,$80 ; frame 1: pole above dotted base, frame 1
  $B122 DEFB $05,$80
  $B124 DEFB $05,$80
  $B126 DEFB $05,$80
@@ -31,7 +40,7 @@ b$B100 DEFB $16,$00
  $B13A DEFB $0C,$F0
  $B13C DEFB $28,$00
  $B13E DEFB $0D,$20
- $B140 DEFB $01,$60
+ $B140 DEFB $01,$60 ; frame 2: pole above dotted base, frame 2
  $B142 DEFB $01,$60
  $B144 DEFB $01,$60
  $B146 DEFB $01,$60
@@ -47,7 +56,7 @@ b$B100 DEFB $16,$00
  $B15A DEFB $03,$30
  $B15C DEFB $0C,$0C
  $B15E DEFB $05,$28
- $B160 DEFB $00,$58
+ $B160 DEFB $00,$58 ; frame 3: pole above dotted base, frame 3
  $B162 DEFB $00,$58
  $B164 DEFB $00,$58
  $B166 DEFB $00,$58
@@ -63,7 +72,7 @@ b$B100 DEFB $16,$00
  $B17A DEFB $02,$CC
  $B17C DEFB $00,$09
  $B17E DEFB $01,$2C
- $B180 DEFB $00,$40
+ $B180 DEFB $00,$40 ; frame 4: pole with hooked top
  $B182 DEFB $01,$80
  $B184 DEFB $02,$40
  $B186 DEFB $05,$C0
@@ -79,7 +88,7 @@ b$B100 DEFB $16,$00
  $B19A DEFB $16,$00
  $B19C DEFB $16,$00
  $B19E DEFB $16,$00
- $B1A0 DEFB $03,$00
+ $B1A0 DEFB $03,$00 ; frame 5: pole with round head
  $B1A2 DEFB $0F,$C0
  $B1A4 DEFB $08,$40
  $B1A6 DEFB $13,$20
@@ -95,7 +104,7 @@ b$B100 DEFB $16,$00
  $B1BA DEFB $05,$80
  $B1BC DEFB $05,$80
  $B1BE DEFB $05,$80
- $B1C0 DEFB $08,$00
+ $B1C0 DEFB $08,$00 ; frame 6: pole with flag top
  $B1C2 DEFB $0E,$00
  $B1C4 DEFB $0B,$00
  $B1C6 DEFB $0B,$80
@@ -111,7 +120,7 @@ b$B100 DEFB $16,$00
  $B1DA DEFB $01,$60
  $B1DC DEFB $01,$60
  $B1DE DEFB $01,$60
- $B1E0 DEFB $00,$30
+ $B1E0 DEFB $00,$30 ; frame 7: pole with diamond top
  $B1E2 DEFB $00,$DC
  $B1E4 DEFB $00,$BC
  $B1E6 DEFB $01,$7E

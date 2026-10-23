@@ -1,5 +1,15 @@
-; Data block at B600
-b$B600 DEFB $00,$00
+; Sprites: flapper, left and right (8 frames); also Willy in The Nightmare Room
+;
+; Eight 16x16 sprites of 32 bytes, 16 pixel rows of 2 bytes each (left byte, right byte; bit 7 = leftmost pixel). Sprite
+; F of the page is at $B600+32*F. Entity definitions (#R$A000) name the page in byte +5 and pick F from the animation
+; phase, the direction and the slot data. The sprites are drawn with #R$9456 (#R$91BE) and have no colour of their own:
+; ink and bright come from the entity definition. A small creature with a body and a flapping wing drawn in a dithered
+; pattern. Frames 0-3 face left, 4-7 face right (the order of the entity pages: bit 7 of entity byte +0 selects the
+; right half). Used by entity definition $1A in rooms $02 $0B $0C $27. #R$9637 also uses this page instead of Willy's
+; own sprites (#R$9D00) in The Nightmare Room (room $1D): it XORs bit 7 of the frame offset, because Willy's sprites
+; have the right-facing frames first while this page has the left-facing ones first.
+@label=SpritesFlapper
+b$B600 DEFB $00,$00 ; frame 0: flapper facing left, frame 0
  $B602 DEFB $00,$00
  $B604 DEFB $00,$00
  $B606 DEFB $00,$00
@@ -15,7 +25,7 @@ b$B600 DEFB $00,$00
  $B61A DEFB $05,$00
  $B61C DEFB $00,$00
  $B61E DEFB $00,$00
- $B620 DEFB $00,$00
+ $B620 DEFB $00,$00 ; frame 1: flapper facing left, frame 1
  $B622 DEFB $00,$00
  $B624 DEFB $00,$00
  $B626 DEFB $00,$00
@@ -31,7 +41,7 @@ b$B600 DEFB $00,$00
  $B63A DEFB $02,$54
  $B63C DEFB $00,$28
  $B63E DEFB $00,$14
- $B640 DEFB $00,$00
+ $B640 DEFB $00,$00 ; frame 2: flapper facing left, frame 2
  $B642 DEFB $00,$00
  $B644 DEFB $00,$00
  $B646 DEFB $00,$00
@@ -47,7 +57,7 @@ b$B600 DEFB $00,$00
  $B65A DEFB $01,$04
  $B65C DEFB $00,$00
  $B65E DEFB $00,$00
- $B660 DEFB $00,$03
+ $B660 DEFB $00,$03 ; frame 3: flapper facing left, frame 3 (wing up)
  $B662 DEFB $00,$0A
  $B664 DEFB $00,$15
  $B666 DEFB $00,$0A
@@ -63,7 +73,7 @@ b$B600 DEFB $00,$00
  $B67A DEFB $00,$22
  $B67C DEFB $00,$00
  $B67E DEFB $00,$00
- $B680 DEFB $80,$00
+ $B680 DEFB $80,$00 ; frame 4: flapper facing right, frame 0 (wing up)
  $B682 DEFB $50,$00
  $B684 DEFB $A8,$00
  $B686 DEFB $50,$00
@@ -79,7 +89,7 @@ b$B600 DEFB $00,$00
  $B69A DEFB $44,$00
  $B69C DEFB $00,$00
  $B69E DEFB $00,$00
- $B6A0 DEFB $00,$00
+ $B6A0 DEFB $00,$00 ; frame 5: flapper facing right, frame 1
  $B6A2 DEFB $00,$00
  $B6A4 DEFB $00,$00
  $B6A6 DEFB $00,$00
@@ -95,7 +105,7 @@ b$B600 DEFB $00,$00
  $B6BA DEFB $20,$80
  $B6BC DEFB $00,$00
  $B6BE DEFB $00,$00
- $B6C0 DEFB $00,$00
+ $B6C0 DEFB $00,$00 ; frame 6: flapper facing right, frame 2
  $B6C2 DEFB $00,$00
  $B6C4 DEFB $00,$00
  $B6C6 DEFB $00,$00
@@ -111,7 +121,7 @@ b$B600 DEFB $00,$00
  $B6DA DEFB $2A,$40
  $B6DC DEFB $14,$00
  $B6DE DEFB $28,$00
- $B6E0 DEFB $00,$00
+ $B6E0 DEFB $00,$00 ; frame 7: flapper facing right, frame 3
  $B6E2 DEFB $00,$00
  $B6E4 DEFB $00,$00
  $B6E6 DEFB $00,$00

@@ -1,5 +1,13 @@
-; Data block at AB00
-b$AB00 DEFB $00,$00
+; Sprites: spinning slab (4 frames), crawler (4 frames)
+;
+; Eight 16x16 sprites of 32 bytes, 16 pixel rows of 2 bytes each (left byte, right byte; bit 7 = leftmost pixel). Sprite
+; F of the page is at $AB00+32*F. Entity definitions (#R$A000) name the page in byte +5 and pick F from the animation
+; phase, the direction and the slot data. The sprites are drawn with #R$9456 (#R$91BE) and have no colour of their own:
+; ink and bright come from the entity definition. Frames 0-3 look like a flat box with a label window turning (front,
+; oblique, edge-on, oblique); frames 4-7 look like a bug with antennae and legs scuttling. Used by entity definitions
+; $65 $66 in rooms $1B $1E $24.
+@label=SpritesSlabCrawler
+b$AB00 DEFB $00,$00 ; frame 0: slab, front view (box with window, dotted base)
  $AB02 DEFB $00,$00
  $AB04 DEFB $2A,$AA
  $AB06 DEFB $7F,$FF
@@ -15,7 +23,7 @@ b$AB00 DEFB $00,$00
  $AB1A DEFB $2A,$AA
  $AB1C DEFB $00,$00
  $AB1E DEFB $00,$00
- $AB20 DEFB $00,$48
+ $AB20 DEFB $00,$48 ; frame 1: slab, oblique
  $AB22 DEFB $01,$2C
  $AB24 DEFB $04,$BC
  $AB26 DEFB $12,$FE
@@ -31,7 +39,7 @@ b$AB00 DEFB $00,$00
  $AB3A DEFB $09,$40
  $AB3C DEFB $05,$00
  $AB3E DEFB $04,$00
- $AB40 DEFB $00,$00
+ $AB40 DEFB $00,$00 ; frame 2: slab, edge-on
  $AB42 DEFB $07,$E0
  $AB44 DEFB $0F,$F0
  $AB46 DEFB $17,$E8
@@ -47,7 +55,7 @@ b$AB00 DEFB $00,$00
  $AB5A DEFB $17,$E8
  $AB5C DEFB $10,$08
  $AB5E DEFB $00,$00
- $AB60 DEFB $12,$00
+ $AB60 DEFB $12,$00 ; frame 3: slab, oblique (other side)
  $AB62 DEFB $34,$80
  $AB64 DEFB $3D,$20
  $AB66 DEFB $7F,$48
@@ -63,7 +71,7 @@ b$AB00 DEFB $00,$00
  $AB7A DEFB $02,$90
  $AB7C DEFB $00,$A0
  $AB7E DEFB $00,$20
- $AB80 DEFB $00,$00
+ $AB80 DEFB $00,$00 ; frame 4: crawler, frame 0
  $AB82 DEFB $00,$00
  $AB84 DEFB $00,$00
  $AB86 DEFB $02,$02
@@ -79,7 +87,7 @@ b$AB00 DEFB $00,$00
  $AB9A DEFB $20,$D8
  $AB9C DEFB $01,$54
  $AB9E DEFB $02,$8A
- $ABA0 DEFB $00,$00
+ $ABA0 DEFB $00,$00 ; frame 5: crawler, frame 1
  $ABA2 DEFB $02,$02
  $ABA4 DEFB $02,$02
  $ABA6 DEFB $01,$74
@@ -95,7 +103,7 @@ b$AB00 DEFB $00,$00
  $ABBA DEFB $06,$8A
  $ABBC DEFB $04,$00
  $ABBE DEFB $00,$00
- $ABC0 DEFB $02,$02
+ $ABC0 DEFB $02,$02 ; frame 6: crawler, frame 2
  $ABC2 DEFB $03,$8E
  $ABC4 DEFB $00,$F8
  $ABC6 DEFB $01,$54
@@ -111,7 +119,7 @@ b$AB00 DEFB $00,$00
  $ABDA DEFB $01,$00
  $ABDC DEFB $00,$80
  $ABDE DEFB $00,$40
- $ABE0 DEFB $00,$00
+ $ABE0 DEFB $00,$00 ; frame 7: crawler, frame 3
  $ABE2 DEFB $02,$02
  $ABE4 DEFB $02,$02
  $ABE6 DEFB $01,$74

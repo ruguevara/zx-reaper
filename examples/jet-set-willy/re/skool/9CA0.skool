@@ -1,4 +1,12 @@
-; Data block at 9CA0
+; Sprite: hatted figure, frame 1
+;
+; One 16x16 sprite of 32 bytes: 16 pixel rows of 2 bytes (left byte, right byte; bit 7 = leftmost pixel), drawn with
+; #R$9456. Sprite 1 of the four figures with a pointed hat and a long dress (frame 5 of sprite page $9C; frames 0-1 of
+; that page are the text leftovers at #R$9C00). #R$9534 draws them in the Master Bedroom (room $23) at $686E: $9C80 and
+; $9CA0 alternate with bit 1 of #R$85CB while Willy stands on the floor (Y $D0), $9CC0 is used while his Y is $C0-$CF
+; and $9CE0 when it is higher; drawing over Willy kills him. Entity definitions $46-$49 use all four in The Nightmare
+; Room (room $1D).
+@label=SpriteFigure1
 b$9CA0 DEFB $03,$00
  $9CA2 DEFB $03,$C0
  $9CA4 DEFB $01,$E0

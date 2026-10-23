@@ -1,5 +1,13 @@
-; Data block at AE00
-b$AE00 DEFB $7E,$00
+; Sprites: two-legged walker (4 frames), arms-up figure on a drum (4 frames)
+;
+; Eight 16x16 sprites of 32 bytes, 16 pixel rows of 2 bytes each (left byte, right byte; bit 7 = leftmost pixel). Sprite
+; F of the page is at $AE00+32*F. Entity definitions (#R$A000) name the page in byte +5 and pick F from the animation
+; phase, the direction and the slot data. The sprites are drawn with #R$9456 (#R$91BE) and have no colour of their own:
+; ink and bright come from the entity definition. Frames 0-3 look like a flat-headed creature with two long legs
+; stepping; frames 4-7 look like a figure with raised arms above a drum-like base, the arms waving. Used by entity
+; definitions $26 $44 $5A $6A $6E in rooms $16 $20 $2B $2D $3C.
+@label=SpritesWalkerDrum
+b$AE00 DEFB $7E,$00 ; frame 0: walker, frame 0
  $AE02 DEFB $99,$00
  $AE04 DEFB $FF,$00
  $AE06 DEFB $81,$00
@@ -15,7 +23,7 @@ b$AE00 DEFB $7E,$00
  $AE1A DEFB $C3,$00
  $AE1C DEFB $A5,$00
  $AE1E DEFB $E7,$00
- $AE20 DEFB $00,$00
+ $AE20 DEFB $00,$00 ; frame 1: walker, frame 1
  $AE22 DEFB $1F,$80
  $AE24 DEFB $26,$40
  $AE26 DEFB $39,$C0
@@ -31,7 +39,7 @@ b$AE00 DEFB $7E,$00
  $AE3A DEFB $C0,$30
  $AE3C DEFB $A0,$50
  $AE3E DEFB $E0,$70
- $AE40 DEFB $00,$00
+ $AE40 DEFB $00,$00 ; frame 2: walker, frame 2
  $AE42 DEFB $00,$00
  $AE44 DEFB $00,$00
  $AE46 DEFB $07,$E0
@@ -47,7 +55,7 @@ b$AE00 DEFB $7E,$00
  $AE5A DEFB $C0,$03
  $AE5C DEFB $A0,$05
  $AE5E DEFB $E0,$07
- $AE60 DEFB $00,$00
+ $AE60 DEFB $00,$00 ; frame 3: walker, frame 3
  $AE62 DEFB $01,$F8
  $AE64 DEFB $02,$64
  $AE66 DEFB $03,$9C
@@ -63,7 +71,7 @@ b$AE00 DEFB $7E,$00
  $AE7A DEFB $0C,$03
  $AE7C DEFB $0A,$05
  $AE7E DEFB $0E,$07
- $AE80 DEFB $0C,$00
+ $AE80 DEFB $0C,$00 ; frame 4: figure on drum, frame 0
  $AE82 DEFB $12,$00
  $AE84 DEFB $21,$10
  $AE86 DEFB $12,$20
@@ -79,7 +87,7 @@ b$AE00 DEFB $7E,$00
  $AE9A DEFB $5D,$80
  $AE9C DEFB $5D,$80
  $AE9E DEFB $FF,$C0
- $AEA0 DEFB $00,$01
+ $AEA0 DEFB $00,$01 ; frame 5: figure on drum, frame 1
  $AEA2 DEFB $00,$02
  $AEA4 DEFB $83,$04
  $AEA6 DEFB $4C,$C8
@@ -95,7 +103,7 @@ b$AE00 DEFB $7E,$00
  $AEBA DEFB $1B,$B0
  $AEBC DEFB $1B,$B0
  $AEBE DEFB $3F,$F0
- $AEC0 DEFB $80,$00
+ $AEC0 DEFB $80,$00 ; frame 6: figure on drum, frame 2
  $AEC2 DEFB $40,$00
  $AEC4 DEFB $20,$01
  $AEC6 DEFB $11,$E2
@@ -111,7 +119,7 @@ b$AE00 DEFB $7E,$00
  $AEDA DEFB $0B,$74
  $AEDC DEFB $0B,$74
  $AEDE DEFB $0F,$FC
- $AEE0 DEFB $00,$00
+ $AEE0 DEFB $00,$00 ; frame 7: figure on drum, frame 3
  $AEE2 DEFB $00,$00
  $AEE4 DEFB $08,$30
  $AEE6 DEFB $04,$CC

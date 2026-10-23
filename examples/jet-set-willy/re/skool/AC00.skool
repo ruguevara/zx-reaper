@@ -1,5 +1,13 @@
-; Data block at AC00
-b$AC00 DEFB $20,$04
+; Sprites: barbed bars (4 frames), spiral disc (4 frames)
+;
+; Eight 16x16 sprites of 32 bytes, 16 pixel rows of 2 bytes each (left byte, right byte; bit 7 = leftmost pixel). Sprite
+; F of the page is at $AC00+32*F. Entity definitions (#R$A000) name the page in byte +5 and pick F from the animation
+; phase, the direction and the slot data. The sprites are drawn with #R$9456 (#R$91BE) and have no colour of their own:
+; ink and bright come from the entity definition. Frames 0-3 look like a double horizontal bar with spikes (barbed wire)
+; changing shape; frames 4-7 look like a round disc with a spiral, turning. Used by entity definitions $60 $61 $64 in
+; rooms $1A $1B $1E $25 $36.
+@label=SpritesBarbedSpiral
+b$AC00 DEFB $20,$04 ; frame 0: barbed bars, frame 0
  $AC02 DEFB $AE,$EC
  $AC04 DEFB $BB,$7D
  $AC06 DEFB $E0,$07
@@ -15,7 +23,7 @@ b$AC00 DEFB $20,$04
  $AC1A DEFB $A0,$04
  $AC1C DEFB $3B,$DC
  $AC1E DEFB $20,$04
- $AC20 DEFB $20,$04
+ $AC20 DEFB $20,$04 ; frame 1: barbed bars, frame 1
  $AC22 DEFB $37,$B4
  $AC24 DEFB $A0,$04
  $AC26 DEFB $FB,$7F
@@ -31,7 +39,7 @@ b$AC00 DEFB $20,$04
  $AC3A DEFB $BD,$B5
  $AC3C DEFB $B7,$EC
  $AC3E DEFB $20,$04
- $AC40 DEFB $20,$04
+ $AC40 DEFB $20,$04 ; frame 2: barbed bars, frame 2
  $AC42 DEFB $3A,$DC
  $AC44 DEFB $3D,$BD
  $AC46 DEFB $E0,$07
@@ -47,7 +55,7 @@ b$AC00 DEFB $20,$04
  $AC5A DEFB $A0,$05
  $AC5C DEFB $3D,$ED
  $AC5E DEFB $20,$04
- $AC60 DEFB $20,$04
+ $AC60 DEFB $20,$04 ; frame 3: barbed bars, frame 3
  $AC62 DEFB $3B,$75
  $AC64 DEFB $A0,$05
  $AC66 DEFB $FD,$BF
@@ -63,7 +71,7 @@ b$AC00 DEFB $20,$04
  $AC7A DEFB $3B,$75
  $AC7C DEFB $2E,$EC
  $AC7E DEFB $20,$04
- $AC80 DEFB $0F,$F0
+ $AC80 DEFB $0F,$F0 ; frame 4: spiral disc, frame 0
  $AC82 DEFB $17,$E8
  $AC84 DEFB $18,$18
  $AC86 DEFB $37,$CC
@@ -79,7 +87,7 @@ b$AC00 DEFB $20,$04
  $AC9A DEFB $18,$18
  $AC9C DEFB $17,$E8
  $AC9E DEFB $0F,$F0
- $ACA0 DEFB $00,$E0
+ $ACA0 DEFB $00,$E0 ; frame 5: spiral disc, frame 1
  $ACA2 DEFB $07,$F0
  $ACA4 DEFB $38,$18
  $ACA6 DEFB $73,$CC
@@ -95,7 +103,7 @@ b$AC00 DEFB $20,$04
  $ACBA DEFB $13,$F4
  $ACBC DEFB $08,$78
  $ACBE DEFB $07,$80
- $ACC0 DEFB $01,$80
+ $ACC0 DEFB $01,$80 ; frame 6: spiral disc, frame 2
  $ACC2 DEFB $07,$E0
  $ACC4 DEFB $18,$18
  $ACC6 DEFB $73,$CE
@@ -111,7 +119,7 @@ b$AC00 DEFB $20,$04
  $ACDA DEFB $18,$18
  $ACDC DEFB $07,$E0
  $ACDE DEFB $01,$80
- $ACE0 DEFB $07,$00
+ $ACE0 DEFB $07,$00 ; frame 7: spiral disc, frame 3
  $ACE2 DEFB $08,$E0
  $ACE4 DEFB $1F,$DC
  $ACE6 DEFB $30,$26

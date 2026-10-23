@@ -1,5 +1,12 @@
-; Data block at B900
-b$B900 DEFB $3C,$00
+; Sprites: coil (4 frames), fringed dome (4 frames)
+;
+; Eight 16x16 sprites of 32 bytes, 16 pixel rows of 2 bytes each (left byte, right byte; bit 7 = leftmost pixel). Sprite
+; F of the page is at $B900+32*F. Entity definitions (#R$A000) name the page in byte +5 and pick F from the animation
+; phase, the direction and the slot data. The sprites are drawn with #R$9456 (#R$91BE) and have no colour of their own:
+; ink and bright come from the entity definition. Frames 0-3 look like a twisting figure-eight or coil; frames 4-7 look
+; like a checkered dome with a fringe underneath. Used by entity definitions $0E $3B $3E $5D in rooms $01 $09 $16 $21.
+@label=SpritesCoilDome
+b$B900 DEFB $3C,$00 ; frame 0: coil, frame 0 (upright)
  $B902 DEFB $6E,$00
  $B904 DEFB $A7,$00
  $B906 DEFB $A5,$00
@@ -15,7 +22,7 @@ b$B900 DEFB $3C,$00
  $B91A DEFB $E5,$00
  $B91C DEFB $76,$00
  $B91E DEFB $3C,$00
- $B920 DEFB $00,$00
+ $B920 DEFB $00,$00 ; frame 1: coil, frame 1 (diagonal)
  $B922 DEFB $00,$00
  $B924 DEFB $00,$B0
  $B926 DEFB $01,$48
@@ -31,7 +38,7 @@ b$B900 DEFB $3C,$00
  $B93A DEFB $E5,$00
  $B93C DEFB $76,$00
  $B93E DEFB $3C,$00
- $B940 DEFB $00,$00
+ $B940 DEFB $00,$00 ; frame 2: coil, frame 2 (flat)
  $B942 DEFB $00,$00
  $B944 DEFB $00,$00
  $B946 DEFB $00,$00
@@ -47,7 +54,7 @@ b$B900 DEFB $3C,$00
  $B95A DEFB $E5,$E5
  $B95C DEFB $76,$76
  $B95E DEFB $3C,$3C
- $B960 DEFB $00,$00
+ $B960 DEFB $00,$00 ; frame 3: coil, frame 3 (diagonal)
  $B962 DEFB $00,$00
  $B964 DEFB $0F,$00
  $B966 DEFB $1B,$80
@@ -63,7 +70,7 @@ b$B900 DEFB $3C,$00
  $B97A DEFB $00,$E5
  $B97C DEFB $00,$76
  $B97E DEFB $00,$3C
- $B980 DEFB $03,$C0
+ $B980 DEFB $03,$C0 ; frame 4: fringed dome, frame 0
  $B982 DEFB $06,$60
  $B984 DEFB $0D,$F0
  $B986 DEFB $1A,$D8
@@ -79,7 +86,7 @@ b$B900 DEFB $3C,$00
  $B99A DEFB $02,$40
  $B99C DEFB $11,$88
  $B99E DEFB $00,$00
- $B9A0 DEFB $03,$C0
+ $B9A0 DEFB $03,$C0 ; frame 5: fringed dome, frame 1
  $B9A2 DEFB $06,$60
  $B9A4 DEFB $0D,$F0
  $B9A6 DEFB $1A,$B8
@@ -95,7 +102,7 @@ b$B900 DEFB $3C,$00
  $B9BA DEFB $01,$80
  $B9BC DEFB $04,$20
  $B9BE DEFB $01,$00
- $B9C0 DEFB $03,$C0
+ $B9C0 DEFB $03,$C0 ; frame 6: fringed dome, frame 2
  $B9C2 DEFB $06,$60
  $B9C4 DEFB $0D,$F0
  $B9C6 DEFB $1A,$D8
@@ -111,7 +118,7 @@ b$B900 DEFB $3C,$00
  $B9DA DEFB $02,$40
  $B9DC DEFB $11,$88
  $B9DE DEFB $04,$20
- $B9E0 DEFB $03,$C0
+ $B9E0 DEFB $03,$C0 ; frame 7: fringed dome, frame 3
  $B9E2 DEFB $06,$60
  $B9E4 DEFB $0D,$F0
  $B9E6 DEFB $1A,$E8

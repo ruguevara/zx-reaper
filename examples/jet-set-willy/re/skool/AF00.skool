@@ -1,5 +1,13 @@
-; Data block at AF00
-b$AF00 DEFB $38,$00
+; Sprites: penknife (4 frames), teardrop with spot (4 frames)
+;
+; Eight 16x16 sprites of 32 bytes, 16 pixel rows of 2 bytes each (left byte, right byte; bit 7 = leftmost pixel). Sprite
+; F of the page is at $AF00+32*F. Entity definitions (#R$A000) name the page in byte +5 and pick F from the animation
+; phase, the direction and the slot data. The sprites are drawn with #R$9456 (#R$91BE) and have no colour of their own:
+; ink and bright come from the entity definition. Frames 0-3 look like a penknife with a blade swinging open; frames 4-7
+; look like a teardrop or leaf shape with a dotted spot, turning. Used by entity definitions $24 $27 $5E $62 in rooms
+; $04 $07 $16 $22 $2A $33 $34.
+@label=SpritesKnifeTeardrop
+b$AF00 DEFB $38,$00 ; frame 0: penknife, frame 0
  $AF02 DEFB $7C,$00
  $AF04 DEFB $7E,$00
  $AF06 DEFB $6D,$80
@@ -15,7 +23,7 @@ b$AF00 DEFB $38,$00
  $AF1A DEFB $7F,$00
  $AF1C DEFB $6C,$00
  $AF1E DEFB $38,$00
- $AF20 DEFB $0E,$60
+ $AF20 DEFB $0E,$60 ; frame 1: penknife, frame 1
  $AF22 DEFB $1F,$94
  $AF24 DEFB $1F,$08
  $AF26 DEFB $1B,$20
@@ -31,7 +39,7 @@ b$AF00 DEFB $38,$00
  $AF3A DEFB $1F,$00
  $AF3C DEFB $1B,$00
  $AF3E DEFB $0E,$00
- $AF40 DEFB $03,$80
+ $AF40 DEFB $03,$80 ; frame 2: penknife, frame 2
  $AF42 DEFB $07,$C0
  $AF44 DEFB $07,$E0
  $AF46 DEFB $06,$D8
@@ -47,7 +55,7 @@ b$AF00 DEFB $38,$00
  $AF5A DEFB $07,$C0
  $AF5C DEFB $06,$C0
  $AF5E DEFB $03,$80
- $AF60 DEFB $00,$E0
+ $AF60 DEFB $00,$E0 ; frame 3: penknife, frame 3
  $AF62 DEFB $01,$F0
  $AF64 DEFB $01,$F0
  $AF66 DEFB $01,$B2
@@ -63,7 +71,7 @@ b$AF00 DEFB $38,$00
  $AF7A DEFB $01,$F0
  $AF7C DEFB $01,$B0
  $AF7E DEFB $00,$E0
- $AF80 DEFB $0C,$00
+ $AF80 DEFB $0C,$00 ; frame 4: teardrop, frame 0
  $AF82 DEFB $16,$00
  $AF84 DEFB $2F,$00
  $AF86 DEFB $2F,$00
@@ -79,7 +87,7 @@ b$AF00 DEFB $38,$00
  $AF9A DEFB $5D,$80
  $AF9C DEFB $3F,$00
  $AF9E DEFB $0C,$00
- $AFA0 DEFB $00,$00
+ $AFA0 DEFB $00,$00 ; frame 5: teardrop, frame 1
  $AFA2 DEFB $00,$00
  $AFA4 DEFB $00,$00
  $AFA6 DEFB $00,$70
@@ -95,7 +103,7 @@ b$AF00 DEFB $38,$00
  $AFBA DEFB $5D,$40
  $AFBC DEFB $3F,$80
  $AFBE DEFB $0E,$00
- $AFC0 DEFB $00,$00
+ $AFC0 DEFB $00,$00 ; frame 6: teardrop, frame 2
  $AFC2 DEFB $00,$00
  $AFC4 DEFB $00,$00
  $AFC6 DEFB $00,$00
@@ -111,7 +119,7 @@ b$AF00 DEFB $38,$00
  $AFDA DEFB $23,$54
  $AFDC DEFB $1F,$F8
  $AFDE DEFB $03,$C0
- $AFE0 DEFB $00,$00
+ $AFE0 DEFB $00,$00 ; frame 7: teardrop, frame 3
  $AFE2 DEFB $00,$00
  $AFE4 DEFB $00,$00
  $AFE6 DEFB $0E,$00

@@ -1,5 +1,13 @@
-; Data block at B200
-b$B200 DEFB $00,$03
+; Sprites: banner (4 frames), round face (4 frames)
+;
+; Eight 16x16 sprites of 32 bytes, 16 pixel rows of 2 bytes each (left byte, right byte; bit 7 = leftmost pixel). Sprite
+; F of the page is at $B200+32*F. Entity definitions (#R$A000) name the page in byte +5 and pick F from the animation
+; phase, the direction and the slot data. The sprites are drawn with #R$9456 (#R$91BE) and have no colour of their own:
+; ink and bright come from the entity definition. Frames 0-3 look like a waving banner; frames 4-7 look like a round
+; grinning face. Used by entity definitions $1B $1D in rooms $09 $25 $28 $2C $2D $30 $34 $3B (the banner in the room
+; named "The Yacht", $3B; the face elsewhere).
+@label=SpritesBannerFace
+b$B200 DEFB $00,$03 ; frame 0: banner, frame 0
  $B202 DEFB $00,$0F
  $B204 DEFB $00,$1F
  $B206 DEFB $80,$3F
@@ -15,7 +23,7 @@ b$B200 DEFB $00,$03
  $B21A DEFB $7F,$C0
  $B21C DEFB $3F,$80
  $B21E DEFB $0E,$00
- $B220 DEFB $00,$00
+ $B220 DEFB $00,$00 ; frame 1: banner, frame 1
  $B222 DEFB $00,$00
  $B224 DEFB $50,$01
  $B226 DEFB $D8,$03
@@ -31,7 +39,7 @@ b$B200 DEFB $00,$03
  $B23A DEFB $07,$FC
  $B23C DEFB $03,$F8
  $B23E DEFB $00,$E0
- $B240 DEFB $00,$00
+ $B240 DEFB $00,$00 ; frame 2: banner, frame 2
  $B242 DEFB $03,$80
  $B244 DEFB $07,$C0
  $B246 DEFB $8F,$C0
@@ -47,7 +55,7 @@ b$B200 DEFB $00,$03
  $B25A DEFB $70,$3F
  $B25C DEFB $00,$1F
  $B25E DEFB $00,$0E
- $B260 DEFB $00,$38
+ $B260 DEFB $00,$38 ; frame 3: banner, frame 3
  $B262 DEFB $00,$FE
  $B264 DEFB $01,$FF
  $B266 DEFB $83,$FF
@@ -63,7 +71,7 @@ b$B200 DEFB $00,$03
  $B27A DEFB $7C,$00
  $B27C DEFB $38,$00
  $B27E DEFB $00,$00
- $B280 DEFB $03,$C0
+ $B280 DEFB $03,$C0 ; frame 4: round face, frame 0
  $B282 DEFB $0E,$F0
  $B284 DEFB $1D,$F8
  $B286 DEFB $3E,$FC
@@ -79,7 +87,7 @@ b$B200 DEFB $00,$03
  $B29A DEFB $16,$78
  $B29C DEFB $0B,$F0
  $B29E DEFB $02,$C0
- $B2A0 DEFB $03,$C0
+ $B2A0 DEFB $03,$C0 ; frame 5: round face, frame 1
  $B2A2 DEFB $0D,$F0
  $B2A4 DEFB $1A,$F8
  $B2A6 DEFB $3F,$FC
@@ -95,7 +103,7 @@ b$B200 DEFB $00,$03
  $B2BA DEFB $1C,$38
  $B2BC DEFB $0B,$F0
  $B2BE DEFB $02,$C0
- $B2C0 DEFB $03,$C0
+ $B2C0 DEFB $03,$C0 ; frame 6: round face, frame 2
  $B2C2 DEFB $0B,$F0
  $B2C4 DEFB $15,$78
  $B2C6 DEFB $3F,$FC
@@ -111,7 +119,7 @@ b$B200 DEFB $00,$03
  $B2DA DEFB $16,$78
  $B2DC DEFB $0B,$F0
  $B2DE DEFB $03,$C0
- $B2E0 DEFB $03,$C0
+ $B2E0 DEFB $03,$C0 ; frame 7: round face, frame 3
  $B2E2 DEFB $0D,$F0
  $B2E4 DEFB $1A,$F8
  $B2E6 DEFB $3F,$FC

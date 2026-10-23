@@ -1,5 +1,11 @@
-; Data block at A900
-b$A900 DEFB $00,$00
+; Sprites: unused page, all zero
+;
+; Eight 16x16 sprites of 32 bytes, 16 pixel rows of 2 bytes each (left byte, right byte; bit 7 = leftmost pixel). Sprite
+; F of the page is at $A900+32*F. Entity definitions (#R$A000) name the page in byte +5 and pick F from the animation
+; phase, the direction and the slot data. The sprites are drawn with #R$9456 (#R$91BE) and have no colour of their own:
+; ink and bright come from the entity definition. This page holds only zero bytes and no entity definition uses it.
+@label=UnusedSpritesA9
+b$A900 DEFB $00,$00 ; frame 0: blank
  $A902 DEFB $00,$00
  $A904 DEFB $00,$00
  $A906 DEFB $00,$00
@@ -15,7 +21,7 @@ b$A900 DEFB $00,$00
  $A91A DEFB $00,$00
  $A91C DEFB $00,$00
  $A91E DEFB $00,$00
- $A920 DEFB $00,$00
+ $A920 DEFB $00,$00 ; frame 1: blank
  $A922 DEFB $00,$00
  $A924 DEFB $00,$00
  $A926 DEFB $00,$00
@@ -31,7 +37,7 @@ b$A900 DEFB $00,$00
  $A93A DEFB $00,$00
  $A93C DEFB $00,$00
  $A93E DEFB $00,$00
- $A940 DEFB $00,$00
+ $A940 DEFB $00,$00 ; frame 2: blank
  $A942 DEFB $00,$00
  $A944 DEFB $00,$00
  $A946 DEFB $00,$00
@@ -47,7 +53,7 @@ b$A900 DEFB $00,$00
  $A95A DEFB $00,$00
  $A95C DEFB $00,$00
  $A95E DEFB $00,$00
- $A960 DEFB $00,$00
+ $A960 DEFB $00,$00 ; frame 3: blank
  $A962 DEFB $00,$00
  $A964 DEFB $00,$00
  $A966 DEFB $00,$00
@@ -63,7 +69,7 @@ b$A900 DEFB $00,$00
  $A97A DEFB $00,$00
  $A97C DEFB $00,$00
  $A97E DEFB $00,$00
- $A980 DEFB $00,$00
+ $A980 DEFB $00,$00 ; frame 4: blank
  $A982 DEFB $00,$00
  $A984 DEFB $00,$00
  $A986 DEFB $00,$00
@@ -79,7 +85,7 @@ b$A900 DEFB $00,$00
  $A99A DEFB $00,$00
  $A99C DEFB $00,$00
  $A99E DEFB $00,$00
- $A9A0 DEFB $00,$00
+ $A9A0 DEFB $00,$00 ; frame 5: blank
  $A9A2 DEFB $00,$00
  $A9A4 DEFB $00,$00
  $A9A6 DEFB $00,$00
@@ -95,7 +101,7 @@ b$A900 DEFB $00,$00
  $A9BA DEFB $00,$00
  $A9BC DEFB $00,$00
  $A9BE DEFB $00,$00
- $A9C0 DEFB $00,$00
+ $A9C0 DEFB $00,$00 ; frame 6: blank
  $A9C2 DEFB $00,$00
  $A9C4 DEFB $00,$00
  $A9C6 DEFB $00,$00
@@ -111,7 +117,7 @@ b$A900 DEFB $00,$00
  $A9DA DEFB $00,$00
  $A9DC DEFB $00,$00
  $A9DE DEFB $00,$00
- $A9E0 DEFB $00,$00
+ $A9E0 DEFB $00,$00 ; frame 7: blank
  $A9E2 DEFB $00,$00
  $A9E4 DEFB $00,$00
  $A9E6 DEFB $00,$00

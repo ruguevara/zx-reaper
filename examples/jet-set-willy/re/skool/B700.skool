@@ -1,5 +1,14 @@
-; Data block at B700
-b$B700 DEFB $0A,$A0
+; Sprites: crowned creature, dome, bars, spotted ball
+;
+; Eight 16x16 sprites of 32 bytes, 16 pixel rows of 2 bytes each (left byte, right byte; bit 7 = leftmost pixel). Sprite
+; F of the page is at $B700+32*F. Entity definitions (#R$A000) name the page in byte +5 and pick F from the animation
+; phase, the direction and the slot data. The sprites are drawn with #R$9456 (#R$91BE) and have no colour of their own:
+; ink and bright come from the entity definition. Frames 0-1 look like a creature with a crown and raised prongs
+; (entities $30-$32 in The Kitchen, room $17, and West of Kitchen, room $18). Frames 2-3 look like a striped dome
+; (entities $1F, $33). Frame 4 is a narrow bar pattern and frames 5-7 a spotted ball turning (entity $5C, frames 4-7).
+; Used by entity definitions $1F $30 $31 $32 $33 $5C in rooms $16 $17 $18 $2E $34 $37 $39.
+@label=SpritesCrownDomeBall
+b$B700 DEFB $0A,$A0 ; frame 0: crowned creature, frame 0
  $B702 DEFB $15,$50
  $B704 DEFB $0A,$A0
  $B706 DEFB $05,$42
@@ -15,7 +24,7 @@ b$B700 DEFB $0A,$A0
  $B71A DEFB $47,$C2
  $B71C DEFB $CE,$C0
  $B71E DEFB $C0,$E0
- $B720 DEFB $C0,$00
+ $B720 DEFB $C0,$00 ; frame 1: crowned creature, frame 1
  $B722 DEFB $CA,$A0
  $B724 DEFB $D5,$50
  $B726 DEFB $CA,$A0
@@ -31,7 +40,7 @@ b$B700 DEFB $0A,$A0
  $B73A DEFB $07,$C2
  $B73C DEFB $06,$E2
  $B73E DEFB $0E,$02
- $B740 DEFB $03,$00
+ $B740 DEFB $03,$00 ; frame 2: dome, frame 0
  $B742 DEFB $04,$80
  $B744 DEFB $05,$C0
  $B746 DEFB $0B,$A0
@@ -47,7 +56,7 @@ b$B700 DEFB $0A,$A0
  $B75A DEFB $2F,$78
  $B75C DEFB $AF,$79
  $B75E DEFB $7F,$FE
- $B760 DEFB $00,$C0
+ $B760 DEFB $00,$C0 ; frame 3: dome, frame 1
  $B762 DEFB $01,$20
  $B764 DEFB $01,$70
  $B766 DEFB $02,$E8
@@ -63,7 +72,7 @@ b$B700 DEFB $0A,$A0
  $B77A DEFB $17,$BC
  $B77C DEFB $97,$BD
  $B77E DEFB $7F,$FE
- $B780 DEFB $76,$00
+ $B780 DEFB $76,$00 ; frame 4: bars (frame 0 of the entity $5C cycle)
  $B782 DEFB $00,$00
  $B784 DEFB $6E,$00
  $B786 DEFB $76,$00
@@ -79,7 +88,7 @@ b$B700 DEFB $0A,$A0
  $B79A DEFB $76,$00
  $B79C DEFB $00,$00
  $B79E DEFB $6E,$00
- $B7A0 DEFB $1D,$80
+ $B7A0 DEFB $1D,$80 ; frame 5: spotted ball, frame 0
  $B7A2 DEFB $2A,$00
  $B7A4 DEFB $27,$60
  $B7A6 DEFB $51,$B0
@@ -95,7 +104,7 @@ b$B700 DEFB $0A,$A0
  $B7BA DEFB $2B,$60
  $B7BC DEFB $24,$00
  $B7BE DEFB $1D,$80
- $B7C0 DEFB $03,$C0
+ $B7C0 DEFB $03,$C0 ; frame 6: spotted ball, frame 1
  $B7C2 DEFB $0C,$30
  $B7C4 DEFB $10,$98
  $B7C6 DEFB $32,$14
@@ -111,7 +120,7 @@ b$B700 DEFB $0A,$A0
  $B7DA DEFB $12,$88
  $B7DC DEFB $0D,$70
  $B7DE DEFB $03,$C0
- $B7E0 DEFB $01,$B8
+ $B7E0 DEFB $01,$B8 ; frame 7: spotted ball, frame 2
  $B7E2 DEFB $00,$54
  $B7E4 DEFB $06,$E4
  $B7E6 DEFB $0D,$8A

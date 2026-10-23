@@ -1,4 +1,10 @@
-; Data block at 9D80
+; Sprite: Willy facing left, walk frame 0
+;
+; One 16x16 sprite of 32 bytes: 16 pixel rows of 2 bytes (left byte, right byte; bit 7 = leftmost pixel), drawn with
+; #R$9456. Willy walking to the left (observed: key O gives $85D0 = 3, bit 0 set), walk frame 0. #R$9637 draws Willy
+; from $9D00 + 128*(bit 0 of #R$85D0) + 32*(#R$85D2 AND 3). In The Nightmare Room (room $1D) #R$9637 uses page $B6
+; (#R$B600) instead.
+@label=SpriteWillyLeft0
 b$9D80 DEFB $0F,$00
  $9D82 DEFB $0F,$00
  $9D84 DEFB $1F,$80

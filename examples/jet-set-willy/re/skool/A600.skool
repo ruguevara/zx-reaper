@@ -1,5 +1,15 @@
-; Data block at A600
-b$A600 DEFB $00,$0F
+; Sprites: toilet (4 frames) and unused filler
+;
+; Eight 16x16 sprites of 32 bytes, 16 pixel rows of 2 bytes each (left byte, right byte; bit 7 = leftmost pixel). Sprite
+; F of the page is at $A600+32*F. Entity definitions (#R$A000) name the page in byte +5 and pick F from the animation
+; phase, the direction and the slot data. The sprites are drawn with #R$9456 (#R$91BE) and have no colour of their own:
+; ink and bright come from the entity definition. Frames 0-1 are the toilet drawn in The Bathroom (room $21) by #R$959A,
+; alternating with bit 0 of the frame counter #R$85CB; frames 2-3 (the same two, plus $40) are used instead once game
+; state #R$85DF is 3 (set by #R$9584 when Willy reaches position $BC in the Bathroom; Willy himself is then no longer
+; drawn by #R$95C8). Frames 4-7 hold bytes that are mostly $80 and are not drawn by any code seen (leftover filler; no
+; entity definition uses page $A6). The look of frames 2-3 is the toilet with something added (a pipe and a swirl).
+@label=SpritesToilet
+b$A600 DEFB $00,$0F ; frame 0: toilet, idle frame 0 (lid line slanted)
  $A602 DEFB $00,$3F
  $A604 DEFB $00,$0F
  $A606 DEFB $30,$0F
@@ -15,7 +25,7 @@ b$A600 DEFB $00,$0F
  $A61A DEFB $1F,$DB
  $A61C DEFB $0F,$FB
  $A61E DEFB $0F,$FB
- $A620 DEFB $00,$0F
+ $A620 DEFB $00,$0F ; frame 1: toilet, idle frame 1 (lid line flat)
  $A622 DEFB $00,$3F
  $A624 DEFB $00,$0F
  $A626 DEFB $00,$0F
@@ -31,7 +41,7 @@ b$A600 DEFB $00,$0F
  $A63A DEFB $1F,$DB
  $A63C DEFB $0F,$FB
  $A63E DEFB $0F,$FB
- $A640 DEFB $03,$AF
+ $A640 DEFB $03,$AF ; frame 2: toilet, state 3 frame 0
  $A642 DEFB $01,$BF
  $A644 DEFB $01,$8F
  $A646 DEFB $01,$8F
@@ -47,7 +57,7 @@ b$A600 DEFB $00,$0F
  $A65A DEFB $1F,$DB
  $A65C DEFB $0F,$FB
  $A65E DEFB $0F,$FB
- $A660 DEFB $00,$0F
+ $A660 DEFB $00,$0F ; frame 3: toilet, state 3 frame 1
  $A662 DEFB $04,$3F
  $A664 DEFB $1E,$2F
  $A666 DEFB $3B,$2F
@@ -63,7 +73,7 @@ b$A600 DEFB $00,$0F
  $A67A DEFB $1F,$DB
  $A67C DEFB $0F,$FB
  $A67E DEFB $0F,$FB
- $A680 DEFB $80,$80
+ $A680 DEFB $80,$80 ; frame 4: filler bytes, never drawn
  $A682 DEFB $80,$80
  $A684 DEFB $8C,$8F
  $A686 DEFB $8F,$8F
@@ -79,7 +89,7 @@ b$A600 DEFB $00,$0F
  $A69A DEFB $80,$80
  $A69C DEFB $80,$80
  $A69E DEFB $80,$80
- $A6A0 DEFB $80,$80
+ $A6A0 DEFB $80,$80 ; frame 5: filler bytes, never drawn
  $A6A2 DEFB $80,$80
  $A6A4 DEFB $80,$80
  $A6A6 DEFB $80,$80
@@ -95,7 +105,7 @@ b$A600 DEFB $00,$0F
  $A6BA DEFB $80,$80
  $A6BC DEFB $80,$80
  $A6BE DEFB $80,$80
- $A6C0 DEFB $80,$80
+ $A6C0 DEFB $80,$80 ; frame 6: filler bytes, never drawn
  $A6C2 DEFB $BF,$BF
  $A6C4 DEFB $BF,$BF
  $A6C6 DEFB $BF,$BF
@@ -111,7 +121,7 @@ b$A600 DEFB $00,$0F
  $A6DA DEFB $80,$80
  $A6DC DEFB $80,$80
  $A6DE DEFB $80,$80
- $A6E0 DEFB $80,$80
+ $A6E0 DEFB $80,$80 ; frame 7: filler bytes, never drawn
  $A6E2 DEFB $80,$80
  $A6E4 DEFB $80,$80
  $A6E6 DEFB $80,$80

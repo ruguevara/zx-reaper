@@ -1,4 +1,10 @@
-; Data block at 9D60
+; Sprite: Willy facing right, walk frame 3
+;
+; One 16x16 sprite of 32 bytes: 16 pixel rows of 2 bytes (left byte, right byte; bit 7 = leftmost pixel), drawn with
+; #R$9456. Willy walking to the right (observed: key P gives $85D0 = 2, bit 0 clear), walk frame 3. #R$9637 draws Willy
+; from $9D00 + 128*(bit 0 of #R$85D0) + 32*(#R$85D2 AND 3); the lives indicator #R$898B shows frames 0-3 in turn (frame
+; counter #R$85E1).
+@label=SpriteWillyRight3
 b$9D60 DEFB $00,$F0
  $9D62 DEFB $00,$F0
  $9D64 DEFB $01,$F8

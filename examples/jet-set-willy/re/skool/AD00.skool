@@ -1,5 +1,13 @@
-; Data block at AD00
-b$AD00 DEFB $0C,$00
+; Sprites: pincers (4 frames), razor blade (4 frames)
+;
+; Eight 16x16 sprites of 32 bytes, 16 pixel rows of 2 bytes each (left byte, right byte; bit 7 = leftmost pixel). Sprite
+; F of the page is at $AD00+32*F. Entity definitions (#R$A000) name the page in byte +5 and pick F from the animation
+; phase, the direction and the slot data. The sprites are drawn with #R$9456 (#R$91BE) and have no colour of their own:
+; ink and bright come from the entity definition. Frames 0-3 look like pincers or pliers (legs apart, crossing); frames
+; 4-7 look like a razor blade turning (flat, diagonal, upright, diagonal). Used by entity definitions $1E $3A $3D $63 in
+; rooms $09 $22 $2B $2E $33 $37.
+@label=SpritesPincersRazor
+b$AD00 DEFB $0C,$00 ; frame 0: pincers, legs apart
  $AD02 DEFB $0C,$00
  $AD04 DEFB $0C,$00
  $AD06 DEFB $0C,$00
@@ -15,7 +23,7 @@ b$AD00 DEFB $0C,$00
  $AD1A DEFB $C0,$C0
  $AD1C DEFB $80,$40
  $AD1E DEFB $80,$40
- $AD20 DEFB $08,$40
+ $AD20 DEFB $08,$40 ; frame 1: pincers, crossing
  $AD22 DEFB $08,$40
  $AD24 DEFB $0C,$C0
  $AD26 DEFB $04,$80
@@ -31,7 +39,7 @@ b$AD00 DEFB $0C,$00
  $AD3A DEFB $C0,$0C
  $AD3C DEFB $80,$04
  $AD3E DEFB $80,$04
- $AD40 DEFB $02,$10
+ $AD40 DEFB $02,$10 ; frame 2: pincers, crossing wide
  $AD42 DEFB $02,$10
  $AD44 DEFB $03,$30
  $AD46 DEFB $01,$20
@@ -47,7 +55,7 @@ b$AD00 DEFB $0C,$00
  $AD5A DEFB $30,$03
  $AD5C DEFB $20,$01
  $AD5E DEFB $20,$01
- $AD60 DEFB $00,$30
+ $AD60 DEFB $00,$30 ; frame 3: pincers, legs apart (narrow)
  $AD62 DEFB $00,$30
  $AD64 DEFB $00,$30
  $AD66 DEFB $00,$30
@@ -63,7 +71,7 @@ b$AD00 DEFB $0C,$00
  $AD7A DEFB $03,$03
  $AD7C DEFB $02,$01
  $AD7E DEFB $02,$01
- $AD80 DEFB $00,$00
+ $AD80 DEFB $00,$00 ; frame 4: razor blade, flat
  $AD82 DEFB $00,$00
  $AD84 DEFB $00,$00
  $AD86 DEFB $7F,$FE
@@ -79,7 +87,7 @@ b$AD00 DEFB $0C,$00
  $AD9A DEFB $00,$00
  $AD9C DEFB $00,$00
  $AD9E DEFB $00,$00
- $ADA0 DEFB $0A,$00
+ $ADA0 DEFB $0A,$00 ; frame 5: razor blade, diagonal
  $ADA2 DEFB $1D,$00
  $ADA4 DEFB $36,$80
  $ADA6 DEFB $67,$40
@@ -95,7 +103,7 @@ b$AD00 DEFB $0C,$00
  $ADBA DEFB $01,$6C
  $ADBC DEFB $00,$B8
  $ADBE DEFB $00,$50
- $ADC0 DEFB $07,$E0
+ $ADC0 DEFB $07,$E0 ; frame 6: razor blade, upright
  $ADC2 DEFB $1F,$F8
  $ADC4 DEFB $14,$28
  $ADC6 DEFB $16,$68
@@ -111,7 +119,7 @@ b$AD00 DEFB $0C,$00
  $ADDA DEFB $14,$28
  $ADDC DEFB $1F,$F8
  $ADDE DEFB $07,$E0
- $ADE0 DEFB $00,$50
+ $ADE0 DEFB $00,$50 ; frame 7: razor blade, diagonal (other way)
  $ADE2 DEFB $00,$B8
  $ADE4 DEFB $01,$6C
  $ADE6 DEFB $02,$E6

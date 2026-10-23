@@ -1,5 +1,15 @@
-; Data block at BA00
-b$BA00 DEFB $07,$E0
+; Sprites: skull face (4 frames), checkered blobs, dripping fringe
+;
+; Eight 16x16 sprites of 32 bytes, 16 pixel rows of 2 bytes each (left byte, right byte; bit 7 = leftmost pixel). Sprite
+; F of the page is at $BA00+32*F. Entity definitions (#R$A000) name the page in byte +5 and pick F from the animation
+; phase, the direction and the slot data. The sprites are drawn with #R$9456 (#R$91BE) and have no colour of their own:
+; ink and bright come from the entity definition. Frames 0-3 look like a skull-like face with a hat brim and crossed
+; bones; entities show frames 0 and 2 or 1 and 3 so that neighbours alternate. Frames 4 and 5 are checkered blobs and
+; 6-7 a dripping fringe; entities $10-$12 use them at three places in the rooms with the big lettering (Entrance to
+; Hades $06, The Chapel $1B, Priests' Hole $26). Used by entity definitions $10 $11 $12 $28 $29 $2A $2B $2C $2D in rooms
+; $00 $02 $06 $08 $0D $14 $15 $1A $1B $26 $2E.
+@label=SpritesSkullBlobDrip
+b$BA00 DEFB $07,$E0 ; frame 0: skull face, frame 0
  $BA02 DEFB $0F,$F0
  $BA04 DEFB $DF,$FB
  $BA06 DEFB $3F,$FC
@@ -15,7 +25,7 @@ b$BA00 DEFB $07,$E0
  $BA1A DEFB $59,$9A
  $BA1C DEFB $8C,$31
  $BA1E DEFB $07,$E0
- $BA20 DEFB $07,$E0
+ $BA20 DEFB $07,$E0 ; frame 1: skull face, frame 1
  $BA22 DEFB $0F,$F0
  $BA24 DEFB $1F,$F8
  $BA26 DEFB $FF,$FF
@@ -31,7 +41,7 @@ b$BA00 DEFB $07,$E0
  $BA3A DEFB $58,$1A
  $BA3C DEFB $4C,$32
  $BA3E DEFB $07,$E0
- $BA40 DEFB $07,$E0
+ $BA40 DEFB $07,$E0 ; frame 2: skull face, frame 2
  $BA42 DEFB $0F,$F0
  $BA44 DEFB $1F,$F8
  $BA46 DEFB $DF,$FB
@@ -47,7 +57,7 @@ b$BA00 DEFB $07,$E0
  $BA5A DEFB $18,$18
  $BA5C DEFB $2C,$34
  $BA5E DEFB $C7,$E3
- $BA60 DEFB $07,$E0
+ $BA60 DEFB $07,$E0 ; frame 3: skull face, frame 3
  $BA62 DEFB $8F,$F1
  $BA64 DEFB $5F,$FA
  $BA66 DEFB $3F,$FC
@@ -63,7 +73,7 @@ b$BA00 DEFB $07,$E0
  $BA7A DEFB $78,$1E
  $BA7C DEFB $8C,$31
  $BA7E DEFB $07,$E0
- $BA80 DEFB $15,$03
+ $BA80 DEFB $15,$03 ; frame 4: checkered blob, frame 0 (entity $10)
  $BA82 DEFB $2A,$BE
  $BA84 DEFB $15,$5E
  $BA86 DEFB $4A,$A8
@@ -79,7 +89,7 @@ b$BA00 DEFB $07,$E0
  $BA9A DEFB $2B,$C6
  $BA9C DEFB $12,$FC
  $BA9E DEFB $0C,$FD
- $BAA0 DEFB $40,$A8
+ $BAA0 DEFB $40,$A8 ; frame 5: checkered blob, frame 1 (entity $11)
  $BAA2 DEFB $FD,$54
  $BAA4 DEFB $7A,$A8
  $BAA6 DEFB $15,$52
@@ -95,7 +105,7 @@ b$BA00 DEFB $07,$E0
  $BABA DEFB $63,$D4
  $BABC DEFB $3F,$48
  $BABE DEFB $BF,$30
- $BAC0 DEFB $FD,$BF
+ $BAC0 DEFB $FD,$BF ; frame 6: dripping fringe, frame 0 (entity $12)
  $BAC2 DEFB $BF,$EF
  $BAC4 DEFB $EA,$D7
  $BAC6 DEFB $AA,$45
@@ -111,7 +121,7 @@ b$BA00 DEFB $07,$E0
  $BADA DEFB $20,$84
  $BADC DEFB $14,$28
  $BADE DEFB $05,$20
- $BAE0 DEFB $FD,$BF
+ $BAE0 DEFB $FD,$BF ; frame 7: dripping fringe, frame 1 (entity $12)
  $BAE2 DEFB $FF,$FB
  $BAE4 DEFB $AC,$D7
  $BAE6 DEFB $AA,$D1

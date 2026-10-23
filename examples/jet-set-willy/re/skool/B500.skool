@@ -1,5 +1,14 @@
-; Data block at B500
-b$B500 DEFB $00,$00
+; Sprites: spiky post, left and right (8 frames)
+;
+; Eight 16x16 sprites of 32 bytes, 16 pixel rows of 2 bytes each (left byte, right byte; bit 7 = leftmost pixel). Sprite
+; F of the page is at $B500+32*F. Entity definitions (#R$A000) name the page in byte +5 and pick F from the animation
+; phase, the direction and the slot data. The sprites are drawn with #R$9456 (#R$91BE) and have no colour of their own:
+; ink and bright come from the entity definition. Narrow upright serrated shapes with a few loose pixels; most of the
+; picture is in the left byte column and frames 0 and 4 are only a small blob. Frames 0-3 are used while moving left,
+; 4-7 while moving right (bit 7 of entity byte +0). Used by entity definitions $34 $35 $58 $6F in rooms $03 $07 $0D $1E
+; $31 $33 $38 $3B.
+@label=SpritesSpikyPosts
+b$B500 DEFB $00,$00 ; frame 0: spiky post (left), frame 0, small blob
  $B502 DEFB $00,$00
  $B504 DEFB $00,$00
  $B506 DEFB $00,$00
@@ -15,7 +24,7 @@ b$B500 DEFB $00,$00
  $B51A DEFB $3F,$00
  $B51C DEFB $1F,$00
  $B51E DEFB $0D,$00
- $B520 DEFB $00,$00
+ $B520 DEFB $00,$00 ; frame 1: spiky post (left), frame 1
  $B522 DEFB $00,$00
  $B524 DEFB $00,$00
  $B526 DEFB $00,$00
@@ -31,7 +40,7 @@ b$B500 DEFB $00,$00
  $B53A DEFB $03,$20
  $B53C DEFB $0F,$20
  $B53E DEFB $87,$20
- $B540 DEFB $00,$60
+ $B540 DEFB $00,$60 ; frame 2: spiky post (left), frame 2, tall
  $B542 DEFB $03,$F0
  $B544 DEFB $01,$D0
  $B546 DEFB $00,$D0
@@ -47,7 +56,7 @@ b$B500 DEFB $00,$00
  $B55A DEFB $0B,$C4
  $B55C DEFB $01,$C4
  $B55E DEFB $20,$C4
- $B560 DEFB $00,$00
+ $B560 DEFB $00,$00 ; frame 3: spiky post (left), frame 3
  $B562 DEFB $00,$00
  $B564 DEFB $00,$00
  $B566 DEFB $00,$00
@@ -63,7 +72,7 @@ b$B500 DEFB $00,$00
  $B57A DEFB $02,$7A
  $B57C DEFB $00,$3A
  $B57E DEFB $04,$FA
- $B580 DEFB $00,$00
+ $B580 DEFB $00,$00 ; frame 4: spiky post (right), frame 0, small blob
  $B582 DEFB $00,$00
  $B584 DEFB $00,$00
  $B586 DEFB $00,$00
@@ -79,7 +88,7 @@ b$B500 DEFB $00,$00
  $B59A DEFB $7E,$00
  $B59C DEFB $7C,$00
  $B59E DEFB $58,$00
- $B5A0 DEFB $00,$00
+ $B5A0 DEFB $00,$00 ; frame 5: spiky post (right), frame 1
  $B5A2 DEFB $00,$00
  $B5A4 DEFB $00,$00
  $B5A6 DEFB $00,$00
@@ -95,7 +104,7 @@ b$B500 DEFB $00,$00
  $B5BA DEFB $26,$10
  $B5BC DEFB $27,$80
  $B5BE DEFB $27,$08
- $B5C0 DEFB $03,$00
+ $B5C0 DEFB $03,$00 ; frame 6: spiky post (right), frame 2, tall
  $B5C2 DEFB $07,$E0
  $B5C4 DEFB $05,$C0
  $B5C6 DEFB $05,$80
@@ -111,7 +120,7 @@ b$B500 DEFB $00,$00
  $B5DA DEFB $11,$E8
  $B5DC DEFB $11,$C0
  $B5DE DEFB $11,$82
- $B5E0 DEFB $00,$00
+ $B5E0 DEFB $00,$00 ; frame 7: spiky post (right), frame 3
  $B5E2 DEFB $00,$00
  $B5E4 DEFB $00,$00
  $B5E6 DEFB $00,$00

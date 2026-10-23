@@ -1,5 +1,14 @@
-; Data block at B800
-b$B800 DEFB $00,$00
+; Sprites: profile critter (4 frames), hooded figure (4 frames)
+;
+; Eight 16x16 sprites of 32 bytes, 16 pixel rows of 2 bytes each (left byte, right byte; bit 7 = leftmost pixel). Sprite
+; F of the page is at $B800+32*F. Entity definitions (#R$A000) name the page in byte +5 and pick F from the animation
+; phase, the direction and the slot data. The sprites are drawn with #R$9456 (#R$91BE) and have no colour of their own:
+; ink and bright come from the entity definition. Frames 0-3 look like an animal in profile with a pointed tip at the
+; top; frames 4-7 look like an upright hooded figure whose arms go up and down. Entities that use all eight frames show
+; one while moving left and the other while moving right (bit 7 of entity byte +0). Used by entity definitions $20 $21
+; $22 $23 in rooms $02 $12 $15 $2E.
+@label=SpritesCritterHooded
+b$B800 DEFB $00,$00 ; frame 0: critter in profile, frame 0
  $B802 DEFB $06,$00
  $B804 DEFB $08,$00
  $B806 DEFB $38,$00
@@ -15,7 +24,7 @@ b$B800 DEFB $00,$00
  $B81A DEFB $0E,$C0
  $B81C DEFB $18,$00
  $B81E DEFB $60,$00
- $B820 DEFB $00,$00
+ $B820 DEFB $00,$00 ; frame 1: critter in profile, frame 1
  $B822 DEFB $00,$00
  $B824 DEFB $0F,$00
  $B826 DEFB $14,$80
@@ -31,7 +40,7 @@ b$B800 DEFB $00,$00
  $B83A DEFB $01,$00
  $B83C DEFB $02,$00
  $B83E DEFB $04,$00
- $B840 DEFB $00,$00
+ $B840 DEFB $00,$00 ; frame 2: critter in profile, frame 2
  $B842 DEFB $00,$60
  $B844 DEFB $00,$80
  $B846 DEFB $03,$80
@@ -47,7 +56,7 @@ b$B800 DEFB $00,$00
  $B85A DEFB $00,$EC
  $B85C DEFB $01,$80
  $B85E DEFB $06,$00
- $B860 DEFB $00,$00
+ $B860 DEFB $00,$00 ; frame 3: critter in profile, frame 3
  $B862 DEFB $00,$00
  $B864 DEFB $00,$04
  $B866 DEFB $00,$08
@@ -63,7 +72,7 @@ b$B800 DEFB $00,$00
  $B87A DEFB $00,$7F
  $B87C DEFB $00,$3B
  $B87E DEFB $00,$F0
- $B880 DEFB $04,$00
+ $B880 DEFB $04,$00 ; frame 4: hooded figure, arms down
  $B882 DEFB $04,$00
  $B884 DEFB $0C,$00
  $B886 DEFB $0C,$00
@@ -79,7 +88,7 @@ b$B800 DEFB $00,$00
  $B89A DEFB $56,$00
  $B89C DEFB $1C,$00
  $B89E DEFB $06,$00
- $B8A0 DEFB $04,$80
+ $B8A0 DEFB $04,$80 ; frame 5: hooded figure, arms up
  $B8A2 DEFB $08,$40
  $B8A4 DEFB $13,$20
  $B8A6 DEFB $13,$20
@@ -95,7 +104,7 @@ b$B800 DEFB $00,$00
  $B8BA DEFB $1D,$80
  $B8BC DEFB $03,$80
  $B8BE DEFB $01,$00
- $B8C0 DEFB $00,$80
+ $B8C0 DEFB $00,$80 ; frame 6: hooded figure, arms down (b)
  $B8C2 DEFB $00,$80
  $B8C4 DEFB $00,$C0
  $B8C6 DEFB $00,$C0
@@ -111,7 +120,7 @@ b$B800 DEFB $00,$00
  $B8DA DEFB $01,$A8
  $B8DC DEFB $00,$E0
  $B8DE DEFB $01,$80
- $B8E0 DEFB $00,$48
+ $B8E0 DEFB $00,$48 ; frame 7: hooded figure, arms up (b)
  $B8E2 DEFB $00,$84
  $B8E4 DEFB $01,$32
  $B8E6 DEFB $01,$02
