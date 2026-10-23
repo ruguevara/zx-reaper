@@ -1,15 +1,16 @@
 # ZX-REAPER
 
-**R**everse **E**ngineer **A**nything, **P**ort **E**verywhere, **R**eproducibly.
+**R**everse **E**ngineer **A**nything, **P**ort **E**verywhere **R**etro.
 
 An agent harness for reverse engineering ZX Spectrum games into sources that
 rebuild the original tape byte for byte, are relocatable and free of magic
 numbers, are documented by an article with a graphics gallery, and are ready
 to be ported routine by routine against the original code.
 
-The method and its reasoning live in a separate note ("Метод реверса игр ZX
-Spectrum с агентом" in the author's Obsidian vault); this repository holds
-everything the agent runs.
+The method and its reasoning, in Russian: [docs/method.md](docs/method.md);
+the full Hungry Horace run and its comparison with the SkoolKit reference:
+[docs/hungry-horace-run.md](docs/hungry-horace-run.md). Both are copies of
+notes in the author's Obsidian vault, refreshed with `scripts/sync-method.py`.
 
 ## Layout
 
@@ -18,6 +19,8 @@ everything the agent runs.
 | `tools/` | command-line tools (Python, SkoolKit, sjasmplus) |
 | `template/` | what every game project starts with: `Makefile`, `AGENTS.md`, `skills/`, `re/questions.md`, `re/findings.md` |
 | `selftest/` | fixture game and an end-to-end test of the whole pipeline |
+| `docs/` | the method and the reference run report (copies of the vault notes) |
+| `scripts/` | repository maintenance (`sync-method.py`) |
 | `examples/hungry-horace/` | the reference run: Hungry Horace (1982) taken through every stage, compared with the SkoolKit reference disassembly |
 
 ## Setup

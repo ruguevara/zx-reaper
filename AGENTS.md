@@ -18,5 +18,7 @@ and `template/skills/`, which get copied into each project.
   the tape in `original/`).
 - Never commit game tapes, snapshots made from them (`re/*.z80`) or split tape
   blocks (`re/tape/`).
-- The method note in the Obsidian vault describes why things are done this
-  way; keep it in step when a stage changes.
+- `docs/method.md` and `docs/hungry-horace-run.md` are copies of notes in the
+  Obsidian vault, which is the master: change the vault note, then run
+  `scripts/sync-method.py "<vault>/Хобби/Реверс ZX Spectrum"`. Keep the method
+  in step when a stage changes.
