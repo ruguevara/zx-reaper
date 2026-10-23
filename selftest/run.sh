@@ -18,6 +18,7 @@ echo "== shift test before relocation work (must fail)"
 if make -s shift-test > shift.log 2>&1; then echo "unexpected pass"; exit 1; fi
 tail -2 shift.log
 echo "== reclassify the data area and the jump table"
+sleep 1   # make 3.81 (macOS) compares whole seconds: edits must come after the last build
 python3 tools/zxq.py reclassify "$here/data-area.ctl"
 python3 tools/zxq.py reclassify "$here/jump-table.ctl"
 echo "== label the self-modified operand, as an agent would"

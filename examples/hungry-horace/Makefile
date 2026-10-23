@@ -25,7 +25,7 @@ else
 endif
 
 .DELETE_ON_ERROR:
-.PHONY: all verify test expected coverage status labels html shift-test export clean help restore diff audit doctor port-test
+.PHONY: all verify test expected coverage status labels html shift-test export clean help restore diff audit doctor port-test port-html
 all: verify
 
 # The tape and everything copied from it (re/tape/, re/*.z80) stay out of git;
@@ -51,6 +51,7 @@ help:
 	@echo "make restore    recreate re/tape, re/orig.z80, re/image.z80 from original/"
 	@echo "make diff       differential tests: Z80 routines against tests/models/*.py"
 	@echo "make port-test  stage 3: the Python port in port/ replays the Z80 runs of tests/inputs"
+	@echo "make port-html  the port as one web page, build/web/game.html (holds game data: not for git)"
 	@echo "make audit      open questions (re/questions.md) and unverified findings (re/findings.md)"
 	@echo "make doctor     check tools and what this project is missing"
 	@echo "sources: $(MASTER)"
@@ -150,6 +151,12 @@ build/record/%.rec: tests/inputs/%.txt re/orig.z80 build/blocks.stamp
 port-test: port/labels.py port/variables.py port/image.bin $(RECORDS)
 	@test -n "$(PORT_ENTRY)" || { echo "set PORT_ENTRY in re/layout.mk"; exit 1; }
 	@$(T)/zxport.py check $(PORT_ENTRY) $(RECORDS)
+
+port-html: port/labels.py port/variables.py port/image.bin
+	rm -rf build/web
+	$(PY) -c "import shutil; shutil.copytree('port', 'build/web/game', ignore=shutil.ignore_patterns('__pycache__'))"
+	cd build/web && pyxel package game game/play.py && pyxel app2html game.pyxapp
+	@echo "serve it: $(PY) -m http.server -d build/web, then open http://localhost:8000/game.html"
 
 audit:
 	@$(T)/zxq.py audit; true
