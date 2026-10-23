@@ -127,7 +127,7 @@ the maps).
 | [First note of the eaten buzz](#smaller-oddities) | 256 loop passes instead of 0 | inferred |
 | [EatObject scores a guard](#smaller-oddities) | a guard cell in Horace's next block scores 50 | inferred, not observed |
 | [SaveBackground returns HL and DE swapped](#smaller-oddities) | no caller uses them | inferred |
-| [Passes above 9](#smaller-oddities) | printed as `:` `;` ... | inferred |
+| [Passes above 9](#smaller-oddities) | printed as `:` `;` ... | verified (F14: `zxrun.py --call ShowScore` with 9 passes and a new 10000 shows `PASSES :`) |
 
 "Verified (source)" means the routine header in the source says it was
 reproduced in the simulator during annotation.
@@ -278,3 +278,18 @@ cannot be told from the code.
   the character `"0" + passes`, so 10 passes would show as `:`.
 - **Score wrap.** [Score](../src/variables.asm#L174) wraps at 65,536; [ShowScore](../src/sprites.asm#L169) would then see a
   different ten-thousands value and award another pass (inferred).
+
+## Open questions
+
+The working registers are [`re/questions.md`](../re/questions.md) and
+[`re/findings.md`](../re/findings.md); `make audit` lists what is still open.
+At the time of writing:
+
+- Long games are not explored: the pace stays at 1 from maze 29 on, and the
+  stall above happens there, but no long run was made (F23).
+- Whether a guard that follows another one picks up the flowers and fruit the
+  first one hides is not tested (F22).
+- Scores past 99999 were not tested.
+- One annotation claim was refuted by a test: `ShowScore` does not ignore HL,
+  it prints it, so the `LD HL,(Score)` before each call is needed (F15, F16).
+

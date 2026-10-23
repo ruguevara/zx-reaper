@@ -154,7 +154,7 @@ EatObject_Item:
 ; of 10000, and plays a short rising chirp. Called after every score change: by
 ; EatObject above, by CheckGuardContact after a guard is eaten, by UpdateBell
 ; (twice) for the bell, and at the start of a maze or a new life by Start (HL
-; is ignored). Printing is skipped in demo mode (see PrintNumber, PrintChar),
+; = the number to print: every caller loads Score into HL first; tested). Printing is skipped in demo mode (see PrintNumber, PrintChar),
 ; but the sound is not. The ten-thousands counter in $7C77 holds score/10000 +
 ; 2 as it was at the last call (the +2 comes from the counting loop below).
 ; When the new value differs, the passes counter $7C78 goes up by one and its

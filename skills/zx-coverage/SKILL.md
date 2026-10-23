@@ -26,5 +26,9 @@ routine executed at least once; 100% instruction coverage is not needed.
 6. Make the important scripts regression tests: `make expected` records their
    frame hashes from the original; `make test` replays them on the build.
 
+Coverage only bounds claims: an address missing from the maps was not run by
+these inputs, which is not proof that it is dead. Record such regions as
+`unknown` findings until the code shows them unreachable.
+
 Stop when two new scripts in a row add under 1% coverage; note what is
 still unexecuted and why in `re/notes.md`.

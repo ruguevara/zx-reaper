@@ -358,7 +358,7 @@ PlaceHorace:
 ; Show the score (this also redraws the passes digit and may award the free
 ; pass) and the best score.
   LD HL,(Score)
-  CALL ShowScore          ; HL is ignored by ShowScore
+  CALL ShowScore          ; prints HL
   LD HL,(BestScore)
   LD DE,SCREEN
   EX DE,HL
