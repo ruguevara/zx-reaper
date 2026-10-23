@@ -1,0 +1,10 @@
+; Location prepositions: 5 phrase codes (bit 7 set)
+;
+; Index = (location flags AND $0E)/2: outside, inside, in, on, at. Read at
+; $963C, copied into the message at $AFFC.
+@label=LocationPrepositions
+b$BA80 DEFW $84C2
+ $BA82 DEFW $837B
+ $BA84 DEFW $8378
+ $BA86 DEFW $84AA
+ $BA88 DEFW $8070

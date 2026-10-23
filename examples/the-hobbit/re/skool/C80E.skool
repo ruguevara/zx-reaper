@@ -1,0 +1,23 @@
+; Blocked exits: 5 records of 6 bytes
+;
+; Record: location id, address of an exit triple in $BA8A, the saved triple
+; (direction, obstacle, destination). $97AD picks one of them (random 1-4 or 5)
+; and zeroes the triple in the location record; $A7C4 puts it back. Record 0 of
+; the table is the overlap $C808-$C80D.
+@label=BlockedExits
+b$C80E DEFB $16
+ $C80F DEFW $BD12
+ $C811 DEFB $01,$00,$31
+ $C814 DEFB $18
+ $C815 DEFW $BD26
+ $C817 DEFB $03,$00,$19
+ $C81A DEFB $15
+ $C81B DEFW $BCF8
+ $C81D DEFB $04,$00,$14
+ $C820 DEFB $22
+ $C821 DEFW $BDE2
+ $C823 DEFB $03,$00,$23
+ $C826 DEFB $0A
+ $C827 DEFW $BB0A
+ $C829 DEFB $03,$00,$0B
+ $C82C DEFB $FF

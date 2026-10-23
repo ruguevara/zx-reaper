@@ -1,0 +1,11 @@
+; Word endings: 6 records of 4 bytes, zero padded
+;
+; Indexed by the top 3 bits of the third dictionary byte of a word (x4), read
+; by $74BA: s, es, ies, BACKSPACE+ies, d, ing.
+@label=WordEndings
+b$B71F DEFB $73,$00,$00,$00
+ $B723 DEFB $65,$73,$00,$00
+ $B727 DEFB $69,$65,$73,$00
+ $B72B DEFB $08,$69,$65,$73
+ $B72F DEFB $64,$00,$00,$00
+ $B733 DEFB $69,$6E,$67,$00

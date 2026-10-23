@@ -1,0 +1,44 @@
+; Run-time pointers and flags (not saved)
+;
+; $B708/$B70A: records of the two nouns of the command ($B6E8, $B6E9); $B70C:
+; record of the acting actor (initially the player, $C11B).
+; .
+; $B70E: random seed (LD A,R at $6CA7); $B712: counter (high byte first)
+; stepping through ROM bytes for $9CA8, the random number routine.
+; .
+; $B70F-$B711: ALL/EXCEPT state of the parser (inferred). $B71B: 1 while an
+; order stored in an order slot is being parsed instead of keyboard input.
+@label=Noun1Record
+g$B708 DEFW $0000
+@label=Noun2Record
+ $B70A DEFW $0000
+@label=ActorRecord
+ $B70C DEFW $C11B
+@label=RandomSeed
+ $B70E DEFB $00
+@label=AllActive
+ $B70F DEFB $00
+@label=AllMode
+ $B710 DEFB $00
+@label=AllError
+ $B711 DEFB $00
+@label=RandomRomPtr
+ $B712 DEFB $00,$00
+@label=SavedMessagePtr
+ $B714 DEFW $0000
+@label=StateB716
+ $B716 DEFB $00
+@label=SourceTextPtr
+ $B717 DEFW $0000
+@label=StateB719
+ $B719 DEFB $00
+@label=StateB71A
+ $B71A DEFB $00
+@label=InputFromOrder
+ $B71B DEFB $00
+@label=StateB71C
+ $B71C DEFB $00
+@label=StateB71D
+ $B71D DEFB $00
+@label=StateB71E
+ $B71E DEFB $00

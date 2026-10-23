@@ -1,0 +1,9 @@
+; Forest river: without the barrel the player is swept away (location $21)
+@label=ArriveForestRiver
+c$C7EA LD A,($C11C)  ;
+ $C7ED CP $13        ;
+ $C7EF RET Z         ;
+ $C7F0 CALL $8E39    ;
+ $C7F3 LD HL,$B26D   ;
+ $C7F6 CALL $72DD    ;
+ $C7F9 JP $90D2      ;

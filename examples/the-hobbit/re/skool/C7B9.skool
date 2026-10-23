@@ -1,0 +1,5 @@
+; Deep bog: start timer 4 (location $1D)
+@label=ArriveBog
+c$C7B9 LD A,($CAA0)  ;
+ $C7BC LD ($CAA1),A  ;
+ $C7BF RET           ;

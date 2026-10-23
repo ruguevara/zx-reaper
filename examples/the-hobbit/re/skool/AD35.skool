@@ -3,4 +3,5 @@
 ; The same with "the" for the first three: used when printing into the input
 ; line.
 @label=ArticleTableInput
+@keep
 w$AD35 DEFW $069F,$069F,$069F,$0603

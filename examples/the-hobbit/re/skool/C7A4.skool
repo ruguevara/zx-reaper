@@ -1,0 +1,9 @@
+; Beorn house: wake the butler (location $16)
+@label=ArriveBeornsHouse
+c$C7A4 LD HL,$C437   ;
+ $C7A7 BIT 3,(HL)    ;
+ $C7A9 RET NZ        ;
+ $C7AA LD A,$42      ;
+ $C7AC LD ($CAE7),A  ;
+ $C7AF SET 7,(HL)    ;
+ $C7B1 RET           ;

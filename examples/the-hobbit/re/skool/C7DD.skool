@@ -1,0 +1,8 @@
+; Forest road and forest: remember the arrival, start timer 8 (locations 2 and
+; 3)
+@label=ArriveForest
+c$C7DD LD A,($8D9B)  ;
+ $C7E0 LD ($B6F3),A  ;
+ $C7E3 LD A,($CABC)  ;
+ $C7E6 LD ($CABD),A  ;
+ $C7E9 RET           ;

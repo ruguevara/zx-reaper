@@ -4,4 +4,5 @@
 ; an, some. Used when the noun is printed with an article, for B701=0 ($AD35
 ; otherwise).
 @label=ArticleTable
+@keep
 w$AD2D DEFW $069F,$0040,$0058,$0603

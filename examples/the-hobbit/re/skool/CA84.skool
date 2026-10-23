@@ -1,0 +1,77 @@
+; Timers: 10 records of 7 bytes, $FF ends (saved)
+;
+; Record: +0 start value (copied to +1 by $C7B2, $AA7D...), +1 counter (0 =
+; stopped; stepped by $96B3, which calls the handler at +2 when it reaches 0,
+; at most one timer per turn via $B6F0), +4 threshold, +5 address called every
+; turn while 0 < counter <= threshold (0: none).
+@label=Timers
+g$CA84 DEFB $02
+@label=Timer0Counter
+ $CA85 DEFB $00
+ $CA86 DEFW $A5FB
+ $CA88 DEFB $00
+ $CA89 DEFW $0000
+@label=Timer1Start
+ $CA8B DEFB $02
+@label=Timer1Counter
+ $CA8C DEFB $00
+ $CA8D DEFW $AA5C
+ $CA8F DEFB $00
+ $CA90 DEFW $0000
+@label=Timer2Start
+ $CA92 DEFB $05
+@label=Timer2Counter
+ $CA93 DEFB $00
+ $CA94 DEFW $AB10
+ $CA96 DEFB $00
+ $CA97 DEFW $0000
+@label=Timer3Start
+ $CA99 DEFB $02
+@label=Timer3Counter
+ $CA9A DEFB $00
+ $CA9B DEFW $A4D9
+ $CA9D DEFB $00
+ $CA9E DEFW $0000
+@label=Timer4Start
+ $CAA0 DEFB $02
+@label=Timer4Counter
+ $CAA1 DEFB $00
+ $CAA2 DEFW $A7AA
+ $CAA4 DEFB $02
+ $CAA5 DEFW $A7AA
+@label=Timer5Start
+ $CAA7 DEFB $04
+@label=Timer5Counter
+ $CAA8 DEFB $00
+ $CAA9 DEFW $AAD5
+ $CAAB DEFB $01
+ $CAAC DEFW $AAB3
+@label=Timer6
+ $CAAE DEFB $00
+@label=Timer6Counter
+ $CAAF DEFB $00
+ $CAB0 DEFW $AAE0
+ $CAB2 DEFB $00
+ $CAB3 DEFW $0000
+@label=Timer7Start
+ $CAB5 DEFB $05
+@label=Timer7Counter
+ $CAB6 DEFB $00
+ $CAB7 DEFW $AB0B
+ $CAB9 DEFB $00
+ $CABA DEFW $0000
+@label=Timer8Start
+ $CABC DEFB $04
+@label=Timer8Counter
+ $CABD DEFB $00
+ $CABE DEFW $AB3A
+ $CAC0 DEFB $03
+ $CAC1 DEFW $AB1F
+@label=Timer9Start
+ $CAC3 DEFB $05
+@label=Timer9Counter
+ $CAC4 DEFB $00
+ $CAC5 DEFW $AA74
+ $CAC7 DEFB $01
+ $CAC8 DEFW $AA91
+ $CACA DEFB $FF

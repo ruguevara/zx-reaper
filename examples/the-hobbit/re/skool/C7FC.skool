@@ -1,0 +1,15 @@
+; Random events: 4 records (dictionary phrase code, message address)
+;
+; One is picked at game start ($97E0, random 0-3) into $B6EE; $A8F6 looks for
+; the phrase (night, man) in a stored order and $A8D2 prints the message.
+@label=RandomEvents
+b$C7FC DEFB $74,$04
+ $C7FE DEFW $B1EE
+ $C800 DEFB $29,$04
+ $C802 DEFW $B2B7
+ $C804 DEFB $74,$04
+ $C806 DEFW $B1EE
+@label=BlockedExitsBase
+ $C808 DEFB $29,$04
+ $C80A DEFW $B2B7
+ $C80C DEFB $FF,$FF

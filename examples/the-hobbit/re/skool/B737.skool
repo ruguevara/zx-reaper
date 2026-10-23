@@ -1,0 +1,5 @@
+; Count of order slots in use
+;
+; Used by $7EBA as the number of slots to claim or release.
+@label=OrderSlotCount
+g$B737 DEFB $00

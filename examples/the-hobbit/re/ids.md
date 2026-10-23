@@ -1,0 +1,186 @@
+# Ids: locations, objects, characters, NPC records, timers
+
+From the classification of the world data (re/notes.md, World).
+
+
+Direction/verb ids in exits: 1 N, 2 S, 3 E, 4 W, 5 NE, 6 NW, 7 SE, 8 SW, 9 up, 10 down (observed by typing the words, B6E7).
+
+## Locations (record address from $B9E0; exits: dir.obstacle>destination)
+
+- $00 (none) @BA8A
+- $01 tunnel like hall @BA97  exits 3.05>04
+- $02 forest road @BED3  exits 3.00>03 4.00>2E
+- $03 forest @BEE4  exits 4.00>02 3.00>2D
+- $04 lonelands @BAA5  exits 4.05>01 3.00>05 1.00>05 5.00>06
+- $05 trolls clearing @BABC  exits 8.00>04 7.00>09 1.00>06
+- $06 trolls path @BAD0  exits 2.00>05 1.01>07
+- $07 trolls cave @BAE1  exits 2.01>06
+- $08 running river @BEF5  exits 1.00>2D 4.00>03
+- $09 rivendell @BAEF  exits 3.00>0A 4.00>05
+- $0A misty mountain @BB00  exits 3.00>0B 1.00>44 4.00>09 2.00>49
+- $0B narrow place @BB17  exits 3.00>0C 4.00>0A 1.00>0E
+- $0C dangerous narrow path @BB2B  exits 3.00>16 4.00>0B
+- $0D goblins dungeon @BCDA  exits 1.11>10 4.1B>12
+- $0E large dry cave @BB3C  exits 10.06>0F 2.00>0B
+- $0F dark stuffy passage @BB4D  exits 9.06>0E 2.00>34 5.00>3A
+- $10 big goblins cavern @BC6A  exits 10.00>39 5.00>12 7.11>0D
+- $11 deep dark lake @BC7E  exits 1.00>37
+- $12 dark winding passage @BC8C  exits 8.00>10 7.00>3F 1.1B>0D
+- $13 inside goblins gate @BCA0  exits 4.00>10 1.00>10 2.00>10 9.0A>14 3.00>10 7.00>10 8.00>10 10.00>10 5.00>41 6.00>10
+- $14 outside goblins gate @BCC9  exits 10.0A>13 3.00>15
+- $15 treeless opening @BCEB  exits 3.00>16 4.00>14
+- $16 beorns house @BCFC  exits 5.00>18 6.00>14 2.00>2E 8.00>0C 1.00>31
+- $17 forestriver @BF06  exits 7.2A>21 1.00>30
+- $18 forest gate @BD16  exits 4.00>16 2.00>2E 3.00>19
+- $19 bewitched gloomy place @BD2A  exits 4.00>18 3.00>42 2.09>00
+- $1A spider threads place @BD3E  exits 3.07>1D 4.07>32 1.07>1C 2.07>1B
+- $1B smothering forest @BD55  exits 1.07>1A 4.07>32
+- $1C levelled elvish clearing @BD66  exits 4.00>19 3.07>1A 5.0D>1E
+- $1D deep bog @BD7A  exits 4.07>1A
+- $1E elvenkings great halls @BD88  exits 3.08>1F 2.00>20 4.0D>1C
+- $1F dark dungeon @BD9C  exits 8.08>20 4.08>1E
+- $20 elvenkings cellar @BDAD  exits 5.08>1F 1.00>1E 10.0C>21
+- $21 forestriver @BDC1  exits 3.27>22 9.0C>00 2.2A>00
+- $22 long lake @BDD5  exits 1.00>24 3.00>23 6.27>21 2.00>2D
+- $23 lake town @BDEC  exits 1.00>22 2.00>22 3.00>22 4.00>22
+- $24 running river @BE03  exits 9.00>25 2.00>22
+- $25 dragons desolation @BE14  exits 1.00>26 10.00>24
+- $26 dale valley @BE25  exits 1.00>27 2.00>25 6.00>28
+- $27 front gate @BE39  exits 1.00>29 2.00>26 4.00>28
+- $28 ravenhill @BE4D  exits 1.00>2A 7.00>25 3.00>27
+- $29 lower halls @BE61  exits 2.00>27 3.00>2B 9.00>2C
+- $2A sidedoor @BE75  exits 2.00>28 3.0B>2B 1.00>33
+- $2B smooth straight passage @BE89  exits 4.0B>2A 3.00>29
+- $2C lonely mountain @BE9A  exits 10.00>29 4.00>2A 2.00>27 8.00>28
+- $2D waterfall @BEC2  exits 2.00>08 4.00>03
+- $2E forest road @BEB1  exits 3.00>02 1.00>18
+- $2F em place @BF42
+- $30 mountains @BF17  exits 8.00>31 3.00>2F 7.00>17
+- $31 great river @BF2B  exits 5.00>30 2.00>16 3.00>18 8.00>0A
+- $32 green forest @BF4D  exits 5.07>1A 4.00>43
+- $33 em place @BF5E  exits 1.00>2F 2.00>2A 9.00>2C
+- $34 dark stuffy passage @BB61  exits 1.00>0F 10.00>35 9.00>36
+- $35 dark stuffy passage @BB75  exits 9.00>34
+- $36 dark stuffy passage @BB83  exits 10.00>34 7.00>37 2.00>40 8.00>11
+- $37 dark stuffy passage @BB9A  exits 2.00>11 5.00>36 8.00>3D 4.00>3C
+- $38 dark stuffy passage @BBB1  exits 8.00>3C
+- $39 dark stuffy passage @BBBF  exits 9.00>10 4.00>41 1.00>3A
+- $3A dark stuffy passage @BBD3  exits 7.00>3E 3.00>0F 2.00>39 9.00>3B
+- $3B dark stuffy passage @BBEA  exits 10.00>3A 2.00>3C
+- $3C dark stuffy passage @BBFB  exits 7.00>3D 1.00>3B 6.00>38
+- $3D dark stuffy passage @BC0F  exits 1.00>36 6.00>3C
+- $3E dark stuffy passage @BC20  exits 3.00>3D
+- $3F dark stuffy passage @BC2E  exits 9.00>40 1.00>12 3.00>3A
+- $40 dark stuffy passage @BC42  exits 6.00>41 4.00>36 8.00>3F
+- $41 dark stuffy passage @BC56  exits 1.00>40 7.00>39 3.00>13
+- $42 west bank @BF72  exits 4.00>19 3.09>43
+- $43 east bank @BF83  exits 3.00>32 4.09>42
+- $44 narrow path @BF94  exits 3.00>47 5.00>45 2.00>0A
+- $45 narrow path @BFA8  exits 1.00>46 8.00>44 2.00>0A
+- $46 narrow path @BFBC  exits 7.00>48 2.00>45
+- $47 narrow path @BFCD  exits 6.00>45 2.00>4A 4.00>44
+- $48 narrow path @BFE1  exits 6.00>46 8.00>47 10.00>4B
+- $49 narrow path @BFF5  exits 3.00>4A 1.00>0A
+- $4A narrow path @C006  exits 1.00>47 4.00>49
+- $4B steep path @C017  exits 10.00>4C
+- $4C steep path @C025  exits 10.00>4D
+- $4D steep path @C033  exits 10.00>4E
+- $4E deep misty valley @C041  exits 3.00>4F 9.00>4D
+- $4F deep misty valley @C052  exits 4.00>4E 9.00>4A
+
+## Objects and characters (record address from $C063; location byte at +$10)
+
+- $00 player (Bilbo) @C11B holder=FF loc=01 flags=E0
+- $01 heavy rock door @C170 holder=FF loc=07,06 flags=81
+- $02 small curious key @C1AD holder=1F loc=0D flags=80
+- $03 curious map @C1D1 holder=3E loc=01 flags=80
+- $04 large key @C1BF holder=47 loc=05 flags=80
+- $05 round green door @C145 holder=FF loc=01,04 flags=80
+- $06 small insignificant crack @C1E6 holder=FF loc=0E,0F flags=80
+- $07 spider web @C205 holder=FF loc=1A,1C,1B,1D,32 flags=80
+- $08 red door @C224 holder=FF loc=1F,1E,20 flags=81
+- $09 fast black river @C24D holder=FF loc=42,43,19 flags=86
+- $0A goblins back door @C28D holder=FF loc=13,14 flags=80
+- $0B mountains side door @C2B5 holder=FF loc=2A,2B flags=01
+- $0C large trap door @C2DD holder=FF loc=20,21 flags=80
+- $0D magic door @C381 holder=FF loc=1E,1C flags=80
+- $0E short strong sword @C305 holder=FF loc=07 flags=94
+- $0F red key @C332 holder=42 loc=20 flags=80
+- $10 valuable golden ring @C31A holder=FF loc=3D flags=80
+- $11 goblins door @C344 holder=FF loc=10,0D flags=80
+- $12 rope @C366 holder=FF loc=07 flags=A0
+- $13 barrel @C3EE holder=FF loc=20 flags=84
+- $14 wine @C418 holder=13 loc=20 flags=82
+- $15 water @C454 holder=FF loc=00 flags=82
+- $16 black water @C469 holder=FF loc=00 flags=82
+- $17 water @C47E holder=FF loc=08,21,22,24,31,2D,11,17 flags=82
+- $18 black water @C49A holder=FF loc=19,42,43 flags=82
+- $19 bow @C4D5 holder=46 loc=23 flags=80
+- $1A strong arrow @C4EA holder=46 loc=23 flags=80
+- $1B window @C4FF holder=FF loc=0D,12 flags=80
+- $1C to @C521 holder=FF loc=10,1E flags=94
+- $1D sand @C534 holder=FF loc=0D flags=80
+- $1E trap door @C54C holder=1D loc=0D flags=81
+- $1F goblins cache @C567 holder=1E loc=0D flags=A0
+- $20 heavy curtain @C57F holder=FF loc=16 flags=80
+- $21 large cupboard @C597 holder=24 loc=16 flags=80
+- $22 food @C5B8 holder=21 loc=16 flags=80
+- $23 valuable treasure @C5CD holder=FF loc=29 flags=80
+- $24 wa @C5DF holder=20 loc=16 flags=A0
+- $25 wooden chest @C5F4 holder=FF loc=01 flags=80
+- $26 lunch @C663 holder=FF loc=00 flags=80
+- $27 strong portcullis @C678 holder=FF loc=21,22 flags=80
+- $28 stone @C68E holder=FF loc=2F flags=80
+- $29 wooden boat @C61B holder=FF loc=43 flags=A0
+- $2A fast river @C26D holder=FF loc=17,21,22 flags=86
+- $2B golden key @C19B holder=FF loc=4F flags=80
+- $3C red golden dragon @C133 holder=FF loc=29 flags=E0
+- $3D nasty goblin @C6A0 holder=FF loc=0F flags=E0
+- $3E gandalf @C3A0 holder=FF loc=01 flags=E0
+- $3F thorin @C3B2 holder=FF loc=01 flags=E0
+- $40 wood elf @C3CA holder=FF loc=1C flags=E0
+- $41 elrond @C3DC holder=FF loc=09 flags=E0
+- $42 butler @C430 holder=FF loc=20 flags=60
+- $43 vicious warg @C442 holder=FF loc=15 flags=E0
+- $44 gollum @C4B1 holder=FF loc=11 flags=E0
+- $45 hideous goblin @C6B8 holder=FF loc=3A flags=E0
+- $46 bard @C4C3 holder=FF loc=23 flags=E0
+- $47 hideous troll @C63F holder=FF loc=05 flags=E0
+- $48 vicious troll @C651 holder=FF loc=05 flags=E0
+- $49 horrible goblin @C6D0 holder=FF loc=12 flags=E0
+- $4A mean goblin @C6E8 holder=FF loc=38 flags=E0
+- $4B vicious goblin @C700 holder=FF loc=40 flags=E0
+- $4C disgusting goblin @C718 holder=FF loc=10 flags=E0
+
+## NPC state records ($CACB; id 0 = dormant slot filled by an event)
+
+- $CACB id 3E max 7 script $C8BA table $C8A1
+- $CAD2 id 3F max 2 script $C8EC table $C8E2
+- $CAD9 id 40 max 2 script $C91D table $C913
+- $CAE0 id 43 max 0 script $C928 table $C924
+- $CAE7 id 00 max 2 script $C950 table $C946
+- $CAEE id 41 max 2 script $C99A table $C990
+- $CAF5 id 44 max 1 script $C9F7 table $C9F0
+- $CAFC id 00 max 1 script $C9DE table $C9D7
+- $CB03 id 00 max 1 script $C9B8 table $C9B1
+- $CB0A id 47 max 1 script $CA3B table $CA34
+- $CB11 id 48 max 1 script $CA3B table $CA34
+- $CB18 id 3D max 1 script $C842 table $C82D
+- $CB1F id 45 max 1 script $C842 table $C82D
+- $CB26 id 4B max 1 script $C871 table $C834
+- $CB2D id 49 max 1 script $C895 table $C83B
+- $CB34 id 4A max 1 script $C895 table $C83B
+- $CB3B id 4C max 1 script $C895 table $C83B
+
+## Timers ($CA84; start, counter, fire handler, threshold, tick handler)
+
+- timer 0 $CA84: 02 00 fire $A5FB thr 00 tick $0000
+- timer 1 $CA8B: 02 00 fire $AA5C thr 00 tick $0000
+- timer 2 $CA92: 05 00 fire $AB10 thr 00 tick $0000
+- timer 3 $CA99: 02 00 fire $A4D9 thr 00 tick $0000
+- timer 4 $CAA0: 02 00 fire $A7AA thr 02 tick $A7AA
+- timer 5 $CAA7: 04 00 fire $AAD5 thr 01 tick $AAB3
+- timer 6 $CAAE: 00 00 fire $AAE0 thr 00 tick $0000
+- timer 7 $CAB5: 05 00 fire $AB0B thr 00 tick $0000
+- timer 8 $CABC: 04 00 fire $AB3A thr 03 tick $AB1F
+- timer 9 $CAC3: 05 00 fire $AA74 thr 01 tick $AA91

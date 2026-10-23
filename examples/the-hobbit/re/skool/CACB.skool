@@ -1,0 +1,92 @@
+; NPC states: 17 records of 7 bytes, $FF ends (saved)
+;
+; Record: +0 character id (0: dormant slot, an event stores the id: $C7AA
+; butler $42, $C7D9 Bard $46, $C7CE dragon $3C), +1 highest index for a random
+; choice, +2 address of the current script, +4 address of the behaviour table,
+; +6 spare. Run by $980E; the six goblin and troll records are listed in $A49C.
+@label=NpcStates
+g$CACB DEFB $3E,$07
+ $CACD DEFW $C8BA
+ $CACF DEFW $C8A1
+ $CAD1 DEFB $05
+@label=NpcThorin
+ $CAD2 DEFB $3F,$02
+ $CAD4 DEFW $C8EC
+ $CAD6 DEFW $C8E2
+ $CAD8 DEFB $06
+@label=NpcElf
+ $CAD9 DEFB $40,$02
+ $CADB DEFW $C91D
+ $CADD DEFW $C913
+ $CADF DEFB $01
+@label=NpcWarg
+ $CAE0 DEFB $43,$00
+ $CAE2 DEFW $C928
+ $CAE4 DEFW $C924
+ $CAE6 DEFB $00
+@label=NpcButler
+ $CAE7 DEFB $00,$02
+ $CAE9 DEFW $C950
+ $CAEB DEFW $C946
+ $CAED DEFB $01
+@label=NpcElrond
+ $CAEE DEFB $41,$02
+ $CAF0 DEFW $C99A
+ $CAF2 DEFW $C990
+ $CAF4 DEFB $05
+@label=NpcGollum
+ $CAF5 DEFB $44,$01
+ $CAF7 DEFW $C9F7
+ $CAF9 DEFW $C9F0
+ $CAFB DEFB $03
+@label=NpcBard
+ $CAFC DEFB $00,$01
+ $CAFE DEFW $C9DE
+ $CB00 DEFW $C9D7
+ $CB02 DEFB $03
+@label=NpcDragon
+ $CB03 DEFB $00,$01
+ $CB05 DEFW $C9B8
+ $CB07 DEFW $C9B1
+ $CB09 DEFB $00
+@label=NpcTroll1
+ $CB0A DEFB $47,$01
+ $CB0C DEFW $CA3B
+ $CB0E DEFW $CA34
+ $CB10 DEFB $01
+@label=NpcTroll2
+ $CB11 DEFB $48,$01
+ $CB13 DEFW $CA3B
+ $CB15 DEFW $CA34
+ $CB17 DEFB $01
+@label=NpcGoblinA
+ $CB18 DEFB $3D,$01
+ $CB1A DEFW $C842
+ $CB1C DEFW $C82D
+ $CB1E DEFB $00
+@label=NpcGoblinB
+ $CB1F DEFB $45,$01
+ $CB21 DEFW $C842
+ $CB23 DEFW $C82D
+ $CB25 DEFB $00
+@label=NpcGoblinC
+ $CB26 DEFB $4B,$01
+ $CB28 DEFW $C871
+ $CB2A DEFW $C834
+ $CB2C DEFB $00
+@label=NpcGoblinD
+ $CB2D DEFB $49,$01
+ $CB2F DEFW $C895
+ $CB31 DEFW $C83B
+ $CB33 DEFB $00
+@label=NpcGoblinE
+ $CB34 DEFB $4A,$01
+ $CB36 DEFW $C895
+ $CB38 DEFW $C83B
+ $CB3A DEFB $00
+@label=NpcGoblinF
+ $CB3B DEFB $4C,$01
+ $CB3D DEFW $C895
+ $CB3F DEFW $C83B
+ $CB41 DEFB $00
+ $CB42 DEFB $FF

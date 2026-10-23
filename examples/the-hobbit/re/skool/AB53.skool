@@ -19,63 +19,123 @@
 ; .
 ; Flags and slots are matched in $71F3/$722E; their exact meaning is open.
 @label=CommandTable
+@keep
 w$AB53 DEFW $0480,$0000,$0000,$02DE ; 1: north - -
+@keep
  $AB5B DEFW $0607,$0000,$0000,$02DE ; 2: south - -
+@keep
  $AB63 DEFW $01FE,$0000,$0000,$02DE ; 3: east - -
+@keep
  $AB6B DEFW $0779,$0000,$0000,$02DE ; 4: west - -
+@keep
  $AB73 DEFW $0485,$0000,$0000,$02DE ; 5: northeast - -
+@keep
  $AB7B DEFW $048E,$0000,$0000,$02DE ; 6: northwest - -
+@keep
  $AB83 DEFW $060C,$0000,$0000,$02DE ; 7: southeast - -
+@keep
  $AB8B DEFW $0615,$0000,$0000,$02DE ; 8: southwest - -
+@keep
  $AB93 DEFW $0725,$0000,$0000,$02DE ; 9: up - -
+@keep
  $AB9B DEFW $01C4,$0000,$0000,$02DE ; 10: down - -
+@keep
  $ABA3 DEFW $E658,$0000,$0796,$4000 ; 11: strike - with
+@keep
  $ABAB DEFW $8134,$0000,$0000,$4000 ; 12: close - -
+@keep
  $ABB3 DEFW $81E8,$0000,$8000,$0000 ; 13: drop - -
+@keep
  $ABBB DEFW $C1E8,$0000,$0378,$4000 ; 14: drop - in
+@keep
  $ABC3 DEFW $E073,$0000,$4796,$4000 ; 15: attack - with
+@keep
  $ABCB DEFW $84B4,$0000,$0000,$4000 ; 16: open - -
+@keep
  $ABD3 DEFW $C508,$0000,$0378,$4000 ; 17: put - in
+@keep
  $ABDB DEFW $C508,$0000,$04AA,$4000 ; 18: put - on
+@keep
  $ABE3 DEFW $868C,$0000,$0000,$4000 ; 19: take - -
+@keep
  $ABEB DEFW $C68C,$04BF,$049C,$4000 ; 20: take out of
+@keep
  $ABF3 DEFW $C68C,$02B5,$0000,$4000 ; 21: take from -
+@keep
  $ABFB DEFW $968C,$249F,$0000,$4000 ; 22: take off -
+@keep
  $AC03 DEFW $0413,$1000,$0000,$4000 ; 23: look - -
+@keep
  $AC0B DEFW $8413,$26C1,$0000,$0000 ; 24: look through -
+@keep
  $AC13 DEFW $8413,$2043,$0000,$0000 ; 25: look across -
+@keep
  $AC1B DEFW $0392,$1000,$0000,$4000 ; 26: inventory - -
+@keep
  $AC23 DEFW $8202,$0000,$0000,$0000 ; 27: eat - -
+@keep
  $AC2B DEFW $823E,$0000,$0000,$4000 ; 28: examine - -
+@keep
  $AC33 DEFW $C2D4,$06D1,$1000,$6000 ; 29: give to -
+@keep
  $AC3B DEFW $82DE,$26C1,$0000,$0000 ; 30: go through -
+@keep
  $AC43 DEFW $822D,$8000,$0000,$0000 ; 31: enter - -
+@keep
  $AC4B DEFW $82DE,$A38E,$0000,$0000 ; 32: go into -
+@keep
  $AC53 DEFW $81E3,$0000,$0000,$0000 ; 33: drink - -
+@keep
  $AC5B DEFW $8228,$0000,$0000,$0000 ; 34: empty - -
+@keep
  $AC63 DEFW $C261,$0000,$0796,$4000 ; 35: fill - with
+@keep
  $AC6B DEFW $056C,$0000,$0000,$0000 ; 36: run - -
+@keep
  $AC73 DEFW $C3F2,$0000,$0796,$4000 ; 37: lock - with
+@keep
  $AC7B DEFW $C712,$0000,$0796,$4000 ; 38: unlock - with
+@keep
  $AC83 DEFW $9285,$0000,$4000,$0000 ; 39: follow - -
+@keep
  $AC8B DEFW $8772,$0000,$0000,$0000 ; 40: wear - -
+@keep
  $AC93 DEFW $86C8,$0000,$0000,$0000 ; 41: throw - -
+@keep
  $AC9B DEFW $C6C8,$0000,$2070,$0000 ; 42: throw - at
+@keep
  $ACA3 DEFW $C6C8,$0000,$0043,$4000 ; 43: throw - across
+@keep
  $ACAB DEFW $C6C8,$0000,$06C1,$4000 ; 44: throw - through
+@keep
  $ACB3 DEFW $80D3,$0000,$4000,$0000 ; 45: burn - -
+@keep
  $ACBB DEFW $C6CD,$0000,$06D1,$4000 ; 46: tie - to
+@keep
  $ACC3 DEFW $8178,$0000,$0000,$0000 ; 47: cut - -
+@keep
  $ACCB DEFW $80F4,$0000,$4000,$0000 ; 48: capture - -
+@keep
  $ACD3 DEFW $8500,$0000,$0000,$0000 ; 49: pull - -
+@keep
  $ACDB DEFW $867C,$0000,$0000,$4000 ; 50: swim - -
+@keep
  $ACE3 DEFW $8720,$0000,$8000,$4000 ; 51: untie - -
+@keep
  $ACEB DEFW $812F,$0000,$0000,$4000 ; 52: climb - -
+@keep
  $ACF3 DEFW $8690,$26D1,$4000,$4000 ; 53: talk to -
+@keep
  $ACFB DEFW $812F,$238E,$0000,$4000 ; 54: climb into -
+@keep
  $AD03 DEFW $812F,$24BF,$049C,$8000 ; 55: climb out of
+@keep
  $AD0B DEFW $93A1,$24B0,$0000,$0000 ; 56: jump onto -
+@keep
  $AD13 DEFW $81A9,$0000,$0000,$4000 ; 57: dig - -
+@keep
  $AD1B DEFW $8594,$0000,$4000,$4000 ; 58: shoot - -
+@keep
  $AD23 DEFW $810D,$0000,$8000,$4000 ; 59: carry - -
+@keep
  $AD2B DEFW $0000                   ; End of the table

@@ -1,0 +1,5 @@
+; Mirkwood spider place: start timer 3 (location $1A)
+@label=ArriveSpiderPlace
+c$C7B2 LD A,($CA92)  ;
+ $C7B5 LD ($CA93),A  ;
+ $C7B8 RET           ;

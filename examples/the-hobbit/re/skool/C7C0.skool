@@ -1,0 +1,16 @@
+; Elvenking cellar: start timer 9, wake the dragon slot and the Bard (location
+; $20)
+@label=ArriveCellar
+c$C7C0 LD A,$03      ;
+ $C7C2 LD ($CAC4),A  ;
+ $C7C5 LD HL,$C13A   ;
+ $C7C8 BIT 3,(HL)    ;
+ $C7CA JR NZ,$C7D1   ;
+ $C7CC LD A,$3C      ;
+ $C7CE LD ($CB03),A  ;
+*$C7D1 LD HL,$C4CA   ;
+ $C7D4 BIT 3,(HL)    ;
+ $C7D6 RET NZ        ;
+ $C7D7 LD A,$46      ;
+ $C7D9 LD ($CAFC),A  ;
+ $C7DC RET           ;

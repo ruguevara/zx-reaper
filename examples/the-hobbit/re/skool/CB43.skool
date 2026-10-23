@@ -1,0 +1,4 @@
+; Unused: 189 zero bytes
+;
+; Not referenced; between the saved NPC states and the picture table.
+s$CB43 DEFS $BD,$00

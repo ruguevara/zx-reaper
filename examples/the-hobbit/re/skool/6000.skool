@@ -11,30 +11,57 @@
 ; (print) and $6F47 (parse) read it; the words of one letter are contiguous and
 ; end where the next letter's begin.
 @label=Vocabulary
+@keep
 w$6000 DEFW $0000
+@keep
  $6002 DEFW $0040
+@keep
  $6004 DEFW $007C
+@keep
  $6006 DEFW $00E2
+@keep
  $6008 DEFW $017C
+@keep
  $600A DEFW $01F6
+@keep
  $600C DEFW $024F
+@keep
  $600E DEFW $02BD
+@keep
  $6010 DEFW $0309
+@keep
  $6012 DEFW $0373
+@keep
  $6014 DEFW $03A1
+@keep
  $6016 DEFW $03A5
+@keep
  $6018 DEFW $03B2
+@keep
  $601A DEFW $0424
+@keep
  $601C DEFW $045F
+@keep
  $601E DEFW $049C
+@keep
  $6020 DEFW $04CD
+@keep
  $6022 DEFW $050C
+@keep
  $6024 DEFW $0521
+@keep
  $6026 DEFW $0577
+@keep
  $6028 DEFW $068C
+@keep
  $602A DEFW $070D
+@keep
  $602C DEFW $0728
+@keep
  $602E DEFW $0751
+@keep
  $6030 DEFW $0000
+@keep
  $6032 DEFW $07A8
+@keep
  $6034 DEFW $0000

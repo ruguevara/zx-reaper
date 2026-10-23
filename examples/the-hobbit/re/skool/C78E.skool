@@ -1,0 +1,20 @@
+; Arrival handlers: (location id, routine address), ends with $FF
+;
+; After a move to a location, $8E24 looks up its id (destination, $8D9B) here
+; and calls the routine ($9B6C).
+@label=ArrivalHandlers
+b$C78E DEFB $16
+ $C78F DEFW $C7A4
+ $C791 DEFB $1A
+ $C792 DEFW $C7B2
+ $C794 DEFB $1D
+ $C795 DEFW $C7B9
+ $C797 DEFB $21
+ $C798 DEFW $C7EA
+ $C79A DEFB $02
+ $C79B DEFW $C7DD
+ $C79D DEFB $03
+ $C79E DEFW $C7DD
+ $C7A0 DEFB $20
+ $C7A1 DEFW $C7C0
+ $C7A3 DEFB $FF

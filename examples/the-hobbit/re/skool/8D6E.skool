@@ -5,31 +5,45 @@
 ; taken.
 @label=TreasureScores
 b$8D6E DEFB $04
+@keep
  $8D6F DEFW $0019
  $8D71 DEFB $07
+@keep
  $8D72 DEFW $0032
  $8D74 DEFB $0B
+@keep
  $8D75 DEFW $0019
  $8D77 DEFB $16
+@keep
  $8D78 DEFW $0019
  $8D7A DEFB $0D
+@keep
  $8D7B DEFW $004B
  $8D7D DEFB $41
+@keep
  $8D7E DEFW $0032
  $8D80 DEFB $1B
+@keep
  $8D81 DEFW $0019
  $8D83 DEFB $1C
+@keep
  $8D84 DEFW $0019
  $8D86 DEFB $1F
+@keep
  $8D87 DEFW $0032
  $8D89 DEFB $22
+@keep
  $8D8A DEFW $0064
  $8D8C DEFB $26
+@keep
  $8D8D DEFW $0019
  $8D8F DEFB $2A
+@keep
  $8D90 DEFW $0019
  $8D92 DEFB $2B
+@keep
  $8D93 DEFW $0032
  $8D95 DEFB $29
+@keep
  $8D96 DEFW $00C8
  $8D98 DEFB $FF

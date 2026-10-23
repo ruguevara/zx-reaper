@@ -1,0 +1,438 @@
+; NPC behaviour: tables of scripts and the scripts (all characters)
+;
+; Run by $980E / $9815 for each NPC record of $CACB, whose +2 is the current
+; script address and +4 its behaviour table. Table: 3-byte records (behaviour
+; id, script address), $FF ends; id 0 is the default, $0F the idle script, $1D
+; and $30 are looked up by command $0C and by events; $9A59 (command $0F) picks
+; entry 0..N at random.
+; .
+; Script command, first byte = op in the low nibble, bit 4: a second address
+; follows (taken on success), bit 5: erase the command after use, bit 6: not
+; interrupted by an order. Ops 0 and 2: verb, noun1, noun2 (4 bytes; run as a
+; typed command); 1 and 3: address of a routine + 1 pad byte ($9B6C); 4: verb
+; only (2 bytes); $C: switch to behaviour id (2 bytes); $E: jump to the address
+; (3 bytes); $F: choose entry at random, argument = highest index (2 bytes);
+; 5-9, $B, $D: 1 byte, restart the default behaviour (entry 0).
+@label=GoblinABehaviours
+b$C82D DEFB $00
+ $C82E DEFW $C842
+ $C830 DEFB $0F
+ $C831 DEFW $C89E
+ $C833 DEFB $FF
+@label=GoblinBBehaviours
+ $C834 DEFB $00
+ $C835 DEFW $C871
+ $C837 DEFB $0F
+ $C838 DEFW $C89E
+ $C83A DEFB $FF
+@label=GoblinCBehaviours
+ $C83B DEFB $00
+ $C83C DEFW $C895
+ $C83E DEFB $0F
+ $C83F DEFW $C89E
+ $C841 DEFB $FF
+@label=ScriptC842
+ $C842 DEFB $02,$10,$06,$FF
+@label=ScriptC846
+ $C846 DEFB $14,$30
+ $C848 DEFW $C84D
+ $C84A DEFB $0E
+ $C84B DEFW $C846
+@label=ScriptC84D
+ $C84D DEFB $04,$09
+@label=ScriptC84F
+ $C84F DEFB $14,$30
+ $C851 DEFW $C856
+ $C853 DEFB $0E
+ $C854 DEFW $C84F
+@label=ScriptC856
+ $C856 DEFB $04,$0A
+@label=ScriptC858
+ $C858 DEFB $14,$30
+ $C85A DEFW $C85F
+ $C85C DEFB $0E
+ $C85D DEFW $C858
+@label=ScriptC85F
+ $C85F DEFB $02,$0C,$06,$FF
+ $C863 DEFB $04,$02
+@label=ScriptC865
+ $C865 DEFB $14,$30
+ $C867 DEFW $C86C
+ $C869 DEFB $0E
+ $C86A DEFW $C865
+@label=ScriptC86C
+ $C86C DEFB $04,$01
+ $C86E DEFB $0E
+ $C86F DEFW $C842
+@label=ScriptC871
+ $C871 DEFB $04,$06
+@label=ScriptC873
+ $C873 DEFB $14,$30
+ $C875 DEFW $C87A
+ $C877 DEFB $0E
+ $C878 DEFW $C873
+@label=ScriptC87A
+ $C87A DEFB $04,$01
+@label=ScriptC87C
+ $C87C DEFB $14,$30
+ $C87E DEFW $C883
+ $C880 DEFB $0E
+ $C881 DEFW $C87C
+@label=ScriptC883
+ $C883 DEFB $04,$08
+@label=ScriptC885
+ $C885 DEFB $14,$30
+ $C887 DEFW $C88C
+ $C889 DEFB $0E
+ $C88A DEFW $C885
+@label=ScriptC88C
+ $C88C DEFB $04,$09
+@label=ScriptC88E
+ $C88E DEFB $14,$30
+ $C890 DEFW $C871
+ $C892 DEFB $0E
+ $C893 DEFW $C88E
+@label=ScriptC895
+ $C895 DEFB $04,$24
+ $C897 DEFB $04,$0F
+ $C899 DEFB $04,$30
+ $C89B DEFB $0E
+ $C89C DEFW $C895
+@label=ScriptC89E
+ $C89E DEFB $04,$30
+ $C8A0 DEFB $07
+@label=GandalfBehaviours
+ $C8A1 DEFB $00
+ $C8A2 DEFW $C8C2
+ $C8A4 DEFB $00
+ $C8A5 DEFW $C8D0
+ $C8A7 DEFB $00
+ $C8A8 DEFW $C8D4
+ $C8AA DEFB $00
+ $C8AB DEFW $C8DA
+ $C8AD DEFB $00
+ $C8AE DEFW $C8DE
+ $C8B0 DEFB $1D
+ $C8B1 DEFW $CA7F
+ $C8B3 DEFB $30
+ $C8B4 DEFW $CA73
+ $C8B6 DEFB $0F
+ $C8B7 DEFW $CA5E
+ $C8B9 DEFB $FF
+@label=ScriptC8BA
+ $C8BA DEFB $02,$1D,$03,$00
+ $C8BE DEFB $02,$10,$05,$FF
+@label=ScriptC8C2
+ $C8C2 DEFB $04,$24
+ $C8C4 DEFB $14,$13
+ $C8C6 DEFW $C8D0
+ $C8C8 DEFB $03
+ $C8C9 DEFW $A4F5
+ $C8CB DEFB $00
+ $C8CC DEFB $04,$0C
+ $C8CE DEFB $04,$1D
+@label=ScriptC8D0
+ $C8D0 DEFB $04,$24
+ $C8D2 DEFB $04,$0D
+@label=ScriptC8D4
+ $C8D4 DEFB $04,$24
+ $C8D6 DEFB $03
+ $C8D7 DEFW $A4FE
+ $C8D9 DEFB $00
+@label=ScriptC8DA
+ $C8DA DEFB $04,$24
+ $C8DC DEFB $04,$1D
+@label=ScriptC8DE
+ $C8DE DEFB $04,$10
+ $C8E0 DEFB $0F,$04
+@label=ThorinBehaviours
+ $C8E2 DEFB $00
+ $C8E3 DEFW $C8EC
+ $C8E5 DEFB $1D
+ $C8E6 DEFW $CA7F
+ $C8E8 DEFB $0F
+ $C8E9 DEFW $CA5E
+ $C8EB DEFB $FF
+@label=ScriptC8EC
+ $C8EC DEFB $12,$27,$00,$FF
+ $C8F0 DEFW $C8F5
+ $C8F2 DEFB $0E
+ $C8F3 DEFW $C8EC
+@label=ScriptC8F5
+ $C8F5 DEFB $12,$13,$02,$FF
+ $C8F9 DEFW $C8FF
+ $C8FB DEFB $23
+ $C8FC DEFW $A51C
+ $C8FE DEFB $00
+@label=ScriptC8FF
+ $C8FF DEFB $13
+ $C900 DEFW $A640
+ $C902 DEFB $00
+ $C903 DEFW $C90C
+ $C905 DEFB $04,$FF
+ $C907 DEFB $04,$24
+ $C909 DEFB $0E
+ $C90A DEFW $C8EC
+@label=ScriptC90C
+ $C90C DEFB $03
+ $C90D DEFW $A657
+ $C90F DEFB $00
+ $C910 DEFB $0E
+ $C911 DEFW $C8EC
+@label=ElfBehaviours
+ $C913 DEFB $00
+ $C914 DEFW $C91D
+ $C916 DEFB $0F
+ $C917 DEFW $C91D
+ $C919 DEFB $1D
+ $C91A DEFW $CA7F
+ $C91C DEFB $FF
+@label=ScriptC91D
+ $C91D DEFB $04,$30
+ $C91F DEFB $04,$24
+ $C921 DEFB $0E
+ $C922 DEFW $C91D
+@label=WargBehaviours
+ $C924 DEFB $00
+ $C925 DEFW $C928
+ $C927 DEFB $FF
+@label=ScriptC928
+ $C928 DEFB $14,$0F
+ $C92A DEFW $C92F
+ $C92C DEFB $0E
+ $C92D DEFW $C928
+@label=ScriptC92F
+ $C92F DEFB $14,$27
+ $C931 DEFW $C93A
+ $C933 DEFB $03
+ $C934 DEFW $A5D1
+ $C936 DEFB $00
+ $C937 DEFB $0E
+ $C938 DEFW $C928
+@label=ScriptC93A
+ $C93A DEFB $14,$24
+ $C93C DEFW $C941
+ $C93E DEFB $0E
+ $C93F DEFW $C928
+@label=ScriptC941
+ $C941 DEFB $04,$FF
+ $C943 DEFB $0E
+ $C944 DEFW $C928
+@label=ButlerBehaviours
+ $C946 DEFB $00
+ $C947 DEFW $C950
+ $C949 DEFB $0F
+ $C94A DEFW $C960
+ $C94C DEFB $1D
+ $C94D DEFW $CA7F
+ $C94F DEFB $FF
+@label=ScriptC950
+ $C950 DEFB $02,$26,$08,$0F
+ $C954 DEFB $02,$10,$08,$FF
+ $C958 DEFB $02,$0C,$08,$FF
+ $C95C DEFB $02,$25,$08,$0F
+@label=ScriptC960
+ $C960 DEFB $14,$30
+ $C962 DEFW $C967
+ $C964 DEFB $0E
+ $C965 DEFW $C960
+@label=ScriptC967
+ $C967 DEFB $02,$10,$13,$FF
+ $C96B DEFB $02,$21,$14,$FF
+ $C96F DEFB $04,$30
+ $C971 DEFB $02,$0C,$13,$FF
+ $C975 DEFB $02,$10,$0C,$FF
+ $C979 DEFB $04,$30
+ $C97B DEFB $02,$13,$13,$FF
+ $C97F DEFB $02,$2C,$13,$0C
+ $C983 DEFB $04,$30
+ $C985 DEFB $02,$0C,$0C,$FF
+ $C989 DEFB $14,$30
+ $C98B DEFW $C950
+ $C98D DEFB $0E
+ $C98E DEFW $C950
+@label=ElrondBehaviours
+ $C990 DEFB $00
+ $C991 DEFW $C9A0
+ $C993 DEFB $0F
+ $C994 DEFW $C9AA
+ $C996 DEFB $1D
+ $C997 DEFW $CA7F
+ $C999 DEFB $FF
+@label=ScriptC99A
+ $C99A DEFB $13
+ $C99B DEFW $A525
+ $C99D DEFB $00
+ $C99E DEFW $C9A4
+@label=ScriptC9A0
+ $C9A0 DEFB $03
+ $C9A1 DEFW $A9E5
+ $C9A3 DEFB $00
+@label=ScriptC9A4
+ $C9A4 DEFB $04,$FF
+ $C9A6 DEFB $14,$FF
+ $C9A8 DEFW $C99A
+@label=ScriptC9AA
+ $C9AA DEFB $14,$0F
+ $C9AC DEFW $C99A
+ $C9AE DEFB $0E
+ $C9AF DEFW $C9AA
+@label=DragonBehaviours
+ $C9B1 DEFB $00
+ $C9B2 DEFW $C9B8
+ $C9B4 DEFB $0F
+ $C9B5 DEFW $C9CD
+ $C9B7 DEFB $FF
+@label=ScriptC9B8
+ $C9B8 DEFB $13
+ $C9B9 DEFW $A6DC
+ $C9BB DEFB $00
+ $C9BC DEFW $C9C1
+ $C9BE DEFB $0E
+ $C9BF DEFW $C9B8
+@label=ScriptC9C1
+ $C9C1 DEFB $13
+ $C9C2 DEFW $A698
+ $C9C4 DEFB $00
+ $C9C5 DEFW $C9D2
+ $C9C7 DEFB $13
+ $C9C8 DEFW $A6C2
+ $C9CA DEFB $00
+ $C9CB DEFW $C9D2
+@label=ScriptC9CD
+ $C9CD DEFB $04,$2D
+ $C9CF DEFB $0E
+ $C9D0 DEFW $C9B8
+@label=ScriptC9D2
+ $C9D2 DEFB $04,$24
+ $C9D4 DEFB $0E
+ $C9D5 DEFW $C9B8
+@label=BardBehaviours
+ $C9D7 DEFB $00
+ $C9D8 DEFW $C9DE
+ $C9DA DEFB $0F
+ $C9DB DEFW $C9E9
+ $C9DD DEFB $FF
+@label=ScriptC9DE
+ $C9DE DEFB $43
+ $C9DF DEFW $A8AB
+ $C9E1 DEFB $00
+@label=BardCommandOp
+ $C9E2 DEFB $42
+@label=BardCommandVerb
+ $C9E3 DEFB $13
+@label=BardCommandArgs
+ $C9E4 DEFB $25,$FF
+ $C9E6 DEFB $0E
+ $C9E7 DEFW $C9DE
+@label=ScriptC9E9
+ $C9E9 DEFB $54,$3A
+ $C9EB DEFW $CA5E
+ $C9ED DEFB $0E
+ $C9EE DEFW $C9E9
+@label=GollumBehaviours
+ $C9F0 DEFB $00
+ $C9F1 DEFW $C9F7
+ $C9F3 DEFB $0F
+ $C9F4 DEFW $CA2B
+ $C9F6 DEFB $FF
+@label=ScriptC9F7
+ $C9F7 DEFB $13
+ $C9F8 DEFW $A8D2
+ $C9FA DEFB $00
+ $C9FB DEFW $CA10
+ $C9FD DEFB $43
+ $C9FE DEFW $A8F6
+ $CA00 DEFB $00
+ $CA01 DEFB $02,$0D,$10,$FF
+ $CA05 DEFB $14,$01
+ $CA07 DEFW $CA21
+@label=ScriptCA09
+ $CA09 DEFB $02,$13,$10,$FF
+ $CA0D DEFB $0E
+ $CA0E DEFW $C9F7
+@label=ScriptCA10
+ $CA10 DEFB $14,$01
+ $CA12 DEFW $CA26
+@label=ScriptCA14
+ $CA14 DEFB $13
+ $CA15 DEFW $A926
+ $CA17 DEFB $00
+ $CA18 DEFW $C9F7
+ $CA1A DEFB $02,$13,$10,$FF
+ $CA1E DEFB $0E
+ $CA1F DEFW $C9F7
+@label=ScriptCA21
+ $CA21 DEFB $04,$08
+ $CA23 DEFB $0E
+ $CA24 DEFW $CA09
+@label=ScriptCA26
+ $CA26 DEFB $04,$08
+ $CA28 DEFB $0E
+ $CA29 DEFW $CA14
+@label=ScriptCA2B
+ $CA2B DEFB $02,$28,$10,$FF
+ $CA2F DEFB $04,$24
+ $CA31 DEFB $0E
+ $CA32 DEFW $C9F7
+@label=TrollBehaviours
+ $CA34 DEFB $00
+ $CA35 DEFW $CA41
+ $CA37 DEFB $0F
+ $CA38 DEFW $CA5E
+ $CA3A DEFB $FF
+@label=ScriptCA3B
+ $CA3B DEFB $13
+ $CA3C DEFW $A9BD
+ $CA3E DEFB $00
+ $CA3F DEFW $CA3B
+@label=ScriptCA41
+ $CA41 DEFB $03
+ $CA42 DEFW $A94E
+ $CA44 DEFB $00
+ $CA45 DEFB $04,$FF
+ $CA47 DEFB $03
+ $CA48 DEFW $A94E
+ $CA4A DEFB $00
+ $CA4B DEFB $04,$FF
+ $CA4D DEFB $03
+ $CA4E DEFW $A94E
+ $CA50 DEFB $00
+ $CA51 DEFB $04,$FF
+ $CA53 DEFB $03
+ $CA54 DEFW $A94E
+ $CA56 DEFB $00
+ $CA57 DEFB $03
+ $CA58 DEFW $A971
+ $CA5A DEFB $00
+ $CA5B DEFB $0E
+ $CA5C DEFW $CA41
+@label=ScriptCA5E
+ $CA5E DEFB $54,$0F
+ $CA60 DEFW $CA6B
+ $CA62 DEFB $54,$0F
+ $CA64 DEFW $CA72
+ $CA66 DEFB $44,$24
+ $CA68 DEFB $0E
+ $CA69 DEFW $CA5E
+@label=ScriptCA6B
+ $CA6B DEFB $54,$27
+ $CA6D DEFW $CA72
+ $CA6F DEFB $0E
+ $CA70 DEFW $CA5E
+@label=ScriptCA72
+ $CA72 DEFB $07
+@label=ScriptCA73
+ $CA73 DEFB $14,$1E
+ $CA75 DEFW $CA7A
+ $CA77 DEFB $04,$24
+ $CA79 DEFB $07
+@label=ScriptCA7A
+ $CA7A DEFB $04,$FF
+ $CA7C DEFB $0E
+ $CA7D DEFW $CA73
+@label=ScriptCA7F
+ $CA7F DEFB $03
+ $CA80 DEFW $A4DF
+ $CA82 DEFB $00
+ $CA83 DEFB $07
