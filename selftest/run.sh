@@ -1,5 +1,5 @@
 #!/bin/sh
-# End-to-end check of the kit on the fixture game (selftest/demo.asm):
+# End-to-end check of zx-reaper on the fixture game (selftest/demo.asm):
 # init -> identical build -> behaviour test -> reclassify -> relocate ->
 # shift test -> export to asm modules -> identical build again.
 # Usage: selftest/run.sh [WORKDIR]   (default: selftest/out/proj)
@@ -21,8 +21,15 @@ echo "== reclassify the data area and the jump table"
 python3 tools/zxq.py reclassify "$here/data-area.ctl"
 python3 tools/zxq.py reclassify "$here/jump-table.ctl"
 echo "== label the self-modified operand, as an agent would"
-sed -i 's/^ \$80B1 LD A,\$00/@label=SMC_SCORE\n&/; s/^ \$80B4 LD (\$80B2),A/@isub=LD (SMC_SCORE+1),A\n&/' re/skool/80A6.skool
-sed -i 's/^ \$8138 LD A,(\$80B2)/@isub=LD A,(SMC_SCORE+1)\n&/' re/skool/812E.skool
+python3 - <<'PY'
+def above(path, line, directive):
+    s = open(path).read()
+    assert line in s, line
+    open(path, 'w').write(s.replace(line, directive + '\n' + line, 1))
+above('re/skool/80A6.skool', ' $80B1 LD A,$00', '@label=SMC_SCORE')
+above('re/skool/80A6.skool', ' $80B4 LD ($80B2),A', '@isub=LD (SMC_SCORE+1),A')
+above('re/skool/812E.skool', ' $8138 LD A,($80B2)', '@isub=LD A,(SMC_SCORE+1)')
+PY
 make -s
 make -s shift-test
 make -s shift-test SHIFT=0x1234

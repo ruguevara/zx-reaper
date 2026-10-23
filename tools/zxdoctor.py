@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Check that the tools are installed and, inside a project, what is missing.
 
-  zxdoctor.py            run from the kit or a project root
+  zxdoctor.py            run from the zx-reaper root or a project root
 Exit status 1 when something required is missing; every problem comes with
 the command that fixes it.
 """
@@ -40,21 +40,19 @@ def tools():
         v = skoolkit.VERSION
         major = int(v.split('.')[0])
         report(major >= 9, 'SkoolKit %s (9.0 or later; tested with 10.1)' % v,
-               'pip install -U skoolkit')
+               'pip install -r <zx-reaper>/requirements.txt')
         report(skoolkit.CSimulator is not None, 'SkoolKit C simulator (fast runs)',
                'reinstall skoolkit from a wheel or with a C compiler', required=False)
     except ImportError:
-        report(False, 'SkoolKit', 'pip install skoolkit')
+        report(False, 'SkoolKit', 'pip install -r <zx-reaper>/requirements.txt')
     v = version(['sjasmplus', '--version'], r'v(\d+\.\d+\.\d+)')
     report(v is not None, 'sjasmplus %s' % (v or ''),
            'build from https://github.com/z00m128/sjasmplus (git submodule update --init; make)')
     report(shutil.which('make') is not None, 'make', 'install make')
     for tool in ('tap2sna.py', 'sna2skool.py', 'skool2asm.py', 'snapmod.py', 'rzxplay.py'):
-        report(shutil.which(tool) is not None, tool, 'pip install skoolkit (puts the scripts on PATH)')
-    report(shutil.which('zmakebas') is not None, 'zmakebas (self-test fixture only)',
-           'apt install zmakebas', required=False)
+        report(shutil.which(tool) is not None, tool, 'activate the venv with SkoolKit (zx-reaper README, Setup)')
     report(shutil.which('fuse') or shutil.which('fuse-sdl') or shutil.which('fuse-gtk'),
-           'Fuse emulator (playing, RZX recording)', 'apt install fuse-emulator-sdl', required=False)
+           'Fuse emulator (playing, RZX recording)', 'install Fuse: https://fuse-emulator.sourceforge.net', required=False)
 
 
 def project():
@@ -69,7 +67,7 @@ def project():
         exp = 'tests/expected/%s.hash' % os.path.splitext(os.path.basename(inp))[0]
         report(os.path.exists(exp), 'expected hashes for %s' % inp, 'make expected')
     for reg in ('re/questions.md', 're/findings.md'):
-        report(os.path.exists(reg), reg, 'copy it from the kit template/re/', required=False)
+        report(os.path.exists(reg), reg, 'copy it from zx-reaper template/re/', required=False)
 
 
 def main():
