@@ -1,2 +1,14 @@
-; Game status buffer entry at 85CD
+; Screen flash timer: never set to a non-zero value by the game
+;
+; If not 0, #R$89AD decrements it once per pass and floods the attribute buffer
+; of the room area (#R$5C00, 512 bytes) with the paper colour (new value * 8
+; and $38, black ink), hiding the room's colours for that pass. A value of N
+; therefore gives N flashes with paper colours N-1, N-2 ... 0 (modulo 8).
+; Only #R$87CA (writes 0) and #R$89AD (decrements) access it: no code sets it,
+; so the effect is not used in the original game (inferred from the references;
+; checked by poking the byte).
+; .
+; Observed: with the byte poked to 3 the room attributes were $10, $08 and $00 in
+; the next three passes, then the room was drawn normally.
+@label=FlashTimer
 g$85CD DEFB $00

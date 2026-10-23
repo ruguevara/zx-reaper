@@ -1,25 +1,44 @@
-; Routine at 898B
+; Draw the lives still in reserve as small walking Willys
 ;
-; Used by the routine at #R$89AD.
-c$898B LD A,($85CC)  ;
+; Draws one 16x16 Willy sprite for each life left in #R$85CC (none when it is
+; 0), from the left end of the bottom status row (screen row 21, column 0), two
+; columns apart. All figures show the same walking frame of the right-facing
+; Willy sprites (#R$9D00): frame = bits 2-3 of the tune step counter #R$85E1,
+; so the row of figures walks on the spot, changing frame every 4 steps of the
+; counter. The counter only advances while the tune is on, so with the tune off
+; the figures stand still (observed). The figures are drawn straight onto the
+; screen, not into the screen buffer, once per pass of the frame loop; their
+; colours are the status bar attributes (#R$9A00), which are never rewritten
+; by the loop.
+; .
+; The game starts with 7 figures. A death (#R$8B07) removes one after the death
+; flash; when none is left, the next death is the game over.
+; .
+; Hardware: writes the screen bitmap.
+@equ=LIVES_SCREEN=$50A0
+@label=DrawLives
+c$898B LD A,($85CC)  ; lives in reserve
  $898E LD HL,$50A0   ;
  $8991 OR A          ;
- $8992 RET Z         ;
- $8993 LD B,A        ;
-*$8994 LD C,$00      ;
+ $8992 RET Z         ; none: nothing to draw
+ $8993 LD B,A        ; B = figures left to draw
+@label=DrawLives_Loop
+*$8994 LD C,$00      ; DrawSprite mode 0: replace
  $8996 PUSH HL       ;
  $8997 PUSH BC       ;
  $8998 LD A,($85E1)  ;
  $899B RLCA          ;
  $899C RLCA          ;
  $899D RLCA          ;
- $899E AND $60       ;
+@isub=AND LIFE_FRAME_MASK
+ $899E AND $60       ; frame offset 0, $20, $40 or $60 from bits 2-3
  $89A0 LD E,A        ;
- $89A1 LD D,$9D      ;
+@isub=LD D,WILLY_SPRITE_PAGE
+ $89A1 LD D,$9D      ; DE = Willy facing right, frame 0-3
  $89A3 CALL $9456    ;
  $89A6 POP BC        ;
  $89A7 POP HL        ;
- $89A8 INC HL        ;
+ $89A8 INC HL        ; next figure two columns to the right
  $89A9 INC HL        ;
  $89AA DJNZ $8994    ;
  $89AC RET           ;

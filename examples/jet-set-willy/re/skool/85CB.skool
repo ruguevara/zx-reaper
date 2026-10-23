@@ -1,2 +1,15 @@
-; Game status buffer entry at 85CB
+; Pass counter: frames of the game loop, modulo 256
+;
+; Incremented once at the end of every pass of the frame loop (#R$89AD, $8A49).
+; Each time it wraps from $FF to 0 the clock advances by one minute (#R$857F),
+; so a game minute is 256 passes (about 19 seconds with the tune on and 17
+; with it off, see #R$89AD). The low bits also drive animations: the colour of
+; the flashing items (#R$93D1), the guard figure in the Master Bedroom
+; (#R$9534) and the toilet (#R$959A). Cleared by #R$87CA at a new game and by
+; #R$9584 when the ending stage 3 starts (so the toilet animation starts in
+; step).
+; .
+; Observed: the clock changes from 7:00am to 7:01am 256 passes after the counter
+; was 0, and with the counter poked to $FF the minute advances in the next pass.
+@label=PassCounter
 g$85CB DEFB $00

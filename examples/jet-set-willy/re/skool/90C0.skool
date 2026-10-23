@@ -1,108 +1,156 @@
-; Routine at 90C0
+; Move the entities of the room by one step
 ;
-; Used by the routine at #R$89AD.
+; Walks the entity buffer (#R$8100: 8 bytes per entity, an entry whose byte +0 is $FF ends the list) and moves
+; every entity one step. #R$89AD calls it once per pass of the frame loop, before Willy is moved; a pass takes
+; about 4 frames (F82). The entity type is in bits 0-2 of byte +0 and only bits 0-1 are tested here. Field use
+; (see also #R$A000 and #R$91BE):
+; .
+; Type 0 (empty entry) and type 4 (arrow, which #R$91BE moves itself): nothing here (type 4 reads as 0).
+; Types 5-7 are moved like 1-3 and drawn like 1-2 (no room uses them).
+; .
+; Type 1, horizontal guardian (#R$9133): byte +0 bit 7 = direction (1 = right), bits 5-6 = animation phase. Every
+; pass the phase counts down (going left) or up (going right) modulo 4; when it wraps the guardian steps one column
+; (byte +2 bits 0-4, minus or plus 1), so it walks one column every 4 passes. At the end of its beat (column =
+; byte +6 going left, = byte +7 going right) it turns instead of stepping: byte +0 becomes $81 (right, phase 0)
+; or $61 (left, phase 3). Byte +2 bits 5-7 are not touched.
+; .
+; Type 2, vertical guardian (#R$917F): byte +0 bit 3 flips every pass and the animation phase (bits 5-7) goes up by
+; one when bit 3 or bit 4 is set after the flip, that is every pass when bit 4 is set and every second pass when it
+; is clear. The Y index (byte +3, twice the pixel row) goes up by the signed step in byte +4 every pass (wrapping
+; modulo 256). When Y reaches or passes the bottom limit (byte +7, unsigned compare) the step is negated; when it
+; reaches or passes the top limit (byte +6) Y is set to that limit and the step is negated.
+; .
+; Type 3, rope (#R$90D9): moves the swing position, byte +1. Bits 0-6 = distance from hanging straight (index into
+; #R$8300), bit 7 = side (0 = leaning right, 1 = leaning left). Byte +0 bit 7 = swing direction (0: from the right
+; side towards the left, 1: the other way). The distance changes by 2 per pass near the ends and by 4 near the
+; middle; when it equals byte +7 (the swing limit, $36) byte +0 bit 7 flips. About 45 passes from one end to the
+; other.
+; .
+; Checked against a Python model on 3000 random entity buffers (F81).
+; .
+; Hardware: none.
+@label=MoveEntities
 c$90C0 LD IX,$8100     ;
+@label=MoveEntities_Loop
 *$90C4 LD A,(IX+$00)   ;
- $90C7 CP $FF          ;
+@isub=CP ENTITY_END
+ $90C7 CP $FF          ; end of the list
  $90C9 RET Z           ;
- $90CA AND $03         ;
- $90CC JP Z,$91B6      ;
+@isub=AND ENTITY_MOVE_MASK
+ $90CA AND $03         ; type bits 0-1: 0 = empty or arrow
+ $90CC JP Z,$91B6      ; nothing to move
+@isub=CP ENTITY_HORIZONTAL
  $90CF CP $01          ;
  $90D1 JP Z,$9133      ;
+@isub=CP ENTITY_VERTICAL
  $90D4 CP $02          ;
  $90D6 JP Z,$917F      ;
- $90D9 BIT 7,(IX+$00)  ;
+@label=MoveEntities_Rope
+@isub=BIT ENTITY_DIR_BIT,(IX+$00)
+ $90D9 BIT 7,(IX+$00)  ; type 3: swing direction
  $90DD JR Z,$90FF      ;
- $90DF LD A,(IX+$01)   ;
+ $90DF LD A,(IX+$01)   ; swing position: bit 7 = side, bits 0-6 = distance
  $90E2 BIT 7,A         ;
  $90E4 JR Z,$90F5      ;
- $90E6 SUB $02         ;
+ $90E6 SUB $02         ; direction 1, left side: distance down by 2 (by 4 once it is below $14)
  $90E8 CP $94          ;
  $90EA JR NC,$911D     ;
  $90EC SUB $02         ;
  $90EE CP $80          ;
  $90F0 JR NZ,$911D     ;
- $90F2 XOR A           ;
+ $90F2 XOR A           ; middle reached: stored as 0 (right side, distance 0)
  $90F3 JR $911D        ;
-*$90F5 ADD A,$02       ;
+*$90F5 ADD A,$02       ; direction 1, right side: distance up by 2 (by 4 while below $12)
  $90F7 CP $12          ;
  $90F9 JR NC,$911D     ;
  $90FB ADD A,$02       ;
  $90FD JR $911D        ;
-*$90FF LD A,(IX+$01)   ;
+*$90FF LD A,(IX+$01)   ; direction 0
  $9102 BIT 7,A         ;
  $9104 JR NZ,$9115     ;
- $9106 SUB $02         ;
+ $9106 SUB $02         ; right side: distance down by 2 (by 4 once it is below $14)
  $9108 CP $14          ;
  $910A JR NC,$911D     ;
  $910C SUB $02         ;
  $910E OR A            ;
  $910F JR NZ,$911D     ;
- $9111 LD A,$80        ;
+ $9111 LD A,$80        ; middle reached: stored as $80 (left side, distance 0)
  $9113 JR $911D        ;
-*$9115 ADD A,$02       ;
+*$9115 ADD A,$02       ; left side: distance up by 2 (by 4 while below $12)
  $9117 CP $92          ;
  $9119 JR NC,$911D     ;
  $911B ADD A,$02       ;
-*$911D LD (IX+$01),A   ;
- $9120 AND $7F         ;
- $9122 CP (IX+$07)     ;
+*$911D LD (IX+$01),A   ; store the new swing position
+ $9120 AND $7F         ; distance only
+ $9122 CP (IX+$07)     ; swing limit reached?
  $9125 JP NZ,$91B6     ;
- $9128 LD A,(IX+$00)   ;
+ $9128 LD A,(IX+$00)   ; yes: flip the swing direction
  $912B XOR $80         ;
  $912D LD (IX+$00),A   ;
  $9130 JP $91B6        ;
-*$9133 BIT 7,(IX+$00)  ;
+@label=MoveEntities_Horizontal
+@isub=BIT ENTITY_DIR_BIT,(IX+$00)
+*$9133 BIT 7,(IX+$00)  ; type 1: direction
  $9137 JR NZ,$915C     ;
  $9139 LD A,(IX+$00)   ;
- $913C SUB $20         ;
- $913E AND $7F         ;
+@isub=SUB ENTITY_PHASE_STEP
+ $913C SUB $20         ; going left: phase down by one
+ $913E AND $7F         ; direction bit stays clear
  $9140 LD (IX+$00),A   ;
- $9143 CP $60          ;
+ $9143 CP $60          ; phase 3 means it wrapped from 0: step
  $9145 JR C,$91B6      ;
- $9147 LD A,(IX+$02)   ;
+ $9147 LD A,(IX+$02)   ; column
+@isub=AND COLUMN_MASK
  $914A AND $1F         ;
- $914C CP (IX+$06)     ;
+ $914C CP (IX+$06)     ; left end of the beat?
  $914F JR Z,$9156      ;
- $9151 DEC (IX+$02)    ;
+ $9151 DEC (IX+$02)    ; no: one column left
  $9154 JR $91B6        ;
-*$9156 LD (IX+$00),$81 ;
+@isub=LD (IX+$00),ENTITY_GO_RIGHT
+*$9156 LD (IX+$00),$81 ; yes: turn right, phase 0
  $915A JR $91B6        ;
-*$915C LD A,(IX+$00)   ;
+*$915C LD A,(IX+$00)   ; going right: phase up by one
+@isub=ADD A,ENTITY_PHASE_STEP
  $915F ADD A,$20       ;
  $9161 OR $80          ;
  $9163 LD (IX+$00),A   ;
- $9166 CP $A0          ;
+ $9166 CP $A0          ; phase 0 means it wrapped from 3: step (phase 1-3 give $A1 or more)
  $9168 JR NC,$91B6     ;
- $916A LD A,(IX+$02)   ;
+ $916A LD A,(IX+$02)   ; column
+@isub=AND COLUMN_MASK
  $916D AND $1F         ;
- $916F CP (IX+$07)     ;
+ $916F CP (IX+$07)     ; right end of the beat?
  $9172 JR Z,$9179      ;
- $9174 INC (IX+$02)    ;
+ $9174 INC (IX+$02)    ; no: one column right
  $9177 JR $91B6        ;
-*$9179 LD (IX+$00),$61 ;
+@isub=LD (IX+$00),ENTITY_GO_LEFT
+*$9179 LD (IX+$00),$61 ; yes: turn left, phase 3
  $917D JR $91B6        ;
-*$917F LD A,(IX+$00)   ;
- $9182 XOR $08         ;
+@label=MoveEntities_Vertical
+*$917F LD A,(IX+$00)   ; type 2
+ $9182 XOR $08         ; bit 3 flips every pass
  $9184 LD (IX+$00),A   ;
- $9187 AND $18         ;
+ $9187 AND $18         ; bits 3-4 set: phase up by one
  $9189 JR Z,$9193      ;
  $918B LD A,(IX+$00)   ;
+@isub=ADD A,ENTITY_PHASE_STEP
  $918E ADD A,$20       ;
  $9190 LD (IX+$00),A   ;
-*$9193 LD A,(IX+$03)   ;
+*$9193 LD A,(IX+$03)   ; Y index plus step
  $9196 ADD A,(IX+$04)  ;
  $9199 LD (IX+$03),A   ;
- $919C CP (IX+$07)     ;
+ $919C CP (IX+$07)     ; bottom limit reached or passed: reverse
  $919F JR NC,$91AE     ;
- $91A1 CP (IX+$06)     ;
- $91A4 JR Z,$91A8      ;
- $91A6 JR NC,$91B6     ;
-*$91A8 LD A,(IX+$06)   ;
+ $91A1 CP (IX+$06)     ; top limit
+ $91A4 JR Z,$91A8      ; at the top limit: clamp and reverse
+ $91A6 JR NC,$91B6     ; between the limits: nothing to do
+*$91A8 LD A,(IX+$06)   ; Y := top limit
  $91AB LD (IX+$03),A   ;
-*$91AE LD A,(IX+$04)   ;
+*$91AE LD A,(IX+$04)   ; step := -step
  $91B1 NEG             ;
  $91B3 LD (IX+$04),A   ;
+@label=MoveEntities_Next
+@isub=LD DE,ENTITY_SIZE
 *$91B6 LD DE,$0008     ;
  $91B9 ADD IX,DE       ;
  $91BB JP $90C4        ;

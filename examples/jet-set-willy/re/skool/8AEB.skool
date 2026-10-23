@@ -1,21 +1,39 @@
-; Routine at 8AEB
+; Cycle the colours of the whole screen one step
 ;
-; Used by the routines at #R$88AE and #R$89AD.
-c$8AEB LD HL,$5800   ;
+; Rewrites every one of the 768 attribute cells ($5800-$5AFF): ink and paper
+; both go up by 3 (modulo 8) and the bright bit is cleared, and the border is
+; set to the ink the first cell had before the step. Calling it repeatedly
+; makes the picture and border change colour. Used as the pause effect of the
+; game (#R$89AD, while it waits for a key; not called when the cheat is
+; active) and once per step of the title message scroll (#R$88AE).
+; .
+; Flash is kept, except that a cell with bright on and a paper that wraps past
+; 7 gets flash toggled by the carry of the paper addition. Observed with a call
+; of the routine on the cells $78, $F8 and $40, which became $93, $13 and $1B.
+; .
+; Hardware: reads and writes the screen attributes, writes the border (port
+; $FE).
+@label=CycleColours
+c$8AEB LD HL,$5800   ; first attribute cell
  $8AEE LD A,(HL)     ;
+@isub=AND INK_MASK
  $8AEF AND $07       ;
- $8AF1 OUT ($FE),A   ;
+ $8AF1 OUT ($FE),A   ; border = ink of the first cell (before the step)
+@label=CycleColours_Cell
 *$8AF3 LD A,(HL)     ;
  $8AF4 ADD A,$03     ;
- $8AF6 AND $07       ;
+@isub=AND INK_MASK
+ $8AF6 AND $07       ; new ink
  $8AF8 LD D,A        ;
  $8AF9 LD A,(HL)     ;
- $8AFA ADD A,$18     ;
- $8AFC AND $B8       ;
+@isub=ADD A,3*PAPER
+ $8AFA ADD A,$18     ; paper + 3
+@isub=AND $FF-INK_MASK-BRIGHT
+ $8AFC AND $B8       ; keep flash and paper, clear bright and ink
  $8AFE OR D          ;
  $8AFF LD (HL),A     ;
  $8B00 INC HL        ;
  $8B01 LD A,H        ;
- $8B02 CP $5B        ;
+ $8B02 CP $5B        ; until the address reaches $5B00
  $8B04 JR NZ,$8AF3   ;
  $8B06 RET           ;

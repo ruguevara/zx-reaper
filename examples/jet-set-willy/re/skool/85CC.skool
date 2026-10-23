@@ -1,2 +1,12 @@
-; Game status buffer entry at 85CC
+; Lives in reserve
+;
+; Set to 7 by #R$87CA at a new game. #R$898B shows one small Willy for each
+; one. When Willy is killed the death flash plays (#R$8B07, $8C01) and then, if
+; this is not 0, it is decremented and Willy restarts the room; if it is 0 the
+; game over scene follows. So a game allows 8 deaths in all: the 8th ends it
+; (observed with random keys from the Bathroom snapshot: the byte went 7, 6, 5,
+; 4, 3, 2, 1, 0 after each of seven deaths, and the eighth death ran the game
+; over scene). Nothing adds a life. Also used by the in-game tune: the fewer
+; lives, the lower the notes (#R$865F).
+@label=LivesLeft
 g$85CC DEFB $00

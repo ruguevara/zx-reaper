@@ -1,44 +1,104 @@
-; Routine at 89AD
+; The frame loop: one pass of the game
 ;
-; Used by the routines at #R$88AE and #R$8B07.
-c$89AD CALL $898B      ;
- $89B0 LD HL,$5E00     ;
- $89B3 LD DE,$5C00     ;
+; Entered by JP with an empty stack (SP=$5BFE) from the room entry (#R$8912), from
+; the death handler (#R$8B07) and from the checks at the end of the pass, and
+; never returns. One pass takes about 262,000 T states with the tune on (230,000
+; with it off), i.e. 13.4 passes per second on a 3.5 MHz Spectrum, nearly all of
+; it in the four block copies. Nothing waits for the screen: interrupts have been
+; off since the loader (#R$8400), so the game speed is just the speed of the
+; loop (see the details in the finding register).
+; .
+; One pass, in order:
+; .
+; 1. Draw the lives in reserve (#R$898B) straight onto the screen.
+; .
+; 2. Copy the empty room (attributes #R$5E00, bitmap #R$7000) over the work
+; buffers #R$5C00 and #R$6000.
+; .
+; 3. Move the entities (#R$90C0); move Willy (#R$8DD3) unless the ending stage
+; (#R$85DF) is 3; leave through the top if his Y reached $E1 or more
+; (#R$94B0); mark his cells, test for nasties and draw him (#R$95C8, also not
+; in stage 3); in stage 2 test for the toilet (#R$9584); room events of the
+; Master Bedroom and Bathroom (#R$9534); draw the entities and test them against
+; Willy (#R$91BE); animate the conveyor (#R$94F9); draw and collect the items
+; (#R$93D1). Any of these can end the pass early by killing Willy (#R$90B6 jumps
+; to $89F5 with #R$85D1 = $FF).
+; .
+; 4. Copy the work bitmap $6000 (top two thirds) to the screen. Stages 2 and 3 set
+; bit 0 of Willy's animation frame #R$85D2. If the screen flash timer #R$85CD
+; is not 0, fill the work attributes with a paper colour. Copy the work
+; attributes to the screen.
+; .
+; 5. Print the items count (#R$857C, at $5070) and the clock (#R$857F, at $5079).
+; .
+; 6. Count the pass (#R$85CB). When it wraps, advance the clock by a minute;
+; 12:59pm going to 1:00 ends the game by a jump to #R$87CA.
+; .
+; 7. Keys: CAPS SHIFT and SPACE together jump to the title screen (#R$87CA). The
+; idle counter #R$85E0 is incremented; when it wraps to 0, or when a key of the
+; A S D F G row is down, the loop waits (pause) until any key of the other
+; rows is pressed, cycling the screen colours about once a second (#R$8AEB)
+; unless the cheat is on. It then goes on to #R$8B07 (after a pause, to restore
+; the status bar and border) or #R$8B17 (death check, tune, cheat keys), which
+; ends by jumping back here.
+; .
+; The clock text is " 7:00a" (hours tens digit or blank, hours units, colon, minutes
+; tens, minutes units, letter a or p). The minutes carry into the hours, the
+; hours go 9, 10, 11, 12 and then 1: at 12 followed by 1 the letter changes
+; from a to p, and 12 followed by 1 with p ends the game.
+; .
+; Hardware: writes the screen bitmap and attributes (the blocks are copied with
+; LDIR), reads the keyboard ports $FEFE, $7FFE, $FDFE and the half rows
+; selected by high byte $02, writes the border while paused.
+@equ=ITEMS_SCREEN=$5070
+@equ=CLOCK_SCREEN=$5079
+@label=FrameLoop
+c$89AD CALL $898B      ; lives in reserve
+ $89B0 LD HL,$5E00     ; empty-room attributes ...
+ $89B3 LD DE,$5C00     ; ... to the work attributes
+@isub=LD BC,ROOM_ATTRS_SIZE
  $89B6 LD BC,$0200     ;
  $89B9 LDIR            ;
- $89BB LD HL,$7000     ;
- $89BE LD DE,$6000     ;
+ $89BB LD HL,$7000     ; empty-room bitmap ...
+ $89BE LD DE,$6000     ; ... to the work bitmap
+@isub=LD BC,ROOM_BITMAP_SIZE
  $89C1 LD BC,$1000     ;
  $89C4 LDIR            ;
- $89C6 CALL $90C0      ;
+ $89C6 CALL $90C0      ; move the entities
  $89C9 LD A,($85DF)    ;
- $89CC CP $03          ;
- $89CE CALL NZ,$8DD3   ;
+@isub=CP STAGE_AT_TOILET
+ $89CC CP $03          ; stage 3: Willy is not moved
+ $89CE CALL NZ,$8DD3   ; move Willy (keys, jump, fall)
  $89D1 LD A,($85CF)    ;
- $89D4 CP $E1          ;
- $89D6 CALL NC,$94B0   ;
+@isub=CP WILLY_Y_ABOVE_TOP
+ $89D4 CP $E1          ; Y index wrapped past the top of the room?
+ $89D6 CALL NC,$94B0   ; leave through the top
  $89D9 LD A,($85DF)    ;
+@isub=CP STAGE_AT_TOILET
  $89DC CP $03          ;
- $89DE CALL NZ,$95C8   ;
+ $89DE CALL NZ,$95C8   ; mark Willy's cells, test nasties, draw him
  $89E1 LD A,($85DF)    ;
+@isub=CP STAGE_RUN_TO_TOILET
  $89E4 CP $02          ;
- $89E6 CALL Z,$9584    ;
- $89E9 CALL $9534      ;
- $89EC CALL $91BE      ;
- $89EF CALL $94F9      ;
- $89F2 CALL $93D1      ;
+ $89E6 CALL Z,$9584    ; stage 2: has he reached the toilet?
+ $89E9 CALL $9534      ; Master Bedroom and Bathroom events
+ $89EC CALL $91BE      ; draw the entities, test them against Willy
+ $89EF CALL $94F9      ; animate the conveyor
+ $89F2 CALL $93D1      ; draw and collect the items
 ; This entry point is used by the routine at #R$90B6.
-*$89F5 LD HL,$6000     ;
- $89F8 LD DE,$4000     ;
+@label=FrameLoop_Present
+*$89F5 LD HL,$6000     ; work bitmap ...
+ $89F8 LD DE,$4000     ; ... to the screen
+@isub=LD BC,ROOM_BITMAP_SIZE
  $89FB LD BC,$1000     ;
  $89FE LDIR            ;
  $8A00 LD A,($85DF)    ;
  $8A03 AND $02         ;
- $8A05 RRCA            ;
+ $8A05 RRCA            ; 1 in stages 2 and 3, else 0
  $8A06 LD HL,$85D2     ;
  $8A09 OR (HL)         ;
- $8A0A LD (HL),A       ;
- $8A0B LD A,($85CD)    ;
+ $8A0A LD (HL),A       ; set bit 0 of Willy's animation frame
+ $8A0B LD A,($85CD)    ; screen flash timer (never set by the game)
  $8A0E OR A            ;
  $8A0F JR Z,$8A26      ;
  $8A11 DEC A           ;
@@ -46,87 +106,126 @@ c$89AD CALL $898B      ;
  $8A15 RLCA            ;
  $8A16 RLCA            ;
  $8A17 RLCA            ;
- $8A18 AND $38         ;
+@isub=AND PAPER_MASK
+ $8A18 AND $38         ; paper colour = timer * 8, black ink
  $8A1A LD HL,$5C00     ;
  $8A1D LD DE,$5C01     ;
+@isub=LD BC,ROOM_ATTRS_SIZE-1
  $8A20 LD BC,$01FF     ;
  $8A23 LD (HL),A       ;
- $8A24 LDIR            ;
-*$8A26 LD HL,$5C00     ;
- $8A29 LD DE,$5800     ;
+ $8A24 LDIR            ; flood the work attributes
+@label=FrameLoop_Attrs
+*$8A26 LD HL,$5C00     ; work attributes ...
+ $8A29 LD DE,$5800     ; ... to the screen
+@isub=LD BC,ROOM_ATTRS_SIZE
  $8A2C LD BC,$0200     ;
  $8A2F LDIR            ;
- $8A31 LD IX,$857F     ;
+ $8A31 LD IX,$857F     ; clock text
  $8A35 LD DE,$5079     ;
+@isub=LD C,CLOCK_LENGTH
  $8A38 LD C,$06        ;
- $8A3A CALL $9680      ;
- $8A3D LD IX,$857C     ;
+ $8A3A CALL $9680      ; print it
+ $8A3D LD IX,$857C     ; items collected digits
  $8A41 LD DE,$5070     ;
+@isub=LD C,ITEM_DIGITS
  $8A44 LD C,$03        ;
- $8A46 CALL $9680      ;
+ $8A46 CALL $9680      ; print them
  $8A49 LD A,($85CB)    ;
  $8A4C INC A           ;
- $8A4D LD ($85CB),A    ;
- $8A50 JR NZ,$8AAB     ;
+ $8A4D LD ($85CB),A    ; count the pass
+ $8A50 JR NZ,$8AAB     ; the clock advances only when the counter wraps
  $8A52 LD IX,$857F     ;
- $8A56 INC (IX+$04)    ;
+@isub=INC (IX+CLOCK_MINUTES_UNITS)
+ $8A56 INC (IX+$04)    ; minutes units
+@isub=LD A,(IX+CLOCK_MINUTES_UNITS)
  $8A59 LD A,(IX+$04)   ;
+@isub=CP ASCII_AFTER_NINE
  $8A5C CP $3A          ;
  $8A5E JR NZ,$8AAB     ;
- $8A60 LD (IX+$04),$30 ;
- $8A64 INC (IX+$03)    ;
+@isub=LD (IX+CLOCK_MINUTES_UNITS),ASCII_ZERO
+ $8A60 LD (IX+$04),$30 ; carry: units 0
+@isub=INC (IX+CLOCK_MINUTES_TENS)
+ $8A64 INC (IX+$03)    ; minutes tens
+@isub=LD A,(IX+CLOCK_MINUTES_TENS)
  $8A67 LD A,(IX+$03)   ;
+@isub=CP ASCII_SIX
  $8A6A CP $36          ;
  $8A6C JR NZ,$8AAB     ;
- $8A6E LD (IX+$03),$30 ;
- $8A72 LD A,(IX+$00)   ;
+@isub=LD (IX+CLOCK_MINUTES_TENS),ASCII_ZERO
+ $8A6E LD (IX+$03),$30 ; carry: tens 0, next hour
+@isub=LD A,(IX+CLOCK_HOURS_TENS)
+ $8A72 LD A,(IX+$00)   ; hours tens: blank or 1
+@isub=CP ASCII_ONE
  $8A75 CP $31          ;
- $8A77 JR NZ,$8A99     ;
- $8A79 INC (IX+$01)    ;
+ $8A77 JR NZ,$8A99     ; blank: hours 1-9
+@isub=INC (IX+CLOCK_HOURS_UNITS)
+ $8A79 INC (IX+$01)    ; hours 10, 11, 12
+@isub=LD A,(IX+CLOCK_HOURS_UNITS)
  $8A7C LD A,(IX+$01)   ;
- $8A7F CP $33          ;
+@isub=CP ASCII_THREE
+ $8A7F CP $33          ; 13 o'clock?
  $8A81 JR NZ,$8AAB     ;
+@isub=LD A,(IX+CLOCK_AM_PM)
  $8A83 LD A,(IX+$05)   ;
+@isub=CP ASCII_P
  $8A86 CP $70          ;
- $8A88 JP Z,$87CA      ;
- $8A8B LD (IX+$00),$20 ;
+ $8A88 JP Z,$87CA      ; 12:59p -> end of the game: back to the title
+@isub=LD (IX+CLOCK_HOURS_TENS),ASCII_SPACE
+ $8A8B LD (IX+$00),$20 ; hour 12 with letter a becomes " 1" ...
+@isub=LD (IX+CLOCK_HOURS_UNITS),ASCII_ONE
  $8A8F LD (IX+$01),$31 ;
- $8A93 LD (IX+$05),$70 ;
+@isub=LD (IX+CLOCK_AM_PM),ASCII_P
+ $8A93 LD (IX+$05),$70 ; ... and the letter changes from a to p
  $8A97 JR $8AAB        ;
-*$8A99 INC (IX+$01)    ;
+@label=FrameLoop_HourBlank
+*$8A99 INC (IX+$01)    ; hours 1-9
  $8A9C LD A,(IX+$01)   ;
+@isub=CP ASCII_AFTER_NINE
  $8A9F CP $3A          ;
  $8AA1 JR NZ,$8AAB     ;
- $8AA3 LD (IX+$01),$30 ;
+@isub=LD (IX+CLOCK_HOURS_UNITS),ASCII_ZERO
+ $8AA3 LD (IX+$01),$30 ; 9 -> 10
+@isub=LD (IX+CLOCK_HOURS_TENS),ASCII_ONE
  $8AA7 LD (IX+$00),$31 ;
-*$8AAB LD BC,$FEFE     ;
+@label=FrameLoop_Keys
+@isub=LD BC,KEYROW_CS_V
+*$8AAB LD BC,$FEFE     ; CAPS SHIFT row
  $8AAE IN A,(C)        ;
  $8AB0 LD E,A          ;
- $8AB1 LD B,$7F        ;
+@isub=LD B,KEYROW_SPACE_B>>8
+ $8AB1 LD B,$7F        ; SPACE row
  $8AB3 IN A,(C)        ;
  $8AB5 OR E            ;
- $8AB6 AND $01         ;
- $8AB8 JP Z,$87CA      ;
+ $8AB6 AND $01         ; bit 0 clear only if CAPS SHIFT and SPACE are both down
+ $8AB8 JP Z,$87CA      ; quit to the title
  $8ABB LD A,($85E0)    ;
  $8ABE INC A           ;
- $8ABF LD ($85E0),A    ;
- $8AC2 JR Z,$8AD1      ;
- $8AC4 LD B,$FD        ;
+ $8ABF LD ($85E0),A    ; idle counter
+ $8AC2 JR Z,$8AD1      ; wrapped: wait for a key by itself
+@isub=LD B,KEYROW_A_G_HI
+ $8AC4 LD B,$FD        ; A S D F G row: the pause keys
  $8AC6 IN A,(C)        ;
+@isub=AND KEYS_MASK
  $8AC8 AND $1F         ;
+@isub=CP NO_KEYS
  $8ACA CP $1F          ;
- $8ACC JR Z,$8B17      ;
- $8ACE LD DE,$0000     ;
-*$8AD1 LD B,$02        ;
+ $8ACC JR Z,$8B17      ; none down: on to the death check and tune
+ $8ACE LD DE,$0000     ; wait counter
+@label=FrameLoop_Wait
+@isub=LD B,KEYROW_NOT_A_G_HI
+*$8AD1 LD B,$02        ; every row except A-G
  $8AD3 IN A,(C)        ;
+@isub=AND KEYS_MASK
  $8AD5 AND $1F         ;
+@isub=CP NO_KEYS
  $8AD7 CP $1F          ;
- $8AD9 JR NZ,$8B07     ;
+ $8AD9 JR NZ,$8B07     ; a key: resume
  $8ADB INC E           ;
  $8ADC JR NZ,$8AD1     ;
  $8ADE INC D           ;
- $8ADF JR NZ,$8AD1     ;
+ $8ADF JR NZ,$8AD1     ; 65536 polls (about a second) per colour step
  $8AE1 LD A,($85E3)    ;
- $8AE4 CP $0A          ;
+@isub=CP CHEAT_ACTIVE
+ $8AE4 CP $0A          ; cheat on: no colour cycling
  $8AE6 CALL NZ,$8AEB   ;
  $8AE9 JR $8AD1        ;

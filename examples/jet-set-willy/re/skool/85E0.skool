@@ -1,2 +1,13 @@
-; Game status buffer entry at 85E0
+; Idle counter: passes since the last key or tune pass
+;
+; Incremented once per pass by #R$89AD ($8ABB). When it wraps to 0 (after 256
+; passes) the frame loop does not go on but waits for a key, as if paused
+; (#R$89AD, $8AD1). It is cleared in every pass in which the tune plays (#R$8B07,
+; $8B3D) and whenever Willy's movement code sees a left or right key or a jump
+; (#R$8DD3, $8F4E, $8F5B, $8F9A). The effect: with the tune off and no key
+; for 256 passes the game stops by itself. Cleared by #R$87CA.
+; .
+; Observed: with the tune off and no key pressed the loop stopped at the wait
+; after exactly 256 passes; with the tune on it never did.
+@label=IdleCounter
 g$85E0 DEFB $00

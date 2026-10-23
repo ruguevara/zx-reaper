@@ -1,2 +1,15 @@
-; Game status buffer entry at 85E2
+; Tune flags: bit 0 = tune key was down last pass, bit 1 = tune off
+;
+; The game tune is toggled by any key of the H J K L ENTER half row (#R$8B07,
+; $8B1F-$8B38). Bit 0 remembers that such a key was down in the previous pass,
+; so that holding the key toggles only once: the first pass with a key down
+; and bit 0 clear flips both bits (XOR 3), and a pass without a key clears bit
+; 0. Bit 1 set means the tune is off: the tune and the step counter #R$85E1
+; are skipped. #R$87CA sets bit 0 only (an ENTER held from the title screen
+; cannot toggle), so the tune is on at the first game and keeps its state
+; across new games.
+; .
+; Observed: with H pressed and released the byte went 0, 3, 2 and with a second
+; press (ENTER) 2, 1, 0; holding the key for several passes toggled once.
+@label=TuneFlags
 g$85E2 DEFB $00

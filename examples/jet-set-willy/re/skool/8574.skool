@@ -1,2 +1,7 @@
-; Message at 8574
+; Game over message, first word
+;
+; "Game" (4 characters), printed at screen row 6, column 10 by the game over
+; scene (#R$8B07, $8CCB) with #R$9680; "Over" follows at column 18 (#R$8578),
+; leaving the middle for the falling foot.
+@label=GameText
 t$8574 DEFM "Game"

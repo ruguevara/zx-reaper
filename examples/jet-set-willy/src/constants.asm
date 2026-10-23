@@ -97,3 +97,45 @@ PIXEL_LEFT               EQU 0x80 ; bit mask of the leftmost pixel of a byte
 PAPER_MASK               EQU 0x38 ; attribute bits 3-5: paper colour
 DRAW_COLLIDE             EQU 1 ; DrawSprite mode (value of C): draw with collision test, stop at the first overlapping pixel
 ENTITY_ATTR_MASK         EQU 0x0F ; entity byte +1 bits 0-3: ink (bits 0-2) and bright (bit 3) of the sprite
+KEYROW_CS_V              EQU 0xFEFE ; port that reads CAPS SHIFT Z X C V (bit 0 = CAPS SHIFT, 0 = pressed)
+KEYROW_SPACE_B           EQU 0x7FFE ; port that reads SPACE SYMBOL-SHIFT M N B (bit 0 = SPACE, 0 = pressed)
+KEYROW_A_G_HI            EQU 0xFD ; high byte of the port that reads A S D F G (the pause keys)
+KEYROW_NOT_A_G_HI        EQU 0x02 ; high byte of a port that reads every half row except A-G (a zero bit selects a row: bit 1 is the A-G row)
+KEYROW_Q_T               EQU 0xFBFE ; port that reads Q W E R T (bit 0 = Q ... bit 4 = T, 0 = pressed)
+KEYROW_P_Y               EQU 0xDFFE ; port that reads P O I U Y (bit 0 = P ... bit 4 = Y, 0 = pressed)
+KEYROW_0_9               EQU 0xEFFE ; port that reads 0 9 8 7 6 (bit 0 = 0 ... bit 4 = 6, 0 = pressed)
+KEYROW_H_ENTER           EQU 0xBFFE ; port that reads H J K L ENTER (bit 0 = ENTER, bit 4 = H, 0 = pressed)
+KEYS_MASK                EQU 0x1F ; the five key bits of a half row read
+NO_KEYS                  EQU 0x1F ; half row read (masked with KEYS_MASK) with no key pressed
+KEY_9_BIT                EQU 1 ; bit of the 0-9 half row that is key 9
+KEY_6_BIT                EQU 4 ; bit of the 0-9 half row that is key 6
+KEY_6_ROOM_BIT           EQU 0x20 ; teleport cheat: key 6 adds 32 to the room number (keys 1-5 add 1, 2, 4, 8, 16)
+ROOM_ATTRS_SIZE          EQU 0x200 ; bytes of attributes of the room area (screen rows 0-15)
+ROOM_BITMAP_SIZE         EQU 0x1000 ; bytes of bitmap of the room area (the top two thirds of the screen)
+WILLY_Y_ABOVE_TOP        EQU 0xE1 ; Willy Y index from which he has gone above the top of the room (Y is unsigned and wraps below 0)
+WILLY_KILLED             EQU 0xFF ; value of the Willy air/death state byte (85D1) that means Willy has been killed
+ASCII_ONE                EQU 0x31 ; ASCII code of the digit 1
+ASCII_THREE              EQU 0x33 ; ASCII code of the digit 3
+ASCII_SIX                EQU 0x36 ; ASCII code of the digit 6
+ASCII_SPACE              EQU 0x20 ; ASCII code of the space
+ASCII_P                  EQU 0x70 ; ASCII code of the letter p
+CLOCK_HOURS_TENS         EQU 0 ; offset in the clock text: tens digit of the hour (blank or 1)
+CLOCK_HOURS_UNITS        EQU 1 ; offset in the clock text: units digit of the hour
+CLOCK_MINUTES_TENS       EQU 3 ; offset in the clock text: tens digit of the minutes
+CLOCK_MINUTES_UNITS      EQU 4 ; offset in the clock text: units digit of the minutes
+CLOCK_AM_PM              EQU 5 ; offset in the clock text: letter a or p
+CLOCK_LENGTH             EQU 6 ; characters of the clock text
+ITEM_DIGITS              EQU 3 ; digits of the items collected count
+CHEAT_ACTIVE             EQU 10 ; value of the cheat progress byte when the whole key sequence has been typed
+TUNE_LENGTH_MASK         EQU 0x7E ; mask that turns the tune step counter into twice the note index (64 notes, 2 passes each)
+LIVES_FULL_PITCH         EQU 0x1C ; 4 * START_LIVES: the tune note gets 0x1C - 4 * lives added, so it is unchanged with a full set of lives
+LIFE_FRAME_MASK          EQU 0x60 ; mask of the animation frame offset (0, 0x20, 0x40, 0x60) of the Willy sprites shown as lives
+WILLY_SPRITE_PAGE        EQU 0x9D ; high byte of the Willy sprite page (right-facing frames at 0x9D00, left-facing at 0x9D80)
+TUNE_BEEP_LOOPS          EQU 3 ; outer loops of 256 beeper writes per note blip in the game
+FLASH_START_ATTR         EQU 0x47 ; first colour of the death flash: bright, white ink, black paper
+FLASH_END_ATTR           EQU 0x3F ; value after the last colour of the death flash (ink 0, bright) is passed
+GAME_OVER_STEPS          EQU 0xC4 ; game over: the foot position counter stops here (steps of 4, 49 steps)
+GAME_OVER_BARREL_INK     EQU 2 ; game over: ink (red) of the barrel cells
+THIRD_ATTRS_SIZE         EQU 0x100 ; bytes of attributes of one third of the screen (8 character rows)
+ROOM_FIRST_LANDING       EQU 0x1C ; room number of First Landing, where the cheat sequence is typed
+CHEAT_Y                  EQU 0xD0 ; Willy Y index required to type the cheat sequence (standing on the lowest floor)

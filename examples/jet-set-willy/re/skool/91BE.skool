@@ -1,37 +1,101 @@
-; Routine at 91BE
+; Draw the entities of the room and test them against Willy
 ;
-; Used by the routine at #R$89AD.
+; Walks the entity buffer (#R$8100, 8 bytes per entity, an entry whose byte +0 is $FF ends the list) and draws
+; every entity into the pixel buffer at $6000 and the attribute buffer at $5C00, on top of the room and of Willy,
+; who #R$95C8 has already drawn. The entity type is bits 0-2 of byte +0: 0 is skipped, 3 is the rope (#R$92A4),
+; 4 the arrow (#R$9237), anything else (1 and 2; 5-7 would be treated the same) a sprite guardian (#R$91D6). A
+; collision jumps to #R$90B7 (KillWilly), which abandons the frame update, so the entities after the one that hit
+; Willy are not drawn in that pass. Moving the entities is #R$90C0, except for the arrow, which moves here.
+; .
+; Guardian (types 1 and 2): +0 type and animation bits, +1 bits 0-2 ink, bit 3 bright, bits 5-7 frame mask,
+; +2 bits 0-4 column of the left cell, bits 5-7 frame offset, +3 Y index (twice the pixel row, as in #R$8200),
+; +5 sprite page. The sprite address is page * 256 + F with F = ((+0 AND +1) OR +2) AND $E0, so the frame number
+; is bits 5-7 (the mask in +1 decides how much of the animation bits of +0 selects the frame, the bits of +2 are
+; or-ed in). First the attributes: the 2 x 2 cells under the sprite (2 x 3 when the Y index is not a multiple of
+; 16) get the ink and bright bits of +1, keeping the paper of the background and clearing flash. Then
+; #R$9456 draws the sprite into the $6000 buffer with the collision test (C = 1): any lit pixel already there
+; (Willy, but also the room tiles) kills Willy (F83).
+; .
+; Arrow (type 4, #R$9237): +0 bit 7 direction, +2 Y index of its centre row (bit 7 = lower half of the room), +4 X
+; column (moves one column per pass), +5 scratch (collision mask), +6 pixel pattern of the fins. See F84, F85,
+; F86: it is drawn only while X is 0-31, as one cell wide: the fin pattern above and below a solid centre row,
+; in white ink; when X reaches $2C (left) or $F4 (right) the pass makes a rising chirp instead (128 speaker
+; toggles, about 32 ms). It kills Willy when its attribute cell has ink 7 and the centre row byte is not empty.
+; Quirk (F92): the arrow of The Attic has the odd Y index $D5, so the row table is read half a word off and its
+; pixels go to $9F6A+X and $A06A+X (inside #R$A000), its attributes to $5D6A+X.
+; .
+; Rope (type 3, #R$92A4): +1 swing position (moved by #R$90C0), +2 column of the top, +3 scratch (current column),
+; +4 length in segments ($20 gives 33 points), +5 scratch (pixel mask, starts at $80). The rope also uses the
+; entry after it: its byte +1 is the segment counter (the rope's byte +9) and bit 0 of its byte +3 the held flag
+; (the rope's byte +11), so a rope is followed by an arrow or by the $FF end marker (F90). The rope is a chain of
+; one-pixel points starting at pixel row 0 of the room; the next point is found from #R$8300 with the index
+; segment + swing distance: the second half gives the rows down (row table bytes, 2 per pixel row), the first half
+; the pixels sideways (left when bit 7 of +1 is set, else right). Points are ORed into the buffer, in the ink of
+; the background.
+; .
+; Willy and the rope use #R$85D6: 0 = Willy holds no rope; 1-$20 = number of the rope segment he holds; $F0-$FF =
+; he has just let go (counts up by 1 per rope pass, so for 16 passes he cannot grab again). While it is 0, any lit
+; pixel of the buffer under a rope point grabs the rope there (Willy, drawn earlier, is the normal case; a room
+; tile or another entity would do it too, F87). While held, every pass puts Willy on the rope: his Y index
+; (#R$85CF) is the Y index of the point minus $10 (the rope passes through the middle of the sprite), his column
+; and frame (#R$85D3, #R$85D2) are taken from the pixel mask of the point (mask $80 or $40: frame 2, $20 or $10:
+; frame 3, both with the column one to the left; $08 or $04: frame 0, $02 or $01: frame 1, in the point's own
+; column), and #R$8E9C recomputes his attribute address. At the end of the rope (F88, F89): during the release countdown
+; $85D6 is counted up and the held flag cleared; otherwise, if the rope is held and Willy walks (bit 1 of #R$85D0),
+; $85D6 goes down one segment (higher up) or up one segment (lower down): +1 when his facing (bit 0 of #R$85D0,
+; 1 = left) differs from the swing direction bit (bit 7 of +0), else -1. In a room whose up exit (#R$80EB) is the
+; room itself he cannot go above segment $0C. Past the last segment he is let go: #R$85D6 := $F0, his Y index is
+; rounded down to a multiple of 8 and the jump/fall state #R$85D1 is cleared. Quirk (F91): a lit pixel under
+; point 0 sets the held flag and moves Willy to the top of the rope without setting $85D6.
+; .
+; Hardware: writes the $6000 pixel buffer and the $5C00 attribute buffer; the arrow chirp toggles the speaker and
+; border bits of port $FE in a busy-wait loop.
+@label=DrawEntities
 c$91BE LD IX,$8100     ;
+@label=DrawEntities_Loop
 *$91C2 LD A,(IX+$00)   ;
+@isub=CP ENTITY_END
  $91C5 CP $FF          ;
  $91C7 RET Z           ;
+@isub=AND ENTITY_TYPE_MASK
  $91C8 AND $07         ;
- $91CA JP Z,$93B3      ;
+ $91CA JP Z,$93B3      ; empty
+@isub=CP ENTITY_ROPE
  $91CD CP $03          ;
  $91CF JP Z,$92A4      ;
+@isub=CP ENTITY_ARROW
  $91D2 CP $04          ;
  $91D4 JR Z,$9237      ;
- $91D6 LD E,(IX+$03)   ;
+@label=DrawEntities_Guardian
+ $91D6 LD E,(IX+$03)   ; guardian: E = Y index
+@isub=LD D,RowAddressTable/256
  $91D9 LD D,$82        ;
- $91DB LD A,(DE)       ;
+ $91DB LD A,(DE)       ; low byte of the row address in the buffer
  $91DC LD L,A          ;
- $91DD LD A,(IX+$02)   ;
+ $91DD LD A,(IX+$02)   ; plus the column
+@isub=AND COLUMN_MASK
  $91E0 AND $1F         ;
  $91E2 ADD A,L         ;
  $91E3 LD L,A          ;
- $91E4 LD A,E          ;
+ $91E4 LD A,E          ; Y index bit 7: upper or lower half of the room
  $91E5 RLCA            ;
  $91E6 AND $01         ;
+@isub=OR SCREEN_ATTRS_BUF/256
  $91E8 OR $5C          ;
- $91EA LD H,A          ;
- $91EB LD DE,$001F     ;
+ $91EA LD H,A          ; HL = attribute buffer address of the top-left cell
+@isub=LD DE,SCREEN_COLS-1
+ $91EB LD DE,$001F     ; to the next row of cells, one column left
  $91EE LD A,(IX+$01)   ;
- $91F1 AND $0F         ;
- $91F3 ADD A,$38       ;
+@isub=AND ENTITY_ATTR_MASK
+ $91F1 AND $0F         ; ink and bright
+@isub=ADD A,WHITE*PAPER
+ $91F3 ADD A,$38       ; bright becomes bit 6, the paper bits are cleared by the next AND
+@isub=AND BRIGHT+INK_MASK
  $91F5 AND $47         ;
- $91F7 LD C,A          ;
+ $91F7 LD C,A          ; C = attribute without paper
  $91F8 LD A,(HL)       ;
- $91F9 AND $38         ;
+@isub=AND PAPER_MASK
+ $91F9 AND $38         ; keep the paper of the background
  $91FB XOR C           ;
  $91FC LD C,A          ;
  $91FD LD (HL),C       ;
@@ -41,111 +105,134 @@ c$91BE LD IX,$8100     ;
  $9201 LD (HL),C       ;
  $9202 INC HL          ;
  $9203 LD (HL),C       ;
- $9204 LD A,(IX+$03)   ;
- $9207 AND $0E         ;
- $9209 JR Z,$920F      ;
- $920B ADD HL,DE       ;
+ $9204 LD A,(IX+$03)   ; Y index in the lower bits
+ $9207 AND $0E         ; 0 when the sprite starts on a character row
+ $9209 JR Z,$920F      ; two rows of cells only
+ $920B ADD HL,DE       ; third row of cells
  $920C LD (HL),C       ;
  $920D INC HL          ;
  $920E LD (HL),C       ;
-*$920F LD C,$01        ;
+@label=DrawEntities_Sprite
+@isub=LD C,DRAW_COLLIDE
+*$920F LD C,$01        ; draw with collision test
  $9211 LD A,(IX+$01)   ;
  $9214 AND (IX+$00)    ;
  $9217 OR (IX+$02)     ;
- $921A AND $E0         ;
+@isub=AND ENTITY_FRAME_MASK
+ $921A AND $E0         ; frame number * 32
  $921C LD E,A          ;
- $921D LD D,(IX+$05)   ;
+ $921D LD D,(IX+$05)   ; sprite page
+@isub=LD H,RowAddressTable/256
  $9220 LD H,$82        ;
- $9222 LD L,(IX+$03)   ;
+ $9222 LD L,(IX+$03)   ; Y index
  $9225 LD A,(IX+$02)   ;
+@isub=AND COLUMN_MASK
  $9228 AND $1F         ;
- $922A OR (HL)         ;
+ $922A OR (HL)         ; row address low byte plus column
  $922B INC HL          ;
- $922C LD H,(HL)       ;
+ $922C LD H,(HL)       ; row address high byte
  $922D LD L,A          ;
- $922E CALL $9456      ;
- $9231 JP NZ,$90B7     ;
- $9234 JP $93B3        ;
-*$9237 BIT 7,(IX+$00)  ;
+ $922E CALL $9456      ; DrawSprite: NZ at the first overlap
+ $9231 JP NZ,$90B7     ; overlap: Willy is killed
+ $9234 JP $93B3        ; no collision
+@label=DrawEntities_Arrow
+@isub=BIT ENTITY_DIR_BIT,(IX+$00)
+*$9237 BIT 7,(IX+$00)  ; arrow: direction
  $923B JR NZ,$9244     ;
- $923D DEC (IX+$04)    ;
- $9240 LD C,$2C        ;
+ $923D DEC (IX+$04)    ; left: X down by one
+@isub=LD C,ARROW_BEEP_LEFT
+ $9240 LD C,$2C        ; X value that makes the beep
  $9242 JR $9249        ;
-*$9244 INC (IX+$04)    ;
+*$9244 INC (IX+$04)    ; right: X up by one
+@isub=LD C,ARROW_BEEP_RIGHT
  $9247 LD C,$F4        ;
 *$9249 LD A,(IX+$04)   ;
- $924C CP C            ;
+ $924C CP C            ; beep value reached?
  $924D JR NZ,$9262     ;
- $924F LD BC,$0280     ;
- $9252 LD A,($80DE)    ;
+@isub=LD BC,2*256+ARROW_BEEP_COUNT
+ $924F LD BC,$0280     ; B = 2: first delay; C = 128 toggles
+ $9252 LD A,($80DE)    ; border colour of the room
+@label=DrawEntities_ArrowBeep
 *$9255 OUT ($FE),A     ;
+@isub=XOR BEEPER_BITS
  $9257 XOR $18         ;
 *$9259 DJNZ $9259      ;
- $925B LD B,C          ;
+ $925B LD B,C          ; next delay = counter, falling: the pitch rises
  $925C DEC C           ;
  $925D JR NZ,$9255     ;
- $925F JP $93B3        ;
-*$9262 AND $E0         ;
+ $925F JP $93B3        ; the arrow is not drawn in this pass
+@label=DrawEntities_ArrowDraw
+@isub=AND 255-COLUMN_MASK
+*$9262 AND $E0         ; X outside 0-31: off screen
  $9264 JP NZ,$93B3     ;
- $9267 LD E,(IX+$02)   ;
+ $9267 LD E,(IX+$02)   ; Y index of the centre row
+@isub=LD D,RowAddressTable/256
  $926A LD D,$82        ;
  $926C LD A,(DE)       ;
- $926D ADD A,(IX+$04)  ;
+ $926D ADD A,(IX+$04)  ; plus X
  $9270 LD L,A          ;
- $9271 LD A,E          ;
+ $9271 LD A,E          ; Y index bit 7: upper or lower half of the room
  $9272 AND $80         ;
  $9274 RLCA            ;
+@isub=OR SCREEN_ATTRS_BUF/256
  $9275 OR $5C          ;
- $9277 LD H,A          ;
- $9278 LD (IX+$05),$00 ;
+ $9277 LD H,A          ; HL = attribute buffer address of the arrow cell
+ $9278 LD (IX+$05),$00 ; collision mask: none
  $927C LD A,(HL)       ;
+@isub=AND INK_MASK
  $927D AND $07         ;
- $927F CP $07          ;
+@isub=CP WHITE
+ $927F CP $07          ; white ink: Willy is in this cell
  $9281 JR NZ,$9286     ;
- $9283 DEC (IX+$05)    ;
+ $9283 DEC (IX+$05)    ; mask $FF
 *$9286 LD A,(HL)       ;
- $9287 OR $07          ;
+@isub=OR WHITE
+ $9287 OR $07          ; the arrow is white
  $9289 LD (HL),A       ;
- $928A INC DE          ;
+ $928A INC DE          ; high byte of the row address
  $928B LD A,(DE)       ;
  $928C LD H,A          ;
- $928D DEC H           ;
+ $928D DEC H           ; the pixel row above the centre row
  $928E LD A,(IX+$06)   ;
- $9291 LD (HL),A       ;
+ $9291 LD (HL),A       ; fins
  $9292 INC H           ;
- $9293 LD A,(HL)       ;
- $9294 AND (IX+$05)    ;
- $9297 JP NZ,$90B7     ;
- $929A LD (HL),$FF     ;
+ $9293 LD A,(HL)       ; centre row: anything lit there?
+ $9294 AND (IX+$05)    ; only counts in a white-ink cell
+ $9297 JP NZ,$90B7     ; Willy is killed
+ $929A LD (HL),$FF     ; solid centre row
  $929C INC H           ;
  $929D LD A,(IX+$06)   ;
- $92A0 LD (HL),A       ;
+ $92A0 LD (HL),A       ; fins below
  $92A1 JP $93B3        ;
-*$92A4 LD IY,$8200     ;
- $92A8 LD (IX+$09),$00 ;
+@label=DrawEntities_Rope
+*$92A4 LD IY,$8200     ; rope: IY = row table, starts at pixel row 0
+ $92A8 LD (IX+$09),$00 ; segment 0 (byte +1 of the next entry)
  $92AC LD A,(IX+$02)   ;
- $92AF LD (IX+$03),A   ;
- $92B2 LD (IX+$05),$80 ;
+ $92AF LD (IX+$03),A   ; current column := column of the top
+@isub=LD (IX+$05),PIXEL_LEFT
+ $92B2 LD (IX+$05),$80 ; pixel mask: leftmost pixel
+@label=DrawEntities_Segment
 *$92B6 LD A,(IY+$00)   ;
  $92B9 ADD A,(IX+$03)  ;
- $92BC LD L,A          ;
- $92BD LD H,(IY+$01)   ;
- $92C0 LD A,($85D6)    ;
+ $92BC LD L,A          ; row address low byte plus column
+ $92BD LD H,(IY+$01)   ; HL = pixel buffer address of this point
+ $92C0 LD A,($85D6)    ; rope variable: 0 = no rope held
  $92C3 OR A            ;
  $92C4 JR NZ,$92D6     ;
- $92C6 LD A,(IX+$05)   ;
+ $92C6 LD A,(IX+$05)   ; no rope held: is the pixel under this point lit?
  $92C9 AND (HL)        ;
  $92CA JR Z,$930E      ;
- $92CC LD A,(IX+$09)   ;
+ $92CC LD A,(IX+$09)   ; grab: remember the segment
  $92CF LD ($85D6),A    ;
- $92D2 SET 0,(IX+$0B)  ;
-*$92D6 CP (IX+$09)     ;
+ $92D2 SET 0,(IX+$0B)  ; held flag
+@label=DrawEntities_Held
+*$92D6 CP (IX+$09)     ; is this the segment Willy holds?
  $92D9 JR NZ,$930E     ;
- $92DB BIT 0,(IX+$0B)  ;
+ $92DB BIT 0,(IX+$0B)  ; and does this rope hold him?
  $92DF JR Z,$930E      ;
- $92E1 LD B,(IX+$03)   ;
+ $92E1 LD B,(IX+$03)   ; column
  $92E4 LD A,(IX+$05)   ;
- $92E7 LD C,$01        ;
+ $92E7 LD C,$01        ; from the pixel mask: C = Willy frame, B = column of his left cell
  $92E9 CP $04          ;
  $92EB JR C,$92FC      ;
  $92ED LD C,$00        ;
@@ -156,89 +243,102 @@ c$91BE LD IX,$8100     ;
  $92F6 CP $40          ;
  $92F8 JR C,$92FC      ;
  $92FA LD C,$02        ;
-*$92FC LD ($85D2),BC   ;
- $9300 LD A,IYl        ;
- $9302 SUB $10         ;
- $9304 LD ($85CF),A    ;
+*$92FC LD ($85D2),BC   ; Willy frame ($85D2) and column ($85D3)
+ $9300 LD A,IYl        ; Y index of this point
+ $9302 SUB $10         ; minus 8 pixel rows
+ $9304 LD ($85CF),A    ; Willy Y index
  $9307 PUSH HL         ;
- $9308 CALL $8E9C      ;
+ $9308 CALL $8E9C      ; Willy attribute address from his Y index and column
  $930B POP HL          ;
- $930C JR $930E        ;
-*$930E LD A,(IX+$05)   ;
+ $930C JR $930E        ; (jumps to the next instruction)
+@label=DrawEntities_Plot
+*$930E LD A,(IX+$05)   ; plot the point
  $9311 OR (HL)         ;
  $9312 LD (HL),A       ;
- $9313 LD A,(IX+$09)   ;
- $9316 ADD A,(IX+$01)  ;
+ $9313 LD A,(IX+$09)   ; segment
+ $9316 ADD A,(IX+$01)  ; plus swing position
  $9319 LD L,A          ;
- $931A SET 7,L         ;
+ $931A SET 7,L         ; second half of the rope table
+@isub=LD H,RopeStepTable/256
  $931C LD H,$83        ;
- $931E LD E,(HL)       ;
+ $931E LD E,(HL)       ; rows down (row table bytes)
  $931F LD D,$00        ;
- $9321 ADD IY,DE       ;
+ $9321 ADD IY,DE       ; IY to the next point
  $9323 RES 7,L         ;
- $9325 LD A,(HL)       ;
+ $9325 LD A,(HL)       ; first half: pixels sideways
  $9326 OR A            ;
  $9327 JR Z,$9350      ;
  $9329 LD B,A          ;
- $932A BIT 7,(IX+$01)  ;
+ $932A BIT 7,(IX+$01)  ; side: bit 7 set = left
  $932E JR Z,$9341      ;
-*$9330 RLC (IX+$05)    ;
- $9334 BIT 0,(IX+$05)  ;
+@label=DrawEntities_ShiftLeft
+*$9330 RLC (IX+$05)    ; mask one pixel left
+ $9334 BIT 0,(IX+$05)  ; moved into the next byte?
  $9338 JR Z,$933D      ;
- $933A DEC (IX+$03)    ;
+ $933A DEC (IX+$03)    ; column left
 *$933D DJNZ $9330      ;
  $933F JR $9350        ;
-*$9341 RRC (IX+$05)    ;
- $9345 BIT 7,(IX+$05)  ;
+@label=DrawEntities_ShiftRight
+*$9341 RRC (IX+$05)    ; mask one pixel right
+ $9345 BIT 7,(IX+$05)  ; moved into the next byte?
  $9349 JR Z,$934E      ;
- $934B INC (IX+$03)    ;
+ $934B INC (IX+$03)    ; column right
 *$934E DJNZ $9341      ;
-*$9350 LD A,(IX+$09)   ;
+@label=DrawEntities_NextSegment
+*$9350 LD A,(IX+$09)   ; last point?
  $9353 CP (IX+$04)     ;
  $9356 JR Z,$935E      ;
  $9358 INC (IX+$09)    ;
  $935B JP $92B6        ;
-*$935E LD A,($85D6)    ;
- $9361 BIT 7,A         ;
+@label=DrawEntities_RopeEnd
+*$935E LD A,($85D6)    ; rope variable
+ $9361 BIT 7,A         ; $F0-$FF: release countdown
  $9363 JR Z,$936F      ;
- $9365 INC A           ;
+ $9365 INC A           ; count up
  $9366 LD ($85D6),A    ;
- $9369 RES 0,(IX+$0B)  ;
+ $9369 RES 0,(IX+$0B)  ; clear the held flag
  $936D JR $93B3        ;
-*$936F BIT 0,(IX+$0B)  ;
+@label=DrawEntities_Climb
+*$936F BIT 0,(IX+$0B)  ; rope held?
  $9373 JR Z,$93B3      ;
- $9375 LD A,($85D0)    ;
- $9378 BIT 1,A         ;
+ $9375 LD A,($85D0)    ; Willy walking state
+ $9378 BIT 1,A         ; walking?
  $937A JR Z,$93B3      ;
- $937C RRCA            ;
+ $937C RRCA            ; bit 1 of the result: facing left XOR swing direction
  $937D XOR (IX+$00)    ;
  $9380 RLCA            ;
  $9381 RLCA            ;
  $9382 AND $02         ;
- $9384 DEC A           ;
+ $9384 DEC A           ; +1 or -1
  $9385 LD HL,$85D6     ;
  $9388 ADD A,(HL)      ;
- $9389 LD (HL),A       ;
- $938A LD A,($80EB)    ;
+ $9389 LD (HL),A       ; one segment down or up
+ $938A LD A,($80EB)    ; up exit of the room
  $938D LD C,A          ;
- $938E LD A,($8420)    ;
- $9391 CP C            ;
+ $938E LD A,($8420)    ; current room
+ $9391 CP C            ; no room above: the up exit is the room itself
  $9392 JR NZ,$939B     ;
  $9394 LD A,(HL)       ;
+@isub=CP ROPE_MIN_SEGMENT
  $9395 CP $0C          ;
  $9397 JR NC,$939B     ;
- $9399 LD (HL),$0C     ;
-*$939B LD A,(HL)       ;
+@isub=LD (HL),ROPE_MIN_SEGMENT
+ $9399 LD (HL),$0C     ; not higher than this segment
+@label=DrawEntities_Limit
+*$939B LD A,(HL)       ; past the last segment?
  $939C CP (IX+$04)     ;
  $939F JR C,$93B3      ;
  $93A1 JR Z,$93B3      ;
- $93A3 LD (HL),$F0     ;
+@isub=LD (HL),ROPE_LET_GO
+ $93A3 LD (HL),$F0     ; let go at the bottom
  $93A5 LD A,($85CF)    ;
- $93A8 AND $F8         ;
+ $93A8 AND $F8         ; Y index down to a multiple of 8
  $93AA LD ($85CF),A    ;
  $93AD XOR A           ;
- $93AE LD ($85D1),A    ;
- $93B1 JR $93B3        ;
+ $93AE LD ($85D1),A    ; clear the jump/fall state
+ $93B1 JR $93B3        ; (jumps to the next instruction)
+@label=DrawEntities_Next
+@isub=LD DE,ENTITY_SIZE
 *$93B3 LD DE,$0008     ;
  $93B6 ADD IX,DE       ;
  $93B8 JP $91C2        ;

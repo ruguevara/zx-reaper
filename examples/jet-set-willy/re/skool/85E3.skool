@@ -1,2 +1,13 @@
-; Game status buffer entry at 85E3
+; Cheat progress: number of letters of the key sequence typed so far
+;
+; 0 at start. While not 10 and while Willy is at Y = $D0 in room $1C (First
+; Landing) the frame loop (#R$8B07, $8B97-$8BFE) reads the half rows Q-T and P-Y
+; for the step number held here and advances it when the next letter of the
+; sequence W R I T E T Y P E R is down (the table is #R$85E5). A reading that is
+; neither the next letter, nor no key, nor the previous letter still held
+; resets it to 0. The value 10 (all ten letters typed) switches the cheat
+; on: the room teleport of #R$8B07 ($8B70) works and the pause no longer
+; cycles the colours (#R$89AD, $8AE1). It is not cleared by #R$87CA, so the
+; cheat stays on across games until the machine is reset.
+@label=CheatProgress
 g$85E3 DEFB $00

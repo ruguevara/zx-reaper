@@ -1,2 +1,6 @@
-; Message at 8578
+; Game over message, second word
+;
+; "Over" (4 characters), printed at screen row 6, column 18 by the game over
+; scene (#R$8B07, $8CD7); see #R$8574.
+@label=OverText
 t$8578 DEFM "Over"
