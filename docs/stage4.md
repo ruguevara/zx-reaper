@@ -17,7 +17,7 @@ Decisions:
    stage 4 routine must turn the one into the other (see Tests). Every call
    in the recorded runs is a test case, and no slice needs the others.
 3. **The display API lives in `zxpyxel`.** The same calls draw a stage 4 port
-   and a new game in the Spectrum style (hyperdream), so this is also the
+   and a new game in the Spectrum style, so this is also the
    drawing layer that `port.md` plans for new games.
 4. **The oracle runs live.** The checks run stage 3 next to stage 4 rather
    than reading golden files; the language-neutral golden runs below are
@@ -139,13 +139,13 @@ oracle; build files (`build/golden/`), since they are made from game data.
 
 | # | Test | Catches | Built |
 | --- | --- | --- | --- |
-| 1 | every call of a stage 3 routine: the stage 4 routine on the decoded state before must give the state after, the same Goto, the same sounds (`bridge/oracle.py routine`) | a slice's errors, before the slices are put together | yes |
-| 2 | the game step by step: state and sounds (`make stage4-test`) | any difference in the rules or the flow | yes |
+| 1 | every call of a stage 3 routine: the stage 4 routine on the decoded state before must give the state after, the same Goto, the same sounds (`bridge/oracle.py routine`, all routines in one replay) | a slice's errors, before the slices are put together | yes |
+| 2 | the game step by step: state and sounds, every sound synthesised (`make stage4-test`) | any difference in the rules or the flow; a sound the synthesiser cannot take | yes |
 | 3 | the screen: `render(state)` through `zxpyxel.display` against stage 3's screen, byte for byte | drawing errors, lost traces of the original's incremental drawing | yes, every 50th step |
 | 4 | coverage: every stage 4 routine runs in some record | a slice that passes only because nothing reached it | yes |
 | 5 | scenarios: the state of step N loaded, K steps run | rare events in seconds | no: test 1 covers them on every recorded call |
-| 6 | invariants under random actions: Horace never inside a wall, at most four guards, the score never falls within a game | errors outside the recorded runs | no |
-| 7 | speed: passes per second at each pace against the record's clock | a wrong pacer | no (by eye) |
+| 6 | free play: random keys through the pacer as a host runs it, invariants after every step (positions on the screen, counters in range, no run of steps without time) | errors outside the recorded runs, a pacer that hangs | yes (`oracle.py play`) |
+| 7 | the clock: the Shows' seconds against the Z80's at the last pass | a wrong pacer | yes: demo +0.1%, play -0.5%, bell +0.8% |
 
 Deviation register (`re/deviations.md`): each quirk the faithful mode keeps
 and a fixed mode may drop (`OR C` for `OR E` in TickGuardTimers, the delay
@@ -202,8 +202,11 @@ step, which hid a second chirp in the same step from the routine check (two
 subagents diagnosed it independently); it now records every speaker edge and
 collapses repeats only when it compares. The contract had left the data of
 the sound effects open, so the noise and the chime came out in a shape the
-synthesiser did not expect; the free-play run caught it. Not done yet:
-deviations (a fixed mode), timing checked against the records' clock, the
+synthesiser did not expect; the free-play run caught it (both are now
+checks: every sound is synthesised in the game check, free play is part of
+`make stage4-test`). The first free-play check also showed that a step may
+take no time: the original goes from the exit arrows into the next maze's
+first pass without a frame. Not done yet: deviations (a fixed mode), the
 golden files for stage 5.
 
 ## Stage 5

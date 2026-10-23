@@ -81,13 +81,20 @@ time, and compares:
    actions, *convert(*stage3_args))` on a copy of the decoded state before
    every call of the stage 3 routine, and compares the decoded state after,
    the return value (a Goto: the target's name) and the sounds.
-   `python bridge/oracle.py routine Name [--max=N] build/record/*.rec`. A
-   routine that works on stage 3 scratch memory (a working buffer) is checked
-   through its caller.
-2. **The game** (the stage's gate): `python bridge/oracle.py game
-   build/record/*.rec` (`make stage4-test`) runs `Game` in lockstep with stage
-   3: at every step boundary (a pass of the title loop or of the main loop) the
-   same Actions go in, and the state and the sounds must be equal.
+   `python bridge/oracle.py routine Name[,Name...] [--max=N] build/record/*.rec`;
+   `routine all` checks every registered routine in one replay. A routine
+   that works on stage 3 scratch memory (a working buffer) is checked through
+   its caller.
+2. **The game** (the stage's gate, `make stage4-test`): `python
+   bridge/oracle.py game build/record/*.rec` runs `Game` in lockstep with
+   stage 3: at every step boundary (a pass of the title loop or of the main
+   loop) the same Actions go in, and the state and the sounds must be equal;
+   every sound is synthesised; the rendered screen is compared byte for byte
+   every 50 steps; the clock of the Shows is compared with the Z80's (keep it
+   within a few per cent: fit the pass time); the routines no record ran are
+   listed. Then `python bridge/oracle.py play`: random keys through the pacer
+   as a host runs it, with invariants (positions on the screen, counters in
+   range, no run of steps without time).
 
 A mismatch names the fields (cells by col and row) with both values. Read
 the stage 3 routine and its asm header, not just the failing field. The
@@ -99,9 +106,20 @@ stage 4 routines no record ran.
 
 ## Orchestration
 
-The lead writes `state.py`, `world.py`, `assets.py`, `flow.py`, the bridge,
-and the contract (which stage 4 routine stands for which stage 3 routine,
-signatures, which are generators, which return a flow target). Subagents
-port one stage 3 module each into `game/<pkg>/<module>.py`, with their
-registry file and the routine check passing on every record. The lead
-integrates and runs the game check.
+The lead writes `state.py`, `world.py` (checked against the stage 3 library
+routines first), `assets.py`, `sounds.py`, `flow.py`, the bridge, and the
+contract; subagents port one stage 3 module each into
+`game/<pkg>/<module>.py` with their `bridge/routines_<module>.py`, the
+routine check passing on every record. The lead integrates and runs the
+game check. The contract, one line per routine other modules or the flow
+call:
+
+| Stage 3 | Stage 4 | Arguments | Generator | Returns | Events |
+| --- | --- | --- | --- | --- | --- |
+| ShowScore(hl) | sprites.show_score | (s, value) | yes | - | Sound('chirp') |
+| CheckGuardContact | events.check_guard_contact | (s) | yes | None or a flow target | Sound('buzz'), Show |
+| PaceAndChime | events.pace_and_chime | (s) | yes | - | Sound('chime', low_first), Show(the pass) |
+
+Every Sound's name and `data` come from `sounds.py`, written before the
+slices: a shape left open comes back in a form the synthesiser does not take
+(the game check now synthesises every sound, so it fails there).

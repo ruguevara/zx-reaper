@@ -18,9 +18,10 @@ and `template/skills/`, which get copied into each project.
   (copy the changed tools in, then `make`, `make test`, `make diff` there with
   the tape in `original/`).
 - Never commit game tapes, snapshots or RAM images made from them (`re/*.z80`,
-  `port/image.bin`) or split tape blocks (`re/tape/`).
+  `port/image.bin`), data extracted from them (`game/assets.json`, the
+  Z80 records and web pages in `build/`) or split tape blocks (`re/tape/`).
 - `docs/method.md` (the method, in Russian) and `docs/hungry-horace-run.md`
-  are the master copies; the author's notes are synced from them. Keep the
+  are the master copies of the method and the reference run. Keep the
   method in step when a stage changes.
 
 ## Port everywhere
@@ -39,7 +40,7 @@ project.
   replayed input (3), golden runs recorded from the previous stage (4, 5).
   A stage without its check is not done.
 - `zxpyxel/` is one library for ports and for new ZX-style games (the master
-  copy is here; hyperdream switches to it from its prototype copy). It is standard-library Python
+  copy is here). It is standard-library Python
   except its host module, which alone imports Pyxel; another framework is
   another host module, not a change to the core or to games. It is copied
   into projects, like `tools/`.

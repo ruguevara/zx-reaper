@@ -2,7 +2,7 @@
 
 Задача: из оригинальной ленты (TAP/TZX) получить папку исходников (asm, BASIC, данные, манифест ленты, Makefile, скрипты), которая собирается в ленту, **побайтно совпадающую** с оригиналом, и при этом читается человеком. Минимум времени человека, времени вообще и токенов.
 
-Здесь — методология. Агентская обвязка — инструменты, шаблон проекта с `AGENTS.md`, восемь skills, самотест и эталонный прогон Hungry Horace — в этом же репозитории [**ZX-REAPER**](https://github.com/ruguevara/zx-reaper) (Retro Engineer Anything, Port Everywhere Rightnow). Пути к инструментам ниже (`tools/…`, `template/…`, `selftest/…`) — относительно его корня.
+Здесь — методология. Агентская обвязка — инструменты, шаблон проекта с `AGENTS.md`, skills, самотест и эталонный прогон Hungry Horace — в этом же репозитории [**ZX-REAPER**](../README.md) (Retro Engineer Anything, Port Everywhere Rightnow). Пути к инструментам ниже (`tools/…`, `template/…`, `selftest/…`) — относительно его корня.
 
 ## Главные решения
 
@@ -189,4 +189,3 @@ L1 даётся автоматически для стандартных лен�
 - sjasmplus: https://github.com/z00m128/sjasmplus
 - RZX Archive: https://www.rzxarchive.co.uk
 - Fuse: https://fuse-emulator.sourceforge.net; ZEsarUX: https://github.com/chernandezba/zesarux
-- Связанные заметки: ZX Spectrum 48K, Sinclair BASIC, Сжатие экранов ZX — таблица решений

@@ -83,4 +83,5 @@ EATEN_TONE_STEPS, EATEN_TONE_CYCLES = 15, 8
 CHIME_LOW_LEN, CHIME_LOW_PITCH = 0x16, 0x0193
 CHIME_HIGH_LEN, CHIME_HIGH_PITCH = 0x1A, 0x0168
 
-PASS_T = 21000                  # T-states of a main-loop pass besides its delay (stage 3 measure; pacing only)
+PASS_T = 21000                  # T-states of a main-loop pass besides its delay (pacing only;
+AUTOPILOT_T = 5700              # the demo's autopilot adds this; both fitted to the records' clock)

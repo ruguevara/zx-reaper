@@ -12,8 +12,8 @@ asm routine by routine. It runs on `zxpyxel`, the library that stands in
 for the 48K hardware the game touches, with Pyxel underneath for the window,
 keys and sound. It is the first stage that runs off the Spectrum and the base
 for stages 4 and 5 (README, "Port everywhere"). The same library serves new
-games in the Spectrum style (hyperdream): their drawing calls write the same
-screen memory that a port writes.
+games in the Spectrum style: their drawing calls write the same screen bytes
+that a port writes.
 
 ## Framework: Pyxel
 
@@ -24,7 +24,7 @@ screen memory that a port writes.
 | Frame loop | `pyxel.run(update, draw)`; `flip()` is not available on the web | own loop | own loop |
 | Screen | 16-colour palette, indexed image, `data_ptr()` for a raw copy | surfaces, `surfarray` | textures |
 | Sound | 4-channel synth; PCM only from a WAV/OGG file (`Sound.pcm`) | raw PCM buffers, queued | `SDL_QueueAudio` |
-| Prototype | `zxpyxel` in hyperdream | none | none |
+| Prototype | an earlier `zxpyxel` | none | none |
 
 Pyxel. The Spectrum's 16 colours (15 distinct) are its palette, the screen
 fits its 256×256 image bank, 50 fps is a setting, and a desktop build or a
@@ -258,29 +258,22 @@ Going back: stage 3 keeps the memory layout and the labels, so a change made
 in Python goes back to asm (or z88dk C) routine by routine, with `zxdiff` run
 the other way: the Python routine is the oracle.
 
-## From the prototypes
+## From the prototype
 
-**zxpyxel** (`hyperdream/src/zxpyxel`) becomes this library. Its master copy
-moves to zx-reaper (`zxpyxel/`); hyperdream depends on it and drops its copy.
-What changes:
+`zxpyxel` began as a prototype written for a new game in the Spectrum style;
+its master copy is now here (`zxpyxel/`). What changed on the way:
 
-- `Display` kept the screen in numpy arrays (a bool bitmap and an attribute
-  grid). Now there is one screen, the display file in memory, and the drawing
-  primitives write its bytes (a horizontal span is a few masked bytes, not a
-  pixel loop). numpy and Pillow leave the library; `load_sprite` (PNG) moves
-  to build time, and hyperdream's game code does not use it.
-- `ZxApp` with `update`/`draw` callbacks becomes `run(main)` with an `async`
-  main. A callback-style game is `while True: update(); draw(); await zx.halt()`.
-- The embedded 768-byte font becomes the ROM's font at $3D00; glyphs 128-255
-  for a codepage stay a feature of `text`.
+- The prototype kept the screen in numpy arrays (a bool bitmap and an
+  attribute grid). Now there is one screen, the display file in the
+  Spectrum's layout, and drawing writes its bytes; numpy and Pillow leave
+  the library, which must run in Pyodide and be copied into a project as it
+  is. PNG sprites become bytes at build time.
+- Update/draw callbacks become `run(main)` with an `async` main for ports
+  (`run_display(update, display)` for games that are not ports). A
+  callback-style game is `while True: update(); draw(); await zx.halt()`.
+- An embedded 768-byte font becomes the ROM's font at $3D00.
 - Kept: the palettes, the FLASH phase, the Pyxel recipe (palette override,
-  blit through `images[0].data_ptr()`, border through `cls`), headless tests,
-  and the drawing and text API, so hyperdream's code changes little.
-
-**mokit** (`mokit/zx/screen.py`): the display-file line formula and the
-attribute bit layout. Not a dependency: it brings numpy, Pillow and a git
-install, while the library must run in Pyodide and be copied into a project
-as it is.
+  blit through `images[0].data_ptr()`, border through `cls`), headless tests.
 
 ## Spike: Hungry Horace (2026-10-23)
 
@@ -339,5 +332,5 @@ bytes are printed now), and words written as bytes (`mem16` and `v`).
 1. The selftest fixture game ported in `selftest/`, so `selftest/run.sh`
    checks stage 3 end to end.
 2. The drawing, text and sprite layer over memory (`zxpyxel.display`, the
-   display API of [stage4.md](stage4.md)), with the prototype's tests;
-   hyperdream switches to it.
+   display API of [stage4.md](stage4.md)), with the prototype's tests, for
+   new games in the Spectrum style.

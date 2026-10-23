@@ -171,6 +171,7 @@ game/assets.json: port/image.bin port/labels.py port/variables.py
 
 stage4-test: game/assets.json $(RECORDS)
 	@$(PY) bridge/oracle.py game $(RECORDS)
+	@$(PY) bridge/oracle.py play
 
 game-html: game/assets.json
 	$(call WEB,game)

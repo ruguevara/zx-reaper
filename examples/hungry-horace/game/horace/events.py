@@ -8,7 +8,7 @@ from .constants import (ATTR_BELL, ATTR_BLANK, ATTR_GUARD, ATTR_HORACE, ATTR_TEX
                         DEATH_FLASHES, DEATH_NOISE_CYCLES, DIR_RIGHT, EATEN_TONE_CYCLES,
                         EATEN_TONE_STEPS, FRUIT_DELAY_MASK, FRUIT_MIN_DELAY, GAME_OVER_FLASHES,
                         GUARD_COUNT, GUARD_WAIT, HORACE_FRAME_BIT, INK_MASK, NOISE_MIN_DELAY, PAPER,
-                        PASS_T, PASSES_LABEL_CELLS, ROWS, SCORE_BELL_BONUS, SCORE_BELL_PICKUP,
+                        PASS_T, AUTOPILOT_T, PASSES_LABEL_CELLS, ROWS, SCORE_BELL_BONUS, SCORE_BELL_PICKUP,
                         SCORE_GUARD, SPEED_DELAY_BASE, SPEED_DELAY_STEP, STATUS_PASSES_COL,
                         SWEEP_CYCLES, SWEEP_STEPS, WHITE)
 from .state import Cell, Show, Sound
@@ -217,7 +217,7 @@ def pace_and_chime(s):
             diff = hl - bc - carry
             hl, carry = diff & 0xFFFF, int(diff < 0)
         t = (hl or 0x10000) * 26
-    yield Show((PASS_T + t) / HZ)
+    yield Show((PASS_T + (0 if s.playing else AUTOPILOT_T) + t) / HZ)
 
 
 def reset_guard_timers(s):

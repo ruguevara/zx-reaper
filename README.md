@@ -21,11 +21,20 @@ any stage is a place to stop, fork and ship.
 | 4 | Python on `zxpyxel` → game logic in plain Python plus graphics, input and sound subsystems with nothing Spectrum-specific in the logic, on the framework the user picks (Pyxel, pygame, SDL2, …) | stage 3 as the oracle: every routine call and every step of the recorded runs, state, screen and sound | built: `zx-clean`; Hungry Horace in faithful mode ([docs/stage4.md](docs/stage4.md)) |
 | 5 | game logic → C/C++ with SDL2 or platform libraries, or JS for the web | the stage 4 golden runs | optional |
 
+Each check uses the stage before as its oracle, so the chain runs back to
+the original: stage 3 replays the input a Z80 run read and must hold the
+same memory at every pass of the main loop; stage 4 runs next to stage 3 on
+the same recorded runs and must reach the same state and sounds at every
+step, and every call of a stage 3 routine is a test case for its stage 4
+version. The work is done by a lead agent and subagents from the skills;
+what a run finds hard becomes a rule in the skill or a check in the tools.
+
 Stages 4 and 5 are optional and go wherever a project needs. Fork the stage 3
-Python, change the game, play it and ship it (Pyxel makes a desktop app or a
-single HTML page), or go back to the Spectrum: stage 3 keeps the original
-memory layout and the routine names, so a change ports back to asm or C
-routine by routine, with the same differential tests run the other way.
+or stage 4 Python, change the game, play it and ship it (Pyxel makes a
+desktop app or a single HTML page: `make port-html`, `make game-html`), or
+go back to the Spectrum: stage 3 keeps the original memory layout and the
+routine names, so a change ports back to asm or C routine by routine, with
+the same differential tests run the other way.
 
 Scope for now: the 48K Spectrum. AY music and effects (128K) come later,
 through [pyayay](https://github.com/ruguevara/pyayay) (Ayumi).
@@ -53,9 +62,9 @@ the full Hungry Horace run and its comparison with the SkoolKit reference:
 | `tools/` | command-line tools (Python, SkoolKit, sjasmplus) |
 | `template/` | what every game project starts with: `Makefile`, `AGENTS.md`, `skills/`, `re/questions.md`, `re/findings.md` |
 | `selftest/` | fixture game and an end-to-end test of the whole pipeline |
-| `zxpyxel/` | the stage 3 library: a stand-in for the 48K Spectrum on Pyxel, for ported and new games ([docs/port.md](docs/port.md)) |
+| `zxpyxel/` | the library of stages 3 and 4, standard-library Python except its Pyxel host: a stand-in for the 48K machine (memory, clock, ports, interrupts, a replay of Z80 runs) and a display that keeps the Spectrum's look without addresses ([docs/port.md](docs/port.md)) |
 | `docs/` | the method, the reference run report, `port.md` (stage 3), `stage4.md` (the stage 4 design) |
-| `examples/hungry-horace/` | the reference run: Hungry Horace (1982) taken through every stage, compared with the SkoolKit reference disassembly |
+| `examples/hungry-horace/` | the reference run: Hungry Horace (1982) taken through stages 1 to 4 (`src/`, `port/`, `game/`), compared with the SkoolKit reference disassembly |
 | `examples/jet-set-willy/` | second run: Jet Set Willy (1984), compared with the SkoolKit reference; report in `re/comparison.md` |
 
 ## Setup
@@ -80,8 +89,9 @@ git init && git add -A && git commit -m "re: init"
 claude                        # AGENTS.md + skills/ drive the rest
 ```
 
-`zxinit.py` copies `template/` and `tools/` into the project, so each project
-is self-contained and keeps working when zx-reaper changes. The original tape
+`zxinit.py` copies `template/` and `tools/` into the project, and `zxpyxel/`
+into `port/`, so each project is self-contained and keeps working when
+zx-reaper changes. The original tape
 stays out of git: put it into `original/` and run `make restore`.
 
 ## Pipeline
@@ -103,12 +113,12 @@ stays out of git: put it into `original/` and run `make restore`.
 | Tool | Purpose |
 | --- | --- |
 | `tools/zxinit.py` | tape → project: split, simulated load, image, coverage, ctl, skool, build glue |
-| `tools/zxrun.py` | headless runner on SkoolKit's C simulator: scripted keys/Kempston, fuzz, execution map, per-frame hashes, screenshots, pokes, write watchpoints, shift test loading, `--call` a game routine and save the screen (renders levels for docs), `--record` the reads, interrupts and checkpoint states a port replays |
+| `tools/zxrun.py` | headless runner on SkoolKit's C simulator: scripted keys/Kempston, fuzz, execution map, per-frame hashes, screenshots, pokes, write watchpoints, shift test loading, `--call` a game routine and save the screen (renders levels for docs), `--record` the reads, interrupts and checkpoint states a port replays, `--save-input` a fuzz run as an input script |
 | `tools/zxq.py` | skool split into one file per entry; show/refs/next/status/unexec/peek/strings/gfx/reclassify/check/const/equs/export; question and finding registers, audit |
 | `tools/zxtape.py` | TAP/TZX ↔ text manifest + payloads, byte-exact rebuild, per-block diff |
 | `tools/zxbasic.py` | lossless BASIC ↔ text (hidden numbers, REM code, odd lines) |
 | `tools/zxgfx.py` | colour sprite/tile sheets from memory, for the docs gallery |
-| `tools/zxdiff.py` | differential tests: a Z80 routine against a Python model or port on generated cases by kind; `--dump` writes golden cases for a C port |
+| `tools/zxdiff.py` | differential tests: a Z80 routine against a Python model or a stage 3 port function on generated cases by kind, with its T-states (`--tstates` per kind); `--dump` writes golden cases for a C port |
 | `tools/zxcompare.py` | compare a skool disassembly with a reference: bytes, classification, boundaries, documentation, magic numbers |
 | `tools/zxport.py` | stage 3: `labels.py` and `variables.py` (typed data labels) from the build, the 48K RAM image of a snapshot, and the whole-game check that replays `zxrun.py --record` runs |
 | `tools/zxdoctor.py` | readiness check: tools, versions, and what a project is missing, with the fixing command |

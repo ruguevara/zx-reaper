@@ -7,10 +7,16 @@ in the step (Actions, decoded from the reads), the sounds it started, the
 interrupts the Z80 took, and the state (decoded from memory). Two checks use
 it:
 
-  python bridge/oracle.py game RECORD...       stage 4 in lockstep, state and sounds per step
-  python bridge/oracle.py routine NAME [--max=N] RECORD...  one stage 4 routine on every call of the
-                                                 stage 3 routine NAME: same state after, same
-                                                 Goto, same sounds
+  python bridge/oracle.py game RECORD...
+      stage 4 in lockstep with stage 3: state and sounds per step (every sound
+      synthesised), the rendered screen byte for byte every 50 steps, the clock
+      against the Z80's; then the stage 4 routines no record ran
+  python bridge/oracle.py routine NAME[,NAME...]|all [--max=N] RECORD...
+      stage 4 routines on every call of their stage 3 routines, in one replay:
+      the same state after, the same Goto, the same sounds
+  python bridge/oracle.py play [FRAMES]
+      free play with random keys through the pacer: every step takes time,
+      the invariants hold
 """
 import copy
 import inspect
@@ -67,7 +73,7 @@ class Oracle:
         """Replay the record through stage 3; on_step(mode, new_mode, actions,
         sounds) at every step boundary (mode: the step just finished, None at the
         first boundary; new_mode: the step starting), zx.mem holding the state."""
-        r = headless.Replay(self.record, labels)
+        r = self.replay = headless.Replay(self.record, labels)
         self.reads, self.sounds, self.interrupts = [], [], 0
         self.mode = None
 
@@ -141,10 +147,13 @@ def fmt(x):
 
 def check_game(record):
     """Stage 4 against stage 3, step by step. Returns the steps checked."""
+    from horace import sounds as sounds_module
     from horace.flow import Game
     from horace.render import render
     from zxpyxel.display import Display
     game, steps, display = None, [0], Display()
+    clock = [0.0, 0.0, 0.0]         # stage 4 seconds; both at the last main-loop step
+    oracle = Oracle(record)
 
     def on_step(mode, new_mode, acts, sounds):
         nonlocal game
@@ -154,6 +163,13 @@ def check_game(record):
         else:
             events = []
             drive(game.step(acts), events)
+            for e in events:
+                if hasattr(e, 'name'):
+                    sounds_module.edges(e)      # the synthesiser takes every sound the game makes
+                else:
+                    clock[0] += e.seconds
+            if new_mode == 'play':
+                clock[1:] = [clock[0], oracle.replay.z80_t / 3500000]
             got_sounds = dedup(e.name for e in events if hasattr(e, 'name'))
             if got_sounds != dedup(sounds):
                 raise Mismatch('step %d (%s): sounds %s, stage 3 %s' % (steps[0], mode, got_sounds,
@@ -167,8 +183,8 @@ def check_game(record):
                 raise Mismatch('step %d: the rendered screen differs from stage 3\'s' % steps[0])
         steps[0] += 1
 
-    Oracle(record).run(on_step)
-    return steps[0]
+    oracle.run(on_step)
+    return steps[0], clock[1], clock[2]
 
 
 def dedup(names):
@@ -179,66 +195,125 @@ def dedup(names):
     return out
 
 
-def check_routine(record, name, limit=None):
-    """The stage 4 routine registered for `name` on every call of the stage 3
-    routine (the first `limit` calls)."""
-    clean, convert = ROUTINES[name]
-    orig = next(getattr(m, name) for m in PORT if callable(getattr(m, name, None)))  # not the label
-    calls = [0]
-    oracle = Oracle(record)
+def check_routines(record, names, limit=None):
+    """The stage 4 routines registered for `names` on every call of their stage 3
+    routines (the first `limit` calls of each), in one replay. Returns the calls
+    checked, by name."""
+    oracle, calls, patched = Oracle(record), {}, []
 
-    def start():
-        if limit is not None and calls[0] >= limit:
-            return None
-        return decode(zx.mem, oracle.mode or 'title'), len(oracle.reads), len(oracle.sounds)
+    def wrap(name):
+        clean, convert = ROUTINES[name]
+        orig = next(getattr(m, name) for m in PORT if callable(getattr(m, name, None)))  # not the label
+        calls[name] = 0
 
-    def finish(call, args, ret):
-        """Run the stage 4 routine on the state before the call; compare."""
-        if call is None:
-            return
-        before, n_reads, n_sounds = call
-        want = decode(zx.mem, oracle.mode or 'title')
-        a = actions(oracle.reads[n_reads:])
-        s, events = copy.deepcopy(before), []
-        got = drive(clean(s, a, *convert(*args)), events)
-        got_sounds = dedup(e.name for e in events if hasattr(e, 'name'))
-        sounds = dedup(oracle.sounds[n_sounds:])
-        problems = report(s, want)
-        if problems or got != ret or got_sounds != sounds:
-            raise Mismatch('%s, call %d (port frame %d), actions %s: returns %r (stage 3 %r), '
-                           'sounds %s (stage 3 %s)\n%s' % (name, calls[0], zx.t // T_FRAME, a, got,
-                                                            ret, got_sounds, sounds, problems))
-        calls[0] += 1
+        def start():
+            if limit is not None and calls[name] >= limit:
+                return None
+            return decode(zx.mem, oracle.mode or 'title'), len(oracle.reads), len(oracle.sounds)
 
-    if inspect.iscoroutinefunction(orig):
-        async def wrapper(*args):
-            call = start()
-            try:
-                ret = await orig(*args)
-            except Goto as g:
-                finish(call, args, g.target.__name__)
-                raise
-            finish(call, args, ret)
-            return ret
-    else:
-        def wrapper(*args):
-            call = start()
-            try:
-                ret = orig(*args)
-            except Goto as g:
-                finish(call, args, g.target.__name__)
-                raise
-            finish(call, args, ret)
-            return ret
-    patched = [m for m in PORT if getattr(m, name, None) is orig]
-    for m in patched:
-        setattr(m, name, wrapper)
+        def finish(call, args, ret):
+            """Run the stage 4 routine on the state before the call; compare."""
+            if call is None:
+                return
+            before, n_reads, n_sounds = call
+            want = decode(zx.mem, oracle.mode or 'title')
+            a = actions(oracle.reads[n_reads:])
+            s, events = copy.deepcopy(before), []
+            got = drive(clean(s, a, *convert(*args)), events)
+            got_sounds = dedup(e.name for e in events if hasattr(e, 'name'))
+            sounds = dedup(oracle.sounds[n_sounds:])
+            if s != want or got != ret or got_sounds != sounds:
+                raise Mismatch('%s, call %d (port frame %d), actions %s: returns %r (stage 3 %r), '
+                               'sounds %s (stage 3 %s)\n%s' % (name, calls[name], zx.t // T_FRAME, a,
+                                                                got, ret, got_sounds, sounds,
+                                                                report(s, want)))
+            calls[name] += 1
+
+        if inspect.iscoroutinefunction(orig):
+            async def wrapper(*args):
+                call = start()
+                try:
+                    ret = await orig(*args)
+                except Goto as g:
+                    finish(call, args, g.target.__name__)
+                    raise
+                finish(call, args, ret)
+                return ret
+        else:
+            def wrapper(*args):
+                call = start()
+                try:
+                    ret = orig(*args)
+                except Goto as g:
+                    finish(call, args, g.target.__name__)
+                    raise
+                finish(call, args, ret)
+                return ret
+        for m in PORT:
+            if getattr(m, name, None) is orig:
+                setattr(m, name, wrapper)
+                patched.append((m, name, orig))
+
+    for name in names:
+        wrap(name)
     try:
         oracle.run()
     finally:
-        for m in patched:
+        for m, name, orig in patched:
             setattr(m, name, orig)
-    return calls[0]
+    return calls
+
+
+def check_play(frames, seed=1):
+    """Free play: random keys for `frames` host frames through the pacer and
+    the sound synthesiser, as a host would run it; the steps must take time
+    (a step may not, as the original's exit to the next maze has no frame, but
+    a run of them hangs the pacer) and keep the invariants."""
+    import random
+    from horace.pacer import Pacer
+    from horace.state import Show
+    from zxpyxel import sound
+    from zxpyxel.display import Display
+    p = Pacer(Display(), 22050, lambda edges, t, rate: sound.pcm(edges, 0, 0, t, rate)[0])
+    step, steps, idle = p.game.step, [0], [0]
+
+    def checked(a):
+        shown = 0
+        for e in step(a):
+            shown += isinstance(e, Show)
+            yield e
+        idle[0] = 0 if shown else idle[0] + 1
+        if idle[0] > 3:
+            raise Mismatch('steps %d-%d took no time: the pacer would hang' % (steps[0] - 3, steps[0]))
+        problem = invariant(p.game.state)
+        if problem:
+            raise Mismatch('step %d: %s' % (steps[0], problem))
+        steps[0] += 1
+
+    p.game.step = checked
+    rnd, keys, best = random.Random(seed), set(), 0
+    for n in range(frames):
+        if n % 8 == 0:
+            keys = set(rnd.sample(['Q', 'Z', 'I', 'P', 'T', 'SPACE'], rnd.choice((0, 1, 1, 2))))
+        p.update(keys)
+        best = max(best, p.game.state.best)
+    return steps[0], best
+
+
+def invariant(s):
+    """What must hold after any step, whatever the keys."""
+    if s.mode not in ('title', 'play') or len(s.cells) != 768:
+        return 'mode %r, %d cells' % (s.mode, len(s.cells))
+    if any(len(c.glyph) != 8 or not 0 <= c.attr < 256 for c in s.cells):
+        return 'a cell is not 8 bytes and an attribute'
+    for who, (col, row) in [('Horace', s.horace.pos)] + [('guard', g.pos) for g in s.guards]:
+        if not (0 <= col < 31 and 0 <= row < 23):
+            return '%s at %r, off the screen' % (who, (col, row))
+    if s.mode == 'play' and not 1 <= s.pace <= 8:
+        return 'pace %d' % s.pace
+    if not (0 <= s.score < 0x10000 and 0 <= s.passes < 0x100):
+        return 'score %d, passes %d' % (s.score, s.passes)
+    return None
 
 
 def functions():
@@ -257,7 +332,9 @@ def main():
         for rec in a[1:]:
             sys.setprofile(lambda frame, event, arg: event == 'call' and ran.add(frame.f_code))
             try:
-                print('%s: %d steps match' % (rec, check_game(rec)))
+                n, t4, t3 = check_game(rec)
+                print('%s: %d steps match; at the last pass stage 4 %.1f s, Z80 %.1f s (%+.1f%%)'
+                      % (rec, n, t4, t3, 100 * (t4 / t3 - 1)))
             except Mismatch as e:
                 sys.exit('%s: MISMATCH %s' % (rec, e))
             finally:
@@ -269,11 +346,20 @@ def main():
         limit = None
         if a[2].startswith('--max='):
             limit, a = int(a[2][6:]), a[:2] + a[3:]
+        names = sorted(ROUTINES) if a[1] == 'all' else a[1].split(',')
         for rec in a[2:]:
             try:
-                print('%s %s: %d calls match' % (a[1], rec, check_routine(rec, a[1], limit)))
+                calls = check_routines(rec, names, limit)
             except Mismatch as e:
                 sys.exit('%s: MISMATCH %s' % (rec, e))
+            print('%s: %s' % (rec, ', '.join('%s %d' % kv for kv in calls.items())))
+    elif a[:1] == ['play'] and len(a) <= 2:
+        frames = int(a[1]) if len(a) == 2 else 15000
+        try:
+            steps, best = check_play(frames)
+        except Mismatch as e:
+            sys.exit('free play: MISMATCH %s' % e)
+        print('free play: %d frames, %d steps, invariants hold (best score %d)' % (frames, steps, best))
     else:
         sys.exit(__doc__)
 

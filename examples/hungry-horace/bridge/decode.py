@@ -18,7 +18,7 @@ def pos(offset):
 
 def cell(mem, col, row):
     a = 0x4000 | (row & 0x18) << 8 | (row & 7) << 5 | col
-    return Cell(bytes(mem[a + 256 * line] for line in range(8)), mem[0x5800 + row * 32 + col])
+    return Cell(bytes(mem[a:a + 2048:256]), mem[0x5800 + row * 32 + col])     # 8 rows, 256 apart
 
 
 def saved(mem, a):
