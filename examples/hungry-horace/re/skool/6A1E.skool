@@ -1,0 +1,4 @@
+; Leave the maze through the exit arrows
+@label=ExitMaze
+c$6A1E POP HL        ;
+ $6A1F JP $60E9      ;

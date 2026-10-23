@@ -1,0 +1,24 @@
+; Get a pseudo-random byte
+;
+; Reads the byte at the pointer kept at #R$7C67 and advances the pointer by one,
+; wrapping it inside $0000-$1FFF. That range is the Spectrum ROM, so the ROM
+; contents serve as the random sequence; the pointer is seeded from FRAMES in
+; the routine at #R$6000. Used for random choices such as the direction
+; weights in #R$624F and the delay and kind of the next bonus item in
+; #R$6922.
+; Hardware: reads the ROM.
+;
+; O:A Random byte
+; O:HL Pointer to the next ROM byte (already stored back)
+@label=GetRandom
+c$6B12 LD HL,($7C67) ;
+ $6B15 LD A,(HL)     ;
+ $6B16 PUSH AF       ;
+ $6B17 INC HL        ;
+ $6B18 LD A,H        ;
+@isub=AND ROM_HIGH_MASK
+ $6B19 AND $1F       ;
+ $6B1B LD H,A        ;
+ $6B1C LD ($7C67),HL ;
+ $6B1F POP AF        ;
+ $6B20 RET           ;

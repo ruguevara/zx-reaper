@@ -1,0 +1,25 @@
+; Give every released guard a chance to drop a fruit
+;
+; Called once per pass of the main loop at #R$6000. Walks the four guard timers (#R$6DA6) with B = 4, 3, 2, 1;
+; for each guard whose timer is zero (released) it loads the guard's record into the working buffer, runs the
+; fruit logic of #R$6922 on it and writes the record back. The sibling routine #R$6622 does the same walk to
+; move the guards.
+; Hardware: none.
+@label=UpdateFruitDrops
+c$6907 LD HL,$6DA6   ;
+@isub=LD B,GUARD_COUNT
+ $690A LD B,$04      ;
+*$690C PUSH BC       ; B = guard number (4 = first record)
+ $690D LD A,(HL)     ;
+ $690E INC HL        ;
+ $690F OR (HL)       ;
+ $6910 INC HL        ;
+ $6911 PUSH HL       ; HL = next timer
+ $6912 JR NZ,$691D   ; timer still running: guard not released yet
+ $6914 CALL $6A3F    ;
+ $6917 CALL $6922    ;
+ $691A CALL $6A6A    ;
+*$691D POP HL        ;
+ $691E POP BC        ;
+ $691F DJNZ $690C    ;
+ $6921 RET           ;

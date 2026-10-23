@@ -1,0 +1,65 @@
+; Move a screen address one character cell in a direction
+;
+; Adds one cell step to a screen address (or to an offset from the screen start)
+; in direction A: up/down change the address by 32 bytes, left/right by 1,
+; carrying into the next or previous screen third when the low byte wraps.
+; Only the two low bits of A matter. There is no check against the maze edges.
+; Hardware: none, pure screen-address arithmetic (the screen layout is the
+; ZX Spectrum's: the high byte holds the third and the pixel row).
+;
+; A Direction (0 up, 1 right, 2 down, 3 left, as stored in $7C70)
+; HL Screen address or offset of the cell
+; O:HL Address of the neighbouring cell
+; O:A Corrupted
+@label=StepCell
+@isub=AND DIR_MASK
+c$6D17 AND $03       ;
+@isub=CP DIR_UP
+ $6D19 CP $00        ;
+ $6D1B JR Z,$6D2E    ;
+@isub=CP DIR_RIGHT
+ $6D1D CP $01        ;
+ $6D1F JR Z,$6D3A    ;
+@isub=CP DIR_DOWN
+ $6D21 CP $02        ;
+ $6D23 JR Z,$6D43    ;
+; Left. DEC does not affect carry, and carry is clear after the CPs above, so
+; the JR NC is always taken and the third is never adjusted (the three
+; instructions after it are never executed).
+ $6D25 DEC L         ;
+ $6D26 JR NC,$6D4D   ;
+ $6D28 LD A,H        ;
+@isub=SUB THIRD_STEP
+ $6D29 SUB $08       ;
+ $6D2B LD H,A        ;
+ $6D2C JR $6D4D      ;
+; Up.
+*$6D2E LD A,L        ;
+@isub=SUB SCREEN_COLS
+ $6D2F SUB $20       ;
+ $6D31 LD L,A        ;
+ $6D32 JR NC,$6D4D   ;
+ $6D34 LD A,H        ;
+@isub=SUB THIRD_STEP
+ $6D35 SUB $08       ;
+ $6D37 LD H,A        ;
+ $6D38 JR $6D4D      ;
+; Right.
+*$6D3A INC L         ;
+ $6D3B JR NZ,$6D4D   ;
+ $6D3D LD A,H        ;
+@isub=ADD A,THIRD_STEP
+ $6D3E ADD A,$08     ;
+ $6D40 LD H,A        ;
+ $6D41 JR $6D4D      ;
+; Down.
+*$6D43 LD A,L        ;
+@isub=ADD A,SCREEN_COLS
+ $6D44 ADD A,$20     ;
+ $6D46 LD L,A        ;
+ $6D47 JR NC,$6D4D   ;
+ $6D49 LD A,H        ;
+@isub=ADD A,THIRD_STEP
+ $6D4A ADD A,$08     ;
+ $6D4C LD H,A        ;
+*$6D4D RET           ;

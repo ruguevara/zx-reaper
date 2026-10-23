@@ -1,0 +1,42 @@
+; Play a rising tone
+;
+; A square-wave sweep of 16 pitch steps, from low to high, of 10 cycles each (about 0.08 s in all). The title
+; screen calls it once per pass of its colour-cycling loop, so it also acts as that loop's pacing delay; the game
+; calls it again at #R$673A. Muted when #R$7C69 (the sound mask) has been toggled off: the beeper bit is then
+; masked out of every OUT and only the white border is written.
+; Hardware: writes port $FE, with busy-wait loops setting the pitch; the border is set to white and the speaker
+; is switched on and off.
+;
+; O:HL Address of the sound mask
+@label=PlayRisingTone
+c$6A77 LD HL,$7C69   ;
+@isub=LD C,SWEEP_STEPS
+ $6A7A LD C,$10      ; C = step number, counting down: half period = 8*C loop passes
+@label=PlayRisingTone_Step
+ $6A7C PUSH BC       ;
+ $6A7D LD B,C        ;
+ $6A7E SLA B         ;
+ $6A80 SLA B         ;
+ $6A82 SLA B         ;
+ $6A84 LD D,B        ; D = half period
+@isub=LD E,SWEEP_CYCLES
+ $6A85 LD E,$0A      ;
+*$6A87 LD B,D        ;
+@isub=LD A,ULA_OUT_MASK
+ $6A88 LD A,$1F      ;
+ $6A8A AND (HL)      ; speaker on unless muted
+@isub=OUT (ULA_PORT),A
+ $6A8B OUT ($FE),A   ;
+*$6A8D DJNZ $6A8D    ;
+@isub=LD A,WHITE
+ $6A8F LD A,$07      ; speaker off, white border
+@isub=OUT (ULA_PORT),A
+ $6A91 OUT ($FE),A   ;
+ $6A93 LD B,D        ;
+*$6A94 DJNZ $6A94    ;
+ $6A96 DEC E         ;
+ $6A97 JR NZ,$6A87   ;
+ $6A99 POP BC        ;
+ $6A9A DEC C         ;
+ $6A9B JR NZ,$6A7C   ;
+ $6A9D RET           ;

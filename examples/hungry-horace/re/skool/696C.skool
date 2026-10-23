@@ -1,0 +1,41 @@
+; Count down the guards' release timers
+;
+; Called once per pass of the main loop at #R$6000. The four 16-bit words at #R$6DA6 are the guards' release
+; timers: a guard whose timer is zero is out in the maze and is processed by #R$6622 and #R$6907. This routine
+; decrements every timer that is not yet zero, so each waiting guard is released in turn.
+;
+; When a timer's high byte is zero and register C is zero, #R$6B0A is incremented. C is not set here: it is
+; left over from #R$686A, which returns C=$3A while the bell is in the maze and C=0 after the bell has been
+; taken. So the byte only counts once the bell is gone, and then it counts every tick of every timer below
+; $0100 (256 increments per guard, wrapping to 0) rather than released guards. The test was probably meant
+; to be OR E ("timer reached zero"). Verified in the simulator: no change before the bell is taken, 256
+; increments afterwards.
+; .
+; Hardware: none.
+@label=TickGuardTimers
+c$696C LD HL,$6DA6   ;
+@isub=LD B,GUARD_COUNT
+ $696F LD B,$04      ;
+@label=TickGuardTimers_Loop
+*$6971 LD E,(HL)     ; DE = this timer
+ $6972 INC HL        ;
+ $6973 LD D,(HL)     ;
+ $6974 DEC HL        ;
+ $6975 LD A,D        ;
+ $6976 OR E          ;
+ $6977 JR Z,$6989    ; already zero: guard is out, nothing to do
+ $6979 DEC DE        ;
+ $697A LD (HL),E     ;
+ $697B INC HL        ;
+ $697C LD (HL),D     ;
+ $697D DEC HL        ;
+ $697E LD A,D        ;
+ $697F OR C          ; BUG? C is not zero in practice (see above)
+ $6980 JR NZ,$6989   ;
+ $6982 LD A,($6B0A)  ;
+ $6985 INC A         ;
+ $6986 LD ($6B0A),A  ;
+*$6989 INC HL        ; next timer
+ $698A INC HL        ;
+ $698B DJNZ $6971    ;
+ $698D RET           ;

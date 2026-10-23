@@ -1,0 +1,22 @@
+; Guard sprites, frame B (4 directions)
+;
+; The second animation frame of the guard's head: 4 sprites of 32 bytes in the order up, right, down, left, in the
+; same layout as #R$7DC7. Used by #R$663D (DrawGuard) when bit 5 of the guard's animation counter is clear.
+;
+@label=GuardSprites2
+b$7E47 DEFB $1F,$3F,$3F,$3F,$5F,$63,$7C,$7F ; up (no face): top-left cell
+ $7E4F DEFB $F8,$FC,$FC,$FC,$F2,$8E,$7E,$FE ; top-right
+ $7E57 DEFB $5F,$5F,$3F,$3F,$1F,$0F,$07,$03 ; bottom-left
+ $7E5F DEFB $FA,$FA,$FC,$FC,$F8,$F0,$E0,$C0 ; bottom-right
+ $7E67 DEFB $1F,$3F,$3F,$3F,$3F,$3C,$7C,$4F ; right: top-left cell
+ $7E6F DEFB $E0,$F0,$F0,$F8,$FF,$44,$44,$BA ; top-right
+ $7E77 DEFB $5F,$5E,$6F,$3F,$3F,$1F,$1F,$07 ; bottom-left
+ $7E7F DEFB $BA,$22,$FC,$F8,$F8,$88,$F8,$C0 ; bottom-right
+ $7E87 DEFB $1F,$3F,$3F,$3F,$7F,$71,$61,$59 ; down (facing the player): top-left cell
+ $7E8F DEFB $F8,$FC,$FC,$FC,$FE,$C6,$82,$66 ; top-right
+ $7E97 DEFB $5B,$67,$3F,$3F,$18,$0C,$06,$03 ; bottom-left
+ $7E9F DEFB $6E,$9E,$FC,$FC,$18,$30,$60,$C0 ; bottom-right
+ $7EA7 DEFB $07,$0F,$0F,$1F,$FF,$22,$22,$77 ; left: top-left cell
+ $7EAF DEFB $F8,$FC,$FC,$FC,$FC,$3C,$3E,$32 ; top-right
+ $7EB7 DEFB $77,$44,$3F,$1F,$1D,$01,$1F,$03 ; bottom-left
+ $7EBF DEFB $3A,$7A,$F6,$FC,$FC,$F8,$F8,$E0 ; bottom-right

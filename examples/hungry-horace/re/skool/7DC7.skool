@@ -1,0 +1,28 @@
+; Guard sprites, frame A (4 directions)
+;
+; The guard's head, 16x16 pixels, one sprite per direction in the order 0 up (no face), 1 right, 2 down (face), 3
+; left: the sprite for direction d is at #R$7DC7 + SPRITE_BYTES * d. Each sprite is 32 bytes: four 8x8 cells in the
+; order top-left, top-right, bottom-left, bottom-right, each cell being 8 bytes of pixel rows from the top (bit 7
+; leftmost); #R$6BD6 (DrawSprite) draws it with an attribute colour of the caller's choice.
+; .
+; Used by #R$663D (DrawGuard) when bit 5 of the guard's animation counter is set, otherwise #R$7E47, so the face
+; changes (eyes and mouth) every 32 draws. Not used while the bell timer #R$6DAE runs: #R$7EC7 is used then. Drawn
+; with attribute $3B (magenta ink on white).
+;
+@label=GuardSprites
+b$7DC7 DEFB $1F,$3F,$3F,$3F,$4F,$71,$7E,$7F ; up (no face): top-left cell
+ $7DCF DEFB $F8,$FC,$FC,$FC,$FA,$C6,$3E,$FE ; top-right
+ $7DD7 DEFB $5F,$5F,$3F,$3F,$1F,$0F,$07,$03 ; bottom-left
+ $7DDF DEFB $FA,$FA,$FC,$FC,$F8,$F0,$E0,$C0 ; bottom-right
+ $7DE7 DEFB $1F,$3F,$3F,$3F,$3F,$3C,$7C,$4C ; right: top-left cell
+ $7DEF DEFB $E0,$F0,$F0,$F8,$FF,$44,$44,$EE ; top-right
+ $7DF7 DEFB $5C,$5E,$6F,$3F,$3F,$1F,$1F,$07 ; bottom-left
+ $7DFF DEFB $EE,$22,$FC,$F8,$B8,$80,$F8,$C0 ; bottom-right
+ $7E07 DEFB $1F,$3F,$3F,$3F,$7F,$63,$41,$66 ; down (facing the player): top-left cell
+ $7E0F DEFB $F8,$FC,$FC,$FC,$FE,$8E,$86,$9A ; top-right
+ $7E17 DEFB $76,$79,$3F,$3F,$1F,$0C,$07,$03 ; bottom-left
+ $7E1F DEFB $DA,$E6,$FC,$FC,$F8,$30,$E0,$C0 ; bottom-right
+ $7E27 DEFB $07,$0F,$0F,$1F,$FF,$22,$22,$5D ; left: top-left cell
+ $7E2F DEFB $F8,$FC,$FC,$FC,$FC,$3C,$3E,$F2 ; top-right
+ $7E37 DEFB $5D,$44,$3F,$1F,$1F,$11,$1F,$03 ; bottom-left
+ $7E3F DEFB $FA,$7A,$F6,$FC,$FC,$F8,$F8,$E0 ; bottom-right

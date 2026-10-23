@@ -1,0 +1,26 @@
+; Draw all guards that are in the maze
+;
+; Second part of the per-frame sprite update (after #R$651E, see #R$6000). Visits the four guard release timers
+; (#R$6DA6, GuardTimers) in order; for each guard whose timer is zero (released) it loads the guard record into the
+; working buffer (#R$6A3F), draws the guard with #R$663D and writes the record back (#R$6A6A). B counts 4 to 1,
+; which selects the records from the first to the last.
+; Hardware: writes the screen bitmap and attributes (through #R$663D).
+@label=DrawGuards
+c$6622 LD HL,$6DA6   ;
+@isub=LD B,GUARD_COUNT
+ $6625 LD B,$04      ;
+@label=DrawGuards_Loop
+*$6627 PUSH BC       ;
+ $6628 LD A,(HL)     ;
+ $6629 INC HL        ;
+ $662A OR (HL)       ;
+ $662B INC HL        ;
+ $662C PUSH HL       ; points at the timer of the next guard
+ $662D JR NZ,$6638   ; timer still running: this guard is not in the maze yet
+ $662F CALL $6A3F    ;
+ $6632 CALL $663D    ;
+ $6635 CALL $6A6A    ;
+*$6638 POP HL        ;
+ $6639 POP BC        ;
+ $663A DJNZ $6627    ;
+ $663C RET           ;

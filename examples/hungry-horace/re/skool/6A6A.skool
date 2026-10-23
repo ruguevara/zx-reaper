@@ -1,0 +1,15 @@
+; Save the working guard record
+;
+; Copies the 43-byte working buffer at #R$6DB8 back to the guard record it was loaded from by #R$6A3F (the source
+; address is kept in #R$6DB6). Call it after changing the buffer.
+;
+; O:HL Address after the working buffer
+; O:DE Address after the saved record
+@label=SaveGuardRecord
+c$6A6A LD HL,($6DB6) ;
+ $6A6D LD DE,$6DB8   ;
+ $6A70 EX DE,HL      ; HL = buffer, DE = record
+@isub=LD BC,GUARD_RECORD_SIZE
+ $6A71 LD BC,$002B   ;
+ $6A74 LDIR          ;
+ $6A76 RET           ;

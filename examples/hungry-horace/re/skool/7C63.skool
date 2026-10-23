@@ -1,0 +1,10 @@
+; Maze number 0-3 (byte)
+;
+; Which of the four mazes is being played. Starts as $FF (set by #R$6000 at game start) so that the first increment
+; gives 0; #R$6000 increments it modulo 4 each time a new maze starts (game start, exit through the right-hand arrows,
+; or a death in the demo). 0 selects descriptor #R$6FD7 with map #R$72F7, 1 selects #R$6FDF with #R$6FF7, 2 selects
+; #R$6FE7 with #R$75F7 and 3 selects #R$6FEF with #R$78F7 (the maps are not in memory order). When it wraps from 3 to 0
+; the game pace #R$7C62 is lowered.
+;
+@label=MazeNumber
+g$7C63 DEFB $FF

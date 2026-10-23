@@ -1,0 +1,7 @@
+; Guard release timer: guard 3 (word, part of GuardTimers)
+;
+; The third word of the four-word array GuardTimers that starts at #R$6DA6 (see there for the meaning and for who sets
+; and counts it). It belongs to the guard whose record is at #R$6E39. Initial value after #R$6A22: 2*n*256 passes (n =
+; game pace #R$7C62, 8 at the start of a game).
+;
+g$6DAA DEFW $0000

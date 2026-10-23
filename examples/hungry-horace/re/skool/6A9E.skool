@@ -1,0 +1,14 @@
+; Load a maze descriptor
+;
+; Copies an 8-byte maze descriptor (four words, one of the four descriptors from #R$6FD7) to the current maze
+; descriptor at #R$6FCF.
+;
+; HL Address of the maze descriptor to use
+; O:HL Address after the source descriptor
+; O:DE Address after the current maze descriptor
+@label=LoadMazeDescriptor
+c$6A9E LD DE,$6FCF   ;
+@isub=LD BC,MAZE_DESC_SIZE
+ $6AA1 LD BC,$0008   ;
+ $6AA4 LDIR          ;
+ $6AA6 RET           ;

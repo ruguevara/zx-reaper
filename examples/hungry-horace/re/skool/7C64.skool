@@ -1,0 +1,10 @@
+; Dead counter of the guard AI (byte)
+;
+; Dead state, verified: #R$63DA reads it at $645E, decrements it when scoring direction 3 (left) and stores it back, and
+; reloads it with the game pace #R$7C62 when scoring direction 0 (up), but nothing ever uses the value (the register it
+; is read into is overwritten at once and no flag from it is tested; no other code touches $7C64). The watch in the
+; simulator shows it counting down from 8 to 1 and reloading, without effect. The loaded value 1 is arbitrary. Probably
+; a leftover of an earlier version of the AI.
+;
+@label=UnusedAiCounter
+g$7C64 DEFB $01

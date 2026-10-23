@@ -1,0 +1,2 @@
+1 SAVE "horace" LINE 2: STOP
+2 LOAD "HORACE"

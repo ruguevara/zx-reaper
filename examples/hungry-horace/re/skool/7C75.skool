@@ -1,0 +1,8 @@
+; Best score (word)
+;
+; The highest score of a real game since the program was loaded, binary like #R$7C73. Printed on the status line when a
+; maze starts (#R$6000); replaced in #R$673A at game over if the score is not lower, but only in a real game (#R$6B0B
+; non-zero). Starts at 0 and is not cleared when a new game begins.
+;
+@label=BestScore
+g$7C75 DEFW $0000

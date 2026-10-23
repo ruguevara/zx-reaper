@@ -1,0 +1,29 @@
+; Reset the guard release timers
+;
+; Called at the start of a game (#R$6000) and after a lost pass (#R$673A), not when Horace leaves a maze through
+; the exit, so the timers carry over into the next maze. It frees the first guard at once and holds the other
+; three back: GuardTimers is an array of four
+; words, one per guard record (in the order of #R$6DE3), counted down once per main loop pass by #R$696C; a guard
+; is moved only while its timer is zero. The timers become 0, n*256, 2n*256 and 4n*256, where n is the guard
+; interval (#R$7C62: 8 at the start of the game, lower from level to level). Also clears the count at #R$6B0A,
+; which #R$696C raises while the timers run out and #R$69A4 uses to shorten the game's delay.
+;
+; O:HL Timer of the last guard
+@label=ResetGuardTimers
+c$6A22 LD A,$00      ;
+@isub=LD (GuardsReleased),A
+ $6A24 LD ($6B0A),A  ;
+ $6A27 LD HL,$0000   ;
+@isub=LD (GuardTimers),HL
+ $6A2A LD ($6DA6),HL ; first guard: no wait
+ $6A2D LD A,($7C62)  ;
+ $6A30 LD H,A        ; HL = interval * 256 (L is still 0)
+@isub=LD (GuardTimers+2),HL
+ $6A31 LD ($6DA8),HL ;
+ $6A34 SLA H         ;
+@isub=LD (GuardTimers+4),HL
+ $6A36 LD ($6DAA),HL ; twice that
+ $6A39 SLA H         ;
+@isub=LD (GuardTimers+6),HL
+ $6A3B LD ($6DAC),HL ; four times
+ $6A3E RET           ;

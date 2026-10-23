@@ -1,0 +1,37 @@
+; Working copy of one guard's state record (43 bytes)
+;
+; The buffer that all guard code works on: #R$6A3F (LoadGuardRecord) copies one of the four 43-byte records (#R$6DE3,
+; #R$6E0E, #R$6E39, #R$6E64; GUARD_RECORD_SIZE) here, the routines for planning (#R$63DA), erasing (#R$655B), drawing
+; (#R$663D), bonus fruit (#R$6922) and eating (#R$66A4) change it, and #R$6A6A (SaveGuardRecord) writes it back (the
+; source is remembered in #R$6DB6). Anything left in the buffer when the next record is loaded is lost. The loaded
+; contents are a placeholder.
+; .
+; Fields (offsets from $6DB8):
+; +0 word: position (GuardRecord), screen offset (address minus $4000) of the top-left cell of the guard's 2x2-cell
+;   sprite
+; +2 byte: direction (GuardDir) 0 up, 1 right, 2 down, 3 left (DIR_*)
+; +3 byte: animation counter (GuardAnim), incremented each time the guard is drawn; bit 5 picks the walking sprite set,
+;   bit 3 the frame while the guard is scared
+; +4 word: new position (GuardNewPos), planned by #R$63DA and made the position by #R$663D
+; +6 byte: wait counter (GuardWait), 90 after the guard has been eaten; while it is not zero the guard is neither
+;   planned nor drawn
+; +7 36 bytes: saved background (SavedBackground) of the four cells under the sprite, in the order top-left, top-right,
+;   bottom-left, bottom-right, nine bytes each (SAVED_CELL_SIZE): the attribute ($3E blank floor at the start) and the
+;   eight pixel rows. The cells start at $6DBF, $6DC8, $6DD1 and $6DDA. #R$655B puts them back when the guard moves on
+;   and #R$6922 overwrites them to leave a bonus fruit behind.
+;
+@label=GuardRecord
+g$6DB8 DEFW $0210
+@label=GuardDir
+ $6DBA DEFB $00
+@label=GuardAnim
+ $6DBB DEFB $00
+@label=GuardNewPos
+ $6DBC DEFW $0210
+@label=GuardWait
+ $6DBE DEFB $00
+@label=SavedBackground
+ $6DBF DEFB $3E,$00,$00,$00,$00,$00,$00,$00,$00
+ $6DC8 DEFB $3E,$00,$00,$00,$00,$00,$00,$00,$00
+ $6DD1 DEFB $3E,$00,$00,$00,$00,$00,$00,$00,$00
+ $6DDA DEFB $3E,$00,$00,$00,$00,$00,$00,$00,$00

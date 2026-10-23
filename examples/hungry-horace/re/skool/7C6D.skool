@@ -1,0 +1,10 @@
+; Horace's next position (word)
+;
+; Where Horace is going to be drawn on this pass. Same encoding as the current position #R$7C6B. #R$6337 (PlanMoves)
+; sets it one cell on from the current position in the current direction, or leaves it equal to the current position if
+; the way is blocked or the step is not due yet, or sets it across the vertical wrap for a wrap pad. #R$651E erases
+; Horace when it differs from #R$7C6B, #R$65A1 scores what is at this position, #R$66A4 checks it for a guard and
+; #R$6821 draws him there. The loaded value is a placeholder.
+;
+@label=HoraceNextPos
+g$7C6D DEFW $014C

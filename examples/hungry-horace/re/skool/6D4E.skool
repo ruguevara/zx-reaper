@@ -1,0 +1,82 @@
+; Draw block-pixel graphics
+;
+; Draws a picture stored as one byte per 8x8 character cell, each byte being a 2x2 grid of 4x4-pixel blocks:
+; bit 4 = top-left block, bit 5 = top-right, bit 0 = bottom-left, bit 1 = bottom-right (1 = set). Cells go left to
+; right, then on to the next character row (and, past the end of a screen third, to the next third). The game uses
+; it for the two title words "HUNGRY" and "HORACE" (160 bytes each, 32x5 cells).
+; Hardware: writes the screen bitmap only; the attributes are not touched.
+;
+; HL Address of the block data
+; DE Screen address of the first cell (its top pixel row)
+; BC Number of cells (data bytes) to draw
+; O:HL Address after the data
+; O:DE Screen address after the last cell
+; O:BC 0
+@label=DrawBlocks
+c$6D4E PUSH BC       ; loop head: one cell per pass
+ $6D4F LD A,(HL)     ;
+@isub=AND BLOCK_TOP_BITS
+ $6D50 AND $30       ; top-row bits: 0 none, $10 left, $20 right, $30 both
+ $6D52 CP $00        ;
+ $6D54 JR Z,$6D6A    ;
+@isub=CP BLOCK_TOP_LEFT
+ $6D56 CP $10        ;
+ $6D58 JR Z,$6D66    ;
+@isub=CP BLOCK_TOP_RIGHT
+ $6D5A CP $20        ;
+ $6D5C JR Z,$6D62    ;
+@isub=LD C,BOTH_HALVES
+ $6D5E LD C,$FF      ;
+ $6D60 JR $6D6C      ;
+@isub=LD C,RIGHT_HALF
+*$6D62 LD C,$0F      ;
+ $6D64 JR $6D6C      ;
+@isub=LD C,LEFT_HALF
+*$6D66 LD C,$F0      ;
+ $6D68 JR $6D6C      ;
+*$6D6A LD C,$00      ;
+@isub=LD B,BLOCK_PIXEL_ROWS
+*$6D6C LD B,$04      ; four pixel rows of the top blocks
+ $6D6E LD A,C        ;
+*$6D6F LD (DE),A     ;
+ $6D70 INC D         ;
+ $6D71 DJNZ $6D6F    ;
+ $6D73 LD A,(HL)     ;
+@isub=AND BLOCK_BOTTOM_BITS
+ $6D74 AND $03       ; bottom-row bits: 0 none, 1 left, 2 right, 3 both
+ $6D76 CP $00        ;
+ $6D78 JR Z,$6D8E    ;
+ $6D7A CP $01        ;
+ $6D7C JR Z,$6D8A    ;
+@isub=CP BLOCK_BOTTOM_RIGHT
+ $6D7E CP $02        ;
+ $6D80 JR Z,$6D86    ;
+@isub=LD C,BOTH_HALVES
+ $6D82 LD C,$FF      ;
+ $6D84 JR $6D90      ;
+@isub=LD C,RIGHT_HALF
+*$6D86 LD C,$0F      ;
+ $6D88 JR $6D90      ;
+@isub=LD C,LEFT_HALF
+*$6D8A LD C,$F0      ;
+ $6D8C JR $6D90      ;
+*$6D8E LD C,$00      ;
+@isub=LD B,BLOCK_PIXEL_ROWS
+*$6D90 LD B,$04      ; four pixel rows of the bottom blocks
+ $6D92 LD A,C        ;
+*$6D93 LD (DE),A     ;
+ $6D94 INC D         ;
+ $6D95 DJNZ $6D93    ;
+ $6D97 INC E         ; next cell to the right
+ $6D98 JR Z,$6D9E    ; E wrapped: end of a screen third, D already points into the next third
+ $6D9A LD A,D        ;
+@isub=SUB CELL_BYTES
+ $6D9B SUB $08       ; back up the eight pixel rows just drawn
+ $6D9D LD D,A        ;
+*$6D9E INC HL        ;
+ $6D9F POP BC        ;
+ $6DA0 DEC BC        ;
+ $6DA1 LD A,B        ;
+ $6DA2 OR C          ;
+ $6DA3 JR NZ,$6D4E   ;
+ $6DA5 RET           ;

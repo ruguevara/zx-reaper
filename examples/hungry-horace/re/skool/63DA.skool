@@ -1,0 +1,260 @@
+; Choose the working guard's direction and next position
+;
+; The guard AI. Called by #R$6337 for each active guard with its record loaded into the working buffer at #R$6DB8
+; (position +0, direction +2, new position +4, wait counter +6). Nothing happens while the wait counter (#R$6DBE, set
+; after the guard has been eaten) is non-zero.
+; .
+; Every one of the four directions gets a score and the highest score wins. The guard decides again at every step
+; (one character cell), not only at junctions. The scores, one byte per direction, are stored from #R$6DB2 (up, right,
+; down, left) and #R$6DB6 serves as the end marker. For each direction the block of cells one step ahead is probed with
+; #R$6CC2:
+; - Wall, edge arrows (the guards never leave through them) or any other result of 2 or more: the score is 0, the
+; direction is never chosen while another one has a score.
+; - Otherwise the score starts at 25 and gets: +40 when it is the guard's current direction (#R$6DBA), so a guard
+; tends to go straight on; or -10 when it is the opposite of the current direction; or, for the two sideways
+; directions, a random 0-31 (the low five bits of a ROM byte, see below).
+; - Chase: a direction that leads towards Horace along its axis gets a bonus of 10 plus the distance in cells along
+; that axis. Up counts when Horace's row is not below the guard's, down when it is not above, left and right likewise
+; with the columns. A direction that leads away from him gets nothing. When Horace is on the guard's row, up and
+; down both get the bonus 10; on its column, left and right do. The bonus grows with the distance, so far away the
+; guard prefers to close the longer gap first.
+; - While the bell timer (#R$6DAE) is running the bonus is subtracted instead of added, so the guard runs from Horace.
+; The subtraction is done on a byte without a floor, so a result below 0 wraps to a value near 255 and wins (probably
+; a bug: a scared guard far from Horace that is walking away turns back towards him, because the opposite direction
+; scores 15 minus up to 33).
+; .
+; The random numbers do not come from #R$6B12: the pointer is the low word of the system variable FRAMES (the
+; interrupts are off, so the game itself owns it), increased by one at every draw and masked to $0000-$0FFF to read a
+; byte of the ROM. Only open sideways directions draw a number.
+; .
+; The best direction (the highest score, a tie going to the highest direction code, so left before down before right
+; before up; if all scores are 0 it is up) is stored in +2. The new position in +4 is the position one cell on (#R$6D17).
+; Probing the chosen direction again can give a wrap pad: the guard then jumps by the vertical wrap delta of the maze
+; descriptor (#R$6FCF), plus when going up and minus when going down, as Horace does. Any other result leaves the
+; guard where it is.
+; Hardware: reads the ROM as a source of random numbers; touches no port or screen.
+;
+; O:HL New position of the guard, also stored in its record (not set when the wait counter is non-zero)
+@label=ChooseGuardMove
+c$63DA LD A,($6DBE)  ; wait counter of the guard
+ $63DD AND A         ;
+ $63DE RET NZ        ; non-zero: the guard is paused
+; Convert a screen offset (third, pixel row, character row, column) into H = cell row 0-23 and L = column 0-31:
+; the three RR H drop the pixel row bits, the five RR H/RR L pairs then shift the 16-bit value right by 5.
+ $63DF LD HL,($7C6B) ;
+ $63E2 RR H          ;
+ $63E4 RR H          ;
+ $63E6 RR H          ;
+@isub=LD B,CELL_COL_BITS
+ $63E8 LD B,$05      ;
+*$63EA RR H          ;
+ $63EC RR L          ;
+ $63EE DJNZ $63EA    ;
+ $63F0 LD A,L        ;
+@isub=AND SCREEN_COLS-1
+ $63F1 AND $1F       ;
+ $63F3 LD HL,($7C6B) ;
+ $63F6 LD H,A        ;
+ $63F7 LD A,L        ;
+@isub=AND SCREEN_COLS-1
+ $63F8 AND $1F       ;
+ $63FA LD L,A        ;
+ $63FB LD ($7C7A),HL ; #R$7C7A = Horace: H row, L column
+; Same for the guard: #R$6DB0 = row and column of the guard.
+ $63FE LD HL,($6DB8) ;
+ $6401 RR H          ;
+ $6403 RR H          ;
+ $6405 RR H          ;
+@isub=LD B,CELL_COL_BITS
+ $6407 LD B,$05      ;
+*$6409 RR H          ;
+ $640B RR L          ;
+ $640D DJNZ $6409    ;
+ $640F LD A,L        ;
+@isub=AND SCREEN_COLS-1
+ $6410 AND $1F       ;
+ $6412 LD HL,($6DB8) ;
+ $6415 LD H,A        ;
+ $6416 LD A,L        ;
+@isub=AND SCREEN_COLS-1
+ $6417 AND $1F       ;
+ $6419 LD L,A        ;
+ $641A LD ($6DB0),HL ; #R$6DB0 = guard: H row, L column
+; Score the directions 3 (left), 2, 1 and 0 (up) in this order; B is the direction being scored.
+@isub=LD B,DIR_COUNT
+ $641D LD B,$04      ;
+@label=ChooseGuardMove_Dir
+*$641F DEC B         ; next direction
+ $6420 LD HL,($6DB8) ;
+ $6423 LD C,$00      ; C = score, 0 if blocked
+ $6425 PUSH BC       ;
+ $6426 LD A,B        ;
+ $6427 CALL $6CC2    ; what is one step ahead?
+ $642A POP BC        ;
+@isub=CP MOVE_EXIT
+ $642B CP $02        ;
+ $642D JP NC,$64C3   ; wall, exit arrows or worse: score stays 0
+@isub=LD C,AI_BASE_SCORE
+ $6430 LD C,$19      ;
+ $6432 LD A,($6DBA)  ; current direction of the guard
+ $6435 CP B          ;
+ $6436 JR NZ,$643E   ; sideways or opposite?
+@isub=LD A,AI_STRAIGHT_BONUS
+ $6438 LD A,$28      ;
+ $643A ADD A,C       ;
+ $643B LD C,A        ;
+ $643C JR $645B      ; score 25 + 40
+@isub=ADD A,DIR_OPPOSITE
+*$643E ADD A,$02     ;
+@isub=AND DIR_MASK
+ $6440 AND $03       ; opposite of the current direction
+ $6442 CP B          ;
+ $6443 JR NZ,$644B   ;
+@isub=LD A,256-AI_REVERSE_PENALTY
+ $6445 LD A,$F6      ;
+ $6447 ADD A,C       ;
+ $6448 LD C,A        ;
+ $6449 JR $645B      ; score 25 - 10
+; Sideways: add the next ROM byte (pointer = FRAMES word, advanced by one at every draw) AND 31.
+*$644B LD HL,($5C78) ;
+ $644E INC HL        ;
+ $644F LD ($5C78),HL ;
+ $6452 LD A,H        ;
+@isub=AND RANDOM_ROM_HIGH_MASK
+ $6453 AND $0F       ;
+ $6455 LD H,A        ;
+ $6456 LD A,(HL)     ;
+@isub=AND AI_RANDOM_MASK
+ $6457 AND $1F       ;
+ $6459 ADD A,C       ;
+ $645A LD C,A        ; score 25 + random 0-31
+; Dead code: #R$7C64 is decremented when direction 3 is scored and reloaded with the game pace when
+; direction 0 is scored; nothing reads it.
+*$645B LD A,B        ;
+@isub=CP DIR_LEFT
+ $645C CP $03        ;
+ $645E LD A,($7C64)  ;
+ $6461 JR NZ,$6467   ;
+ $6463 DEC A         ; dead counter
+ $6464 LD ($7C64),A  ;
+*$6467 AND A         ;
+ $6468 LD A,B        ;
+@isub=CP DIR_UP
+ $6469 CP $00        ;
+ $646B JR NZ,$6473   ;
+ $646D LD A,($7C62)  ;
+ $6470 LD ($7C64),A  ;
+*$6473 LD A,B        ;
+@isub=CP DIR_UP
+ $6474 CP $00        ;
+ $6476 JR NZ,$6484   ;
+; Up: bonus only if Horace is level with or above the guard (guard row - Horace row >= 0).
+ $6478 LD HL,($6DB0) ;
+ $647B LD A,H        ;
+ $647C LD HL,($7C7A) ;
+ $647F SUB H         ;
+ $6480 JR C,$64C3    ; Horace is below: no bonus
+ $6482 JR $64AE      ;
+@isub=CP DIR_RIGHT
+*$6484 CP $01        ;
+ $6486 JR NZ,$6494   ;
+; Right: bonus only if Horace is level with or right of the guard (Horace column - guard column >= 0).
+ $6488 LD HL,($7C7A) ;
+ $648B LD A,L        ;
+ $648C LD HL,($6DB0) ;
+ $648F SUB L         ;
+ $6490 JR C,$64C3    ;
+ $6492 JR $64AE      ;
+@isub=CP DIR_DOWN
+*$6494 CP $02        ;
+ $6496 JR NZ,$64A4   ;
+; Down: bonus only if Horace is level with or below the guard (Horace row - guard row >= 0).
+ $6498 LD HL,($7C7A) ;
+ $649B LD A,H        ;
+ $649C LD HL,($6DB0) ;
+ $649F SUB H         ;
+ $64A0 JR C,$64C3    ;
+ $64A2 JR $64AE      ;
+; Left: bonus only if Horace is level with or left of the guard (guard column - Horace column >= 0).
+*$64A4 LD HL,($6DB0) ;
+ $64A7 LD A,L        ;
+ $64A8 LD HL,($7C7A) ;
+ $64AB SUB L         ;
+ $64AC JR C,$64C3    ;
+*$64AE AND A         ;
+@isub=ADD A,AI_CHASE_BIAS
+ $64AF ADD A,$0A     ; distance + 10
+; The bell timer is a word: non-zero means the guards are scared.
+ $64B1 PUSH AF       ;
+ $64B2 PUSH HL       ;
+ $64B3 LD HL,($6DAE) ;
+ $64B6 LD A,H        ;
+ $64B7 OR L          ;
+ $64B8 POP HL        ;
+ $64B9 JR Z,$64C0    ;
+ $64BB POP AF        ;
+; Scared: subtract the bonus (8-bit wrap-around, see the description).
+ $64BC NEG           ;
+ $64BE JR $64C1      ; unsigned compare later: a negative result looks like a high score
+*$64C0 POP AF        ;
+*$64C1 ADD A,C       ;
+ $64C2 LD C,A        ;
+@label=ChooseGuardMove_Store
+*$64C3 PUSH BC       ;
+ $64C4 LD HL,$6DB2   ;
+ $64C7 LD C,B        ;
+ $64C8 LD B,$00      ;
+ $64CA ADD HL,BC     ;
+ $64CB POP BC        ;
+ $64CC LD A,C        ;
+ $64CD LD (HL),A     ; store the score at #R$6DB2 + direction
+ $64CE INC B         ;
+ $64CF DEC B         ;
+ $64D0 JP NZ,$641F   ;
+@label=ChooseGuardMove_Pick
+; Pick the highest score, scanning left, down, right, up. A is the best so far, C its direction.
+ $64D3 XOR A         ;
+ $64D4 LD HL,$6DB6   ;
+@isub=LD B,DIR_COUNT
+ $64D7 LD B,$04      ;
+*$64D9 DEC B         ;
+ $64DA DEC HL        ;
+ $64DB CP (HL)       ; score of this direction
+ $64DC JR NC,$64E0   ;
+ $64DE LD A,(HL)     ; new best
+ $64DF LD C,B        ;
+*$64E0 INC B         ;
+ $64E1 DEC B         ;
+ $64E2 JR NZ,$64D9   ;
+ $64E4 LD A,C        ;
+ $64E5 LD ($6DBA),A  ; store the chosen direction in the record
+@label=ChooseGuardMove_Move
+; Now find the position one step in the chosen direction.
+ $64E8 LD A,($6DBA)  ; chosen direction
+ $64EB LD HL,($6DB8) ; guard position
+ $64EE CALL $6CC2    ;
+@isub=CP MOVE_FREE
+ $64F1 CP $00        ;
+ $64F3 JR Z,$650A    ;
+@isub=CP MOVE_WRAP
+ $64F5 CP $01        ;
+ $64F7 JR NZ,$6517   ;
+; Wrap pad: add the wrap delta going up, subtract it going down.
+ $64F9 LD BC,($6FCF) ;
+ $64FD LD A,($6DBA)  ;
+ $6500 AND A         ;
+ $6501 JR Z,$6507    ;
+ $6503 SBC HL,BC     ;
+ $6505 JR $6508      ;
+*$6507 ADD HL,BC     ;
+*$6508 JR $6513      ;
+; Free: one cell on.
+*$650A LD HL,($6DB8) ;
+ $650D LD A,($6DBA)  ;
+ $6510 CALL $6D17    ;
+*$6513 LD ($6DBC),HL ;
+ $6516 RET           ; new position stored
+; Blocked: stay.
+*$6517 LD HL,($6DB8) ;
+ $651A LD ($6DBC),HL ;
+ $651D RET           ;

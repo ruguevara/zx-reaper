@@ -1,0 +1,9 @@
+; Score of the last extra pass (byte)
+;
+; Score divided by 10000, plus 2 (the counting loop in #R$65C7 starts at 1 and adds one more), as it was the last time
+; the score was shown. #R$65C7 compares it with the new value: when they differ the number of passes #R$7C78 goes up by
+; one (an extra pass for every 10000 points) and the digit on the status line is reprinted. Cleared by #R$6000 at the
+; start of a game, so the first call finds 2 and gives a free pass.
+;
+@label=ExtraPassMark
+g$7C77 DEFB $00

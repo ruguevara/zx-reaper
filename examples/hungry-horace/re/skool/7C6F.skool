@@ -1,0 +1,9 @@
+; Requested direction: key pressed, $FF if none (byte)
+;
+; Direction code the player asks for: 0 up, 1 right, 2 down, 3 left (DIR_*), $FF (DIR_NONE) for none. #R$624F sets it to
+; $FF on every pass, then to the code of the key found (Q/4 up, Z/3 down, P/2 right, I/1 left), and back to $FF if
+; #R$6CC2 reports a wall in that direction; a valid request is copied to the current direction #R$7C70 at once. The demo
+; autopilot never sets it. Only #R$624F uses it.
+;
+@label=RequestedDir
+g$7C6F DEFB $FF

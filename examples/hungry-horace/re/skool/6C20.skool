@@ -1,0 +1,39 @@
+; Find the object in a 2x2-cell block of the screen
+;
+; Reads the four attribute cells of a 16x16 sprite area and reports which
+; object colour is in it. Used for collisions: the guard colour has priority,
+; then the bell, then a flower (see #R$6C46). The four cells are read in the
+; order top-left, top-right, bottom-left, bottom-right.
+; Hardware: reads the attribute area; nothing is written.
+;
+; HL Screen offset of the top-left cell (a screen address without the $4000 base)
+; O:A Attribute of the object found ($3B guard, $3A bell, $3C flower), 0 if none
+; O:F Z set when nothing was found
+; O:BC' Corrupted
+; O:DE' Corrupted
+; O:HL' Corrupted
+@label=GetBlockObject
+c$6C20 PUSH BC       ;
+ $6C21 PUSH DE       ;
+ $6C22 PUSH HL       ;
+ $6C23 LD BC,$4000   ;
+ $6C26 ADD HL,BC     ;
+ $6C27 CALL $6C0F    ;
+ $6C2A EXX           ;
+ $6C2B LD E,$00      ;
+ $6C2D CALL $6C46    ;
+ $6C30 INC HL        ;
+ $6C31 CALL $6C46    ;
+@isub=LD BC,SCREEN_COLS-1
+ $6C34 LD BC,$001F   ;
+ $6C37 ADD HL,BC     ;
+ $6C38 CALL $6C46    ;
+ $6C3B INC HL        ;
+ $6C3C CALL $6C46    ;
+ $6C3F LD A,E        ;
+ $6C40 EXX           ;
+ $6C41 POP HL        ;
+ $6C42 POP DE        ;
+ $6C43 POP BC        ;
+ $6C44 AND A         ;
+ $6C45 RET           ;

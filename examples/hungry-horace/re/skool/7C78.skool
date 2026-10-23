@@ -1,0 +1,9 @@
+; Passes left, Horace's lives (byte)
+;
+; The "PASSES" counter of the status line: number of lives, as a binary number printed as one digit. Set to 3 by #R$6000
+; at the start of a game; the first score update then adds a free pass (see #R$7C77), so a game starts with 4. #R$673A
+; decrements it when Horace is caught; at 0 the game is over. #R$65C7 increments it for every 10000 points (no upper
+; limit).
+;
+@label=Passes
+g$7C78 DEFB $00

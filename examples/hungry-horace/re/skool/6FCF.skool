@@ -1,0 +1,24 @@
+; Current maze descriptor (4 words)
+;
+; The descriptor of the maze being played, copied by #R$6A9E (LoadMazeDescriptor) from one of #R$6FD7, #R$6FDF, #R$6FE7,
+; #R$6FEF when #R$6000 starts a maze (the loaded contents equal #R$6FDF and are replaced at the first maze). Positions
+; are screen offsets (address minus $4000) of the top-left cell of a 2x2 block.
+; .
+; Fields:
+; +0 word: vertical wrap delta (this word has the label MazeDescriptor), added to a position that goes up through a wrap pad and
+;   subtracted when going down (#R$6337 for Horace, #R$63DA for guards); a screen offset difference
+; +2 word: position of the bell at the start of the maze (MazeBellStart); copied to the bell position #R$7CC4 when a
+;   maze starts and used again by #R$686A when the bell is picked up
+; +4 word: start position of guard 1 (MazeGuardStart), used by #R$6000 for the guard whose release timer is 0 when a
+;   maze starts or Horace has lost a life
+; +6 word: start position of Horace (MazeHoraceStart), also the start of the guards whose timers are still running and
+;   the place eaten guards go back to (#R$66A4)
+;
+@label=MazeDescriptor
+g$6FCF DEFW $1060
+@label=MazeBellStart
+ $6FD1 DEFW $00FC
+@label=MazeGuardStart
+ $6FD3 DEFW $1010
+@label=MazeHoraceStart
+ $6FD5 DEFW $0841

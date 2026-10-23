@@ -1,0 +1,27 @@
+; Maze 4 descriptor (4 words)
+;
+; Maze 4 descriptor: four words giving the maze's wrap delta and its starting positions (8 bytes, MAZE_DESC_SIZE). The
+; maze is selected by the maze number 3 in #R$7C63 (numbers run 0 to 3 and repeat, the game starts with maze 0), and
+; the descriptor is copied by #R$6A9E to the current maze descriptor #R$6FCF when #R$6000 starts the maze. It goes
+; with the map #R$78F7 (Maze4Map); the four descriptors are at #R$6FD7, #R$6FDF, #R$6FE7 and #R$6FEF but their maps
+; are not in the same order in memory.
+; .
+; Fields:
+; +0 word: vertical wrap delta, added to the position of Horace or a guard that goes up through a wrap pad (tile 9 of
+;   the map) and subtracted when going down: a screen-offset difference (#R$6337, #R$63DA); 0 when the maze has no
+;   wrap pads
+; +2 word: position of the bell at the start of the maze (copied to #R$7CC4; 0 there means no bell)
+; +4 word: position of the first guard when its release timer is zero (guard 1 at the start of a maze)
+; +6 word: position of Horace's start, at the left-hand arrows; a guard whose release timer is not zero waits here too
+; Positions are screen offsets (address minus $4000) of the top-left cell of a 2x2-cell block: THIRD_SIZE per screen
+; third of 8 character rows, CELL_ROW_STEP per row inside a third, plus the column.
+;
+@label=Maze4Desc
+@isub=DEFW THIRD_SIZE*2-CELL_ROW_STEP
+b$6FEF DEFW $0FE0 ; wrap delta: 15 character rows
+@isub=DEFW CELL_ROW_STEP*3+29
+ $6FF1 DEFW $007D ; bell: row 3, column 29
+@isub=DEFW THIRD_SIZE+CELL_ROW_STEP*3+15
+ $6FF3 DEFW $086F ; guard 1 start: row 11, column 15
+@isub=DEFW CELL_ROW_STEP*3+1
+ $6FF5 DEFW $0061 ; Horace start: row 3, column 1

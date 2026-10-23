@@ -1,0 +1,70 @@
+; Print one digit of a number, then the character
+;
+; Digit part: finds how many times the power of ten BC fits into HL by
+; repeated subtraction, leaving the remainder in HL, and turns the count into
+; the ASCII digit by adding it to A. Then falls through to #R$6B4F to print it.
+;
+; A ASCII code of "0" (the digit count is added to it), carry flag clear
+; BC Power of ten to divide by (10000, 1000, 100 or 10)
+; DE Screen address of the character cell to print at
+; HL Number to print
+; O:A ASCII code of "0" again (see #R$6B4F)
+; O:DE Screen address of the next character cell
+; O:HL Remainder of the number
+@label=PrintDigit
+c$6B48 INC A         ;
+ $6B49 SBC HL,BC     ;
+ $6B4B JR NC,$6B48   ;
+ $6B4D ADD HL,BC     ;
+ $6B4E DEC A         ;
+; Print a character
+;
+; Draws the character A from the ROM font in the cell at DE, in black ink on
+; white paper, and sets the cell's attribute through HL' (see #R$6C0F), when
+; printing is enabled. Printing is enabled while bit 0 of the flag at #R$6B0B
+; is set; when it is clear (the demo), the routine returns at once and the
+; screen is left alone. The routine at #R$6C0F must have been called for DE's
+; cell before the first character of a string; HL' then advances with DE.
+; Hardware: reads the character set of the ROM at $3D00 and writes the screen
+; bitmap and attributes.
+;
+; A Character code ($20-$7F; $7F gives the ROM copyright glyph)
+; DE Screen address of the cell (first pixel row)
+; O:A ASCII code of "0", zero flag clear, carry flag clear (when printed); A
+; is unchanged when printing is disabled
+; O:DE Screen address of the next cell (unchanged when disabled)
+; HL, BC Preserved
+@label=PrintChar
+*$6B4F PUSH BC       ;
+ $6B50 PUSH AF       ;
+ $6B51 LD A,($6B0B)  ;
+ $6B54 LD B,A        ;
+ $6B55 POP AF        ;
+ $6B56 BIT 0,B       ;
+ $6B58 POP BC        ;
+ $6B59 RET Z         ;
+; Swap so that HL is the screen address and DE the saved HL; then HL becomes
+; the font address of the character: A*8 + (font base - 8 * space).
+ $6B5A EX DE,HL      ;
+ $6B5B PUSH BC       ;
+ $6B5C PUSH DE       ;
+ $6B5D EX DE,HL      ;
+ $6B5E LD H,$00      ;
+ $6B60 LD L,A        ;
+ $6B61 ADD HL,HL     ;
+ $6B62 ADD HL,HL     ;
+ $6B63 ADD HL,HL     ;
+@isub=LD BC,ROM_CHARSET-CHAR_SPACE*CELL_BYTES
+ $6B64 LD BC,$3C00   ;
+ $6B67 ADD HL,BC     ;
+ $6B68 EX DE,HL      ;
+@isub=LD C,WHITE*PAPER+BLACK
+ $6B69 LD C,$38      ;
+ $6B6B CALL $6BFA    ;
+ $6B6E POP DE        ;
+ $6B6F POP BC        ;
+ $6B70 EX DE,HL      ;
+@isub=LD A,CHAR_0
+ $6B71 LD A,$30      ;
+ $6B73 AND A         ;
+ $6B74 RET           ;

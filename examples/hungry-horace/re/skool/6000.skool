@@ -1,0 +1,409 @@
+; Start the program: title screen, demo mode and the main game loop
+;
+; Entry point of the game (the BASIC loader calls USR 24576) and its whole control flow. It never returns; all
+; the other routines are called from here, and the places that leave the maze jump back into it.
+; .
+; Phases: (1) #R$6000 seeds the random pointer and switches the sound on. (2) The title screen at #R$601A clears the
+; screen, draws the block-pixel words HUNGRY and HORACE and the copyright and prompt texts, then loops at #R$6086:
+; each pass cycles the ink colour of the two words and plays a rising tone (which paces the loop, about 0.08 s),
+; and ends after TITLE_PASSES passes. A key press starts a game (GameActive = 1); running out of passes starts the
+; demo (GameActive = 0), in which Horace is steered by the autopilot and nothing is printed except the DEMO MODE banner.
+; (3) #R$60C9 starts a game or demo: first maze, score 0, three passes, slowest guard interval. (4) #R$60E9 is the
+; next-maze entry, also reached from #R$6A1E when Horace leaves through the exit arrows and from #R$673A in the demo
+; after a death: it picks the next of the four mazes (every fourth maze the guard interval gets one step faster, down
+; to 1), draws it, prints the status line (game) or the banner (demo), and sets up the bell and the fruit timer.
+; (5) #R$61AA places the four guards and Horace at their starting positions, shows the score, and clears the bell timer;
+; #R$673A also jumps here after a lost pass in a game. (6) The main loop at #R$6229.
+; .
+; One pass of the main loop, in call order: #R$624F ReadControls (keys or demo autopilot, sets the requested
+; direction); #R$6337 PlanMoves (every GuardInterval passes Horace and the guards choose their next positions);
+; #R$651E EraseSprites (restore the background under the sprites that are about to move); #R$65A1 EatObject (score
+; what Horace steps on); #R$6622 DrawGuards; #R$66A4 (guard contact test: a lost pass via #R$673A, or a guard eaten
+; while the bell timer runs); #R$6821 DrawHorace; #R$686A UpdateBell (animate the bell or let Horace take it);
+; #R$6907 UpdateFruitDrops; #R$696C TickGuardTimers (release the waiting guards); #R$698E CheckSoundKey (T toggles the
+; sound); #R$69A4 PaceAndChime (delay loop that sets the game speed, or the bell chime). The loop is left only by
+; jumps that drop the return address: #R$6A1E (exit arrows), #R$673A (guard contact) and the demo abort in #R$624F.
+; .
+; Hardware: disables interrupts (the ROM BEEPER routine used by the chime re-enables them); reads the ROM as a random
+; number source; the title screen clears and draws the screen bitmap and attributes directly, reads every
+; keyboard half-row at once on port $FE, and uses the beeper for the tone and the pacing.
+@label=Start
+c$6000 DI            ; interrupts off
+; Seed the random pointer: the low byte of FRAMES (with its low five bits as the high byte) addresses a ROM byte,
+; and that byte, treated the same way, becomes RandomPtr, the pointer GetRandom walks through the ROM.
+ $6001 LD A,($5C78)  ;
+ $6004 LD L,A        ;
+@isub=AND ROM_HIGH_MASK
+ $6005 AND $1F       ;
+ $6007 LD H,A        ;
+ $6008 LD A,(HL)     ;
+ $6009 LD L,A        ;
+@isub=AND ROM_HIGH_MASK
+ $600A AND $1F       ;
+ $600C LD H,A        ;
+ $600D LD ($7C67),HL ;
+; Sound on (mask $1F) and the T key counted as up.
+ $6010 LD HL,$7C6A   ;
+@isub=LD (HL),KEY_T_BIT
+ $6013 LD (HL),$10   ;
+ $6015 LD HL,$7C69   ;
+@isub=LD (HL),ULA_OUT_MASK
+ $6018 LD (HL),$1F   ;
+; Title screen, also the restart point after a game or demo has ended (jumped to from #R$673A). Clear the screen:
+; attributes white on white while the bitmap is wiped, then white paper with black ink.
+@label=ShowTitle
+*$601A LD HL,$5800   ;
+@isub=LD DE,ATTRS+1
+ $601D LD DE,$5801   ;
+@isub=LD BC,ATTRS_SIZE-1
+ $6020 LD BC,$02FF   ;
+@isub=LD (HL),WHITE*PAPER+WHITE
+ $6023 LD (HL),$3F   ;
+ $6025 LDIR          ;
+ $6027 LD HL,$4000   ;
+@isub=LD DE,SCREEN+1
+ $602A LD DE,$4001   ;
+@isub=LD BC,SCREEN_SIZE-1
+ $602D LD BC,$17FF   ;
+ $6030 LD (HL),$00   ;
+ $6032 LDIR          ;
+ $6034 LD HL,$5800   ;
+@isub=LD DE,ATTRS+1
+ $6037 LD DE,$5801   ;
+@isub=LD BC,ATTRS_SIZE-1
+ $603A LD BC,$02FF   ;
+@isub=LD (HL),WHITE*PAPER+BLACK
+ $603D LD (HL),$38   ;
+ $603F LDIR          ;
+; GameActive = 0 (title mode) and arm the title countdown.
+ $6041 LD A,$00      ;
+ $6043 LD ($6B0B),A  ; GameActive = 0 (title)
+@isub=LD HL,TITLE_PASSES
+ $6046 LD HL,$008C   ;
+ $6049 LD ($6B08),HL ;
+; Draw the title: HUNGRY at character rows 5-9 and HORACE at rows 12-16, from the block-pixel pictures.
+@label=DrawTitle
+@isub=LD DE,SCREEN+5*SCREEN_COLS
+ $604C LD DE,$40A0   ;
+ $604F LD HL,$6E8F   ;
+@isub=LD BC,5*SCREEN_COLS
+ $6052 LD BC,$00A0   ;
+ $6055 CALL $6D4E    ; draw HUNGRY
+@isub=LD DE,SCREEN+THIRD_SIZE+4*SCREEN_COLS
+ $6058 LD DE,$4880   ;
+ $605B LD HL,$6F2F   ;
+@isub=LD BC,5*SCREEN_COLS
+ $605E LD BC,$00A0   ;
+ $6061 CALL $6D4E    ; draw HORACE
+; Print the copyright line and the prompt on rows 22-23. PrintChar draws only while GameActive is 1, so the flag is
+; raised for the printing and the old value restored.
+@label=PrintTitleText
+ $6064 LD A,($6B0B)  ;
+ $6067 PUSH AF       ;
+ $6068 LD A,$01      ;
+ $606A LD ($6B0B),A  ;
+@isub=LD HL,SCREEN+2*THIRD_SIZE+6*SCREEN_COLS
+ $606D LD HL,$50C0   ;
+ $6070 CALL $6C0F    ; point HL' at the attribute cell
+ $6073 EX DE,HL      ; DE = screen address, HL = text
+ $6074 LD HL,$6AA7   ;
+@label=PrintTitleText_Loop
+*$6077 LD A,(HL)     ;
+@isub=CP TEXT_END
+ $6078 CP $FF        ; $FF ends a text
+ $607A JR Z,$6082    ;
+ $607C INC HL        ;
+ $607D CALL $6B4F    ; print one character
+ $6080 JR $6077      ;
+*$6082 POP AF        ; restore GameActive (0)
+ $6083 LD ($6B0B),A  ;
+; Title loop, one pass per rising tone: advance the ink colour (0-7, on white paper) of the attribute cells of both
+; title words, HUNGRY then HORACE.
+@label=TitleLoop
+@isub=LD HL,ATTRS+5*SCREEN_COLS
+*$6086 LD HL,$58A0   ;
+@isub=LD DE,ATTRS+5*SCREEN_COLS+1
+ $6089 LD DE,$58A1   ;
+@isub=LD BC,5*SCREEN_COLS-1
+ $608C LD BC,$009F   ;
+ $608F LD A,(HL)     ;
+ $6090 INC A         ;
+@isub=AND WHITE*PAPER+WHITE
+ $6091 AND $3F       ;
+@isub=OR WHITE*PAPER
+ $6093 OR $38        ;
+ $6095 LD (HL),A     ;
+ $6096 LDIR          ;
+@isub=LD HL,ATTRS+12*SCREEN_COLS
+ $6098 LD HL,$5980   ;
+@isub=LD DE,ATTRS+12*SCREEN_COLS+1
+ $609B LD DE,$5981   ;
+@isub=LD BC,5*SCREEN_COLS-1
+ $609E LD BC,$009F   ;
+ $60A1 LD A,(HL)     ;
+ $60A2 INC A         ;
+@isub=AND WHITE*PAPER+WHITE
+ $60A3 AND $3F       ;
+@isub=OR WHITE*PAPER
+ $60A5 OR $38        ;
+ $60A7 LD (HL),A     ;
+ $60A8 LDIR          ;
+ $60AA CALL $6A77    ; rising tone, also the pacing
+; Count down; when it reaches zero start the demo with GameActive still 0. Otherwise read all keyboard half-rows at
+; once: no key pressed means loop, any key starts a game with GameActive = 1.
+ $60AD LD HL,($6B08) ;
+ $60B0 DEC HL        ;
+ $60B1 LD ($6B08),HL ;
+ $60B4 LD A,H        ;
+ $60B5 OR L          ;
+ $60B6 JR Z,$60C9    ; countdown over: demo
+@isub=LD A,KB_ALL_ROWS
+ $60B8 LD A,$00      ;
+@isub=IN A,(ULA_PORT)
+ $60BA IN A,($FE)    ;
+@isub=AND KEY_BITS
+ $60BC AND $1F       ;
+@isub=CP KEY_BITS
+ $60BE CP $1F        ;
+ $60C0 JR Z,$6086    ;
+ $60C2 LD A,$01      ;
+ $60C4 LD ($6B0B),A  ; key pressed: game
+ $60C7 JR $60C9      ; no-op jump to the next instruction
+; Start a game, or the demo: no maze yet (the next one is number 0), slowest pace, three passes, score 0, no guards
+; released.
+@label=StartGame
+@isub=LD A,MAZE_NONE
+*$60C9 LD A,$FF      ;
+ $60CB LD ($7C63),A  ;
+@isub=LD A,START_GUARD_INTERVAL
+ $60CE LD A,$08      ;
+ $60D0 LD ($7C62),A  ;
+@isub=LD A,START_PASSES
+ $60D3 LD A,$03      ;
+ $60D5 LD ($7C78),A  ;
+ $60D8 LD HL,$0000   ;
+ $60DB LD ($7C73),HL ;
+ $60DE LD A,$00      ;
+ $60E0 LD ($6B0A),A  ;
+ $60E3 LD ($7C77),A  ;
+ $60E6 CALL $6A22    ;
+; Next maze. Entered from #R$6A1E (Horace left through the exit arrows) and from #R$673A (demo, after a death). When
+; the maze number has just passed 3 (that is, after the fourth maze) the guard interval drops by one, to a minimum
+; of 1: the game gets faster every four mazes.
+@label=NextMaze
+*$60E9 LD A,($7C63)  ;
+ $60EC INC A         ;
+@isub=AND 255-MAZE_MASK
+ $60ED AND $FC       ;
+ $60EF JR Z,$60FC    ; maze number was 0-2 or none: no speed-up
+ $60F1 LD A,($7C62)  ;
+ $60F4 DEC A         ;
+ $60F5 JR NZ,$60F9   ;
+@isub=LD A,MIN_GUARD_INTERVAL
+ $60F7 LD A,$01      ; the interval would reach 0: stay at 1
+*$60F9 LD ($7C62),A  ;
+; Advance to the next maze number (0-3, wrapping).
+@label=AdvanceMaze
+*$60FC LD A,($7C63)  ;
+ $60FF INC A         ;
+@isub=AND MAZE_MASK
+ $6100 AND $03       ;
+ $6102 LD ($7C63),A  ;
+; Load the maze descriptor and pick the map. Maze 0 uses the map at $72F7, maze 1 $6FF7, maze 2 $75F7 and maze 3
+; $78F7.
+@label=SelectMaze
+ $6105 LD A,($7C63)  ;
+ $6108 CP $00        ;
+ $610A JR NZ,$6117   ;
+@isub=LD HL,MazeDescriptor+MAZE_DESC_SIZE
+ $610C LD HL,$6FD7   ;
+ $610F CALL $6A9E    ;
+ $6112 LD HL,$72F7   ;
+ $6115 JR $6140      ;
+*$6117 CP $01        ;
+ $6119 JR NZ,$6126   ;
+@isub=LD HL,MazeDescriptor+2*MAZE_DESC_SIZE
+ $611B LD HL,$6FDF   ;
+ $611E CALL $6A9E    ;
+ $6121 LD HL,$6FF7   ;
+ $6124 JR $6140      ;
+*$6126 CP $02        ;
+ $6128 JR NZ,$6135   ;
+@isub=LD HL,MazeDescriptor+3*MAZE_DESC_SIZE
+ $612A LD HL,$6FE7   ;
+ $612D CALL $6A9E    ;
+ $6130 LD HL,$75F7   ;
+ $6133 JR $6140      ;
+@isub=LD HL,MazeDescriptor+4*MAZE_DESC_SIZE
+*$6135 LD HL,$6FEF   ;
+ $6138 CALL $6A9E    ;
+ $613B LD HL,$78F7   ;
+ $613E JR $6140      ;
+; Draw the whole maze: 24 rows of 32 cells, from the map in HL.
+@label=DrawMazeScreen
+*$6140 LD DE,$4000   ;
+@isub=LD BC,SCREEN_COLS*SCREEN_ROWS
+ $6143 LD BC,$0300   ;
+ $6146 CALL $6B75    ; draw the maze
+; Top row: in a game print the status line PASSES / SCORE / BEST, in demo mode the DEMO MODE banner.
+@label=ShowTopRow
+ $6149 LD A,($6B0B)  ;
+ $614C AND A         ;
+ $614D JR Z,$6164    ; demo mode: the banner
+ $614F LD HL,$4000   ;
+ $6152 CALL $6C0F    ;
+ $6155 EX DE,HL      ;
+ $6156 LD HL,$7C47   ;
+@label=ShowTopRow_Loop
+*$6159 LD A,(HL)     ;
+@isub=CP TEXT_END
+ $615A CP $FF        ;
+ $615C JR Z,$618F    ; end of the status line text
+ $615E INC HL        ;
+ $615F CALL $6B4F    ;
+ $6162 JR $6159      ;
+; Demo: print the banner with printing enabled, then restore GameActive = 0.
+@label=ShowDemoBanner
+*$6164 LD A,$01      ;
+ $6166 LD ($6B0B),A  ;
+ $6169 LD HL,$4000   ;
+ $616C CALL $6C0F    ;
+ $616F EX DE,HL      ;
+ $6170 LD HL,$6AE7   ;
+@label=ShowDemoBanner_Loop
+*$6173 LD A,(HL)     ;
+@isub=CP TEXT_END
+ $6174 CP $FF        ;
+ $6176 JR Z,$617E    ; end of the banner text
+ $6178 INC HL        ;
+ $6179 CALL $6B4F    ;
+ $617C JR $6173      ;
+; Make the words DEMO MODE flash.
+*$617E LD A,$00      ;
+ $6180 LD ($6B0B),A  ;
+ $6183 LD HL,$5800   ;
+@isub=LD B,DEMO_BANNER_LEN
+ $6186 LD B,$09      ;
+@label=FlashBanner_Loop
+*$6188 LD A,(HL)     ;
+@isub=ADD A,FLASH
+ $6189 ADD A,$80     ;
+ $618B LD (HL),A     ;
+ $618C INC HL        ;
+ $618D DJNZ $6188    ;
+; Per-maze set-up: the bell starts at the position in the maze descriptor, the number of passes is printed after
+; PASSES and the fruit timer is armed.
+@label=InitMaze
+@isub=LD HL,(MazeBellStart)
+*$618F LD HL,($6FD1) ;
+ $6192 LD ($7CC4),HL ;
+@isub=LD HL,SCREEN+STATUS_PASSES_COL
+ $6195 LD HL,$4007   ;
+ $6198 CALL $6C0F    ;
+ $619B LD A,($7C78)  ;
+@isub=ADD A,CHAR_0
+ $619E ADD A,$30     ;
+ $61A0 EX DE,HL      ;
+ $61A1 CALL $6B4F    ; print the digit of the passes (game only)
+@isub=LD HL,FRUIT_FIRST_DELAY
+ $61A4 LD HL,$07D0   ;
+ $61A7 LD ($7C65),HL ;
+; Also entered from #R$673A after Horace has lost a pass in a game: the maze stays on the screen. If the bell is
+; still in the maze, put it back at its start position.
+@label=RestartMaze
+*$61AA LD HL,($7CC4) ;
+ $61AD LD A,H        ;
+ $61AE OR L          ;
+ $61AF JR Z,$61B7    ;
+@isub=LD HL,(MazeBellStart)
+ $61B1 LD HL,($6FD1) ;
+ $61B4 LD ($7CC4),HL ;
+; Reset the four guards (B = 4 for the first record down to 1): the position is the start position of released
+; guards (descriptor +4) when the release timer is zero, else the start position of Horace (descriptor +6), where
+; the waiting guards stand until their timers run out (checked in the simulator); the saved background is set to
+; four blank cells.
+@label=PlaceGuards
+@isub=LD B,GUARD_COUNT
+*$61B7 LD B,$04      ;
+@label=PlaceGuards_Loop
+*$61B9 PUSH BC       ;
+ $61BA CALL $6A3F    ;
+ $61BD POP BC        ;
+ $61BE PUSH BC       ;
+ $61BF SLA B         ;
+ $61C1 LD C,B        ;
+ $61C2 LD B,$00      ; BC = 2 * B
+ $61C4 XOR A         ;
+ $61C5 LD HL,$6DAE   ; end of the four guard release timers
+ $61C8 SBC HL,BC     ; HL = timer of this guard (B = 4: the first)
+ $61CA LD A,(HL)     ;
+ $61CB INC HL        ;
+ $61CC OR (HL)       ;
+ $61CD JR NZ,$61D4   ; timer still running: wait at Horace's start
+@isub=LD HL,(MazeGuardStart)
+ $61CF LD HL,($6FD3) ;
+ $61D2 JR $61D7      ;
+@isub=LD HL,(MazeHoraceStart)
+*$61D4 LD HL,($6FD5) ;
+*$61D7 LD ($6DB8),HL ; guard position and new position
+ $61DA LD ($6DBC),HL ;
+ $61DD LD HL,$6DBF   ;
+@isub=LD C,SPRITE_CELLS
+ $61E0 LD C,$04      ;
+@isub=LD (HL),ATTR_BLANK
+*$61E2 LD (HL),$3E   ;
+ $61E4 INC HL        ;
+@isub=LD B,CELL_BYTES
+ $61E5 LD B,$08      ;
+*$61E7 LD (HL),$00   ;
+ $61E9 INC HL        ;
+ $61EA DJNZ $61E7    ;
+ $61EC DEC C         ;
+ $61ED JR NZ,$61E2   ;
+ $61EF CALL $6A6A    ; store the record
+ $61F2 POP BC        ;
+ $61F3 DJNZ $61B9    ;
+; Horace starts at the position in descriptor +6, facing right; the step countdown is restarted from the guard
+; interval.
+@label=PlaceHorace
+@isub=LD HL,(MazeHoraceStart)
+ $61F5 LD HL,($6FD5) ;
+ $61F8 LD ($7C6B),HL ;
+ $61FB LD ($7C6D),HL ;
+@isub=LD A,DIR_RIGHT
+ $61FE LD A,$01      ;
+ $6200 LD ($7C70),A  ;
+ $6203 LD A,($7C62)  ;
+ $6206 LD ($7C61),A  ;
+; Show the score (this also redraws the passes digit and may award the free pass) and the best score.
+ $6209 LD HL,($7C73) ;
+ $620C CALL $65C7    ; HL is ignored by ShowScore
+ $620F LD HL,($7C75) ;
+ $6212 LD DE,$4000   ;
+ $6215 EX DE,HL      ;
+@isub=LD BC,STATUS_BEST_COL
+ $6216 LD BC,$001A   ;
+ $6219 ADD HL,BC     ;
+ $621A EX DE,HL      ;
+ $621B CALL $6B21    ; print BestScore (game only)
+; No bell timer (the guards are not scared) and Horace in his normal colour.
+ $621E LD HL,$0000   ;
+ $6221 LD ($6DAE),HL ;
+@isub=LD A,ATTR_HORACE
+ $6224 LD A,$39      ;
+ $6226 LD ($7C71),A  ;
+; Main loop, see the description above.
+@label=MainLoop
+*$6229 CALL $624F    ;
+ $622C CALL $6337    ;
+ $622F CALL $651E    ;
+ $6232 CALL $65A1    ;
+ $6235 CALL $6622    ;
+ $6238 CALL $66A4    ;
+ $623B CALL $6821    ;
+ $623E CALL $686A    ;
+ $6241 CALL $6907    ;
+ $6244 CALL $696C    ;
+ $6247 CALL $698E    ;
+ $624A CALL $69A4    ;
+ $624D JR $6229      ;

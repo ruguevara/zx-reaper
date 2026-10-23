@@ -1,0 +1,9 @@
+; Wrap pause counter (byte)
+;
+; Set to 90 (WRAP_PAUSE) by #R$6337 when Horace walks onto a wrap pad at the top or bottom of the maze and is moved to
+; the opposite edge; counted down once per pass by #R$6821. While it is non-zero Horace is invisible and frozen: #R$624F
+; reads no keys, #R$6337 does not plan him, #R$65A1 scores nothing and #R$6821 only copies the next position to the
+; current one. Cleared by #R$673A when he dies; otherwise 0.
+;
+@label=WrapPause
+g$7C79 DEFB $00

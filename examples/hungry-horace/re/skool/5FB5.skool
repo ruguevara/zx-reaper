@@ -1,0 +1,7 @@
+@org
+; Unused zero bytes below the game code
+;
+; 75 bytes of zeroes ($5FB5-$5FFF) between the top of the BASIC area (the loader's CLEAR 24500 puts RAMTOP just below
+; them) and the code at #R$6000. Nothing in the game reads or writes them.
+;
+s$5FB5 DEFS $4B

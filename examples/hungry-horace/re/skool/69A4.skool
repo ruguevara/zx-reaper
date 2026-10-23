@@ -1,0 +1,91 @@
+; Pace the game loop, or ring the bell
+;
+; The last routine of every pass of the main loop at #R$6000, and the only thing that sets the game speed. While
+; the bell bonus is lying in the maze (the word at #R$7CC4, its screen offset, is not zero; #R$686A animates it and
+; counts #R$7CC6 up on every pass), the bell rings twice per 64 passes of that counter and the sound replaces the
+; delay: when the counter is 0 (mod 64) a lower then a higher tone, when it is $20 a higher then a lower tone,
+; provided sound is on (#R$7C69 = $1F). In every other case it burns a busy-wait delay of
+;   $015E + $1E * level - 2 * 64 * (guards released)
+; loop passes, where level is #R$7C62 (8 at the start of a game, then lower, so the game gets faster) and the
+; guards-released term (#R$6B0A, see #R$696C) is in practice zero. The rotation of that count uses RLA, so it
+; is a multiply by 64 only for counts 0-3.
+; Hardware: the delay is a timing loop (#R$6B0C), so the CPU speed sets the game speed. The chime calls the ROM
+; BEEPER routine, which drives the speaker through port $FE and re-enables interrupts when it returns (the game
+; runs with interrupts off, hence the DI after each call). BEEPER takes DE = frequency * duration (cycles) and
+; HL = pitch value; the tones are about 1010 Hz and 1120 Hz for about 22 ms each.
+@label=PaceAndChime
+c$69A4 LD HL,($7CC4) ;
+ $69A7 LD A,H        ;
+ $69A8 OR L          ;
+ $69A9 JR NZ,$69D0   ; bell present: maybe ring it
+@label=PaceAndChime_Delay
+*$69AB LD A,($7C62)  ;
+ $69AE LD E,A        ; E = level, at least 1
+@isub=LD HL,SPEED_DELAY_BASE
+ $69AF LD HL,$015E   ;
+@isub=LD BC,SPEED_DELAY_STEP
+*$69B2 LD BC,$001E   ;
+ $69B5 ADD HL,BC     ; HL = base + step * level
+ $69B6 DEC E         ;
+ $69B7 JR NZ,$69B2   ;
+ $69B9 XOR A         ; clear carry for the RLA and SBC below
+ $69BA LD A,($6B0A)  ;
+ $69BD RLA           ; A = guards released * 64 (for 0-3), see above
+ $69BE RLA           ;
+ $69BF RLA           ;
+ $69C0 RLA           ;
+ $69C1 RLA           ;
+ $69C2 RLA           ;
+ $69C3 LD B,$00      ;
+ $69C5 LD C,A        ;
+ $69C6 SBC HL,BC     ; HL = HL - 2 * A
+ $69C8 SBC HL,BC     ;
+ $69CA PUSH HL       ;
+ $69CB POP BC        ; BC = number of delay passes
+ $69CC CALL $6B0C    ;
+ $69CF RET           ;
+; The bell is lying in the maze: ring it on two phases of its animation counter.
+*$69D0 LD A,($7CC6)  ;
+@isub=AND BELL_PHASE_MASK
+ $69D3 AND $3F       ;
+ $69D5 CP $00        ;
+ $69D7 JR NZ,$69F6   ;
+ $69D9 LD HL,$7C69   ; phase 0: lower tone, then higher tone
+ $69DC LD A,(HL)     ;
+@isub=CP ULA_OUT_MASK
+ $69DD CP $1F        ; sound mask = $1F: sound on
+ $69DF JR NZ,$69AB   ; muted: just delay
+@isub=LD DE,CHIME_LOW_LEN
+ $69E1 LD DE,$0016   ;
+@isub=LD HL,CHIME_LOW_PITCH
+ $69E4 LD HL,$0193   ;
+ $69E7 CALL $03B5    ;
+ $69EA DI            ; BEEPER leaves interrupts enabled
+@isub=LD DE,CHIME_HIGH_LEN
+ $69EB LD DE,$001A   ;
+@isub=LD HL,CHIME_HIGH_PITCH
+ $69EE LD HL,$0168   ;
+ $69F1 CALL $03B5    ;
+ $69F4 DI            ;
+ $69F5 RET           ;
+@isub=CP BELL_HALF_PHASE
+*$69F6 CP $20        ; phase $20: higher tone, then lower tone
+ $69F8 JR NZ,$69AB   ; any other phase: just delay
+ $69FA LD HL,$7C69   ;
+ $69FD LD A,(HL)     ;
+@isub=CP ULA_OUT_MASK
+ $69FE CP $1F        ;
+ $6A00 JR NZ,$69AB   ;
+@isub=LD DE,CHIME_HIGH_LEN
+ $6A02 LD DE,$001A   ;
+@isub=LD HL,CHIME_HIGH_PITCH
+ $6A05 LD HL,$0168   ;
+ $6A08 CALL $03B5    ;
+ $6A0B DI            ;
+@isub=LD DE,CHIME_LOW_LEN
+ $6A0C LD DE,$0016   ;
+@isub=LD HL,CHIME_LOW_PITCH
+ $6A0F LD HL,$0193   ;
+ $6A12 CALL $03B5    ;
+ $6A15 DI            ;
+ $6A16 RET           ;

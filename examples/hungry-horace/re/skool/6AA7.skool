@@ -1,0 +1,14 @@
+; Title screen caption
+;
+; The two caption lines of the title screen, printed one character at a time by #R$6000 with #R$6B4F from the screen
+; address $50C0 (character row 22, column 0) in the ROM font: the 63 characters fill row 22 and run on into row 23.
+; The first line reads " Copyright (c) 1982 Beam Software" and the second "PRESS ANY KEY TO START PLAY" (the copyright
+; sign is character $7F of the ROM font).
+; .
+; Format: plain ASCII characters, terminated by $FF (the print loop in #R$6000 stops at $FF).
+;
+@label=TitleText
+t$6AA7 DEFM " Copyright "
+ $6AB2 DEFB $7F
+ $6AB3 DEFM " 1982 Beam Software   PRESS ANY KEY TO START PLAY  "
+ $6AE6 DEFB $FF

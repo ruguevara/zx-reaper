@@ -1,0 +1,30 @@
+; Point HL' at the attribute cell of a screen address
+;
+; Converts the screen bitmap address in HL into the attribute address of the
+; same character cell and leaves it in the alternate register HL'. The low byte
+; is the same in both, so only the high byte changes: bits 3-4 of H select the
+; screen third (0-2), which becomes the offset from the attribute high byte.
+; The drawing routines #R$6BFA and #R$6B4F then write an attribute through HL'
+; (and increment it) for every cell they draw. The main register set is
+; selected again on return.
+; Hardware: computes an address in the attribute area ($5800-$5AFF); writes
+; nothing.
+;
+; HL Screen bitmap address (in the first pixel row of a cell)
+; O:HL' Attribute address matching HL
+; O:A Corrupted
+@label=SetAttrPointer
+c$6C0F PUSH HL       ;
+ $6C10 EXX           ;
+ $6C11 POP HL        ;
+ $6C12 LD A,H        ;
+@isub=AND THIRD_BITS
+ $6C13 AND $18       ;
+ $6C15 SRA A         ;
+ $6C17 SRA A         ;
+ $6C19 SRA A         ;
+@isub=ADD A,ATTRS_HIGH
+ $6C1B ADD A,$58     ;
+ $6C1D LD H,A        ;
+ $6C1E EXX           ;
+ $6C1F RET           ;

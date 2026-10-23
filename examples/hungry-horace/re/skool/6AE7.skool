@@ -1,0 +1,11 @@
+; Demo mode banner
+;
+; The banner shown in the top character row (screen address $4000, 32 characters) while the demonstration game is
+; running: "DEMO MODE  PRESS ANY KEY TO PLAY". Printed by #R$6000 with #R$6B4F in place of the status line (#R$7C47);
+; the first nine attribute cells ("DEMO MODE") are then set to flash.
+; .
+; Format: plain ASCII characters, terminated by $FF.
+;
+@label=DemoText
+t$6AE7 DEFM "DEMO MODE  PRESS ANY KEY TO PLAY"
+ $6B07 DEFB $FF

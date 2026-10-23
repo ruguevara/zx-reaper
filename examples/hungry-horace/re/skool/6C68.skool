@@ -1,0 +1,47 @@
+; Save the background under a guard sprite
+;
+; Remembers what is on the screen in the 2x2-cell area (16x16 pixels) whose
+; top-left cell is HL, so that it can be put back when the guard moves on (see
+; #R$655B). The four cells are stored in the order top-left, top-right,
+; bottom-left, bottom-right, 9 bytes each (attribute, then 8 bitmap rows), in
+; the 36 bytes at $6DBF inside the current guard record (see #R$6DB8). Guard
+; coloured cells are stored as blank floor (see #R$6C95).
+; Hardware: reads the screen bitmap and the attribute area.
+;
+; HL Screen offset of the top-left cell (a screen address without the $4000 base)
+; O:HL Corrupted: holds the original DE (the pops are in the wrong order; no caller uses it)
+; O:DE Corrupted: holds the original HL
+; O:BC' Corrupted
+; O:HL' Corrupted
+@label=SaveBackground
+c$6C68 PUSH BC       ;
+ $6C69 PUSH DE       ;
+ $6C6A PUSH HL       ;
+ $6C6B LD BC,$4000   ;
+ $6C6E ADD HL,BC     ;
+ $6C6F CALL $6C0F    ;
+ $6C72 LD DE,$6DBF   ;
+ $6C75 CALL $6C95    ;
+ $6C78 CALL $6C95    ;
+; Move both pointers to the left cell of the next row: HL' is two cells along
+; already, so add 30; the same for HL, carrying into the next screen third.
+ $6C7B EXX           ;
+@isub=LD BC,SCREEN_COLS-2
+ $6C7C LD BC,$001E   ;
+ $6C7F ADD HL,BC     ;
+ $6C80 EXX           ;
+ $6C81 LD A,L        ;
+@isub=ADD A,SCREEN_COLS-2
+ $6C82 ADD A,$1E     ;
+ $6C84 LD L,A        ;
+ $6C85 JR NC,$6C8B   ;
+ $6C87 LD A,H        ;
+@isub=ADD A,THIRD_STEP
+ $6C88 ADD A,$08     ;
+ $6C8A LD H,A        ;
+*$6C8B CALL $6C95    ;
+ $6C8E CALL $6C95    ;
+ $6C91 POP DE        ;
+ $6C92 POP HL        ;
+ $6C93 POP BC        ;
+ $6C94 RET           ;

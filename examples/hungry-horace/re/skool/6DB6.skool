@@ -1,0 +1,9 @@
+; Pointer to the guard record in the working buffer (word)
+;
+; Set by #R$6A3F (LoadGuardRecord) to the address of the guard record (#R$6DE3, #R$6E0E, #R$6E39 or #R$6E64) that was
+; copied into the working buffer #R$6DB8, and used by #R$6A6A (SaveGuardRecord) as the destination when the buffer is
+; written back. The loaded value is guard 1's record. It follows the four direction scores of #R$6DB2, and the backwards
+; scans of #R$63DA and #R$624F use its address as the end of that table (its contents are not read).
+;
+@label=GuardRecordPtr
+g$6DB6 DEFW $6DE3

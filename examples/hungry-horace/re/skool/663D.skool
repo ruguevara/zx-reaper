@@ -1,0 +1,69 @@
+; Draw one guard
+;
+; Draws the guard of the working buffer (#R$6DB8) at its new position (+4) and makes that its current position (+0).
+; A guard that has just been eaten waits first: while the wait counter (#R$6DBE, GuardWait) is non-zero it is counted
+; down and the guard is not drawn; the guard reappears when the count reaches zero. The graphic depends on the bell
+; timer (#R$6DAE):
+; - Timer running (guards can be eaten): the timer is counted down by one for every guard drawn, and the guard uses
+; one of the two alternating frames at #R$7EC7 (frame chosen by bit 3 of the animation counter in +3).
+; - Otherwise the normal guard graphics: the direction (+2, 0-3) selects one of four sprites of 32 bytes in a set
+; of four, which is #R$7E47 when bit 5 of the animation counter in +3 is clear and #R$7DC7 when it is set.
+; The animation counter (+3) is incremented on every call that gets this far. The guard record must have been loaded
+; into the working buffer with #R$6A3F and is saved again by the caller.
+; Hardware: writes the screen bitmap and four attribute cells (through #R$6BD6).
+@label=DrawGuard
+c$663D LD A,($6DBE)  ; wait counter
+ $6640 AND A         ;
+ $6641 JR Z,$6648    ;
+ $6643 DEC A         ;
+ $6644 LD ($6DBE),A  ;
+ $6647 RET NZ        ; still waiting
+*$6648 LD HL,($6DBC) ;
+ $664B LD ($6DB8),HL ; new position becomes current
+ $664E LD BC,($6DAE) ; bell timer
+ $6652 LD A,B        ;
+ $6653 OR C          ;
+ $6654 JR Z,$6673    ; not running: normal guard
+ $6656 DEC BC        ;
+ $6657 LD ($6DAE),BC ;
+ $665B LD DE,$7EC7   ; edible guard frames
+ $665E EX DE,HL      ; HL = frames, DE = position
+ $665F LD A,($6DBB)  ;
+ $6662 INC A         ;
+ $6663 LD ($6DBB),A  ;
+@isub=AND GUARD_SCARED_FRAME_BIT
+ $6666 AND $08       ;
+ $6668 CP $00        ;
+ $666A JR Z,$6670    ;
+@isub=LD BC,SPRITE_BYTES
+ $666C LD BC,$0020   ; second frame
+ $666F ADD HL,BC     ;
+*$6670 EX DE,HL      ; HL = position, DE = sprite
+ $6671 JR $669B      ;
+*$6673 EX DE,HL      ; DE = position
+ $6674 LD A,($6DBB)  ;
+ $6677 INC A         ;
+ $6678 LD ($6DBB),A  ;
+@isub=AND GUARD_WALK_FRAME_BIT
+ $667B AND $20       ;
+ $667D CP $00        ;
+ $667F JR NZ,$6686   ;
+ $6681 LD HL,$7E47   ; second set, direction 0
+ $6684 JR $6689      ;
+*$6686 LD HL,$7DC7   ; first set, direction 0
+; Direction * 32 (RLC five times) is the offset of the direction's sprite.
+*$6689 LD A,($6DBA)  ;
+ $668C RLC A         ;
+ $668E RLC A         ;
+ $6690 RLC A         ;
+ $6692 RLC A         ;
+ $6694 RLC A         ;
+ $6696 LD B,$00      ;
+ $6698 LD C,A        ;
+ $6699 ADD HL,BC     ;
+ $669A EX DE,HL      ; HL = position, DE = sprite
+*$669B CALL $6C0F    ;
+@isub=LD C,ATTR_GUARD
+ $669E LD C,$3B      ;
+ $66A0 CALL $6BD6    ;
+ $66A3 RET           ;
