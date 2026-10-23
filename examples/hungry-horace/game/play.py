@@ -1,6 +1,6 @@
 """Hungry Horace, stage 4, on Pyxel. From the project root: python game/play.py
 
-Needs game/assets.json (make game/assets.json). Keys as on the Spectrum (Q up,
+Needs game/assets/ (make game/assets/state.json). Keys as on the Spectrum (Q up,
 Z down, I left, P right, T sound) or the arrows."""
 import pyxel
 

@@ -166,14 +166,15 @@ port-html: port/labels.py port/variables.py port/image.bin
 	$(call WEB,port)
 
 # Stage 4 (skill zx-clean): the game in game/, bridge/ checks it against stage 3
-game/assets.json: port/image.bin port/labels.py port/variables.py
+# editable assets (PNG, text, JSON), written once: edits are kept (--force rewrites)
+game/assets/state.json: | port/image.bin port/labels.py port/variables.py
 	$(PY) bridge/assets.py
 
-stage4-test: game/assets.json $(RECORDS)
+stage4-test: game/assets/state.json $(RECORDS)
 	@$(PY) bridge/oracle.py game $(RECORDS)
 	@$(PY) bridge/oracle.py play
 
-game-html: game/assets.json
+game-html: game/assets/state.json
 	$(call WEB,game)
 
 audit:

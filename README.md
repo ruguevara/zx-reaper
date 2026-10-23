@@ -51,9 +51,10 @@ Out of scope: stage 5 for now; 128K and AY; protected and turbo loaders
 (such games start from a snapshot instead of the tape); games that need
 contention-exact timing.
 
-The method and its reasoning, in Russian: [docs/method.md](docs/method.md);
-the full Hungry Horace run and its comparison with the SkoolKit reference:
-[docs/hungry-horace-run.md](docs/hungry-horace-run.md).
+The method and its reasoning: [docs/method.md](docs/method.md); the full
+Hungry Horace run and its comparison with the SkoolKit reference:
+[docs/hungry-horace-run.md](docs/hungry-horace-run.md). Both are also in
+Russian (`*.ru.md` next to them).
 
 ## Layout
 

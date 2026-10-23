@@ -182,6 +182,13 @@ owns the cell's colour) and are modelled on purpose or registered as
 deviations. The rest (score, timers, pace, the demo's autopilot) maps
 directly from stage 3.
 
+The game's data is editable files in `game/assets/` (game data, not
+committed): PNG sheets for the tiles, sprites, fruit and title letters,
+loaded through `zxpyxel.png` and checked (size, Spectrum colours, one ink per
+cell); the mazes as text, one character a tile; the texts and the state as
+loaded as JSON. The font and the random bytes are the ROM's. The game check
+passing after the change is the round trip.
+
 Built (`examples/hungry-horace/`): `game/horace/` (state, world, movement,
 sprites, events, flow, render, sounds, controls; about 900 lines), `game/play.py`
 (a pacer over `zxpyxel.pyxel_host.run_display`), `bridge/` (decoder, assets,

@@ -19,15 +19,15 @@ that read like the rules, events for sound and time. It looks the same (the
 | `game/<pkg>/` | the stage 4 game, a package (its module names must not clash with `port/`) |
 | `game/<pkg>/constants.py` | the rules' numbers, hand-picked from `src/constants.asm`, names kept; no addresses |
 | `game/<pkg>/state.py` | the state: dataclasses of plain values; `Actions`, `Sound`, `Show` |
-| `game/<pkg>/assets.py` | loads `game/assets.json`: graphics as bytes, maps, texts |
+| `game/<pkg>/assets.py` | loads and checks `game/assets/`: graphics as bytes, maps, texts |
 | `game/<pkg>/world.py` | the leaf helpers (what stage 3's library did, on positions) |
 | `game/<pkg>/flow.py` | `Game`: start, `step(actions)`, the flow between title, play and game over |
-| `game/assets.json` | game data from the original's image (`python bridge/assets.py`); never committed |
+| `game/assets/` | the game's data as editable files, from the original's image (`python bridge/assets.py`); never committed |
 | `bridge/` | the only code that sees both stages: `decode.py` (stage 3 memory -> state), `assets.py`, `oracle.py` (the checks), `routines_<module>.py` (which stage 4 routine stands for which stage 3 routine) |
 
 `game/` never imports `port/` or anything with an address. The bridge is
 test and build code. Setup: `cp -R port/zxpyxel game/` (the library, as in
-`port/`), then `make game/assets.json`; `make stage4-test` is the gate,
+`port/`), then `make game/assets/state.json`; `make stage4-test` is the gate,
 `python game/play.py` plays it, `make game-html` builds the web page.
 
 ## The state
@@ -44,6 +44,29 @@ test and build code. Setup: `cp -R port/zxpyxel game/` (the library, as in
   draws it.
 - Random numbers keep the original's source (the ROM bytes the game reads),
   as a pointer in the state.
+
+## Assets
+
+Always as files a person can edit with ordinary tools, wherever the data
+has such a form; bytes only where it has none:
+
+- Graphics: PNG, through `zxpyxel.png` (standard library). One sheet per kind
+  (tiles, each figure's frames, fonts), drawn in the game's colours on its
+  paper. The loader turns them into 8-byte cells and checks them as they
+  load: the size, Spectrum colours only, one ink per 8x8 cell on the paper,
+  as on the hardware; an error names the file, the cell or pixel, and what
+  was expected. Where a cell's colour is data (fruit drawn in red and
+  green), it comes from the ink.
+- Maps: text, one character a tile, a legend at the top, a header line per
+  map for its positions.
+- Texts, positions, tables: JSON. The state as loaded (the variables before
+  the game starts): JSON.
+- Bytes (`.bin`) only for data with no better form. What zxpyxel ships (the
+  ROM's font and bytes) is not copied.
+
+`bridge/assets.py` writes the files once and keeps them after that (edits
+are not overwritten; `--force` writes them again). `make stage4-test` is the
+round-trip check: the game loads the files and must still match stage 3.
 
 ## Routines
 

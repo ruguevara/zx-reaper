@@ -66,17 +66,20 @@ code and the core do not change.
 
 ```
 zxpyxel/
-  machine.py     the Spectrum: memory, the ROM (48.rom), clock, ports, interrupts, frame sync, checkpoints
-  screen.py      screen memory → 256×192 palette indices; palettes; FLASH
-  draw.py        pset, lines, rectangles, polygons, blit, attribute writes, clipping
-  text.py        text in the ROM font or a loaded codepage
-  sprite.py      sprites from bytes (UDG); a PNG becomes bytes at build time
+  machine.py     the Spectrum: the ROM (48.rom), clock, ports, interrupts, frame sync, checkpoints, Goto
+  memory.py      mem, mem16 and typed variables over the same 64K, wrapping like the Z80
+  screen.py      screen bytes → 256×192 palette indices; palettes; FLASH
+  display.py     the screen without addresses (stage 4, new games): cells, sprites, ROM-font text, border
+  png.py         PNG in and out (standard library); Spectrum graphics as checked 8x8 cells
   sound.py       speaker edges → PCM (WAV bytes)
   rom.py         ROM routines games call (BEEPER, …) by ROM label
-  keys.py        key matrix: ZX key names ↔ half-row and bit; host key maps
-  pyxel_host.py  window, palette, blit, keys, audio; run(main)
-  headless.py    no window: scripted or replayed input, frame dumps, checkpoint log
+  keys.py        key matrix: ZX key names ↔ half-row and bit
+  pyxel_host.py  window, palette, blit, keys, audio; run(main) for ports, run_display(update, display)
+  headless.py    no window: scripted keys, or a Z80 record replayed and checked at checkpoints
 ```
+
+Not built yet: drawing primitives over the display (lines, rectangles,
+polygons, clipping) for new games.
 
 A port uses the machine and writes screen memory the way the original does.
 A new game uses the same machine and draws with `draw`, `text` and `sprite`,

@@ -18,11 +18,11 @@ and `template/skills/`, which get copied into each project.
   (copy the changed tools in, then `make`, `make test`, `make diff` there with
   the tape in `original/`).
 - Never commit game tapes, snapshots or RAM images made from them (`re/*.z80`,
-  `port/image.bin`), data extracted from them (`game/assets.json`, the
+  `port/image.bin`), data extracted from them (`game/assets/`, the
   Z80 records and web pages in `build/`) or split tape blocks (`re/tape/`).
-- `docs/method.md` (the method, in Russian) and `docs/hungry-horace-run.md`
-  are the master copies of the method and the reference run. Keep the
-  method in step when a stage changes.
+- `docs/method.md` (the method) and `docs/hungry-horace-run.md` (the
+  reference run) are the master copies; `docs/*.ru.md` are their Russian
+  versions. Keep both languages in step when a stage changes.
 
 ## Port everywhere
 

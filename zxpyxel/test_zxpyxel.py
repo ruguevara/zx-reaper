@@ -66,6 +66,31 @@ def test_display():
     assert screen.render(d.data, base=0) == screen.render(zx.mem) and d.attr(1, 9) == 0x7A
 
 
+def test_png(tmp='/tmp/zxpyxel-test.png'):
+    from zxpyxel import png
+    cells = [(bytes([0x81, 0x42, 0x24, 0x18, 0, 0xFF, 1, 0x80]), 2, False), (bytes(8), 0, False),
+             (bytes([0xF0] * 8), 4, True), (bytes([0x0F] * 8), 0, False)]
+    png.write_cells(tmp, 2, 2, cells)
+    assert png.cells(tmp, 2, 2) == cells                      # round trip, inks and BRIGHT
+    for bad, why in (((3, 2), 'pixels expected'),):
+        try:
+            png.cells(tmp, *bad)
+            assert False, why
+        except ValueError as e:
+            assert why in str(e)
+    # a 1-bit indexed PNG, as editors save two-colour images: black ink on white
+    import struct
+    import zlib
+
+    def chunk(k, b):
+        return struct.pack('>I', len(b)) + k + b + struct.pack('>I', zlib.crc32(k + b))
+    raw = b''.join(b'\0' + bytes([0xA5]) for _ in range(8))
+    open(tmp, 'wb').write(b'\x89PNG\r\n\x1a\n' + chunk(b'IHDR', struct.pack('>IIBBBBB', 8, 8, 1, 3, 0, 0, 0))
+                          + chunk(b'PLTE', bytes([205, 205, 205, 0, 0, 0])) + chunk(b'IDAT', zlib.compress(raw))
+                          + chunk(b'IEND', b''))
+    assert png.cells(tmp, 1, 1) == [(bytes([0xA5]) * 8, 0, False)]
+
+
 def test_goto():
     trail = []
 
