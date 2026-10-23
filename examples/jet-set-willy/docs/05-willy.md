@@ -193,7 +193,7 @@ state.
    (room 29) the page is $B6 ([SpritesFlapper](../src/sprites.asm#L2273)) with the facing half
    swapped, so Willy appears as the flapping creature (F58).
 
-![Willy's eight frames: four facing right, four facing left](img/willy.png)
+![Willy's eight frames: four facing right, four facing left](img/willy.png) ![Walking: frames 0-3 facing right, then 3-0 facing left](img/willy-walk.gif)
 
 ![Willy in The Nightmare Room, drawn from page $B6 (bottom middle)](img/nightmare.png)
 

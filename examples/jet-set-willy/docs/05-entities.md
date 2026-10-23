@@ -141,6 +141,10 @@ pixel rows), and some have step 0 and only animate in place.
 ## Sprites
 
 The 26 pages and the guardians that use them are in the
-[gallery](07-graphics.md#sprite-pages). The figure in the Master Bedroom and
+[gallery](07-graphics.md#sprite-pages); every guardian's animation is in
+[Guardian animations](07-graphics.md#guardian-animations).
+
+![Room 16 in play, Willy hidden: the rope swings, the arrow crosses, the guardians move (one GIF frame per pass)](img/room-16.gif)
+ The figure in the Master Bedroom and
 the toilet are not entities; they are drawn by
 [UpdateBedroom](../src/specialrooms.asm#L22) and [DrawToilet](../src/specialrooms.asm#L107) ([Items and the ending](05-items-ending.md)).

@@ -21,11 +21,13 @@ Indexes run from [FirstItemIndex](../src/itemtable.asm#L10) ($AD) to $FF. The se
 low byte of the cell's address in the work attribute buffer ($5C or $5D) and
 in the work bitmap ($60 or $68), so no arithmetic is needed (F15).
 
-![The item picture of each room, rooms 0-60 in rows of 16](img/item-graphics.png)
+![The item picture of each room, rooms 0-60 in rows of 16, with the number of items the table puts in the room](img/item-graphics.png)
 
-The picture is room bytes $E1-$E8 ([RoomItemGfx](../src/buffers.asm#L68)). Five rooms (20, 23,
-41, 42, 45) have a picture but no item, and room 28 has an item with a blank
-picture (F49).
+The picture is room bytes $E1-$E8 ([RoomItemGfx](../src/buffers.asm#L68)), the count under it is
+from the item table. 17 rooms have no item and a blank picture. Six rooms
+(20, 23, 41, 45, 47, 48) have a picture but no item, room 42's picture is a
+solid block ($FF in all 8 bytes) with no item, and room 28 has an item with a
+blank picture, so that item is invisible (F49, F122).
 
 ## Drawing and collecting
 
@@ -85,7 +87,7 @@ The frame depends on Willy's height (F63):
 | $C0-$CF and above $D0 | 2 |
 | below $C0 (the upper platform) | 3, an arm stretched out |
 
-![The four frames of the figure](img/figure.png)
+![The four frames of the figure](img/figure.png) ![Frames 0 and 1 alternating: the figure with Willy on the low floor](img/figure.gif)
 
 The title message names Maria as the one who must let Willy get to his bed;
 the sources call this sprite "the figure", and nothing in the code names it.
@@ -104,7 +106,7 @@ Willy runs right out of the Master Bedroom, through "Top Landing" (34) and
 into "The Bathroom" (33); the rooms on the way are played normally, and in
 the simulator run he fell into room 28 on the way and came back (F65).
 
-![Stage 3: the toilet with frames 2-3, Willy gone](img/ending.png)
+![Stage 3: the toilet with frames 2-3, Willy gone](img/ending.png) ![The toilet: frames 0-1 in play, then frames 2-3 of stage 3](img/toilet.gif)
 
 [DrawToilet](../src/specialrooms.asm#L107) runs in every room except the Master Bedroom (it is the
 other branch of [UpdateBedroom](../src/specialrooms.asm#L22)) and does nothing outside the Bathroom.

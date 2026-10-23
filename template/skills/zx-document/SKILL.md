@@ -74,7 +74,15 @@ All images come from the game's bytes, never redrawn by hand:
 
 - Sprite and tile sheets: `tools/zxgfx.py sheet ADDR COUNT W H docs/img/x.png
   --attrs ...` (colours = the attributes the game uses; `--layout linear` for
-  row-ordered sprites).
+  row-ordered sprites; `--labels` captions each graphic, e.g. with how often
+  the game uses it).
+- Sprites with animation frames or movement phases: a GIF per animation,
+  `tools/zxgfx.py gif ADDR COUNT W H docs/img/x.gif --order 0,1,2,3 --delay CS`,
+  in the order and at the speed the game shows them (the frame rule comes
+  from the code). Many animated objects (all enemies): one GIF of a sheet,
+  built with `compose` and `write_gif` from `tools/zxgfx.py` in a project
+  script. Things that move across a level: sample the screen every few frames
+  (`tools/zxrun.py ... --frames N --dump`) and write the frames as a GIF.
 - Levels, title graphics and anything with its own drawing routine: call the
   game's routine in the simulator and save the screen:
   `tools/zxrun.py re/orig.z80 --cls ATTR --call DrawMaze --reg HL=... --reg DE=$4000

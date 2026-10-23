@@ -30,9 +30,11 @@ each room and draw one pass. The commands are in
 Rendered in white (the game draws Willy with whatever ink his cells have:
 white where he marks background cells).
 
-![Willy: frames 0-3 facing right ($9D00), 0-3 facing left ($9D80)](img/willy.png)
+![Willy: frames 0-3 facing right ($9D00), 0-3 facing left ($9D80)](img/willy.png) ![Willy walking: right frames 0-3, then left frames 3-0](img/willy-walk.gif)
 
-![The figure in the Master Bedroom, frames 0-3 ($9C80), in the cyan of its top cells](img/figure.png)
+![The figure in the Master Bedroom, frames 0-3 ($9C80), in the cyan of its top cells](img/figure.png) ![The figure's frames 0 and 1 alternating, in its colours (cyan top cells, white bottom cells)](img/figure.gif)
+
+![The toilet ($A600): frames 0-1 in play, frames 2-3 in ending stage 3](img/toilet.gif)
 
 ![Foot ($9C40) and barrel ($9C60)](img/foot-barrel.png)
 
@@ -74,6 +76,29 @@ rooms use each page is in the comment of each page in
 | 25 | $BE | [SpritesStalkHeadBall](../src/sprites.asm#L3408) | head on a stalk, dark ball |
 | 26 | $BF | [SpritesImpsGuards](../src/sprites.asm#L3552) | stick figure, spear guard and plumed guard |
 
+## Guardian animations
+
+Every guardian of rooms 0-60, in its ink on black, cycling through the
+frames the game shows: a horizontal guardian (type 1) through phases 0-3
+walking right, then 3-0 walking left; a vertical guardian (type 2) through
+phases 0-7. The frame is ((byte 0 AND byte 1) OR slot byte) >> 5 (F54), so
+one definition placed with two different slot bytes appears twice. Caption:
+definition index and the rooms that use it ("+" = more rooms). The real
+speed is one phase per pass for vertical guardians with bit 4 set, half that
+otherwise, and one phase per pass for horizontal guardians (they move one
+column per four phases); here every frame lasts 0.16 s. Made by
+[`scripts/docs-anim.py`](../scripts/docs-anim.py) from the definitions and the room slots.
+
+![Every guardian's animation cycle](img/guardians.gif)
+
+## Rooms in motion
+
+Room 16 recorded in the simulator, one GIF frame every 4 frames (about one
+pass of the frame loop), with Willy hidden (ending stage 3): the rope swings
+between its limits, the arrow crosses the room, the guardians move.
+
+![Room 16 in play](img/room-16.gif)
+
 ## Code screen and title graphics
 
 ![The four keys of the code screen ($9B00) in the inks of CodeScreenAttrs](img/code-keys.png)
@@ -82,10 +107,13 @@ rooms use each page is in the comment of each page in
 
 ## Item pictures
 
-One per room (room bytes $E1-$E8), rooms 0-60 in rows of 16, in yellow.
-In play they flash in magenta, green, cyan and yellow.
+One per room (room bytes $E1-$E8), rooms 0-60 in rows of 16, in yellow,
+with the room number and the number of items the item table puts in that
+room ("-" for none). In play they flash in magenta, green, cyan and yellow.
+A picture with "-" is never shown; room 28's item has a blank picture
+(F49, F122).
 
-![Item pictures of rooms 0-60](img/item-graphics.png)
+![Item pictures of rooms 0-60 with item counts](img/item-graphics.png)
 
 ## Tiles
 

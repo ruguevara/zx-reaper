@@ -25,6 +25,8 @@ all: $(IMG)/loader.png $(IMG)/code-screen.png $(IMG)/title-screen.png \
      $(IMG)/death.png $(IMG)/gameover-fall.png $(IMG)/gameover-end.png \
      $(IMG)/ending.png $(IMG)/nightmare.png $(IMG)/pause.png \
      $(IMG)/attic-after-16.png \
+     $(IMG)/guardians.gif $(IMG)/willy-walk.gif $(IMG)/figure.gif \
+     $(IMG)/toilet.gif $(IMG)/room-16.gif \
      $(ROOM_PNGS) $(IMG)/room-map.png
 
 $(TMP):
@@ -97,9 +99,23 @@ $(IMG)/code-keys.png:
 	$(GFX) 0x9B00 4 2 2 $@ --layout linear --attrs 0x41,0x42,0x03,0x04 --scale 4
 $(IMG)/title-pieces.png:
 	$(GFX) 0x8431 4 1 1 $@ --attr 0x05 --scale 6
-# item graphic of every room (room byte $E1, one page per room)
-$(IMG)/item-graphics.png:
-	$(GFX) 0xC0E1 61 1 1 $@ --stride 256 --attr 0x46 --cols 16 --scale 4
+# item graphic of every room (room byte $E1, one page per room), captioned
+# with the room number and how many items the item table puts there
+$(IMG)/item-graphics.png: scripts/docs-anim.py
+	$(PY) scripts/docs-anim.py items $@
+# --- animations (GIF) ---------------------------------------------------
+# every guardian of rooms 0-60 cycling through its frames (horizontal movers:
+# right 0-3 then left 3-0; vertical movers: phases 0-7), captioned with the
+# definition index and its rooms
+$(IMG)/guardians.gif: scripts/docs-anim.py
+	$(PY) scripts/docs-anim.py guardians $@
+# Willy walking right then left, the figure's arm, the toilet (frames 0-1,
+# then 2-3 of ending stage 3)
+$(IMG)/willy-walk.gif $(IMG)/figure.gif $(IMG)/toilet.gif &: scripts/docs-anim.py
+	$(PY) scripts/docs-anim.py sprites $(IMG)
+# room 16 in play, Willy hidden: the rope swings, the arrow and guardians move
+$(IMG)/room-16.gif: $(INGAME) scripts/docs-anim.py
+	$(PY) scripts/docs-anim.py room $(INGAME) 16 $@
 # the six tiles of rooms 24 and 29 as defined (attribute + 8 rows)
 $(IMG)/tiles-24.png:
 	$(GFX) 0xD8A0 6 1 1 $@ --layout attrcells --scale 6
