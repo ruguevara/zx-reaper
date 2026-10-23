@@ -16,15 +16,20 @@ c$94D2 LD A,($80EC)  ;
  $94D8 XOR A         ;
  $94D9 LD ($85CF),A  ; Y = 0
  $94DC LD A,($85D1)  ;
+@isub=CP AIR_FATAL_FALL-1
  $94DF CP $0B        ;
  $94E1 JR NC,$94E8   ;
+@isub=LD A,AIR_FALL_START
  $94E3 LD A,$02      ;
  $94E5 LD ($85D1),A  ;
 @label=ExitRoomDown_Column
  $94E8 LD A,($85D3)  ;
+@isub=AND COLUMN_MASK
  $94EB AND $1F       ; row 0, same column
  $94ED LD ($85D3),A  ;
+@isub=LD A,SCREEN_ATTRS_BUF>>8
  $94F0 LD A,$5C      ; attribute page of the upper half
+@isub=LD (WillyAttrAddr+1),A
  $94F2 LD ($85D4),A  ;
  $94F5 POP HL        ; drop the return address
  $94F6 JP $8912      ; load the new room

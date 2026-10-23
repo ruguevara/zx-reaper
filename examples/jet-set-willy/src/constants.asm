@@ -225,3 +225,4 @@ ROOM_NIGHTMARE           EQU 0x1D ; room number of The Nightmare Room, where Wil
 WILLY_FACING_HALF        EQU 0x80 ; offset of the right-facing half (frames 4-7) in a Willy sprite page
 RAMP_OFFSET_MASK         EQU 0x0C ; bits of the ramp Y offset of the Willy sprite (0, 4, 8 or 12 index units)
 TUNE_PASSES              EQU 100 ; passes of 256 inner iterations that one tune note lasts
+TOILET_ROW               EQU 13 ; Bathroom: character row of the top of the toilet sprite (2 cells high)

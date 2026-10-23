@@ -25,17 +25,17 @@ c$959A LD A,($8420)  ; current room
  $95AC CP $03        ;
  $95AE JR NZ,$95B2   ;
  $95B0 SET 6,E       ; at the toilet: frame 2 or 3
-@isub=LD D,SpritesToilet/256
+@isub=LD D,SpritesToilet>>8
 *$95B2 LD D,$A6      ; DE = sprite
 @isub=LD IX,RowAddressTable+BEDROOM_FLOOR_Y
  $95B4 LD IX,$82D0   ; row table entry of pixel row 104
-@isub=LD BC,SPRITE_HEIGHT*256+TOILET_COLUMN
+@isub=LD BC,SPRITE_HEIGHT*HI_BYTE+TOILET_COLUMN
  $95B8 LD BC,$101C   ; 16 rows, column 28
  $95BB CALL $9668    ;
-@isub=LD HL,WHITE*256+WHITE
+@isub=LD HL,WHITE*HI_BYTE+WHITE
  $95BE LD HL,$0707   ;
-@isub=LD (SCREEN_ATTRS_BUF+13*SCREEN_COLS+TOILET_COLUMN),HL
+@isub=LD (SCREEN_ATTRS_BUF+TOILET_ROW*SCREEN_COLS+TOILET_COLUMN),HL
  $95C1 LD ($5DBC),HL ; row 13, columns 28-29
-@isub=LD (SCREEN_ATTRS_BUF+14*SCREEN_COLS+TOILET_COLUMN),HL
+@isub=LD (SCREEN_ATTRS_BUF+(TOILET_ROW+1)*SCREEN_COLS+TOILET_COLUMN),HL
  $95C4 LD ($5DDC),HL ; row 14
  $95C7 RET           ;

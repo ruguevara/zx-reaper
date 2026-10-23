@@ -44,6 +44,7 @@ c$95C8 LD HL,($85D3) ; Willy's top-left attribute cell
  $95E1 OR A          ;
  $95E2 JR NZ,$95F8   ; jumping or falling: no offset
  $95E4 LD A,($85D2)  ; animation frame
+@isub=AND ANIM_FRAME_MASK
  $95E7 AND $03       ;
  $95E9 RLCA          ;
  $95EA RLCA          ; frame * 4
@@ -51,8 +52,10 @@ c$95C8 LD HL,($85D3) ; Willy's top-left attribute cell
  $95EC LD A,($80DA)  ;
  $95EF AND $01       ;
  $95F1 DEC A         ; direction 0: $FF, 1: 0
+@isub=XOR RAMP_OFFSET_MASK
  $95F2 XOR $0C       ;
  $95F4 XOR B         ;
+@isub=AND RAMP_OFFSET_MASK
  $95F5 AND $0C       ; direction 0: frame*4, direction 1: 12-frame*4
  $95F7 LD B,A        ;
 *$95F8 LD HL,($85D3) ;

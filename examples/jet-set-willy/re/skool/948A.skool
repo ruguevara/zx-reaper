@@ -12,7 +12,9 @@
 c$948A LD A,($80E9)  ;
  $948D LD ($8420),A  ; new current room
  $9490 LD A,($85D3)  ;
+@isub=OR COLUMN_MASK
  $9493 OR $1F        ;
+@isub=AND ~1
  $9495 AND $FE       ; column = 30 (low 5 bits 11110), row bits unchanged
  $9497 LD ($85D3),A  ;
  $949A POP HL        ; drop the return address

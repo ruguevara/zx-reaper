@@ -10,7 +10,7 @@
 ; DE Screen address of pixel row 0 of the character cell
 ; O:DE Screen address of pixel row 0 of the cell 8 pixel rows lower (D advanced by 8)
 @label=PrintChar
-@isub=LD H,ROM_FONT_CODE0/CELL_HEIGHT/256
+@isub=LD H,ROM_FONT_CODE0/CELL_HEIGHT>>8
 c$9691 LD H,$07      ;
  $9693 LD L,A        ;
  $9694 SET 7,L       ; HL = $0780+A (A < 128)

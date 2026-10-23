@@ -34,6 +34,7 @@ c$9534 LD A,($8420)  ; current room
  $9547 RRCA          ;
  $9548 RRCA          ;
  $9549 RRCA          ; -> $20 or 0
+@isub=OR SpriteFigure0&$FF
  $954A OR $80        ; frame 0 ($9C80) or 1 ($9CA0)
  $954C LD E,A        ;
  $954D LD A,($85CF)  ;
@@ -47,24 +48,25 @@ c$9534 LD A,($8420)  ; current room
  $9558 JR NC,$955C   ;
 @isub=LD E,SpriteFigure3&$FF
  $955A LD E,$E0      ; Willy higher up: frame 3
-@isub=LD D,SpriteFigure0/256
+@isub=LD D,SpriteFigure0>>8
 *$955C LD D,$9C      ; DE = sprite
-@isub=LD HL,SCREEN_PIXEL_BUF+$86E
+@isub=LD HL,SCREEN_PIXEL_BUF+THIRD_SIZE+(FIGURE_ROW-CELL_HEIGHT)*SCREEN_COLS+FIGURE_COLUMN
  $955E LD HL,$686E   ; buffer address of the figure
  $9561 LD C,$01      ; collision test
  $9563 CALL $9456    ;
  $9566 JP NZ,$90B7   ; overlaps Willy (or anything drawn): Willy dies
-@isub=LD HL,(BRIGHT+CYAN)*256+BRIGHT+CYAN
+@isub=LD HL,(BRIGHT+CYAN)*HI_BYTE+BRIGHT+CYAN
  $9569 LD HL,$4545   ;
-@isub=LD (SCREEN_ATTRS_BUF+11*SCREEN_COLS+14),HL
+@isub=LD (SCREEN_ATTRS_BUF+FIGURE_ROW*SCREEN_COLS+FIGURE_COLUMN),HL
  $956C LD ($5D6E),HL ; row 11, columns 14-15
-@isub=LD HL,WHITE*256+WHITE
+@isub=LD HL,WHITE*HI_BYTE+WHITE
  $956F LD HL,$0707   ;
-@isub=LD (SCREEN_ATTRS_BUF+12*SCREEN_COLS+14),HL
+@isub=LD (SCREEN_ATTRS_BUF+(FIGURE_ROW+1)*SCREEN_COLS+FIGURE_COLUMN),HL
  $9572 LD ($5D8E),HL ; row 12, columns 14-15
  $9575 RET           ;
 ; Ending stage not 0: watch for Willy reaching the bed end of the room.
 *$9576 LD A,($85D3)  ; low byte of Willy's attribute address
+@isub=AND COLUMN_MASK
  $9579 AND $1F       ; column
 @isub=CP BED_END_COLUMN
  $957B CP $06        ;

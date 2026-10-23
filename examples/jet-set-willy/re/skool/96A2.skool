@@ -19,6 +19,7 @@ c$96A2 LD A,(HL)     ;
 @isub=CP TUNE_END
  $96A3 CP $FF        ;
  $96A5 RET Z         ;
+@isub=LD BC,TUNE_PASSES
  $96A6 LD BC,$0064   ;
  $96A9 XOR A         ;
  $96AA LD E,(HL)     ;
@@ -34,6 +35,7 @@ c$96A2 LD A,(HL)     ;
 *$96B4 DJNZ $96AC    ;
  $96B6 EX AF,AF'     ;
  $96B7 LD A,C        ;
+@isub=CP TUNE_PASSES/2
  $96B8 CP $32        ;
  $96BA JR NZ,$96BE   ;
  $96BC RL E          ; halfway through the note: double the half-period

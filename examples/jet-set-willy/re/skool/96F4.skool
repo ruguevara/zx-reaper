@@ -15,10 +15,13 @@
 @label=ShowAttrMap
 c$96F4 LD HL,$5E00   ;
  $96F7 LD DE,$5800   ;
+@isub=LD BC,ROOM_ATTRS_SIZE
  $96FA LD BC,$0200   ;
  $96FD LDIR          ;
  $96FF LD HL,$4000   ;
+@isub=LD DE,SCREEN+1
  $9702 LD DE,$4001   ;
+@isub=LD BC,ROOM_BITMAP_SIZE-1
  $9705 LD BC,$0FFF   ;
  $9708 LD (HL),$18   ;
  $970A LDIR          ;

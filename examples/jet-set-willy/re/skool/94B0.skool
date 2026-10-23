@@ -13,11 +13,16 @@
 c$94B0 LD A,($80EB)  ;
  $94B3 LD ($8420),A  ; new current room
  $94B6 LD A,($85D3)  ;
+@isub=AND COLUMN_MASK
  $94B9 AND $1F       ; keep the column, clear the row bits
+@isub=ADD A,SCREEN_COLS*(Y_LOW_FLOOR/Y_ROW_STEP-CELL_HEIGHT)
  $94BB ADD A,$A0     ; row bits 101 = row 5
  $94BD LD ($85D3),A  ;
+@isub=LD A,1+(SCREEN_ATTRS_BUF>>8)
  $94C0 LD A,$5D      ; attribute page of the lower half
+@isub=LD (WillyAttrAddr+1),A
  $94C2 LD ($85D4),A  ;
+@isub=LD A,Y_LOW_FLOOR
  $94C5 LD A,$D0      ; Y = 104 pixel rows * 2
  $94C7 LD ($85CF),A  ;
  $94CA XOR A         ;

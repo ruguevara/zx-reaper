@@ -745,6 +745,11 @@ def cmd_export(asm_path, modules_path, outdir):
     while chunks and all(directive.match(line) for line in chunks[0].split('\n')):
         head.append(chunks.pop(0))
     head = '\n\n'.join(head)
+    # an @org on a later entry (a fixed part after a shifted one) is a chunk
+    # of its own: it belongs to the entry that follows
+    for i in range(len(chunks) - 2, -1, -1):
+        if all(re.match(r'^\s*ORG\s', line, re.I) for line in chunks[i].split('\n')):
+            chunks[i:i + 2] = [chunks[i] + '\n' + chunks[i + 1]]
     if len(chunks) != len(entries):
         sys.exit('asm has %d entries, skool has %d: cannot split' % (len(chunks), len(entries)))
     mods = []

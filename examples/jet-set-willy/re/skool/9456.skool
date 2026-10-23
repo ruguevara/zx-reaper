@@ -54,17 +54,22 @@ c$9456 LD B,$10      ;
  $946F INC H         ; next pixel row
  $9470 INC DE        ;
  $9471 LD A,H        ;
+@isub=AND CELL_HEIGHT-1
  $9472 AND $07       ;
  $9474 JR NZ,$9486   ;
  $9476 LD A,H        ; crossed into the next character row
+@isub=SUB CELL_HEIGHT
  $9477 SUB $08       ;
  $9479 LD H,A        ;
  $947A LD A,L        ;
+@isub=ADD A,SCREEN_COLS
  $947B ADD A,$20     ;
  $947D LD L,A        ;
+@isub=AND ~COLUMN_MASK
  $947E AND $E0       ;
  $9480 JR NZ,$9486   ;
  $9482 LD A,H        ; crossed into the next third of the bitmap
+@isub=ADD A,THIRD_PAGES
  $9483 ADD A,$08     ;
  $9485 LD H,A        ;
 *$9486 DJNZ $9458    ;

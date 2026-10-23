@@ -31,6 +31,7 @@
 ; Hardware: writes the speaker/MIC/border bits of port $FE (busy-wait beep)
 ; on a pick-up; the pixels go to the screen buffer, not to the screen.
 @label=UpdateItems
+@isub=LD H,ItemRoomTable>>8
 c$93D1 LD H,$A4        ;
  $93D3 LD A,($A3FF)    ;
  $93D6 LD L,A          ;
@@ -45,6 +46,7 @@ c$93D1 LD H,$A4        ;
  $93E2 LD A,(HL)       ; bit 7 (bottom half) becomes bit 0 of the attribute page
  $93E3 RLCA            ;
  $93E4 AND $01         ;
+@isub=ADD A,SCREEN_ATTRS_BUF>>8
  $93E6 ADD A,$5C       ;
  $93E8 LD D,A          ; D = $5C or $5D
  $93E9 INC H           ;
@@ -58,23 +60,28 @@ c$93D1 LD H,$A4        ;
  $93F1 JR NZ,$9430     ; not touched: draw the item
  $93F3 LD IX,$857C     ; collected: add 1 to the three-digit counter
 @label=UpdateItems_Carry
+@isub=INC (IX+ITEM_DIGITS-1)
 *$93F7 INC (IX+$02)    ;
+@isub=LD A,(IX+ITEM_DIGITS-1)
  $93FA LD A,(IX+$02)   ;
 @isub=CP ASCII_AFTER_NINE
  $93FD CP $3A          ;
  $93FF JR NZ,$9409     ;
-@isub=LD (IX+$02),ASCII_ZERO
+@isub=LD (IX+ITEM_DIGITS-1),ASCII_ZERO
  $9401 LD (IX+$02),$30 ; digit overflow: back to 0, carry to the next digit
  $9405 DEC IX          ;
  $9407 JR $93F7        ;
 @label=UpdateItems_Sound
  $9409 LD A,($80DE)    ; beep: border colour, then alternating with the beeper bits
+@isub=LD C,ITEM_BEEP_START
  $940C LD C,$80        ; C = $80, $7E, ... 2: 64 half-periods; delay B = $90 - C grows,
 @label=UpdateItems_Beep
+@isub=OUT (ULA_PORT),A
 *$940E OUT ($FE),A     ; so the pitch falls
 @isub=XOR BEEPER_BITS
  $9410 XOR $18         ;
  $9412 LD E,A          ;
+@isub=LD A,ITEM_BEEP_DELAY
  $9413 LD A,$90        ;
  $9415 SUB C           ;
  $9416 LD B,A          ;
@@ -95,11 +102,13 @@ c$93D1 LD H,$A4        ;
 @label=UpdateItems_Draw
 *$9430 LD A,($85CB)    ; ink = 3 + ((pass counter + table index) AND 3)
  $9433 ADD A,L         ;
+@isub=AND ITEM_COLOURS-1
  $9434 AND $03         ;
+@isub=ADD A,MAGENTA
  $9436 ADD A,$03       ;
  $9438 LD C,A          ;
  $9439 LD A,(DE)       ;
-@isub=AND $FF-INK_MASK
+@isub=AND ~INK_MASK
  $943A AND $F8         ;
  $943C OR C            ;
  $943D LD (DE),A       ;
@@ -108,7 +117,9 @@ c$93D1 LD H,$A4        ;
  $9440 RLCA            ;
  $9441 RLCA            ;
  $9442 RLCA            ;
+@isub=AND THIRD_PAGES
  $9443 AND $08         ;
+@isub=ADD A,SCREEN_PIXEL_BUF>>8
  $9445 ADD A,$60       ;
  $9447 LD D,A          ;
  $9448 PUSH HL         ;

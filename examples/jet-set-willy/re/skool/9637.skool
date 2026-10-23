@@ -24,7 +24,7 @@
 @label=DrawWilly
 c$9637 LD A,($85CF)  ;
  $963A ADD A,B       ;
-@isub=LD IXh,RowAddressTable/256
+@isub=LD IXh,RowAddressTable>>8
  $963B LD IXh,$82    ;
  $963E LD IXl,A      ;
  $9640 LD A,($85D0)  ;
@@ -32,6 +32,7 @@ c$9637 LD A,($85CF)  ;
  $9645 RRCA          ; facing -> bit 7
  $9646 LD E,A        ;
  $9647 LD A,($85D2)  ;
+@isub=AND ANIM_FRAME_MASK
  $964A AND $03       ;
  $964C RRCA          ;
  $964D RRCA          ;
@@ -41,15 +42,19 @@ c$9637 LD A,($85CF)  ;
 @isub=LD D,WILLY_SPRITE_PAGE
  $9651 LD D,$9D      ;
  $9653 LD A,($8420)  ;
+@isub=CP ROOM_NIGHTMARE
  $9656 CP $1D        ;
  $9658 JR NZ,$9660   ;
+@isub=LD D,SpritesFlapper>>8
  $965A LD D,$B6      ;
  $965C LD A,E        ;
+@isub=XOR WILLY_FACING_HALF
  $965D XOR $80       ;
  $965F LD E,A        ;
 @isub=LD B,SPRITE_HEIGHT
 *$9660 LD B,$10      ;
  $9662 LD A,($85D3)  ;
+@isub=AND COLUMN_MASK
  $9665 AND $1F       ;
  $9667 LD C,A        ;
 ; Alternative entry: OR a 16x16 sprite into the $6000 buffer through a row

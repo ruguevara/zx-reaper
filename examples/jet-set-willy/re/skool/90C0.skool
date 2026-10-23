@@ -49,42 +49,62 @@ c$90C0 LD IX,$8100     ;
 @isub=BIT ENTITY_DIR_BIT,(IX+$00)
  $90D9 BIT 7,(IX+$00)  ; type 3: swing direction
  $90DD JR Z,$90FF      ;
+@isub=LD A,(IX+ENT_SWING)
  $90DF LD A,(IX+$01)   ; swing position: bit 7 = side, bits 0-6 = distance
  $90E2 BIT 7,A         ;
  $90E4 JR Z,$90F5      ;
+@isub=SUB ROPE_STEP
  $90E6 SUB $02         ; direction 1, left side: distance down by 2 (by 4 once it is below $14)
+@isub=CP ROPE_SIDE_LEFT+ROPE_FAST_DOWN
  $90E8 CP $94          ;
  $90EA JR NC,$911D     ;
+@isub=SUB ROPE_STEP
  $90EC SUB $02         ;
+@isub=CP ROPE_SIDE_LEFT
  $90EE CP $80          ;
  $90F0 JR NZ,$911D     ;
  $90F2 XOR A           ; middle reached: stored as 0 (right side, distance 0)
  $90F3 JR $911D        ;
+@isub=ADD A,ROPE_STEP
 *$90F5 ADD A,$02       ; direction 1, right side: distance up by 2 (by 4 while below $12)
+@isub=CP ROPE_FAST_UP
  $90F7 CP $12          ;
  $90F9 JR NC,$911D     ;
+@isub=ADD A,ROPE_STEP
  $90FB ADD A,$02       ;
  $90FD JR $911D        ;
+@isub=LD A,(IX+ENT_SWING)
 *$90FF LD A,(IX+$01)   ; direction 0
  $9102 BIT 7,A         ;
  $9104 JR NZ,$9115     ;
+@isub=SUB ROPE_STEP
  $9106 SUB $02         ; right side: distance down by 2 (by 4 once it is below $14)
+@isub=CP ROPE_FAST_DOWN
  $9108 CP $14          ;
  $910A JR NC,$911D     ;
+@isub=SUB ROPE_STEP
  $910C SUB $02         ;
  $910E OR A            ;
  $910F JR NZ,$911D     ;
+@isub=LD A,ROPE_SIDE_LEFT
  $9111 LD A,$80        ; middle reached: stored as $80 (left side, distance 0)
  $9113 JR $911D        ;
+@isub=ADD A,ROPE_STEP
 *$9115 ADD A,$02       ; left side: distance up by 2 (by 4 while below $12)
+@isub=CP ROPE_SIDE_LEFT+ROPE_FAST_UP
  $9117 CP $92          ;
  $9119 JR NC,$911D     ;
+@isub=ADD A,ROPE_STEP
  $911B ADD A,$02       ;
+@isub=LD (IX+ENT_SWING),A
 *$911D LD (IX+$01),A   ; store the new swing position
+@isub=AND ROPE_DIST_MASK
  $9120 AND $7F         ; distance only
+@isub=CP (IX+ENT_LIMIT_HIGH)
  $9122 CP (IX+$07)     ; swing limit reached?
  $9125 JP NZ,$91B6     ;
  $9128 LD A,(IX+$00)   ; yes: flip the swing direction
+@isub=XOR 1<<ENTITY_DIR_BIT
  $912B XOR $80         ;
  $912D LD (IX+$00),A   ;
  $9130 JP $91B6        ;
@@ -95,15 +115,20 @@ c$90C0 LD IX,$8100     ;
  $9139 LD A,(IX+$00)   ;
 @isub=SUB ENTITY_PHASE_STEP
  $913C SUB $20         ; going left: phase down by one
+@isub=AND (1<<ENTITY_DIR_BIT)-1
  $913E AND $7F         ; direction bit stays clear
  $9140 LD (IX+$00),A   ;
+@isub=CP ENTITY_LAST_PHASE*ENTITY_PHASE_STEP
  $9143 CP $60          ; phase 3 means it wrapped from 0: step
  $9145 JR C,$91B6      ;
+@isub=LD A,(IX+ENT_COLUMN)
  $9147 LD A,(IX+$02)   ; column
 @isub=AND COLUMN_MASK
  $914A AND $1F         ;
+@isub=CP (IX+ENT_LIMIT_LOW)
  $914C CP (IX+$06)     ; left end of the beat?
  $914F JR Z,$9156      ;
+@isub=DEC (IX+ENT_COLUMN)
  $9151 DEC (IX+$02)    ; no: one column left
  $9154 JR $91B6        ;
 @isub=LD (IX+$00),ENTITY_GO_RIGHT
@@ -112,15 +137,20 @@ c$90C0 LD IX,$8100     ;
 *$915C LD A,(IX+$00)   ; going right: phase up by one
 @isub=ADD A,ENTITY_PHASE_STEP
  $915F ADD A,$20       ;
+@isub=OR 1<<ENTITY_DIR_BIT
  $9161 OR $80          ;
  $9163 LD (IX+$00),A   ;
+@isub=CP ENTITY_PHASE_STEP+(1<<ENTITY_DIR_BIT)
  $9166 CP $A0          ; phase 0 means it wrapped from 3: step (phase 1-3 give $A1 or more)
  $9168 JR NC,$91B6     ;
+@isub=LD A,(IX+ENT_COLUMN)
  $916A LD A,(IX+$02)   ; column
 @isub=AND COLUMN_MASK
  $916D AND $1F         ;
+@isub=CP (IX+ENT_LIMIT_HIGH)
  $916F CP (IX+$07)     ; right end of the beat?
  $9172 JR Z,$9179      ;
+@isub=INC (IX+ENT_COLUMN)
  $9174 INC (IX+$02)    ; no: one column right
  $9177 JR $91B6        ;
 @isub=LD (IX+$00),ENTITY_GO_LEFT
@@ -128,26 +158,37 @@ c$90C0 LD IX,$8100     ;
  $917D JR $91B6        ;
 @label=MoveEntities_Vertical
 *$917F LD A,(IX+$00)   ; type 2
+@isub=XOR ENTITY_V_FLIP
  $9182 XOR $08         ; bit 3 flips every pass
  $9184 LD (IX+$00),A   ;
+@isub=AND ENTITY_V_ANIM_MASK
  $9187 AND $18         ; bits 3-4 set: phase up by one
  $9189 JR Z,$9193      ;
  $918B LD A,(IX+$00)   ;
 @isub=ADD A,ENTITY_PHASE_STEP
  $918E ADD A,$20       ;
  $9190 LD (IX+$00),A   ;
+@isub=LD A,(IX+ENT_Y)
 *$9193 LD A,(IX+$03)   ; Y index plus step
+@isub=ADD A,(IX+ENT_STEP)
  $9196 ADD A,(IX+$04)  ;
+@isub=LD (IX+ENT_Y),A
  $9199 LD (IX+$03),A   ;
+@isub=CP (IX+ENT_LIMIT_HIGH)
  $919C CP (IX+$07)     ; bottom limit reached or passed: reverse
  $919F JR NC,$91AE     ;
+@isub=CP (IX+ENT_LIMIT_LOW)
  $91A1 CP (IX+$06)     ; top limit
  $91A4 JR Z,$91A8      ; at the top limit: clamp and reverse
  $91A6 JR NC,$91B6     ; between the limits: nothing to do
+@isub=LD A,(IX+ENT_LIMIT_LOW)
 *$91A8 LD A,(IX+$06)   ; Y := top limit
+@isub=LD (IX+ENT_Y),A
  $91AB LD (IX+$03),A   ;
+@isub=LD A,(IX+ENT_STEP)
 *$91AE LD A,(IX+$04)   ; step := -step
  $91B1 NEG             ;
+@isub=LD (IX+ENT_STEP),A
  $91B3 LD (IX+$04),A   ;
 @label=MoveEntities_Next
 @isub=LD DE,ENTITY_SIZE

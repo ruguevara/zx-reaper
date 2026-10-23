@@ -27,7 +27,7 @@ c$94F9 LD HL,($80D7) ;
  $94FF RLCA          ;
  $9500 RLCA          ;
  $9501 RLCA          ;
-@isub=ADD A,ROOM_PIXEL_BUF/256
+@isub=ADD A,ROOM_PIXEL_BUF>>8
  $9502 ADD A,$70     ; $70 or $78: empty-room screen buffer page
  $9504 LD H,A        ;
  $9505 LD E,L        ;

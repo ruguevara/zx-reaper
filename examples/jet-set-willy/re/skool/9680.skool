@@ -18,6 +18,7 @@ c$9680 LD A,(IX+$00) ;
  $9686 INC IX        ;
  $9688 INC E         ; next column
  $9689 LD A,D        ;
+@isub=SUB CELL_HEIGHT
  $968A SUB $08       ; undo the 8 INC D of #R$9691
  $968C LD D,A        ;
  $968D DEC C         ;

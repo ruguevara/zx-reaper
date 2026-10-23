@@ -11,6 +11,7 @@
 c$949E LD A,($80EA)  ;
  $94A1 LD ($8420),A  ; new current room
  $94A4 LD A,($85D3)  ;
+@isub=AND ~COLUMN_MASK
  $94A7 AND $E0       ; column = 0, row bits unchanged
  $94A9 LD ($85D3),A  ;
  $94AC POP HL        ; drop the return address
