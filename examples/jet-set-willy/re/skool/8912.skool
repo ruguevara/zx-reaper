@@ -1,9 +1,17 @@
 ; Enter a room: build its entities and buffers and start the frame loop
 ;
-; This entry point is used by the routines at #R$8B07, #R$948A, #R$949E,
-; #R$94B0 and #R$94D2.
-; Enter the room whose number is in #R$8420 (alternative entry, used by every
-; room change and by the restart after a death).
+; Copies the room whose number is in #R$8420 from #R$C000 to #R$8000, builds
+; the entity buffer #R$8100 from the definitions at #R$A000, saves Willy's
+; state at #R$85D7, builds the room buffers (#R$8D33), prints the room name
+; and the status line and sets the border, then jumps to the frame loop
+; #R$89AD.
+; .
+; Used by every room change (#R$948A, #R$949E, #R$94B0, #R$94D2), the teleport
+; cheat (#R$8B70), the restart after a death (#R$8C01) and the start of a game
+; (#R$88FC).
+; .
+; Hardware: writes the bottom third of the screen bitmap and attributes and
+; the border (port $FE).
 @label=EnterRoom
 c$8912 LD A,($8420)        ; room number
 @isub=OR ROOM_TABLE_PAGE

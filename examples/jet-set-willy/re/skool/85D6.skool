@@ -6,6 +6,6 @@
 ; fall logic, no walking and no landing, only the keys are read (the move state then drives the
 ; climbing in #R$91BE). A jump key on a rope sets it to $F0 ($8FA9, ROPE_LET_GO), sets the walking bit of
 ; #R$85D0 and starts a jump from the row boundary above. It is not saved with Willy's other state: it is
-; cleared to 0 whenever a room is entered (#R$898B, $8985). See findings F87-F89.
+; cleared to 0 whenever a room is entered (#R$8912, at $8985). See findings F87-F89.
 @label=WillyRope
 g$85D6 DEFB $00

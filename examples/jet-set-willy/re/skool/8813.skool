@@ -1,11 +1,14 @@
 ; Show the title screen, play the title tune and scroll the message
 ;
-; This entry point is used by the routine at #R$88AE.
-; Redraw the title screen: clear the bitmap, copy the attributes, draw the title graphic (alternative entry, from #R$88AE after a scroll of the message).
-; Redraw the title screen: clear the bitmap, copy the attributes, draw the title
-; graphic (alternative entry, from #R$88AE after a scroll of the message).
-; Redraw the title screen: clear the bitmap, copy the attributes, draw the title
-; graphic (alternative entry, from #R$88AE after a scroll of the message).
+; Clears the bitmap, copies the title attributes from #R$9800, draws the title
+; graphic from #R$8431, detects a Kempston joystick (#R$85CE) and plays the
+; title tune #R$85FB, then goes on to #R$88AE, which scrolls the message.
+; .
+; Entered from #R$87CA (new game) and again from #R$88AE after each full
+; scroll of the message.
+; .
+; Hardware: writes the screen bitmap and attributes, reads the Kempston port
+; and the keyboard, drives the beeper.
 @label=ShowTitleScreen
 c$8813 LD HL,$4000         ; clear the bitmap: first byte, then fill the rest
 @isub=LD DE,SCREEN+1

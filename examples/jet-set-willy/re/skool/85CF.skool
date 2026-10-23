@@ -12,6 +12,6 @@
 ; by #R$87CA and by the death restore from #R$85D7. Read by #R$9637 and #R$95C8 (drawing, with the
 ; ramp offset added) and by the Master Bedroom guard (#R$9534).
 ; .
-; Observed in the simulator: jump arc and fall steps, see findings F92-F95.
+; Observed in the simulator: jump arc and fall steps, see findings F109-F111, F118.
 @label=WillyY
 g$85CF DEFB $00

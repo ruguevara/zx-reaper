@@ -7,7 +7,7 @@
 ; 16 the ground test is made. It keeps the value 18 after the jump until the next one starts.
 ; Saved at room entry in #R$85D7 (byte +6 of the copy).
 ; .
-; Observed with a jump from the Bathroom floor: Y $D0 -> $C8 $C0 $BA $B4 $B0 $AC $AA $A8 $A8 $A8 $AA $AC
+; Observed (finding F109) with a jump from a floor: Y $D0 -> $C8 $C0 $BA $B4 $B0 $AC $AA $A8 $A8 $A8 $AA $AC
 ; $B0 $B4 $BA $C0 $C8 $D0 over 18 passes.
 @label=WillyJumpStep
 g$85D5 DEFB $00

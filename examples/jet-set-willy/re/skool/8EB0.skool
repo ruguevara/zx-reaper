@@ -1,0 +1,31 @@
+; End of jump, start of fall, head bump: Willy's air-state helpers
+;
+; The jump has reached step 18: it becomes a fall of state 6 from the take-off height.
+@label=MoveWilly_EndJump
+@isub=LD A,AIR_FALL_AFTER_JUMP
+c$8EB0 LD A,$06      ;
+ $8EB2 LD ($85D1),A  ;
+ $8EB5 RET           ;
+; Willy stands on nothing: start a fall (state 2); he does not move in this pass.
+@label=MoveWilly_StartFall
+@isub=LD A,AIR_FALL_START
+*$8EB6 LD A,$02      ;
+ $8EB8 LD ($85D1),A  ;
+ $8EBB RET           ;
+; Head bump in a jump: round Y up to the next character row boundary, start a fall (state 2) and
+; stop walking.
+@label=MoveWilly_HitHead
+*$8EBC LD A,($85CF)  ; Y index
+@isub=ADD A,Y_ROW_STEP
+ $8EBF ADD A,$10     ;
+@isub=AND Y_ROW_MASK
+ $8EC1 AND $F0       ; row boundary below
+ $8EC3 LD ($85CF),A  ;
+ $8EC6 CALL $8E9C    ; attribute address from the new Y
+@isub=LD A,AIR_FALL_START
+ $8EC9 LD A,$02      ;
+ $8ECB LD ($85D1),A  ;
+ $8ECE LD HL,$85D0   ; move state
+@isub=RES MOVE_WALK_BIT,(HL)
+ $8ED1 RES 1,(HL)    ; stop walking
+ $8ED3 RET           ;

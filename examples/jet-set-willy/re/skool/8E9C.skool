@@ -1,0 +1,25 @@
+; Set Willy's attribute-buffer address from a Y index
+;
+; Puts Willy's attribute-buffer address in step with his Y: sets
+; #R$85D3/#R$85D4 to the cell of his top-left corner, attribute page $5C (rows
+; 0-7) or $5D (rows 8-15), row = Y / 16, keeping the column already in
+; #R$85D3.
+; .
+; Reached by falling through from the fall code in #R$8DD3 and called by
+; #R$8DD3, #R$8ED4 and the rope code in #R$91BE after it moves Willy.
+@label=SetWillyCell
+@isub=AND Y_ROW_MASK
+c$8E9C AND $F0       ; Y / 16 = character row, times 16
+ $8E9E LD L,A        ; L = row * 16
+ $8E9F XOR A         ;
+ $8EA0 RL L          ; row * 32; carry = row 8-15
+@isub=ADC A,SCREEN_ATTRS_BUF/256
+ $8EA2 ADC A,$5C     ; attribute page $5C or $5D
+ $8EA4 LD H,A        ;
+ $8EA5 LD A,($85D3)  ; old address: keep its column
+@isub=AND COLUMN_MASK
+ $8EA8 AND $1F       ;
+ $8EAA OR L          ;
+ $8EAB LD L,A        ;
+ $8EAC LD ($85D3),HL ; new attribute address
+ $8EAF RET           ;

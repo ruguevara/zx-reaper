@@ -17,6 +17,6 @@
 ; below $0B. Saved at room entry in #R$85D7.
 ; .
 ; Observed: falls from each height checked in the Bathroom with Willy poked into the air, see
-; findings F92-F94.
+; findings F109-F111.
 @label=WillyAirState
 g$85D1 DEFB $00

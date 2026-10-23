@@ -1,0 +1,165 @@
+; Walk Willy one step: ramps and walls
+;
+; Takes a step when the move state #R$85D0 asks for one, climbing or
+; descending ramps and stopping at walls. Reached by JP from #R$8ED4.
+; .
+; Hardware: none (reads the attribute buffer, port reads are in #R$8ED4).
+@label=MoveWilly_Walk
+c$8FBC LD A,($85D0)  ; move state
+@isub=AND MOVE_WALK_MASK
+ $8FBF AND $02       ;
+ $8FC1 RET Z         ; not walking: done
+ $8FC2 LD A,($85D6)  ; rope variable
+ $8FC5 DEC A         ;
+ $8FC6 BIT 7,A       ;
+ $8FC8 RET Z         ; holding a rope: no walking
+ $8FC9 LD A,($85D0)  ; move state
+@isub=AND MOVE_FACING_LEFT
+ $8FCC AND $01       ;
+ $8FCE JP Z,$9042    ; facing right
+ $8FD1 LD A,($85D2)  ; walk frame
+ $8FD4 OR A          ;
+ $8FD5 JR Z,$8FDC    ; left: the step is taken when the frame is 0
+ $8FD7 DEC A         ;
+ $8FD8 LD ($85D2),A  ;
+ $8FDB RET           ;
+; Step left (frame 0 reached). With the air state 0 first look for a ramp cell, which sets BC, the
+; change of the attribute address (-32 up, +32 down, 0 level). The cell to test is the one at
+; offset $1F from his top-left cell (direction 0: one row down, one column left, the next ramp cell
+; up the slope) or $41 (direction 1: two rows down, one column right, under his right foot, the
+; next ramp cell down the slope).
+@label=MoveWilly_LeftStep
+*$8FDC LD A,($85D1)  ; air state
+ $8FDF LD BC,$0000   ; BC = 0: level step
+ $8FE2 CP $00        ;
+ $8FE4 JR NZ,$900A   ; jumping: no ramp
+ $8FE6 LD HL,($85D3) ; attribute address of the top-left cell
+ $8FE9 LD BC,$0000   ;
+ $8FEC LD A,($80DA)  ; ramp direction: 0 rises left, 1 rises right
+ $8FEF DEC A         ; $FF or 0
+ $8FF0 OR $A1        ; $FF or $A1
+ $8FF2 XOR $E0       ; $1F or $41: the cell to test, see above
+ $8FF4 LD E,A        ;
+ $8FF5 LD D,$00      ;
+ $8FF7 ADD HL,DE     ; cell to test
+ $8FF8 LD A,($80C4)  ; ramp attribute
+ $8FFB CP (HL)       ; ramp cell?
+ $8FFC JR NZ,$900A   ; no: level step
+@isub=LD BC,SCREEN_COLS
+ $8FFE LD BC,$0020   ; a row down
+ $9001 LD A,($80DA)  ; ramp direction
+ $9004 OR A          ;
+ $9005 JR NZ,$900A   ; direction 1: ramp rises right, the step goes down
+@isub=LD BC,-SCREEN_COLS
+ $9007 LD BC,$FFE0   ; direction 0: ramp rises left, the step goes up
+@label=MoveWilly_LeftCells
+*$900A LD HL,($85D3) ; attribute address of the top-left cell
+ $900D LD A,L        ; column
+@isub=AND COLUMN_MASK
+ $900E AND $1F       ;
+ $9010 JP Z,$948A    ; column 0: through the left of the room
+ $9013 ADD HL,BC     ; row change of the ramp
+ $9014 DEC HL        ; one column left
+@isub=LD DE,SCREEN_COLS
+ $9015 LD DE,$0020   ;
+ $9018 ADD HL,DE     ; second row of Willy: the cell left of his lower body
+ $9019 LD A,($80B2)  ; wall attribute
+ $901C CP (HL)       ; wall: blocked
+ $901D RET Z         ;
+ $901E LD A,($85CF)  ; Y index
+ $9021 SRA C         ; half the row change in Y units: -16, 0 or +16
+ $9023 ADD A,C       ;
+ $9024 LD B,A        ; B = new Y
+@isub=AND Y_CELL_MASK
+ $9025 AND $0F       ;
+ $9027 JR Z,$9032    ; on a row boundary: two rows only
+ $9029 LD A,($80B2)  ; third row of a jump
+ $902C ADD HL,DE     ;
+ $902D CP (HL)       ; wall: blocked
+ $902E RET Z         ;
+ $902F OR A          ;
+ $9030 SBC HL,DE     ; back to row 2
+*$9032 OR A          ; row 1: the cell at his head level is not tested
+ $9033 SBC HL,DE     ;
+ $9035 LD ($85D3),HL ; new attribute address
+ $9038 LD A,B        ;
+ $9039 LD ($85CF),A  ; new Y
+@isub=LD A,WALK_LAST_FRAME
+ $903C LD A,$03      ;
+ $903E LD ($85D2),A  ; frame restarts at 3 when facing left
+ $9041 RET           ;
+; Facing right: count the frame up 0-3 and step in the pass that finds it at 3.
+@label=MoveWilly_Right
+*$9042 LD A,($85D2)  ; walk frame
+@isub=CP WALK_LAST_FRAME
+ $9045 CP $03        ;
+ $9047 JR Z,$904E    ; frame 3: step
+ $9049 INC A         ;
+ $904A LD ($85D2),A  ;
+ $904D RET           ;
+; Step right (frame 3 reached), with the ramp test as for #R$8FDC. The cell to test is at offset $40
+; from his top-left cell (direction 0: two rows down, under his left foot, the next ramp cell down
+; the slope) or $22 (direction 1: one row down, two columns right, the next ramp cell up the slope).
+@label=MoveWilly_RightStep
+*$904E LD A,($85D1)  ; air state
+ $9051 LD BC,$0000   ; BC = 0: level step
+ $9054 OR A          ;
+ $9055 JR NZ,$9078   ; jumping: no ramp
+ $9057 LD HL,($85D3) ;
+ $905A LD A,($80DA)  ; ramp direction
+ $905D DEC A         ; $FF or 0
+ $905E OR $9D        ; $FF or $9D
+ $9060 XOR $BF       ; $40 or $22: the cell to test, see above
+ $9062 LD E,A        ;
+ $9063 LD D,$00      ;
+ $9065 ADD HL,DE     ; cell to test
+ $9066 LD A,($80C4)  ; ramp attribute
+ $9069 CP (HL)       ; ramp cell?
+ $906A JR NZ,$9078   ; no: level step
+@isub=LD BC,SCREEN_COLS
+ $906C LD BC,$0020   ; a row down
+ $906F LD A,($80DA)  ; ramp direction
+ $9072 OR A          ;
+ $9073 JR Z,$9078    ; direction 0: ramp rises left, the step goes down
+@isub=LD BC,-SCREEN_COLS
+ $9075 LD BC,$FFE0   ; direction 1: ramp rises right, the step goes up
+@label=MoveWilly_RightCells
+*$9078 LD HL,($85D3) ; attribute address
+ $907B ADD HL,BC     ; row change of the ramp
+ $907C INC HL        ; two columns right: the column beyond Willy
+ $907D INC HL        ;
+ $907E LD A,L        ;
+@isub=AND COLUMN_MASK
+ $907F AND $1F       ;
+ $9081 JP Z,$949E    ; column 0: through the right of the room
+@isub=LD DE,SCREEN_COLS
+ $9084 LD DE,$0020   ;
+ $9087 LD A,($80B2)  ; wall attribute
+ $908A ADD HL,DE     ; second row of Willy
+ $908B CP (HL)       ; wall: blocked
+ $908C RET Z         ;
+ $908D LD A,($85CF)  ; Y index
+ $9090 SRA C         ; half the row change in Y units
+ $9092 ADD A,C       ;
+ $9093 LD B,A        ; B = new Y
+@isub=AND Y_CELL_MASK
+ $9094 AND $0F       ;
+ $9096 JR Z,$90A1    ; on a row boundary: skip the third row
+ $9098 LD A,($80B2)  ; third row of a jump
+ $909B ADD HL,DE     ;
+ $909C CP (HL)       ; wall: blocked
+ $909D RET Z         ;
+ $909E OR A          ;
+ $909F SBC HL,DE     ; back to row 2
+*$90A1 LD A,($80B2)  ; wall attribute
+ $90A4 OR A          ;
+ $90A5 SBC HL,DE     ; row 1: the cell at head level
+ $90A7 CP (HL)       ; wall: blocked (unlike the left step)
+ $90A8 RET Z         ;
+ $90A9 DEC HL        ; one column back: Willy's new left cell
+ $90AA LD ($85D3),HL ; new attribute address
+ $90AD XOR A         ;
+ $90AE LD ($85D2),A  ; frame restarts at 0 when facing right
+ $90B1 LD A,B        ;
+ $90B2 LD ($85CF),A  ; new Y
+ $90B5 RET           ;
