@@ -7,7 +7,7 @@
 ; .
 ; Hardware: reads the keyboard (ports $FBFE, $DFFE, $EFFE, $F7FE, $7EFE...)
 ; and the Kempston port when #R$85CE is set.
-@label=MoveWilly_Supported
+@label=ReadWillyInput
 c$8ED4 LD E,$FF      ; E = key bits, nothing pressed
  $8ED6 LD A,($85D6)  ; rope variable
  $8ED9 DEC A         ;

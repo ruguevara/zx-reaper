@@ -4,7 +4,7 @@
 ; descending ramps and stopping at walls. Reached by JP from #R$8ED4.
 ; .
 ; Hardware: none (reads the attribute buffer, port reads are in #R$8ED4).
-@label=MoveWilly_Walk
+@label=WalkWilly
 c$8FBC LD A,($85D0)  ; move state
 @isub=AND MOVE_WALK_MASK
  $8FBF AND $02       ;

@@ -32,7 +32,7 @@
 ; back to $0C), Willy drops 8 index units (4 pixel rows) per pass and the speaker clicks with a falling
 ; pitch. Falling has no horizontal movement.
 ; .
-; 5. Ground found (MoveWilly_Supported). A fall state of $0C or more kills Willy (#R$90B7). From
+; 5. Ground found (#R$8ED4). A fall state of $0C or more kills Willy (#R$90B7). From
 ; standing at the top of a fall that means a drop of 5 character rows or more (4 rows is survived);
 ; after a jump that ended over a gap (state 6) a drop of 3 rows kills. The state becomes 0. Then
 ; the input is collected as one byte of key bits (bits 0, 2, 4 mean right, bits 1, 3, 5 mean left,
@@ -44,7 +44,7 @@
 ; conveyor, leave the state unchanged). A jump key starts the jump (air state 1, step 0) and the
 ; pass goes on to the walking code, with the move state just computed.
 ; .
-; 6. Walking (MoveWilly_Walk). Only if bit 1 of #R$85D0 is set and no rope is held. Willy takes one
+; 6. Walking (#R$8FBC). Only if bit 1 of #R$85D0 is set and no rope is held. Willy takes one
 ; cell (8 pixels) every 4 passes: the frame #R$85D2 counts 3 down to 0 when facing left and 0 up to 3
 ; when facing right, and the step is taken in the pass that finds the frame at the end of its count
 ; (the frame is then reset). On the ground the step follows a ramp: a ramp cell next to his feet (the

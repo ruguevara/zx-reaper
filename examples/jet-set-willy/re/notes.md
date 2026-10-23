@@ -72,9 +72,18 @@ eight entity slots (2 bytes each: definition index, start data).
 
 ## Coverage
 
-93% of code instructions executed: fuzz from the code screen, `code`, `title`,
-`start` scripts, four fuzz runs from an in-game snapshot (re/maps/fuzz2-5),
-and an RZX walkthrough ("Perfect JSW" from the RZX Archive, same version: only
-runtime state differs in $8000-$FFFF). Not executed: $88AE-$88F9 (part),
-$8AEB, parts of $89AD and $8B07, $9534-$9575, $96DE. The RZX speed run
-"jsw7.56am" is a different build (25 KB differ) and was not used.
+97% of code instructions executed (`make coverage`): scripts `code`, `title`
+(tune, scroll, colour cycling), `start`, `pause` (pause, tune toggle, idle
+pause, CAPS SHIFT+SPACE quit), fuzz runs (re/maps/fuzz*.map), the RZX
+walkthrough "Perfect JSW" (same version; only runtime state differs), and
+`ending.map` (simulator runs with pokes that reach the ending stages, F61-F65).
+Not executed by these inputs, with the reason:
+- $86FF: the FRAMES value $8E case of the code screen (F-entry of #R$86C3).
+- $8A11-$8A24: flash timer $85CD is never set by any code (F105).
+- $8A8B-$8A97, $8AA3-$8AA7: the clock reaching 1:00pm and 13:00 (observed with
+  pokes, F75/F95; a full run takes 18 game hours).
+- $8B7A-$8B94, $8BE5-$8BF4: teleport and WRITETYPER completion (observed with
+  pokes and snapshots, F72/F106).
+- $9283, $9399: rare arrow and rope branches.
+- $93BB-$93D0 and $96F4-$9717: unreachable leftovers (F10, F11).
+The RZX speed run "jsw7.56am" is a different build (25 KB differ) and was not used.

@@ -1,0 +1,44 @@
+# Code, ENTER, walk in the Bathroom; then pause, tune toggle, idle pause, quit.
+0    -
+40   4
+50   -
+60   2
+70   -
+80   3
+90   -
+100  2
+110  -
+120  ENTER
+300  ENTER
+310  -
+# in the Bathroom: walk right, jump, walk left
+400  P
+460  P M
+470  P
+520  -
+560  O
+640  O M
+650  O
+760  -
+# pause with A, colours cycle; resume with P; tune off with H, wait for the
+# idle auto-pause (256 passes with the tune off and no movement key), resume
+900  A
+910  -
+1100 P
+1110 -
+1200 H
+1210 -
+1400 H
+1410 -
+1500 H
+1510 -
+1700 W
+1710 -
+1720 SPACE
+1730 -
+5800 M
+5810 -
+# CAPS SHIFT + SPACE: quit to the title
+6000 CS SPACE
+6010 -
+6600 END
