@@ -34,6 +34,16 @@ the project, so each project is self-contained.
 | `tools/zxbasic.py` | lossless BASIC ↔ text (hidden numbers, REM code, odd lines) |
 | `tools/zxgfx.py` | colour sprite/tile sheets from memory, for the docs gallery |
 | `tools/zxcompare.py` | compare our skool with a reference disassembly: bytes, classification, boundaries, documentation, magic numbers |
+| `tools/zxdiff.py` | differential tests: a Z80 routine against a Python model or port on generated cases by kind; `--dump` writes golden cases for a C port |
+| `tools/zxdoctor.py` | readiness check: tools, versions, and what a project is missing, with the fixing command |
+
+Working registers in every project: `re/questions.md` (what the work must
+answer, with status) and `re/findings.md` (claims with status observed /
+inferred / unknown / refuted and their evidence), edited through
+`zxq.py question|finding` and summarised by `make audit`. The evidence
+discipline, the question list and the per-routine differential tests follow
+ideas from [REA](https://github.com/morluto/rea) and the reconstruction
+projects built with it.
 
 ## Self-test
 
@@ -43,7 +53,8 @@ selftest/run.sh
 
 Builds a small fixture game (`selftest/demo.asm`, BASIC loader with hidden
 numbers), runs init, behaviour test, reclassification, relocation, shift test
-and export, and checks byte identity at each step. Ends with `SELFTEST PASSED`.
+and export, a differential test, the registers and the doctor, and checks
+byte identity at each step. Ends with `SELFTEST PASSED`.
 
 ## Limits
 

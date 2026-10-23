@@ -31,4 +31,12 @@ printf '0x8000 main\n0x8144 data\n' > re/modules.txt
 make -s export
 make -s test
 make -s shift-test SHIFT=0x300
+echo "== differential test, findings register, doctor"
+mkdir -p tests/models
+cp "$here/cell_attr_model.py" tests/models/
+make -s diff
+python3 tools/zxq.py finding add observed "cellad returns ATTRS + 32*PY + PX" "zxdiff: tests/models/cell_attr_model.py" > /dev/null
+python3 tools/zxq.py question set Q6 answered "F1" > /dev/null
+python3 tools/zxq.py audit | head -2
+python3 tools/zxdoctor.py > /dev/null
 echo "SELFTEST PASSED"

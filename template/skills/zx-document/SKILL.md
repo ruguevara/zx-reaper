@@ -44,6 +44,15 @@ docs/img/                 PNGs (committed)
 - Numbers: hex with `$`, decimal in parentheses where it helps (`$0300` (768)).
 - No filler, no marketing tone, no metaphors.
 
+## Audit before writing
+
+`make audit` lists open questions and `unknown`/`inferred` findings. Answer or
+mark each question (`tools/zxq.py question set Q7 answered "F12, F15"`), try to
+turn important `inferred` findings into `observed` ones (simulator, models),
+and list what stays open in `docs/06-tricks.md` under "Open questions". The
+"verified"/"inferred" marks in the article come from `re/findings.md`; cite
+finding IDs where a claim is not obvious.
+
 ## Bug hunt before writing `06-tricks.md`
 
 Annotation finds bugs on the paths it reads; bugs at the edges need a

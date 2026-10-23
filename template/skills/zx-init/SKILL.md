@@ -9,8 +9,10 @@ description: Start a ZX Spectrum RE project from a TAP/TZX, or repair the start 
 
 1. `python3 <kit>/tools/zxinit.py game.tap game-re/` (add `--rzx play.rzx` if you have one).
 2. It must end with `IDENTICAL`. Read its TODO lines and `re/notes.md`.
-3. `git init && git add -A && git commit -m "re: init"`.
-4. Look at the game: `tools/zxrun.py re/orig.z80 --frames 300 --shot 299:/tmp/title.png`,
+3. `tools/zxdoctor.py` must say `ready`. Read `re/questions.md` (the default
+   question list): add game-specific questions, delete those that cannot apply.
+4. `git init && git add -A && git commit -m "re: init"`.
+5. Look at the game: `tools/zxrun.py re/orig.z80 --frames 300 --shot 299:/tmp/title.png`,
    view the PNG, write the controls you see into `re/notes.md`.
 
 ## Non-standard tapes

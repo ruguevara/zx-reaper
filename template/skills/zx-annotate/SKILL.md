@@ -84,7 +84,23 @@ c$9100 LD B,$10        ; 16 pixel rows
 - Leave a number alone when it is just a number (`ADD A,2` that moves two
   pixels can stay, or become `STEP` if it recurs).
 
+## Findings and open questions
+
+- A claim that other work depends on (a variable's meaning, a data format, a
+  rule of the game, a bug) goes into the register with its status:
+  `tools/zxq.py finding add inferred "GuardWait counts down 90 passes after a guard is eaten" "code: $663D decrements, $66A4 sets 90" "$6DBE"`.
+  `observed` needs a run: simulator watch or screenshot (`zxrun.py`), a byte
+  check, or a passing model (`zx-port` skill). Reading the code is `inferred`.
+  Something you could not settle is `unknown`; a claim shown wrong is set to
+  `refuted`, never deleted. The command is safe for parallel agents.
+- Claims from coverage are bounded: write "not executed with the inputs in
+  re/maps", not "dead code", unless the code itself makes it unreachable (an
+  unconditional jump over it, a condition that cannot hold); say which.
+- For a precise claim that is easy to get wrong (address arithmetic, scoring
+  rules, AI weights), a model in `tests/models/` checks it on generated cases
+  (`zx-port` skill).
+
 ## Report back
 
-For each entry: label and title. Then facts about other entries you learned
-(variables' meaning with evidence, data formats), and open questions.
+For each entry: label and title. Then the finding IDs you added or changed,
+facts about other entries (with evidence), and open questions.

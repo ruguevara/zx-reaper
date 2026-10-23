@@ -32,6 +32,13 @@ The agent should read the disassembly through this tool, never whole.
   zxq.py const [NAME VALUE [COMMENT]]
                                     list or add a numeric constant (src/constants.asm,
                                     used through @isub); safe for parallel agents
+  zxq.py finding add STATUS CLAIM EVIDENCE [REFS]
+  zxq.py finding set ID STATUS EVIDENCE   re/findings.md: claims with status observed /
+                                    inferred / unknown / refuted and their evidence
+  zxq.py findings [STATUS...]       list findings
+  zxq.py question add QUESTION      re/questions.md: what the work must answer
+  zxq.py question set ID STATUS ANSWER   STATUS: open / partial / answered
+  zxq.py audit                      open questions and unverified findings
   zxq.py cmp A.bin B.bin ORG        differing addresses and their entries
   zxq.py export ASM MODULES OUTDIR  split skool2asm output into modules
 
@@ -537,6 +544,100 @@ def cmd_equs(consolidate):
     return 0
 
 
+FINDING_STATUS = ('observed', 'inferred', 'unknown', 'refuted')
+QUESTION_STATUS = ('open', 'partial', 'answered')
+REGISTERS = {
+    'finding': ('re/findings.md', 'F', ['ID', 'Status', 'Claim', 'Evidence', 'Refs'],
+                '# Findings\n\nEvery claim about the game with its status and evidence. '
+                '`observed`: seen in the simulator, a byte check or a test; `inferred`: '
+                'read from code, not run; `unknown`: open; `refuted`: shown wrong (keep it). '
+                'Only observed evidence can make a claim observed. Edit through '
+                '`tools/zxq.py finding`.\n\n'),
+    'question': ('re/questions.md', 'Q', ['ID', 'Status', 'Question', 'Answer'],
+                 '# Questions\n\nWhat this reverse engineering must answer; revisit before '
+                 'finishing. Edit through `tools/zxq.py question`.\n\n'),
+}
+
+
+def table_cell(text):
+    return ' '.join(str(text).replace('|', '/').split())
+
+
+def registry(kind, op, args):
+    """Add to or update a markdown-table register under a file lock."""
+    import fcntl
+    path, prefix, cols, intro = REGISTERS[kind]
+    statuses = FINDING_STATUS if kind == 'finding' else QUESTION_STATUS
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, 'a+') as f:
+        fcntl.flock(f, fcntl.LOCK_EX)
+        f.seek(0)
+        text = f.read()
+        if '| ID |' not in text:
+            text = (text or intro) + '| ' + ' | '.join(cols) + ' |\n' + '| --- ' * len(cols) + '|\n'
+        lines = text.rstrip('\n').split('\n')
+        rows = [i for i, line in enumerate(lines) if re.match(r'^\| %s\d+ \|' % prefix, line)]
+        if op == 'add':
+            if kind == 'finding':
+                status, claim, evidence = args[0], args[1], args[2]
+                refs = args[3] if len(args) > 3 else ''
+                cells = [status, claim, evidence, refs]
+            else:
+                status, cells = 'open', ['open', args[0], '']
+            if status not in statuses:
+                print('status must be one of: ' + ', '.join(statuses))
+                return 1
+            n = 1 + max([int(re.match(r'^\| %s(\d+)' % prefix, lines[i]).group(1)) for i in rows] or [0])
+            rid = '%s%d' % (prefix, n)
+            lines.append('| %s | %s |' % (rid, ' | '.join(table_cell(c) for c in cells)))
+            print('added ' + rid)
+        else:
+            rid, status, note = args[0], args[1], args[2]
+            if status not in statuses:
+                print('status must be one of: ' + ', '.join(statuses))
+                return 1
+            hit = [i for i in rows if lines[i].startswith('| %s |' % rid)]
+            if not hit:
+                print('no %s %s' % (kind, rid))
+                return 1
+            cells = [c.strip() for c in lines[hit[0]].strip('|').split('|')]
+            cells[1] = status
+            col = 3 if kind == 'finding' else 3
+            cells[col] = table_cell((cells[col] + '; ' if cells[col] else '') + note)
+            lines[hit[0]] = '| ' + ' | '.join(cells) + ' |'
+            print('updated %s: %s' % (rid, status))
+        f.seek(0)
+        f.truncate()
+        f.write('\n'.join(lines) + '\n')
+    return 0
+
+
+def read_register(kind):
+    path, prefix, cols, intro = REGISTERS[kind]
+    out = []
+    if os.path.exists(path):
+        for line in open(path):
+            if re.match(r'^\| %s\d+ \|' % prefix, line):
+                out.append([c.strip() for c in line.strip().strip('|').split('|')])
+    return out
+
+
+def cmd_audit():
+    qs, fs = read_register('question'), read_register('finding')
+    count = lambda rows, st: sum(1 for r in rows if r[1] == st)
+    print('questions: %d answered, %d partial, %d open' % (
+        count(qs, 'answered'), count(qs, 'partial'), count(qs, 'open')))
+    print('findings: %d observed, %d inferred, %d unknown, %d refuted' % tuple(
+        count(fs, st) for st in FINDING_STATUS))
+    for r in qs:
+        if r[1] != 'answered':
+            print('  %s %-8s %s' % (r[0], r[1], r[2]))
+    for r in fs:
+        if r[1] in ('unknown', 'inferred'):
+            print('  %s %-8s %s' % (r[0], r[1], r[2][:100]))
+    return 1 if count(qs, 'open') or count(fs, 'unknown') else 0
+
+
 def cmd_reclassify(frag, force):
     import subprocess
     addrs = []
@@ -668,6 +769,14 @@ def main():
         sys.exit(cmd_equs('--consolidate' in a))
     elif cmd == 'const' and len(a) in (1, 3) or cmd == 'const' and len(a) > 3:
         sys.exit(cmd_const(a[1:]))
+    elif cmd in ('finding', 'question') and len(a) >= 3 and a[1] in ('add', 'set'):
+        sys.exit(registry(cmd, a[1], a[2:]))
+    elif cmd == 'findings':
+        for r in read_register('finding'):
+            if len(a) == 1 or r[1] in a[1:]:
+                print(' | '.join(r))
+    elif cmd == 'audit':
+        sys.exit(cmd_audit())
     elif cmd == 'cmp' and len(a) == 4:
         cmd_cmp(a[1], a[2], parse_addr(a[3]))
     elif cmd == 'export' and len(a) == 4:

@@ -18,7 +18,10 @@ states (`git commit -m "re: <what>"`). Never edit `original/`.
 | `re/image.z80` | load-time memory image the skool files describe |
 | `re/orig.z80` | machine state at handover to the game (after the loader) |
 | `re/maps/*.map` | code execution maps (coverage) |
-| `re/notes.md` | memory map, loader notes, open questions |
+| `re/notes.md` | memory map, loader notes |
+| `re/questions.md` | what the work must answer, with status (`tools/zxq.py question`) |
+| `re/findings.md` | claims with status observed / inferred / unknown / refuted and evidence (`tools/zxq.py finding`) |
+| `tests/models/*.py` | executable models of routines, checked against the Z80 code (`make diff`) |
 | `src/build.asm` | assembles the game, `SAVEBIN`s each tape block |
 | `src/*.bas` | BASIC loaders, lossless text (`tools/zxbasic.py`) |
 | `src/game.asm`, `src/*.asm` | master source after `make export` |
@@ -31,6 +34,7 @@ states (`git commit -m "re: <what>"`). Never edit `original/`.
 
 ```
 make / make test / make status / make labels / make shift-test / make export / make help
+make doctor / make diff / make audit
 tools/zxq.py next 20                 what to annotate next (dependencies first)
 tools/zxq.py show $8000              one entry + its callers and callees
 tools/zxq.py refs $5C00              who reads, writes, calls an address
@@ -63,6 +67,8 @@ Phases (details in the skills in `skills/`):
 4. `zx-annotate` — names, titles, descriptions; the bulk of the work.
 5. `zx-relocate` — symbolic operands until `make shift-test` passes.
 6. `zx-export` — modules in `src/`, final pass, README.
+- `zx-port` — executable models of routines (annotation proof) and, later, the
+  port to C/Python routine by routine against the Z80 code.
 7. `zx-document` — the article in `docs/`: how the game works, top-down, with
    a PNG gallery of sprites, tiles and level maps and links into `src/`.
 
@@ -89,6 +95,10 @@ the new labels and one-line titles. The lead runs `make`, commits, and repeats.
   from the code; no `INC A ; increment A`.
 - Unknown is fine: write `Unknown` / `TODO:` in a comment instead of guessing.
   A wrong name costs more than a missing one.
+- Keep observation, inference and unknowns apart: a claim others build on goes
+  into `re/findings.md` with its status and evidence; only a run (simulator,
+  test, model) makes it `observed`. "Not executed" from coverage is bounded by
+  the inputs used, not proof of dead code.
 - Facts that span many entries (memory map, data formats) go to `re/notes.md`.
 
 ## Ask the human when
