@@ -1,1 +1,2 @@
 skoolkit==10.1
+pyxel==2.9.4    # zxpyxel host only (stage 3 ports); the tools do not need it

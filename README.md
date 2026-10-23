@@ -7,10 +7,44 @@ rebuild the original tape byte for byte, are relocatable and free of magic
 numbers, are documented by an article with a graphics gallery, and are ready
 to be ported routine by routine against the original code.
 
+## Port everywhere
+
+Reverse engineering is the first half. The second half takes the game off
+the Spectrum in stages. Each stage is checked against the one before it, and
+any stage is a place to stop, fork and ship.
+
+| # | From → to | Check | Status |
+| --- | --- | --- | --- |
+| 1 | tape → automatic disassembly (SkoolKit) → tape | tape and snapshot byte-identical | built: `zx-init`, `zx-coverage`, `zx-classify` |
+| 2 | automatic disassembly → annotated, relocatable asm without magic numbers → tape | the same, plus `make shift-test` and routine models (`make diff`) | built: `zx-annotate` to `zx-document`, models in `zx-port` |
+| 3 | asm → Python on `zxpyxel`, a library that stands in for the 48K hardware on [Pyxel](https://github.com/kitao/pyxel): the original memory layout, the same screens and behaviour, code that follows the asm routine by routine | routines against the Z80 code (`zxdiff.py`); the whole game by replaying the Z80 run's input and comparing game memory at checkpoints | library and spike: [docs/port.md](docs/port.md) |
+| 4 | Python on `zxpyxel` → game logic in plain Python plus graphics, input and sound subsystems with nothing Spectrum-specific, on the framework the user picks (Pyxel, pygame, SDL2, …) | the stage 3 checkpoints through an adapter, then its own golden runs | optional |
+| 5 | game logic → C/C++ with SDL2 or platform libraries, or JS for the web | the stage 4 golden runs | optional |
+
+Stages 4 and 5 are optional and go wherever a project needs. Fork the stage 3
+Python, change the game, play it and ship it (Pyxel makes a desktop app or a
+single HTML page), or go back to the Spectrum: stage 3 keeps the original
+memory layout and the routine names, so a change ports back to asm or C
+routine by routine, with the same differential tests run the other way.
+
+Scope for now: the 48K Spectrum. AY music and effects (128K) come later,
+through [pyayay](https://github.com/ruguevara/pyayay) (Ayumi).
+
+Done when a game of a different genre and engine, The Hobbit (Melbourne
+House, 1982), runs as a stage 3 Python port on the desktop and in the browser
+with little help from the author, and goes through stage 4 with the agent
+interviewing the author on how to port graphics, input and sound. The run is
+blind: the existing annotated disassemblies and write-ups of The Hobbit are
+compared with the result afterwards, as the SkoolKit reference was for
+Hungry Horace.
+
+Out of scope: stage 5 for now; 128K and AY; protected and turbo loaders
+(such games start from a snapshot instead of the tape); games that need
+contention-exact timing.
+
 The method and its reasoning, in Russian: [docs/method.md](docs/method.md);
 the full Hungry Horace run and its comparison with the SkoolKit reference:
-[docs/hungry-horace-run.md](docs/hungry-horace-run.md). Both are copies of
-notes in the author's Obsidian vault, refreshed with `scripts/sync-method.py`.
+[docs/hungry-horace-run.md](docs/hungry-horace-run.md).
 
 ## Layout
 
@@ -19,8 +53,8 @@ notes in the author's Obsidian vault, refreshed with `scripts/sync-method.py`.
 | `tools/` | command-line tools (Python, SkoolKit, sjasmplus) |
 | `template/` | what every game project starts with: `Makefile`, `AGENTS.md`, `skills/`, `re/questions.md`, `re/findings.md` |
 | `selftest/` | fixture game and an end-to-end test of the whole pipeline |
-| `docs/` | the method and the reference run report (copies of the vault notes) |
-| `scripts/` | repository maintenance (`sync-method.py`) |
+| `zxpyxel/` | the stage 3 library: a stand-in for the 48K Spectrum on Pyxel, for ported and new games ([docs/port.md](docs/port.md)) |
+| `docs/` | the method, the reference run report, `port.md` (the stage 3 design) |
 | `examples/hungry-horace/` | the reference run: Hungry Horace (1982) taken through every stage, compared with the SkoolKit reference disassembly |
 | `examples/jet-set-willy/` | second run: Jet Set Willy (1984), compared with the SkoolKit reference; report in `re/comparison.md` |
 
@@ -75,6 +109,7 @@ stays out of git: put it into `original/` and run `make restore`.
 | `tools/zxgfx.py` | colour sprite/tile sheets from memory, for the docs gallery |
 | `tools/zxdiff.py` | differential tests: a Z80 routine against a Python model or port on generated cases by kind; `--dump` writes golden cases for a C port |
 | `tools/zxcompare.py` | compare a skool disassembly with a reference: bytes, classification, boundaries, documentation, magic numbers |
+| `tools/zxport.py` | inputs of a stage 3 port: `labels.py` from the symbol file, the 48K RAM image of a snapshot |
 | `tools/zxdoctor.py` | readiness check: tools, versions, and what a project is missing, with the fixing command |
 
 Working registers in every project: `re/questions.md` (what the work must
@@ -87,6 +122,9 @@ projects built with it.
 
 ## Limits
 
+- Stage 3 of "Port everywhere" has its library and a spike (Hungry Horace's
+  title and first maze, on the desktop and in the browser); stages 4 and 5
+  are a design ([docs/port.md](docs/port.md)).
 - `zxrun.py` is 48K only and has no memory contention: frame hashes check
   logic, not cycle-exact effects (multicolour, border tricks). Check those in
   Fuse or ZEsarUX by eye.

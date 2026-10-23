@@ -1,5 +1,3 @@
-<!-- Copy of the vault note "Hungry Horace — прогон метода и сравнение с SkoolKit". Edit it in the vault, then run scripts/sync-method.py. -->
-
 # Hungry Horace — прогон метода и сравнение с SkoolKit
 
 Полный прогон [метода](method.md) на Hungry Horace (Psion/Melbourne House, 1982) и сравнение результата с эталонной дизассемблировкой Ричарда Даймонда (skoolkit.ca, версия 2026-04-10). Эталон был скачан в отдельную папку и не открывался, пока аннотация не закончилась; субагентам запрещено было искать чужие дизассемблировки.

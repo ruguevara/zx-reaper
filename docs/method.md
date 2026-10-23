@@ -1,10 +1,8 @@
-<!-- Copy of the vault note "Метод реверса игр ZX Spectrum с агентом". Edit it in the vault, then run scripts/sync-method.py. -->
-
 # Метод реверса игр ZX Spectrum с агентом
 
 Задача: из оригинальной ленты (TAP/TZX) получить папку исходников (asm, BASIC, данные, манифест ленты, Makefile, скрипты), которая собирается в ленту, **побайтно совпадающую** с оригиналом, и при этом читается человеком. Минимум времени человека, времени вообще и токенов.
 
-Здесь — только методология. Агентская обвязка — инструменты, шаблон проекта с `AGENTS.md`, восемь skills, самотест и эталонный прогон Hungry Horace — в отдельном приватном репозитории [**ZX-REAPER**](https://github.com/ruguevara/zx-reaper) (локально `~/projects/zx-reaper`; Retro Engineer Anything, Port Everywhere Rightnow). Пути к инструментам ниже (`tools/…`, `template/…`, `selftest/…`) — относительно этого репозитория.
+Здесь — методология. Агентская обвязка — инструменты, шаблон проекта с `AGENTS.md`, восемь skills, самотест и эталонный прогон Hungry Horace — в этом же репозитории [**ZX-REAPER**](https://github.com/ruguevara/zx-reaper) (Retro Engineer Anything, Port Everywhere Rightnow). Пути к инструментам ниже (`tools/…`, `template/…`, `selftest/…`) — относительно его корня.
 
 ## Главные решения
 
