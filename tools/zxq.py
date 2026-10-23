@@ -114,6 +114,17 @@ def split_entries(text):
         para = para.strip('\n')
         if not para:
             continue
+        if not entries and not head:
+            # global directives (@start, @equ...) open the first paragraph; they
+            # belong in head.skool (skool2asm ignores directives before @start).
+            # @org stays: it sets the ORG of the entry it is attached to.
+            lines = para.split('\n')
+            n = 0
+            while n < len(lines) and re.match(r'@(start|equ|set-|assemble|writer)', lines[n]):
+                n += 1
+            if n:
+                head.append('\n'.join(lines[:n]))
+                para = '\n'.join(lines[n:])
         e = Entry(para + '\n')
         if e.addr is None:
             head.append(para)
@@ -483,9 +494,35 @@ def cmd_equs(consolidate):
     if bad:
         print('fix the conflicts first')
         return 1
+    # names for addresses inside the disassembly become @label directives:
+    # a label moves with the code, an EQU pins it
+    entries = load()
+    inside = {}
+    for name, vals in found.items():
+        v = next(iter(vals))
+        for e in entries:
+            if any(a == v for a, i, c in e.instr):
+                inside[name] = (v, e)
+                break
+    for name, (v, e) in sorted(inside.items()):
+        text = open(e.fname).read()
+        if v in e.labels:
+            if e.labels[v] != name:
+                print('kept @label=%s at $%04X; @equ %s dropped (rename by hand if better)'
+                      % (e.labels[v], v, name))
+            continue
+        lines = text.split('\n')
+        for k, line in enumerate(lines):
+            m = INSTR.match(line)
+            if m and int(m.group(2), 16) == v:
+                lines.insert(k, '@label=' + name)
+                break
+        open(e.fname, 'w').write('\n'.join(lines))
+        e.labels[v] = name
+        print('@label=%s at $%04X (%s)' % (name, v, e.fname))
     have = {m.group(1) for m in map(EQU.match, head.splitlines()) if m}
     new = ['@equ=%s=$%04X' % (n, next(iter(v))) for n, v in sorted(found.items(), key=lambda kv: min(kv[1]))
-           if n not in have]
+           if n not in have and n not in inside]
     if new:
         lines = head.rstrip('\n').split('\n') if head.strip() else []
         open(head_path, 'w').write('\n'.join(lines + new) + '\n')
