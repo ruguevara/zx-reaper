@@ -50,7 +50,15 @@ c$9100 LD B,$10        ; 16 pixel rows
 - Title: one line, what it is. Description: what it does in game terms, then
   a `Hardware:` sentence when it touches the screen, attributes, ports, ROM,
   interrupts or timing loops (this is what a port to C/Python must replace).
-  Register lines: inputs `A Meaning`, outputs `O:HL Meaning`.
+  Register lines: inputs `A Meaning`, outputs `O:HL Meaning`. They describe
+  what the routine's own instructions see, because a port's signature is
+  built from them: inputs are the registers and flags read before they are
+  written; outputs are what some caller uses after the call (check every
+  CALL). Flags count: `F Carry clear on entry`, `O:F Z set when nothing
+  found`. Write `E`, not `E'`, when the routine reads E, and say in the
+  description when the caller does EXX around the call. A value a caller
+  takes from a register this routine leaves behind gets an `O:` line too
+  (`O:C $3A while the bell is in the maze (TickGuardTimers relies on it)`).
 - Labels: routines `VerbNoun` (`DrawSprite`), data/variables `NounPhrase`
   (`GuardX`), unique, at most 24 characters. `@label=` goes on the line before
   the instruction. Label loop heads and alternative entry points that other code

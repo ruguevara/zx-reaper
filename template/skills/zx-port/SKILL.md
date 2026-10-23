@@ -89,6 +89,14 @@ and its code region (a system variable it reads, such as FRAMES:
   flag the caller branches on becomes a returned bool. Return only the
   outputs some caller uses (check the callers), and say what is returned in
   the docstring.
+- Flags: a carry chain (`RLA`, `ADC`, `SBC` in a row) is one integer of 9
+  or 17 bits, with a comment naming the instructions. A flag that leaks from
+  one call into the next becomes an explicit argument, and the comment says
+  so. `CP n` + `JR C` is unsigned `a < n`; `JP M` is signed
+  (`x - 256 if x > 127`).
+- Width: mask a register where the asm can overflow it, at the assignment,
+  not at the use (`c = c + bonus & 0xFF`). Traps: `DEC` of 0 is $FF,
+  `DJNZ` with B = 0 runs 256 times, `ADD HL` drops the carry out of 16 bits.
 - Memory, three ways onto the same 64K, all wrapping like the Z80:
   `v.Name` for a data label with the width the asm declares (`v.Passes -= 1`
   a DEFB, `v.Score = 0` a DEFW, `v.GuardTimers[i]` a table; generated
@@ -98,12 +106,20 @@ and its code region (a system variable it reads, such as FRAMES:
   Python. Register arithmetic is plain ints: mask it (`& 0xFF`) where the
   register would wrap.
 - Write exactly the bytes the asm writes, including scratch variables and
-  values that look dead: the check compares all of the code region.
+  values that look dead: the check compares all of the code region. Stage 3
+  does not tidy up: mark each write that is there only for the check (a dead
+  store, a no-effect write, a scratch table) with a `# check:` comment, so
+  stage 4 can find it and delete it.
 - Fall-through into the next label: call it as the last statement. A jump
   that drops return addresses (`POP HL` + `JP Label`): `raise Goto(Label)`
   (from zxpyxel); the entry routine runs `await dispatch(...)`, which goes on
   at the target. Keep the asm's quirks (a wrong mask, an off-by-one): they
-  are the behaviour; a comment names them.
+  are the behaviour; a comment names them. A second entry point inside a
+  routine (`EraseGuard_Always`) is its own function, which the outer one
+  calls after its own checks. A routine that never returns says so in its
+  docstring and ends in a Goto or in a call to a routine that raises one.
+  Stack quirks (a leak, a dropped word) have no Python equivalent: a comment
+  names the finding, nothing more.
 - An inline loop the asm repeats in several places becomes one lower-case
   helper (`print_text`), not a routine.
 - Hardware only through `zx`: `zx.inp(port)` with the full 16-bit port
@@ -125,7 +141,11 @@ and its code region (a system variable it reads, such as FRAMES:
   each CALL and RET it makes is 27 more. `zxdiff.py --tstates` prints the
   mean per case kind, the Z80 next to what the port charged: with case kinds
   that follow the branches, the difference per kind is what each branch
-  still has to charge.
+  still has to charge. An async routine: measure the Z80 side with a
+  cases-only file in `tests/models/` (no `model`, no `port`: zxdiff prints
+  the T-states); one that never returns: charge its loops exactly and let
+  the drift of `make port-test` judge the rest. Do not hand-count
+  straight-line code.
 
 ### Checks
 
@@ -163,6 +183,28 @@ and its code region (a system variable it reads, such as FRAMES:
    (control flow differs before that point), or the bytes that differ at a
    checkpoint, named by label or screen cell, with the Z80 frame. Look at
    that frame (`tools/zxrun.py re/orig.z80 --input ... --shot F:z80.png`),
-   find the routine that writes the bytes (`--watch`), fix, repeat.
+   find the routine that writes the bytes (`--watch`), fix, repeat. A
+   difference in a variable an interrupt handler writes (FRAMES) means the
+   Z80 took an interrupt the port's clock did not: the record holds the
+   ROM's interrupts, so check that `PORT_STATE` covers the variable and that
+   the port changes it only in `zx.handler`.
+
+   A pass proves only what the inputs reach. `make port-test` lists the port
+   routines no record ran; add an input that reaches them: search seeds with
+   `tools/zxrun.py re/orig.z80 --fuzz SEED:HOLD:KEYS --frames N --map
+   /tmp/f.map` for the routine's address, save the one that reaches it with
+   `--save-input tests/inputs/NAME.txt`, then `make expected`.
 3. By eye: `python port/play.py` next to the original in an emulator; speed
-   and sound are judged there.
+   and sound are judged there. `make port-html` builds the web page.
+
+### Orchestration
+
+The lead writes the control flow (the entry routine and the main loop, in
+`port/main.py`) and a contract before any subagent starts: for each module,
+the routines other modules call with their signatures, which are `async`,
+the Goto targets and where they live, the cross-module calls. Leaf modules
+(drawing, printing, probes, records) go first, so their signatures are
+fixed; the rest then go in parallel, one subagent per module, against the
+contract. Each subagent gets this skill, the contract, the files it may
+edit, and the rule to run zxdiff on explicit files only (`make diff`
+rewrites STATUS.md). The lead integrates and runs `make port-test`.

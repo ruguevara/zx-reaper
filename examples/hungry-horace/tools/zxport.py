@@ -11,7 +11,8 @@
                                                  port routine ENTRY (module.Routine in
                                                  port/) replays each zxrun.py --record from
                                                  port/image.bin and must match at every
-                                                 checkpoint; prints the clock drift
+                                                 checkpoint; prints the clock drift and
+                                                 the routines no record ran
 """
 import os
 import re
@@ -89,16 +90,37 @@ def check(entry, records):
     module, routine = entry.rsplit('.', 1)
     main = getattr(__import__(module), routine)
     ram = open('port/image.bin', 'rb').read()
+    ran = set()
     for path in records:
         zx.reset(ram)
+        sys.setprofile(lambda frame, event, arg: event == 'call' and ran.add(frame.f_code))
         try:
             passes, z80_t, port_t = headless.replay(main, path, labels)
         except headless.Mismatch as e:
             sys.exit('%s: MISMATCH %s' % (path, e))
+        finally:
+            sys.setprofile(None)
         if not passes:
             sys.exit('%s: the Z80 never reached the checkpoint' % path)
         print('%s: %d checkpoints match; at the last, Z80 frame %d, port frame %d (%+.1f%%)' % (
             path, passes, z80_t // T_FRAME, port_t // T_FRAME, 100 * (port_t / z80_t - 1)))
+    never = sorted(name for code, name in routines().items() if code not in ran)
+    if never:
+        print('never ran in any record (add an input that reaches them): ' + ', '.join(never))
+
+
+def routines():
+    """The port's routines: functions named as labels (capitalised) in port/*.py."""
+    port, out = os.path.abspath('port'), {}
+    for m in list(sys.modules.values()):
+        path = getattr(m, '__file__', None)
+        if not path or os.path.dirname(os.path.abspath(path)) != port:
+            continue
+        for name, f in vars(m).items():
+            if name[:1].isupper() and getattr(f, '__module__', None) == m.__name__ \
+                    and hasattr(f, '__code__'):
+                out[f.__code__] = '%s.%s' % (m.__name__, name)
+    return out
 
 
 if __name__ == '__main__':

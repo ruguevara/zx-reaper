@@ -21,6 +21,7 @@ Examples:
   zxrun.py orig.z80 --frames 3000 --input play.txt --map cov.map
   zxrun.py orig.z80 --frames 500 --shot 100:title.png --shot 499:game.png
   zxrun.py orig.z80 --frames 9000 --fuzz 7:4:Q,A,O,P,M,SPACE --map cov.map
+  zxrun.py orig.z80 --frames 9000 --fuzz 7:4:Q,A,O,P --save-input tests/inputs/fuzz7.txt
   zxrun.py orig.z80 --frames 2000 --input play.txt --hashes orig.hash
   zxrun.py new.z80 --frames 2000 --input play.txt --expect orig.hash
   zxrun.py orig.z80 --frames 300 --watch 0x8000-0x80FF --watch-from 250
@@ -85,6 +86,18 @@ def parse_input(path):
             sys.exit('%s:%d: unknown key(s) %s' % (path, lineno, ' '.join(bad)))
         events.append((frame, keys))
     return events
+
+
+def save_input(path, events, frames):
+    with open(path, 'w') as f:
+        f.write('# zxrun.py %s\n' % ' '.join(sys.argv[1:]))
+        prev = None
+        for frame, keys in events:
+            line = ' '.join(keys) or '-'
+            if line != prev:
+                f.write('%d %s\n' % (frame, line))
+                prev = line
+        f.write('%d END\n' % frames)
 
 
 def fuzz_input(spec, frames):
@@ -199,6 +212,9 @@ def main():
     ap.add_argument('--watch', metavar='A[-B]', help='log writes to A..B (pure Python simulator)')
     ap.add_argument('--watch-from', type=int, default=0, metavar='FRAME',
                     help='run fast until FRAME, then start watching')
+    ap.add_argument('--save-input', metavar='FILE',
+                    help='write the input (script or --fuzz) as an input script, e.g. a fuzz '
+                         'run that reaches a routine, for tests/inputs/')
     ap.add_argument('--record', help='write the game\'s IN reads and the checkpoint states')
     ap.add_argument('--checkpoint', type=parse_int, metavar='ADDR',
                     help='with --record: save the state at every pass through ADDR')
@@ -251,6 +267,8 @@ def main():
     events = [e for e in events if e[1] is not None]
     if args.frames is None:
         args.frames = ends[0] if ends else 500
+    if args.save_input:
+        save_input(args.save_input, events, args.frames)
     shots = {}
     for s in args.shot:
         f, path = s.split(':', 1)
