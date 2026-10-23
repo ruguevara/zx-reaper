@@ -1,6 +1,16 @@
-; Routine at 788C
+; Step IY to the next older phrase record, counting down B
 ;
-; Used by the routine at #R$75F6.
+; Counts one record off B, moves IY to the nearest older record that is not an
+; EXCEPT record (#R$78A5) and leaves the old IY in IX (the swap is #R$7896).
+; The mirror of #R$7892, which goes to newer records. Used by #R$75F6 to walk
+; the records from the newest to the oldest.
+;
+; B Records left to visit
+; IY Current record
+; O:B Decreased by one
+; O:IY The next older record
+; O:IX The old IY
+@label=StepOlderCount
 c$788C DEC B         ;
- $788D CALL $78A5    ;
- $7890 JR $7896      ;
+ $788D CALL $78A5    ; FindOlderRecord: IX = the older record
+ $7890 JR $7896      ; swap IX and IY

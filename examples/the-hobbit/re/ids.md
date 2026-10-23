@@ -118,7 +118,7 @@ Direction/verb ids in exits: 1 N, 2 S, 3 E, 4 W, 5 NE, 6 NW, 7 SE, 8 SW, 9 up, 1
 - $19 bow @C4D5 holder=46 loc=23 flags=80
 - $1A strong arrow @C4EA holder=46 loc=23 flags=80
 - $1B window @C4FF holder=FF loc=0D,12 flags=80
-- $1C to @C521 holder=FF loc=10,1E flags=94
+- $1C torch @C521 holder=FF loc=10,1E flags=94
 - $1D sand @C534 holder=FF loc=0D flags=80
 - $1E trap door @C54C holder=1D loc=0D flags=81
 - $1F goblins cache @C567 holder=1E loc=0D flags=A0

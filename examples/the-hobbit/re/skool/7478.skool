@@ -1,12 +1,19 @@
-; Routine at 7478
+; Print the noun of a name phrase with its article
 ;
-; Used by the routines at #R$7394 and #R$9ED6.
+; DE is the noun code of a name phrase (bits 12-15 style, bits 0-11 dictionary
+; offset). When PhraseMode ($B703) is not 0 the article (or the capital flag
+; of a proper name) comes first (#R$743F); then the noun itself is printed
+; with its style bits cleared, as a word of print mode 0 (#R$74C1).
+;
+; DE Noun code of the name phrase
+; O:D Style bits cleared
+@label=PrintNounWord
 c$7478 PUSH DE       ;
- $7479 LD A,($B703)  ;
+ $7479 LD A,($B703)  ; PhraseMode: with article?
  $747C AND A         ;
- $747D CALL NZ,$743F ;
+ $747D CALL NZ,$743F ; PrintArticle
  $7480 POP DE        ;
  $7481 LD A,D        ;
- $7482 AND $0F       ;
+ $7482 AND $0F       ; keep the offset only
  $7484 LD D,A        ;
- $7485 JP $74C1      ;
+ $7485 JP $74C1      ; PrintWord

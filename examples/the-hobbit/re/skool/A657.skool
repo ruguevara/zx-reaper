@@ -1,16 +1,29 @@
-; Routine at A657
-c$A657 CALL $9D44    ;
- $A65A LD A,$08      ;
- $A65C CALL $9C9F    ;
- $A65F CP $05        ;
- $A661 RET NC        ;
- $A662 CP $03        ;
- $A664 LD HL,$B0F4   ;
- $A667 JP NC,$97F4   ;
- $A66A LD HL,$B0D5   ;
- $A66D JP Z,$A1E3    ;
- $A670 LD HL,$B0E5   ;
- $A673 CP $00        ;
- $A675 JP Z,$97F4    ;
- $A678 LD HL,$B05B   ;
- $A67B JP $A1E3      ;
+; Thorin's remarks
+;
+; Script handler (op 3, in Thorin's script #R$C90C). Always passes the test
+; pass of the script engine (#R$9D44). Then, by a random number A from 0 to 8
+; (small values likelier): 0 "Thorin sits down and starts singing about gold",
+; 1-2 Thorin says "Hurry up", 3-4 "Thorin wait" (these two as plain text with
+; a full stop, #R$97F4), 5 or more nothing.
+; .
+; The branch for "Get us out of this one, thief !" ($B0D5) cannot be reached:
+; it tests Z after a CP 3 that has already sent every A of 3 or more away
+; (finding).
+; .
+; Hardware: none (the text goes through the message printer).
+@label=ThorinTalks
+c$A657 CALL $9D44
+ $A65A LD A,$08      ; random 0 to 8
+ $A65C CALL $9C9F
+ $A65F CP $05        ; 5 or more: silent
+ $A661 RET NC
+ $A662 CP $03        ; 3 or 4:
+ $A664 LD HL,$B0F4   ; "Thorin wait"
+ $A667 JP NC,$97F4
+ $A66A LD HL,$B0D5   ; "Get us out of this one, thief !" (never reached)
+ $A66D JP Z,$A1E3    ; Z cannot hold here: A is below 3 and not 3
+ $A670 LD HL,$B0E5   ; "Thorin sits down and starts singing about gold"
+ $A673 CP $00
+ $A675 JP Z,$97F4
+ $A678 LD HL,$B05B   ; 1 or 2: "Hurry up"
+ $A67B JP $A1E3

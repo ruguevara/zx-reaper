@@ -1,34 +1,55 @@
-; Routine at 97AD
+; Set up a new game: the blocked exit, the random event, the actor
 ;
-; Used by the routine at #R$6C00.
+; Called once from the start routine (#R$6C00). Clears Subject (the player
+; acts), ExitRestoreMode and ReplyGiven, and makes the player the acting actor
+; (ActorRecord = Chr00Player).
+; .
+; Then it chooses which of the 5 BlockedExits records is active this game
+; (RandomUpTo(BLOCKED_EXIT_MAX) + 1), remembers the record by patching the
+; operand of the LD IY,nn at $A7CF (#R$A7C4 puts the exit back later), and
+; zeroes that exit triple (direction, obstacle, destination) in the location
+; record, so the exit does not exist until #R$A7C4 restores it. Last it picks
+; one of the 4 RandomEvents records (RandomUpTo(RANDOM_EVENT_MAX)) into
+; RandomEventPtr.
+; .
+; The random numbers are why the game differs each time (the seed is the R
+; register at the first key, #R$6C00).
+@label=InitNewGame
 c$97AD SUB A         ;
- $97AE LD ($B6EA),A  ;
- $97B1 LD ($B6F1),A  ;
- $97B4 LD ($B6F9),A  ;
+ $97AE LD ($B6EA),A  ; the player acts
+ $97B1 LD ($B6F1),A  ; ExitRestoreMode
+ $97B4 LD ($B6F9),A  ; ReplyGiven
  $97B7 LD HL,$C11B   ;
- $97BA LD ($B70C),HL ;
+ $97BA LD ($B70C),HL ; ActorRecord = the player
+@isub=LD A,BLOCKED_EXIT_MAX
  $97BD LD A,$04      ;
- $97BF CALL $9C9F    ;
+ $97BF CALL $9C9F    ; 0-4
  $97C2 INC A         ;
- $97C3 LD B,A        ;
- $97C4 LD IY,$C808   ;
+ $97C3 LD B,A        ; 1-5
+@isub=LD IY,BlockedExits-BLOCKED_EXIT_SIZE
+ $97C4 LD IY,$C808   ; the table starts one record later
+@isub=LD DE,BLOCKED_EXIT_SIZE
  $97C8 LD DE,$0006   ;
+@label=InitNewGame_Step
 *$97CB ADD IY,DE     ;
- $97CD DJNZ $97CB    ;
- $97CF LD ($A7D1),IY ;
- $97D3 LD L,(IY+$01) ;
+ $97CD DJNZ $97CB    ; IY = record B
+@isub=LD (SmcBlockedExit+2),IY
+ $97CF LD ($A7D1),IY ; patches the LD IY,nn at $A7CF (#R$A7C4)
+ $97D3 LD L,(IY+$01) ; the exit triple in the location record
  $97D6 LD H,(IY+$02) ;
+@isub=LD B,EXIT_SIZE
  $97D9 LD B,$03      ;
-*$97DB LD (HL),$00   ;
+*$97DB LD (HL),$00   ; remove the exit
  $97DD INC HL        ;
  $97DE DJNZ $97DB    ;
+@isub=LD A,RANDOM_EVENT_MAX
  $97E0 LD A,$03      ;
- $97E2 CALL $9C9F    ;
+ $97E2 CALL $9C9F    ; 0-3
  $97E5 LD E,A        ;
  $97E6 LD D,$00      ;
  $97E8 SLA E         ;
- $97EA SLA E         ;
- $97EC LD HL,$C7FC   ;
+ $97EA SLA E         ; times 4 (the size of a random event record)
+ $97EC LD HL,$C7FC   ; RandomEvents
  $97EF ADD HL,DE     ;
- $97F0 LD ($B6EE),HL ;
+ $97F0 LD ($B6EE),HL ; RandomEventPtr
  $97F3 RET           ;

@@ -234,9 +234,9 @@ from the code):
   gives the byte address and bit mask, $81B5 plots (sets the pixel and sets the
   attribute of the cell to ink = fill colour $824E, paper kept).
 - $00 end. $08 x y: move pen. Other values 1-$1F are ignored (none present).
-- $80-$FF line, 2 bytes (code $7FD5): byte1 = 1 rrrr L U V, byte2 = rr nnnnnn.
-  V=1 vertical-major ($8185) else horizontal-major ($8151); U=1: y-1 (up)
-  else y+1 (bit1 of C); L=1: x-1 else x+1 (bit2 of C); n+1 steps on the major
+- $80-$FF line, 2 bytes (code $7FD5): byte1 = 1 rrrr L D V, byte2 = rr nnnnnn.
+  V=1 vertical-major ($8185) else horizontal-major ($8151); D=1: y-1, down the
+  screen (MovePenDown) else y+1, up (bit 1 of C); L=1: x-1 else x+1 (bit 2 of C); n+1 steps on the major
   axis; every r+1 major steps one minor step (r = rrrr<<2 | rr, B=r+1).
 - $40-$7F fill, 3 bytes: ink = A&7, x, y; flood fill by scan lines ($8071,
   stack of spans, boundary = lit pixels) in ink colour A&7 ($824E).

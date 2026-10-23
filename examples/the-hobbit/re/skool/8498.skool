@@ -1,15 +1,32 @@
-; Routine at 8498
+; Load one block from tape, restart the game on an error
 ;
-; Used by the routine at #R$8451.
+; Calls the ROM's LD-BYTES. If it reports success (carry set) the routine
+; returns. If the block is bad or the load is stopped, it prints "Tape error -
+; hit any key to restart program." in the input window, waits for a key and
+; jumps to #R$6C27, which restores the starting state and begins a
+; new game: the blocks already read have overwritten the running game.
+; .
+; Hardware: the ROM tape loader LD-BYTES; the keyboard port $FE.
+;
+; A Flag byte of the block
+; F Carry set to load
+; IX Address to load to
+; DE Length of the block
+; O:F Carry set when loaded (otherwise the routine does not return)
+@label=LoadBlock
 c$8498 CALL $0556    ;
- $849B RET C         ;
+ $849B RET C         ; loaded
  $849C LD A,$01      ;
- $849E LD ($B701),A  ;
- $84A1 LD HL,$B357   ;
+ $849E LD ($B701),A  ; print in the input window
+ $84A1 LD HL,$B357   ; "Tape error -     hit any key to restart program."
  $84A4 CALL $72DD    ;
-*$84A7 XOR A         ;
+@label=LoadBlock_WaitKey
+*$84A7 XOR A         ; select all keyboard half-rows
+@isub=IN A,(PORT_ULA)
  $84A8 IN A,($FE)    ;
+@isub=AND KEY_BITS
  $84AA AND $1F       ;
+@isub=CP KEY_BITS
  $84AC CP $1F        ;
- $84AE JR Z,$84A7    ;
- $84B0 JP $6C27      ;
+ $84AE JR Z,$84A7    ; no key down yet
+ $84B0 JP $6C27      ; restart

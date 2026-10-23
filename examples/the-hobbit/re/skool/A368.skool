@@ -1,6 +1,20 @@
-; Routine at A368
-c$A368 LD IX,($B70C) ;
- $A36C LD A,(IX+$10) ;
- $A36F CP $0F        ;
- $A371 JP NZ,$9F76   ;
- $A374 JP $910E      ;
+; Open handler of the small insignificant crack
+;
+; The handler of the crack (OBJ_SMALL_INSIGNIFICANT) for the verb open ($10),
+; from its verb table. The crack can only be opened by a character who is in
+; the dark stuffy passage $0F (the first location in the acting character's
+; record); from anywhere else the command is refused (#R$9F76: "cannot open").
+; In the passage the normal open handler runs (#R$910E, which tests locked and
+; open).
+; .
+; Observed: a nasty goblin in $0F opens it (verbs.txt). The actor is read from
+; ActorRecord, the noun from Noun1Record by #R$910E.
+;
+; Hardware: none.
+@label=OpenCrack
+c$A368 LD IX,($B70C) ; actor record
+ $A36C LD A,(IX+$10) ; actor's location
+@isub=CP LOC_DARK_STUFFY_PASSA_0F
+ $A36F CP $0F
+ $A371 JP NZ,$9F76   ; not in the passage: refuse
+ $A374 JP $910E      ; the normal open

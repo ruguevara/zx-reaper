@@ -1,38 +1,60 @@
-; Routine at 9DD9
+; Find the next object that a typed noun phrase can mean
 ;
-; Used by the routines at #R$7A73 and #R$7DBC.
+; Walks the object table (#R$9B93) from the entry in IX and returns the id of
+; the next record that qualifies, or $FF at the end of the table. A record
+; qualifies when:
+; .
+; 1. its kind fits AllMode ($B710): 0 things (objects and dead characters), 1
+; living characters (flag bit 6 set, bit 3 clear), ALL_MODE_ANY anything;
+; .
+; 2. its name phrase (+8, three word codes) matches the typed phrase (the
+; match is #R$71F3, which compares word by word);
+; .
+; 3. unless AllActive ($B70F) is set, the actor can reach it (#R$9E34).
+; .
+; Start with IX = ObjectTable-3 ($C060); to get the next candidate call again with
+; the IX returned. DE, HL and IY are kept.
+; .
+; HL Typed noun phrase (three word tokens)
+; IX Entry before the first to examine (ObjectTable-3 to start)
+; O:A Id of the object found, $FF when there are no more
+; O:IX Its entry in the object table
+@label=FindNextNamedObject
 c$9DD9 PUSH BC       ;
  $9DDA PUSH DE       ;
  $9DDB PUSH IY       ;
- $9DDD LD IY,($B70C) ;
- $9DE1 LD D,(IY+$10) ;
- $9DE4 LD A,($B710)  ;
+ $9DDD LD IY,($B70C) ; the actor's record
+ $9DE1 LD D,(IY+$10) ; D := the actor's location (not used again)
+ $9DE4 LD A,($B710)  ; AllMode
  $9DE7 LD E,A        ;
+@label=FindNextNamedObject_Next
 *$9DE8 CALL $9B93    ;
- $9DEB JR Z,$9E1D    ;
+ $9DEB JR Z,$9E1D    ; end of the table
+@isub=LD A,ALL_MODE_ANY
  $9DED LD A,$02      ;
  $9DEF CP E          ;
- $9DF0 JR Z,$9E01    ;
+ $9DF0 JR Z,$9E01    ; any kind
  $9DF2 LD A,(IY+$07) ;
- $9DF5 AND $48       ;
+ $9DF5 AND $48       ; character and not dead?
  $9DF7 CP $40        ;
  $9DF9 LD A,$00      ;
  $9DFB JR NZ,$9DFE   ;
- $9DFD INC A         ;
+ $9DFD INC A         ; 1 = living character
 *$9DFE CP E          ;
- $9DFF JR NZ,$9DE8   ;
+ $9DFF JR NZ,$9DE8   ; the wrong kind
+@isub=LD BC,REC_PHRASE_A
 *$9E01 LD BC,$0008   ;
  $9E04 PUSH IY       ;
- $9E06 ADD IY,BC     ;
+ $9E06 ADD IY,BC     ; its name phrase
  $9E08 CALL $71F3    ;
  $9E0B POP IY        ;
- $9E0D JR NZ,$9DE8   ;
- $9E0F LD A,($B70F)  ;
+ $9E0D JR NZ,$9DE8   ; the phrase does not match
+ $9E0F LD A,($B70F)  ; AllActive
  $9E12 AND A         ;
- $9E13 JR NZ,$9E1D   ;
+ $9E13 JR NZ,$9E1D   ; no reach test then
  $9E15 LD A,(IX+$00) ;
  $9E18 CALL $9E34    ;
- $9E1B JR Z,$9DE8    ;
+ $9E1B JR Z,$9DE8    ; out of reach
 *$9E1D LD A,(IX+$00) ;
  $9E20 POP IY        ;
  $9E22 POP DE        ;

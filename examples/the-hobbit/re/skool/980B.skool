@@ -1,7 +1,7 @@
 ; Three bytes of the turn routines ($980E, $99C6)
 @label=TurnVar1
 g$980B DEFB $00
-@label=TurnVar2
+@label=SightState
  $980C DEFB $00
 @label=TurnVar3
  $980D DEFB $00

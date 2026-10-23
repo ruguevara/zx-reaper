@@ -1,18 +1,32 @@
-; Routine at 9F2D
+; Find the exit of the actor's location that leads to a given place
 ;
-; Used by the routine at #R$8FD6.
+; Walks the exits of the actor's location (#R$9E95) for one whose destination
+; (record byte +2) is A. At #R$9F30 the walk can be told to compare another
+; byte of the exit record: the displacement of the LD A,(IX+d) at #R$9F40 is a
+; self-modified byte, written from A (2 destination here, 1 the obstacle
+; from #R$9F25). It is not restored, so it stays as last set. BC and IY are kept.
+; .
+; A Destination location id
+; O:A The id when an exit has it, $FF when none has
+; O:IX The exit record (direction, obstacle, destination) when found
+@label=FindExitByDestination
 c$9F2D PUSH AF       ;
- $9F2E LD A,$02      ;
+@isub=LD A,EXIT_DEST
+ $9F2E LD A,$02      ; compare byte +2
 ; This entry point is used by the routine at #R$9F25.
-*$9F30 LD ($9F42),A  ;
+@label=FindExitByField
+@isub=LD (SmcExitField+2),A
+*$9F30 LD ($9F42),A  ; sets the field the walk compares
  $9F33 POP AF        ;
  $9F34 PUSH BC       ;
  $9F35 PUSH IY       ;
- $9F37 LD B,A        ;
- $9F38 CALL $9E95    ;
+ $9F37 LD B,A        ; B = the value looked for
+ $9F38 CALL $9E95    ; IX = exits - 3
+@label=FindExitByDestination_Next
 *$9F3B CALL $9B93    ;
- $9F3E JR Z,$9F46    ;
- $9F40 LD A,(IX+$02) ;
+ $9F3E JR Z,$9F46    ; no more exits: A = $FF
+@label=SmcExitField
+ $9F40 LD A,(IX+$02) ; the displacement byte is rewritten at #R$9F30
  $9F43 CP B          ;
  $9F44 JR NZ,$9F3B   ;
 *$9F46 POP IY        ;

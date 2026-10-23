@@ -1,30 +1,47 @@
-; Routine at 9D50
+; Empty the first object: consumables vanish, the rest passes up
 ;
-; Used by the routine at #R$92ED.
-c$9D50 LD A,($B6E8)    ;
+; Entry for the object in FirstObject ($B6E8); #R$9D53 takes the holder in A.
+; Used when a holder is destroyed or killed: its contents are either gone or
+; handed to whatever held the holder.
+; .
+; Every record held by the holder (+1 = A) is treated alone. If its consumable
+; flag (bit 1 of +7) is clear its holder becomes the holder's own holder ($FF
+; when the holder lies at a location). If it is set, it evaporates: its first
+; location is cleared, its holder is set to $FF, its present flag (bit 7 of +7)
+; is cleared, its name is printed and then "Evaporates.". HL is kept.
+; .
+; Hardware: none.
+@label=EmptyFirstObject
+c$9D50 LD A,($B6E8)    ; FirstObject
 ; This entry point is used by the routine at #R$977F.
+@label=EmptyHolder
 *$9D53 PUSH IY         ;
  $9D55 PUSH IX         ;
  $9D57 PUSH HL         ;
- $9D58 CALL $9BCA      ;
- $9D5B LD B,(IX+$01)   ;
+ $9D58 CALL $9BCA      ; IX = the holder's record
+ $9D5B LD B,(IX+$01)   ; B = what holds the holder
+@isub=LD IX,ObjectTable-ID_ENTRY_SIZE
  $9D5E LD IX,$C060     ;
-*$9D62 CALL $9BA9      ;
+@label=EmptyHolder_Next
+*$9D62 CALL $9BA9      ; next record, A kept
  $9D65 JR Z,$9D91      ;
- $9D67 CP (IY+$01)     ;
+ $9D67 CP (IY+$01)     ; held by the holder?
  $9D6A JR NZ,$9D62     ;
+@isub=BIT FLAG_CONSUMABLE,(IY+$07)
  $9D6C BIT 1,(IY+$07)  ;
  $9D70 JR Z,$9D8B      ;
  $9D72 PUSH AF         ;
- $9D73 LD (IY+$10),$00 ;
+ $9D73 LD (IY+$10),$00 ; location none
+@isub=LD (IY+$01),AT_LOCATION
  $9D77 LD (IY+$01),$FF ;
- $9D7B RES 7,(IY+$07)  ;
- $9D7F CALL $9EC7      ;
+@isub=RES FLAG_PRESENT,(IY+$07)
+ $9D7B RES 7,(IY+$07)  ; no longer present
+ $9D7F CALL $9EC7      ; its name
  $9D82 LD HL,$B143     ;
- $9D85 CALL $72DD      ;
+ $9D85 CALL $72DD      ; "Evaporates."
  $9D88 POP AF          ;
  $9D89 JR $9D62        ;
-*$9D8B LD (IY+$01),B   ;
+*$9D8B LD (IY+$01),B   ; passes to the holder's holder
  $9D8E JP $9D62        ;
 *$9D91 POP HL          ;
  $9D92 POP IX          ;

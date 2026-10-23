@@ -1,71 +1,99 @@
-; Routine at 9FC7
+; List the objects of a holder, one per line, with their contents
 ;
-; Used by the routine at #R$9FAF.
+; Sets the story window indent (ListIndent, $869F: the number of spaces
+; #R$86A1 prints at the start of each line) to D, then walks the object table
+; for records whose holder (+1) is A. A record is listed when:
+; .
+; 1. it is at location B: for a holder of $FF it has exactly one location and it
+; is B; otherwise its first, or its second, location is B;
+; .
+; 2. it is not the actor itself at the top level (D = LIST_INDENT);
+; .
+; 3. the actor can reach it (#R$9E34).
+; .
+; A listed object counts in C, then prints its full name (PhraseMode 0) and a
+; full stop, and, when it has something to show (#R$A050 returned carry clear),
+; the routine calls itself for it with the indent raised by LIST_INDENT_STEP.
+; The actor itself gets only a new line. The old indent is put back at the end.
+; .
+; Hardware: none directly (the text goes to the screen through #R$858B).
+; .
+; A Holder id, or AT_LOCATION
+; B Location id
+; C Number listed so far (0 at the first call)
+; D Indent, in spaces
+; O:A Unchanged
+; O:C Number listed, with the contents of the objects listed
+@label=ListHolderContents
 c$9FC7 PUSH HL       ;
- $9FC8 LD L,A        ;
+ $9FC8 LD L,A        ; L = holder
  $9FC9 LD A,($869F)  ;
- $9FCC LD H,A        ;
+ $9FCC LD H,A        ; H = the old indent
  $9FCD LD A,D        ;
- $9FCE LD ($869F),A  ;
+ $9FCE LD ($869F),A  ; the new indent
  $9FD1 LD A,L        ;
- $9FD2 EX (SP),HL    ;
+ $9FD2 EX (SP),HL    ; keep both on the stack
  $9FD3 PUSH IX       ;
+@isub=LD IX,ObjectTable-ID_ENTRY_SIZE
  $9FD5 LD IX,$C060   ;
-*$9FD9 CALL $9BA9    ;
+@label=ListHolderContents_Next
+*$9FD9 CALL $9BA9    ; next record, A kept
  $9FDC JR Z,$A046    ;
- $9FDE CP (IY+$01)   ;
+ $9FDE CP (IY+$01)   ; held by the holder?
  $9FE1 JR NZ,$9FD9   ;
  $9FE3 PUSH AF       ;
  $9FE4 INC A         ;
- $9FE5 LD E,(IY+$00) ;
- $9FE8 JR NZ,$9FEF   ;
- $9FEA LD A,$01      ;
+ $9FE5 LD E,(IY+$00) ; E = its number of locations
+ $9FE8 JR NZ,$9FEF   ; a holder
+ $9FEA LD A,$01      ; lying at the location: it must have one location
  $9FEC CP E          ;
  $9FED JR NZ,$A03D   ;
 *$9FEF LD A,(IY+$10) ;
  $9FF2 CP B          ;
- $9FF3 JR Z,$9FFE    ;
+ $9FF3 JR Z,$9FFE    ; first location is B
  $9FF5 DEC E         ;
- $9FF6 JR Z,$A03D    ;
+ $9FF6 JR Z,$A03D    ; only one location: no
  $9FF8 LD A,(IY+$11) ;
  $9FFB CP B          ;
- $9FFC JR NZ,$A03D   ;
-*$9FFE LD A,($B6EA)  ;
+ $9FFC JR NZ,$A03D   ; second location is not B
+*$9FFE LD A,($B6EA)  ; Subject
  $A001 CP (IX+$00)   ;
  $A004 JR NZ,$A00B   ;
+@isub=LD A,LIST_INDENT
  $A006 LD A,$04      ;
  $A008 CP D          ;
- $A009 JR Z,$A03D    ;
-*$A00B LD A,(IX+$00) ;
- $A00E CALL $9E34    ;
+ $A009 JR Z,$A03D    ; the actor is not listed at the top level
+ $A00B LD A,(IX+$00) ;
+ $A00E CALL $9E34    ; can the actor reach it?
  $A011 JR Z,$A03D    ;
- $A013 INC C         ;
+ $A013 INC C         ; one more listed
  $A014 SUB A         ;
- $A015 LD ($B704),A  ;
- $A018 LD ($B703),A  ;
- $A01B CALL $9EC7    ;
+ $A015 LD ($B704),A  ; CapitalNext := 0
+ $A018 LD ($B703),A  ; PhraseMode := 0 (adjectives too)
+ $A01B CALL $9EC7    ; print its name
  $A01E LD A,($B6EA)  ;
  $A021 CP (IX+$00)   ;
- $A024 JR Z,$A041    ;
+ $A024 JR Z,$A041    ; the actor: just end the line
+@isub=LD A,CHAR_FULLSTOP
  $A026 LD A,$2E      ;
- $A028 CALL $858B    ;
+ $A028 CALL $858B    ; "."
  $A02B LD A,(IX+$00) ;
- $A02E CALL $A050    ;
- $A031 JR C,$A03D    ;
+ $A02E CALL $A050    ; header of its contents (or just a new line)
+ $A031 JR C,$A03D    ; nothing to list
  $A033 LD A,(IX+$00) ;
  $A036 PUSH DE       ;
  $A037 INC D         ;
- $A038 INC D         ;
- $A039 CALL $9FC7    ;
+ $A038 INC D         ; indent two more
+ $A039 CALL $9FC7    ; list its contents
  $A03C POP DE        ;
 *$A03D POP AF        ;
  $A03E JP $9FD9      ;
-*$A041 CALL $8583    ;
+*$A041 CALL $8583    ; new line
  $A044 JR $A03D      ;
 *$A046 POP IX        ;
  $A048 EX (SP),HL    ;
  $A049 LD A,H        ;
- $A04A LD ($869F),A  ;
+ $A04A LD ($869F),A  ; the old indent back
  $A04D LD A,L        ;
- $A04E POP HL        ;
+ $A04E POP HL        ; A = the holder again
  $A04F RET           ;

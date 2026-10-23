@@ -1,25 +1,35 @@
-; Routine at 9ED6
+; Print a name phrase
 ;
-; Used by the routines at #R$7434, #R$9686 and #R$9EC7.
+; Prints the name phrase at IY: three word codes, the noun at +0 and two adjectives at +2 and
+; +4. When PhraseMode ($B703) is 0 the article of the noun (#R$743F) and the two
+; adjectives come first; then the noun is printed by #R$7478, which adds the
+; article only when PhraseMode is not 0. So PhraseMode 0 gives "the wooden
+; chest" and any other value gives "the chest". A word code of 0 prints nothing, and
+; a noun code of 0 prints no noun. AF and DE are kept.
+; .
+; Hardware: none directly (the words go to the screen through #R$74C1).
+; .
+; IY Name phrase (6 bytes: noun, adjective, adjective)
+@label=PrintNamePhrase
 c$9ED6 PUSH AF       ;
  $9ED7 PUSH DE       ;
- $9ED8 LD A,($B703)  ;
+ $9ED8 LD A,($B703)  ; PhraseMode
  $9EDB CP $00        ;
- $9EDD JR NZ,$9EFA   ;
+ $9EDD JR NZ,$9EFA   ; noun only
  $9EDF LD D,(IY+$01) ;
  $9EE2 LD E,(IY+$00) ;
- $9EE5 CALL $743F    ;
+ $9EE5 CALL $743F    ; the article of the noun
  $9EE8 LD E,(IY+$02) ;
  $9EEB LD D,(IY+$03) ;
- $9EEE CALL $74C1    ;
+ $9EEE CALL $74C1    ; first adjective
  $9EF1 LD E,(IY+$04) ;
  $9EF4 LD D,(IY+$05) ;
- $9EF7 CALL $74C1    ;
+ $9EF7 CALL $74C1    ; second adjective
 *$9EFA LD E,(IY+$00) ;
  $9EFD LD D,(IY+$01) ;
  $9F00 LD A,D        ;
  $9F01 OR E          ;
- $9F02 CALL NZ,$7478 ;
+ $9F02 CALL NZ,$7478 ; the noun
  $9F05 POP DE        ;
  $9F06 POP AF        ;
  $9F07 RET           ;

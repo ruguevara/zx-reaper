@@ -1,33 +1,54 @@
-; Routine at 95ED
+; Test whether the subject is in the dark
 ;
-; Used by the routines at #R$712B, #R$820B, #R$8D9D, #R$950F, #R$9B02 and
-; #R$A3E6.
+; Carry set means the subject cannot see: HL is then MsgDark ("It is dark.").
+; Only the player can be in the dark; any other subject (a non-zero Subject)
+; always sees. The player sees when none of these holds: standing inside a
+; closed holder (#R$9E7A finds one), or in a location whose flags have the lit
+; bit (LOC_LIT, bit 7) clear (caves and dungeons). In those cases it is still
+; light when the light source, object $0E (OBJ_SHORT_STRONG_SWORD), is within the
+; player's reach (#R$9E34) and its flags have bits 4 and 2 set and bit 3 clear
+; ($94 at the start). Observed in the simulator by moving the player to cave
+; $0E and the sword there and varying its flags.
+; .
+; Called by the picture drawing (#R$820B), the move handler (#R$8D9D), the
+; command dispatcher (#R$950F), #R$9B02, #R$712B and #R$A3E6.
+; .
+; IX, IY, BC are preserved.
+;
+; Subject 0 for the player
+; O:F Carry set when it is dark
+; O:HL MsgDark when it is dark
+@label=CheckDark
 c$95ED LD A,($B6EA)   ;
  $95F0 AND A          ;
- $95F1 RET NZ         ;
+ $95F1 RET NZ         ; not the player: sees (carry clear)
  $95F2 PUSH IX        ;
  $95F4 PUSH BC        ;
- $95F5 LD IX,$C11B    ;
- $95F9 CALL $9E7A     ;
+ $95F5 LD IX,$C11B    ; the player
+ $95F9 CALL $9E7A     ; closed holder
  $95FC INC A          ;
- $95FD JR NZ,$9608    ;
- $95FF CALL $9D37     ;
- $9602 BIT 7,(IX+$00) ;
- $9606 JR NZ,$9624    ;
-*$9608 PUSH IY        ;
+ $95FD JR NZ,$9608    ; inside one: needs the light
+ $95FF CALL $9D37     ; the location record
+@isub=BIT LOC_LIT,(IX+$00)
+ $9602 BIT 7,(IX+$00) ; lit?
+ $9606 JR NZ,$9624    ; yes: sees
+ $9608 PUSH IY        ;
+@isub=LD A,OBJ_SHORT_STRONG_SWORD
  $960A LD A,$0E       ;
- $960C LD IY,$C305    ;
- $9610 CALL $9E34     ;
+ $960C LD IY,$C305    ; the light source
+ $9610 CALL $9E34     ; within reach?
  $9613 POP IY         ;
- $9615 JR Z,$9620     ;
- $9617 LD A,($C30C)   ;
+ $9615 JR Z,$9620     ; no: dark
+ $9617 LD A,($C30C)   ; its flags
+@isub=XOR LIGHT_FLAGS_XOR
  $961A XOR $F7        ;
- $961C AND $1C        ;
- $961E JR Z,$9628     ;
-*$9620 LD HL,$AE1F    ;
+@isub=AND LIGHT_FLAGS_MASK
+ $961C AND $1C        ; bits 4 and 2 set, bit 3 clear?
+ $961E JR Z,$9628     ; yes: light
+ $9620 LD HL,$AE1F    ; "It is dark."
  $9623 SCF            ;
-*$9624 POP BC         ;
+*$9624 POP BC          ;
  $9625 POP IX         ;
  $9627 RET            ;
-*$9628 AND A          ;
+*$9628 AND A          ; carry clear
  $9629 JR $9624       ;

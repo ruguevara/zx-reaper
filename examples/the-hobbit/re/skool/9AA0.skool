@@ -1,22 +1,32 @@
-; Routine at 9AA0
+; Switch an NPC to the script for an event
 ;
-; Used by the routines at #R$95DF and #R$980E.
+; Looks up the NPC's record (#R$9A85), then the entry for the behaviour id in B
+; in the NPC's behaviour table (+4: id, script address; see NpcStates) and makes that
+; script the NPC's current script (+2). Nothing changes when the NPC has no
+; record or its table has no entry for the id. Used by script op $C (switch
+; behaviour) in #R$980E and by #R$95DF when a character is told of an event.
+; .
+; A Character id
+; B Behaviour id (0 default, $0F idle, others for events)
+@label=SwitchNpcScript
 c$9AA0 PUSH IY       ;
  $9AA2 PUSH IX       ;
- $9AA4 CALL $9A85    ;
+ $9AA4 CALL $9A85    ; IY = NPC record
+@isub=CP END_MARK
  $9AA7 CP $FF        ;
- $9AA9 JR Z,$9AC8    ;
+ $9AA9 JR Z,$9AC8    ; no such NPC
  $9AAB LD L,(IY+$04) ;
  $9AAE LD H,(IY+$05) ;
  $9AB1 PUSH HL       ;
- $9AB2 POP IX        ;
+ $9AB2 POP IX        ; IX = behaviour table
  $9AB4 LD A,B        ;
- $9AB5 CALL $9DBD    ;
+ $9AB5 CALL $9DBD    ; find the entry for the id
+@isub=CP END_MARK
  $9AB8 CP $FF        ;
- $9ABA JR Z,$9AC8    ;
+ $9ABA JR Z,$9AC8    ; not in the table
  $9ABC LD L,(IX+$01) ;
  $9ABF LD H,(IX+$02) ;
- $9AC2 LD (IY+$02),L ;
+ $9AC2 LD (IY+$02),L ; current script := the entry's script
  $9AC5 LD (IY+$03),H ;
 *$9AC8 POP IX        ;
  $9ACA POP IY        ;

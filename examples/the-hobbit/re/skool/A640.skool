@@ -1,11 +1,21 @@
-; Routine at A640
-c$A640 LD A,($B6F6)  ;
- $A643 LD HL,$B6F5   ;
- $A646 CP (HL)       ;
- $A647 RET NZ        ;
- $A648 LD A,($C122)  ;
- $A64B BIT 7,A       ;
- $A64D RET NZ        ;
- $A64E CALL $9D44    ;
- $A651 LD HL,$B0CB   ;
- $A654 JP $A1E3      ;
+; Thorin asks where the thief is
+;
+; Script handler (op 3, in Thorin's script #R$C8FF). When Thorin is where the
+; player is and the player is invisible (the present/visible flag, bit 7 of
+; the player's flags, is cleared while the ring is worn, #R$A377) he says
+; "Where's the thief ?". Otherwise it returns before the test pass accepts,
+; so the script takes its alternative step (#R$C90C, #R$A657).
+; .
+; Hardware: none (the text goes through the message printer).
+@label=ThorinMissesThief
+c$A640 LD A,($B6F6)  ; location of the NPC being run
+ $A643 LD HL,$B6F5
+ $A646 CP (HL)
+ $A647 RET NZ        ; not with the player: refuse
+ $A648 LD A,($C122)  ; the player's flags
+@isub=BIT FLAG_PRESENT,A
+ $A64B BIT 7,A
+ $A64D RET NZ        ; visible: refuse
+ $A64E CALL $9D44
+ $A651 LD HL,$B0CB   ; "Where's the thief ?"
+ $A654 JP $A1E3

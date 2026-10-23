@@ -1,12 +1,21 @@
-; Routine at 9B02
+; Update where the player is and whether the player can see
 ;
-; Used by the routines at #R$980E and #R$9BDD.
+; Stores the player's location in PlayerLocation and sets SightState (#R$980C)
+; to 0 when the player can see (#R$95ED returns carry clear) or to 1 when it is
+; too dark. #R$980E uses SightState for the "You hear a noise." rule: it goes to 2
+; once that message has been printed in a turn. Called at the start of every turn
+; and after the player has been carried to a new place (#R$9BDD).
+;
+; Uses the actor in Subject ($B6EA) through #R$95ED, which returns at once for
+; any actor but the player.
+@label=UpdatePlayerSight
+@isub=LD A,PLAYER
 c$9B02 LD A,$00      ;
- $9B04 CALL $9F82    ;
- $9B07 LD ($B6F5),A  ;
- $9B0A CALL $95ED    ;
+ $9B04 CALL $9F82    ; the player's location
+ $9B07 LD ($B6F5),A  ; PlayerLocation
+ $9B0A CALL $95ED    ; carry set: too dark to see
  $9B0D LD A,$00      ;
  $9B0F JR NC,$9B12   ;
- $9B11 INC A         ;
-*$9B12 LD ($980C),A  ;
+ $9B11 INC A         ; 1 when dark
+*$9B12 LD ($980C),A  ; SightState
  $9B15 RET           ;

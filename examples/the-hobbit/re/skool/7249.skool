@@ -1,39 +1,63 @@
-; Routine at 7249
+; Wait for a key of the line editor, typing WAIT when the player is idle
 ;
-; Used by the routine at #R$6DD6.
+; Scans the keyboard with #R$8B93 until a key is newly pressed and returns its
+; code. The scans are counted in the idle counter at $B714 (set to
+; IDLE_SCANS_MAX by #R$6DD6 at the start of every line). When it runs to 0 with
+; no key the routine rubs out whatever was typed (#R$6E8B), types the word
+; WAIT into the line buffer and the input window and returns a carriage return
+; as if the player had pressed ENTER, so a player who does nothing sees time
+; pass. That takes roughly 15-20 s (the scan loop is not tied to a frame).
+; .
+; Each key pressed gives IDLE_SCANS_PER_KEY scans back to the counter, to at
+; most IDLE_SCANS_MAX, so typing keeps the player from timing out.
+; .
+; Hardware: polls the keyboard (via #R$8B93); the wait is a counted loop.
+;
+; HL Address after the last typed character in the input line buffer
+; B Free bytes left in the buffer
+; O:A Key code ($0D after the time-out)
+; O:HL The same address, after WAIT on a time-out
+; O:B Free bytes left, $7C on a time-out
+@label=WaitKey
 c$7249 PUSH HL       ;
- $724A LD HL,($B714) ;
-*$724D CALL $8B93    ;
+ $724A LD HL,($B714) ; idle counter ($B714)
+@label=WaitKey_Scan
+*$724D CALL $8B93    ; ReadKey
  $7250 AND A         ;
- $7251 JR NZ,$7273   ;
+ $7251 JR NZ,$7273   ; a key
  $7253 DEC HL        ;
  $7254 LD A,H        ;
  $7255 OR L          ;
  $7256 JR NZ,$724D   ;
- $7258 POP HL        ;
+ $7258 POP HL        ; time-out: the line buffer pointer
  $7259 PUSH HL       ;
- $725A CALL $6E8B    ;
- $725D LD DE,$7291   ;
+ $725A CALL $6E8B    ; erase the typed line
+ $725D LD DE,$7291   ; WaitText
  $7260 LD B,$04      ;
 *$7262 LD A,(DE)     ;
- $7263 LD (HL),A     ;
+ $7263 LD (HL),A     ; type "WAIT" into the buffer...
  $7264 INC HL        ;
  $7265 INC DE        ;
- $7266 CALL $858B    ;
- $7269 DJNZ $7262    ;
- $726B EX (SP),HL    ;
+ $7266 CALL $858B    ; ...and the input window
+ $7269 DJNZ $7262   ;
+ $726B EX (SP),HL    ; the pointer after WAIT is returned in HL
+@isub=LD B,INPUT_LINE_SIZE-4
  $726C LD B,$7C      ;
- $726E LD A,$0D      ;
- $7270 LD HL,$FE0C   ;
+@isub=LD A,CHAR_CR
+ $726E LD A,$0D      ; ENTER
+@isub=LD HL,-IDLE_SCANS_PER_KEY
+ $7270 LD HL,$FE0C   ; so that the refill below gives the full count
 *$7273 PUSH AF       ;
  $7274 XOR A         ;
+@isub=LD DE,IDLE_SCANS_PER_KEY
  $7275 LD DE,$01F4   ;
- $7278 ADC HL,DE     ;
+ $7278 ADC HL,DE     ; counter + 500
+@isub=LD DE,IDLE_SCANS_MAX
  $727A LD DE,$0BB8   ;
- $727D JR C,$7284    ;
- $727F CALL $728B    ;
- $7282 JR C,$7285    ;
-*$7284 EX DE,HL      ;
+ $727D JR C,$7284    ; wrapped (the time-out case): full count
+ $727F CALL $728B    ; compare with the maximum
+ $7282 JR C,$7285    ; below it: keep
+*$7284 EX DE,HL      ; else the maximum
 *$7285 LD ($B714),HL ;
  $7288 POP AF        ;
  $7289 POP HL        ;

@@ -1,48 +1,78 @@
-; Routine at 7585
+; Parse the typed word list into phrase records
 ;
-; Used by the routine at #R$6C00.
-c$7585 LD IY,$B9C8   ;
+; The sentence parser. The word list built by #R$6C00 at $709C (WordListPtr
+; points at it) is read word by word with #R$7873; the class of each word picks
+; a handler from ActionTable ($75D2), which stores the word in the phrase being
+; built: ActionSlots ($757B: two prepositions, noun, two adjectives) are copied
+; into one of the two phrase blocks of the record at IY (#R$782B), command
+; words go to the record's first words (#R$7914). Records are 24 bytes and
+; grow down the phrase stack from $B9C8; ALL, EXCEPT, AND and THEN start or
+; extend records (#R$75F6, #R$8251, #R$770B). The result is read by
+; #R$7960, which matches the records against the command table.
+; .
+; Entered at #R$7585 for a line typed by the player. #R$82FD enters at #R$758A
+; with A = 1 to parse the text of an order given with SAY TO. When a question
+; of the game is waiting for its answer (AwaitingAnswer not 0) the answer is parsed
+; as the continuation of the saved record: the parser goes on at #R$7614 as if
+; AND had just been read.
+; .
+; Registers in the handlers: E parser flags (bit 1: the record has no command
+; word yet; bit 3: cleared by #R$770B when it has saved a position; bits 6, 7:
+; first and second phrase block still free), D class of the last word read, IY
+; the record being built, ParserWordCount ($B706) the number of records.
+;
+; A InputFromOrder: 0 for the typed line (#R$758A only; #R$7585 sets it)
+; IY Phrase record to start with ($B9C8 for #R$7585)
+; O:F Z when the line was parsed, NZ when it was refused (a message was printed)
+@label=ParseLine
+c$7585 LD IY,$B9C8   ; top of the phrase stack
  $7589 XOR A         ;
 ; This entry point is used by the routine at #R$82FD.
-*$758A LD ($B71B),A  ;
- $758D CALL $785F    ;
- $7590 LD ($B706),A  ;
- $7593 LD E,$FF      ;
- $7595 LD A,($B71A)  ;
+@label=ParseLineFrom
+*$758A LD ($B71B),A  ; InputFromOrder
+ $758D CALL $785F    ; ClearAllStage
+ $7590 LD ($B706),A  ; ParserWordCount = 0
+ $7593 LD E,$FF      ; all parser flags set
+ $7595 LD A,($B71A)  ; AwaitingAnswer: an answer is awaited?
  $7598 AND A         ;
- $7599 LD D,$A0      ;
+@isub=LD D,TOKEN_AND
+ $7599 LD D,$A0      ; the answer continues the saved record, like "and"
  $759B JP NZ,$7614   ;
- $759E LD D,$C0      ;
+@isub=LD D,TOKEN_END
+ $759E LD D,$C0      ; no word before this one
 ; This entry point is used by the routines at #R$75F6 and #R$8251.
+@label=StartPhraseRecord
 *$75A0 XOR A         ;
- $75A1 LD ($757A),A  ;
+ $75A1 LD ($757A),A  ; ActionFlag: no preposition in this phrase yet
  $75A4 LD A,E        ;
- $75A5 OR $C7        ;
+ $75A5 OR $C7        ; both phrase blocks free, command word needed...
  $75A7 LD E,A        ;
- $75A8 LD A,($B719)  ;
+ $75A8 LD A,($B719)  ; AllStage
  $75AB CP $02        ;
  $75AD JR NZ,$75B1   ;
- $75AF RES 1,E       ;
-*$75B1 CALL $7864    ;
+ $75AF RES 1,E       ; after EXCEPT no command word is needed
+*$75B1 CALL $7864    ; ClearRecord
 ; This entry point is used by the routines at #R$76EC, #R$772F, #R$7795,
 ; #R$7929, #R$82B3, #R$82BA, #R$82D2, #R$8315 and #R$83A0.
-*$75B4 LD HL,$757B   ;
+@label=ParseNextWord
+*$75B4 LD HL,$757B   ; ActionSlots
  $75B7 LD B,$0A      ;
- $75B9 CALL $70E2    ;
+ $75B9 CALL $70E2    ; ClearBytes
  $75BC SET 4,E       ;
 ; This entry point is used by the routine at #R$7790.
-*$75BE CALL $7873    ;
+@label=DispatchWord
+*$75BE CALL $7873    ; ReadWord: A = class nibble
  $75C1 PUSH DE       ;
- $75C2 RRCA          ;
+ $75C2 RRCA          ; class * 2
  $75C3 RRCA          ;
  $75C4 RRCA          ;
  $75C5 LD E,A        ;
  $75C6 LD D,$00      ;
- $75C8 LD HL,$75D2   ;
+ $75C8 LD HL,$75D2   ; ActionTable
  $75CB ADD HL,DE     ;
  $75CC LD E,(HL)     ;
  $75CD INC HL        ;
  $75CE LD D,(HL)     ;
  $75CF EX DE,HL      ;
  $75D0 POP DE        ;
- $75D1 JP (HL)       ;
+ $75D1 JP (HL)       ; to the handler of the class

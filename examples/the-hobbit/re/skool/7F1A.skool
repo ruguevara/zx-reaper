@@ -1,43 +1,67 @@
-; Routine at 7F1A
+; Take the acting character's stored order and test it
 ;
-; Used by the routine at #R$980E.
+; Called by the NPC runner (#R$980E, #R$A814, #R$A8F6) when a character who was
+; given an order by SAY TO is about to act. Finds the order slot owned by
+; Subject (#R$7EFF) and frees it at once (owner 0); the 24 bytes after the owner
+; are the parsed command. With A = 0 it stops there. Otherwise it parses that
+; record as if the player had typed it (InputFromOrder = 1, #R$79B6, keeping
+; VerbAllFlag) and, when the parse succeeds, runs the check of the command
+; (#R$7AED). A parse failure or a refused check frees all of the character's
+; remaining slots (#R$7F60). The command ends up in the parser's variables
+; (CommandId, FirstObject, SecondObject) for the caller to carry out.
+; .
+; All registers are preserved except A and F, and HL in the A = 0 case. The
+; three callers pass A = 1; the A = 0 path is not executed with the inputs in
+; re/maps. If Subject owns no slot HL is past the table and the zero is written
+; at the first byte after it (PhraseStack).
+;
+; A 0: only fetch the slot; not 0: parse and check the order
+; Subject ($B6EA) The character whose order is wanted
+; O:A 0 when there is no usable order (all slots of the character freed), else not 0
+; O:F Z when there is no usable order
+; O:HL (A = 0 only) Address of the stored command record
+@label=RunStoredOrder
 c$7F1A PUSH IX       ;
  $7F1C PUSH IY       ;
  $7F1E PUSH BC       ;
  $7F1F PUSH DE       ;
  $7F20 PUSH HL       ;
- $7F21 LD C,A        ;
- $7F22 CALL $7EFF    ;
- $7F25 LD (HL),$00   ;
- $7F27 INC HL        ;
+ $7F21 LD C,A                 ; C = mode
+ $7F22 CALL $7EFF             ; HL = slot of Subject
+@isub=LD (HL),ORDER_SLOT_FREE
+ $7F25 LD (HL),$00            ; slot is taken: owner 0
+ $7F27 INC HL                 ; HL = the stored record
  $7F28 XOR A         ;
  $7F29 CP C          ;
  $7F2A JR NZ,$7F37   ;
- $7F2C OR $01        ;
- $7F2E EX (SP),HL    ;
+ $7F2C OR $01                 ; A = 1, NZ
+ $7F2E EX (SP),HL             ; the record address replaces the saved HL
+@label=RunStoredOrder_Return
 *$7F2F POP HL        ;
  $7F30 POP DE        ;
  $7F31 POP BC        ;
  $7F32 POP IY        ;
  $7F34 POP IX        ;
  $7F36 RET           ;
+@label=RunStoredOrder_Parse
 *$7F37 PUSH HL       ;
- $7F38 POP IY        ;
+ $7F38 POP IY                 ; IY = the stored command
  $7F3A LD A,$01      ;
- $7F3C LD ($B71B),A  ;
- $7F3F LD A,($B71C)  ;
+ $7F3C LD ($B71B),A           ; InputFromOrder = 1
+ $7F3F LD A,($B71C)           ; VerbAllFlag is kept across the parse
  $7F42 PUSH AF       ;
- $7F43 CALL $79B6    ;
+ $7F43 CALL $79B6             ; parse the record; Z = failed
  $7F46 EX AF,AF'     ;
  $7F47 XOR A         ;
- $7F48 LD ($B71B),A  ;
+ $7F48 LD ($B71B),A           ; InputFromOrder = 0
  $7F4B POP AF        ;
  $7F4C LD ($B71C),A  ;
  $7F4F EX AF,AF'     ;
  $7F50 JR Z,$7F57    ;
- $7F52 CALL $7AED    ;
- $7F55 JR NZ,$7F2F   ;
-*$7F57 LD A,($B6EA)  ;
- $7F5A CALL $7F60    ;
- $7F5D XOR A         ;
+ $7F52 CALL $7AED             ; run the check of the command
+ $7F55 JR NZ,$7F2F            ; allowed: return NZ
+@label=RunStoredOrder_Drop
+*$7F57 LD A,($B6EA)           ; parse failed or refused:
+ $7F5A CALL $7F60             ; free the actor's slots
+ $7F5D XOR A                  ; A = 0, Z
  $7F5E JR $7F2F      ;

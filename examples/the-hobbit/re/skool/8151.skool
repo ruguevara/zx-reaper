@@ -1,35 +1,55 @@
-; Routine at 8151
+; Draw a straight picture line segment
 ;
-; Used by the routine at #R$7FA7.
-c$8151 BIT 0,C       ;
+; The line command of the picture drawer (#R$7FA7). Plots L pixels from the pen
+; position, moving the pen after each plot: a step along the major axis every
+; time and a step along the other axis every B major steps (a shallow or steep
+; line made of runs; B = 1 gives a diagonal). Drawing stops early when a pen
+; move reports the edge of the picture area (#R$8141 and the other pen moves
+; return Z there). The pen ends one step past the last pixel. Bit 0 of C picks
+; the major axis: clear is horizontal (this part), set is vertical (#R$8185, the
+; same code with the axes swapped).
+; .
+; Hardware: writes the screen bitmap and attributes through #R$81B5.
+;
+; B Major steps per minor step (1-64)
+; C Direction bits: bit 0 vertical-major; bit 1 the minor/vertical step is #R$813A (pen y down), clear #R$812B (up); bit 2 the horizontal step is #R$8148 (left), clear #R$8141 (right)
+; D Pen x
+; E Pen y
+; L Number of major steps (1-64)
+; O:D, E Pen after the last step
+; BC, HL are preserved
+@label=DrawPictureLine
+c$8151 BIT 0,C                ; bit 0: vertical-major
  $8153 JR NZ,$8185   ;
- $8155 PUSH HL       ;
+ $8155 PUSH HL                ; keep L and B
  $8156 PUSH BC       ;
-*$8157 CALL $81B5    ;
- $815A BIT 2,C       ;
+@label=DrawPictureLine_Step
+*$8157 CALL $81B5             ; colour the pixel
+ $815A BIT 2,C                ; bit 2: left or right
  $815C JR Z,$8165    ;
  $815E CALL $8148    ;
  $8161 JR Z,$8182    ;
  $8163 JR $816A      ;
 *$8165 CALL $8141    ;
  $8168 JR Z,$8182    ;
-*$816A DEC B         ;
+*$816A DEC B                  ; every B steps:
  $816B JR NZ,$817F   ;
- $816D BIT 1,C       ;
+ $816D BIT 1,C                ; bit 1: down or up
  $816F JR Z,$8178    ;
  $8171 CALL $813A    ;
  $8174 JR Z,$8182    ;
  $8176 JR $817D      ;
 *$8178 CALL $812B    ;
  $817B JR Z,$8182    ;
-*$817D POP BC        ;
+*$817D POP BC                 ; restart the count of B
  $817E PUSH BC       ;
-*$817F DEC L         ;
+*$817F DEC L                  ; next major step
  $8180 JR NZ,$8157   ;
 *$8182 POP BC        ;
  $8183 POP HL        ;
  $8184 RET           ;
-*$8185 PUSH HL       ;
+@label=DrawPictureLine_Vertical
+*$8185 PUSH HL                ; the same with x and y swapped
  $8186 PUSH BC       ;
 *$8187 CALL $81B5    ;
  $818A BIT 1,C       ;

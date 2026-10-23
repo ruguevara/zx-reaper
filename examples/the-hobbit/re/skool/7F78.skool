@@ -1,12 +1,25 @@
-; Routine at 7F78
+; Draw the picture of a location
 ;
-; Used by the routine at #R$965B.
+; Looks the location up in PictureTable ($CC00) and draws its picture with
+; #R$7FA7. Does nothing but set PictureFound to $FF when pictures are off (the
+; N key held at start-up left PicturesEnabled, $B707, at 0). Otherwise
+; PictureFound is the location id, or $FF when the location has no picture (the
+; table holds 22 pictures for about 60 locations). The caller #R$965B then waits
+; for a key when a picture was drawn.
+; .
+; Hardware: the drawing writes the screen bitmap, the attributes and the border.
+;
+; A Location id
+; PicturesEnabled ($B707) 0 = pictures off
+; O:PictureFound Id of the picture drawn, $FF if none
+; All registers are preserved
+@label=DrawLocationPicture
 c$7F78 PUSH AF       ;
- $7F79 LD A,($B707)  ;
+ $7F79 LD A,($B707)           ; PicturesEnabled
  $7F7C AND A         ;
  $7F7D JR NZ,$7F86   ;
- $7F7F LD A,$FF      ;
- $7F81 LD ($7F77),A  ;
+ $7F7F LD A,$FF               ; pictures off:
+ $7F81 LD ($7F77),A           ; PictureFound = $FF
  $7F84 POP AF        ;
  $7F85 RET           ;
 *$7F86 POP AF        ;
@@ -15,12 +28,12 @@ c$7F78 PUSH AF       ;
  $7F89 PUSH BC       ;
  $7F8A PUSH DE       ;
  $7F8B PUSH IX       ;
- $7F8D LD IX,$CC00   ;
- $7F91 CALL $9DBD    ;
- $7F94 LD ($7F77),A  ;
- $7F97 LD L,(IX+$01) ;
+ $7F8D LD IX,$CC00            ; picture table
+ $7F91 CALL $9DBD             ; find the id; Z = not found
+ $7F94 LD ($7F77),A           ; id or $FF
+ $7F97 LD L,(IX+$01)          ; HL = address of the picture data
  $7F9A LD H,(IX+$02) ;
- $7F9D CALL NZ,$7FA7 ;
+ $7F9D CALL NZ,$7FA7          ; draw it (flags still from the lookup)
  $7FA0 POP IX        ;
  $7FA2 POP DE        ;
  $7FA3 POP BC        ;

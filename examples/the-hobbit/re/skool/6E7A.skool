@@ -1,11 +1,24 @@
-; Routine at 6E7A
+; Repeat the previous command (the @ key)
 ;
-; Used by the routine at #R$6DD6.
-c$6E7A LD A,($B71A)  ;
+; Reached from the line editor #R$6DD6 when "@" is the first key of an empty
+; line. The input line buffer still holds the previous line and the parsed
+; word list at $709C is untouched, so the caller only has to parse that list
+; again: this routine rubs out the "> " prompt with two back-spaces and
+; returns Z with A = 0, which sends the caller (#R$6C00) straight to parsing.
+; .
+; While a question of the game ("Which ...?") waits for its answer
+; (AwaitingAnswer is not 0) the key is ignored and the editor goes on reading keys.
+; .
+; Hardware: echoes through #R$858B (input window).
+;
+; O:A 0
+; O:F Z set (no new line was typed)
+c$6E7A LD A,($B71A)  ; AwaitingAnswer: an answer is awaited
  $6E7D AND A         ;
- $6E7E JP NZ,$6DF5   ;
+ $6E7E JP NZ,$6DF5   ; yes: ignore "@", read the next key
+@isub=LD A,CHAR_BACKSPACE
  $6E81 LD A,$08      ;
- $6E83 CALL $858B    ;
- $6E86 CALL $858B    ;
+ $6E83 CALL $858B    ; rub out the prompt ">"
+ $6E86 CALL $858B    ; and the space after it
  $6E89 XOR A         ;
  $6E8A RET           ;

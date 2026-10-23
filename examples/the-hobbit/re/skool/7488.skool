@@ -1,7 +1,16 @@
-; Routine at 7488
+; Print the name of an actor
 ;
-; Used by the routines at #R$73A3 and #R$740C.
+; A is an actor id as kept in Subject ($B6EA): $FF means nobody known and
+; prints the word "someone"; any other id (0 is the player, who prints as
+; "you") is a character or object whose name phrase is printed by #R$73D6, with
+; or without an article as PhraseMode ($B703) says. Used by the message
+; control codes 6 and 16.
+;
+; A Actor id, NO_ACTOR for "someone"
+@label=PrintActorName
+@isub=CP NO_ACTOR
 c$7488 CP $FF        ;
- $748A JP NZ,$73D6   ;
- $748D LD DE,$0AE3   ;
- $7490 JP $74C1      ;
+ $748A JP NZ,$73D6   ; PrintNameOfObject
+@isub=LD DE,WORD_SOMEONE
+ $748D LD DE,$0AE3   ; "someone"
+ $7490 JP $74C1      ; PrintWord

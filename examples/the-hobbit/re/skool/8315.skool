@@ -1,61 +1,96 @@
-; Routine at 8315
-c$8315 LD A,($B71B)    ;
+; Handle the end of the typed words: store the orders of a SAY TO line
+;
+; The handler of the special word with dictionary offset 0, the end of the
+; word list (first entry of #R$8271). It works together with #R$82FD to parse a
+; SAY TO line twice (seen with SAY TO THORIN "GIVE MAP TO ME", frame 14895 of
+; verbs.txt). With InputFromOrder ($B71B) 0 it only starts the second pass
+; (#R$82FD). With InputFromOrder 1 the second pass has ended: it clears the
+; flag and works out how many phrase records were parsed since the pass began
+; (ParserWordCount minus PicVar3, the count kept by #R$82FD). Each of them,
+; newest first, is copied into a free order slot of OrderSlots (the owner byte
+; first, set to $FF = pending, then the 24 bytes of the record). A record whose
+; bit 6 of +1 is set is not kept: its slot is freed again. It stops when no
+; slot is free. The number of slots used goes to OrderSlotCount for
+; #R$7EBA, which gives them to the character addressed. Finally it clears
+; AllStage, restores ParserWordCount and returns to the dispatcher at #R$75B4
+; with the word class that #R$82FD saved in PicVar2.
+; .
+; Hardware: none.
+;
+; InputFromOrder ($B71B) 0 first pass, 1 second pass
+; PicVar2 ($824F) Class nibble of the last word, from #R$82FD
+; PicVar3 ($8250) ParserWordCount when the second pass began, from #R$82FD
+; stack IY, BC, DE as pushed by #R$82FD
+; O:D Class nibble of the last word
+; O:OrderSlotCount Number of slots filled
+@label=StoreParsedOrders
+c$8315 LD A,($B71B)           ; InputFromOrder
  $8318 AND A           ;
- $8319 JR Z,$82FD      ;
- $831B DEC A           ;
- $831C LD ($B71B),A    ;
- $831F LD A,($8250)    ;
+ $8319 JR Z,$82FD             ; 0: start the second pass
+ $831B DEC A                  ; second pass over:
+ $831C LD ($B71B),A           ; InputFromOrder = 0
+ $831F LD A,($8250)           ; PicVar3: count when the pass began
  $8322 LD B,A          ;
- $8323 LD A,($B706)    ;
- $8326 SUB B           ;
+ $8323 LD A,($B706)           ; ParserWordCount
+ $8326 SUB B                  ; A = records parsed in the pass
  $8327 AND A           ;
- $8328 LD C,$00        ;
- $832A JR Z,$8378      ;
- $832C POP IY          ;
+ $8328 LD C,$00               ; C counts the slots used
+ $832A JR Z,$8378             ; none: nothing to store
+ $832C POP IY                 ; IY = the saved IY
  $832E PUSH IY         ;
- $8330 LD DE,$FFE8     ;
+@isub=LD DE,-PARSED_RECORD_SIZE
+ $8330 LD DE,$FFE8            ; one phrase record back
  $8333 ADD IY,DE       ;
- $8335 LD B,A          ;
-*$8336 LD IX,$B738     ;
+ $8335 LD B,A                 ; B = records to store
+@label=StoreParsedOrders_Record
+*$8336 LD IX,$B738            ; first slot
  $833A PUSH DE         ;
  $833B PUSH BC         ;
- $833C LD DE,$0019     ;
+@isub=LD DE,ORDER_SLOT_SIZE
+ $833C LD DE,$0019            ; slot size
+@isub=LD B,ORDER_SLOTS
  $833F LD B,$08        ;
-*$8341 LD A,(IX+$00)   ;
+@label=StoreParsedOrders_Find
+*$8341 LD A,(IX+$00)          ; look for a free slot
  $8344 AND A           ;
  $8345 JR Z,$834B      ;
- $8347 ADD IX,DE       ;
+ $8347 ADD IX,DE              ; next slot
  $8349 DJNZ $8341      ;
-*$834B LD (IX+$00),$FF ;
+@isub=LD (IX+0),FLAG_SLOT_PENDING
+*$834B LD (IX+$00),$FF        ; take it: pending
  $834F INC IX          ;
  $8351 POP BC          ;
  $8352 POP DE          ;
- $8353 JR NZ,$8378     ;
- $8355 BIT 6,(IY+$01)  ;
+ $8353 JR NZ,$8378            ; NZ: no free slot, stop
+ $8355 BIT 6,(IY+$01)         ; record flag (+1 bit 6): not to keep
  $8359 JR Z,$8361      ;
- $835B LD (IX-$01),$00 ;
+@isub=LD (IX-1),ORDER_SLOT_FREE
+ $835B LD (IX-$01),$00        ; free the slot again
  $835F JR $8373        ;
+@label=StoreParsedOrders_Copy
 *$8361 PUSH BC         ;
- $8362 LD B,$18        ;
+@isub=LD B,PARSED_RECORD_SIZE
+ $8362 LD B,$18               ; copy the 24 bytes of the record
 *$8364 LD A,(IY+$00)   ;
  $8367 LD (IX+$00),A   ;
  $836A INC IY          ;
  $836C INC IX          ;
  $836E DJNZ $8364      ;
  $8370 POP BC          ;
- $8371 ADD IY,DE       ;
-*$8373 ADD IY,DE       ;
- $8375 INC C           ;
+ $8371 ADD IY,DE              ; IY back to the start of the record
+*$8373 ADD IY,DE              ; and one record further back
+ $8375 INC C                  ; slots used
  $8376 DJNZ $8336      ;
-*$8378 XOR A           ;
+@label=StoreParsedOrders_Done
+*$8378 XOR A                  ; AllStage = 0
  $8379 LD ($B719),A    ;
  $837C LD A,C          ;
- $837D LD ($B737),A    ;
- $8380 POP IY          ;
- $8382 LD A,($8250)    ;
+ $837D LD ($B737),A           ; OrderSlotCount
+ $8380 POP IY                 ; IY from before
+ $8382 LD A,($8250)           ; PicVar3 back into ParserWordCount
  $8385 LD ($B706),A    ;
- $8388 POP BC          ;
+ $8388 POP BC                 ; BC, DE from #R$82FD
  $8389 POP DE          ;
- $838A LD A,($824F)    ;
+ $838A LD A,($824F)           ; PicVar2: the class nibble
  $838D LD D,A          ;
- $838E JP $75B4        ;
+ $838E JP $75B4               ; on with the next word

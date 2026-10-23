@@ -1,23 +1,37 @@
-; Routine at 939E
-c$939E LD IY,($B70A)  ;
- $93A2 CALL $9C78     ;
- $93A5 LD HL,$ADF1    ;
- $93A8 JP NC,$72DD    ;
- $93AB LD A,($B6E9)   ;
- $93AE CALL $9CED     ;
- $93B1 LD IX,($B708)  ;
- $93B5 ADD A,(IX+$03) ;
- $93B8 PUSH AF        ;
- $93B9 POP BC         ;
- $93BA LD A,(IY+$03)  ;
- $93BD SUB B          ;
- $93BE LD HL,$AE0C    ;
- $93C1 JP C,$72DD     ;
- $93C4 CALL $9D44     ;
- $93C7 LD A,($B6E9)   ;
- $93CA LD (IX+$01),A  ;
- $93CD LD A,(IY+$10)  ;
- $93D0 LD (IX+$10),A  ;
- $93D3 LD B,A         ;
- $93D4 LD A,($B6E8)   ;
- $93D7 JP $9BDD       ;
+; Give the first object to the second
+;
+; Default handler (VerbHandlers) of command 29, "give X to Y". The subject must
+; hold the object (#R$9C78: "<subject> is not carrying it." otherwise) and the
+; recipient must have room: the bulk it already holds (#R$9CED) plus the
+; object's bulk (+3) may not exceed its capacity (+3), or it says "<subject> is
+; carrying too much.". When performed, the object's holder (+1) becomes the
+; recipient and its location (+$10) the recipient's, and #R$9BDD finishes the
+; move (the object's contents go with it).
+;
+; Noun1Record Record of the object given
+; Noun2Record Record of the recipient
+; FirstObject Id of the object given
+; SecondObject Id of the recipient
+@label=GiveObject
+c$939E LD IY,($B70A)     ; the recipient
+ $93A2 CALL $9C78        ; held by the subject?
+ $93A5 LD HL,$ADF1       ; "<subject> is not carrying it."
+ $93A8 JP NC,$72DD       ;
+ $93AB LD A,($B6E9)      ;
+ $93AE CALL $9CED        ; bulk the recipient already holds
+ $93B1 LD IX,($B708)     ;
+ $93B5 ADD A,(IX+$03)    ; plus the bulk of the object
+ $93B8 PUSH AF           ;
+ $93B9 POP BC            ; B = total
+ $93BA LD A,(IY+$03)     ; the recipient's capacity
+ $93BD SUB B             ;
+ $93BE LD HL,$AE0C       ; "<subject> is carrying too much."
+ $93C1 JP C,$72DD        ;
+ $93C4 CALL $9D44        ; abandon unless performing
+ $93C7 LD A,($B6E9)      ; the recipient becomes the holder
+ $93CA LD (IX+$01),A     ;
+ $93CD LD A,(IY+$10)     ; and the object is where it is
+ $93D0 LD (IX+$10),A     ;
+ $93D3 LD B,A            ; B = that location
+ $93D4 LD A,($B6E8)      ; A = the object
+ $93D7 JP $9BDD          ;

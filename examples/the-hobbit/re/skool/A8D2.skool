@@ -1,21 +1,34 @@
-; Routine at A8D2
-c$A8D2 LD A,($C4C1)  ;
- $A8D5 LD HL,$B6F5   ;
- $A8D8 CP (HL)       ;
- $A8D9 RET NZ        ;
- $A8DA LD HL,$C122   ;
- $A8DD BIT 7,(HL)    ;
- $A8DF RET Z         ;
- $A8E0 CALL $9D44    ;
- $A8E3 LD HL,($B6EE) ;
- $A8E6 INC HL        ;
- $A8E7 INC HL        ;
- $A8E8 LD E,(HL)     ;
- $A8E9 INC HL        ;
- $A8EA LD D,(HL)     ;
- $A8EB PUSH DE       ;
- $A8EC POP HL        ;
- $A8ED CALL $A1E3    ;
- $A8F0 LD A,$01      ;
- $A8F2 LD ($B6F9),A  ;
- $A8F5 RET           ;
+; Gollum asks his riddle
+;
+; Script handler (op 3, in Gollum's script #R$C9F7). When Gollum is where the
+; player is and the player is visible (not wearing the ring: flag bit 7 of
+; the player is set) the test pass accepts and Gollum says the riddle chosen
+; at the start of the game (RandomEventPtr: the message word at +2 of the
+; record in #R$C7FC; the riddle of the dark or the riddle of the animal with
+; four feet). It sets ReplyGiven to 1, so that the answer is looked for by
+; #R$A8F6. Otherwise it returns before the test pass accepts and the script
+; takes its alternative step (#R$CA10).
+; .
+; Hardware: none (the text goes through the message printer).
+@label=GollumAsksRiddle
+c$A8D2 LD A,($C4C1)  ; Gollum's location
+ $A8D5 LD HL,$B6F5   ; player's location
+ $A8D8 CP (HL)
+ $A8D9 RET NZ        ; not together: refuse
+ $A8DA LD HL,$C122
+@isub=BIT FLAG_PRESENT,(HL)
+ $A8DD BIT 7,(HL)    ; player invisible: refuse
+ $A8DF RET Z
+ $A8E0 CALL $9D44
+ $A8E3 LD HL,($B6EE) ; the chosen random event
+ $A8E6 INC HL        ; skip the phrase code
+ $A8E7 INC HL
+ $A8E8 LD E,(HL)
+ $A8E9 INC HL
+ $A8EA LD D,(HL)
+ $A8EB PUSH DE
+ $A8EC POP HL
+ $A8ED CALL $A1E3    ; say the riddle
+ $A8F0 LD A,$01
+ $A8F2 LD ($B6F9),A  ; ReplyGiven := 1: waiting for the answer
+ $A8F5 RET

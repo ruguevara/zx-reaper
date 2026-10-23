@@ -1,39 +1,63 @@
-; Routine at A448
-c$A448 LD IX,($B708)  ;
- $A44C BIT 3,(IX+$07) ;
- $A450 RET Z          ;
- $A451 RES 3,(IX+$07) ;
- $A455 LD DE,$0006    ;
- $A458 LD IY,$A49C    ;
- $A45C LD A,($B6E8)   ;
-*$A45F CP (IY+$00)    ;
- $A462 JR Z,$A468     ;
- $A464 ADD IY,DE      ;
- $A466 JR $A45F       ;
-*$A468 PUSH IY        ;
- $A46A POP HL         ;
- $A46B INC HL         ;
- $A46C LD E,(HL)      ;
- $A46D INC HL         ;
- $A46E LD D,(HL)      ;
- $A46F LD (DE),A      ;
- $A470 INC HL         ;
- $A471 LD A,(HL)      ;
- $A472 LD (IX+$10),A  ;
- $A475 INC HL         ;
- $A476 LD A,(HL)      ;
- $A477 LD (IX+$0A),A  ;
- $A47A INC HL         ;
- $A47B LD A,(HL)      ;
- $A47C LD (IX+$0B),A  ;
- $A47F LD HL,$B068    ;
- $A482 CALL $72DD     ;
- $A485 LD A,($C12B)   ;
- $A488 CP B           ;
- $A489 RET NZ         ;
- $A48A LD DE,$005E    ;
- $A48D CALL $74C1     ;
- $A490 LD DE,$02E2    ;
- $A493 CALL $74C1     ;
- $A496 LD HL,$B018    ;
- $A499 JP $72DD       ;
+; Bring a killed goblin back at its home
+;
+; Chained after the attack handler #R$9171 in the verb table of each of the six
+; goblins (verb 0 = run after the previous entry). When the attacked character
+; (Noun1Record) has just been killed (its dead flag, bit 3, is set) the goblin
+; is revived: the flag is cleared, and the record found in #R$A49C by its id
+; supplies the goblin's home. The id is stored back into the goblin's NPC
+; state (so #R$980E runs it again; #R$977F had cleared it), and its location
+; (+$10) and its second name phrase (+$0A, +$0B: it was replaced by the word
+; "dead", #R$A18C) are restored. Prints "<goblin> falls down a hole and
+; vanishes." and, when the player's location equals B, "Another goblin enters."
+; So the goblins cannot be killed for good.
+; .
+; Hardware: none (the text goes through the message printer).
+;
+; B Compared with the player's location; nothing here sets it (a leftover of
+;   the command dispatcher: $0E when the mean goblin was killed with the
+;   player at $36), so the "Another goblin enters." line is unreliable
+@label=RespawnKilledGoblin
+c$A448 LD IX,($B708)  ; IX = the attacked character
+@isub=BIT FLAG_DEAD,(IX+$07)
+ $A44C BIT 3,(IX+$07) ; killed?
+ $A450 RET Z          ; no: nothing to do
+@isub=RES FLAG_DEAD,(IX+$07)
+ $A451 RES 3,(IX+$07) ; alive again
+@isub=LD DE,RESPAWN_RECORD_SIZE
+ $A455 LD DE,$0006
+ $A458 LD IY,$A49C    ; IY = RecordTable
+ $A45C LD A,($B6E8)   ; A = the goblin's id
+@label=RespawnKilledGoblin_Find
+*$A45F CP (IY+$00)    ; find the record of that id (it is always there)
+ $A462 JR Z,$A468
+ $A464 ADD IY,DE
+ $A466 JR $A45F
+*$A468 PUSH IY
+ $A46A POP HL
+ $A46B INC HL
+ $A46C LD E,(HL)
+ $A46D INC HL
+ $A46E LD D,(HL)
+ $A46F LD (DE),A      ; the NPC state's id slot := the goblin's id
+ $A470 INC HL
+ $A471 LD A,(HL)
+ $A472 LD (IX+$10),A  ; home location
+ $A475 INC HL
+ $A476 LD A,(HL)
+ $A477 LD (IX+$0A),A  ; second name phrase restored (replaces "dead")
+ $A47A INC HL
+ $A47B LD A,(HL)
+ $A47C LD (IX+$0B),A
+ $A47F LD HL,$B068    ; "<obj1> falls down a hole and vanishes."
+ $A482 CALL $72DD
+ $A485 LD A,($C12B)   ; player's location
+ $A488 CP B
+ $A489 RET NZ         ; not equal to B: done
+@isub=LD DE,WORD_ANOTHER
+ $A48A LD DE,$005E
+ $A48D CALL $74C1     ; "another"
+@isub=LD DE,WORD_GOBLIN
+ $A490 LD DE,$02E2
+ $A493 CALL $74C1     ; "goblin"
+ $A496 LD HL,$B018    ; "Enters."
+ $A499 JP $72DD

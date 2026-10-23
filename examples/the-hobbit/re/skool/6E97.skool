@@ -1,84 +1,118 @@
-; Routine at 6E97
+; Turn the next typed word into a word token
 ;
-; Used by the routine at #R$6C00.
+; Skips spaces in the typed line and makes one token of what follows: the end
+; of the line (carriage return) gives TOKEN_END, a full stop, comma or double
+; quote its punctuation token (#R$6F30), anything else is looked up in the
+; dictionary at $6000 (#R$6F47). A typed word matches the first dictionary
+; entry that starts with the same letters when the typed word is not longer
+; than the entry. A typed word that is longer than an entry of 4 or more
+; letters matches it when it starts with all of its letters, unless a later
+; entry matches as well; the longer one is then preferred. A synonym entry
+; (last byte bit 6) is replaced by the word it points to, so "n" gives the
+; token of "north". A word that matches nothing gives TOKEN_UNKNOWN.
+; .
+; The token is a class in the high nibble (dictionary class of the word, see
+; the notes) and the dictionary offset of the word in the other 12 bits:
+; B = class + offset bits 8-11, C = offset bits 0-7. The caller
+; (#R$6C00) stores B and C in the word list at $709C. InputLinePtr
+; ($B6DA) is set to the start of the word, for the "I do not know the word"
+; message. Entry points inside the loop use SourceTextPtr ($B717) for the
+; dictionary entry being tried.
+; .
+; Hardware: none.
+;
+; HL Address in the typed line to read from
+; O:A Class nibble of the token ($C0 end of line, $D0 unknown word, $90/$A0/$B0 punctuation)
+; O:D The same
+; O:B Class nibble and dictionary offset bits 8-11
+; O:C Dictionary offset bits 0-7
+; O:HL Address after the word or punctuation mark (also when the word is unknown)
+; O:E Preserved
+@label=ReadTypedWord
 c$6E97 PUSH DE        ;
 *$6E98 LD A,(HL)      ;
  $6E99 INC HL         ;
+@isub=CP CHAR_SPACE
  $6E9A CP $20         ;
- $6E9C JR Z,$6E98     ;
+ $6E9C JR Z,$6E98     ; skip spaces
  $6E9E DEC HL         ;
- $6E9F LD ($B6DA),HL  ;
+ $6E9F LD ($B6DA),HL  ; InputLinePtr: start of this word
+@isub=CP CHAR_CR
  $6EA2 CP $0D         ;
- $6EA4 JR Z,$6EDE     ;
- $6EA6 CALL $6F30     ;
- $6EA9 JR Z,$6EE3     ;
- $6EAB CALL $6F47     ;
- $6EAE JR NZ,$6EBC    ;
- $6EB0 PUSH HL        ;
-*$6EB1 CALL $6FBA     ;
- $6EB4 JR Z,$6EC0     ;
-*$6EB6 CALL $6F72     ;
- $6EB9 JR Z,$6EB1     ;
- $6EBB POP HL         ;
+ $6EA4 JR Z,$6EDE     ; end of the line
+ $6EA6 CALL $6F30     ; punctuation?
+ $6EA9 JR Z,$6EE3     ; yes: A = its token, BC = 0
+ $6EAB CALL $6F47     ; copy the letters, find the first entry for the first letter
+ $6EAE JR NZ,$6EBC    ; no entry: unknown word
+ $6EB0 PUSH HL        ; address after the typed word
+*$6EB1 CALL $6FBA     ; compare the letters with the entry
+ $6EB4 JR Z,$6EC0     ; same as far as the shorter one goes
+*$6EB6 CALL $6F72     ; try the next entry
+ $6EB9 JR Z,$6EB1     ; (same first letter)
+ $6EBB POP HL         ; none left: unknown word
+@isub=LD A,TOKEN_UNKNOWN
 *$6EBC LD A,$D0       ;
  $6EBE JR $6EE0       ;
-*$6EC0 LD A,($708A)   ;
+*$6EC0 LD A,($708A)   ; length of the typed word
  $6EC3 LD B,A         ;
- $6EC4 LD A,($709B)   ;
+ $6EC4 LD A,($709B)   ; length of the entry
  $6EC7 CP B           ;
- $6EC8 JR NC,$6EEB    ;
+ $6EC8 JR NC,$6EEB    ; entry not shorter: accept it
  $6ECA CP $04         ;
- $6ECC JR C,$6EB6     ;
- $6ECE PUSH IX        ;
- $6ED0 CALL $6F76     ;
- $6ED3 JR NZ,$6EE9    ;
+ $6ECC JR C,$6EB6     ; shorter than 4 letters: no, try the next entry
+ $6ECE PUSH IX        ; the typed word is longer: is there a better entry?
+ $6ED0 CALL $6F76     ; decode the next entry
+ $6ED3 JR NZ,$6EE9    ; none: accept this one
  $6ED5 CALL $6FBA     ;
- $6ED8 JR NZ,$6EE9    ;
+ $6ED8 JR NZ,$6EE9    ; the next one does not match: accept this one
  $6EDA POP IX         ;
- $6EDC JR $6EB6       ;
+ $6EDC JR $6EB6       ; it matches too: take it as the candidate
+@isub=LD A,TOKEN_END
 *$6EDE LD A,$C0       ;
-*$6EE0 LD BC,$0000    ;
+*$6EE0 LD BC,$0000    ; no word
+@label=ReadTypedWord_Done
 *$6EE3 POP DE         ;
- $6EE4 LD D,A         ;
+ $6EE4 LD D,A         ; D = class nibble
  $6EE5 ADD A,B        ;
- $6EE6 LD B,A         ;
+ $6EE6 LD B,A         ; B = class + offset bits 8-11
  $6EE7 LD A,D         ;
  $6EE8 RET            ;
 *$6EE9 POP IX         ;
-*$6EEB LD IX,($B717)  ;
+@label=ReadTypedWord_Accept
+*$6EEB LD IX,($B717)  ; SourceTextPtr: the entry that matched
  $6EEF PUSH IX        ;
  $6EF1 XOR A          ;
-*$6EF2 INC IX         ;
+*$6EF2 INC IX         ; find the last byte of the entry
  $6EF4 INC A          ;
  $6EF5 BIT 7,(IX-$01) ;
  $6EF9 JR Z,$6EF2     ;
- $6EFB CP $02         ;
+ $6EFB CP $02         ; byte 2 never ends an entry
  $6EFD JR Z,$6EF2     ;
  $6EFF CP $03         ;
  $6F01 JR NZ,$6F09    ;
- $6F03 BIT 7,(IX-$02) ;
+ $6F03 BIT 7,(IX-$02) ; byte 3 does not end it after a verb flag in byte 2
  $6F07 JR NZ,$6EF2    ;
-*$6F09 BIT 6,(IX-$01) ;
+*$6F09 BIT 6,(IX-$01) ; synonym?
  $6F0D JR Z,$6F1A     ;
- $6F0F LD L,(IX+$00)  ;
+ $6F0F LD L,(IX+$00)  ; offset of the word it stands for
  $6F12 LD H,(IX+$01)  ;
  $6F15 LD DE,$6000    ;
  $6F18 ADD HL,DE      ;
- $6F19 EX (SP),HL     ;
-*$6F1A POP HL         ;
- $6F1B LD A,(HL)      ;
+ $6F19 EX (SP),HL     ; use that entry instead
+*$6F1A POP HL         ; the dictionary entry
+ $6F1B LD A,(HL)      ; class bits 3-2: bits 5-6 of byte 1...
  $6F1C RLCA           ;
  $6F1D AND $C0        ;
  $6F1F LD B,A         ;
  $6F20 INC HL         ;
- $6F21 LD A,(HL)      ;
+ $6F21 LD A,(HL)      ; ...class bits 1-0: bits 5-6 of byte 2
  $6F22 RRCA           ;
  $6F23 AND $30        ;
- $6F25 ADD A,B        ;
+ $6F25 ADD A,B        ; A = class nibble
  $6F26 DEC HL         ;
- $6F27 LD DE,$A000    ;
+ $6F27 LD DE,$A000    ; HL - $6000: the offset of the entry
  $6F2A ADD HL,DE      ;
  $6F2B PUSH HL        ;
- $6F2C POP BC         ;
- $6F2D POP HL         ;
+ $6F2C POP BC         ; BC = offset
+ $6F2D POP HL         ; address after the typed word
  $6F2E JR $6EE3       ;

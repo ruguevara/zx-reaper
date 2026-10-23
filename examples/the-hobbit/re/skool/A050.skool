@@ -1,42 +1,62 @@
-; Routine at A050
+; Print the line that introduces what an object holds
 ;
-; Used by the routines at #R$910E and #R$9FC7.
+; For an object that can show its contents (flags +7 bit 5 or 3 set: open or
+; alive, or dead) and holds at least one present record (#R$9D97) prints:
+; .
+; - for a character "<name> is carrying" (the message in MsgCarrying2), then
+; clears carry;
+; - for any other holder the relation word of the holder (#R$A09D, "In the", "On
+; the"...), its noun and "there is" or "there are" (MsgThere, with the word "is"
+; for one thing and "are" for more), then clears carry.
+; .
+; Otherwise it ends the line with a new line (#R$8583) and sets carry. The
+; caller (#R$9FC7, #R$910E) lists the contents when carry is clear. BC, DE and IX
+; are kept.
+; .
+; Hardware: none directly (the text goes to the screen through #R$72DD).
+; .
+; A Id of the holder
+; O:F Carry set when there is nothing to list
+@label=PrintContentsHeader
 c$A050 PUSH IX        ;
  $A052 PUSH BC        ;
  $A053 PUSH DE        ;
- $A054 LD C,A         ;
- $A055 CALL $9BCA     ;
+ $A054 LD C,A         ; C = holder id
+ $A055 CALL $9BCA     ; IX = its record
  $A058 LD A,(IX+$07)  ;
- $A05B AND $28        ;
- $A05D JR Z,$A097     ;
+ $A05B AND $28        ; open, alive or dead?
+ $A05D JR Z,$A097     ; no: nothing to show
  $A05F LD A,C         ;
- $A060 CALL $9D97     ;
+ $A060 CALL $9D97     ; A = how many it holds
  $A063 CP $00         ;
- $A065 JR Z,$A097     ;
+ $A065 JR Z,$A097     ; none
+@isub=BIT FLAG_CHARACTER,(IX+$07)
  $A067 BIT 6,(IX+$07) ;
  $A06B JR Z,$A074     ;
- $A06D LD A,C         ;
+ $A06D LD A,C         ; a character: "<name> is carrying"
  $A06E PUSH AF        ;
  $A06F LD HL,$ADF9    ;
  $A072 JR $A08E       ;
-*$A074 LD HL,$039B    ;
+@isub=LD HL,WORD_IS
+*$A074 LD HL,$039B    ; "is" for one thing
  $A077 DEC A          ;
  $A078 JR Z,$A07D     ;
- $A07A LD HL,$0065    ;
+@isub=LD HL,WORD_ARE
+ $A07A LD HL,$0065    ; "are" for more
 *$A07D PUSH HL        ;
- $A07E LD L,(IX+$08)  ;
+ $A07E LD L,(IX+$08)  ; the holder's noun
  $A081 LD A,(IX+$09)  ;
  $A084 AND $0F        ;
  $A086 LD H,A         ;
  $A087 PUSH HL        ;
- $A088 CALL $A09D     ;
+ $A088 CALL $A09D     ; "In the" / "On the"...
  $A08B LD HL,$AFE0    ;
-*$A08E CALL $72DD     ;
- $A091 AND A          ;
+*$A08E CALL $72DD     ; "<noun> there is/are" or "<name> is carrying"
+ $A091 AND A          ; carry clear
 *$A092 POP DE         ;
  $A093 POP BC         ;
  $A094 POP IX         ;
  $A096 RET            ;
-*$A097 CALL $8583     ;
+*$A097 CALL $8583     ; a new line
  $A09A SCF            ;
  $A09B JR $A092       ;

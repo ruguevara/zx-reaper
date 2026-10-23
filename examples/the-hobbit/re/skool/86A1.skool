@@ -1,101 +1,150 @@
-; Routine at 86A1
+; Print a character in the story window
 ;
-; Used by the routine at #R$858B.
+; The story window packs 42 characters of 6 pixels into one 32-cell row, so
+; the cursor is a cell address (StoryCursor) plus a pixel offset in C
+; (kept in the byte at $869E). What it does with the character in A:
+; .
+; At the start of an empty line (StoryLastChar is 0) it first prints ListIndent
+; spaces, an indent set by #R$9FC7.
+; .
+; New line ($0D): sets CapitalNext, clears StoryLastChar, copies the finished row
+; to the ZX printer (#R$8B22), then pauses so the player can read: while
+; NoPauseLines is not 0 (the opening text) it only counts it down and waits
+; until no key is down; otherwise it polls the keyboard for SCROLL_DELAY
+; loops and, if any key is down, waits until all keys are up (holding a key
+; pauses the scroll). Then it scrolls the window up one line (#R$876B) and
+; starts a new line with StoryColumn at 42.
+; .
+; Back-space ($08): steps the cursor back, blanks the cell and steps back again.
+; .
+; Other characters: capital letters become lower case; if CapitalNext is not 0
+; the next letter is made a capital again and CapitalNext cleared; a full stop
+; (.) sets CapitalNext (any non-zero value will do). The glyph is drawn by
+; #R$87C9 and remembered in StoryLastChar. When StoryColumn counts down to 0 the
+; line ends like a new line.
+; .
+; Hardware: reads the keyboard port $FE (the pause); draws on the screen
+; through #R$87C9 and #R$876B; may drive the printer.
+;
+; A Character code ($0D, $08, $20-$7F)
+; O:A Character code (AF, BC and HL are kept)
+@label=OutputStoryChar
 c$86A1 PUSH HL       ;
  $86A2 PUSH BC       ;
  $86A3 PUSH AF       ;
- $86A4 LD HL,($869C) ;
+ $86A4 LD HL,($869C) ; cursor cell
  $86A7 LD A,($869E)  ;
- $86AA LD C,A        ;
+ $86AA LD C,A        ; pixel offset in the cell
  $86AB LD A,($86A0)  ;
  $86AE AND A         ;
- $86AF JR NZ,$86C6   ;
- $86B1 LD A,($869F)  ;
+ $86AF JR NZ,$86C6   ; not at the start of a line
+ $86B1 LD A,($869F)  ; indent
  $86B4 AND A         ;
  $86B5 JR Z,$86C6    ;
  $86B7 LD B,A        ;
+@label=OutputStoryChar_Indent
+@isub=LD A,CHAR_SPACE
 *$86B8 LD A,$20      ;
  $86BA CALL $87C9    ;
  $86BD LD A,($869B)  ;
  $86C0 DEC A         ;
- $86C1 LD ($869B),A  ;
+ $86C1 LD ($869B),A  ; one column used
  $86C4 DJNZ $86B8    ;
 *$86C6 POP AF        ;
  $86C7 PUSH AF       ;
+@isub=CP CHAR_CR
  $86C8 CP $0D        ;
  $86CA JR NZ,$870D   ;
  $86CC LD A,$01      ;
- $86CE LD ($B704),A  ;
+ $86CE LD ($B704),A  ; CapitalNext: the next letter is a capital
+@label=StoryLineEnd
 *$86D1 XOR A         ;
- $86D2 LD ($86A0),A  ;
- $86D5 CALL $8B22    ;
+ $86D2 LD ($86A0),A  ; empty line
+ $86D5 CALL $8B22    ; copy the row to the printer
  $86D8 PUSH BC       ;
  $86D9 LD A,($B716)  ;
  $86DC AND A         ;
- $86DD JR NZ,$86F3   ;
+ $86DD JR NZ,$86F3   ; opening text: no delay
+@isub=LD BC,SCROLL_DELAY
  $86DF LD BC,$8000   ;
+@label=OutputStoryChar_Delay
 *$86E2 XOR A         ;
+@isub=IN A,(PORT_ULA)
  $86E3 IN A,($FE)    ;
+@isub=AND KEY_BITS
  $86E5 AND $1F       ;
+@isub=CP KEY_BITS
  $86E7 CP $1F        ;
- $86E9 JR NZ,$86F7   ;
+ $86E9 JR NZ,$86F7   ; a key is down: wait for release
  $86EB DEC BC        ;
  $86EC LD A,B        ;
  $86ED OR C          ;
  $86EE JR NZ,$86E2   ;
- $86F0 POP BC        ;
+ $86F0 POP BC        ; delay over, no key
  $86F1 JR $8701      ;
 *$86F3 DEC A         ;
- $86F4 LD ($B716),A  ;
+ $86F4 LD ($B716),A  ; one more line of the opening text shown
 *$86F7 POP BC        ;
+@label=OutputStoryChar_Release
 *$86F8 XOR A         ;
+@isub=IN A,(PORT_ULA)
  $86F9 IN A,($FE)    ;
+@isub=AND KEY_BITS
  $86FB AND $1F       ;
+@isub=CP KEY_BITS
  $86FD CP $1F        ;
- $86FF JR NZ,$86F8   ;
-*$8701 LD HL,$5020   ;
+ $86FF JR NZ,$86F8   ; wait until all keys are up
+*$8701 LD HL,$5020   ; start of the bottom story row
  $8704 LD C,$01      ;
- $8706 CALL $876B    ;
+ $8706 CALL $876B    ; scroll up
+@isub=LD A,STORY_COLUMNS
  $8709 LD A,$2A      ;
  $870B JR $8753      ;
+@isub=CP CHAR_BACKSPACE
 *$870D CP $08        ;
  $870F JR NZ,$8722   ;
- $8711 CALL $8761    ;
+ $8711 CALL $8761    ; back one character
+@isub=LD A,CHAR_SPACE
  $8714 LD A,$20      ;
- $8716 CALL $87C9    ;
- $8719 CALL $8761    ;
+ $8716 CALL $87C9    ; blank it
+ $8719 CALL $8761    ; and back again
  $871C LD A,($869B)  ;
- $871F INC A         ;
+ $871F INC A         ; one more column left
  $8720 JR $8753      ;
+@isub=CP 'A'
 *$8722 CP $41        ;
  $8724 JR C,$872C    ;
+@isub=CP 'Z'+1
  $8726 CP $5B        ;
  $8728 JR NC,$872C   ;
- $872A OR $20        ;
+ $872A OR $20        ; capitals to lower case
 *$872C PUSH HL       ;
- $872D LD HL,$B704   ;
- $8730 INC (HL)      ;
+ $872D LD HL,$B704   ; CapitalNext
+ $8730 INC (HL)      ; (sets Z when it is 0)
  $8731 DEC (HL)      ;
  $8732 JR Z,$8740    ;
+@isub=CP 'a'
  $8734 CP $61        ;
  $8736 JR C,$8740    ;
+@isub=CP 'z'+1
  $8738 CP $7B        ;
  $873A JR NC,$8740   ;
- $873C RES 5,A       ;
+ $873C RES 5,A       ; letter after a sentence end: capital
  $873E LD (HL),$00   ;
+@isub=CP '.'
 *$8740 CP $2E        ;
  $8742 JR NZ,$8745   ;
- $8744 INC (HL)      ;
+ $8744 INC (HL)      ; full stop: CapitalNext becomes non-zero
 *$8745 POP HL        ;
- $8746 CALL $87C9    ;
- $8749 LD ($86A0),A  ;
+ $8746 CALL $87C9    ; draw
+ $8749 LD ($86A0),A  ; remember it: the line is not empty
  $874C LD A,($869B)  ;
  $874F DEC A         ;
- $8750 JP Z,$86D1    ;
-*$8753 LD ($869B),A  ;
- $8756 LD ($869C),HL ;
+ $8750 JP Z,$86D1    ; line full: end it
+*$8753 LD ($869B),A  ; new StoryColumn
+ $8756 LD ($869C),HL ; new cursor cell
  $8759 LD A,C        ;
- $875A LD ($869E),A  ;
+ $875A LD ($869E),A  ; new pixel offset
  $875D POP AF        ;
  $875E POP BC        ;
  $875F POP HL        ;

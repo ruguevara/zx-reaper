@@ -1,23 +1,33 @@
-; Routine at A138
+; List the visible exits of a location
 ;
-; Used by the routine at #R$965B.
-c$A138 PUSH IX       ;
- $A13A PUSH IY       ;
- $A13C PUSH DE       ;
- $A13D PUSH BC       ;
- $A13E CALL $A0AE    ;
- $A141 CALL $A124    ;
- $A144 JR Z,$A15D    ;
- $A146 LD HL,$B020   ;
- $A149 CALL $72DD    ;
-*$A14C LD A,(IX+$00) ;
- $A14F CALL $A0BA    ;
- $A152 CALL $74C1    ;
- $A155 CALL $A124    ;
- $A158 JR NZ,$A14C   ;
- $A15A CALL $8583    ;
-*$A15D POP BC        ;
- $A15E POP DE        ;
- $A15F POP IY        ;
- $A161 POP IX        ;
- $A163 RET           ;
+; Prints "Visible exits are:" and the direction word of every exit that has no
+; obstacle and is not erased (#R$A124), then a new line. Prints nothing when
+; there is no such exit. Part of every location description (#R$965B), after
+; the obstacles (#R$A0C8); also the second entry of that description at $967F.
+; .
+; Hardware: none (the text goes through the message printer).
+;
+; A Location id
+; Preserves BC, DE, IX and IY.
+@label=ListVisibleExits
+c$A138 PUSH IX
+ $A13A PUSH IY
+ $A13C PUSH DE
+ $A13D PUSH BC
+ $A13E CALL $A0AE    ; IX = location record + 7, BC = 3
+ $A141 CALL $A124    ; IX = first listable exit
+ $A144 JR Z,$A15D    ; none: print nothing
+ $A146 LD HL,$B020   ; "Visible exits are:"
+ $A149 CALL $72DD
+@label=ListVisibleExits_Next
+*$A14C LD A,(IX+$00) ; direction id of the exit
+ $A14F CALL $A0BA    ; DE = direction word
+ $A152 CALL $74C1    ; print the word
+ $A155 CALL $A124    ; next listable exit
+ $A158 JR NZ,$A14C
+ $A15A CALL $8583    ; end the line
+*$A15D POP BC
+ $A15E POP DE
+ $A15F POP IY
+ $A161 POP IX
+ $A163 RET

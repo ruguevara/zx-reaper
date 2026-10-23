@@ -1,23 +1,40 @@
-; Routine at 8D33
-c$8D33 CALL $9C78    ;
- $8D36 LD HL,$AE11   ;
+; Take or carry an object (default handler of the verbs take and carry)
+;
+; Verb ids $13 (take) and $3B (carry) in VerbHandlers. The subject (Subject)
+; takes the first object. Prints "<subject> already carrying <obj1>." when it
+; already holds it (#R$9C78). Then #R$8CF1 checks weight and kind. The command
+; is refused (#R$9F76) when the first object is something the subject is
+; itself in or on: the walk goes up the chain of holders of the subject
+; looking for the first object. When the command is really performed
+; (#R$9D44) the first object's holder (+1) becomes the subject. If its holder
+; was the rope (OBJ_ROPE; apparently the object is tied to it), the rope's
+; own holder ($C367) is set instead, so the rope comes with the subject.
+; .
+; Hardware: none.
+@label=VerbTake
+c$8D33 CALL $9C78    ; already held?
+ $8D36 LD HL,$AE11   ; "{SUBJ_IS} already carrying {OBJ1}."
  $8D39 JP C,$72DD    ;
- $8D3C CALL $8CF1    ;
- $8D3F LD A,($B6EA)  ;
-*$8D42 CALL $9BCA    ;
+ $8D3C CALL $8CF1    ; can the subject lift and carry it?
+ $8D3F LD A,($B6EA)  ; the subject
+@label=VerbTake_Up
+*$8D42 CALL $9BCA    ; record of A
  $8D45 LD A,($B6E8)  ;
- $8D48 CP (IX+$01)   ;
- $8D4B JP Z,$9F76    ;
- $8D4E LD A,(IX+$01) ;
+ $8D48 CP (IX+$01)   ; is the first object this one's holder?
+ $8D4B JP Z,$9F76    ; yes: refuse
+ $8D4E LD A,(IX+$01) ; go up to the holder
+@isub=CP AT_LOCATION
  $8D51 CP $FF        ;
  $8D53 JR NZ,$8D42   ;
- $8D55 LD IX,($B708) ;
- $8D59 CALL $9D44    ;
+ $8D55 LD IX,($B708) ; the first object
+ $8D59 CALL $9D44    ; only when really performing
  $8D5C LD A,(IX+$01) ;
- $8D5F CP $12        ;
- $8D61 LD A,($B6EA)  ;
+@isub=CP OBJ_ROPE
+ $8D5F CP $12        ; tied to the rope?
+ $8D61 LD A,($B6EA)  ; the subject
  $8D64 JR Z,$8D6A    ;
- $8D66 LD (IX+$01),A ;
+ $8D66 LD (IX+$01),A ; the object is now held by the subject
  $8D69 RET           ;
-*$8D6A LD ($C367),A  ;
+@isub=LD (Obj12Rope+1),A
+ $8D6A LD ($C367),A  ; the rope is held by the subject (holder field of the rope record $C366)
  $8D6D RET           ;

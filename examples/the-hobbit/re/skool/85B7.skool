@@ -1,46 +1,71 @@
-; Routine at 85B7
+; Print a character in the input window
 ;
-; Used by the routine at #R$858B.
+; Prints at the input window's cursor (InputCursor) in the bottom five
+; character rows and moves the cursor, drawing the cursor glyph
+; (InputCursorGlyph) at the new place; letters a-z are made capitals. A new
+; line ($0D) blanks the cursor, scrolls the window up one line
+; (#R$860D) and puts the cursor at column 0 of the bottom row. Back-space
+; ($08) blanks the cursor cell and moves the cursor one cell back, scrolling
+; the window down (#R$864A) when that goes back past the start of a line.
+; When InputColumn (columns left in the line) reaches 0 the line wraps like a
+; new line. $85B7 is the entry from #R$858B, which has AF on the stack; $85B8
+; takes the character in A.
+; .
+; Hardware: draws characters of the ROM font in the screen (through #R$867A).
+;
+; A Character code ($0D, $08, $20-$7F) ($85B8 only)
+@label=PrintToInput
 c$85B7 POP AF        ;
 ; This entry point is used by the routine at #R$6C00.
+@label=PrintInputWindowChar
 *$85B8 PUSH HL       ;
  $85B9 PUSH AF       ;
- $85BA LD HL,($85B4) ;
+ $85BA LD HL,($85B4) ; cursor cell
+@isub=CP CHAR_CR
  $85BD CP $0D        ;
  $85BF JR NZ,$85C8   ;
+@isub=LD A,CHAR_SPACE
  $85C1 LD A,$20      ;
- $85C3 CALL $867A    ;
- $85C6 JR $85DF      ;
+ $85C3 CALL $867A    ; blank the cursor
+ $85C6 JR $85DF      ; new line
+@isub=CP CHAR_BACKSPACE
 *$85C8 CP $08        ;
  $85CA JR Z,$85F5    ;
- $85CC CP $61        ;
+@isub=CP 'a'
+ $85CC CP $61        ; lower case letter?
  $85CE JR C,$85D6    ;
+@isub=CP 'z'+1
  $85D0 CP $7B        ;
  $85D2 JR NC,$85D6   ;
- $85D4 AND $5F       ;
-*$85D6 CALL $867A    ;
- $85D9 LD A,($85B3)  ;
+ $85D4 AND $5F       ; to capital
+*$85D6 CALL $867A    ; draw it over the cursor, HL := next cell
+ $85D9 LD A,($85B3)  ; InputColumn
  $85DC DEC A         ;
- $85DD JR NZ,$85E6   ;
-*$85DF LD L,$E0      ;
- $85E1 CALL $860D    ;
+ $85DD JR NZ,$85E6   ; room left in the line
+@label=InputNewLine
+@isub=LD L,CURSOR_ROW_START
+*$85DF LD L,$E0      ; start of the bottom row
+ $85E1 CALL $860D    ; scroll the window up
+@isub=LD A,INPUT_COLUMNS
  $85E4 LD A,$20      ;
-*$85E6 LD ($85B3),A  ;
- $85E9 LD A,($85B6)  ;
- $85EC LD ($85B4),HL ;
- $85EF CALL $867A    ;
+*$85E6 LD ($85B3),A  ; new InputColumn
+ $85E9 LD A,($85B6)  ; the cursor glyph
+ $85EC LD ($85B4),HL ; new cursor cell
+ $85EF CALL $867A    ; draw the cursor
  $85F2 POP AF        ;
  $85F3 POP HL        ;
  $85F4 RET           ;
+@label=InputBackspace
 *$85F5 LD A,$20      ;
- $85F7 CALL $867A    ;
- $85FA DEC L         ;
+ $85F7 CALL $867A    ; blank the cursor
+ $85FA DEC L         ; HL back to the cell before the cursor
  $85FB DEC L         ;
  $85FC LD A,($85B3)  ;
- $85FF INC A         ;
+ $85FF INC A         ; one more column left
+@isub=CP INPUT_COLUMNS_PLUS_1
  $8600 CP $21        ;
  $8602 JR NZ,$85E6   ;
- $8604 LD L,$FF      ;
- $8606 CALL $864A    ;
- $8609 LD A,$01      ;
+ $8604 LD L,$FF      ; back past the start of the line: end of the row above
+ $8606 CALL $864A    ; scroll the window down
+ $8609 LD A,$01      ; one column left, at the end of that row
  $860B JR $85E6      ;

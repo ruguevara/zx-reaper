@@ -1,35 +1,51 @@
-; Routine at 9ACD
+; Announce that a character or object has arrived where the player is
 ;
-; Used by the routine at #R$99C6.
+; Called after a command or an NPC turn with the actor, or the first object, in A,
+; the address of the byte that holds its location from before the action in HL
+; and the message in DE. Prints the message ("<name> enters." for the actor,
+; "<name> appears." for the object) only when it is now at the player's
+; location and was not there before. It prints nothing when A is $FF or 0 (the
+; player), when SightState is 2 (the dark noise was already given), when the
+; location has not changed, when the player is somewhere else, or when MoveFlag
+; is 0 (the last #R$9BDD move carried the player along).
+; .
+; The name is passed to the message as the name phrase of the record (+8) on the
+; stack.
+; .
+; A Id of the actor or object ($FF none, 0 player)
+; HL Address of a byte holding its location before the action
+; DE Message to print
+@label=AnnounceArrival
+@isub=CP END_MARK
 c$9ACD CP $FF        ;
  $9ACF RET Z         ;
  $9AD0 AND A         ;
- $9AD1 RET Z         ;
+ $9AD1 RET Z         ; the player never arrives
  $9AD2 LD B,A        ;
- $9AD3 LD A,($980C)  ;
+ $9AD3 LD A,($980C)  ; SightState: 2 = "You hear a noise." already given
  $9AD6 CP $02        ;
  $9AD8 RET Z         ;
  $9AD9 LD A,B        ;
- $9ADA CALL $9F82    ;
+ $9ADA CALL $9F82    ; A = its location now
  $9ADD LD C,A        ;
  $9ADE CP (HL)       ;
- $9ADF RET Z         ;
+ $9ADF RET Z         ; not moved
  $9AE0 LD A,($B6F5)  ;
  $9AE3 CP C          ;
- $9AE4 RET NZ        ;
+ $9AE4 RET NZ        ; not where the player is
  $9AE5 LD A,($9BDC)  ;
  $9AE8 AND A         ;
- $9AE9 RET Z         ;
+ $9AE9 RET Z         ; MoveFlag 0: the player moved with it
  $9AEA LD A,$01      ;
- $9AEC LD ($B702),A  ;
+ $9AEC LD ($B702),A  ; messages visible
  $9AEF PUSH DE       ;
- $9AF0 POP HL        ;
+ $9AF0 POP HL        ; HL = the message
  $9AF1 LD A,B        ;
- $9AF2 CALL $9BCA    ;
+ $9AF2 CALL $9BCA    ; IX = its record
  $9AF5 PUSH DE       ;
  $9AF6 LD DE,$0008   ;
  $9AF9 ADD IX,DE     ;
  $9AFB POP DE        ;
- $9AFC PUSH IX       ;
- $9AFE CALL $72DD    ;
+ $9AFC PUSH IX       ; the name phrase, for the message
+ $9AFE CALL $72DD    ; "<name> enters." / "<name> appears."
  $9B01 RET           ;

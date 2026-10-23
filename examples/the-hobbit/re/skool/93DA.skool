@@ -1,20 +1,29 @@
-; Routine at 93DA
+; Examine the first object
 ;
-; Used by the routine at #R$A7C4.
-c$93DA CALL $9D44    ;
+; Default handler (VerbHandlers) of command 28, "examine"; #R$A7C4 uses it for
+; every subject but Elrond. When the object's record has a description message
+; (+14, +15) that is printed; otherwise it prints "<subject> see <the object
+; name>." (MsgSee, then the name, a full stop and a new line).
+; .
+; Nothing is printed unless the command is really performed (CommitOrAbort).
+;
+; FirstObject Id of the object examined
+@label=ExamineObject
+c$93DA CALL $9D44    ; abandon unless performing
  $93DD LD A,($B6E8)  ;
- $93E0 CALL $9BCA    ;
- $93E3 LD L,(IX+$0E) ;
+ $93E0 CALL $9BCA    ; its record in IX
+ $93E3 LD L,(IX+$0E) ; description message
  $93E6 LD H,(IX+$0F) ;
  $93E9 LD A,H        ;
  $93EA OR L          ;
- $93EB JP NZ,$72DD   ;
- $93EE LD HL,$B000   ;
+ $93EB JP NZ,$72DD   ; print it
+ $93EE LD HL,$B000   ; "<subject> see"
  $93F1 CALL $72DD    ;
  $93F4 PUSH IX       ;
  $93F6 POP IY        ;
- $93F8 CALL $9EC7    ;
+ $93F8 CALL $9EC7    ; the name
+@isub=LD A,CHAR_FULLSTOP
  $93FB LD A,$2E      ;
  $93FD CALL $858B    ;
- $9400 CALL $8583    ;
+ $9400 CALL $8583    ; new line
  $9403 RET           ;

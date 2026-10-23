@@ -1,19 +1,35 @@
-; Routine at 73C2
+; Control code 9: print the name of the second object with an article
+;
+; Sets the article flag (PhraseMode, $B703) and prints the name of the second
+; object of the command ($B6E9): a location id when Noun2Kind ($B6FF) is not 0
+; (name from #R$71D5), otherwise an object (#R$71E2), printed with #R$7434. The
+; second entry leaves the article flag as the caller set it (used by #R$712B).
+; The code 7 handler (#R$73AF) joins at #R$73CE with its own noun. HL is kept.
+; .
+; The printer calls this handler with IX at the code byte. Return Z when there
+; is nothing to print; NZ with a word token in DE and the printer prints it.
+;
+; A Id of the object or location to name (#R$73D6 only)
+; O:A 0
+; O:F Z
+@label=PrintSecondObjectName
 c$73C2 LD A,$01      ;
- $73C4 LD ($B703),A  ;
+ $73C4 LD ($B703),A  ; PhraseMode: with article
 ; This entry point is used by the routine at #R$712B.
-*$73C7 LD A,($B6FF)  ;
+@label=PrintSecondObjectNameAsIs
+*$73C7 LD A,($B6FF)  ; Noun2Kind
  $73CA AND A         ;
- $73CB LD A,($B6E9)  ;
+ $73CB LD A,($B6E9)  ; SecondObject
 ; This entry point is used by the routine at #R$73AF.
-*$73CE JR Z,$73D6    ;
+*$73CE JR Z,$73D6    ; an object
  $73D0 PUSH HL       ;
- $73D1 CALL $71D5    ;
+ $73D1 CALL $71D5    ; name phrase of the location
  $73D4 JR $73DA      ;
 ; This entry point is used by the routine at #R$7488.
+@label=PrintNameOfObject
 *$73D6 PUSH HL       ;
- $73D7 CALL $71E2    ;
-*$73DA CALL $7434    ;
+ $73D7 CALL $71E2    ; name phrase of the object or character A
+*$73DA CALL $7434    ; print it
  $73DD POP HL        ;
  $73DE XOR A         ;
  $73DF RET           ;

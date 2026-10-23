@@ -1,9 +1,18 @@
-; Routine at A4DF
-c$A4DF CALL $9D44    ;
- $A4E2 LD A,$0A      ;
- $A4E4 CALL $9C9F    ;
- $A4E7 LD HL,$B0A6   ;
- $A4EA CP $08        ;
- $A4EC JP NC,$A1E3   ;
- $A4EF LD HL,$B047   ;
- $A4F2 JP $A1E3      ;
+; NPC answer to being given something
+;
+; Script handler (op 3 in #R$C82D) of behaviour $1D, the behaviour switched on
+; by the event "give" (command id $1D) for Gandalf, Thorin, the wood elf, the
+; butler and Elrond. The character speaks: usually "Thank you", sometimes (a
+; random number from 0 to 10 of 8 or more) "What do you expect me to do with
+; this ?". Always passes the test pass of the script engine (#R$9D44).
+; .
+; Hardware: none (the text goes through the message printer).
+@label=NpcAnswersGift
+c$A4DF CALL $9D44    ; test pass: allowed, nothing else
+ $A4E2 LD A,$0A
+ $A4E4 CALL $9C9F    ; random 0 to 10
+ $A4E7 LD HL,$B0A6   ; "What do you expect me to do with this ?"
+ $A4EA CP $08        ; 8 or more
+ $A4EC JP NC,$A1E3
+ $A4EF LD HL,$B047   ; "Thank you"
+ $A4F2 JP $A1E3

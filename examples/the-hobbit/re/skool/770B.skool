@@ -1,17 +1,33 @@
-; Routine at 770B
-c$770B RES 3,E       ;
+; Parse AND: save the parser position, then treat it as a separator
+;
+; The handler of class 10 (and, the comma) in ActionTable. Clears flag bit 3 of
+; E ("a position is saved"), skips any further AND words, puts the first word
+; after them back (WordListPtr points at it again) and saves the parser state
+; in SavedHL, SavedA1, SavedIY and SavedA2 ($7574-$7579): the address of that word,
+; the flags E, the phrase record IY and ParserWordCount. Then goes on at
+; #R$75FA as for THEN. When a command word follows instead of another
+; noun (inferred: "take the map and go east"), #R$772F restores this state
+; (it reloads WordListPtr, E, IY and the word count from the saved copies)
+; and parses from the saved word again as a new command.
+;
+; D Class of the previous word
+; E Parser flags (bit 3 is cleared)
+; IY Phrase record being built
+@label=ParseAnd
+c$770B RES 3,E       ; a position is saved
  $770D PUSH DE       ;
-*$770E CALL $7873    ;
- $7711 CP $A0        ;
+*$770E CALL $7873    ; ReadWord
+@isub=CP TOKEN_AND
+ $7711 CP $A0        ; skip "and and"
  $7713 JR Z,$770E    ;
- $7715 DEC HL        ;
+ $7715 DEC HL        ; back to the start of that token
  $7716 DEC HL        ;
- $7717 LD ($7574),HL ;
- $771A LD ($B6DC),HL ;
+ $7717 LD ($7574),HL ; SavedHL
+ $771A LD ($B6DC),HL ; WordListPtr: read it again later
  $771D POP DE        ;
  $771E LD A,E        ;
- $771F LD ($7576),A  ;
- $7722 LD ($7577),IY ;
- $7726 LD A,($B706)  ;
- $7729 LD ($7579),A  ;
+ $771F LD ($7576),A  ; SavedA1: the flags
+ $7722 LD ($7577),IY ; SavedIY: the record
+ $7726 LD A,($B706)  ; ParserWordCount
+ $7729 LD ($7579),A  ; SavedA2
  $772C JP $75FA      ;

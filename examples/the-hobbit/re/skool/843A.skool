@@ -1,12 +1,26 @@
-; Routine at 843A
-c$843A LD A,$04      ;
+; PAUSE: wait for a key with a green border
+;
+; The handler of the word PAUSE (via #R$828B). Sets the border green, waits
+; for a key to be pressed (#R$84B9) and then for it to be released, sets the
+; border white again and goes on with the dispatcher (#R$82B3).
+; .
+; Hardware: writes the border (port $FE) and reads the keyboard port.
+@label=WordPause
+@isub=LD A,BORDER_GREEN
+c$843A LD A,$04               ; green border
+@isub=OUT (PORT_ULA),A
  $843C OUT ($FE),A   ;
- $843E CALL $84B9    ;
-*$8441 XOR A         ;
+ $843E CALL $84B9             ; wait for a key press
+*$8441 XOR A                  ; wait until all keys are up
+@isub=IN A,(PORT_ULA)
  $8442 IN A,($FE)    ;
+@isub=AND KEY_BITS
  $8444 AND $1F       ;
+@isub=CP KEY_BITS
  $8446 CP $1F        ;
  $8448 JR NZ,$8441   ;
- $844A LD A,$07      ;
+@isub=LD A,BORDER_WHITE
+ $844A LD A,$07               ; white border again
+@isub=OUT (PORT_ULA),A
  $844C OUT ($FE),A   ;
- $844E JP $82B3      ;
+ $844E JP $82B3               ; back to the dispatcher

@@ -1,19 +1,40 @@
-; Routine at 8F3E
+; Walk through a given exit (follow, enter, go into)
 ;
-; Used by the routine at #R$8FD6.
+; Common end of the handlers #R$8FCD (verbs enter and go into: the first
+; object is the place to go to) and #R$8FD6 (follow). They call #R$9F2D, which
+; searches the exits of the current location for the one that leads to a
+; wanted location. This routine refuses the command (#R$9F76) when no exit was
+; found (A = $FF), when the exit has no destination, or when #R$8E85 says the
+; obstacle or the destination stops the subject. Otherwise, when the command is
+; really performed (#R$9D44), it makes the exit's direction the verb
+; (CommandId), clears FirstObject and continues in the move handler at #R$8DAB,
+; which does the walk as if the player had typed the compass direction.
+; .
+; #R$8E85 reads TakeId and TakeWeight, which only #R$8D9D sets, after the
+; walk starts, so here they still have the values from the last move.
+; .
+; Hardware: none.
+;
+; A Result of #R$9F2D: $FF when no exit was found
+; IX Exit record found (direction, obstacle, destination)
+@label=WalkToExit
+@isub=CP END_MARK
 c$8F3E CP $FF        ;
- $8F40 JP Z,$9F76    ;
- $8F43 LD A,(IX+$02) ;
+ $8F40 JP Z,$9F76    ; no such exit
+@isub=LD A,(IX+EXIT_DEST)
+ $8F43 LD A,(IX+$02) ; destination
  $8F46 CP $00        ;
  $8F48 JP Z,$9F76    ;
- $8F4B LD A,(IX+$01) ;
+@isub=LD A,(IX+EXIT_OBSTACLE)
+ $8F4B LD A,(IX+$01) ; obstacle
  $8F4E PUSH IX       ;
  $8F50 CALL $8E85    ;
  $8F53 POP IX        ;
- $8F55 JP NZ,$9F76   ;
- $8F58 CALL $9D44    ;
- $8F5B LD A,(IX+$00) ;
- $8F5E LD ($B6E7),A  ;
+ $8F55 JP NZ,$9F76   ; blocked
+ $8F58 CALL $9D44    ; only when really performing
+ $8F5B LD A,(IX+$00) ; the exit's direction
+ $8F5E LD ($B6E7),A  ; becomes the verb
+@isub=LD A,AT_LOCATION
  $8F61 LD A,$FF      ;
- $8F63 LD ($B6E8),A  ;
- $8F66 JP $8DAB      ;
+ $8F63 LD ($B6E8),A  ; no first object
+ $8F66 JP $8DAB      ; move

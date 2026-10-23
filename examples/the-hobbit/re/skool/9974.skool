@@ -1,33 +1,52 @@
-; Routine at 9974
+; Run an NPC script command of type 4 (a verb alone)
 ;
-; Used by the routine at #R$980E.
-c$9974 LD DE,$0002    ;
- $9977 CALL $9918     ;
- $997A LD A,(IX+$01)  ;
- $997D CP $FF         ;
+; Called by the script interpreter (#R$980E, dispatching on the low nibble of
+; the command byte) for op 4: command byte, verb id, and, when bit 4 of the
+; command byte is set, a word giving the alternative script address. The
+; script pointer (IY+2, IY+3) is first moved past the command
+; (#R$9918, length 2).
+; .
+; A verb of $FF is no action: with the alternative bit it jumps to the
+; alternative address, otherwise the NPC is done for this turn. Any other verb
+; becomes the command (CommandId, with no first or second object) and is
+; tried through #R$99C6. When that works the NPC is done for this turn. When it
+; fails, TurnVar1 counts the failure and the NPC continues at the alternative
+; address if the command has one (#R$9885), otherwise with its next command
+; (#R$987F).
+; .
+; IX Address of the command (as HL)
+; IY The NPC record
+@label=RunScriptVerb
+c$9974 LD DE,$0002    ; length of the command
+ $9977 CALL $9918     ; step the script pointer past it
+ $997A LD A,(IX+$01)  ; the verb
+@isub=CP NO_OBJECT
+ $997D CP $FF         ; none?
  $997F JR Z,$9994     ;
- $9981 LD ($B6E7),A   ;
+ $9981 LD ($B6E7),A   ; CommandId
+@isub=LD A,NO_OBJECT
  $9984 LD A,$FF       ;
- $9986 LD ($B6E8),A   ;
- $9989 LD ($B6E9),A   ;
- $998C CALL $99C6     ;
- $998F JR Z,$99AA     ;
- $9991 JP $9901       ;
-*$9994 BIT 4,(IX+$00) ;
- $9998 JP Z,$9901     ;
- $999B LD L,(IX+$02)  ;
+ $9986 LD ($B6E8),A   ; no first object
+ $9989 LD ($B6E9),A   ; no second object
+ $998C CALL $99C6     ; try it
+ $998F JR Z,$99AA     ; failed
+ $9991 JP $9901       ; done: next NPC
+*$9994 BIT 4,(IX+$00) ; an alternative address?
+ $9998 JP Z,$9901     ; no: next NPC
+ $999B LD L,(IX+$02)  ; jump there
  $999E LD H,(IX+$03)  ;
  $99A1 LD (IY+$02),L  ;
  $99A4 LD (IY+$03),H  ;
  $99A7 JP $9901       ;
-; This entry point is used by the routine at #R$9928.
-*$99AA LD HL,$980B    ;
+; Entry point: the command failed (also used by #R$9928 for orders).
+@label=ScriptCommandFailed
+*$99AA LD HL,$980B    ; TurnVar1 counts the failures
  $99AD INC (HL)       ;
  $99AE BIT 4,(IX+$00) ;
- $99B2 JP Z,$987F     ;
- $99B5 ADD IX,DE      ;
+ $99B2 JP Z,$987F     ; no alternative: carry on with the script
+ $99B5 ADD IX,DE      ; the alternative address follows the command
  $99B7 LD H,(IX+$01)  ;
  $99BA LD L,(IX+$00)  ;
- $99BD LD (IY+$02),L  ;
+ $99BD LD (IY+$02),L  ; the script continues there
  $99C0 LD (IY+$03),H  ;
  $99C3 JP $9885       ;

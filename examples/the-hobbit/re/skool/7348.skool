@@ -1,16 +1,31 @@
-; Routine at 7348
+; End a message with a closing word (print modes 2, 3 and 6)
 ;
-; Used by the routine at #R$72D3.
-c$7348 CALL $74C1    ;
+; Reached with the first two bytes of a word item in DE (D = print mode and
+; offset bits 8-11). Prints the word with #R$74C1, then ends the message as
+; the mode says: WORD_END_PLAIN nothing more, WORD_END_STOP a full stop and a new
+; line, WORD_END_NEWLINE a new line only. The control codes $14 and $15 enter at
+; #R$734B with D set to the mode and no word. Then restores A, DE and IX of
+; the caller of the message printer (#R$72DD) and returns to it.
+; .
+; Hardware: prints through #R$858B and #R$8583 (story window or input window).
+;
+; D Print mode (bit 6: new line only; bit 4: full stop and new line)
+; E Offset bits 0-7 of the word
+; O:A Saved A of the message printer
+; O:DE Saved DE of the message printer
+; O:IX Saved IX of the message printer
+@label=PrintEndingWord
+c$7348 CALL $74C1    ; print the word
 ; This entry point is used by the routines at #R$7340 and #R$7344.
-*$734B LD A,$2E      ;
- $734D BIT 6,D       ;
+@label=EndMessage
+*$734B LD A,$2E      ; "."
+ $734D BIT 6,D       ; mode 6: new line only
  $734F JR NZ,$7358   ;
- $7351 BIT 4,D       ;
+ $7351 BIT 4,D       ; mode 3: full stop...
  $7353 CALL NZ,$858B ;
  $7356 BIT 4,D       ;
-*$7358 CALL NZ,$8583 ;
- $735B LD DE,($70DD) ;
- $735F LD IX,($70E0) ;
- $7363 LD A,($70DC)  ;
+*$7358 CALL NZ,$8583 ; ...and a new line (PrintNewLine)
+ $735B LD DE,($70DD) ; SavedDE
+ $735F LD IX,($70E0) ; SavedIX
+ $7363 LD A,($70DC)  ; SavedA
  $7366 RET           ;

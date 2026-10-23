@@ -1,10 +1,15 @@
-; Routine at 7ABA
+; Start the candidate scan for the second noun
 ;
-; Used by the routine at #R$7A14.
-c$7ABA LD A,($B71E)  ;
- $7ABD CALL $7ACC    ;
- $7AC0 LD A,($B6FF)  ;
+; The same as #R$7AA6 for the second noun phrase: the class is bits 0-1 of
+; StateB71E ($B71E), Noun2Kind ($B6FF) tells a place from an object, and the
+; start position goes to RecPtr2 ($7950) for #R$7D17.
+;
+; O:IX The start position, also stored in RecPtr2
+@label=StartNounScan2
+c$7ABA LD A,($B71E)  ; StateB71E: noun 2 class, bits 0-1
+ $7ABD CALL $7ACC    ; PickScanStart
+ $7AC0 LD A,($B6FF)  ; Noun2Kind
  $7AC3 AND A         ;
- $7AC4 CALL NZ,$9E95 ;
- $7AC7 LD ($7950),IX ;
+ $7AC4 CALL NZ,$9E95 ; a place: SeekActorExits
+ $7AC7 LD ($7950),IX ; RecPtr2
  $7ACB RET           ;

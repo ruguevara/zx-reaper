@@ -1,13 +1,25 @@
-; Routine at 7D54
+; Find the next object that fits noun phrase 2 and passes the check
 ;
-; Used by the routine at #R$7D17.
+; Like #R$7CFC for the second noun phrase of a command: asks the lookup routine
+; in IY (through #R$7CC9, HL = RecBuf2) for the next candidate, keeps it in
+; SecondObject ($B6E9), sets bit 1 of RecWork1 ($793E) and runs the whole
+; command check with #R$7AED, which needs both objects. The loop repeats while
+; the check refuses (Z) and ends on the first accepted object or when the
+; lookup is exhausted. Used by #R$7D17.
+;
+; IY Lookup routine: #R$9DD9 (objects around) or #R$9EA0 (exits), set by #R$7D17
+; IX Cursor of the lookup, kept by it between calls
+; O:A $FF when no candidate is left, otherwise ActionAllowed (not 0)
+; O:F Z when no candidate is left
+; O:SecondObject The accepted object
+@label=NextNoun2Match
 c$7D54 LD HL,$7948   ;
- $7D57 CALL $7CC9    ;
- $7D5A CP $FF        ;
+ $7D57 CALL $7CC9             ; next candidate for phrase 2
+ $7D5A CP $FF                 ; $FF: none left
  $7D5C RET Z         ;
- $7D5D LD ($B6E9),A  ;
+ $7D5D LD ($B6E9),A           ; SecondObject
  $7D60 LD HL,$793E   ;
- $7D63 SET 1,(HL)    ;
- $7D65 CALL $7AED    ;
- $7D68 JR Z,$7D54    ;
+ $7D63 SET 1,(HL)             ; RecWork1 bit 1: phrase 2 has a candidate
+ $7D65 CALL $7AED             ; full check of the command
+ $7D68 JR Z,$7D54             ; refused: try the next one
  $7D6A RET           ;

@@ -1,16 +1,26 @@
-; Routine at 9FAF
+; List what a holder holds at a location, or print "Nothing"
 ;
-; Used by the routines at #R$8C4B, #R$90EB, #R$910E and #R$9F94.
+; Lists the objects held by the holder in A (or lying at the location when A is
+; $FF) that are at location B and that the actor can reach, indented by
+; LIST_INDENT spaces, through #R$9FC7. When none was listed prints "Nothing".
+; Used for "You see :" in a location description (#R$9F94), for the inventory
+; ("<subject> is carrying.", #R$90EB, for an actor in B6EA) and for the contents of a container (#R$910E).
+; .
+; A Holder id, or AT_LOCATION for objects lying at the location
+; B Location id
+; O:HL Destroyed
+@label=ListObjects
 c$9FAF PUSH IY       ;
  $9FB1 PUSH DE       ;
  $9FB2 PUSH BC       ;
- $9FB3 LD C,$00      ;
- $9FB5 LD D,$04      ;
+ $9FB3 LD C,$00      ; C counts what is listed
+@isub=LD D,LIST_INDENT
+ $9FB5 LD D,$04      ; indent
  $9FB7 CALL $9FC7    ;
  $9FBA SUB A         ;
  $9FBB CP C          ;
  $9FBC LD HL,$B33B   ;
- $9FBF CALL Z,$72DD  ;
+ $9FBF CALL Z,$72DD  ; nothing listed: "Nothing"
  $9FC2 POP BC        ;
  $9FC3 POP DE        ;
  $9FC4 POP IY        ;

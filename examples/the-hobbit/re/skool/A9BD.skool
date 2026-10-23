@@ -1,11 +1,22 @@
-; Routine at A9BD
-c$A9BD LD A,($B6F5)  ;
- $A9C0 CP $05        ;
- $A9C2 RET NZ        ;
- $A9C3 CALL $9D44    ;
- $A9C6 LD A,($B6EA)  ;
- $A9C9 LD HL,$B238   ;
- $A9CC CP $47        ;
- $A9CE JR Z,$A9D3    ;
- $A9D0 LD HL,$B24C   ;
-*$A9D3 JP $A1E3      ;
+; The trolls talk about cooking the player
+;
+; Script handler (op 3, in the script #R$CA3B of both trolls). When the player
+; is at the trolls clearing (LOC_TROLLS_CLEARING) the speaking troll says
+; "Blimey, look at this!! Can yer cook'em?" (the hideous troll) or "Yer can try,
+; but he wouldn't make above a mouthfull" (the vicious troll). Elsewhere it
+; returns before the test pass accepts, and the script repeats.
+; .
+; Hardware: none (the text goes through the message printer).
+@label=TrollsTalk
+c$A9BD LD A,($B6F5)  ; player's location
+@isub=CP LOC_TROLLS_CLEARING
+ $A9C0 CP $05
+ $A9C2 RET NZ        ; not at the clearing: refuse
+ $A9C3 CALL $9D44
+ $A9C6 LD A,($B6EA)  ; the troll speaking
+ $A9C9 LD HL,$B238   ; "Blimey, look at this!! Can yer cook'em?"
+@isub=CP CHR_HIDEOUS_TROLL
+ $A9CC CP $47
+ $A9CE JR Z,$A9D3
+ $A9D0 LD HL,$B24C   ; "Yer can try, but he wouldn't make above a mouthfull"
+*$A9D3 JP $A1E3

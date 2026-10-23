@@ -1,7 +1,15 @@
-; Routine at 7D90
+; Print a parser reply and return failure
 ;
-; Used by the routines at #R$7DBC, #R$7E4D and #R$7EA8.
-c$7D90 CALL $7D6B    ;
- $7D93 CALL $72D3    ;
+; The common end of the parser's questions and complaints: switches to
+; performing and printing mode with #R$7D6B, prints the message at HL (with the
+; words the caller has pushed on the stack for its {WORD} codes) and returns 0
+; with Z set, which the callers pass on as "the command was not carried out".
+;
+; HL Message to print: "Which {WORD} ?", "I do not see {THING} here", "I see nothing to ...", "... what ?"
+; O:A 0
+; O:F Z
+@label=PrintReplyFail
+c$7D90 CALL $7D6B             ; ActionPerform = 1, RawOutputFlag = 1
+ $7D93 CALL $72D3             ; print the message at HL
  $7D96 XOR A         ;
  $7D97 RET           ;

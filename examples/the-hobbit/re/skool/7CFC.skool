@@ -1,15 +1,29 @@
-; Routine at 7CFC
+; Find the next object that fits noun phrase 1 and passes the check
 ;
-; Used by the routine at #R$7CCB.
+; Used by #R$7CCB to step through the candidates for the first noun phrase of a
+; command. Each pass asks the lookup routine in IY (through #R$7CC9, with HL =
+; RecBuf1, the phrase's words) for the next object, keeps it in FirstObject
+; ($B6E8), sets bit 1 of RecWork ($793D: a candidate was found for phrase 1) and
+; asks #R$94D6 whether that object lets the command through (it leaves the
+; answer in ActionAllowed). A refused candidate is dropped and the next one is
+; fetched, so the loop ends on the first accepted object or when the lookup is
+; exhausted.
+;
+; IY Lookup routine: #R$9DD9 (objects around) or #R$9EA0 (exits), set by #R$7CCB
+; IX Cursor of the lookup, kept by it between calls
+; O:A $FF when no candidate is left, otherwise 1 (ActionAllowed)
+; O:F Z when no candidate is left
+; O:FirstObject The accepted object
+@label=NextNoun1Match
 c$7CFC LD HL,$7942   ;
- $7CFF CALL $7CC9    ;
- $7D02 CP $FF        ;
+ $7CFF CALL $7CC9             ; next candidate for phrase 1
+ $7D02 CP $FF                 ; $FF: none left
  $7D04 RET Z         ;
- $7D05 LD ($B6E8),A  ;
+ $7D05 LD ($B6E8),A           ; FirstObject
  $7D08 LD HL,$793D   ;
- $7D0B SET 1,(HL)    ;
- $7D0D CALL $94D6    ;
+ $7D0B SET 1,(HL)             ; RecWork bit 1: phrase 1 has a candidate
+ $7D0D CALL $94D6             ; does the verb allow it? (ActionAllowed)
  $7D10 LD A,($B6FB)  ;
  $7D13 AND A         ;
- $7D14 JR Z,$7CFC    ;
+ $7D14 JR Z,$7CFC             ; refused: try the next one
  $7D16 RET           ;

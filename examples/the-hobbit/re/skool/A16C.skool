@@ -1,20 +1,35 @@
-; Routine at A16C
+; Print "<object> is <state>" for the object in IX
 ;
-; Used by the routines at #R$8EEC, #R$910E, #R$9138, #R$9171 and #R$92ED.
-c$A16C LD L,(IX+$08) ;
- $A16F LD H,(IX+$09) ;
+; Loads the first name phrase (+8) of the record in IX and falls into $A172.
+; .
+; $A172 picks the state word for the id in A from #R$A224 (bit 7 clear:
+; unlocked, empty, off, closed, dead) or from #R$A234 (bit 7 set: locked, full,
+; broken, on, open, alive), indexed by the id without bit 7, and prints
+; "<the phrase> is <word>." with #R$AFBB. The commands use it to say why they
+; failed ("The door is locked.") or what they did ("The goblin is dead.").
+; .
+; Hardware: none (the text goes through the message printer).
+;
+; A State id (bit 7 selects the second word table)
+; IX Record of the object (not used at $A172)
+; HL Name phrase of the object ($A172 only)
+; Preserves DE.
+@label=PrintStateIX
+c$A16C LD L,(IX+$08)
+ $A16F LD H,(IX+$09)
 ; This entry point is used by the routine at #R$A164.
-*$A172 PUSH DE       ;
- $A173 PUSH HL       ;
- $A174 LD HL,$A224   ;
- $A177 BIT 7,A       ;
- $A179 JR Z,$A17E    ;
- $A17B LD HL,$A234   ;
-*$A17E CALL $A0BD    ;
- $A181 POP HL        ;
- $A182 PUSH DE       ;
- $A183 PUSH HL       ;
- $A184 LD HL,$AFBB   ;
- $A187 CALL $72DD    ;
- $A18A POP DE        ;
- $A18B RET           ;
+@label=PrintStateHL
+*$A172 PUSH DE
+ $A173 PUSH HL
+ $A174 LD HL,$A224   ; table of the ids without bit 7
+ $A177 BIT 7,A
+ $A179 JR Z,$A17E
+ $A17B LD HL,$A234   ; bit 7 set: the other table
+*$A17E CALL $A0BD    ; DE = state word
+ $A181 POP HL
+ $A182 PUSH DE
+ $A183 PUSH HL
+ $A184 LD HL,$AFBB   ; <the_arg> is <word>.
+ $A187 CALL $72DD
+ $A18A POP DE        ; restore DE
+ $A18B RET

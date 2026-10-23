@@ -1,16 +1,26 @@
-; Routine at 7AA1
+; Start the candidate scan for the first noun
 ;
-; Used by the routine at #R$79B6.
-c$7AA1 LD A,($B71C)  ;
+; Sets RecPtr1 ($794E), the position from which #R$7CCB goes through the
+; candidates for the first noun phrase. The class of the noun is bits 2-3 of
+; the command flags StateB71E ($B71E) (#R$7ACC turns it into the start of the
+; object table). When Noun1Kind ($B6FE) is not 0 the noun is a place, and the
+; scan starts at the exits of the actor's location instead (#R$9E95). Does
+; nothing while VerbAllFlag is not 0 (ALL was typed: the nouns are then taken
+; one by one by other code); #R$7AA6 skips that test (used by #R$7AF5).
+;
+; O:IX The start position, also stored in RecPtr1
+@label=StartNounScan1
+c$7AA1 LD A,($B71C)  ; VerbAllFlag: ALL typed
  $7AA4 AND A         ;
  $7AA5 RET NZ        ;
 ; This entry point is used by the routine at #R$7AF5.
-*$7AA6 LD A,($B71E)  ;
+@label=StartNounScan1_Always
+*$7AA6 LD A,($B71E)  ; StateB71E
  $7AA9 RRCA          ;
- $7AAA RRCA          ;
- $7AAB CALL $7ACC    ;
- $7AAE LD A,($B6FE)  ;
+ $7AAA RRCA          ; noun 1 class, bits 2-3
+ $7AAB CALL $7ACC    ; PickScanStart
+ $7AAE LD A,($B6FE)  ; Noun1Kind
  $7AB1 AND A         ;
- $7AB2 CALL NZ,$9E95 ;
- $7AB5 LD ($794E),IX ;
+ $7AB2 CALL NZ,$9E95 ; a place: SeekActorExits
+ $7AB5 LD ($794E),IX ; RecPtr1
  $7AB9 RET           ;

@@ -42,7 +42,7 @@ Calling a routine (render data with the game's own code, for docs):
   zxrun.py orig.z80 --cls 0x38 --call 0x6B75 --reg HL=0x6FF7 --reg DE=0x4000 \
       --reg BC=0x300 --png maze1.png [--crop X,Y,W,H]
   pushes a return address, runs ADDR with interrupts off until it returns,
-  then writes the screen (cells X,Y,W,H) as PNG.
+  prints the registers, then writes the screen (cells X,Y,W,H) as PNG.
 """
 import argparse
 import hashlib
@@ -477,9 +477,14 @@ def main():
                               None, None)
         print('returned from $%04X after %d instructions' % (args.call, ops)
               if sim.registers[PC] == ret else 'did not return (PC=$%04X)' % sim.registers[PC])
+        r = sim.registers
+        print('A=%02X F=%02X BC=%02X%02X DE=%02X%02X HL=%02X%02X IX=%02X%02X IY=%02X%02X' % tuple(
+            r[i] for i in (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11)))
         if args.png:
             png(sim.memory[0x4000:0x5B00], args.png, crop, args.scale)
             print('wrote %s' % args.png)
+        if args.text is not None:
+            print(screen_text(sim.memory, None if args.text < 0 else args.text))
         if args.dump:
             ram, registers, st, machine = get_state(sim)
             write_snapshot(args.dump, ram, registers, st, machine)

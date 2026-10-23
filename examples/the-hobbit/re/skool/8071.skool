@@ -1,61 +1,88 @@
-; Routine at 8071
+; Flood fill a region of the picture
 ;
-; Used by the routine at #R$7FA7.
-c$8071 LD ($824E),A  ;
+; The fill command of the picture drawer (#R$7FA7): fills the clear pixels
+; around the seed pen position until lit pixels (lines drawn earlier) bound the
+; region. Scan-line fill: each seed on the stack gives a span (go left to the
+; first lit pixel, then right to the next); every pixel of the span is plotted
+; (#R$81B5, in the ink colour, which also recolours the attribute cell) and the
+; rows above and below are tested, one new seed being pushed for each run of
+; clear pixels. The lit pixel that stops a span is plotted as well. Seeds are
+; pen positions (D = x, E = y) kept on the machine stack above a sentinel with
+; y $80; the fill ends when the sentinel comes back. DrawVar1 and DrawVar2 are
+; the "a seed was already pushed for this run" flags of the row above and the
+; row below.
+; .
+; At the end PicVar1, the ink colour used by #R$81B5 for the lines too, is set
+; to 0, so lines drawn after a fill are black (the lines of a picture whose
+; paper is black are white, see #R$81B5).
+; .
+; Hardware: writes the screen bitmap and attributes (and reads the bitmap).
+;
+; A Ink colour 0-7 (kept in PicVar1)
+; D Seed pen x
+; E Seed pen y
+; All registers other than AF are preserved
+@label=FloodFill
+c$8071 LD ($824E),A           ; fill ink colour
  $8074 PUSH DE       ;
  $8075 PUSH HL       ;
- $8076 LD HL,$0080   ;
+@isub=LD HL,FILL_SENTINEL
+ $8076 LD HL,$0080            ; sentinel seed (y = $80)
  $8079 PUSH HL       ;
-*$807A CALL $80EE    ;
- $807D JR NZ,$8086   ;
- $807F CALL $8148    ;
+@label=FloodFill_Span
+*$807A CALL $80EE             ; go left along the row ...
+ $807D JR NZ,$8086            ; ... while the pixel is clear
+ $807F CALL $8148             ; MovePenLeft: Z at the left edge
  $8082 JR NZ,$807A   ;
- $8084 JR $808C      ;
-*$8086 CALL $81B5    ;
- $8089 CALL $8141    ;
-*$808C LD HL,$0000   ;
+ $8084 JR $808C               ; edge reached: the span starts here
+*$8086 CALL $81B5             ; lit pixel: colour it
+ $8089 CALL $8141             ; and step back right: start of the span
+*$808C LD HL,$0000            ; no seed pushed above
  $808F LD ($806F),HL ;
-*$8092 CALL $812B    ;
+@label=FloodFill_Column
+*$8092 CALL $812B             ; up: is the pixel above clear?
  $8095 LD A,$00      ;
- $8097 JR Z,$80AE    ;
+ $8097 JR Z,$80AE             ; top edge: nothing above
  $8099 CALL $80EE    ;
  $809C LD A,$00      ;
- $809E JR NZ,$80A9   ;
- $80A0 LD A,($806F)  ;
+ $809E JR NZ,$80A9            ; lit above: no seed
+ $80A0 LD A,($806F)           ; clear above:
  $80A3 AND A         ;
- $80A4 JR NZ,$80A9   ;
- $80A6 PUSH DE       ;
+ $80A4 JR NZ,$80A9            ; a seed is already there
+ $80A6 PUSH DE                ; new seed for the row above
  $80A7 LD A,$01      ;
 *$80A9 PUSH AF       ;
- $80AA CALL $813A    ;
+ $80AA CALL $813A             ; back to the row
  $80AD POP AF        ;
-*$80AE LD ($806F),A  ;
- $80B1 CALL $813A    ;
+*$80AE LD ($806F),A           ; DrawVar1 = flag for the row above
+ $80B1 CALL $813A             ; down: the pixel below
  $80B4 LD A,$00      ;
- $80B6 JR Z,$80CD    ;
+ $80B6 JR Z,$80CD             ; bottom edge: nothing below
  $80B8 CALL $80EE    ;
  $80BB LD A,$00      ;
  $80BD JR NZ,$80C8   ;
- $80BF LD A,($8070)  ;
+ $80BF LD A,($8070)           ; DrawVar2
  $80C2 AND A         ;
  $80C3 JR NZ,$80C8   ;
- $80C5 PUSH DE       ;
+ $80C5 PUSH DE                ; new seed for the row below
  $80C6 LD A,$01      ;
 *$80C8 PUSH AF       ;
- $80C9 CALL $812B    ;
+ $80C9 CALL $812B             ; back to the row
  $80CC POP AF        ;
-*$80CD LD ($8070),A  ;
- $80D0 CALL $81B5    ;
- $80D3 CALL $8141    ;
+*$80CD LD ($8070),A           ; DrawVar2 = flag for the row below
+ $80D0 CALL $81B5             ; colour this pixel
+ $80D3 CALL $8141             ; right: Z at the right edge
  $80D6 JR Z,$80E0    ;
- $80D8 CALL $80EE    ;
+ $80D8 CALL $80EE             ; clear: continue the span
  $80DB JR Z,$8092    ;
- $80DD CALL $81B5    ;
-*$80E0 POP DE        ;
+ $80DD CALL $81B5             ; lit: it bounds the span, colour it too
+@label=FloodFill_NextSeed
+*$80E0 POP DE                 ; next seed
  $80E1 LD A,E        ;
- $80E2 CP $80        ;
+@isub=CP FILL_SENTINEL
+ $80E2 CP $80                 ; sentinel: the fill is over
  $80E4 JR NZ,$807A   ;
- $80E6 LD A,$00      ;
+ $80E6 LD A,$00               ; PicVar1 = 0
  $80E8 LD ($824E),A  ;
  $80EB POP HL        ;
  $80EC POP DE        ;

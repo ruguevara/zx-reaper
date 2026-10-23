@@ -1,28 +1,45 @@
-; Routine at 9630
+; Describe a location as "<subject> are in ..." with its picture
 ;
-; Used by the routines at #R$8C4B and #R$8D9D.
+; Chooses the preposition of the location from its flags (bits 1-3, times 2, index
+; into LocationPrepositions: outside, inside, in, on, at) and writes that phrase
+; code over the second item of MsgSubjIsIn (self-modifying message data at
+; $AFFD-$AFFE, high byte first), so the message reads "You are in", "You are
+; on" and so on. Then it joins #R$964D with that message.
+; .
+; The player sees this when entering a location for the first time and for LOOK
+; (#R$8D9D, #R$8C4B); a visited location gets the shorter #R$96A8.
+; .
+; Hardware: draws the picture and may wait for a key (see #R$965B).
+; .
+; A Location id
+; O:IX Record of the location (the entry at $964D keeps IX, IY and BC)
+@label=DescribeLocation
 c$9630 PUSH AF       ;
- $9631 CALL $9BB1    ;
- $9634 LD A,(IX+$00) ;
+ $9631 CALL $9BB1    ; the location record in IX
+ $9634 LD A,(IX+$00) ; flags
+@isub=AND LOC_PREP_MASK
  $9637 AND $0E       ;
  $9639 LD E,A        ;
  $963A LD D,$00      ;
- $963C LD HL,$BA80   ;
+ $963C LD HL,$BA80   ; LocationPrepositions
  $963F ADD HL,DE     ;
  $9640 LD E,(HL)     ;
  $9641 INC HL        ;
- $9642 LD D,(HL)     ;
+ $9642 LD D,(HL)     ; DE = the phrase code
+@isub=LD HL,MsgSubjIsIn+1
  $9643 LD HL,$AFFD   ;
- $9646 LD (HL),D     ;
+ $9646 LD (HL),D     ; patch the message
  $9647 INC HL        ;
  $9648 LD (HL),E     ;
  $9649 POP AF        ;
- $964A LD HL,$AFFC   ;
-; This entry point is used by the routines at #R$962B and #R$A3E6.
+ $964A LD HL,$AFFC   ; MsgSubjIsIn: "<subject> are in"
+; Entry point: describe location A, starting with the message at HL (also
+; DescribeSeen and #R$A3E6).
+@label=DescribeLocation_Intro
 *$964D PUSH IX       ;
  $964F PUSH IY       ;
  $9651 PUSH BC       ;
- $9652 CALL $965B    ;
+ $9652 CALL $965B    ; print the intro, the description and the picture
  $9655 POP BC        ;
  $9656 POP IY        ;
  $9658 POP IX        ;

@@ -1,14 +1,17 @@
 ; Story window cursor state
 ;
-; Column counter ($869B), cursor address ($869C), character under it ($869E),
-; flags ($869F, $86A0). Set at the start ($6C8D-$6CB0) and by $86A1.
+; Column counter ($869B), cursor cell address ($869C), pixel offset of the
+; cursor within its cell ($869E; 6-pixel characters straddle cells), the indent
+; printed at the start of an empty line ($869F, set by #R$9FC7) and the last
+; character printed on the line ($86A0, 0 = empty line). Set at the start
+; ($6C8D-$6CB0) and by #R$86A1.
 @label=StoryColumn
 g$869B DEFB $00
 @label=StoryCursor
  $869C DEFW $0000
-@label=StoryCursorChar
+@label=StoryCursorPixel
  $869E DEFB $00
-@label=StoryFlag1
+@label=ListIndent
  $869F DEFB $00
-@label=StoryFlag2
+@label=StoryLastChar
  $86A0 DEFB $00

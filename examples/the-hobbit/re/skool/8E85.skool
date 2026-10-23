@@ -1,42 +1,65 @@
-; Routine at 8E85
+; Check whether the subject can pass an obstacle and enter the destination
 ;
-; Used by the routines at #R$8D9D and #R$8F3E.
+; Part of moving (#R$8D9D, #R$8F3E). Uses the variables of the take routine
+; set by the mover: TakeId (the destination location id), TakeWeight (the
+; weight the subject adds to the destination: its own +2 plus what it carries,
+; #R$9CE8). With an obstacle id (the exit's obstacle byte) it tests the
+; obstacle's record: flag bits 5 (active) and 3 (dead or disabled) both clear
+; stops the traveller (PASS_BLOCKED), so does bit 7 of the state byte (+4)
+; when the subject is the player; then TakeWeight must be below the obstacle's
+; +2 or the result is PASS_TOO_SMALL. Then, with or without an obstacle, the
+; destination: TakeObject gets its record, and unless its capacity (+1) is
+; $FF (unlimited), what is left of the capacity after the weights of the
+; objects lying there (#R$9C41) must exceed TakeWeight, or the result is
+; PASS_TOO_FULL.
+; .
+; Hardware: none.
+;
+; A Obstacle id, 0 for none
+; O:A 0 can pass, PASS_BLOCKED, PASS_TOO_SMALL or PASS_TOO_FULL
+; O:F Z set when it can pass
+; O:IX Record of the obstacle (PASS_BLOCKED, PASS_TOO_SMALL) or of the destination (PASS_TOO_FULL)
+@label=CheckPassage
 c$8E85 AND A          ;
- $8E86 JR Z,$8EA7     ;
- $8E88 CALL $9BCA     ;
+ $8E86 JR Z,$8EA7     ; no obstacle
+ $8E88 CALL $9BCA     ; obstacle record
  $8E8B LD A,(IX+$07)  ;
- $8E8E AND $28        ;
- $8E90 JR Z,$8ECE     ;
+ $8E8E AND $28        ; active or dead/disabled bit
+ $8E90 JR Z,$8ECE     ; neither: blocked
  $8E92 LD A,($B6EA)   ;
  $8E95 AND A          ;
- $8E96 JR NZ,$8E9E    ;
- $8E98 BIT 7,(IX+$04) ;
+ $8E96 JR NZ,$8E9E    ; not the player
+ $8E98 BIT 7,(IX+$04) ; the player is stopped by state bit 7
  $8E9C JR NZ,$8ECE    ;
-*$8E9E LD A,($8D9C)   ;
- $8EA1 LD B,(IX+$02)  ;
+*$8E9E LD A,($8D9C)   ; TakeWeight
+ $8EA1 LD B,(IX+$02)  ; the obstacle's capacity
  $8EA4 SUB B          ;
- $8EA5 JR NC,$8ECA    ;
-*$8EA7 LD A,($8D9B)   ;
+ $8EA5 JR NC,$8ECA    ; weight not below it: too small
+*$8EA7 LD A,($8D9B)   ; TakeId
  $8EAA LD B,A         ;
- $8EAB CALL $9BB1     ;
- $8EAE LD ($8D99),IX  ;
+ $8EAB CALL $9BB1     ; destination record
+ $8EAE LD ($8D99),IX  ; TakeObject
+@isub=LD A,END_MARK
  $8EB2 LD A,$FF       ;
- $8EB4 CP (IX+$01)    ;
+ $8EB4 CP (IX+$01)    ; unlimited capacity?
  $8EB7 JR Z,$8EC4     ;
  $8EB9 LD A,B         ;
- $8EBA CALL $9C41     ;
+ $8EBA CALL $9C41     ; room left in the destination
  $8EBD LD C,A         ;
  $8EBE LD A,($8D9C)   ;
  $8EC1 SUB C          ;
- $8EC2 JR NC,$8EC6    ;
+ $8EC2 JR NC,$8EC6    ; weight not below the room: too full
 *$8EC4 XOR A          ;
- $8EC5 RET            ;
+ $8EC5 RET            ; can pass
+@isub=LD A,PASS_TOO_FULL
 *$8EC6 LD A,$03       ;
  $8EC8 AND A          ;
  $8EC9 RET            ;
+@isub=LD A,PASS_TOO_SMALL
 *$8ECA LD A,$02       ;
  $8ECC AND A          ;
  $8ECD RET            ;
+@isub=LD A,PASS_BLOCKED
 *$8ECE LD A,$01       ;
  $8ED0 AND A          ;
  $8ED1 RET            ;

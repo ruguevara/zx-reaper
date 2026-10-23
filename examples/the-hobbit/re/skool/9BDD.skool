@@ -1,27 +1,40 @@
-; Routine at 9BDD
+; Move what a carrier holds to a new location, bringing the player along
 ;
-; Used by the routines at #R$8D9D, #R$939E and #R$A3E6.
+; Called when an actor or object has been put at a new location (B). Sets
+; MoveFlag to 1 and gives the new location to everything the carrier holds,
+; and what those hold (#R$9C17). If that walk met the player (MoveFlag was
+; cleared: the player is inside or carried by the carrier), the player arrives
+; too: with the player as the actor (Subject 0, ActorRecord the player's record,
+; TakeId = B) it runs the arrival part of the take routine (#R$8E12), then
+; #R$9B02 refreshes what the player can see, and the actor is restored. The
+; arrival step is skipped when the player's first location ($C12B) is 0.
+; MoveFlag is 0 when the routine ends with the player carried.
+; .
+; A Id of the carrier (an actor or an object that holds things)
+; B The new location
+@label=MoveCarried
+@isub=LD HL,MoveFlag
 c$9BDD LD HL,$9BDC   ;
  $9BE0 LD (HL),$01   ;
- $9BE2 CALL $9C17    ;
+ $9BE2 CALL $9C17    ; relocate the contents
  $9BE5 LD A,(HL)     ;
  $9BE6 AND A         ;
- $9BE7 RET NZ        ;
+ $9BE7 RET NZ        ; the player was not among them
  $9BE8 PUSH HL       ;
- $9BE9 LD A,($C12B)  ;
+ $9BE9 LD A,($C12B)  ; the player's first location
  $9BEC AND A         ;
  $9BED JR Z,$9C13    ;
- $9BEF LD A,($B6EA)  ;
+ $9BEF LD A,($B6EA)  ; keep the actor
  $9BF2 PUSH AF       ;
- $9BF3 LD HL,($B70C) ;
+ $9BF3 LD HL,($B70C) ; and its record
  $9BF6 PUSH HL       ;
- $9BF7 LD HL,$C11B   ;
+ $9BF7 LD HL,$C11B   ; the player
  $9BFA LD ($B70C),HL ;
  $9BFD XOR A         ;
- $9BFE LD ($B6EA),A  ;
+ $9BFE LD ($B6EA),A  ; Subject := player
  $9C01 LD A,B        ;
- $9C02 LD ($8D9B),A  ;
- $9C05 CALL $8E12    ;
+ $9C02 LD ($8D9B),A  ; TakeId := the new location
+ $9C05 CALL $8E12    ; the player arrives
  $9C08 CALL $9B02    ;
  $9C0B POP HL        ;
  $9C0C LD ($B70C),HL ;
@@ -29,5 +42,5 @@ c$9BDD LD HL,$9BDC   ;
  $9C10 LD ($B6EA),A  ;
 *$9C13 POP HL        ;
  $9C14 XOR A         ;
- $9C15 LD (HL),A     ;
+ $9C15 LD (HL),A     ; MoveFlag := 0
  $9C16 RET           ;

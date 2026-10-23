@@ -1,25 +1,35 @@
-; Routine at 9C41
+; Capacity left at a location
 ;
-; Used by the routine at #R$8E85.
+; Takes the capacity of the location (record +1) and subtracts the weight (+2) of
+; every object or character record that has exactly one location and that
+; location is the one given, stopping at 0 when the sum is too much. The
+; caller (#R$8E85) has already dealt with the $FF capacity of an unlimited
+; location. BC, IX and IY are kept.
+; .
+; A Location id
+; O:A Capacity left, 0 when the weights add up to more than the capacity
+@label=LocationSpareCapacity
 c$9C41 PUSH IX       ;
  $9C43 PUSH IY       ;
  $9C45 PUSH BC       ;
- $9C46 LD B,A        ;
- $9C47 CALL $9BB1    ;
+ $9C46 LD B,A        ; B = the location
+ $9C47 CALL $9BB1    ; IX = its record
  $9C4A LD A,(IX+$01) ;
- $9C4D LD C,A        ;
+ $9C4D LD C,A        ; C = capacity
+@isub=LD IX,ObjectTable-ID_ENTRY_SIZE
  $9C4E LD IX,$C060   ;
+@label=LocationSpareCapacity_Next
 *$9C52 CALL $9B93    ;
- $9C55 JR Z,$9C6D    ;
+ $9C55 JR Z,$9C6D    ; end of the table
  $9C57 LD A,(IY+$00) ;
  $9C5A CP $01        ;
- $9C5C JR NZ,$9C52   ;
+ $9C5C JR NZ,$9C52   ; only records with one location
  $9C5E LD A,B        ;
  $9C5F CP (IY+$10)   ;
- $9C62 JR NZ,$9C52   ;
+ $9C62 JR NZ,$9C52   ; and that one is the location
  $9C64 LD A,C        ;
- $9C65 SUB (IY+$02)  ;
- $9C68 JR C,$9C74    ;
+ $9C65 SUB (IY+$02)  ; minus its weight
+ $9C68 JR C,$9C74    ; over capacity
  $9C6A LD C,A        ;
  $9C6B JR $9C52      ;
 *$9C6D LD A,C        ;

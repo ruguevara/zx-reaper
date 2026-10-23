@@ -1,8 +1,16 @@
-; Routine at A5D1
-c$A5D1 CALL $9D44    ;
- $A5D4 LD HL,$C452   ;
- $A5D7 LD A,($C12B)  ;
- $A5DA CP (HL)       ;
- $A5DB RET NZ        ;
- $A5DC LD HL,$B085   ;
- $A5DF JP $97F4      ;
+; The warg runs around the player and howls
+;
+; Script handler (op 3, in the warg's script #R$C92F). Always passes the test
+; pass of the script engine (#R$9D44); when the player is in the warg's
+; location it prints "The vicious warg run around you and howls." (#R$97F4
+; adds the full stop and a new line).
+; .
+; Hardware: none (the text goes through the message printer).
+@label=WargHowls
+c$A5D1 CALL $9D44
+ $A5D4 LD HL,$C452   ; the warg's location
+ $A5D7 LD A,($C12B)  ; player's location
+ $A5DA CP (HL)
+ $A5DB RET NZ        ; elsewhere: silent
+ $A5DC LD HL,$B085   ; "The vicious warg run around you and howls"
+ $A5DF JP $97F4

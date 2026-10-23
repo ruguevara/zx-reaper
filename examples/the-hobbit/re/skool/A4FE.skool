@@ -1,12 +1,19 @@
-; Routine at A4FE
-c$A4FE CALL $9D44    ;
- $A501 LD A,$02      ;
- $A503 CALL $9C9F    ;
- $A506 LD HL,$B052   ;
- $A509 CP $00        ;
- $A50B JP Z,$A1E3    ;
- $A50E LD HL,$B05B   ;
- $A511 CP $01        ;
- $A513 JP Z,$A1E3    ;
- $A516 LD HL,$B05F   ;
- $A519 JP $A1E3      ;
+; Gandalf cheers the player on
+;
+; Script handler (op 3, in Gandalf's script #R$C8D4). Says one of "You are doing
+; a great job", "Hurry up" or "Hello", chosen by a random number from 0 to 2.
+; Always passes the test pass of the script engine (#R$9D44).
+; .
+; Hardware: none (the text goes through the message printer).
+@label=GandalfCheers
+c$A4FE CALL $9D44
+ $A501 LD A,$02
+ $A503 CALL $9C9F    ; random 0 to 2
+ $A506 LD HL,$B052   ; "You are doing a great job"
+ $A509 CP $00
+ $A50B JP Z,$A1E3
+ $A50E LD HL,$B05B   ; "Hurry up"
+ $A511 CP $01
+ $A513 JP Z,$A1E3
+ $A516 LD HL,$B05F   ; "Hello"
+ $A519 JP $A1E3

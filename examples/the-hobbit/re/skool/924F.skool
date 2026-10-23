@@ -1,31 +1,56 @@
-; Routine at 924F
-c$924F CALL $8D25     ;
- $9252 LD A,($B6E9)   ;
- $9255 CP (IX+$01)    ;
- $9258 JP Z,$72CE     ;
- $925B LD IY,($B70A)  ;
- $925F LD A,($B6E7)   ;
- $9262 CP $12         ;
- $9264 JR Z,$926C     ;
- $9266 BIT 5,(IY+$07) ;
- $926A JR Z,$9297     ;
-*$926C LD A,(IY+$02)  ;
- $926F SUB (IX+$02)   ;
- $9272 JR C,$927E     ;
- $9274 PUSH AF        ;
- $9275 LD A,($B6E9)   ;
- $9278 CALL $9CE8     ;
- $927B LD B,A         ;
- $927C POP AF         ;
- $927D SUB B          ;
-*$927E LD HL,$AE1A    ;
- $9281 JP C,$72DD     ;
- $9284 JP Z,$72DD     ;
- $9287 CALL $9D44     ;
- $928A LD A,(IY+$10)  ;
- $928D LD (IX+$10),A  ;
- $9290 LD A,($B6E9)   ;
- $9293 LD (IX+$01),A  ;
- $9296 RET            ;
-*$9297 LD A,$05       ;
- $9299 JP $A164       ;
+; Put the first object into (or onto) the second
+;
+; Verb handler of the commands "drop in" (14) and "put in" (17) in the verb
+; tables of containers (the second object); #R$8F69 also reaches it through
+; #R$9F4A with the nouns swapped. It refuses, in this order:
+; .
+; #R$8D25 refuses first (the object has several places, like a door, or is a
+; liquid); then "I cannot do that." when the first object is already in the
+; second; "<container> is closed" (#R$A164) unless the container is open (this
+; check is skipped for command 18, "put on"); and the message "<obj2> is too full."
+; when the first object's weight (+2) is more than the container's capacity (+2)
+; or does not leave room beside what it already holds (#R$9CE8; an exact fit is
+; refused too).
+; .
+; Otherwise (CommitOrAbort: only when performed) the first object's holder (+1)
+; becomes the second object and its location (+$10) becomes the container's.
+;
+; Noun1Record Record of the first object
+; Noun2Record Record of the second object (the container)
+; FirstObject Id of the first object
+; SecondObject Id of the second object
+; CommandId The command (14, 17 or 18)
+@label=PutObjectIn
+c$924F CALL $8D25        ; refuse a fixed object or a liquid
+ $9252 LD A,($B6E9)      ;
+ $9255 CP (IX+$01)       ; already in it?
+ $9258 JP Z,$72CE        ; "I cannot do that."
+ $925B LD IY,($B70A)     ; the container
+ $925F LD A,($B6E7)      ;
+@isub=CP CMD_PUT_ON
+ $9262 CP $12            ; put on: no need for it to be open
+ $9264 JR Z,$926C        ;
+@isub=BIT FLAG_ACTIVE,(IY+$07)
+ $9266 BIT 5,(IY+$07)    ; open?
+ $926A JR Z,$9297        ;
+*$926C LD A,(IY+$02)     ; container's capacity
+ $926F SUB (IX+$02)      ; minus the weight of the object
+ $9272 JR C,$927E        ; too heavy for it
+ $9274 PUSH AF          ;
+ $9275 LD A,($B6E9)      ;
+ $9278 CALL $9CE8        ; weight it already holds
+ $927B LD B,A            ;
+ $927C POP AF            ;
+ $927D SUB B             ; room left; carry or zero: too full
+*$927E LD HL,$AE1A       ; "<obj2> is too full."
+ $9281 JP C,$72DD        ;
+ $9284 JP Z,$72DD        ;
+ $9287 CALL $9D44        ; abandon unless performing
+ $928A LD A,(IY+$10)     ; the object goes to the container's location
+ $928D LD (IX+$10),A     ;
+ $9290 LD A,($B6E9)      ; and its holder is the container
+ $9293 LD (IX+$01),A     ;
+ $9296 RET               ;
+@isub=LD A,REASON_CLOSED
+*$9297 LD A,$05          ; state "closed"
+ $9299 JP $A164          ; "<container> is closed"

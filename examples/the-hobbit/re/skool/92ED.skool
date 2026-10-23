@@ -1,69 +1,107 @@
-; Routine at 92ED
-c$92ED LD IX,($B708)  ;
- $92F1 BIT 1,(IX+$07) ;
- $92F5 JP NZ,$9F76    ;
- $92F8 BIT 3,(IX+$07) ;
- $92FC JP NZ,$9399    ;
- $92FF SUB A          ;
- $9300 CP (IX+$06)    ;
- $9303 JP Z,$9F76     ;
- $9306 LD B,A         ;
- $9307 LD A,($B6E9)   ;
- $930A INC A          ;
- $930B JR Z,$932C     ;
- $930D LD IY,($B70A)  ;
- $9311 LD A,(IY+$05)  ;
- $9314 AND A          ;
- $9315 JP Z,$9F76     ;
- $9318 PUSH IX        ;
- $931A LD IX,($B70A)  ;
- $931E LD A,$0B       ;
- $9320 CALL $9B81     ;
- $9323 POP IX         ;
- $9325 INC A          ;
- $9326 JP Z,$9F76     ;
- $9329 LD B,(IY+$05)  ;
-*$932C CALL $9D44     ;
- $932F LD A,$15       ;
- $9331 CALL $9CA8     ;
- $9334 ADD A,B        ;
- $9335 LD IY,($B70C)  ;
- $9339 ADD A,(IY+$05) ;
- $933C JR NC,$9340    ;
- $933E LD A,$FF       ;
-*$9340 SUB (IX+$06)   ;
- $9343 JR C,$9360     ;
- $9345 SET 3,(IX+$07) ;
- $9349 LD A,($B6E8)   ;
- $934C CALL $A18C     ;
- $934F SRA (IX+$05)   ;
- $9353 LD A,(IX+$04)  ;
- $9356 CP $02         ;
- $9358 CALL C,$9D50   ;
- $935B LD A,$83       ;
- $935D CALL $A16C     ;
-*$9360 LD A,($B6E9)   ;
- $9363 CP $FF         ;
- $9365 RET Z          ;
- $9366 LD IY,($B70A)  ;
- $936A BIT 3,(IY+$07) ;
- $936E RET NZ         ;
- $936F LD B,(IY+$06)  ;
- $9372 LD A,$15       ;
- $9374 CALL $9CA8     ;
- $9377 ADD A,B        ;
- $9378 JR NC,$937C    ;
- $937A LD A,$FF       ;
-*$937C SUB (IX+$06)   ;
- $937F RET C          ;
- $9380 SET 3,(IY+$07) ;
- $9384 LD A,($B6E9)   ;
- $9387 CALL $A18C     ;
- $938A LD A,(IY+$05)  ;
- $938D SRA A          ;
- $938F LD (IY+$05),A  ;
- $9392 CALL $9D50     ;
- $9395 PUSH IY        ;
- $9397 POP IX         ;
-*$9399 LD A,$83       ;
- $939B JP $A16C       ;
+; Strike an object, perhaps with a weapon
+;
+; Verb handler of command 11, "strike" ("strike X with Y"), in the verb tables
+; of breakable things (also reached from the throw and shoot handlers when the
+; target is not a character, and from #R$A761). The first object is hit by the
+; subject, with the second object as the weapon when one is given.
+; .
+; Refused (#R$9F76) when the object is a liquid or has defence 0 (+6); when it is
+; already broken (flag bit 3) it says "<object> is broken". A weapon is refused
+; when its attack strength (+5) is 0 or its own verb table has no "strike"
+; entry.
+; .
+; Once performed: strength = random spread (STRIKE_SPREAD) + weapon attack (+5,
+; 0 without a weapon) + the subject's attack (+5), saturated at $FF. When it is
+; at least the object's defence (+6) the object breaks: the broken flag is set,
+; its name becomes "broken ..." (#R$A18C), its attack is halved and, when its
+; state byte (+4) is below 2, its contents spill (#R$9D50); the message is
+; "<object> is broken" (REASON_BROKEN). Then the weapon is tried the same way
+; with its defence (+6) against the object's, and when it comes out as at least
+; the object's defence the weapon breaks too and its "is broken" message is
+; printed. The spread is added as an unsigned byte, so a negative spread
+; saturates to $FF as in #R$9213 (inferred: not tried in play).
+;
+; Noun1Record Record of the object struck
+; Noun2Record Record of the weapon (when SecondObject is not $FF)
+; FirstObject Id of the object struck
+; SecondObject Id of the weapon, or $FF
+@label=StrikeObject
+c$92ED LD IX,($B708)     ;
+@isub=BIT FLAG_CONSUMABLE,(IX+$07)
+ $92F1 BIT 1,(IX+$07)    ; a liquid cannot be struck
+ $92F5 JP NZ,$9F76       ;
+@isub=BIT FLAG_DEAD,(IX+$07)
+ $92F8 BIT 3,(IX+$07)    ; already broken
+ $92FC JP NZ,$9399       ;
+ $92FF SUB A             ;
+ $9300 CP (IX+$06)       ; defence 0: unbreakable
+ $9303 JP Z,$9F76        ;
+ $9306 LD B,A            ; B = weapon attack, 0 without a weapon
+ $9307 LD A,($B6E9)      ;
+ $930A INC A             ; no weapon?
+ $930B JR Z,$932C        ;
+ $930D LD IY,($B70A)     ; the weapon
+ $9311 LD A,(IY+$05)     ;
+ $9314 AND A             ;
+ $9315 JP Z,$9F76        ; attack 0: not a weapon
+ $9318 PUSH IX           ;
+ $931A LD IX,($B70A)     ;
+@isub=LD A,CMD_STRIKE
+ $931E LD A,$0B          ;
+ $9320 CALL $9B81        ; does the weapon have a "strike" entry?
+ $9323 POP IX            ;
+ $9325 INC A             ;
+ $9326 JP Z,$9F76        ; no
+ $9329 LD B,(IY+$05)     ; weapon attack
+ $932C CALL $9D44        ; abandon unless performing
+@isub=LD A,STRIKE_SPREAD
+ $932F LD A,$15          ;
+ $9331 CALL $9CA8        ; random spread
+ $9334 ADD A,B           ; plus the weapon's attack
+ $9335 LD IY,($B70C)     ; the subject
+ $9339 ADD A,(IY+$05)    ; plus the subject's attack
+ $933C JR NC,$9340       ;
+ $933E LD A,$FF          ; saturate
+*$9340 SUB (IX+$06)      ; minus the object's defence
+ $9343 JR C,$9360        ; not enough: the object holds
+@isub=SET FLAG_DEAD,(IX+$07)
+ $9345 SET 3,(IX+$07)    ; the object breaks
+ $9349 LD A,($B6E8)      ;
+ $934C CALL $A18C        ; its name becomes "broken ..."
+ $934F SRA (IX+$05)      ; half the attack
+ $9353 LD A,(IX+$04)     ; state byte
+ $9356 CP $02            ;
+ $9358 CALL C,$9D50      ; spill its contents
+@isub=LD A,REASON_BROKEN
+ $935B LD A,$83          ;
+ $935D CALL $A16C        ; "<object> is broken"
+*$9360 LD A,($B6E9)      ;
+@isub=CP NO_OBJECT
+ $9363 CP $FF            ;
+ $9365 RET Z             ; no weapon: done
+ $9366 LD IY,($B70A)     ; the weapon
+@isub=BIT FLAG_DEAD,(IY+$07)
+ $936A BIT 3,(IY+$07)    ;
+ $936E RET NZ            ; already broken
+ $936F LD B,(IY+$06)     ; weapon defence
+@isub=LD A,STRIKE_SPREAD
+ $9372 LD A,$15          ;
+ $9374 CALL $9CA8        ;
+ $9377 ADD A,B           ;
+ $9378 JR NC,$937C       ;
+ $937A LD A,$FF          ;
+*$937C SUB (IX+$06)      ; minus the object's defence
+ $937F RET C             ; below it: the weapon holds
+@isub=SET FLAG_DEAD,(IY+$07)
+ $9380 SET 3,(IY+$07)    ; the weapon breaks
+ $9384 LD A,($B6E9)      ;
+ $9387 CALL $A18C        ; its name becomes "broken ..."
+ $938A LD A,(IY+$05)     ;
+ $938D SRA A             ; half the attack
+ $938F LD (IY+$05),A     ;
+ $9392 CALL $9D50        ; spill its contents
+ $9395 PUSH IY           ;
+ $9397 POP IX            ; the message names the weapon
+@isub=LD A,REASON_BROKEN
+*$9399 LD A,$83          ;
+ $939B JP $A16C          ; "<IX> is broken"

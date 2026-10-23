@@ -1,16 +1,28 @@
-; Routine at A926
-c$A926 LD A,($C4C1)  ;
- $A929 LD HL,$B6F5   ;
- $A92C CP (HL)       ;
- $A92D RET NZ        ;
- $A92E CALL $9D44    ;
- $A931 LD HL,$B2D9   ;
- $A934 LD A,$08      ;
- $A936 CALL $9C9F    ;
- $A939 JP NC,$A1E3   ;
- $A93C LD IX,$C31A   ;
- $A940 LD A,$44      ;
- $A942 CP (IX+$01)   ;
- $A945 JP Z,$A1E3    ;
- $A948 LD HL,$B2E7   ;
- $A94B JP $A1E3      ;
+; Gollum mutters about his pockets
+;
+; Script handler (op 3, in Gollum's script #R$CA14). When Gollum is where the
+; player is, he says one of two things. A random number from 0 to 8 that is
+; not negative (the carry left by #R$9C9F is clear), or Gollum holding the
+; golden ring, gives "What has it got in its pockets ?"; otherwise (the ring is
+; not with him) "My birthday present - how did we lose it. My precious".
+; When he is elsewhere it returns before the test pass accepts, and the
+; script takes its alternative step (#R$C9F7).
+; .
+; Hardware: none (the text goes through the message printer).
+@label=GollumTalks
+c$A926 LD A,($C4C1)  ; Gollum's location
+ $A929 LD HL,$B6F5
+ $A92C CP (HL)
+ $A92D RET NZ        ; not together: refuse
+ $A92E CALL $9D44
+ $A931 LD HL,$B2D9   ; "What has it got in its pockets ?"
+ $A934 LD A,$08      ; random 0 to 8
+ $A936 CALL $9C9F
+ $A939 JP NC,$A1E3   ; carry clear: say it
+ $A93C LD IX,$C31A   ; the golden ring
+@isub=LD A,CHR_GOLLUM
+ $A940 LD A,$44
+ $A942 CP (IX+$01)   ; held by Gollum?
+ $A945 JP Z,$A1E3    ; yes: the same words
+ $A948 LD HL,$B2E7   ; "My birthday present - how did we lose it. My precious"
+ $A94B JP $A1E3

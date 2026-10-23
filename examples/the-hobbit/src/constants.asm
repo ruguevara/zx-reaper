@@ -107,7 +107,7 @@ OBJ_BLACK_WATER_18       EQU $18 ; black water
 OBJ_BOW                  EQU $19 ; bow
 OBJ_STRONG_ARROW         EQU $1A ; strong arrow
 OBJ_WINDOW               EQU $1B ; window
-OBJ_1C                   EQU $1C ; object $1C (name not decoded)
+OBJ_TORCH                EQU $1C ; torch
 OBJ_SAND                 EQU $1D ; sand
 OBJ_TRAP_DOOR            EQU $1E ; trap door
 OBJ_GOBLINS_CACHE        EQU $1F ; goblins cache
@@ -228,3 +228,59 @@ ALL_STATE_EXCEPT         EQU 2 ; AllStage after EXCEPT following ALL
 ROW_BYTES                EQU 32 ; bytes in one pixel line of a screen character row
 INPUT_SCROLL_ROWS        EQU 4 ; input window: character rows moved up by one scroll (rows 20-23 to 19-22)
 ITEM_COMMON_WORD         EQU 0x60 ; message item byte: first of the 32 common words ($60-$7F), index into CommonWordTable
+STATE_VARS_SIZE          EQU 29 ; bytes of the saved game variables (SavedScriptBytes block)
+STATE_OBJECTS_SIZE       EQU 1557 ; bytes of the saved object and character records
+STATE_TIMERS_SIZE        EQU 191 ; bytes of the saved timers and NPC records
+STATE_LOCATIONS_SIZE     EQU 1497 ; bytes of the saved location records
+TAPE_FLAG_DATA           EQU 0xFF ; flag byte of the headerless data blocks the game saves and loads
+SCROLL_DELAY             EQU 0x8000 ; story window: key-polling loop count of the pause after a full line (about half a second)
+CURSOR_ROW_START         EQU 0xE0 ; low byte of the screen address of column 0 of the bottom character row (input window)
+INPUT_COLUMNS_PLUS_1     EQU 33 ; input window: column counter after a back-space at the start of a line
+PICTURE_BITMAP_SIZE      EQU 0x1000 ; bytes of bitmap in the picture area (top 16 character rows)
+PICTURE_ATTRS_SIZE       EQU 0x0200 ; bytes of attributes in the picture area (16 rows of 32)
+PICTURE_TOP_PEN_Y        EQU 0x7F ; pen y of the top pixel row of the picture area (pixel row from the top = 127 - y)
+FILL_SENTINEL            EQU 0x80 ; flood fill: y of the seed that marks the bottom of the seed stack (real pen y is below 128)
+ORDER_SLOT_FREE          EQU 0 ; order slot owner value: slot is free
+FLAG_CONSUMABLE          EQU 1 ; record flag (+7) bit: consumable, vanishes when its holder is emptied
+EXIT_OBSTACLE            EQU 1 ; offset of the obstacle object in an exit record
+EXIT_DEST                EQU 2 ; offset of the destination location in an exit record
+LIST_INDENT              EQU 4 ; story window indent (spaces) of the top level of an object list
+LIST_INDENT_STEP         EQU 2 ; extra indent of each nested level of an object list
+ALL_MODE_ANY             EQU 2 ; AllMode: any object matches (0 things, 1 living characters)
+WORD_IS                  EQU 0x039B ; dictionary offset of the word 'is'
+WORD_ARE                 EQU 0x0065 ; dictionary offset of the word 'are'
+CHAR_FULLSTOP            EQU 0x2E ; full stop character
+ALL_MODE_CHARACTERS      EQU 1 ; AllMode: only living characters match
+TOKEN_END                EQU 0xC0 ; word token of the end of the typed line: class 12
+TOKEN_UNKNOWN            EQU 0xD0 ; word token of a typed word not in the dictionary: class 13
+IDLE_SCANS_MAX           EQU 0x0BB8 ; line editor: key scans without a key before WAIT is typed (3000)
+IDLE_SCANS_PER_KEY       EQU 0x01F4 ; line editor: scans given back to the idle counter by each key (500)
+INPUT_LINE_SIZE          EQU 0x80 ; bytes in the typed line buffer (128, then a carriage return)
+NO_ACTOR                 EQU 0xFF ; actor id: nobody (the message printer says 'someone')
+WORD_SOMEONE             EQU 0x0AE3 ; dictionary offset of the word 'someone'
+CODE_FIRST_END           EQU 0x14 ; message control codes from here on end the message (jumped to, not called)
+WORD_END_PLAIN           EQU 0x20 ; word print mode: print the word and end the message
+WORD_END_STOP            EQU 0x30 ; word print mode: print the word, a full stop and a new line, end the message
+WORD_END_NEWLINE         EQU 0x60 ; word print mode: print the word, a new line, end the message
+MAX_PREPOSITIONS         EQU 3 ; a phrase takes fewer than this many prepositions
+PASS_BLOCKED             EQU 1 ; exit check result: the obstacle stops the traveller
+PASS_TOO_SMALL           EQU 2 ; exit check result: the obstacle (a vehicle or opening) is too small for the traveller
+PASS_TOO_FULL            EQU 3 ; exit check result: the destination location is too full for the traveller
+RESPAWN_RECORD_SIZE      EQU 6 ; bytes in a RecordTable entry (goblin id, NPC state address, 3 bytes of the record)
+CMD_STRIKE               EQU 0x0B ; command id of strike/hit with (the verb word 'strike')
+CMD_PUT_ON               EQU 0x12 ; command id of put X on Y
+REASON_BROKEN            EQU 0x83 ; reason id 3 with bit 7: broken
+LOC_PREP_MASK            EQU 0x0E ; location flags (+0) bits 1-3: index (times 2) into LocationPrepositions
+LOC_NAME_OFFSET          EQU 2 ; offset in a location record of its name phrase codes (noun, 2 adjectives)
+LIGHT_FLAGS_XOR          EQU 0xF7 ; light test: flags of the light source XOR this, then AND LIGHT_FLAGS_MASK, must be 0 (bits 4 and 2 set, bit 3 clear)
+LIGHT_FLAGS_MASK         EQU 0x1C ; light test: record flag bits 2-4 compared
+BLOCKED_EXIT_SIZE        EQU 6 ; bytes in a blocked-exit record (location, exit address, saved triple)
+BLOCKED_EXIT_MAX         EQU 4 ; RandomUpTo limit for the blocked exit: record 1 + 0..4
+RANDOM_EVENT_MAX         EQU 3 ; RandomUpTo limit for the random event: record 0..3
+STRIKE_SPREAD            EQU 0x15 ; random spread (RandomSigned) added to a strike's strength
+NO_OBJECT                EQU 0xFF ; object id: none (FirstObject, SecondObject, script verb)
+WORD_ABOVE               EQU 0x07B5 ; dictionary offset of the word 'above'
+WORD_BELOW               EQU 0x082B ; dictionary offset of the word 'below'
+WORD_ANOTHER             EQU 0x005E ; dictionary offset of the word 'another'
+WORD_GOBLIN              EQU 0x02E2 ; dictionary offset of the word 'goblin'
+LOC_LIT                  EQU 7 ; location flags (+0) bit: lit (outdoors); clear in caves and dungeons, where the player needs a light

@@ -1,8 +1,16 @@
-; Routine at A525
-c$A525 LD A,($B6F6)  ;
- $A528 LD HL,$B6F5   ;
- $A52B CP (HL)       ;
- $A52C RET NZ        ;
- $A52D CALL $9D44    ;
- $A530 LD HL,$B05F   ;
- $A533 JP $A1E3      ;
+; Elrond greets the player
+;
+; Script handler (op 3, in Elrond's script #R$C99A). When Elrond is where the
+; player is (ActorLocation = PlayerLocation) he says "Hello". Otherwise it
+; returns before the test pass accepts, so the script takes its alternative
+; step (#R$C9A4).
+; .
+; Hardware: none (the text goes through the message printer).
+@label=ElrondGreets
+c$A525 LD A,($B6F6)  ; location of the NPC being run
+ $A528 LD HL,$B6F5
+ $A52B CP (HL)
+ $A52C RET NZ        ; not with the player: refuse
+ $A52D CALL $9D44
+ $A530 LD HL,$B05F   ; "Hello"
+ $A533 JP $A1E3

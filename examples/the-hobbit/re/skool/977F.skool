@@ -1,24 +1,37 @@
-; Routine at 977F
+; Kill a character
 ;
-; Used by the routine at #R$9171.
+; Called when a fight or a shot kills someone (#R$9171, #R$9065, #R$929C and
+; more). With A = 0 the player is dead: the game ends in #R$90D2 ("<subject> is
+; dead." and a restart). Otherwise the character A is marked dead (flag bit 3), what it
+; carries is put down where it stands (#R$9D53 moves its contents to its own
+; holder, and liquids evaporate), its NPC record is made dormant by clearing its id so
+; that the NPC loop no longer runs it, its name becomes "dead ..." (#R$A18C) and its
+; pending orders are freed (#R$7F60).
+; .
+; BC, IX and IY are preserved.
+; .
+; A Id of the character that dies, 0 for the player
+@label=KillCharacter
 c$977F AND A           ;
- $9780 JP Z,$90D2      ;
+ $9780 JP Z,$90D2      ; the player: game over
  $9783 PUSH BC         ;
  $9784 PUSH IY         ;
  $9786 PUSH IX         ;
- $9788 LD C,A          ;
+ $9788 LD C,A          ; C = the character
  $9789 CALL $9BCA      ;
- $978C SET 3,(IX+$07)  ;
- $9790 CALL $9D53      ;
+@isub=SET FLAG_DEAD,(IX+$07)
+ $978C SET 3,(IX+$07)  ; dead
+ $9790 CALL $9D53      ; put down what it carries
  $9793 LD A,C          ;
- $9794 CALL $9A85      ;
+ $9794 CALL $9A85      ; its NPC record
+@isub=CP END_MARK
  $9797 CP $FF          ;
  $9799 LD A,C          ;
- $979A JR Z,$97A0      ;
- $979C LD (IY+$00),$00 ;
-*$97A0 CALL $A18C      ;
+ $979A JR Z,$97A0      ; none
+ $979C LD (IY+$00),$00 ; dormant: the NPC loop skips it
+ $97A0 CALL $A18C      ; name becomes "dead ..."
  $97A3 LD A,C          ;
- $97A4 CALL $7F60      ;
+ $97A4 CALL $7F60      ; free its order slots
  $97A7 POP IX          ;
  $97A9 POP IY          ;
  $97AB POP BC          ;

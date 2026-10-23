@@ -1,22 +1,40 @@
-; Routine at 9034
-c$9034 CALL $9D44    ;
- $9037 LD A,($B6E8)  ;
- $903A CALL $9A85    ;
- $903D CP $FF        ;
- $903F LD A,$00      ;
+; Handler for "talk to": the character takes some of the orders
+;
+; The default handler (VerbHandlers) of command 53, "talk to". The parser has
+; already stored the orders typed after the name in order slots (#R$7EBA); this
+; decides how many of them the addressed character (FirstObject) obeys and
+; calls ClaimOrderSlots with that number.
+; .
+; A character with no NPC record obeys none. After a character has spoken to the
+; player (ReplyGiven is set by #R$A8D2) the reply is accepted: one order. Otherwise
+; the NPC record's byte +6 is its obedience: 0 obeys none, any other value n
+; obeys a random number of orders from 0 to n; when that comes out as 0 the
+; character says "<obj1> says "No"".
+; .
+; Only a real performance counts (CommitOrAbort drops out when the command is
+; only being tried).
+;
+; FirstObject The character spoken to
+@label=TalkToCharacter
+c$9034 CALL $9D44    ; abandon unless performing
+ $9037 LD A,($B6E8)  ; the character
+ $903A CALL $9A85    ; its NPC record in IY
+@isub=CP END_MARK
+ $903D CP $FF        ; no record?
+ $903F LD A,$00      ; (keeps the flags) no orders
  $9041 JR Z,$9058    ;
- $9043 LD A,($B6F9)  ;
+ $9043 LD A,($B6F9)  ; ReplyGiven: 1 order when it just spoke
  $9046 CP $00        ;
  $9048 JR NZ,$9058   ;
- $904A LD A,(IY+$06) ;
+ $904A LD A,(IY+$06) ; obedience
  $904D CP $00        ;
- $904F JR Z,$9058    ;
- $9051 CALL $9C9F    ;
+ $904F JR Z,$9058    ; none: no orders
+ $9051 CALL $9C9F    ; random number of orders 0 to obedience
  $9054 CP $00        ;
- $9056 JR Z,$905C    ;
-*$9058 CALL $7EBA    ;
+ $9056 JR Z,$905C    ; 0: refuse
+*$9058 CALL $7EBA    ; ClaimOrderSlots: keep A orders
  $905B RET           ;
-*$905C LD HL,$B1E3   ;
+*$905C LD HL,$B1E3   ; "<obj1> says "No""
  $905F CALL $72DD    ;
- $9062 SUB A         ;
+ $9062 SUB A         ; no orders
  $9063 JR $9058      ;

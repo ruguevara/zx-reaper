@@ -1,13 +1,22 @@
-; Routine at 9686
+; Print a location's description text or its name
 ;
-; Used by the routine at #R$965B.
-c$9686 JP NZ,$72DD   ;
-; This entry point is used by the routine at #R$96A8.
-*$9689 LD DE,$0002   ;
+; Prints the description message of the location when it has one (its
+; record's word +8, passed here as the flag NZ), otherwise falls into
+; PrintLocationName.
+;
+; F NZ when the location has a description message
+; HL The description message (record +8), when F is NZ
+; IX Record of the location
+@label=PrintLocationText
+c$9686 JP NZ,$72DD   ; print the message
+; Entry point (also used by #R$96A8): print the location's name as words.
+@label=PrintLocationName
+@isub=LD DE,LOC_NAME_OFFSET
+*$9689 LD DE,$0002   ; name phrase codes at +2
  $968C PUSH IY       ;
  $968E PUSH IX       ;
  $9690 POP IY        ;
- $9692 ADD IY,DE     ;
- $9694 CALL $9ED6    ;
+ $9692 ADD IY,DE     ; IY: the name phrase codes of the location
+ $9694 CALL $9ED6    ; print adjectives and noun
  $9697 POP IY        ;
  $9699 RET           ;

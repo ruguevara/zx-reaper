@@ -1,15 +1,28 @@
-; Routine at A73B
-c$A73B LD HL,$C3B9    ;
- $A73E BIT 3,(HL)     ;
- $A740 RET Z          ;
- $A741 CALL $97FF     ;
- $A744 LD IX,$C1AD    ;
- $A748 SET 3,(IX+$07) ;
- $A74C LD A,$02       ;
- $A74E CALL $A18C     ;
- $A751 LD A,$02       ;
- $A753 LD IY,$C11B    ;
- $A757 CALL $9E25     ;
- $A75A RET Z          ;
- $A75B LD HL,$B109    ;
- $A75E JP $72DD       ;
+; Killing Thorin breaks the small curious key
+;
+; Chained after the attack handler #R$9171 in Thorin's verb table. When Thorin
+; has just been killed (his dead flag, bit 3, is set) and the command is really
+; performed, the small curious key is marked dead/disabled (flag bit 3) and
+; renamed "broken key" (#R$A18C). If the key is within the player's reach
+; (#R$9E25) it prints "The small curious key shatters."
+; .
+; Hardware: none (the text goes through the message printer).
+@label=ThorinDeathBreaksKey
+c$A73B LD HL,$C3B9    ; Thorin's flags
+@isub=BIT FLAG_DEAD,(HL)
+ $A73E BIT 3,(HL)
+ $A740 RET Z          ; not killed: nothing to do
+ $A741 CALL $97FF     ; only when performed for real
+ $A744 LD IX,$C1AD    ; the small curious key
+@isub=SET FLAG_DEAD,(IX+$07)
+ $A748 SET 3,(IX+$07)
+@isub=LD A,OBJ_SMALL_CURIOUS_KEY
+ $A74C LD A,$02
+ $A74E CALL $A18C     ; broken
+@isub=LD A,OBJ_SMALL_CURIOUS_KEY
+ $A751 LD A,$02
+ $A753 LD IY,$C11B
+ $A757 CALL $9E25     ; reach test: IX = key, IY = player
+ $A75A RET Z          ; out of reach: silent
+ $A75B LD HL,$B109    ; "The small curious key shatters."
+ $A75E JP $72DD

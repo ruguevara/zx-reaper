@@ -1,42 +1,57 @@
-; Routine at 9728
+; Report an object that another character is carrying
 ;
-; Used by the routine at #R$950F.
-c$9728 CP $FF         ;
+; Used by the command dispatcher (#R$950F) on each noun before a command runs.
+; Does nothing unless the subject is the player and the object has a place
+; (is not lying at a location). When the object is not held by the player
+; (#R$9C7B) but, at the top of its holder chain, by a character and the player's
+; present flag (bit 7 of its flags at Chr00PlayerFlags) is set, it prints
+; "<the character> is carrying <the object>." (MsgCarrying3) and the command is
+; abandoned by the caller.
+; .
+; IX, IY and BC are preserved.
+; .
+; A Object id, or $FF for none
+; O:F NZ when the message was printed, Z when not
+@label=CheckHeldByOther
+c$9728 CP $FF         ; no object: Z
  $972A RET Z          ;
  $972B PUSH IX        ;
  $972D PUSH IY        ;
  $972F PUSH BC        ;
- $9730 LD B,A         ;
+ $9730 LD B,A         ; B = object
  $9731 LD A,($B6EA)   ;
- $9734 CP $00         ;
+ $9734 CP $00         ; only the player is told
  $9736 JR Z,$973B     ;
- $9738 XOR A          ;
+ $9738 XOR A          ; Z
  $9739 JR $9776       ;
 *$973B LD A,B         ;
  $973C CALL $9BCA     ;
- $973F LD A,(IX+$01)  ;
- $9742 CP $FF         ;
+ $973F LD A,(IX+$01)  ; holder
+@isub=CP AT_LOCATION
+ $9742 CP $FF         ; lies at a location: nothing to say
  $9744 JR Z,$9776     ;
  $9746 LD A,B         ;
  $9747 PUSH IX        ;
- $9749 POP IY         ;
- $974B CALL $9C7B     ;
- $974E JR C,$9776     ;
- $9750 CALL $9BCA     ;
- $9753 BIT 6,(IX+$07) ;
+ $9749 POP IY         ; IY = the object
+ $974B CALL $9C7B     ; held by the player?
+ $974E JR C,$9776     ; yes: nothing to say
+ $9750 CALL $9BCA     ; A = top of the holder chain: its record in IX
+@isub=BIT FLAG_CHARACTER,(IX+$07)
+ $9753 BIT 6,(IX+$07) ; a character?
  $9757 JR Z,$9776     ;
- $9759 LD A,($C122)   ;
+ $9759 LD A,($C122)   ; player's flags
+@isub=BIT FLAG_PRESENT,A
  $975C BIT 7,A        ;
  $975E JR Z,$9776     ;
- $9760 LD L,(IY+$08)  ;
+ $9760 LD L,(IY+$08)  ; the object's name
  $9763 LD H,(IY+$09)  ;
  $9766 PUSH HL        ;
- $9767 LD L,(IX+$08)  ;
+ $9767 LD L,(IX+$08)  ; the carrier's name
  $976A LD H,(IX+$09)  ;
  $976D PUSH HL        ;
- $976E LD HL,$AFE4    ;
+ $976E LD HL,$AFE4    ; "<the carrier> is carrying <the object>."
  $9771 CALL $72DD     ;
- $9774 OR $01         ;
+ $9774 OR $01         ; NZ: said
 *$9776 POP BC         ;
  $9777 POP IY         ;
  $9779 POP IX         ;

@@ -1,10 +1,11 @@
 ; Input window cursor state
 ;
-; Column counter ($85B3), cursor screen address ($85B4), character under the
-; cursor ($85B6). Set at the start ($6C82) and by the print routine $85B8.
+; Column counter ($85B3), cursor screen address ($85B4), and the cursor's
+; glyph ($85B6: '+', set at $6C85). Set at the start ($6C82) and by the print
+; routine #R$85B8.
 @label=InputColumn
 g$85B3 DEFB $00
 @label=InputCursor
  $85B4 DEFW $0000
-@label=InputCursorChar
+@label=InputCursorGlyph
  $85B6 DEFB $00

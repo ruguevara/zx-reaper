@@ -1,8 +1,16 @@
-; Routine at 8C9B
+; Require the first object to be held by the subject
 ;
-; Used by the routine at #R$8CA6.
-c$8C9B CALL $9C78    ;
+; Checks with #R$9C78 that the subject carries the first object. If it does,
+; returns. If not, drops its own return address, so that the handler that
+; called it ends at once, and prints "<subject> not carrying it." Used by the
+; drop handler #R$8CA6.
+; .
+; Hardware: none.
+;
+; O:F Carry set when the object is held (otherwise the caller's caller gets control)
+@label=RequireHeld
+c$8C9B CALL $9C78    ; held by the subject?
  $8C9E RET C         ;
- $8C9F POP HL        ;
- $8CA0 LD HL,$ADF1   ;
- $8CA3 JP $72DD      ;
+ $8C9F POP HL        ; no: discard the return address,
+ $8CA0 LD HL,$ADF1   ; "{SUBJ_IS} not carrying it."
+ $8CA3 JP $72DD      ; print it and return to the handler's caller

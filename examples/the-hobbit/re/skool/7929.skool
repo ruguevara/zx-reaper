@@ -1,12 +1,24 @@
-; Routine at 7929
+; Refuse the line with "What ?"
 ;
-; Used by the routines at #R$76EC, #R$772F and #R$82BA.
-c$7929 CALL $75F1    ;
- $792C JP NZ,$75B4   ;
+; For a typed line (#R$75F1 gives Z) prints "What ?" in the input window and
+; returns NZ to the caller of the parser, so the line is not executed. For an
+; order being parsed (SAY TO) the error is ignored and the parser goes on with
+; the next word at #R$75B4. #R$7924 enters here after dropping a return
+; address. #R$792F is the second entry, which prints the message only (used when
+; the parser ends with a sentence that is not finished).
+; .
+; Hardware: none directly (the message goes through #R$72DD).
+;
+; E Parser flags (kept for #R$75B4)
+; O:F NZ when the line was refused (#R$792F)
+@label=RejectLine
+c$7929 CALL $75F1    ; TestTypedLine
+ $792C JP NZ,$75B4   ; an order: ignore the error, ParseNextWord
 ; This entry point is used by the routines at #R$6C00 and #R$75F6.
-*$792F LD HL,$AD9F   ;
+@label=PrintWhat
+*$792F LD HL,$AD9F   ; "What ?"
  $7932 LD A,$01      ;
- $7934 LD ($B701),A  ;
- $7937 CALL $72DD    ;
- $793A OR $01        ;
+ $7934 LD ($B701),A  ; RawOutputFlag: the input window
+ $7937 CALL $72DD    ; PrintMessage
+ $793A OR $01        ; NZ
  $793C RET           ;

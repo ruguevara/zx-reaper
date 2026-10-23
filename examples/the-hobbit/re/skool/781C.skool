@@ -1,10 +1,21 @@
-; Routine at 781C
+; Store a preposition in the phrase slots
 ;
-; Used by the routine at #R$7795.
-c$781C LD HL,$757A   ;
- $781F INC (HL)      ;
+; Counts the prepositions of the phrase in ActionFlag ($757A, cleared when a
+; phrase record is started by #R$75A0): the third is refused (RejectPhrase,
+; #R$7924). Otherwise the word is stored in the first free of the two
+; preposition slots at the start of ActionSlots ($757B, $757D) by #R$780C.
+; .
+; Preposition-like words are class 7 (on, with, to...) and class 1 (in, into),
+; which #R$7795 reads.
+;
+; BC Word (class nibble and dictionary offset)
+; O:HL After the stored word (#R$780C)
+@label=StorePreposition
+c$781C LD HL,$757A   ; ActionFlag
+ $781F INC (HL)      ; one more preposition
  $7820 LD A,(HL)     ;
+@isub=CP MAX_PREPOSITIONS
  $7821 CP $03        ;
- $7823 JP NC,$7924   ;
- $7826 LD HL,$757B   ;
- $7829 JR $780C      ;
+ $7823 JP NC,$7924   ; a third one: reject the phrase
+ $7826 LD HL,$757B   ; ActionSlots: the two preposition slots
+ $7829 JR $780C      ; StoreWordInPair

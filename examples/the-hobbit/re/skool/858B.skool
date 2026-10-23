@@ -1,29 +1,41 @@
-; Routine at 858B
+; Print a character in the current output window
 ;
-; Used by the routines at #R$6C00, #R$6DD6, #R$6E4F, #R$6E7A, #R$6E8B, #R$712B,
-; #R$7249, #R$72C3, #R$7348, #R$74BA, #R$83F5, #R$8583, #R$8C4B, #R$93DA,
-; #R$97F4 and #R$9FC7.
-c$858B CALL $8576    ;
+; The one character output of the game. Does nothing when #R$8576 says output
+; is off. Otherwise sends the character to the input window (#R$85B7) when
+; RawOutputFlag is set, or to the story window (#R$86A1). In the story window,
+; while LispFlag is set, an S or s is followed by an H, so that the speaker
+; lisps (the extra H goes through the same story window routine, with its
+; capital and line end rules).
+; .
+; Hardware: none itself; the windows draw on the screen.
+;
+; A Character code ($0D new line, $08 back-space, $20-$7F printable)
+; O:F Z set when output is off (nothing printed)
+@label=PrintChar
+c$858B CALL $8576    ; output enabled?
  $858E RET Z         ;
  $858F PUSH AF       ;
  $8590 LD A,($B701)  ;
  $8593 AND A         ;
- $8594 JR NZ,$85B7   ;
+ $8594 JR NZ,$85B7   ; RawOutputFlag set: the input window
  $8596 POP AF        ;
- $8597 CALL $86A1    ;
+ $8597 CALL $86A1    ; story window
  $859A PUSH AF       ;
  $859B LD A,($B700)  ;
  $859E AND A         ;
- $859F JR NZ,$85A3   ;
+ $859F JR NZ,$85A3   ; LispFlag set
  $85A1 POP AF        ;
  $85A2 RET           ;
 *$85A3 POP AF        ;
+@isub=CP 'S'
  $85A4 CP $53        ;
  $85A6 JR Z,$85AB    ;
+@isub=CP 's'
  $85A8 CP $73        ;
  $85AA RET NZ        ;
 *$85AB PUSH AF       ;
+@isub=LD A,'H'
  $85AC LD A,$48      ;
- $85AE CALL $86A1    ;
+ $85AE CALL $86A1    ; S -> SH
  $85B1 POP AF        ;
  $85B2 RET           ;

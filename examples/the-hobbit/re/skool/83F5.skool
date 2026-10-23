@@ -1,27 +1,43 @@
-; Routine at 83F5
+; Print the score as a percentage of the adventure
 ;
-; Used by the routines at #R$8391 and #R$90D2.
+; Prints "You have mastered " (message $B454), the Score ($B6F7) as hundreds
+; digit (left out when 0), tens digit, a full stop and the units digit, and then
+; "% Of this adventure." (message $B462), so the score is kept in tenths of a
+; percent (finding F24). Digits come from #R$842E and go out one by one
+; through #R$858B. Used by the SCORE word (#R$83EF), by QUIT (#R$8391) and by
+; the death and ending code (#R$90D2). Clears RawOutputFlag first and
+; CapitalNext after the number.
+; .
+; Hardware: none (text output goes through the message printer).
+;
+; Score ($B6F7) Word, tenths of a percent
+; HL, DE are preserved
+@label=PrintScore
 c$83F5 PUSH HL       ;
  $83F6 PUSH DE       ;
  $83F7 XOR A         ;
- $83F8 LD ($B701),A  ;
- $83FB LD HL,$B454   ;
+ $83F8 LD ($B701),A           ; RawOutputFlag = 0
+ $83FB LD HL,$B454            ; "You have mastered "
  $83FE CALL $72DD    ;
- $8401 LD HL,($B6F7) ;
- $8404 LD DE,$0064   ;
- $8407 CALL $842E    ;
- $840A CALL NZ,$858B ;
- $840D LD DE,$000A   ;
+ $8401 LD HL,($B6F7)          ; Score
+@isub=LD DE,100
+ $8404 LD DE,$0064            ; hundreds
+ $8407 CALL $842E             ; A = digit, Z if 0
+ $840A CALL NZ,$858B          ; print it unless it is 0
+@isub=LD DE,10
+ $840D LD DE,$000A            ; tens
  $8410 CALL $842E    ;
- $8413 CALL $858B    ;
- $8416 LD A,$2E      ;
+ $8413 CALL $858B             ; print it
+@isub=LD A,'.'
+ $8416 LD A,$2E               ; full stop
  $8418 CALL $858B    ;
- $841B LD A,L        ;
+ $841B LD A,L                 ; units: the remainder
+@isub=ADD A,'0'
  $841C ADD A,$30     ;
  $841E CALL $858B    ;
- $8421 XOR A         ;
+ $8421 XOR A                  ; CapitalNext = 0
  $8422 LD ($B704),A  ;
- $8425 LD HL,$B462   ;
+ $8425 LD HL,$B462            ; "% Of this adventure."
  $8428 CALL $72DD    ;
  $842B POP DE        ;
  $842C POP HL        ;

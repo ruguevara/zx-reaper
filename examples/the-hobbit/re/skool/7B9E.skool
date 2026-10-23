@@ -1,61 +1,96 @@
-; Routine at 7B9E
+; Find the command table record that matches a parsed phrase
 ;
-; Used by the routine at #R$79B6.
+; Takes the phrase record at IY (first command word, then up to two
+; preposition words in its two phrase blocks) and looks for a record of the
+; command table that has the same verb and prepositions (#R$71F3, which also
+; accepts the two prepositions swapped).
+; .
+; First the ALL flag (bit 7 of the first word) is kept in RecWork4 ($7952), the
+; verb goes to RecWord1 ($7958), and the (up to) two prepositions of the record
+; are collected from both blocks in the order first block, second block (#R$7CAC)
+; into RecWord2 and RecWord3 ($795A-$795D). Then the command table is walked
+; in 8-byte steps up to its zero word.
+; .
+; If a record matches, #R$7C23 splits the noun phrases of the phrase for it
+; and the routine returns NZ with IX at the record.
+; .
+; If none matches and the verb matched alone (PhraseMatched, $B6DF, set by
+; #R$71F3) the verb is used with the wrong prepositions and #R$7EA8 reports
+; that. Otherwise the word is a verb that has no entry in the command table,
+; and the game prints message $ADA3 ("You {WORD}." and "Time passes...", the
+; word being the verb) with ActionPerform set. For a line typed by the player
+; the routine then drops both return addresses and goes on at #R$798B, the end
+; of the turn, so "sing" makes time pass. For the text of an order (SAY TO) it
+; returns Z.
+; .
+; Hardware: none.
+;
+; IY Parsed phrase record
+; O:F NZ when a command record matched, Z when none did
+; O:IX Matching command table record
+@label=MatchCommand
 c$7B9E PUSH IY       ;
- $7BA0 LD L,(IY+$00) ;
+ $7BA0 LD L,(IY+$00) ; first command word
  $7BA3 LD H,(IY+$01) ;
  $7BA6 LD A,H        ;
- $7BA7 AND $80       ;
- $7BA9 LD ($7952),A  ;
+ $7BA7 AND $80       ; the ALL flag (RECF_ALL)
+ $7BA9 LD ($7952),A  ; RecWork4
  $7BAC RES 7,H       ;
- $7BAE LD ($7958),HL ;
- $7BB1 LD HL,$795A   ;
+ $7BAE LD ($7958),HL ; RecWord1: the verb word
+ $7BB1 LD HL,$795A   ; RecWord2
  $7BB4 PUSH HL       ;
  $7BB5 LD B,$04      ;
- $7BB7 CALL $70E2    ;
+ $7BB7 CALL $70E2    ; ClearBytes: RecWord2 and RecWord3 empty
  $7BBA POP HL        ;
- $7BBB LD B,$02      ;
- $7BBD LD E,$04      ;
- $7BBF CALL $7CAC    ;
- $7BC2 LD E,$0E      ;
+ $7BBB LD B,$02      ; room for two words
+@isub=LD E,REC_BLOCK_A
+ $7BBD LD E,$04      ; first preposition of the first block
+ $7BBF CALL $7CAC    ; CollectWord
+@isub=LD E,REC_BLOCK_B
+ $7BC2 LD E,$0E      ; first preposition of the second block
  $7BC4 CALL $7CAC    ;
- $7BC7 LD E,$06      ;
+@isub=LD E,REC_BLOCK_A+2
+ $7BC7 LD E,$06      ; second preposition of the first block
  $7BC9 CALL $7CAC    ;
- $7BCC LD E,$10      ;
+@isub=LD E,REC_BLOCK_B+2
+ $7BCC LD E,$10      ; second preposition of the second block
  $7BCE CALL $7CAC    ;
  $7BD1 XOR A         ;
- $7BD2 LD ($B6DF),A  ;
- $7BD5 LD HL,$7958   ;
+ $7BD2 LD ($B6DF),A  ; PhraseMatched = 0
+ $7BD5 LD HL,$7958   ; RecWord1: verb and two prepositions
+@isub=LD DE,COMMAND_RECORD_SIZE
  $7BD8 LD DE,$0008   ;
- $7BDB LD IX,$AB53   ;
+ $7BDB LD IX,$AB53   ; CommandTable
+@label=MatchCommand_Next
 *$7BDF PUSH IX       ;
  $7BE1 POP IY        ;
- $7BE3 CALL $71F3    ;
- $7BE6 JR Z,$7C1B    ;
+ $7BE3 CALL $71F3    ; MatchCommandRecord
+ $7BE6 JR Z,$7C1B    ; found
  $7BE8 ADD IX,DE     ;
  $7BEA LD A,(IX+$01) ;
  $7BED OR (IX+$00)   ;
- $7BF0 JR NZ,$7BDF   ;
+ $7BF0 JR NZ,$7BDF   ; until the zero word that ends the table
  $7BF2 POP IY        ;
- $7BF4 LD A,($B6DF)  ;
+ $7BF4 LD A,($B6DF)  ; PhraseMatched
  $7BF7 AND A         ;
- $7BF8 JP NZ,$7EA8   ;
- $7BFB LD HL,($7958) ;
+ $7BF8 JP NZ,$7EA8   ; the verb is known but not with these words
+ $7BFB LD HL,($7958) ; the verb word, for {WORD}
  $7BFE PUSH HL       ;
- $7BFF LD HL,$ADA3   ;
+ $7BFF LD HL,$ADA3   ; "You {WORD}." "Time passes..."
  $7C02 XOR A         ;
- $7C03 LD ($B701),A  ;
- $7C06 LD ($B71C),A  ;
+ $7C03 LD ($B701),A  ; RawOutputFlag: the story window
+ $7C06 LD ($B71C),A  ; VerbAllFlag = 0
  $7C09 LD A,$01      ;
- $7C0B LD ($B6FA),A  ;
- $7C0E CALL $72D3    ;
- $7C11 LD A,($B71B)  ;
+ $7C0B LD ($B6FA),A  ; ActionPerform = 1
+ $7C0E CALL $72D3    ; PrintParserMessage
+ $7C11 LD A,($B71B)  ; InputFromOrder
  $7C14 DEC A         ;
- $7C15 RET Z         ;
- $7C16 POP HL        ;
- $7C17 POP HL        ;
+ $7C15 RET Z         ; an order: Z, no match
+ $7C16 POP HL        ; the typed line: end the turn here. Drop the return
+ $7C17 POP HL        ; addresses of #R$79B6 and of its caller
  $7C18 JP $798B      ;
+@label=MatchCommand_Found
 *$7C1B POP IY        ;
- $7C1D CALL $7C23    ;
- $7C20 OR $01        ;
+ $7C1D CALL $7C23    ; SplitNounPhrases (A = 1 if the prepositions were swapped)
+ $7C20 OR $01        ; NZ
  $7C22 RET           ;

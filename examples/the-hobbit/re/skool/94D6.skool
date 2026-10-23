@@ -1,27 +1,41 @@
-; Routine at 94D6
+; Test whether the command can be applied to the first object
 ;
-; Used by the routine at #R$7CFC.
+; Sets ActionAllowed to 1 when the verb (CommandId) makes sense for the first
+; object, otherwise to 0. It is 0 when the nouns clash (#R$9B44 says Z: the
+; object is the subject or the second object). Otherwise it is 1 when the verb
+; has a default handler (VerbHandlers), or when it is a placing command
+; (#R$A1D0, whose second object takes the first), or when the object's own verb
+; table has an entry for the verb (#R$9B81). #R$7CFC calls it for each candidate
+; of an ambiguous noun and takes the first one for which the answer is 1.
+; .
+; IX and HL are preserved.
+;
+; CommandId The verb to try
+; FirstObject The candidate object
+; O:ActionAllowed 1 when the verb applies, 0 when not
+@label=CheckVerbApplies
 c$94D6 PUSH IX       ;
  $94D8 PUSH HL       ;
- $94D9 CALL $9B44    ;
+ $94D9 CALL $9B44    ; nouns distinct?
  $94DC LD A,$00      ;
- $94DE JR Z,$9508    ;
+ $94DE JR Z,$9508    ; no: 0
  $94E0 LD A,($B6E7)  ;
- $94E3 LD IX,$C730   ;
+ $94E3 LD IX,$C730   ; default handlers
  $94E7 CALL $9DBD    ;
- $94EA CP $FF        ;
+@isub=CP END_MARK
+ $94EA CP $FF        ; found one?
  $94EC LD A,$01      ;
- $94EE JR NZ,$9508   ;
- $94F0 CALL $A1D0    ;
+ $94EE JR NZ,$9508   ; yes: 1
+ $94F0 CALL $A1D0    ; a placing command?
  $94F3 LD A,$01      ;
- $94F5 JR Z,$9508    ;
- $94F7 LD A,($B6E8)  ;
+ $94F5 JR Z,$9508    ; yes: 1
+ $94F7 LD A,($B6E8)  ; the object's own verb table
  $94FA CALL $9BCA    ;
  $94FD LD A,($B6E7)  ;
  $9500 CALL $9B81    ;
  $9503 LD A,$01      ;
- $9505 JR C,$9508    ;
- $9507 SUB A         ;
+ $9505 JR C,$9508    ; has the verb: 1
+ $9507 SUB A         ; else 0
 *$9508 LD ($B6FB),A  ;
  $950B POP HL        ;
  $950C POP IX        ;

@@ -1,33 +1,53 @@
-; Routine at A7C4
-c$A7C4 LD A,($B6EA)  ;
- $A7C7 CP $41        ;
- $A7C9 JP NZ,$93DA   ;
- $A7CC CALL $9D44    ;
- $A7CF LD IY,$0000   ;
- $A7D3 LD L,(IY+$01) ;
- $A7D6 LD H,(IY+$02) ;
- $A7D9 LD A,($B6F1)  ;
- $A7DC CP $00        ;
- $A7DE JR NZ,$A7EF   ;
- $A7E0 LD B,$03      ;
-*$A7E2 LD A,(IY+$03) ;
- $A7E5 LD (HL),A     ;
- $A7E6 INC HL        ;
- $A7E7 INC IY        ;
- $A7E9 DJNZ $A7E2    ;
- $A7EB LD IY,($A7D1) ;
-*$A7EF LD A,(IY+$05) ;
- $A7F2 CALL $9BB1    ;
- $A7F5 INC IX        ;
- $A7F7 INC IX        ;
- $A7F9 PUSH IX       ;
- $A7FB LD A,(IY+$00) ;
- $A7FE CALL $9BB1    ;
- $A801 INC IX        ;
- $A803 INC IX        ;
- $A805 PUSH IX       ;
- $A807 LD A,(IY+$03) ;
- $A80A CALL $A0BA    ;
- $A80D PUSH DE       ;
- $A80E LD HL,$B1D0   ;
- $A811 JP $A1E3      ;
+; Examine the curious map
+;
+; Handler of the curious map (OBJ_CURIOUS_MAP) for the verb examine ($1C). When
+; the examiner (the subject, $B6EA) is not Elrond it is the ordinary examine
+; (#R$93DA: "There seem to be some symbols on it but <subject> cannot read
+; them."). When Elrond reads it, he reveals the exit that #R$97AD erased at
+; the start of the game: the erased exit triple is put back in its location
+; record and he says "Go <direction> from <place> to get to <place>"
+; (observed: "SAY TO ELROND READ MAP" in the endgame run).
+; .
+; The blocked-exit record (#R$C80E: location, exit triple address, saved
+; triple) is the operand of the instruction at $A7CF, which #R$97CF patched.
+; The restore happens while ExitRestoreMode is 0 (it is never set to anything
+; else).
+; .
+; Hardware: none (the text goes through the message printer).
+@label=ExamineMap
+c$A7C4 LD A,($B6EA)  ; the subject
+@isub=CP CHR_ELROND
+ $A7C7 CP $41
+ $A7C9 JP NZ,$93DA   ; not Elrond: plain examine
+ $A7CC CALL $9D44    ; only when performed for real
+@label=SmcBlockedExit
+ $A7CF LD IY,$0000   ; record of the blocked exit (patched by #R$97CF)
+ $A7D3 LD L,(IY+$01) ; HL = address of the exit triple in the location record
+ $A7D6 LD H,(IY+$02)
+ $A7D9 LD A,($B6F1)  ; ExitRestoreMode
+ $A7DC CP $00
+ $A7DE JR NZ,$A7EF   ; not 0: do not restore
+ $A7E0 LD B,$03      ; copy the saved triple (direction, obstacle, destination) back
+@label=ExamineMap_Restore
+*$A7E2 LD A,(IY+$03)
+ $A7E5 LD (HL),A
+ $A7E6 INC HL
+ $A7E7 INC IY
+ $A7E9 DJNZ $A7E2
+@isub=LD IY,(SmcBlockedExit+2)
+ $A7EB LD IY,($A7D1) ; IY = the record again
+*$A7EF LD A,(IY+$05) ; destination
+ $A7F2 CALL $9BB1    ; IX = destination location record
+ $A7F5 INC IX        ; IX = its name phrase (+2)
+ $A7F7 INC IX
+ $A7F9 PUSH IX
+ $A7FB LD A,(IY+$00) ; location of the exit
+ $A7FE CALL $9BB1
+ $A801 INC IX
+ $A803 INC IX
+ $A805 PUSH IX       ; its name phrase
+ $A807 LD A,(IY+$03) ; direction id
+ $A80A CALL $A0BA    ; DE = direction word
+ $A80D PUSH DE
+ $A80E LD HL,$B1D0   ; "Go <word> from <thing> to get to <thing>"
+ $A811 JP $A1E3

@@ -1,33 +1,49 @@
-; Routine at 8CF1
+; Check that the subject can lift and carry the first object
 ;
-; Used by the routine at #R$8D33.
-c$8CF1 LD IX,($B708)  ;
+; Three tests on the first object (Noun1Record) for the actor (ActorRecord).
+; 1. Its bulk (record +3, plus everything inside it, #R$9CED; capped at $FF)
+; must not exceed the actor's own +3, the biggest load the actor can lift:
+; else prints "<obj1> is too heavy to lift." 2. What is left of that capacity
+; after the bulk of everything the subject already carries must not go
+; negative: else prints "<subject> carrying too much." 3. The object must have
+; a single place (#R$9246: doors, rivers and webs have several) and bit 1 of
+; its record flags (+7) must be clear; otherwise the command is refused
+; (#R$9F76). The failing cases drop the return address, so the handler that
+; called this routine ends at once. $8D25 is the entry for the last test
+; only, used by #R$924F.
+; .
+; Hardware: none.
+;
+; O:IX Record of the first object (when it returns)
+@label=CheckCanCarry
+c$8CF1 LD IX,($B708)  ; first object
  $8CF5 LD A,($B6E8)   ;
- $8CF8 CALL $9CED     ;
- $8CFB ADD A,(IX+$03) ;
+ $8CF8 CALL $9CED     ; bulk of what is inside it
+ $8CFB ADD A,(IX+$03) ; plus its own bulk
  $8CFE JR NC,$8D02    ;
- $8D00 LD A,$FF       ;
+ $8D00 LD A,$FF       ; cap at 255
 *$8D02 LD B,A         ;
- $8D03 LD IY,($B70C)  ;
- $8D07 LD A,(IY+$03)  ;
+ $8D03 LD IY,($B70C)  ; the actor
+ $8D07 LD A,(IY+$03)  ; the actor's capacity
  $8D0A SUB B          ;
- $8D0B LD HL,$AE04    ;
+ $8D0B LD HL,$AE04    ; "{OBJ1} is too heavy to lift."
  $8D0E JR C,$8D20     ;
  $8D10 PUSH AF        ;
  $8D11 LD A,($B6EA)   ;
- $8D14 CALL $9CED     ;
+ $8D14 CALL $9CED     ; bulk of what the subject carries
  $8D17 LD B,A         ;
  $8D18 POP AF         ;
  $8D19 SUB B          ;
  $8D1A JP P,$8D25     ;
- $8D1D LD HL,$AE0C    ;
-*$8D20 EX (SP),HL     ;
- $8D21 POP HL         ;
- $8D22 JP $72DD       ;
+ $8D1D LD HL,$AE0C    ; "{SUBJ_IS} carrying too much."
+*$8D20 EX (SP),HL     ; discard the return address
+ $8D21 POP HL         ; HL := message
+ $8D22 JP $72DD       ; print it, return to the handler's caller
 ; This entry point is used by the routine at #R$924F.
-*$8D25 CALL $9246     ;
+@label=CheckCanCarry_Single
+*$8D25 CALL $9246     ; single place?
  $8D28 JR NZ,$8D2F    ;
  $8D2A BIT 1,(IX+$07) ;
- $8D2E RET Z          ;
+ $8D2E RET Z          ; fine
 *$8D2F POP HL         ;
- $8D30 JP $9F76       ;
+ $8D30 JP $9F76        ; refuse

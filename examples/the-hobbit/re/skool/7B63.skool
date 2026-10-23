@@ -1,15 +1,27 @@
-; Routine at 7B63
+; Copy the name phrase of an object or place into a record buffer
 ;
-; Used by the routine at #R$7AF5.
+; Copies the six bytes of the name phrase (noun and two adjectives) of object B,
+; or of place B when the kind in A is not 0, to DE. B = $FF means no noun and
+; nothing is copied. Called by #R$7AF5 for RecBuf1 ($7942) and RecBuf2
+; ($7948) so that a command given to a character carries its noun phrases.
+;
+; A Noun kind (Noun1Kind or Noun2Kind): 0 object, else location
+; B Object or location id, $FF for none
+; DE Where to copy to
+; O:BC 0 (when copied)
+; O:DE After the copy (when copied)
+; O:HL After the name phrase (when copied)
+@label=CopyNamePhrase
 c$7B63 INC B         ;
- $7B64 RET Z         ;
+ $7B64 RET Z         ; $FF: none
  $7B65 DEC B         ;
  $7B66 AND A         ;
  $7B67 LD A,B        ;
  $7B68 JR Z,$7B6F    ;
- $7B6A CALL $71D5    ;
+ $7B6A CALL $71D5    ; LocationNamePtr
  $7B6D JR $7B72      ;
-*$7B6F CALL $71E2    ;
+*$7B6F CALL $71E2    ; ObjectNamePtr
+@isub=LD BC,PHRASE_WORDS_SIZE
 *$7B72 LD BC,$0006   ;
  $7B75 LDIR          ;
  $7B77 RET           ;

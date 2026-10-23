@@ -1,7 +1,19 @@
-; Routine at 9138
-c$9138 LD IX,($B708)  ;
- $913C CALL $A5CA     ;
- $913F JP Z,$A16C     ;
- $9142 CALL $9D44     ;
- $9145 RES 5,(IX+$07) ;
- $9149 RET            ;
+; Close the first object
+;
+; Verb handler of command 12, "close", in the verb tables of doors, chests and
+; the like (and the shared close of #R$A67E and #R$A761). When the object is not
+; open it says "<object> is closed" (state id 5, see #R$A16C); otherwise it
+; clears the open flag (bit 5 of the flags).
+; .
+; Nothing changes unless the command is really performed (CommitOrAbort).
+;
+; Noun1Record Record of the object to close
+@label=CloseObject
+c$9138 LD IX,($B708)     ;
+ $913C CALL $A5CA        ; open?
+ $913F JP Z,$A16C        ; no: "<it> is closed"
+ $9142 CALL $9D44        ; abandon unless performing
+@label=CloseObject_Clear
+@isub=RES FLAG_ACTIVE,(IX+$07)
+ $9145 RES 5,(IX+$07)    ; no longer open
+ $9149 RET               ;

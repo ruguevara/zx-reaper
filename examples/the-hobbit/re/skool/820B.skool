@@ -1,9 +1,23 @@
-; Routine at 820B
+; Start a picture: border, attribute fill and clear
 ;
-; Used by the routine at #R$7FA7.
-c$820B CALL $95ED    ;
- $820E EX AF,AF'     ;
- $820F LD A,(IY+$00) ;
+; The first step of #R$7FA7. Asks #R$95ED whether the player can see (carry set:
+; too dark; the same rule as for a room description). The picture data begin
+; with two bytes: the border colour and the attribute that fills the picture
+; area. If it is too dark both are taken as 0, so the picture area is cleared
+; to black with a black border, and the picture is abandoned (the return
+; address is dropped and the drawer leaves at #R$8069). Otherwise sets the
+; border, clears the bitmap of the picture area ($4000-$4FFF, the top 16 rows)
+; and fills its attributes ($5800-$59FF).
+; .
+; Hardware: writes the border (port $FE), the screen bitmap and the attributes.
+; The carry from #R$95ED is parked in AF' while the registers are used.
+;
+; IY Picture data: border, attribute, then the drawing commands
+; O:IY Advanced past the two header bytes
+@label=StartPicture
+c$820B CALL $95ED             ; carry = too dark to see
+ $820E EX AF,AF'              ; carry kept in AF'
+ $820F LD A,(IY+$00)          ; border colour
  $8212 INC IY        ;
  $8214 EX AF,AF'     ;
  $8215 JR NC,$821A   ;
@@ -11,19 +25,26 @@ c$820B CALL $95ED    ;
  $8218 XOR A         ;
  $8219 EX AF,AF'     ;
 *$821A EX AF,AF'     ;
- $821B OUT ($FE),A   ;
+@isub=OUT (PORT_ULA),A
+ $821B OUT ($FE),A            ; set the border
  $821D PUSH HL       ;
  $821E PUSH DE       ;
  $821F PUSH BC       ;
- $8220 LD HL,$4000   ;
+@isub=LD HL,SCREEN
+ $8220 LD HL,$4000            ; clear the picture bitmap
+@isub=LD DE,SCREEN+1
  $8223 LD DE,$4001   ;
+@isub=LD BC,PICTURE_BITMAP_SIZE-1
  $8226 LD BC,$0FFF   ;
  $8229 LD (HL),$00   ;
  $822B LDIR          ;
- $822D LD HL,$5800   ;
+@isub=LD HL,ATTRS
+ $822D LD HL,$5800            ; fill the picture attributes
+@isub=LD DE,ATTRS+1
  $8230 LD DE,$5801   ;
+@isub=LD BC,PICTURE_ATTRS_SIZE-1
  $8233 LD BC,$01FF   ;
- $8236 LD A,(IY+$00) ;
+ $8236 LD A,(IY+$00)          ; attribute byte
  $8239 INC IY        ;
  $823B EX AF,AF'     ;
  $823C JR NC,$8241   ;
@@ -37,6 +58,6 @@ c$820B CALL $95ED    ;
  $8246 POP DE        ;
  $8247 POP HL        ;
  $8248 EX AF,AF'     ;
- $8249 RET NC        ;
- $824A POP HL        ;
- $824B JP $8069      ;
+ $8249 RET NC                 ; light: back to the drawer
+ $824A POP HL                 ; dark: drop the return address
+ $824B JP $8069               ; and leave the drawer

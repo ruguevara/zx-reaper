@@ -1,20 +1,34 @@
-; Routine at 9EA0
+; Find the next exit whose destination a typed noun phrase names
 ;
-; Used by the routine at #R$7DBC.
+; Walks the exits of the actor's location (IX from #R$9E95) and, for each, looks
+; up its destination location and matches the typed phrase (#R$71F3) against that
+; location's name phrase (record +2, three word codes). Returns the
+; destination id of the first match, or $FF when the exits are used up. Used for
+; "go to <place>"; #R$7DBC falls back to the object search when it finds none.
+; .
+; HL Typed noun phrase (three word tokens)
+; IX Exit record before the first to examine (#R$9E95 gives the start)
+; O:A Destination location id, $FF when no more exits match
+; O:IX The exit record found
+; IY and DE are kept.
+@label=FindExitByName
 c$9EA0 PUSH IY       ;
  $9EA2 PUSH DE       ;
- $9EA3 LD DE,$0002   ;
-*$9EA6 CALL $9B93    ;
- $9EA9 JR Z,$9EC3    ;
- $9EAB LD A,(IX+$02) ;
+ $9EA3 LD DE,$0002   ; offset of the location's first name phrase
+@label=FindExitByName_Next
+*$9EA6 CALL $9B93    ; next exit (as 3-byte entries)
+ $9EA9 JR Z,$9EC3    ; end of the exits
+@isub=LD A,(IX+EXIT_DEST)
+ $9EAB LD A,(IX+$02) ; destination
  $9EAE PUSH IX       ;
- $9EB0 CALL $9BB1    ;
+ $9EB0 CALL $9BB1    ; IX = the destination's record
  $9EB3 PUSH IX       ;
  $9EB5 POP IY        ;
- $9EB7 POP IX        ;
- $9EB9 ADD IY,DE     ;
+ $9EB7 POP IX        ; back to the exit
+ $9EB9 ADD IY,DE     ; IY = its name phrase
  $9EBB CALL $71F3    ;
- $9EBE JR NZ,$9EA6   ;
+ $9EBE JR NZ,$9EA6   ; no match
+@isub=LD A,(IX+EXIT_DEST)
  $9EC0 LD A,(IX+$02) ;
 *$9EC3 POP DE        ;
  $9EC4 POP IY        ;

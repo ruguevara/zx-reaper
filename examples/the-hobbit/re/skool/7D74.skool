@@ -1,7 +1,7 @@
 ; Save the parsed record for the player's reply
 ;
-; Stores A in StateB71A ($B71A) and copies the 24-byte parsed record at IY to
-; $B9C8, the top record of the phrase stack. #R$7960 tests StateB71A first and
+; Stores A in AwaitingAnswer ($B71A) and copies the 24-byte parsed record at IY to
+; $B9C8, the top record of the phrase stack. #R$7960 tests AwaitingAnswer first and
 ; when it is not 0 goes on with the reply; the callers pass the offset of the
 ; noun phrase (RecWork6/7) the question is about ("Which ...?", "... what?").
 ;

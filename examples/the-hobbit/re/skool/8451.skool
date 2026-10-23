@@ -1,29 +1,47 @@
-; Routine at 8451
+; Load a saved game from tape
+;
+; Handler of the word LOAD. Reads the four saved-state blocks with #R$8498 in
+; the order SavedScriptBytes, Chr00Player, Timers, Loc00None, then puts the
+; three Bard script bytes back at $C9E2 (#R$84B3) and returns to the dispatcher.
+; The blocks are read straight over the live game state, so a tape error
+; (handled in #R$8498) restarts the program.
+; .
+; Hardware: the ROM tape loader (LD-BYTES, through #R$8498); it re-enables
+; interrupts, so the routine executes DI after the last block.
+@label=LoadGame
 c$8451 PUSH IX       ;
  $8453 PUSH DE       ;
- $8454 LD A,$FF      ;
- $8456 SCF           ;
- $8457 LD IX,$B6EB   ;
+@isub=LD A,TAPE_FLAG_DATA
+ $8454 LD A,$FF      ; flag byte of the block
+ $8456 SCF           ; carry set: load (not verify)
+ $8457 LD IX,$B6EB   ; saved variables
+@isub=LD DE,STATE_VARS_SIZE
  $845B LD DE,$001D   ;
  $845E CALL $8498    ;
+@isub=LD A,TAPE_FLAG_DATA
  $8461 LD A,$FF      ;
  $8463 SCF           ;
- $8464 LD IX,$C11B   ;
+ $8464 LD IX,$C11B   ; object and character records
+@isub=LD DE,STATE_OBJECTS_SIZE
  $8468 LD DE,$0615   ;
  $846B CALL $8498    ;
+@isub=LD A,TAPE_FLAG_DATA
  $846E LD A,$FF      ;
  $8470 SCF           ;
- $8471 LD IX,$CA84   ;
+ $8471 LD IX,$CA84   ; timers and NPC records
+@isub=LD DE,STATE_TIMERS_SIZE
  $8475 LD DE,$00BF   ;
  $8478 CALL $8498    ;
+@isub=LD A,TAPE_FLAG_DATA
  $847B LD A,$FF      ;
  $847D SCF           ;
- $847E LD IX,$BA8A   ;
+ $847E LD IX,$BA8A   ; location records
+@isub=LD DE,STATE_LOCATIONS_SIZE
  $8482 LD DE,$05D9   ;
  $8485 CALL $8498    ;
- $8488 DI            ;
- $8489 LD HL,$B6EB   ;
- $848C LD DE,$C9E2   ;
+ $8488 DI            ; the ROM returned with interrupts on
+ $8489 LD HL,$B6EB   ; copy the script bytes back from SavedScriptBytes
+ $848C LD DE,$C9E2   ; to the script area
  $848F CALL $84B3    ;
  $8492 POP DE        ;
  $8493 POP IX        ;

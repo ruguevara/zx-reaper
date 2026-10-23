@@ -429,6 +429,12 @@ def cmd_const(args):
             return 0
         name, value = args[0], args[1]
         comment = ' '.join(args[2:])
+        names = re.findall(r'[A-Za-z_]\w*', re.sub(r'\$[0-9A-Fa-f]+|0x[0-9A-Fa-f]+|%[01]+|\d+', '', value))
+        unknown = [n for n in names if n not in have]
+        if unknown or not re.match(r'^[\w$%+\-*/()<>&|~ ]+$', value):
+            print('VALUE %r is not a number or an expression of known constants (%s); '
+                  'usage: zxq.py const NAME VALUE [COMMENT]' % (value, ' '.join(unknown)))
+            return 1
         if name in have:
             if have[name].replace(' ', '') == value.replace(' ', ''):
                 print('%s already defined' % name)
