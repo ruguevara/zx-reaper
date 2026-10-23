@@ -171,11 +171,16 @@ def main():
                 '; edit freely (add blocks, INCBINs, extra SAVEBINs).\n'
                 '  DEVICE ZXSPECTRUM48\n'
                 '  IFNDEF SHIFT\nSHIFT = 0\n  ENDIF\n'
+                '  INCLUDE "constants.asm"\n'
                 '  INCLUDE "game.asm"\n'
                 '  IF SHIFT == 0\n')
         for s, n, path in savebins:
             f.write('  SAVEBIN "%s",$%04X,%d\n' % (path, s, n))
         f.write('  ELSE\n  SAVEBIN "build/shifted.bin",$%04X+SHIFT,%d\n  ENDIF\n' % (lo, hi - lo))
+    with open(os.path.join(p, 'src/constants.asm'), 'w') as f:
+        f.write('; Numeric constants (sizes, counts, colours, key masks, codes), used in\n'
+                '; the skool files through @isub. Add with: tools/zxq.py const NAME VALUE COMMENT\n'
+                '; Addresses (ROM, system variables, screen) are @equ lines in re/skool/head.skool.\n')
     with open(os.path.join(p, 're/layout.mk'), 'w') as f:
         f.write('# Written by zxinit.py\nREGION_START := 0x%04X\nREGION_END := 0x%04X\n'
                 'ENTRY_PC := 0x%04X\nENTRY_IN_REGION := %d\n' % (lo, hi, pc, lo <= pc < hi))

@@ -46,7 +46,8 @@ build/game.skool: $(SKOOL) | build
 	$(T)/zxq.py join re/skool > $@
 
 # ORG lines get +SHIFT so the shift test can move the code;
-# IXl/IXh/IYl/IYh (skool2asm) become IXL/IXH/IYL/IYH (sjasmplus)
+# skool2asm writes IXl/IXh/IYl/IYh; sjasmplus takes ixl/IXL/xl/lx... but not
+# mixed case (unless --syntax=i), so normalise to IXL/IXH/IYL/IYH
 build/game.asm: build/game.skool
 	skool2asm.py -q -w -H -c $< | sed -E \
 	  -e 's/^( +ORG +)(\$$[0-9A-Fa-f]+)\s*$$/\1\2+SHIFT/' \

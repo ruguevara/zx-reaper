@@ -1,48 +1,82 @@
 ---
 name: zx-annotate
-description: Name and describe ZX Spectrum skool entries (routines, data, variables) one file at a time. Use for the bulk annotation loop, including as a subagent given a list of entry files.
+description: Name and describe ZX Spectrum skool entries (routines, data, variables), replace magic numbers with named constants and label self-modifying code, one file at a time. Use for the bulk annotation loop, including as a subagent given a list of entry files.
 ---
 
 # zx-annotate
 
 Input: a list of entry files (`re/skool/XXXX.skool`), usually from
-`tools/zxq.py next N`. Edit only those files.
+`tools/zxq.py next N`. Edit only those files. Other agents edit other files
+at the same time, so never edit `head.skool`, never run `make` (it shares
+`build/`); verify with `tools/zxq.py check` instead.
 
-For each entry:
+## Per entry
 
-1. `tools/zxq.py show $XXXX` — the entry plus its callers and callees with their
+1. `tools/zxq.py show $XXXX` — the entry plus callers and callees with their
    current names and titles. Use those names; do not re-read callees that
-   already have titles.
-2. If the purpose is not clear from the code, ask the simulator, do not guess:
-   - when is it called: `tools/zxrun.py re/orig.z80 --input tests/inputs/play-1.txt --stop $XXXX`
-     then `--shot` around that frame;
-   - what it writes: `--watch` on its target addresses;
-   - what a table holds: `zxq.py gfx` / `peek`.
-3. Edit the file:
-   - replace the default title (`; Routine at ...`) with one line;
-   - description paragraph after `;` line: what it does, in game terms;
-   - inputs/outputs as register lines:
-     ```
-     ; Draw a sprite
-     ;
-     ; Copies a 2x16 sprite to the screen with XOR.
-     ;
-     ; HL Sprite address
-     ; DE Screen address
-     @label=DrawSprite
-     c$9100 LD B,$10
-     ```
-   - `@label=` lines for the entry and for important inner targets (loop heads,
-     alternative entry points);
-   - instruction comments only for non-obvious intent (`; screen line down`,
-     `; self-modified: speed`). Comment text goes after `;` on the instruction line.
-   - in comments, refer to other entries as `#R$XXXX` (becomes a link/label).
-4. Never change instruction text or addresses. Never touch other files.
+   already have titles. `re/notes.md` has the memory map.
+2. If the purpose is not clear from the code, ask the simulator instead of
+   guessing: `tools/zxrun.py re/orig.z80 --input tests/inputs/demo.txt --stop $XXXX`
+   (when is it reached), `--shot F:/tmp/x.png` (what is on screen), `--watch A-B`
+   (who writes), `tools/zxq.py gfx` / `peek` (what a table holds).
+3. Edit the file (format below). Keep every instruction's address and bytes.
+4. `tools/zxq.py check` must print `IDENTICAL`.
 
-After the batch: `make` must say `IDENTICAL` (a typo in a directive breaks
-it). Report: each entry's label and title, and any facts for `re/notes.md`
-(variable meanings, data formats) and open questions.
+## Format
 
-Quality bar: a reader who knows Z80 understands the entry from its title and
-description without reading the code. Use `Unknown purpose` plus what you do
-know rather than an invented name.
+```
+; Draw a sprite
+;
+; Copies a 16x16 sprite (32 bytes, cells TL TR BL BR) to the screen.
+; Hardware: writes the screen bitmap.
+;
+; HL Sprite graphic address
+; DE Screen address of the top-left cell
+; O:HL Address after the sprite
+@label=DrawSprite
+c$9100 LD B,$10        ; 16 pixel rows
+@isub=LD A,KB_Q_T
+ $9102 LD A,$FB        ; read Q-T
+```
+
+- Title: one line, what it is. Description: what it does in game terms, then
+  a `Hardware:` sentence when it touches the screen, attributes, ports, ROM,
+  interrupts or timing loops (this is what a port to C/Python must replace).
+  Register lines: inputs `A Meaning`, outputs `O:HL Meaning`.
+- Labels: routines `VerbNoun` (`DrawSprite`), data/variables `NounPhrase`
+  (`GuardX`), unique, at most 24 characters. `@label=` goes on the line before
+  the instruction. Label loop heads and alternative entry points that other code
+  jumps to (`DrawSprite_Loop`), not every branch.
+- Data entries: the title names the format; in the description list the
+  fields (`+0 word: screen address`, `+2 byte: direction 0-3`...). Put
+  `@label=` on fields other code reads directly (struct fields).
+- Comments: only where the intent is not obvious; refer to entries as `#R$XXXX`.
+- `Unknown` is allowed; a wrong name costs more than a missing one.
+
+## Magic numbers
+
+- **Addresses outside the code** (ROM routines, system variables, screen
+  positions): `@equ=NAME=$XXXX` lines at the top of your own entry file
+  (the lead moves them to `head.skool`). skool2asm then replaces every 16-bit
+  operand with that value, so run `tools/zxq.py equs --uses` and put `@keep`
+  on the line before any instruction where the value is a count, not that address.
+  Existing names: `tools/zxq.py equs`.
+- **Numbers** (sizes, counts, colours, key masks, tile codes, directions,
+  offsets): `tools/zxq.py const NAME VALUE COMMENT` (prints a note if the
+  value already has a name; reuse it if the meaning is the same), then
+  `@isub=` with the instruction rewritten using the name. Expressions are fine:
+  `@isub=LD (HL),CYAN*PAPER+BLACK`, `@isub=LD BC,ATTRS_SIZE-1`,
+  `@isub=LD DE,ATTRS+1`. Existing names: `tools/zxq.py const`.
+- **Addresses inside the code**: nothing to do; operands become labels when
+  the target has a `@label`. For an address in the middle of a data entry
+  write `@isub=LD HL,MazeRecord1+7`.
+- **Self-modifying code**: label the modified instruction
+  (`@label=SmcGuardSpeed`), say in a comment what modifies it, and write the
+  stores as `@isub=LD (SmcGuardSpeed+1),A`.
+- Leave a number alone when it is just a number (`ADD A,2` that moves two
+  pixels can stay, or become `STEP` if it recurs).
+
+## Report back
+
+For each entry: label and title. Then facts about other entries you learned
+(variables' meaning with evidence, data formats), and open questions.

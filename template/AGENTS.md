@@ -38,6 +38,9 @@ tools/zxq.py peek $9000 64 | strings 5 [START END]
 tools/zxq.py gfx $A000 256 2 /tmp/s.png [cells]   look at bytes as a bitmap, then view the PNG
 tools/zxq.py unexec re/maps/*.map    code never executed (data candidates)
 tools/zxq.py reclassify frag.ctl     re-disassemble a range from a control-file fragment
+tools/zxq.py check                   byte check in a private build dir (use this, not make, in parallel agents)
+tools/zxq.py const [NAME VALUE TEXT] numeric constants (src/constants.asm), used via @isub
+tools/zxq.py equs [--uses]           address names (@equ) and every operand they replace
 tools/zxrun.py re/orig.z80 --input tests/inputs/x.txt --shot 200:/tmp/a.png --map re/maps/x.map
 tools/zxrun.py re/orig.z80 --frames 300 --watch $5C00-$5C0F --watch-from 250   # who writes here
 ```
@@ -73,6 +76,12 @@ the new labels and one-line titles. The lead runs `make`, commits, and repeats.
   `NounPhrase` (`SpriteTable`, `PlayerX`), constants `UPPER_CASE`. Unique, ≤ 24 chars.
 - A label is set once, with `@label=` on the instruction; operands stay numeric in
   skool files and skool2asm turns them into labels.
+- No magic numbers in the final asm: addresses outside the code get `@equ` names
+  (ROM, system variables, screen), numbers get constants from `src/constants.asm`
+  through `@isub`, self-modified operands are `Label+1`. Details: `zx-annotate`.
+- Descriptions say which hardware a routine touches (`Hardware:` sentence) and
+  data descriptions give field layouts: the sources must be portable to C or
+  Python on a Spectrum-like platform library.
 - Entry title: one line saying what it is. Description: what, inputs (`R` lines),
   outputs, side effects. Instruction comments only where the intent is not obvious
   from the code; no `INC A ; increment A`.

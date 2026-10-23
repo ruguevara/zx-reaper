@@ -16,9 +16,22 @@ The agent should read the disassembly through this tool, never whole.
   zxq.py peek ADDR [LEN]            hex + text dump of the image
   zxq.py strings [MIN [START END]]  text runs (plain or bit-7 terminated), default
                                     $5B00-$FFFF
-  zxq.py gfx ADDR LEN W OUT.png [cells] [SCALE]
+  zxq.py gfx ADDR LEN W OUT.png [cells] [SCALE] [block=N]
                                     render bytes as a bitmap W bytes wide (linear
-                                    rows, or `cells`: 8x8 characters, 8 bytes each)
+                                    rows, or `cells`: 8x8 characters, 8 bytes each);
+                                    block=N draws each N-byte block as a separate
+                                    tile (sprite banks); tiles are laid out in a
+                                    square-ish grid with 1-byte gaps
+  zxq.py check                      `make verify` in a private copy (safe for
+                                    parallel agents: uses its own build dir)
+  zxq.py equs [--uses|--consolidate]
+                                    list @equ address names; --uses: every 16-bit
+                                    operand each one replaces (add @keep before
+                                    wrong ones); --consolidate: move @equ lines
+                                    from entry files into head.skool
+  zxq.py const [NAME VALUE [COMMENT]]
+                                    list or add a numeric constant (src/constants.asm,
+                                    used through @isub); safe for parallel agents
   zxq.py cmp A.bin B.bin ORG        differing addresses and their entries
   zxq.py export ASM MODULES OUTDIR  split skool2asm output into modules
 
@@ -287,7 +300,9 @@ def cmd_peek(addr, n):
 
 
 def cmd_strings(minlen, start=0x5B00, end=0x10000):
+    import glob
     mem = image()
+    executed = read_map(glob.glob('re/maps/*.map'))
     a = start
     while a < end:
         b = a
@@ -295,17 +310,14 @@ def cmd_strings(minlen, start=0x5B00, end=0x10000):
             b += 1
         term = b < end and 32 <= (mem[b] & 0x7F) < 127 and mem[b] & 0x80
         text = ''.join(chr(c) for c in mem[a:b]) + (chr(mem[b] & 0x7F) if term else '')
-        if len(text) >= minlen and len(set(text)) > 2:
+        if len(text) >= minlen and len(set(text)) > 2 and not executed.intersection(range(a, b + 1)):
             short = text if len(text) <= 64 else text[:64] + '...'
             print('$%04X %3d %s%s' % (a, len(text), short, '  [bit 7 end]' if term else ''))
         a = b + 1
 
 
-def cmd_gfx(addr, n, width, out, cells=False, scale=4):
-    import struct
-    import zlib
-    mem = image()
-    data = mem[addr:addr + n]
+def gfx_rows(data, width, cells):
+    """Bitmap rows (lists of bytes, `width` bytes each) for `data`."""
     if cells:   # 8x8 characters, `width` characters per row
         chars = [data[i:i + 8] for i in range(0, len(data), 8)]
         rows = []
@@ -317,6 +329,29 @@ def cmd_gfx(addr, n, width, out, cells=False, scale=4):
     else:
         rows = [data[i:i + width] for i in range(0, len(data), width)]
         rows[-1] = rows[-1] + [0] * (width - len(rows[-1]))
+    return rows
+
+
+def cmd_gfx(addr, n, width, out, cells=False, scale=4, block=0):
+    import struct
+    import zlib
+    data = image()[addr:addr + n]
+    if block:
+        tiles = [gfx_rows(data[i:i + block], width, cells) for i in range(0, len(data), block)]
+    else:   # one tall bitmap, cut into side-by-side columns
+        rows = gfx_rows(data, width, cells)
+        h = max(8, int((len(rows) * width * 8) ** 0.5) // 8 * 8)
+        tiles = [rows[i:i + h] for i in range(0, len(rows), h)]
+    # lay tiles out in a roughly square grid (image APIs reject long strips)
+    th = max(len(t) for t in tiles) + 1
+    per_row = max(1, min(len(tiles), round((len(tiles) * th / ((width + 1) * 8)) ** 0.5)))
+    rows = []
+    for r in range(0, len(tiles), per_row):
+        band = tiles[r:r + per_row]
+        band += [[]] * (per_row - len(band))
+        for y in range(th):
+            rows.append([b for t in band for b in ((t[y] if y < len(t) else [0] * width) + [0])])
+    width = len(rows[0])
     raw = b''
     for row in rows:
         bits = [(b >> (7 - k)) & 1 for b in row for k in range(8)]
@@ -330,6 +365,139 @@ def cmd_gfx(addr, n, width, out, cells=False, scale=4):
         f.write(b'\x89PNG\r\n\x1a\n' + chunk(b'IHDR', struct.pack('>IIBBBBB', w, h, 8, 0, 0, 0, 0))
                 + chunk(b'IDAT', zlib.compress(raw)) + chunk(b'IEND', b''))
     print('wrote %s (%dx%d px, %d rows of %d bytes)' % (out, w, h, len(rows), width))
+
+
+def cmd_check():
+    import shutil
+    import subprocess
+    import tempfile
+    tmp = tempfile.mkdtemp(prefix='zxcheck-')
+    try:
+        for name in os.listdir('.'):
+            if name not in ('build', '.git'):
+                os.symlink(os.path.abspath(name), os.path.join(tmp, name))
+        r = subprocess.run(['make', '-s', 'verify'], cwd=tmp, capture_output=True, text=True)
+        out = (r.stdout + r.stderr).strip().splitlines()
+        print('\n'.join(out[-15:]))
+        return r.returncode
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
+EQU = re.compile(r'^@equ=([A-Za-z_][A-Za-z0-9_]*)=(.+?)\s*$')
+
+
+def cmd_const(args):
+    import fcntl
+    path = 'src/constants.asm'
+    with open(path, 'a+') as f:
+        fcntl.flock(f, fcntl.LOCK_EX)
+        f.seek(0)
+        have = {}
+        for line in f:
+            m = re.match(r'^([A-Za-z_][A-Za-z0-9_]*)\s+EQU\s+([^;]+?)\s*(;.*)?$', line)
+            if m:
+                have[m.group(1)] = m.group(2)
+        if not args:
+            f.seek(0)
+            sys.stdout.write(f.read())
+            return 0
+        name, value = args[0], args[1]
+        comment = ' '.join(args[2:])
+        if name in have:
+            if have[name].replace(' ', '') == value.replace(' ', ''):
+                print('%s already defined' % name)
+                return 0
+            print('CONFLICT: %s is already %s' % (name, have[name]))
+            return 1
+        same = [n for n, v in have.items() if v.replace(' ', '') == value.replace(' ', '')]
+        if same:
+            print('note: same value as %s; reuse it if the meaning is the same' % ' '.join(same))
+        f.seek(0, 2)
+        f.write('%-24s EQU %s%s\n' % (name, value, ' ; ' + comment if comment else ''))
+        print('added %s' % name)
+    return 0
+
+
+def cmd_equ_uses():
+    names = {}
+    for e in [None] + load():
+        path = os.path.join(SKOOL_DIR, 'head.skool') if e is None else e.fname
+        if os.path.exists(path):
+            for line in open(path):
+                m = EQU.match(line)
+                if m:
+                    names[parse_addr(m.group(2))] = m.group(1)
+    for e in load():
+        keep = False
+        for line in e.lines:
+            if line.startswith('@keep'):
+                keep = True
+                continue
+            m = INSTR.match(line)
+            if not m:
+                continue
+            ins = m.group(3).partition(';')[0].strip()
+            if not ins.startswith('DEF'):
+                for v in OPERAND_ADDR.findall(ins):
+                    if int(v, 16) in names:
+                        print('%-16s $%s  %-22s %s%s' % (names[int(v, 16)], m.group(2), ins,
+                                                         e.name, '  (@keep)' if keep else ''))
+            keep = False
+
+
+def cmd_equs(consolidate):
+    head_path = os.path.join(SKOOL_DIR, 'head.skool')
+    head = open(head_path).read() if os.path.exists(head_path) else ''
+    found = {}   # name -> {value: [files]}
+    for path in [head_path] + [e.fname for e in load()]:
+        if not os.path.exists(path):
+            continue
+        for line in open(path):
+            m = EQU.match(line)
+            if m:
+                found.setdefault(m.group(1), {}).setdefault(parse_addr(m.group(2)), []).append(path)
+    by_value = {}
+    for name, vals in found.items():
+        for v in vals:
+            by_value.setdefault(v, []).append(name)
+    labels = {lab for e in load() for lab in e.labels.values()}
+    bad = 0
+    for name, vals in sorted(found.items()):
+        if len(vals) > 1:
+            bad += 1
+            print('CONFLICT %s: %s' % (name, ', '.join('$%04X in %s' % (v, ' '.join(f))
+                                                        for v, f in vals.items())))
+        if name in labels:
+            bad += 1
+            print('CONFLICT %s is also a @label' % name)
+    for v, names in sorted(by_value.items()):
+        if len(set(names)) > 1:
+            print('note: $%04X has several names: %s (the last one wins in operands)'
+                  % (v, ' '.join(sorted(set(names)))))
+    if not consolidate:
+        for name, vals in sorted(found.items(), key=lambda kv: min(kv[1])):
+            for v in vals:
+                print('%-24s $%04X' % (name, v))
+        return 1 if bad else 0
+    if bad:
+        print('fix the conflicts first')
+        return 1
+    have = {m.group(1) for m in map(EQU.match, head.splitlines()) if m}
+    new = ['@equ=%s=$%04X' % (n, next(iter(v))) for n, v in sorted(found.items(), key=lambda kv: min(kv[1]))
+           if n not in have]
+    if new:
+        lines = head.rstrip('\n').split('\n') if head.strip() else []
+        open(head_path, 'w').write('\n'.join(lines + new) + '\n')
+    moved = 0
+    for e in load():
+        text = open(e.fname).read()
+        kept = [line for line in text.split('\n') if not EQU.match(line)]
+        if len(kept) != len(text.split('\n')):
+            moved += 1
+            open(e.fname, 'w').write('\n'.join(kept))
+    print('head.skool: %d new constants; cleaned %d entry files' % (len(new), moved))
+    return 0
 
 
 def cmd_reclassify(frag, force):
@@ -447,9 +615,18 @@ def main():
     elif cmd == 'strings':
         cmd_strings(int(a[1]) if len(a) > 1 else 5,
                     *(parse_addr(x) for x in a[2:4]))
-    elif cmd == 'gfx' and 5 <= len(a) <= 7:
+    elif cmd == 'gfx' and 5 <= len(a) <= 8:
         cmd_gfx(parse_addr(a[1]), parse_addr(a[2]), int(a[3]), a[4], 'cells' in a[5:],
-                next((int(x) for x in a[5:] if x.isdigit()), 4))
+                next((int(x) for x in a[5:] if x.isdigit()), 4),
+                next((parse_addr(x[6:]) for x in a[5:] if x.startswith('block=')), 0))
+    elif cmd == 'check':
+        sys.exit(cmd_check())
+    elif cmd == 'equs' and '--uses' in a:
+        cmd_equ_uses()
+    elif cmd == 'equs':
+        sys.exit(cmd_equs('--consolidate' in a))
+    elif cmd == 'const' and len(a) in (1, 3) or cmd == 'const' and len(a) > 3:
+        sys.exit(cmd_const(a[1:]))
     elif cmd == 'cmp' and len(a) == 4:
         cmd_cmp(a[1], a[2], parse_addr(a[3]))
     elif cmd == 'export' and len(a) == 4:
