@@ -42,6 +42,7 @@ tools/zxq.py peek $9000 64 | strings 5 [START END]
 tools/zxq.py gfx $A000 256 2 /tmp/s.png [cells]   look at bytes as a bitmap, then view the PNG
 tools/zxq.py unexec re/maps/*.map    code never executed (data candidates)
 tools/zxq.py reclassify frag.ctl     re-disassemble a range from a control-file fragment
+tools/zxq.py cut $8C4A "Title"       split an annotated entry at an address, keeping its annotation
 tools/zxq.py check                   byte check in a private build dir (use this, not make, in parallel agents)
 tools/zxq.py const [NAME VALUE TEXT] numeric constants (src/constants.asm), used via @isub
 tools/zxq.py equs [--uses]           address names (@equ) and every operand they replace
@@ -75,7 +76,9 @@ Phases (details in the skills in `skills/`):
 Orchestration: the lead agent plans, classifies, relocates and reviews. Bulk
 annotation goes to subagents (cheaper model) in batches of 5–15 related entries
 from `zxq.py next`; each subagent edits only the files it was given and returns
-the new labels and one-line titles. The lead runs `make`, commits, and repeats.
+the new labels and one-line titles, and proposes splits where a second routine
+starts inside an entry. The lead applies splits with `zxq.py cut`, runs `make`,
+commits, and repeats.
 
 ## Conventions
 

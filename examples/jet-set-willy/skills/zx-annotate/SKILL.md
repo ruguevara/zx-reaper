@@ -102,5 +102,6 @@ c$9100 LD B,$10        ; 16 pixel rows
 
 ## Report back
 
-For each entry: label and title. Then the finding IDs you added or changed,
+For each entry: label and title. Proposed splits: address, title, reason
+(the lead applies them with `tools/zxq.py cut ADDR TITLE`). Then the finding IDs you added or changed,
 facts about other entries (with evidence), and open questions.
