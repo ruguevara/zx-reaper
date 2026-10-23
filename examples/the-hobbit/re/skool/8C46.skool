@@ -1,0 +1,2 @@
+; Data block at 8C46
+b$8C46 DEFB $02,$00

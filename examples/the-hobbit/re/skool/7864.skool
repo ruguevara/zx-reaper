@@ -1,0 +1,10 @@
+; Routine at 7864
+;
+; Used by the routines at #R$7585 and #R$77B9.
+c$7864 PUSH IY       ;
+ $7866 POP HL        ;
+ $7867 LD B,$18      ;
+ $7869 CALL $70E2    ;
+ $786C LD (IY-$18),B ;
+ $786F LD (IY-$17),B ;
+ $7872 RET           ;

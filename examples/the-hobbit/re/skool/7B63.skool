@@ -1,0 +1,15 @@
+; Routine at 7B63
+;
+; Used by the routine at #R$7AF5.
+c$7B63 INC B         ;
+ $7B64 RET Z         ;
+ $7B65 DEC B         ;
+ $7B66 AND A         ;
+ $7B67 LD A,B        ;
+ $7B68 JR Z,$7B6F    ;
+ $7B6A CALL $71D5    ;
+ $7B6D JR $7B72      ;
+*$7B6F CALL $71E2    ;
+*$7B72 LD BC,$0006   ;
+ $7B75 LDIR          ;
+ $7B77 RET           ;

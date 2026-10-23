@@ -1,0 +1,2 @@
+; Message at B48C
+t$B48C DEFM "b GOODc"

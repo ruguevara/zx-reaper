@@ -1,0 +1,10 @@
+; Routine at 9E25
+;
+; Used by the routine at #R$980E.
+c$9E25 CALL $9E2B    ;
+ $9E28 CALL $9E40    ;
+*$9E2B PUSH IX       ;
+ $9E2D PUSH IY       ;
+ $9E2F POP IX        ;
+ $9E31 POP IY        ;
+ $9E33 RET           ;

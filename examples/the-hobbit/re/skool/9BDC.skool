@@ -1,0 +1,2 @@
+; Data block at 9BDC
+b$9BDC DEFB $FF

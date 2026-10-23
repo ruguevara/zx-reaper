@@ -1,0 +1,8 @@
+; Routine at A0AE
+;
+; Used by the routines at #R$A0C8 and #R$A138.
+c$A0AE CALL $9BB1    ;
+ $A0B1 LD BC,$0007   ;
+ $A0B4 ADD IX,BC     ;
+ $A0B6 LD BC,$0003   ;
+ $A0B9 RET           ;

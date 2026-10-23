@@ -1,0 +1,26 @@
+; Routine at 70F3
+;
+; Used by the routines at #R$712B, #R$7AF5 and #R$7C23.
+c$70F3 LD A,(IX+$05) ;
+ $70F6 RRCA          ;
+ $70F7 RRCA          ;
+ $70F8 RRCA          ;
+ $70F9 RRCA          ;
+ $70FA AND $0F       ;
+ $70FC LD C,A        ;
+ $70FD LD A,(IX+$07) ;
+ $7100 AND $F0       ;
+ $7102 ADD A,C       ;
+ $7103 LD ($B71E),A  ;
+ $7106 LD A,(IX+$01) ;
+ $7109 RRCA          ;
+ $710A RRCA          ;
+ $710B RRCA          ;
+ $710C RRCA          ;
+ $710D AND $0F       ;
+ $710F LD C,A        ;
+ $7110 LD A,(IX+$03) ;
+ $7113 AND $F0       ;
+ $7115 ADD A,C       ;
+ $7116 LD ($B71D),A  ;
+ $7119 RET           ;

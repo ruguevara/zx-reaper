@@ -1,0 +1,12 @@
+; Routine at 7892
+;
+; Used by the routine at #R$75F6.
+c$7892 DEC B         ;
+; This entry point is used by the routine at #R$75F6.
+*$7893 CALL $789F    ;
+; This entry point is used by the routine at #R$788C.
+*$7896 PUSH IX       ;
+ $7898 PUSH IY       ;
+ $789A POP IX        ;
+ $789C POP IY        ;
+ $789E RET           ;

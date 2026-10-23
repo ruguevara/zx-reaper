@@ -1,0 +1,23 @@
+; Routine at 9BB1
+;
+; Used by the routines at #R$71D5, #R$8E85, #R$9630, #R$965B, #R$96A8, #R$9C41,
+; #R$9D37 and #R$A0AE.
+c$9BB1 CP $50        ;
+ $9BB3 JR C,$9BB7    ;
+ $9BB5 XOR A         ;
+ $9BB6 RET           ;
+*$9BB7 PUSH DE       ;
+ $9BB8 LD DE,$B9E0   ;
+ $9BBB PUSH HL       ;
+ $9BBC LD L,A        ;
+ $9BBD LD H,$00      ;
+ $9BBF ADD HL,HL     ;
+ $9BC0 ADD HL,DE     ;
+ $9BC1 LD E,(HL)     ;
+ $9BC2 INC HL        ;
+ $9BC3 LD D,(HL)     ;
+ $9BC4 PUSH DE       ;
+ $9BC5 POP IX        ;
+ $9BC7 POP HL        ;
+ $9BC8 POP DE        ;
+ $9BC9 RET           ;

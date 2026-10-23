@@ -1,0 +1,16 @@
+; Routine at 7AA1
+;
+; Used by the routine at #R$79B6.
+c$7AA1 LD A,($B71C)  ;
+ $7AA4 AND A         ;
+ $7AA5 RET NZ        ;
+; This entry point is used by the routine at #R$7AF5.
+*$7AA6 LD A,($B71E)  ;
+ $7AA9 RRCA          ;
+ $7AAA RRCA          ;
+ $7AAB CALL $7ACC    ;
+ $7AAE LD A,($B6FE)  ;
+ $7AB1 AND A         ;
+ $7AB2 CALL NZ,$9E95 ;
+ $7AB5 LD ($794E),IX ;
+ $7AB9 RET           ;

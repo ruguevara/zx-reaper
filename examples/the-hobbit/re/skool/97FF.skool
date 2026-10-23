@@ -1,0 +1,3 @@
+; Data block at 97FF
+b$97FF DEFB $C5,$ED,$4B,$FA,$B6,$79,$A0,$20
+ $9807 DEFB $01,$C1,$C1,$C9,$00,$00,$00

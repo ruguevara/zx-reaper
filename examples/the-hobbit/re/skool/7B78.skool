@@ -1,0 +1,21 @@
+; Routine at 7B78
+;
+; Used by the routines at #R$79B6 and #R$7AF5.
+c$7B78 LD A,($B71E)  ;
+ $7B7B AND $40       ;
+ $7B7D LD ($B711),A  ;
+ $7B80 LD A,($B71D)  ;
+ $7B83 LD B,A        ;
+ $7B84 AND $01       ;
+ $7B86 LD ($B70F),A  ;
+ $7B89 LD A,B        ;
+ $7B8A AND $80       ;
+ $7B8C JR Z,$7B90    ;
+ $7B8E LD A,$01      ;
+*$7B90 LD ($B6FE),A  ;
+ $7B93 LD A,B        ;
+ $7B94 AND $40       ;
+ $7B96 JR Z,$7B9A    ;
+ $7B98 LD A,$01      ;
+*$7B9A LD ($B6FF),A  ;
+ $7B9D RET           ;

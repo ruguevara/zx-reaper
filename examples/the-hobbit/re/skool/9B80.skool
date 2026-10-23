@@ -1,0 +1,4 @@
+; Routine at 9B80
+;
+; Used by the routine at #R$9B6C.
+c$9B80 JP (HL)       ;

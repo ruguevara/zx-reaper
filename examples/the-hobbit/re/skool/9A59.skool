@@ -1,0 +1,27 @@
+; Routine at 9A59
+;
+; Used by the routine at #R$980E.
+c$9A59 LD A,(IX+$01) ;
+ $9A5C CP (IY+$01)   ;
+ $9A5F JR C,$9A64    ;
+ $9A61 LD A,(IY+$01) ;
+*$9A64 CALL $9C9F    ;
+ $9A67 LD E,A        ;
+; This entry point is used by the routine at #R$980E.
+*$9A68 LD A,(IY+$01) ;
+ $9A6B CP E          ;
+ $9A6C JR NC,$9A6F   ;
+ $9A6E LD E,A        ;
+*$9A6F LD L,(IY+$04) ;
+ $9A72 LD H,(IY+$05) ;
+ $9A75 LD D,$00      ;
+ $9A77 ADD HL,DE     ;
+ $9A78 ADD HL,DE     ;
+ $9A79 ADD HL,DE     ;
+ $9A7A INC HL        ;
+ $9A7B LD E,(HL)     ;
+ $9A7C INC HL        ;
+ $9A7D LD D,(HL)     ;
+ $9A7E LD (IY+$02),E ;
+ $9A81 LD (IY+$03),D ;
+ $9A84 RET           ;

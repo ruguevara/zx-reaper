@@ -1,0 +1,8 @@
+; Routine at 9C9F
+;
+; Used by the routines at #R$8D9D, #R$8FAD, #R$97AD, #R$9A59 and #R$A657.
+c$9C9F CALL $9CA8    ;
+ $9CA2 BIT 7,A       ;
+ $9CA4 RET Z         ;
+ $9CA5 NEG           ;
+ $9CA7 RET           ;

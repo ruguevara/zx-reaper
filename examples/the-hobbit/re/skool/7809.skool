@@ -1,0 +1,17 @@
+; Routine at 7809
+;
+; Used by the routine at #R$77B9.
+c$7809 LD HL,$7581   ;
+ $780C LD A,(HL)     ;
+ $780D INC HL        ;
+ $780E OR (HL)       ;
+ $780F JR Z,$7818    ;
+ $7811 INC HL        ;
+ $7812 LD A,(HL)     ;
+ $7813 INC HL        ;
+ $7814 OR (HL)       ;
+ $7815 JP NZ,$7924   ;
+*$7818 LD (HL),B     ;
+ $7819 DEC HL        ;
+ $781A LD (HL),C     ;
+ $781B RET           ;

@@ -1,0 +1,15 @@
+; Routine at 7AD8
+;
+; Used by the routine at #R$7A14.
+c$7AD8 LD A,($B71D)  ;
+ $7ADB BIT 2,A       ;
+ $7ADD RET Z         ;
+ $7ADE LD HL,$793E   ;
+ $7AE1 BIT 0,(HL)    ;
+ $7AE3 RET NZ        ;
+ $7AE4 BIT 1,A       ;
+ $7AE6 JR NZ,$7AEB   ;
+ $7AE8 OR $01        ;
+ $7AEA RET           ;
+*$7AEB XOR A         ;
+ $7AEC RET           ;

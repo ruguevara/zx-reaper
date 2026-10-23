@@ -1,0 +1,16 @@
+; Routine at 6F30
+;
+; Used by the routine at #R$6E97.
+c$6F30 LD B,$B0      ;
+ $6F32 CP $2E        ;
+ $6F34 JR Z,$6F41    ;
+ $6F36 LD B,$A0      ;
+ $6F38 CP $2C        ;
+ $6F3A JR Z,$6F41    ;
+ $6F3C CP $22        ;
+ $6F3E RET NZ        ;
+ $6F3F LD B,$90      ;
+*$6F41 INC HL        ;
+ $6F42 LD A,B        ;
+ $6F43 LD BC,$0000   ;
+ $6F46 RET           ;

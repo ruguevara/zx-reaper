@@ -1,0 +1,3 @@
+; Routine at 7790
+c$7790 RES 4,E       ;
+ $7792 JP $75BE      ;

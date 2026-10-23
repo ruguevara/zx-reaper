@@ -1,0 +1,8 @@
+; Routine at A525
+c$A525 LD A,($B6F6)  ;
+ $A528 LD HL,$B6F5   ;
+ $A52B CP (HL)       ;
+ $A52C RET NZ        ;
+ $A52D CALL $9D44    ;
+ $A530 LD HL,$B05F   ;
+ $A533 JP $A1E3      ;

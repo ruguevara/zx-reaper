@@ -1,0 +1,9 @@
+; Routine at 8583
+;
+; Used by the routines at #R$6C00, #R$712B, #R$7348, #R$74BA, #R$8C4B, #R$965B,
+; #R$96A8, #R$97F4, #R$9FC7, #R$A050 and #R$A138.
+c$8583 PUSH AF       ;
+ $8584 LD A,$0D      ;
+ $8586 CALL $858B    ;
+ $8589 POP AF        ;
+ $858A RET           ;

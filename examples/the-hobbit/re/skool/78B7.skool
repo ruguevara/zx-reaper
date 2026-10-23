@@ -1,0 +1,36 @@
+; Routine at 78B7
+;
+; Used by the routine at #R$75F6.
+c$78B7 EXX           ;
+ $78B8 LD A,(IX+$01) ;
+ $78BB AND $7F       ;
+ $78BD OR (IY+$01)   ;
+ $78C0 LD (IY+$01),A ;
+ $78C3 LD A,(IX+$00) ;
+ $78C6 LD (IY+$00),A ;
+ $78C9 EXX           ;
+ $78CA LD A,(IY+$1C) ;
+ $78CD OR (IY+$1D)   ;
+ $78D0 RET Z         ;
+ $78D1 BIT 7,E       ;
+ $78D3 RET Z         ;
+ $78D4 EXX           ;
+ $78D5 PUSH IY       ;
+ $78D7 POP HL        ;
+ $78D8 LD DE,$0012   ;
+ $78DB ADD HL,DE     ;
+ $78DC PUSH HL       ;
+ $78DD LD DE,$FFF6   ;
+ $78E0 ADD HL,DE     ;
+ $78E1 POP DE        ;
+ $78E2 LD BC,$0006   ;
+ $78E5 LDIR          ;
+ $78E7 LD DE,$0004   ;
+; This entry point is used by the routine at #R$75F6.
+*$78EA CALL $78FF    ;
+ $78ED LD A,(IY+$02) ;
+ $78F0 OR (IY+$03)   ;
+ $78F3 LD DE,$0002   ;
+ $78F6 CALL Z,$7903  ;
+ $78F9 EXX           ;
+ $78FA RET           ;

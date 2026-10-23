@@ -1,0 +1,16 @@
+; Routine at 9F94
+;
+; Used by the routine at #R$965B.
+c$9F94 PUSH IY       ;
+ $9F96 PUSH AF       ;
+ $9F97 PUSH BC       ;
+ $9F98 LD HL,$B003   ;
+ $9F9B CALL $72DD    ;
+ $9F9E LD A,$FF      ;
+ $9FA0 LD IY,($B70C) ;
+ $9FA4 LD B,(IY+$10) ;
+ $9FA7 CALL $9FAF    ;
+ $9FAA POP BC        ;
+ $9FAB POP AF        ;
+ $9FAC POP IY        ;
+ $9FAE RET           ;

@@ -1,0 +1,9 @@
+; Routine at 9D37
+;
+; Used by the routines at #R$95ED and #R$9E95.
+c$9D37 PUSH AF       ;
+ $9D38 LD IX,($B70C) ;
+ $9D3C LD A,(IX+$10) ;
+ $9D3F CALL $9BB1    ;
+ $9D42 POP AF        ;
+ $9D43 RET           ;

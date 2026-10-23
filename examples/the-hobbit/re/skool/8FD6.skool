@@ -1,0 +1,12 @@
+; Routine at 8FD6
+c$8FD6 LD IX,($B70C) ;
+ $8FDA LD B,(IX+$10) ;
+ $8FDD LD IX,($B708) ;
+ $8FE1 LD A,(IX+$10) ;
+ $8FE4 CP B          ;
+ $8FE5 JR Z,$8FEF    ;
+ $8FE7 CALL $9F2D    ;
+ $8FEA CP $FF        ;
+ $8FEC JP NZ,$8F3E   ;
+*$8FEF LD HL,$AFE9   ;
+ $8FF2 JP $72DD      ;

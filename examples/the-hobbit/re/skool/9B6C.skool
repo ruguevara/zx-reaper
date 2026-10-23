@@ -1,0 +1,17 @@
+; Routine at 9B6C
+;
+; Used by the routines at #R$8D9D, #R$950F, #R$96B3 and #R$9928.
+c$9B6C PUSH IX       ;
+ $9B6E PUSH IY       ;
+ $9B70 PUSH DE       ;
+ $9B71 PUSH BC       ;
+ $9B72 PUSH HL       ;
+ $9B73 LD A,L        ;
+ $9B74 OR H          ;
+ $9B75 CALL NZ,$9B80 ;
+ $9B78 POP HL        ;
+ $9B79 POP BC        ;
+ $9B7A POP DE        ;
+ $9B7B POP IY        ;
+ $9B7D POP IX        ;
+ $9B7F RET           ;

@@ -1,0 +1,3 @@
+; Data block at 8FCD
+b$8FCD DEFB $3A,$E8,$B6,$CD,$2D,$9F,$C3,$3E
+ $8FD5 DEFB $8F

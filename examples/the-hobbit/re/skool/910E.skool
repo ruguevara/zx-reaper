@@ -1,0 +1,20 @@
+; Routine at 910E
+;
+; Used by the routine at #R$A368.
+c$910E CALL $A1F9     ;
+ $9111 JP NZ,$A16C    ;
+ $9114 CALL $9D44     ;
+ $9117 SET 5,(IX+$07) ;
+ $911B LD A,(IX+$00)  ;
+ $911E DEC A          ;
+ $911F RET NZ         ;
+ $9120 LD A,($B6E8)   ;
+ $9123 CALL $9D97     ;
+ $9126 AND A          ;
+ $9127 RET Z          ;
+ $9128 LD A,($B6E8)   ;
+ $912B CALL $A050     ;
+ $912E RET C          ;
+ $912F LD B,(IX+$10)  ;
+ $9132 LD A,($B6E8)   ;
+ $9135 JP $9FAF       ;

@@ -1,0 +1,14 @@
+; Routine at 76EC
+c$76EC BIT 1,E       ;
+ $76EE JR NZ,$7731   ;
+ $76F0 LD D,$00      ;
+ $76F2 BIT 2,E       ;
+ $76F4 JP Z,$7929    ;
+ $76F7 LD A,($B719)  ;
+ $76FA CP $02        ;
+ $76FC JR NZ,$7701   ;
+ $76FE CALL $7858    ;
+*$7701 RES 2,E       ;
+ $7703 LD L,$02      ;
+ $7705 CALL $7918    ;
+ $7708 JP $75B4      ;

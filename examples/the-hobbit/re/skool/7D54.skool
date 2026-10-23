@@ -1,0 +1,13 @@
+; Routine at 7D54
+;
+; Used by the routine at #R$7D17.
+c$7D54 LD HL,$7948   ;
+ $7D57 CALL $7CC9    ;
+ $7D5A CP $FF        ;
+ $7D5C RET Z         ;
+ $7D5D LD ($B6E9),A  ;
+ $7D60 LD HL,$793E   ;
+ $7D63 SET 1,(HL)    ;
+ $7D65 CALL $7AED    ;
+ $7D68 JR Z,$7D54    ;
+ $7D6A RET           ;

@@ -1,0 +1,5 @@
+; Data block at AF00
+b$AF00 DEFB $89,$C9,$8A,$29,$07,$93,$A1,$B8
+ $AF08 DEFB $08,$0C,$03,$8B,$40,$8A,$7A,$81
+ $AF10 DEFB $34,$7B,$0E,$B1,$FB,$06,$85,$C3
+ $AF18 DEFB $63,$07

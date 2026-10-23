@@ -1,0 +1,11 @@
+; Routine at 8761
+;
+; Used by the routine at #R$86A1.
+c$8761 LD A,C        ;
+ $8762 SUB $06       ;
+ $8764 LD C,A        ;
+ $8765 RET NC        ;
+ $8766 ADD A,$08     ;
+ $8768 LD C,A        ;
+ $8769 DEC L         ;
+ $876A RET           ;

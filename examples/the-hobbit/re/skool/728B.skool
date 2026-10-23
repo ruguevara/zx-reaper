@@ -1,0 +1,9 @@
+; Routine at 728B
+;
+; Used by the routine at #R$7249.
+c$728B LD A,H        ;
+ $728C SUB D         ;
+ $728D RET NZ        ;
+ $728E LD A,L        ;
+ $728F SUB E         ;
+ $7290 RET           ;

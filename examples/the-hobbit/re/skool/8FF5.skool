@@ -1,0 +1,5 @@
+; Data block at 8FF5
+b$8FF5 DEFB $CD,$F1,$8C,$21,$71,$91,$3E,$0F
+ $8FFD DEFB $DD,$2A,$0A,$B7,$DD,$CB,$07,$76
+ $9005 DEFB $20,$05,$21,$ED,$92,$3E,$0B,$32
+ $900D DEFB $E7,$B6,$CD,$4A,$9F

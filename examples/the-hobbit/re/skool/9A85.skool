@@ -1,0 +1,20 @@
+; Routine at 9A85
+;
+; Used by the routine at #R$9AA0.
+c$9A85 PUSH DE       ;
+ $9A86 PUSH BC       ;
+ $9A87 LD B,A        ;
+ $9A88 LD HL,$CACB   ;
+ $9A8B LD DE,$0007   ;
+*$9A8E LD A,(HL)     ;
+ $9A8F CP B          ;
+ $9A90 JR Z,$9A9A    ;
+ $9A92 CP $FF        ;
+ $9A94 JR Z,$9A9A    ;
+ $9A96 ADD HL,DE     ;
+ $9A97 JP $9A8E      ;
+*$9A9A POP BC        ;
+ $9A9B POP DE        ;
+ $9A9C PUSH HL       ;
+ $9A9D POP IY        ;
+ $9A9F RET           ;

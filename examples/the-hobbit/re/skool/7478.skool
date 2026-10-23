@@ -1,0 +1,12 @@
+; Routine at 7478
+;
+; Used by the routine at #R$9ED6.
+c$7478 PUSH DE       ;
+ $7479 LD A,($B703)  ;
+ $747C AND A         ;
+ $747D CALL NZ,$743F ;
+ $7480 POP DE        ;
+ $7481 LD A,D        ;
+ $7482 AND $0F       ;
+ $7484 LD D,A        ;
+ $7485 JP $74C1      ;

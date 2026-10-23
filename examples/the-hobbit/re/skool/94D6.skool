@@ -1,0 +1,28 @@
+; Routine at 94D6
+;
+; Used by the routine at #R$7CFC.
+c$94D6 PUSH IX       ;
+ $94D8 PUSH HL       ;
+ $94D9 CALL $9B44    ;
+ $94DC LD A,$00      ;
+ $94DE JR Z,$9508    ;
+ $94E0 LD A,($B6E7)  ;
+ $94E3 LD IX,$C730   ;
+ $94E7 CALL $9DBD    ;
+ $94EA CP $FF        ;
+ $94EC LD A,$01      ;
+ $94EE JR NZ,$9508   ;
+ $94F0 CALL $A1D0    ;
+ $94F3 LD A,$01      ;
+ $94F5 JR Z,$9508    ;
+ $94F7 LD A,($B6E8)  ;
+ $94FA CALL $9BCA    ;
+ $94FD LD A,($B6E7)  ;
+ $9500 CALL $9B81    ;
+ $9503 LD A,$01      ;
+ $9505 JR C,$9508    ;
+ $9507 SUB A         ;
+*$9508 LD ($B6FB),A  ;
+ $950B POP HL        ;
+ $950C POP IX        ;
+ $950E RET           ;

@@ -1,0 +1,13 @@
+; Routine at 9C78
+;
+; Used by the routines at #R$939E and #R$950F.
+c$9C78 LD A,($B6E8)  ;
+; This entry point is used by the routines at #R$950F and #R$9728.
+*$9C7B LD HL,$B6EA   ;
+ $9C7E CP $FF        ;
+ $9C80 SCF           ;
+ $9C81 RET Z         ;
+ $9C82 PUSH IX       ;
+ $9C84 CALL $9C8A    ;
+ $9C87 POP IX        ;
+ $9C89 RET           ;

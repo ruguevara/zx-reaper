@@ -1,0 +1,20 @@
+; Routine at 6FD3
+;
+; Used by the routine at #R$6C00.
+c$6FD3 PUSH HL       ;
+ $6FD4 PUSH DE       ;
+ $6FD5 PUSH BC       ;
+ $6FD6 LD A,$07      ;
+ $6FD8 OUT ($FE),A   ;
+ $6FDA LD HL,$4000   ;
+ $6FDD LD DE,$4001   ;
+ $6FE0 LD BC,$1800   ;
+ $6FE3 LD (HL),$00   ;
+ $6FE5 LDIR          ;
+ $6FE7 LD BC,$0300   ;
+ $6FEA LD (HL),$38   ;
+ $6FEC LDIR          ;
+ $6FEE POP BC        ;
+ $6FEF POP DE        ;
+ $6FF0 POP HL        ;
+ $6FF1 RET           ;

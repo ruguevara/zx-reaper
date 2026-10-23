@@ -1,0 +1,12 @@
+; Routine at A09D
+;
+; Used by the routines at #R$8C4B and #R$A050.
+c$A09D LD HL,$AFCA   ;
+ $A0A0 LD A,(IX+$04) ;
+ $A0A3 RLCA          ;
+ $A0A4 RLCA          ;
+ $A0A5 AND $3C       ;
+ $A0A7 LD E,A        ;
+ $A0A8 LD D,$00      ;
+ $A0AA ADD HL,DE     ;
+ $A0AB JP $72DD      ;

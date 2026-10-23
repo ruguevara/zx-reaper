@@ -1,0 +1,2 @@
+; Data block at 7DB0
+b$7DB0 DEFB $A7,$CA,$F5,$7D

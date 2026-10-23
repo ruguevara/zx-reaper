@@ -1,0 +1,7 @@
+; Routine at 742D
+c$742D POP DE        ;
+ $742E POP HL        ;
+ $742F POP AF        ;
+ $7430 PUSH HL       ;
+ $7431 PUSH DE       ;
+ $7432 JR $7428      ;

@@ -1,0 +1,16 @@
+; Routine at 812B
+;
+; Used by the routines at #R$8071 and #R$8151.
+c$812B INC E         ;
+ $812C BIT 7,E       ;
+ $812E JR Z,$8135    ;
+ $8130 DEC E         ;
+ $8131 LD H,A        ;
+ $8132 XOR A         ;
+ $8133 LD A,H        ;
+ $8134 RET           ;
+; This entry point is used by the routine at #R$813A.
+*$8135 LD H,A        ;
+ $8136 OR $01        ;
+ $8138 LD A,H        ;
+ $8139 RET           ;

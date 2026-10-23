@@ -1,0 +1,31 @@
+; Routine at 9C41
+;
+; Used by the routine at #R$8E85.
+c$9C41 PUSH IX       ;
+ $9C43 PUSH IY       ;
+ $9C45 PUSH BC       ;
+ $9C46 LD B,A        ;
+ $9C47 CALL $9BB1    ;
+ $9C4A LD A,(IX+$01) ;
+ $9C4D LD C,A        ;
+ $9C4E LD IX,$C060   ;
+*$9C52 CALL $9B93    ;
+ $9C55 JR Z,$9C6D    ;
+ $9C57 LD A,(IY+$00) ;
+ $9C5A CP $01        ;
+ $9C5C JR NZ,$9C52   ;
+ $9C5E LD A,B        ;
+ $9C5F CP (IY+$10)   ;
+ $9C62 JR NZ,$9C52   ;
+ $9C64 LD A,C        ;
+ $9C65 SUB (IY+$02)  ;
+ $9C68 JR C,$9C74    ;
+ $9C6A LD C,A        ;
+ $9C6B JR $9C52      ;
+*$9C6D LD A,C        ;
+ $9C6E POP BC        ;
+ $9C6F POP IY        ;
+ $9C71 POP IX        ;
+ $9C73 RET           ;
+*$9C74 LD C,$00      ;
+ $9C76 JR $9C6D      ;

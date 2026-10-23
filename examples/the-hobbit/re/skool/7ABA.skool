@@ -1,0 +1,10 @@
+; Routine at 7ABA
+;
+; Used by the routine at #R$7A14.
+c$7ABA LD A,($B71E)  ;
+ $7ABD CALL $7ACC    ;
+ $7AC0 LD A,($B6FF)  ;
+ $7AC3 AND A         ;
+ $7AC4 CALL NZ,$9E95 ;
+ $7AC7 LD ($7950),IX ;
+ $7ACB RET           ;

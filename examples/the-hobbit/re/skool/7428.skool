@@ -1,0 +1,6 @@
+; Routine at 7428
+;
+; Used by the routine at #R$742D.
+c$7428 EX AF,AF'     ;
+ $7429 LD A,$01      ;
+ $742B JR $7411      ;

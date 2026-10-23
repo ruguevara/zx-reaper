@@ -1,0 +1,35 @@
+; Routine at 81B5
+;
+; Used by the routines at #R$8071 and #R$8151.
+c$81B5 PUSH HL       ;
+ $81B6 CALL $81DE    ;
+ $81B9 PUSH AF       ;
+ $81BA PUSH HL       ;
+ $81BB LD A,H        ;
+ $81BC AND $18       ;
+ $81BE RRCA          ;
+ $81BF RRCA          ;
+ $81C0 RRCA          ;
+ $81C1 ADD A,$58     ;
+ $81C3 LD H,A        ;
+ $81C4 LD A,(HL)     ;
+ $81C5 AND $38       ;
+ $81C7 LD (HL),A     ;
+ $81C8 LD A,($824E)  ;
+ $81CB RLCA          ;
+ $81CC RLCA          ;
+ $81CD RLCA          ;
+ $81CE CP (HL)       ;
+ $81CF JR NZ,$81D3   ;
+ $81D1 XOR $38       ;
+*$81D3 RRCA          ;
+ $81D4 RRCA          ;
+ $81D5 RRCA          ;
+ $81D6 OR (HL)       ;
+ $81D7 LD (HL),A     ;
+ $81D8 POP HL        ;
+ $81D9 POP AF        ;
+ $81DA OR (HL)       ;
+ $81DB LD (HL),A     ;
+ $81DC POP HL        ;
+ $81DD RET           ;

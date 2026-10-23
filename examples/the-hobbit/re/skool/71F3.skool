@@ -1,0 +1,33 @@
+; Routine at 71F3
+;
+; Used by the routines at #R$7B9E and #R$9DD9.
+c$71F3 PUSH DE       ;
+ $71F4 PUSH HL       ;
+ $71F5 PUSH IY       ;
+ $71F7 CALL $722E    ;
+ $71FA JR NZ,$7229   ;
+ $71FC LD A,$01      ;
+ $71FE LD ($B6DF),A  ;
+ $7201 CALL $722E    ;
+ $7204 JR NZ,$720D   ;
+ $7206 CALL $722E    ;
+ $7209 LD A,$00      ;
+ $720B JR Z,$7229    ;
+*$720D POP IY        ;
+ $720F POP HL        ;
+ $7210 PUSH HL       ;
+ $7211 PUSH IY       ;
+ $7213 LD DE,$0004   ;
+ $7216 ADD IY,DE     ;
+ $7218 INC HL        ;
+ $7219 INC HL        ;
+ $721A CALL $722E    ;
+ $721D JR NZ,$7229   ;
+ $721F LD DE,$FFFC   ;
+ $7222 ADD IY,DE     ;
+ $7224 CALL $722E    ;
+ $7227 LD A,$01      ;
+*$7229 POP IY        ;
+ $722B POP HL        ;
+ $722C POP DE        ;
+ $722D RET           ;

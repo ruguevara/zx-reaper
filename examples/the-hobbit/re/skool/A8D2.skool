@@ -1,0 +1,21 @@
+; Routine at A8D2
+c$A8D2 LD A,($C4C1)  ;
+ $A8D5 LD HL,$B6F5   ;
+ $A8D8 CP (HL)       ;
+ $A8D9 RET NZ        ;
+ $A8DA LD HL,$C122   ;
+ $A8DD BIT 7,(HL)    ;
+ $A8DF RET Z         ;
+ $A8E0 CALL $9D44    ;
+ $A8E3 LD HL,($B6EE) ;
+ $A8E6 INC HL        ;
+ $A8E7 INC HL        ;
+ $A8E8 LD E,(HL)     ;
+ $A8E9 INC HL        ;
+ $A8EA LD D,(HL)     ;
+ $A8EB PUSH DE       ;
+ $A8EC POP HL        ;
+ $A8ED CALL $A1E3    ;
+ $A8F0 LD A,$01      ;
+ $A8F2 LD ($B6F9),A  ;
+ $A8F5 RET           ;

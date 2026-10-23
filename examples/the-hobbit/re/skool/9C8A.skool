@@ -1,0 +1,16 @@
+; Routine at 9C8A
+;
+; Used by the routine at #R$9C78.
+c$9C8A CALL $9BCA    ;
+ $9C8D PUSH AF       ;
+ $9C8E LD A,(IX+$01) ;
+ $9C91 CP $FF        ;
+ $9C93 JR Z,$9C9C    ;
+ $9C95 POP IX        ;
+ $9C97 CP (HL)       ;
+ $9C98 JR NZ,$9C8A   ;
+ $9C9A SCF           ;
+ $9C9B RET           ;
+*$9C9C POP AF        ;
+ $9C9D AND A         ;
+ $9C9E RET           ;

@@ -1,0 +1,16 @@
+; Routine at 740C
+c$740C LD A,($B6EA)  ;
+ $740F EX AF,AF'     ;
+ $7410 XOR A         ;
+; This entry point is used by the routine at #R$7428.
+*$7411 LD ($B703),A  ;
+ $7414 EX AF,AF'     ;
+ $7415 PUSH AF       ;
+ $7416 CALL $7488    ;
+ $7419 POP AF        ;
+ $741A AND A         ;
+ $741B LD DE,$039B   ;
+ $741E RET NZ        ;
+ $741F LD DE,$0065   ;
+ $7422 OR $01        ;
+ $7424 RET           ;

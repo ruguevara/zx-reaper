@@ -1,0 +1,9 @@
+; Routine at 9F76
+;
+; Used by the routines at #R$8D9D and #R$A368.
+c$9F76 LD A,($B6FA)  ;
+ $9F79 DEC A         ;
+ $9F7A JP Z,$712B    ;
+ $9F7D SUB A         ;
+ $9F7E LD ($B6FB),A  ;
+ $9F81 RET           ;

@@ -1,0 +1,23 @@
+; Routine at 939E
+c$939E LD IY,($B70A)  ;
+ $93A2 CALL $9C78     ;
+ $93A5 LD HL,$ADF1    ;
+ $93A8 JP NC,$72DD    ;
+ $93AB LD A,($B6E9)   ;
+ $93AE CALL $9CED     ;
+ $93B1 LD IX,($B708)  ;
+ $93B5 ADD A,(IX+$03) ;
+ $93B8 PUSH AF        ;
+ $93B9 POP BC         ;
+ $93BA LD A,(IY+$03)  ;
+ $93BD SUB B          ;
+ $93BE LD HL,$AE0C    ;
+ $93C1 JP C,$72DD     ;
+ $93C4 CALL $9D44     ;
+ $93C7 LD A,($B6E9)   ;
+ $93CA LD (IX+$01),A  ;
+ $93CD LD A,(IY+$10)  ;
+ $93D0 LD (IX+$10),A  ;
+ $93D3 LD B,A         ;
+ $93D4 LD A,($B6E8)   ;
+ $93D7 JP $9BDD       ;

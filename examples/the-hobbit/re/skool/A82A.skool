@@ -1,0 +1,4 @@
+; Data block at A82A
+b$A82A DEFB $C6,$DD,$BE,$02,$20,$1C,$CD,$6E
+ $A832 DEFB $A8,$38,$0D,$21,$76,$AF,$CD,$6E
+ $A83A DEFB $A8

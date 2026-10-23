@@ -1,0 +1,11 @@
+; Routine at 9D44
+;
+; Used by the routines at #R$8C4B, #R$8D9D, #R$910E, #R$939E, #R$A525, #R$A640,
+; #R$A657, #R$A8D2 and #R$A9BD.
+c$9D44 LD A,($B6FA)  ;
+ $9D47 CP $01        ;
+ $9D49 RET Z         ;
+ $9D4A INC A         ;
+ $9D4B LD ($B6FB),A  ;
+ $9D4E POP BC        ;
+ $9D4F RET           ;

@@ -1,0 +1,2 @@
+; Data block at 892E
+b$892E DEFB $7C,$44,$44,$00,$00

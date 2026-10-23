@@ -1,0 +1,9 @@
+; Routine at 79A9
+;
+; Used by the routines at #R$79B6 and #R$7AF5.
+c$79A9 XOR A         ;
+ $79AA LD ($B701),A  ;
+ $79AD LD HL,$793D   ;
+ $79B0 LD B,$11      ;
+ $79B2 CALL $70E2    ;
+ $79B5 RET           ;

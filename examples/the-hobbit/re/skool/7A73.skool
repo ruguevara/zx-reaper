@@ -1,0 +1,26 @@
+; Routine at 7A73
+;
+; Used by the routine at #R$79B6.
+c$7A73 PUSH IY        ;
+ $7A75 PUSH DE        ;
+ $7A76 PUSH HL        ;
+*$7A77 LD DE,$FFE8    ;
+ $7A7A ADD IY,DE      ;
+ $7A7C BIT 6,(IY+$01) ;
+ $7A80 JR Z,$7A9C     ;
+ $7A82 LD IX,$C060    ;
+*$7A86 PUSH IY        ;
+ $7A88 POP HL         ;
+ $7A89 LD DE,$0008    ;
+ $7A8C ADD HL,DE      ;
+ $7A8D CALL $9DD9     ;
+ $7A90 CP $FF         ;
+ $7A92 JR Z,$7A77     ;
+ $7A94 LD HL,$B6E8    ;
+ $7A97 CP (HL)        ;
+ $7A98 JR NZ,$7A86    ;
+ $7A9A OR $01         ;
+*$7A9C POP HL         ;
+ $7A9D POP DE         ;
+ $7A9E POP IY         ;
+ $7AA0 RET            ;

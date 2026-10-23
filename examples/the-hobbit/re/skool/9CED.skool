@@ -1,0 +1,15 @@
+; Routine at 9CED
+;
+; Used by the routine at #R$939E.
+c$9CED PUSH BC       ;
+ $9CEE LD B,$00      ;
+; This entry point is used by the routine at #R$9CE8.
+*$9CF0 PUSH IX       ;
+ $9CF2 PUSH IY       ;
+ $9CF4 LD C,$00      ;
+ $9CF6 CALL $9D00    ;
+ $9CF9 LD A,C        ;
+ $9CFA POP IY        ;
+ $9CFC POP IX        ;
+ $9CFE POP BC        ;
+ $9CFF RET           ;

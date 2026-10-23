@@ -1,0 +1,12 @@
+; Routine at A1E3
+;
+; Used by the routines at #R$A525, #R$A640, #R$A657, #R$A8D2 and #R$A9BD.
+c$A1E3 PUSH HL       ;
+ $A1E4 LD HL,$B009   ;
+ $A1E7 CALL $72DD    ;
+ $A1EA POP HL        ;
+ $A1EB LD A,$01      ;
+ $A1ED LD ($B704),A  ;
+ $A1F0 CALL $72DD    ;
+ $A1F3 LD HL,$B00F   ;
+ $A1F6 JP $72DD      ;

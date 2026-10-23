@@ -1,0 +1,16 @@
+; Routine at A657
+c$A657 CALL $9D44    ;
+ $A65A LD A,$08      ;
+ $A65C CALL $9C9F    ;
+ $A65F CP $05        ;
+ $A661 RET NC        ;
+ $A662 CP $03        ;
+ $A664 LD HL,$B0F4   ;
+ $A667 JP NC,$97F4   ;
+ $A66A LD HL,$B0D5   ;
+ $A66D JP Z,$A1E3    ;
+ $A670 LD HL,$B0E5   ;
+ $A673 CP $00        ;
+ $A675 JP Z,$97F4    ;
+ $A678 LD HL,$B05B   ;
+ $A67B JP $A1E3      ;

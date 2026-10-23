@@ -1,0 +1,12 @@
+; Routine at 9B02
+;
+; Used by the routines at #R$980E and #R$9BDD.
+c$9B02 LD A,$00      ;
+ $9B04 CALL $9F82    ;
+ $9B07 LD ($B6F5),A  ;
+ $9B0A CALL $95ED    ;
+ $9B0D LD A,$00      ;
+ $9B0F JR NC,$9B12   ;
+ $9B11 INC A         ;
+*$9B12 LD ($980C),A  ;
+ $9B15 RET           ;

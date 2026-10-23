@@ -1,0 +1,5 @@
+; Data block at 837F
+b$837F DEFB $B7,$FD,$E1,$3A,$50,$82,$32,$06
+ $8387 DEFB $B7,$C1,$D1,$3A,$4F,$82,$57,$C3
+ $838F DEFB $B4,$75,$CD,$F5,$83,$AF,$DB,$FE
+ $8397 DEFB $E6,$1F,$FE,$1F,$28,$F7,$C3

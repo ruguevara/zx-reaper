@@ -1,0 +1,8 @@
+; Routine at 9E34
+;
+; Used by the routines at #R$95ED, #R$9DD9 and #R$9FC7.
+c$9E34 PUSH IX       ;
+ $9E36 LD IX,($B70C) ;
+ $9E3A CALL $9E40    ;
+ $9E3D POP IX        ;
+ $9E3F RET           ;

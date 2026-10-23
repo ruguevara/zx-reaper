@@ -1,0 +1,36 @@
+; Routine at 7960
+;
+; Used by the routine at #R$6C00.
+c$7960 XOR A          ;
+ $7961 LD ($B71C),A   ;
+ $7964 LD IY,$B9C8    ;
+ $7968 LD HL,$B71A    ;
+ $796B CP (HL)        ;
+ $796C LD (HL),A      ;
+ $796D JP NZ,$7994    ;
+*$7970 CALL $79B6     ;
+ $7973 JR NZ,$797A    ;
+ $7975 XOR A          ;
+ $7976 LD ($B705),A   ;
+ $7979 RET            ;
+*$797A CALL $7AED     ;
+ $797D JP Z,$7DF5     ;
+ $7980 LD A,$01       ;
+ $7982 LD ($B6FA),A   ;
+ $7985 CALL $712B     ;
+ $7988 CALL $950F     ;
+; This entry point is used by the routine at #R$7B9E.
+*$798B CALL $96B3     ;
+; This entry point is used by the routine at #R$7DF5.
+*$798E LD A,($B71C)   ;
+ $7991 AND A          ;
+ $7992 JR NZ,$7970    ;
+*$7994 LD A,($B706)   ;
+ $7997 DEC A          ;
+ $7998 LD ($B706),A   ;
+ $799B RET Z          ;
+ $799C LD BC,$FFE8    ;
+*$799F ADD IY,BC      ;
+ $79A1 BIT 6,(IY+$01) ;
+ $79A5 JR NZ,$799F    ;
+ $79A7 JR $7970       ;

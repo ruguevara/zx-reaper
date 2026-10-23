@@ -1,0 +1,8 @@
+; Routine at 813A
+;
+; Used by the routines at #R$8071 and #R$8151.
+c$813A DEC E         ;
+ $813B BIT 7,E       ;
+ $813D JR Z,$8135    ;
+ $813F INC E         ;
+ $8140 RET           ;

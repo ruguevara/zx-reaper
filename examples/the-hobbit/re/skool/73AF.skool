@@ -1,0 +1,8 @@
+; Routine at 73AF
+c$73AF LD A,$01      ;
+ $73B1 LD ($B703),A  ;
+; This entry point is used by the routine at #R$712B.
+*$73B4 LD A,($B6FE)  ;
+ $73B7 AND A         ;
+ $73B8 LD A,($B6E8)  ;
+ $73BB JR $73CE      ;

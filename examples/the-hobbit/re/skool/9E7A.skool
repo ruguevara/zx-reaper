@@ -1,0 +1,16 @@
+; Routine at 9E7A
+;
+; Used by the routines at #R$95ED and #R$9E40.
+c$9E7A PUSH IX       ;
+*$9E7C LD A,(IX+$01) ;
+ $9E7F CP $FF        ;
+ $9E81 JR Z,$9E92    ;
+ $9E83 EX AF,AF'     ;
+ $9E84 LD A,(IX+$01) ;
+ $9E87 CALL $9BCA    ;
+ $9E8A LD A,(IX+$07) ;
+ $9E8D AND $28       ;
+ $9E8F JR NZ,$9E7C   ;
+ $9E91 EX AF,AF'     ;
+*$9E92 POP IX        ;
+ $9E94 RET           ;

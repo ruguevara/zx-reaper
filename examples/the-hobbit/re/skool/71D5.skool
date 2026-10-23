@@ -1,0 +1,11 @@
+; Routine at 71D5
+;
+; Used by the routines at #R$73C7 and #R$7B63.
+c$71D5 PUSH IX       ;
+ $71D7 CALL $9BB1    ;
+ $71DA PUSH IX       ;
+ $71DC POP HL        ;
+ $71DD INC HL        ;
+ $71DE INC HL        ;
+ $71DF POP IX        ;
+ $71E1 RET           ;

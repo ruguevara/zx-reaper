@@ -1,0 +1,2 @@
+; Message at B370
+t$B370 DEFM " RESTART PROGRAM"

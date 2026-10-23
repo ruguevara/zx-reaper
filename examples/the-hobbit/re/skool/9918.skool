@@ -1,0 +1,11 @@
+; Routine at 9918
+;
+; Used by the routines at #R$9928 and #R$9974.
+c$9918 ADD HL,DE      ;
+ $9919 BIT 4,(IX+$00) ;
+ $991D JR Z,$9921     ;
+ $991F INC HL         ;
+ $9920 INC HL         ;
+*$9921 LD (IY+$02),L  ;
+ $9924 LD (IY+$03),H  ;
+ $9927 RET            ;

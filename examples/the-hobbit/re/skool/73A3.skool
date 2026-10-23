@@ -1,0 +1,8 @@
+; Routine at 73A3
+c$73A3 XOR A         ;
+ $73A4 LD ($B703),A  ;
+; This entry point is used by the routine at #R$712B.
+*$73A7 LD A,($B6EA)  ;
+ $73AA CALL $7488    ;
+ $73AD XOR A         ;
+ $73AE RET           ;

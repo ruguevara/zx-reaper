@@ -1,0 +1,3 @@
+; Data block at 7D74
+b$7D74 DEFB $32,$1A,$B7,$FD,$E5,$E1,$11,$C8
+ $7D7C DEFB $B9,$01,$18,$00,$ED,$B0,$C9

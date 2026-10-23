@@ -1,0 +1,2 @@
+; Data block at B340
+b$B340 DEFB $EA,$5D,$8B,$17

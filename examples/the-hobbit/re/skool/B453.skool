@@ -1,0 +1,2 @@
+; Data block at B453
+b$B453 DEFB $15,$7F,$89,$7E

@@ -1,0 +1,23 @@
+; Routine at 7CCB
+;
+; Used by the routine at #R$7A14.
+c$7CCB PUSH IY       ;
+ $7CCD LD IX,($794E) ;
+ $7CD1 LD A,($B6FE)  ;
+ $7CD4 DEC A         ;
+ $7CD5 JR Z,$7CF1    ;
+ $7CD7 LD IY,$9DD9   ;
+ $7CDB LD A,($B71E)  ;
+ $7CDE RRCA          ;
+ $7CDF RRCA          ;
+ $7CE0 AND $03       ;
+ $7CE2 LD ($B710),A  ;
+ $7CE5 CALL $7CFC    ;
+ $7CE8 CP $FF        ;
+*$7CEA LD ($794E),IX ;
+ $7CEE POP IY        ;
+ $7CF0 RET           ;
+*$7CF1 LD IY,$9EA0   ;
+ $7CF5 CALL $7CFC    ;
+ $7CF8 CP $FF        ;
+ $7CFA JR $7CEA      ;

@@ -1,0 +1,14 @@
+; Routine at 9B93
+;
+; Used by the routines at #R$9BA9, #R$9C41, #R$9DD9, #R$9F08 and #R$9F2D.
+c$9B93 EXX           ;
+ $9B94 LD DE,$0003   ;
+ $9B97 ADD IX,DE     ;
+ $9B99 LD D,(IX+$02) ;
+ $9B9C LD E,(IX+$01) ;
+ $9B9F PUSH DE       ;
+ $9BA0 POP IY        ;
+ $9BA2 LD A,(IX+$00) ;
+ $9BA5 CP $FF        ;
+ $9BA7 EXX           ;
+ $9BA8 RET           ;

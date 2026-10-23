@@ -1,0 +1,2 @@
+; Data block at B36D
+b$B36D DEFB $83,$A5,$7B

@@ -1,0 +1,2 @@
+; Data block at AD96
+b$AD96 DEFB $89,$C5,$78,$8B,$DE

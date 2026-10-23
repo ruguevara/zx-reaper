@@ -1,0 +1,17 @@
+; Routine at 9FAF
+;
+; Used by the routines at #R$8C4B, #R$910E and #R$9F94.
+c$9FAF PUSH IY       ;
+ $9FB1 PUSH DE       ;
+ $9FB2 PUSH BC       ;
+ $9FB3 LD C,$00      ;
+ $9FB5 LD D,$04      ;
+ $9FB7 CALL $9FC7    ;
+ $9FBA SUB A         ;
+ $9FBB CP C          ;
+ $9FBC LD HL,$B33B   ;
+ $9FBF CALL Z,$72DD  ;
+ $9FC2 POP BC        ;
+ $9FC3 POP DE        ;
+ $9FC4 POP IY        ;
+ $9FC6 RET           ;

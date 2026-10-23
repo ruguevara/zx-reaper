@@ -1,0 +1,38 @@
+; Routine at 864A
+;
+; Used by the routine at #R$85B7.
+c$864A PUSH HL       ;
+ $864B PUSH DE       ;
+ $864C PUSH BC       ;
+ $864D PUSH AF       ;
+ $864E LD HL,$50C0   ;
+ $8651 LD DE,$50E0   ;
+ $8654 LD A,$05      ;
+*$8656 PUSH HL       ;
+ $8657 PUSH DE       ;
+ $8658 LD B,$08      ;
+*$865A PUSH HL       ;
+ $865B PUSH DE       ;
+ $865C PUSH BC       ;
+ $865D LD BC,$0020   ;
+ $8660 LDIR          ;
+ $8662 POP BC        ;
+ $8663 POP DE        ;
+ $8664 POP HL        ;
+ $8665 INC H         ;
+ $8666 INC D         ;
+ $8667 DJNZ $865A    ;
+ $8669 POP DE        ;
+ $866A POP HL        ;
+ $866B LD BC,$FFE0   ;
+ $866E ADD HL,BC     ;
+ $866F EX DE,HL      ;
+ $8670 ADD HL,BC     ;
+ $8671 EX DE,HL      ;
+ $8672 DEC A         ;
+ $8673 JR NZ,$8656   ;
+ $8675 POP AF        ;
+ $8676 POP BC        ;
+ $8677 POP DE        ;
+ $8678 POP HL        ;
+ $8679 RET           ;

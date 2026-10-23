@@ -1,0 +1,62 @@
+; Routine at 72D3
+;
+; Used by the routine at #R$7B9E.
+c$72D3 LD A,($B71B)  ;
+ $72D6 AND A         ;
+ $72D7 JR Z,$72DD    ;
+ $72D9 XOR A         ;
+ $72DA LD ($B6FA),A  ;
+; This entry point is used by the routines at #R$6C00, #R$72CE, #R$792F,
+; #R$8C4B, #R$8D9D, #R$8FD6, #R$939E, #R$950F, #R$965B, #R$9686, #R$9728,
+; #R$97F4, #R$980E, #R$9ACD, #R$9F94, #R$9FAF, #R$A050, #R$A09D, #R$A0C8,
+; #R$A138, #R$A1E3 and #R$A9D6.
+*$72DD LD ($70DD),DE ;
+ $72E1 LD ($70E0),IX ;
+ $72E5 LD ($70DC),A  ;
+ $72E8 LD A,($B6FA)  ;
+ $72EB AND A         ;
+ $72EC JR NZ,$72F1   ;
+ $72EE LD ($B6FB),A  ;
+*$72F1 PUSH HL       ;
+ $72F2 POP IX        ;
+*$72F4 LD A,(IX+$00) ;
+ $72F7 BIT 7,A       ;
+ $72F9 JR Z,$7318    ;
+ $72FB AND $7F       ;
+ $72FD LD D,A        ;
+ $72FE LD E,(IX+$01) ;
+ $7301 INC IX        ;
+ $7303 AND $F0       ;
+ $7305 CP $30        ;
+ $7307 JR Z,$7348    ;
+ $7309 CP $20        ;
+ $730B JR Z,$7348    ;
+ $730D CP $60        ;
+ $730F JR Z,$7348    ;
+; This entry point is used by the routine at #R$7493.
+*$7311 CALL $74C1    ;
+*$7314 INC IX        ;
+ $7316 JR $72F4      ;
+*$7318 CP $20        ;
+ $731A JR C,$7326    ;
+ $731C CP $60        ;
+ $731E JP NC,$7493   ;
+ $7321 CALL $72C3    ;
+ $7324 JR $7314      ;
+*$7326 PUSH DE       ;
+ $7327 LD E,A        ;
+ $7328 LD D,$00      ;
+ $732A LD HL,$7295   ;
+ $732D ADD HL,DE     ;
+ $732E ADD HL,DE     ;
+ $732F LD E,(HL)     ;
+ $7330 INC HL        ;
+ $7331 LD D,(HL)     ;
+ $7332 EX DE,HL      ;
+ $7333 POP DE        ;
+ $7334 CP $14        ;
+ $7336 JR NC,$733F   ;
+ $7338 CALL $733F    ;
+ $733B JR Z,$7314    ;
+ $733D JR $7311      ;
+*$733F JP (HL)       ;

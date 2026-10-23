@@ -1,0 +1,21 @@
+; Routine at 9D97
+;
+; Used by the routines at #R$910E and #R$A050.
+c$9D97 PUSH IX        ;
+ $9D99 PUSH IY        ;
+ $9D9B PUSH BC        ;
+ $9D9C LD B,$00       ;
+ $9D9E LD IX,$C060    ;
+*$9DA2 CALL $9BA9     ;
+ $9DA5 JR Z,$9DB6     ;
+ $9DA7 CP (IY+$01)    ;
+ $9DAA JR NZ,$9DA2    ;
+ $9DAC BIT 7,(IY+$07) ;
+ $9DB0 JR Z,$9DA2     ;
+ $9DB2 INC B          ;
+ $9DB3 JP $9DA2       ;
+*$9DB6 LD A,B         ;
+ $9DB7 POP BC         ;
+ $9DB8 POP IY         ;
+ $9DBA POP IX         ;
+ $9DBC RET            ;

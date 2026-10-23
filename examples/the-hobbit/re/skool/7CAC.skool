@@ -1,0 +1,22 @@
+; Routine at 7CAC
+;
+; Used by the routine at #R$7B9E.
+c$7CAC XOR A         ;
+ $7CAD CP B          ;
+ $7CAE RET Z         ;
+ $7CAF LD D,$00      ;
+ $7CB1 PUSH IY       ;
+ $7CB3 ADD IY,DE     ;
+ $7CB5 LD A,(IY+$00) ;
+ $7CB8 LD (HL),A     ;
+ $7CB9 INC HL        ;
+ $7CBA LD A,(IY+$01) ;
+ $7CBD LD (HL),A     ;
+ $7CBE DEC HL        ;
+ $7CBF OR (IY+$00)   ;
+ $7CC2 POP IY        ;
+ $7CC4 RET Z         ;
+ $7CC5 DEC B         ;
+ $7CC6 INC HL        ;
+ $7CC7 INC HL        ;
+ $7CC8 RET           ;

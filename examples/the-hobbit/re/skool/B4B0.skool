@@ -1,0 +1,2 @@
+; Data block at B4B0
+b$B4B0 DEFB $7B,$60,$86,$AB,$7E

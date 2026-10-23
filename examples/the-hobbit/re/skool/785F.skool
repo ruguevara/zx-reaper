@@ -1,0 +1,6 @@
+; Routine at 785F
+;
+; Used by the routines at #R$7585 and #R$7731.
+c$785F XOR A         ;
+ $7860 LD ($B719),A  ;
+ $7863 RET           ;

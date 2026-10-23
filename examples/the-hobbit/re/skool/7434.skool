@@ -1,0 +1,9 @@
+; Routine at 7434
+;
+; Used by the routines at #R$7367 and #R$73C7.
+c$7434 PUSH IY       ;
+ $7436 PUSH HL       ;
+ $7437 POP IY        ;
+ $7439 CALL $9ED6    ;
+ $743C POP IY        ;
+ $743E RET           ;

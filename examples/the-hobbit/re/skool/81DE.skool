@@ -1,0 +1,38 @@
+; Routine at 81DE
+;
+; Used by the routines at #R$80EE and #R$81B5.
+c$81DE LD A,$7F      ;
+ $81E0 SUB E         ;
+ $81E1 LD L,A        ;
+ $81E2 AND $07       ;
+ $81E4 OR $40        ;
+ $81E6 LD H,A        ;
+ $81E7 LD A,L        ;
+ $81E8 AND $C0       ;
+ $81EA RRCA          ;
+ $81EB RRCA          ;
+ $81EC RRCA          ;
+ $81ED OR H          ;
+ $81EE LD H,A        ;
+ $81EF LD A,L        ;
+ $81F0 AND $38       ;
+ $81F2 RLCA          ;
+ $81F3 RLCA          ;
+ $81F4 LD L,A        ;
+ $81F5 LD A,D        ;
+ $81F6 RRCA          ;
+ $81F7 RRCA          ;
+ $81F8 RRCA          ;
+ $81F9 AND $1F       ;
+ $81FB OR L          ;
+ $81FC LD L,A        ;
+ $81FD LD A,D        ;
+ $81FE AND $07       ;
+ $8200 PUSH BC       ;
+ $8201 LD B,A        ;
+ $8202 INC B         ;
+ $8203 LD A,$01      ;
+*$8205 RRC A         ;
+ $8207 DJNZ $8205    ;
+ $8209 POP BC        ;
+ $820A RET           ;

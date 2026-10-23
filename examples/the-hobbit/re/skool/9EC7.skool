@@ -1,0 +1,11 @@
+; Routine at 9EC7
+;
+; Used by the routine at #R$9FC7.
+c$9EC7 PUSH IY       ;
+ $9EC9 PUSH DE       ;
+ $9ECA LD DE,$0008   ;
+ $9ECD ADD IY,DE     ;
+ $9ECF CALL $9ED6    ;
+ $9ED2 POP DE        ;
+ $9ED3 POP IY        ;
+ $9ED5 RET           ;

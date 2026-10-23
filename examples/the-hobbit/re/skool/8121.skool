@@ -1,0 +1,11 @@
+; Routine at 8121
+;
+; Used by the routine at #R$7FA7.
+c$8121 PUSH AF       ;
+ $8122 INC HL        ;
+ $8123 LD A,H        ;
+ $8124 CP $5A        ;
+ $8126 JR NZ,$8129   ;
+ $8128 DEC HL        ;
+*$8129 POP AF        ;
+ $812A RET           ;

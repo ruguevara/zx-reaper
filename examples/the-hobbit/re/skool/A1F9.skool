@@ -1,0 +1,10 @@
+; Routine at A1F9
+;
+; Used by the routine at #R$910E.
+c$A1F9 LD IX,($B708)  ;
+ $A1FD BIT 0,(IX+$07) ;
+ $A201 LD A,$80       ;
+ $A203 RET NZ         ;
+ $A204 BIT 5,(IX+$07) ;
+ $A208 LD A,$85       ;
+ $A20A RET            ;

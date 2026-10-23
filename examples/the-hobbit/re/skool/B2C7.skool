@@ -1,0 +1,3 @@
+; Data block at B2C7
+b$B2C7 DEFB $CA,$3A,$2C,$8B,$98,$63,$8A,$1F
+ $B2CF DEFB $61,$8B

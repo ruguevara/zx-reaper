@@ -1,0 +1,30 @@
+; Routine at 9D00
+;
+; Used by the routine at #R$9CED.
+c$9D00 PUSH IX        ;
+ $9D02 LD IX,$C063    ;
+*$9D06 CALL $9BA9     ;
+ $9D09 JR Z,$9D2F     ;
+ $9D0B CP (IY+$01)    ;
+ $9D0E JR NZ,$9D06    ;
+ $9D10 PUSH AF        ;
+ $9D11 SUB A          ;
+ $9D12 CP B           ;
+ $9D13 LD A,C         ;
+ $9D14 JR Z,$9D1F     ;
+ $9D16 ADD A,(IY+$02) ;
+ $9D19 JP PE,$9D32    ;
+ $9D1C LD C,A         ;
+ $9D1D JR $9D2C       ;
+*$9D1F ADD A,(IY+$03) ;
+ $9D22 JP PE,$9D32    ;
+ $9D25 LD C,A         ;
+ $9D26 LD A,(IX+$00)  ;
+ $9D29 CALL $9D00     ;
+*$9D2C POP AF         ;
+ $9D2D JR $9D06       ;
+*$9D2F POP IX         ;
+ $9D31 RET            ;
+*$9D32 POP AF         ;
+ $9D33 LD C,$FF       ;
+ $9D35 JR $9D2F       ;

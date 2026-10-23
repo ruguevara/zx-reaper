@@ -1,0 +1,11 @@
+; Routine at 6E7A
+;
+; Used by the routine at #R$6DD6.
+c$6E7A LD A,($B71A)  ;
+ $6E7D AND A         ;
+ $6E7E JP NZ,$6DF5   ;
+ $6E81 LD A,$08      ;
+ $6E83 CALL $858B    ;
+ $6E86 CALL $858B    ;
+ $6E89 XOR A         ;
+ $6E8A RET           ;

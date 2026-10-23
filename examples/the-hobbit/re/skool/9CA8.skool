@@ -1,0 +1,34 @@
+; Routine at 9CA8
+;
+; Used by the routine at #R$9C9F.
+c$9CA8 PUSH IX        ;
+ $9CAA PUSH BC        ;
+ $9CAB LD C,A         ;
+ $9CAC SLA A          ;
+ $9CAE JR NC,$9CB2    ;
+ $9CB0 LD A,$FF       ;
+*$9CB2 LD B,A         ;
+*$9CB3 LD IX,$B712    ;
+ $9CB7 INC (IX+$01)   ;
+ $9CBA JR NZ,$9CBF    ;
+ $9CBC INC (IX+$00)   ;
+*$9CBF LD IX,($B712)  ;
+ $9CC3 LD A,($B70E)   ;
+ $9CC6 ADC A,(IX+$00) ;
+ $9CC9 ADD IX,DE      ;
+ $9CCB XOR (IX+$01)   ;
+ $9CCE PUSH HL        ;
+ $9CCF LD HL,$B70E    ;
+ $9CD2 CP (HL)        ;
+ $9CD3 POP HL         ;
+ $9CD4 JR Z,$9CB3     ;
+ $9CD6 LD ($B70E),A   ;
+*$9CD9 CP B           ;
+ $9CDA JR C,$9CE3     ;
+ $9CDC JR Z,$9CE3     ;
+ $9CDE SRL A          ;
+ $9CE0 JP $9CD9       ;
+*$9CE3 SUB C          ;
+ $9CE4 POP BC         ;
+ $9CE5 POP IX         ;
+ $9CE7 RET            ;

@@ -1,0 +1,12 @@
+; Routine at 7EFF
+;
+; Used by the routines at #R$7F10 and #R$7F1A.
+c$7EFF LD HL,$B738   ;
+ $7F02 LD DE,$0019   ;
+ $7F05 LD A,($B6EA)  ;
+ $7F08 LD B,$08      ;
+*$7F0A CP (HL)       ;
+ $7F0B RET Z         ;
+ $7F0C ADD HL,DE     ;
+ $7F0D DJNZ $7F0A    ;
+ $7F0F RET           ;

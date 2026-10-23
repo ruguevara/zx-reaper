@@ -1,0 +1,15 @@
+; Routine at 8106
+;
+; Used by the routine at #R$7FA7.
+c$8106 PUSH AF       ;
+ $8107 PUSH DE       ;
+ $8108 LD DE,$0020   ;
+ $810B ADD HL,DE     ;
+ $810C LD A,H        ;
+ $810D CP $5A        ;
+ $810F JR NZ,$8113   ;
+ $8111 AND A         ;
+ $8112 SBC HL,DE     ;
+ $8114 POP DE        ;
+ $8115 POP AF        ;
+ $8116 RET           ;

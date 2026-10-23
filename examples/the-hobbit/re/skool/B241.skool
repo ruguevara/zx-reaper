@@ -1,0 +1,2 @@
+; Data block at B241
+b$B241 DEFB $F0,$EB,$8B,$E7,$88,$8B

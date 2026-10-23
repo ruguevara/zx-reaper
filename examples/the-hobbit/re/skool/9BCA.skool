@@ -1,0 +1,12 @@
+; Routine at 9BCA
+;
+; Used by the routines at #R$71E2, #R$8C4B, #R$8D9D, #R$8E85, #R$94D6, #R$950F,
+; #R$9728, #R$9ACD, #R$9B16, #R$9C8A, #R$9E7A, #R$9F82, #R$A050 and #R$A0C8.
+c$9BCA LD IX,$C063   ;
+ $9BCE CALL $9DBD    ;
+ $9BD1 PUSH HL       ;
+ $9BD2 LD L,(IX+$01) ;
+ $9BD5 LD H,(IX+$02) ;
+ $9BD8 EX (SP),HL    ;
+ $9BD9 POP IX        ;
+ $9BDB RET           ;

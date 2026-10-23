@@ -1,0 +1,18 @@
+; Routine at 9F08
+;
+; Used by the routines at #R$8D9D and #R$8FAD.
+c$9F08 PUSH BC       ;
+ $9F09 PUSH IY       ;
+ $9F0B LD B,A        ;
+ $9F0C CALL $9E95    ;
+*$9F0F CALL $9B93    ;
+ $9F12 JR Z,$9F21    ;
+ $9F14 LD A,(IX+$02) ;
+ $9F17 AND A         ;
+ $9F18 JR Z,$9F0F    ;
+ $9F1A LD A,(IX+$00) ;
+ $9F1D CP B          ;
+ $9F1E JP NZ,$9F0F   ;
+*$9F21 POP IY        ;
+ $9F23 POP BC        ;
+ $9F24 RET           ;

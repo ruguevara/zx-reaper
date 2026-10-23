@@ -1,0 +1,2 @@
+; Data block at 9F25
+b$9F25 DEFB $3A,$E8,$B6,$F5,$3E,$01,$18,$03

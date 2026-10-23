@@ -1,0 +1,7 @@
+; Data block at A83E
+b$A83E DEFB $82,$AF,$18,$29,$3E,$12,$32,$1C
+ $A846 DEFB $C6,$21,$8B,$AF,$18,$1F,$21,$76
+ $A84E DEFB $AF,$CD,$6E,$A8,$38,$17,$DD,$7E
+ $A856 DEFB $02,$DD,$2A,$08,$B7,$DD,$77,$10
+ $A85E DEFB $DD,$36,$01,$FF,$3A,$E8,$B6,$CD
+ $A866 DEFB $DD,$9B,$21,$6D,$AF,$C3,$DD

@@ -1,0 +1,15 @@
+; Routine at 783E
+;
+; Used by the routine at #R$7850.
+c$783E PUSH BC       ;
+ $783F PUSH IY       ;
+ $7841 POP HL        ;
+ $7842 ADD HL,DE     ;
+ $7843 EX DE,HL      ;
+ $7844 LD HL,$757B   ;
+ $7847 LD BC,$000A   ;
+ $784A LDIR          ;
+ $784C POP BC        ;
+ $784D POP DE        ;
+ $784E XOR A         ;
+ $784F RET           ;

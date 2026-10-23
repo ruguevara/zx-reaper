@@ -1,0 +1,8 @@
+; Routine at 7ACC
+;
+; Used by the routines at #R$7AA1 and #R$7ABA.
+c$7ACC LD IX,$C063   ;
+ $7AD0 AND $03       ;
+ $7AD2 RET Z         ;
+ $7AD3 LD IX,$C060   ;
+ $7AD7 RET           ;

@@ -1,0 +1,28 @@
+; Routine at 6E4F
+;
+; Used by the routine at #R$6DD6.
+c$6E4F CP $09        ;
+ $6E51 JR Z,$6E72    ;
+ $6E53 CP $08        ;
+ $6E55 JR Z,$6E76    ;
+ $6E57 CP $0A        ;
+ $6E59 JR Z,$6E6E    ;
+ $6E5B CP $5B        ;
+ $6E5D RET NZ        ;
+ $6E5E LD A,$4E      ;
+*$6E60 LD (HL),A     ;
+ $6E61 INC HL        ;
+ $6E62 CALL $858B    ;
+ $6E65 DEC B         ;
+ $6E66 LD A,$0D      ;
+ $6E68 LD (HL),A     ;
+ $6E69 INC HL        ;
+ $6E6A DEC B         ;
+ $6E6B OR $01        ;
+ $6E6D RET           ;
+*$6E6E LD A,$53      ;
+ $6E70 JR $6E60      ;
+*$6E72 LD A,$45      ;
+ $6E74 JR $6E60      ;
+*$6E76 LD A,$57      ;
+ $6E78 JR $6E60      ;

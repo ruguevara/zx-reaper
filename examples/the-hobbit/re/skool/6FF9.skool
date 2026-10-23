@@ -1,0 +1,3 @@
+; Message at 6FF9
+t$6FF9 DEFM "                                                                 "
+ $703A DEFM "                                                               "

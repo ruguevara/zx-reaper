@@ -1,0 +1,21 @@
+; Routine at 722E
+;
+; Used by the routine at #R$71F3.
+c$722E PUSH HL       ;
+ $722F LD A,(HL)     ;
+ $7230 INC HL        ;
+ $7231 OR (HL)       ;
+ $7232 JR Z,$7241    ;
+ $7234 LD A,(IY+$01) ;
+ $7237 XOR (HL)      ;
+ $7238 AND $0F       ;
+ $723A JR NZ,$7241   ;
+ $723C DEC HL        ;
+ $723D LD A,(HL)     ;
+ $723E CP (IY+$00)   ;
+*$7241 POP HL        ;
+ $7242 INC HL        ;
+ $7243 INC HL        ;
+ $7244 INC IY        ;
+ $7246 INC IY        ;
+ $7248 RET           ;

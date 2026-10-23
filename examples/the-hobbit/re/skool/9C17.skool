@@ -1,0 +1,22 @@
+; Routine at 9C17
+;
+; Used by the routine at #R$9BDD.
+c$9C17 PUSH IY       ;
+ $9C19 PUSH IX       ;
+ $9C1B LD IX,$C060   ;
+*$9C1F CALL $9BA9    ;
+ $9C22 JR Z,$9C3C    ;
+ $9C24 CP (IY+$01)   ;
+ $9C27 JR NZ,$9C1F   ;
+ $9C29 LD (IY+$10),B ;
+ $9C2C PUSH AF       ;
+ $9C2D LD A,(IX+$00) ;
+ $9C30 AND A         ;
+ $9C31 JR NZ,$9C36   ;
+ $9C33 LD ($9BDC),A  ;
+*$9C36 CALL $9C17    ;
+ $9C39 POP AF        ;
+ $9C3A JR $9C1F      ;
+*$9C3C POP IX        ;
+ $9C3E POP IY        ;
+ $9C40 RET           ;

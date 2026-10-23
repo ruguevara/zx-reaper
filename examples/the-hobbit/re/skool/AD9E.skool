@@ -1,0 +1,3 @@
+; Data block at AD9E
+b$AD9E DEFB $16,$7D,$20,$3F,$14,$0D,$F7,$A8
+ $ADA6 DEFB $01,$2E,$0D,$FB,$87,$8A

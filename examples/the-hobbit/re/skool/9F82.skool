@@ -1,0 +1,12 @@
+; Routine at 9F82
+;
+; Used by the routines at #R$980E, #R$99C6, #R$9ACD and #R$9B02.
+c$9F82 CP $FF        ;
+ $9F84 RET Z         ;
+ $9F85 CALL $9BCA    ;
+ $9F88 LD A,$01      ;
+ $9F8A CP (IX+$00)   ;
+ $9F8D LD A,$FF      ;
+ $9F8F RET NZ        ;
+ $9F90 LD A,(IX+$10) ;
+ $9F93 RET           ;

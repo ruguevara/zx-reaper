@@ -1,0 +1,15 @@
+; Routine at 7493
+;
+; Used by the routine at #R$72D3.
+c$7493 SUB $60       ;
+ $7495 LD E,A        ;
+ $7496 LD D,$00      ;
+ $7498 LD HL,$AD3D   ;
+ $749B ADD HL,DE     ;
+ $749C ADD HL,DE     ;
+ $749D LD E,(HL)     ;
+ $749E INC HL        ;
+ $749F LD A,(HL)     ;
+ $74A0 ADD A,$50     ;
+ $74A2 LD D,A        ;
+ $74A3 JP $7311      ;

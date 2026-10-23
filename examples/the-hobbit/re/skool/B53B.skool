@@ -1,0 +1,2 @@
+; Data block at B53B
+b$B53B DEFB $7C,$B4,$0F,$87,$56,$82,$8F

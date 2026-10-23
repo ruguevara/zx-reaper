@@ -1,0 +1,33 @@
+; Routine at 9974
+;
+; Used by the routine at #R$980E.
+c$9974 LD DE,$0002    ;
+ $9977 CALL $9918     ;
+ $997A LD A,(IX+$01)  ;
+ $997D CP $FF         ;
+ $997F JR Z,$9994     ;
+ $9981 LD ($B6E7),A   ;
+ $9984 LD A,$FF       ;
+ $9986 LD ($B6E8),A   ;
+ $9989 LD ($B6E9),A   ;
+ $998C CALL $99C6     ;
+ $998F JR Z,$99AA     ;
+ $9991 JP $9901       ;
+*$9994 BIT 4,(IX+$00) ;
+ $9998 JP Z,$9901     ;
+ $999B LD L,(IX+$02)  ;
+ $999E LD H,(IX+$03)  ;
+ $99A1 LD (IY+$02),L  ;
+ $99A4 LD (IY+$03),H  ;
+ $99A7 JP $9901       ;
+; This entry point is used by the routine at #R$9928.
+*$99AA LD HL,$980B    ;
+ $99AD INC (HL)       ;
+ $99AE BIT 4,(IX+$00) ;
+ $99B2 JP Z,$987F     ;
+ $99B5 ADD IX,DE      ;
+ $99B7 LD H,(IX+$01)  ;
+ $99BA LD L,(IX+$00)  ;
+ $99BD LD (IY+$02),L  ;
+ $99C0 LD (IY+$03),H  ;
+ $99C3 JP $9885       ;

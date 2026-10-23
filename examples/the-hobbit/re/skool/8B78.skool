@@ -1,0 +1,9 @@
+; Routine at 8B78
+;
+; Used by the routine at #R$8B93.
+c$8B78 LD BC,$03E8   ;
+*$8B7B DEC BC        ;
+ $8B7C LD A,B        ;
+ $8B7D OR C          ;
+ $8B7E JR NZ,$8B7B   ;
+ $8B80 RET           ;

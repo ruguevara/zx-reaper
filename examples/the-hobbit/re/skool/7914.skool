@@ -1,0 +1,16 @@
+; Routine at 7914
+;
+; Used by the routine at #R$7731.
+c$7914 RES 1,E       ;
+ $7916 LD L,$00      ;
+; This entry point is used by the routines at #R$76EC and #R$7731.
+*$7918 PUSH DE       ;
+ $7919 PUSH IY       ;
+ $791B POP DE        ;
+ $791C LD H,$00      ;
+ $791E ADD HL,DE     ;
+ $791F LD (HL),C     ;
+ $7920 INC HL        ;
+ $7921 LD (HL),B     ;
+ $7922 POP DE        ;
+ $7923 RET           ;

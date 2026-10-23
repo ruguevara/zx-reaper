@@ -1,0 +1,2 @@
+; Data block at 7DDF
+b$7DDF DEFB $11,$E8,$B6,$01,$FE,$B6,$28,$17

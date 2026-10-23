@@ -1,0 +1,12 @@
+; Routine at 7367
+c$7367 XOR A         ;
+ $7368 LD ($B703),A  ;
+ $736B POP DE        ;
+ $736C POP HL        ;
+ $736D EX (SP),HL    ;
+ $736E PUSH DE       ;
+ $736F LD A,H        ;
+ $7370 OR L          ;
+ $7371 CALL NZ,$7434 ;
+ $7374 XOR A         ;
+ $7375 RET           ;

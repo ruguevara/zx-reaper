@@ -1,0 +1,9 @@
+; Routine at 95DF
+;
+; Used by the routine at #R$950F.
+c$95DF BIT 6,(IX+$07) ;
+ $95E3 RET Z          ;
+ $95E4 BIT 3,(IX+$07) ;
+ $95E8 RET NZ         ;
+ $95E9 CALL $9AA0     ;
+ $95EC RET            ;

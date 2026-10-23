@@ -1,0 +1,10 @@
+; Routine at 6E8B
+;
+; Used by the routines at #R$6DD6 and #R$7249.
+c$6E8B BIT 7,B       ;
+ $6E8D RET NZ        ;
+ $6E8E LD A,$08      ;
+ $6E90 CALL $858B    ;
+ $6E93 INC B         ;
+ $6E94 DEC HL        ;
+ $6E95 JR $6E8B      ;

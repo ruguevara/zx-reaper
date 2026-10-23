@@ -1,0 +1,3 @@
+; Data block at 6DCC
+b$6DCC DEFB $C3,$C3,$2C,$34,$10,$08,$2C,$34
+ $6DD4 DEFB $C3,$C3

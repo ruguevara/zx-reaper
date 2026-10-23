@@ -1,0 +1,4 @@
+; Data block at CF3A
+b$CF3A DEFB $40,$08,$01,$0A,$01,$08,$01,$0E
+ $CF42 DEFB $FF,$08,$00,$48,$C2,$1F,$C7,$20
+ $CF4A DEFB $C6

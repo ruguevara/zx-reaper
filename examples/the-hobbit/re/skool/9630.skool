@@ -1,0 +1,28 @@
+; Routine at 9630
+;
+; Used by the routines at #R$8C4B and #R$8D9D.
+c$9630 PUSH AF       ;
+ $9631 CALL $9BB1    ;
+ $9634 LD A,(IX+$00) ;
+ $9637 AND $0E       ;
+ $9639 LD E,A        ;
+ $963A LD D,$00      ;
+ $963C LD HL,$BA80   ;
+ $963F ADD HL,DE     ;
+ $9640 LD E,(HL)     ;
+ $9641 INC HL        ;
+ $9642 LD D,(HL)     ;
+ $9643 LD HL,$AFFD   ;
+ $9646 LD (HL),D     ;
+ $9647 INC HL        ;
+ $9648 LD (HL),E     ;
+ $9649 POP AF        ;
+ $964A LD HL,$AFFC   ;
+ $964D PUSH IX       ;
+ $964F PUSH IY       ;
+ $9651 PUSH BC       ;
+ $9652 CALL $965B    ;
+ $9655 POP BC        ;
+ $9656 POP IY        ;
+ $9658 POP IX        ;
+ $965A RET           ;

@@ -1,0 +1,10 @@
+; Routine at 8141
+;
+; Used by the routines at #R$8071 and #R$8151.
+c$8141 INC D         ;
+ $8142 RET NZ        ;
+ $8143 DEC D         ;
+ $8144 LD H,A        ;
+ $8145 XOR A         ;
+ $8146 LD A,H        ;
+ $8147 RET           ;

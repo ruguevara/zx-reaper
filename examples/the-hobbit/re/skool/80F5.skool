@@ -1,0 +1,15 @@
+; Routine at 80F5
+;
+; Used by the routine at #R$7FA7.
+c$80F5 PUSH AF       ;
+ $80F6 PUSH DE       ;
+ $80F7 LD DE,$0020   ;
+ $80FA AND A         ;
+ $80FB SBC HL,DE     ;
+ $80FD LD A,H        ;
+ $80FE CP $57        ;
+ $8100 JR NZ,$8103   ;
+ $8102 ADD HL,DE     ;
+*$8103 POP DE        ;
+ $8104 POP AF        ;
+ $8105 RET           ;

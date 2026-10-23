@@ -1,0 +1,13 @@
+; Routine at 78A5
+;
+; Used by the routines at #R$7858 and #R$788C.
+c$78A5 PUSH DE        ;
+ $78A6 LD DE,$0018    ;
+; This entry point is used by the routine at #R$789F.
+*$78A9 PUSH IY        ;
+ $78AB POP IX         ;
+*$78AD ADD IX,DE      ;
+ $78AF BIT 6,(IX+$01) ;
+ $78B3 JR NZ,$78AD    ;
+ $78B5 POP DE         ;
+ $78B6 RET            ;

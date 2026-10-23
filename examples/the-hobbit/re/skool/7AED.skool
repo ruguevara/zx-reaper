@@ -1,0 +1,7 @@
+; Routine at 7AED
+;
+; Used by the routines at #R$7960, #R$7A14, #R$7D54 and #R$7F1A.
+c$7AED CALL $950F    ;
+ $7AF0 LD A,($B6FB)  ;
+ $7AF3 AND A         ;
+ $7AF4 RET           ;

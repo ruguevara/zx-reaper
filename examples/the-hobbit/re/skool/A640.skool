@@ -1,0 +1,11 @@
+; Routine at A640
+c$A640 LD A,($B6F6)  ;
+ $A643 LD HL,$B6F5   ;
+ $A646 CP (HL)       ;
+ $A647 RET NZ        ;
+ $A648 LD A,($C122)  ;
+ $A64B BIT 7,A       ;
+ $A64D RET NZ        ;
+ $A64E CALL $9D44    ;
+ $A651 LD HL,$B0CB   ;
+ $A654 JP $A1E3      ;

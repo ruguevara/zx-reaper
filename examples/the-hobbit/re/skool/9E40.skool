@@ -1,0 +1,34 @@
+; Routine at 9E40
+;
+; Used by the routines at #R$9E25 and #R$9E34.
+c$9E40 BIT 7,(IY+$07) ;
+ $9E44 RET Z          ;
+ $9E45 PUSH IY        ;
+ $9E47 PUSH IX        ;
+ $9E49 PUSH BC        ;
+ $9E4A LD B,A         ;
+ $9E4B LD C,(IX+$10)  ;
+ $9E4E PUSH IY        ;
+ $9E50 CALL $9E7A     ;
+ $9E53 CP B           ;
+ $9E54 LD B,A         ;
+ $9E55 POP IX         ;
+ $9E57 JR Z,$9E72     ;
+ $9E59 CALL $9E7A     ;
+ $9E5C CP B           ;
+ $9E5D JR NZ,$9E6F    ;
+ $9E5F INC A          ;
+ $9E60 JR NZ,$9E72    ;
+ $9E62 LD B,(IY+$00)  ;
+ $9E65 LD A,C         ;
+*$9E66 CP (IY+$10)    ;
+ $9E69 JR Z,$9E72     ;
+ $9E6B INC IY         ;
+ $9E6D DJNZ $9E66     ;
+*$9E6F XOR A          ;
+ $9E70 JR $9E74       ;
+*$9E72 OR $01         ;
+*$9E74 POP BC         ;
+ $9E75 POP IX         ;
+ $9E77 POP IY         ;
+ $9E79 RET            ;

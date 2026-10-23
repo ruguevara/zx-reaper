@@ -1,0 +1,18 @@
+; Routine at 7F60
+;
+; Used by the routine at #R$7F1A.
+c$7F60 PUSH HL       ;
+ $7F61 PUSH DE       ;
+ $7F62 PUSH BC       ;
+ $7F63 LD HL,$B738   ;
+ $7F66 LD DE,$0019   ;
+ $7F69 LD B,$08      ;
+*$7F6B CP (HL)       ;
+ $7F6C JR NZ,$7F70   ;
+ $7F6E LD (HL),$00   ;
+*$7F70 ADD HL,DE     ;
+ $7F71 DJNZ $7F6B    ;
+ $7F73 POP BC        ;
+ $7F74 POP DE        ;
+ $7F75 POP HL        ;
+ $7F76 RET           ;

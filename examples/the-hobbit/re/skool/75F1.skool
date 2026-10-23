@@ -1,0 +1,6 @@
+; Routine at 75F1
+;
+; Used by the routines at #R$75F6, #R$7731 and #R$7924.
+c$75F1 LD A,($B71B)  ;
+ $75F4 AND A         ;
+ $75F5 RET           ;

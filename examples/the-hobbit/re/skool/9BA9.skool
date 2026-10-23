@@ -1,0 +1,9 @@
+; Routine at 9BA9
+;
+; Used by the routines at #R$9C17, #R$9D00, #R$9D97 and #R$9FC7.
+c$9BA9 PUSH BC       ;
+ $9BAA LD B,A        ;
+ $9BAB CALL $9B93    ;
+ $9BAE LD A,B        ;
+ $9BAF POP BC        ;
+ $9BB0 RET           ;

@@ -1,0 +1,7 @@
+; Data block at 7E7F
+b$7E7F DEFB $92,$7E,$32,$A1,$7E,$DD,$2A,$5E
+ $7E87 DEFB $79,$DD,$6E,$04,$DD,$66,$05,$DD
+ $7E8F DEFB $CB,$07,$7E,$20,$03,$21,$00,$00
+ $7E97 DEFB $E3,$E5,$DD,$6E,$02,$DD,$66,$03
+ $7E9F DEFB $CB,$6C,$20,$03,$21,$00,$00,$E3
+ $7EA7 DEFB $E9,$2A,$5C,$79,$E5

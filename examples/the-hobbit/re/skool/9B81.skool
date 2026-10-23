@@ -1,0 +1,14 @@
+; Routine at 9B81
+;
+; Used by the routines at #R$94D6 and #R$950F.
+c$9B81 PUSH DE       ;
+ $9B82 LD D,A        ;
+ $9B83 LD A,(IX+$00) ;
+ $9B86 ADD A,$10     ;
+ $9B88 LD E,A        ;
+ $9B89 LD A,D        ;
+ $9B8A LD D,$00      ;
+ $9B8C ADD IX,DE     ;
+ $9B8E CALL $9DBD    ;
+ $9B91 POP DE        ;
+ $9B92 RET           ;

@@ -1,0 +1,9 @@
+; Routine at 7924
+;
+; Used by the routines at #R$7809 and #R$782B.
+c$7924 CALL $75F1    ;
+ $7927 RET NZ        ;
+ $7928 POP HL        ;
+; This entry point is used by the routines at #R$76EC and #R$7731.
+*$7929 CALL $75F1    ;
+ $792C JP NZ,$75B4   ;

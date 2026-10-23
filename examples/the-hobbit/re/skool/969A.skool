@@ -1,0 +1,11 @@
+; Routine at 969A
+;
+; Used by the routine at #R$965B.
+c$969A XOR A         ;
+ $969B IN A,($FE)    ;
+ $969D AND $1F       ;
+ $969F CP $1F        ;
+ $96A1 JR Z,$969A    ;
+ $96A3 LD A,$07      ;
+ $96A5 OUT ($FE),A   ;
+ $96A7 RET           ;

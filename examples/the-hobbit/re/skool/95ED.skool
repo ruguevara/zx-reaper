@@ -1,0 +1,32 @@
+; Routine at 95ED
+;
+; Used by the routines at #R$712B, #R$820B, #R$8D9D, #R$950F and #R$9B02.
+c$95ED LD A,($B6EA)   ;
+ $95F0 AND A          ;
+ $95F1 RET NZ         ;
+ $95F2 PUSH IX        ;
+ $95F4 PUSH BC        ;
+ $95F5 LD IX,$C11B    ;
+ $95F9 CALL $9E7A     ;
+ $95FC INC A          ;
+ $95FD JR NZ,$9608    ;
+ $95FF CALL $9D37     ;
+ $9602 BIT 7,(IX+$00) ;
+ $9606 JR NZ,$9624    ;
+*$9608 PUSH IY        ;
+ $960A LD A,$0E       ;
+ $960C LD IY,$C305    ;
+ $9610 CALL $9E34     ;
+ $9613 POP IY         ;
+ $9615 JR Z,$9620     ;
+ $9617 LD A,($C30C)   ;
+ $961A XOR $F7        ;
+ $961C AND $1C        ;
+ $961E JR Z,$9628     ;
+*$9620 LD HL,$AE1F    ;
+ $9623 SCF            ;
+*$9624 POP BC         ;
+ $9625 POP IX         ;
+ $9627 RET            ;
+*$9628 AND A          ;
+ $9629 JR $9624       ;

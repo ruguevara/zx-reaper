@@ -1,0 +1,7 @@
+; Routine at 96A8
+;
+; Used by the routine at #R$8D9D.
+c$96A8 CALL $9BB1    ;
+ $96AB CALL $9689    ;
+ $96AE CALL $8583    ;
+ $96B1 JR $967F      ;

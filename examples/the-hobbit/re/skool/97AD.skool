@@ -1,0 +1,34 @@
+; Routine at 97AD
+;
+; Used by the routine at #R$6C00.
+c$97AD SUB A         ;
+ $97AE LD ($B6EA),A  ;
+ $97B1 LD ($B6F1),A  ;
+ $97B4 LD ($B6F9),A  ;
+ $97B7 LD HL,$C11B   ;
+ $97BA LD ($B70C),HL ;
+ $97BD LD A,$04      ;
+ $97BF CALL $9C9F    ;
+ $97C2 INC A         ;
+ $97C3 LD B,A        ;
+ $97C4 LD IY,$C808   ;
+ $97C8 LD DE,$0006   ;
+*$97CB ADD IY,DE     ;
+ $97CD DJNZ $97CB    ;
+ $97CF LD ($A7D1),IY ;
+ $97D3 LD L,(IY+$01) ;
+ $97D6 LD H,(IY+$02) ;
+ $97D9 LD B,$03      ;
+*$97DB LD (HL),$00   ;
+ $97DD INC HL        ;
+ $97DE DJNZ $97DB    ;
+ $97E0 LD A,$03      ;
+ $97E2 CALL $9C9F    ;
+ $97E5 LD E,A        ;
+ $97E6 LD D,$00      ;
+ $97E8 SLA E         ;
+ $97EA SLA E         ;
+ $97EC LD HL,$C7FC   ;
+ $97EF ADD HL,DE     ;
+ $97F0 LD ($B6EE),HL ;
+ $97F3 RET           ;

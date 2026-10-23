@@ -1,0 +1,3 @@
+; Data block at DB60
+b$DB60 DEFB $08,$64,$57,$D2,$EB,$08,$8F,$57
+ $DB68 DEFB $8B,$C7,$41,$86

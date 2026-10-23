@@ -1,0 +1,12 @@
+; Routine at 8576
+;
+; Used by the routine at #R$858B.
+c$8576 PUSH HL       ;
+ $8577 LD L,A        ;
+ $8578 LD A,($B6FA)  ;
+ $857B LD H,A        ;
+ $857C LD A,($B702)  ;
+ $857F AND H         ;
+ $8580 LD A,L        ;
+ $8581 POP HL        ;
+ $8582 RET           ;

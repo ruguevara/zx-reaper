@@ -1,0 +1,30 @@
+; Routine at 9928
+;
+; Used by the routine at #R$980E.
+c$9928 CALL $9918      ;
+ $992B BIT 0,(IX+$00)  ;
+ $992F JR NZ,$994A     ;
+ $9931 LD A,(IX+$01)   ;
+ $9934 LD ($B6E7),A    ;
+ $9937 LD A,(IX+$02)   ;
+ $993A LD ($B6E8),A    ;
+ $993D LD A,(IX+$03)   ;
+ $9940 LD ($B6E9),A    ;
+ $9943 CALL $99C6      ;
+ $9946 JR Z,$99AA      ;
+ $9948 JR $9967        ;
+*$994A LD L,(IX+$01)   ;
+ $994D LD H,(IX+$02)   ;
+ $9950 SUB A           ;
+ $9951 LD ($B6FA),A    ;
+ $9954 LD ($B6FB),A    ;
+ $9957 CALL $9B6C      ;
+ $995A LD A,($B6FB)    ;
+ $995D CP $01          ;
+ $995F JR NZ,$99AA     ;
+ $9961 LD ($B6FA),A    ;
+ $9964 CALL $9B6C      ;
+*$9967 BIT 5,(IX+$00)  ;
+ $996B JP Z,$9901      ;
+ $996E LD (IX+$00),$00 ;
+ $9972 JR $9901        ;

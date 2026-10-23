@@ -1,0 +1,29 @@
+; Routine at 7F78
+;
+; Used by the routine at #R$965B.
+c$7F78 PUSH AF       ;
+ $7F79 LD A,($B707)  ;
+ $7F7C AND A         ;
+ $7F7D JR NZ,$7F86   ;
+ $7F7F LD A,$FF      ;
+ $7F81 LD ($7F77),A  ;
+ $7F84 POP AF        ;
+ $7F85 RET           ;
+*$7F86 POP AF        ;
+ $7F87 PUSH AF       ;
+ $7F88 PUSH HL       ;
+ $7F89 PUSH BC       ;
+ $7F8A PUSH DE       ;
+ $7F8B PUSH IX       ;
+ $7F8D LD IX,$CC00   ;
+ $7F91 CALL $9DBD    ;
+ $7F94 LD ($7F77),A  ;
+ $7F97 LD L,(IX+$01) ;
+ $7F9A LD H,(IX+$02) ;
+ $7F9D CALL NZ,$7FA7 ;
+ $7FA0 POP IX        ;
+ $7FA2 POP DE        ;
+ $7FA3 POP BC        ;
+ $7FA4 POP HL        ;
+ $7FA5 POP AF        ;
+ $7FA6 RET           ;

@@ -1,0 +1,47 @@
+; Routine at 7585
+;
+; Used by the routine at #R$6C00.
+c$7585 LD IY,$B9C8   ;
+ $7589 XOR A         ;
+ $758A LD ($B71B),A  ;
+ $758D CALL $785F    ;
+ $7590 LD ($B706),A  ;
+ $7593 LD E,$FF      ;
+ $7595 LD A,($B71A)  ;
+ $7598 AND A         ;
+ $7599 LD D,$A0      ;
+ $759B JP NZ,$7614   ;
+ $759E LD D,$C0      ;
+; This entry point is used by the routine at #R$75F6.
+*$75A0 XOR A         ;
+ $75A1 LD ($757A),A  ;
+ $75A4 LD A,E        ;
+ $75A5 OR $C7        ;
+ $75A7 LD E,A        ;
+ $75A8 LD A,($B719)  ;
+ $75AB CP $02        ;
+ $75AD JR NZ,$75B1   ;
+ $75AF RES 1,E       ;
+*$75B1 CALL $7864    ;
+; This entry point is used by the routines at #R$76EC, #R$7731, #R$77B9 and
+; #R$7924.
+*$75B4 LD HL,$757B   ;
+ $75B7 LD B,$0A      ;
+ $75B9 CALL $70E2    ;
+ $75BC SET 4,E       ;
+; This entry point is used by the routine at #R$7790.
+*$75BE CALL $7873    ;
+ $75C1 PUSH DE       ;
+ $75C2 RRCA          ;
+ $75C3 RRCA          ;
+ $75C4 RRCA          ;
+ $75C5 LD E,A        ;
+ $75C6 LD D,$00      ;
+ $75C8 LD HL,$75D2   ;
+ $75CB ADD HL,DE     ;
+ $75CC LD E,(HL)     ;
+ $75CD INC HL        ;
+ $75CE LD D,(HL)     ;
+ $75CF EX DE,HL      ;
+ $75D0 POP DE        ;
+ $75D1 JP (HL)       ;

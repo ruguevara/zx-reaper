@@ -1,0 +1,13 @@
+; Routine at A124
+;
+; Used by the routine at #R$A138.
+c$A124 ADD IX,BC     ;
+ $A126 LD A,$FF      ;
+ $A128 CP (IX+$00)   ;
+ $A12B RET Z         ;
+ $A12C XOR A         ;
+ $A12D CP (IX+$01)   ;
+ $A130 JR NZ,$A124   ;
+ $A132 CP (IX+$00)   ;
+ $A135 JR Z,$A124    ;
+ $A137 RET           ;

@@ -1,0 +1,2 @@
+; Data block at 7E61
+b$7E61 DEFB $E5,$21,$E7,$AD

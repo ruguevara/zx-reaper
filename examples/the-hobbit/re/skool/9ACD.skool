@@ -1,0 +1,35 @@
+; Routine at 9ACD
+;
+; Used by the routine at #R$99C6.
+c$9ACD CP $FF        ;
+ $9ACF RET Z         ;
+ $9AD0 AND A         ;
+ $9AD1 RET Z         ;
+ $9AD2 LD B,A        ;
+ $9AD3 LD A,($980C)  ;
+ $9AD6 CP $02        ;
+ $9AD8 RET Z         ;
+ $9AD9 LD A,B        ;
+ $9ADA CALL $9F82    ;
+ $9ADD LD C,A        ;
+ $9ADE CP (HL)       ;
+ $9ADF RET Z         ;
+ $9AE0 LD A,($B6F5)  ;
+ $9AE3 CP C          ;
+ $9AE4 RET NZ        ;
+ $9AE5 LD A,($9BDC)  ;
+ $9AE8 AND A         ;
+ $9AE9 RET Z         ;
+ $9AEA LD A,$01      ;
+ $9AEC LD ($B702),A  ;
+ $9AEF PUSH DE       ;
+ $9AF0 POP HL        ;
+ $9AF1 LD A,B        ;
+ $9AF2 CALL $9BCA    ;
+ $9AF5 PUSH DE       ;
+ $9AF6 LD DE,$0008   ;
+ $9AF9 ADD IX,DE     ;
+ $9AFB POP DE        ;
+ $9AFC PUSH IX       ;
+ $9AFE CALL $72DD    ;
+ $9B01 RET           ;

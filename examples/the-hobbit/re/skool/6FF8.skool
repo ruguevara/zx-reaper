@@ -1,0 +1,2 @@
+; Data block at 6FF8
+b$6FF8 DEFB $0D

@@ -1,0 +1,18 @@
+; Routine at 9B16
+;
+; Used by the routine at #R$980E.
+c$9B16 LD A,$FF       ;
+ $9B18 LD ($B6E9),A   ;
+ $9B1B LD A,(IX+$01)  ;
+ $9B1E LD ($B6E8),A   ;
+ $9B21 CALL $9BCA     ;
+ $9B24 BIT 3,(IX+$07) ;
+ $9B28 JP NZ,$9870    ;
+ $9B2B BIT 6,(IX+$07) ;
+ $9B2F JP NZ,$9870    ;
+ $9B32 BIT 5,(IX+$07) ;
+ $9B36 JP Z,$9901     ;
+ $9B39 LD A,$37       ;
+ $9B3B LD ($B6E7),A   ;
+ $9B3E CALL $99C6     ;
+ $9B41 JP $9901       ;

@@ -1,0 +1,13 @@
+; Routine at 71E2
+;
+; Used by the routines at #R$73C7 and #R$7B63.
+c$71E2 PUSH DE       ;
+ $71E3 PUSH IX       ;
+ $71E5 CALL $9BCA    ;
+ $71E8 PUSH IX       ;
+ $71EA POP HL        ;
+ $71EB LD DE,$0008   ;
+ $71EE ADD HL,DE     ;
+ $71EF POP IX        ;
+ $71F1 POP DE        ;
+ $71F2 RET           ;

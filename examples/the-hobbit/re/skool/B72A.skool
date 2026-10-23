@@ -1,0 +1,2 @@
+; Data block at B72A
+b$B72A DEFB $00,$08

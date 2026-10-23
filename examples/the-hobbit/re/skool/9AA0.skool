@@ -1,0 +1,23 @@
+; Routine at 9AA0
+;
+; Used by the routines at #R$95DF and #R$980E.
+c$9AA0 PUSH IY       ;
+ $9AA2 PUSH IX       ;
+ $9AA4 CALL $9A85    ;
+ $9AA7 CP $FF        ;
+ $9AA9 JR Z,$9AC8    ;
+ $9AAB LD L,(IY+$04) ;
+ $9AAE LD H,(IY+$05) ;
+ $9AB1 PUSH HL       ;
+ $9AB2 POP IX        ;
+ $9AB4 LD A,B        ;
+ $9AB5 CALL $9DBD    ;
+ $9AB8 CP $FF        ;
+ $9ABA JR Z,$9AC8    ;
+ $9ABC LD L,(IX+$01) ;
+ $9ABF LD H,(IX+$02) ;
+ $9AC2 LD (IY+$02),L ;
+ $9AC5 LD (IY+$03),H ;
+*$9AC8 POP IX        ;
+ $9ACA POP IY        ;
+ $9ACC RET           ;

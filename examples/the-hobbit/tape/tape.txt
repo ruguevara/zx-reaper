@@ -1,0 +1,8 @@
+format tzx 1.10
+tzx 0x30 1c4372656174656420776974682052616d736f6674204d616b65545a58
+pause=1001 header program "hobbit    " len=191 p1=5 p2=191
+pause=1336 data 0xff build/loader03.bin
+pause=996 header code "p         " len=6912 p1=32768 p2=32768
+pause=1202 data 0xff data/screen05.scr
+pause=991 header code "h         " len=40000 p1=24576 p2=32768
+pause=28766 data 0xff build/blk07.bin

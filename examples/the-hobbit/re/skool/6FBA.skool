@@ -1,0 +1,18 @@
+; Routine at 6FBA
+;
+; Used by the routine at #R$6E97.
+c$6FBA LD A,($708A)  ;
+ $6FBD LD B,A        ;
+ $6FBE LD A,($709B)  ;
+ $6FC1 CP B          ;
+ $6FC2 JR NC,$6FC5   ;
+ $6FC4 LD B,A        ;
+*$6FC5 LD HL,$707A   ;
+ $6FC8 LD DE,$708B   ;
+*$6FCB LD A,(DE)     ;
+ $6FCC CP (HL)       ;
+ $6FCD RET NZ        ;
+ $6FCE INC DE        ;
+ $6FCF INC HL        ;
+ $6FD0 DJNZ $6FCB    ;
+ $6FD2 RET           ;

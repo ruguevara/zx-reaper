@@ -1,0 +1,23 @@
+; Routine at A138
+;
+; Used by the routine at #R$965B.
+c$A138 PUSH IX       ;
+ $A13A PUSH IY       ;
+ $A13C PUSH DE       ;
+ $A13D PUSH BC       ;
+ $A13E CALL $A0AE    ;
+ $A141 CALL $A124    ;
+ $A144 JR Z,$A15D    ;
+ $A146 LD HL,$B020   ;
+ $A149 CALL $72DD    ;
+*$A14C LD A,(IX+$00) ;
+ $A14F CALL $A0BA    ;
+ $A152 CALL $74C1    ;
+ $A155 CALL $A124    ;
+ $A158 JR NZ,$A14C   ;
+ $A15A CALL $8583    ;
+*$A15D POP BC        ;
+ $A15E POP DE        ;
+ $A15F POP IY        ;
+ $A161 POP IX        ;
+ $A163 RET           ;

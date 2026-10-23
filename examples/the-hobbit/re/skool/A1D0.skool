@@ -1,0 +1,15 @@
+; Routine at A1D0
+;
+; Used by the routines at #R$94D6 and #R$950F.
+c$A1D0 PUSH HL       ;
+ $A1D1 PUSH BC       ;
+ $A1D2 LD B,$05      ;
+ $A1D4 LD HL,$A20B   ;
+ $A1D7 LD A,($B6E7)  ;
+*$A1DA CP (HL)       ;
+ $A1DB JR Z,$A1E0    ;
+ $A1DD INC HL        ;
+ $A1DE DJNZ $A1DA    ;
+*$A1E0 POP BC        ;
+ $A1E1 POP HL        ;
+ $A1E2 RET           ;

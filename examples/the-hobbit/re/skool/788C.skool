@@ -1,0 +1,6 @@
+; Routine at 788C
+;
+; Used by the routine at #R$75F6.
+c$788C DEC B         ;
+ $788D CALL $78A5    ;
+ $7890 JR $7896      ;

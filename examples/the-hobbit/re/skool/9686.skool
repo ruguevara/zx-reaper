@@ -1,0 +1,13 @@
+; Routine at 9686
+;
+; Used by the routine at #R$965B.
+c$9686 JP NZ,$72DD   ;
+; This entry point is used by the routine at #R$96A8.
+*$9689 LD DE,$0002   ;
+ $968C PUSH IY       ;
+ $968E PUSH IX       ;
+ $9690 POP IY        ;
+ $9692 ADD IY,DE     ;
+ $9694 CALL $9ED6    ;
+ $9697 POP IY        ;
+ $9699 RET           ;

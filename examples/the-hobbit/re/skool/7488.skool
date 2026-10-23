@@ -1,0 +1,7 @@
+; Routine at 7488
+;
+; Used by the routines at #R$73A3 and #R$740C.
+c$7488 CP $FF        ;
+ $748A JP NZ,$73D6   ;
+ $748D LD DE,$0AE3   ;
+ $7490 JP $74C1      ;

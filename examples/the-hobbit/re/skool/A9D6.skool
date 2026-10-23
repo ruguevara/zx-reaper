@@ -1,0 +1,9 @@
+; Routine at A9D6
+;
+; Used by the routine at #R$96B3.
+c$A9D6 LD A,($C5CE)  ;
+ $A9D9 CP $25        ;
+ $A9DB RET NZ        ;
+ $A9DC LD HL,$B3D9   ;
+ $A9DF CALL $72DD    ;
+ $A9E2 JP $90DF      ;

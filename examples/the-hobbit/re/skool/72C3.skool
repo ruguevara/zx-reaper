@@ -1,0 +1,9 @@
+; Routine at 72C3
+;
+; Used by the routine at #R$72D3.
+c$72C3 CALL $858B    ;
+ $72C6 CP $0D        ;
+ $72C8 RET NZ        ;
+ $72C9 XOR A         ;
+ $72CA LD ($B704),A  ;
+ $72CD RET           ;

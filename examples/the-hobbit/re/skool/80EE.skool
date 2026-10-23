@@ -1,0 +1,8 @@
+; Routine at 80EE
+;
+; Used by the routine at #R$8071.
+c$80EE PUSH HL       ;
+ $80EF CALL $81DE    ;
+ $80F2 AND (HL)      ;
+ $80F3 POP HL        ;
+ $80F4 RET           ;

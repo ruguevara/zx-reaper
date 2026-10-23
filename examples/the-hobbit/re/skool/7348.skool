@@ -1,0 +1,16 @@
+; Routine at 7348
+;
+; Used by the routine at #R$72D3.
+c$7348 CALL $74C1    ;
+; This entry point is used by the routines at #R$7340 and #R$7344.
+*$734B LD A,$2E      ;
+ $734D BIT 6,D       ;
+ $734F JR NZ,$7358   ;
+ $7351 BIT 4,D       ;
+ $7353 CALL NZ,$858B ;
+ $7356 BIT 4,D       ;
+*$7358 CALL NZ,$8583 ;
+ $735B LD DE,($70DD) ;
+ $735F LD IX,($70E0) ;
+ $7363 LD A,($70DC)  ;
+ $7366 RET           ;

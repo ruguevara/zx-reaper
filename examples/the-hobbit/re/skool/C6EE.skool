@@ -1,0 +1,4 @@
+; Data block at C6EE
+b$C6EE DEFB $60,$E0,$E2,$02,$34,$04,$00,$00
+ $C6F6 DEFB $00,$00,$38,$0F,$71,$91,$00,$48
+ $C6FE DEFB $A4,$FF,$01,$FF,$40

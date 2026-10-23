@@ -1,0 +1,13 @@
+; Routine at 782B
+;
+; Used by the routine at #R$77B9.
+c$782B BIT 6,E       ;
+ $782D JR NZ,$7850   ;
+ $782F BIT 7,E       ;
+ $7831 JR NZ,$7838   ;
+ $7833 CALL $7924    ;
+ $7836 XOR A         ;
+ $7837 RET           ;
+*$7838 RES 7,E       ;
+ $783A PUSH DE       ;
+ $783B LD DE,$000E   ;

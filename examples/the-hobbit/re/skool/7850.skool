@@ -1,0 +1,7 @@
+; Routine at 7850
+;
+; Used by the routines at #R$77B9 and #R$782B.
+c$7850 RES 6,E       ;
+ $7852 PUSH DE       ;
+ $7853 LD DE,$0004   ;
+ $7856 JR $783E      ;

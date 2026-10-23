@@ -1,0 +1,19 @@
+; Routine at 9F2D
+;
+; Used by the routine at #R$8FD6.
+c$9F2D PUSH AF       ;
+ $9F2E LD A,$02      ;
+ $9F30 LD ($9F42),A  ;
+ $9F33 POP AF        ;
+ $9F34 PUSH BC       ;
+ $9F35 PUSH IY       ;
+ $9F37 LD B,A        ;
+ $9F38 CALL $9E95    ;
+*$9F3B CALL $9B93    ;
+ $9F3E JR Z,$9F46    ;
+ $9F40 LD A,(IX+$02) ;
+ $9F43 CP B          ;
+ $9F44 JR NZ,$9F3B   ;
+*$9F46 POP IY        ;
+ $9F48 POP BC        ;
+ $9F49 RET           ;

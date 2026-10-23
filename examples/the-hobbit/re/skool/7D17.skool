@@ -1,0 +1,28 @@
+; Routine at 7D17
+;
+; Used by the routine at #R$7A14.
+c$7D17 XOR A         ;
+ $7D18 LD ($B70F),A  ;
+ $7D1B PUSH IY       ;
+ $7D1D LD IX,($7950) ;
+ $7D21 LD A,($B6FF)  ;
+ $7D24 DEC A         ;
+ $7D25 JR Z,$7D49    ;
+ $7D27 LD IY,$9DD9   ;
+ $7D2B LD A,($B71E)  ;
+ $7D2E AND $03       ;
+ $7D30 LD ($B710),A  ;
+ $7D33 CALL $7D54    ;
+ $7D36 CP $FF        ;
+*$7D38 LD ($7950),IX ;
+ $7D3C POP IY        ;
+ $7D3E PUSH AF       ;
+ $7D3F LD A,($B71D)  ;
+ $7D42 AND $01       ;
+ $7D44 LD ($B70F),A  ;
+ $7D47 POP AF        ;
+ $7D48 RET           ;
+*$7D49 LD IY,$9EA0   ;
+ $7D4D CALL $7D54    ;
+ $7D50 CP $FF        ;
+ $7D52 JR $7D38      ;

@@ -1,0 +1,23 @@
+; Routine at 965B
+;
+; Used by the routine at #R$9630.
+c$965B LD B,A        ;
+ $965C CALL $9BB1    ;
+ $965F CALL $72DD    ;
+ $9662 LD L,(IX+$08) ;
+ $9665 LD H,(IX+$09) ;
+ $9668 LD A,H        ;
+ $9669 OR L          ;
+ $966A CALL $9686    ;
+ $966D LD A,B        ;
+ $966E CALL $7F78    ;
+ $9671 LD A,($7F77)  ;
+ $9674 INC A         ;
+ $9675 CALL NZ,$969A ;
+ $9678 CALL $8583    ;
+ $967B LD A,B        ;
+ $967C CALL $A0C8    ;
+; This entry point is used by the routine at #R$96A8.
+*$967F LD A,B        ;
+ $9680 CALL $A138    ;
+ $9683 JP $9F94      ;

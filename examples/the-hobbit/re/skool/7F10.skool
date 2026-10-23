@@ -1,0 +1,11 @@
+; Routine at 7F10
+;
+; Used by the routine at #R$980E.
+c$7F10 PUSH HL       ;
+ $7F11 PUSH DE       ;
+ $7F12 PUSH BC       ;
+ $7F13 CALL $7EFF    ;
+ $7F16 POP BC        ;
+ $7F17 POP DE        ;
+ $7F18 POP HL        ;
+ $7F19 RET           ;

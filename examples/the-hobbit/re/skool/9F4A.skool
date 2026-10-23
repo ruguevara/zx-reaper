@@ -1,0 +1,7 @@
+; Data block at 9F4A
+b$9F4A DEFB $ED,$5B,$08,$B7,$FD,$2A,$0A,$B7
+ $9F52 DEFB $FD,$22,$08,$B7,$ED,$53,$0A,$B7
+ $9F5A DEFB $ED,$4B,$E8,$B6,$78,$32,$E8,$B6
+ $9F62 DEFB $79,$32,$E9,$B6,$CD,$6C,$9B,$ED
+ $9F6A DEFB $43,$E8,$B6,$ED,$53,$08,$B7,$FD
+ $9F72 DEFB $22,$0A,$B7,$C9

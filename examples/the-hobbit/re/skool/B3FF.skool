@@ -1,0 +1,2 @@
+; Data block at B3FF
+b$B3FF DEFB $82,$1D,$C7,$EA

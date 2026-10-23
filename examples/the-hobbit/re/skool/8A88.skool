@@ -1,0 +1,2 @@
+; Data block at 8A88
+b$8A88 DEFB $18,$00,$00,$00

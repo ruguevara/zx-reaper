@@ -1,0 +1,7 @@
+; Routine at 97F4
+;
+; Used by the routine at #R$A657.
+c$97F4 CALL $72DD    ;
+ $97F7 LD A,$2E      ;
+ $97F9 CALL $858B    ;
+ $97FC JP $8583      ;

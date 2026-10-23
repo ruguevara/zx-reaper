@@ -1,0 +1,11 @@
+; Routine at A9BD
+c$A9BD LD A,($B6F5)  ;
+ $A9C0 CP $05        ;
+ $A9C2 RET NZ        ;
+ $A9C3 CALL $9D44    ;
+ $A9C6 LD A,($B6EA)  ;
+ $A9C9 LD HL,$B238   ;
+ $A9CC CP $47        ;
+ $A9CE JR Z,$A9D3    ;
+ $A9D0 LD HL,$B24C   ;
+*$A9D3 JP $A1E3      ;

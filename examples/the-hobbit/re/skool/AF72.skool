@@ -1,0 +1,5 @@
+; Data block at AF72
+b$AF72 DEFB $8A,$6B,$B5,$A6,$C2,$4F,$89,$B1
+ $AF7A DEFB $85,$99,$74,$78,$8A,$6B,$B5,$A6
+ $AF82 DEFB $0B,$08,$66,$CA,$D4,$84,$BF,$B7
+ $AF8A DEFB $C3,$83,$BB

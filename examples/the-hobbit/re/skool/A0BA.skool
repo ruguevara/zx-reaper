@@ -1,0 +1,13 @@
+; Routine at A0BA
+;
+; Used by the routines at #R$A0C8 and #R$A138.
+c$A0BA LD HL,$A20E   ;
+ $A0BD LD E,A        ;
+ $A0BE RES 7,E       ;
+ $A0C0 LD D,$00      ;
+ $A0C2 ADD HL,DE     ;
+ $A0C3 ADD HL,DE     ;
+ $A0C4 LD E,(HL)     ;
+ $A0C5 INC HL        ;
+ $A0C6 LD D,(HL)     ;
+ $A0C7 RET           ;

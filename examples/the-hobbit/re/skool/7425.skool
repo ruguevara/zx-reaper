@@ -1,0 +1,2 @@
+; Data block at 7425
+b$7425 DEFB $3A,$E8,$B6

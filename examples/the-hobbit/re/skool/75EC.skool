@@ -1,0 +1,6 @@
+; Routine at 75EC
+;
+; Used by the routine at #R$75F6.
+c$75EC LD A,($B71B)  ;
+ $75EF DEC A         ;
+ $75F0 RET           ;

@@ -1,0 +1,2 @@
+; Data block at 7820
+b$7820 DEFB $7E,$FE,$03,$D2

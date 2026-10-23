@@ -1,0 +1,8 @@
+; Routine at 70E2
+;
+; Used by the routines at #R$6C00, #R$7585, #R$7864, #R$79A9 and #R$7B9E.
+c$70E2 XOR A         ;
+*$70E3 LD (HL),A     ;
+ $70E4 INC HL        ;
+ $70E5 DJNZ $70E3    ;
+ $70E7 RET           ;

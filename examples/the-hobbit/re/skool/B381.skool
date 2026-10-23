@@ -1,0 +1,2 @@
+; Message at B381
+t$B381 DEFM "TAPE ERROR -    "

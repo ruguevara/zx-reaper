@@ -1,0 +1,9 @@
+; Routine at 9E95
+;
+; Used by the routines at #R$7AA1, #R$7ABA, #R$9F08 and #R$9F2D.
+c$9E95 PUSH DE       ;
+ $9E96 CALL $9D37    ;
+ $9E99 LD DE,$0007   ;
+ $9E9C ADD IX,DE     ;
+ $9E9E POP DE        ;
+ $9E9F RET           ;

@@ -1,0 +1,22 @@
+; Routine at 9DBD
+;
+; Used by the routines at #R$6C00, #R$7F78, #R$8D9D, #R$94D6, #R$950F, #R$9AA0,
+; #R$9B81 and #R$9BCA.
+c$9DBD EXX           ;
+ $9DBE PUSH IX       ;
+ $9DC0 POP HL        ;
+ $9DC1 LD B,A        ;
+ $9DC2 LD E,$03      ;
+ $9DC4 LD D,$00      ;
+*$9DC6 LD A,(HL)     ;
+ $9DC7 CP B          ;
+ $9DC8 JR Z,$9DD2    ;
+ $9DCA CP $FF        ;
+ $9DCC JR Z,$9DD2    ;
+ $9DCE ADD HL,DE     ;
+ $9DCF JP $9DC6      ;
+*$9DD2 PUSH HL       ;
+ $9DD3 POP IX        ;
+ $9DD5 CP $FF        ;
+ $9DD7 EXX           ;
+ $9DD8 RET           ;

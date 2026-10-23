@@ -1,0 +1,38 @@
+; Routine at 743F
+;
+; Used by the routines at #R$7478 and #R$9ED6.
+c$743F BIT 7,D       ;
+ $7441 JR Z,$7455    ;
+ $7443 LD A,E        ;
+ $7444 LD HL,$07A8   ;
+ $7447 CP L          ;
+ $7448 JR NZ,$744F   ;
+ $744A LD A,D        ;
+ $744B AND $0F       ;
+ $744D CP H          ;
+ $744E RET Z         ;
+*$744F LD A,$01      ;
+ $7451 LD ($B704),A  ;
+ $7454 RET           ;
+*$7455 LD HL,$AD2D   ;
+ $7458 LD A,($B701)  ;
+ $745B LD E,A        ;
+ $745C LD A,($70DF)  ;
+ $745F OR E          ;
+ $7460 JR Z,$7465    ;
+ $7462 LD HL,$AD35   ;
+*$7465 LD A,D        ;
+ $7466 RRCA          ;
+ $7467 RRCA          ;
+ $7468 RRCA          ;
+ $7469 AND $1E       ;
+ $746B PUSH DE       ;
+ $746C LD E,A        ;
+ $746D LD D,$00      ;
+ $746F ADD HL,DE     ;
+ $7470 LD E,(HL)     ;
+ $7471 INC HL        ;
+ $7472 LD D,(HL)     ;
+ $7473 CALL $74C1    ;
+ $7476 POP DE        ;
+ $7477 RET           ;

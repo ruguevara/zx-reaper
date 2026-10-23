@@ -1,0 +1,2 @@
+; Data block at A887
+b$A887 DEFB $C6,$FE

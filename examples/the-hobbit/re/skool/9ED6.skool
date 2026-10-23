@@ -1,0 +1,25 @@
+; Routine at 9ED6
+;
+; Used by the routines at #R$7434, #R$9686 and #R$9EC7.
+c$9ED6 PUSH AF       ;
+ $9ED7 PUSH DE       ;
+ $9ED8 LD A,($B703)  ;
+ $9EDB CP $00        ;
+ $9EDD JR NZ,$9EFA   ;
+ $9EDF LD D,(IY+$01) ;
+ $9EE2 LD E,(IY+$00) ;
+ $9EE5 CALL $743F    ;
+ $9EE8 LD E,(IY+$02) ;
+ $9EEB LD D,(IY+$03) ;
+ $9EEE CALL $74C1    ;
+ $9EF1 LD E,(IY+$04) ;
+ $9EF4 LD D,(IY+$05) ;
+ $9EF7 CALL $74C1    ;
+*$9EFA LD E,(IY+$00) ;
+ $9EFD LD D,(IY+$01) ;
+ $9F00 LD A,D        ;
+ $9F01 OR E          ;
+ $9F02 CALL NZ,$7478 ;
+ $9F05 POP DE        ;
+ $9F06 POP AF        ;
+ $9F07 RET           ;

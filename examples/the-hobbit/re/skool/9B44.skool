@@ -1,0 +1,25 @@
+; Routine at 9B44
+;
+; Used by the routines at #R$94D6 and #R$950F.
+c$9B44 LD A,($B6E8)  ;
+ $9B47 INC A         ;
+ $9B48 JR NZ,$9B4C   ;
+ $9B4A INC A         ;
+ $9B4B RET           ;
+*$9B4C LD A,($B6FE)  ;
+ $9B4F AND A         ;
+ $9B50 JR NZ,$9B5F   ;
+ $9B52 LD HL,$B6E8   ;
+ $9B55 LD A,($B6EA)  ;
+ $9B58 CP (HL)       ;
+ $9B59 RET Z         ;
+ $9B5A LD A,($B6E9)  ;
+ $9B5D CP (HL)       ;
+ $9B5E RET Z         ;
+*$9B5F LD A,($B6FF)  ;
+ $9B62 AND A         ;
+ $9B63 RET NZ        ;
+ $9B64 LD A,($B6E9)  ;
+ $9B67 LD HL,$B6EA   ;
+ $9B6A CP (HL)       ;
+ $9B6B RET           ;

@@ -1,0 +1,17 @@
+; Routine at 8FAD
+c$8FAD LD A,$0A      ;
+ $8FAF CALL $9C9F    ;
+ $8FB2 CP $00        ;
+ $8FB4 JR Z,$8FAD    ;
+*$8FB6 LD B,A        ;
+ $8FB7 CALL $9F08    ;
+ $8FBA CP B          ;
+ $8FBB JR Z,$8FC7    ;
+ $8FBD LD A,B        ;
+ $8FBE INC A         ;
+ $8FBF CP $0A        ;
+ $8FC1 JR C,$8FB6    ;
+ $8FC3 LD A,$01      ;
+ $8FC5 JR $8FB6      ;
+*$8FC7 LD ($B6E7),A  ;
+ $8FCA JP $8D9D      ;

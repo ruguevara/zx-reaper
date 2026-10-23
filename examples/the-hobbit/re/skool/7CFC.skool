@@ -1,0 +1,15 @@
+; Routine at 7CFC
+;
+; Used by the routine at #R$7CCB.
+c$7CFC LD HL,$7942   ;
+ $7CFF CALL $7CC9    ;
+ $7D02 CP $FF        ;
+ $7D04 RET Z         ;
+ $7D05 LD ($B6E8),A  ;
+ $7D08 LD HL,$793D   ;
+ $7D0B SET 1,(HL)    ;
+ $7D0D CALL $94D6    ;
+ $7D10 LD A,($B6FB)  ;
+ $7D13 AND A         ;
+ $7D14 JR Z,$7CFC    ;
+ $7D16 RET           ;

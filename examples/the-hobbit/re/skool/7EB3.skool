@@ -1,0 +1,3 @@
+; Data block at 7EB3
+b$7EB3 DEFB $E5,$21,$B0,$AD,$C3,$90,$7D,$C5
+ $7EBB DEFB $DD,$E5,$D5

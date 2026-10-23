@@ -1,0 +1,5 @@
+; Data block at 78FB
+b$78FB DEFB $0E,$06,$18,$06,$0E,$0A,$18,$02
+*$7903 DEFB $0E,$02,$FD,$E5,$E1,$19,$E5,$DD
+ $790B DEFB $E5,$E1,$19,$D1,$06,$00,$ED,$B0
+ $7913 DEFB $C9

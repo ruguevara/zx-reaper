@@ -1,0 +1,6 @@
+; Routine at 789F
+;
+; Used by the routine at #R$7892.
+c$789F PUSH DE       ;
+ $78A0 LD DE,$FFE8   ;
+ $78A3 JR $78A9      ;

@@ -1,0 +1,6 @@
+; Routine at A368
+c$A368 LD IX,($B70C) ;
+ $A36C LD A,(IX+$10) ;
+ $A36F CP $0F        ;
+ $A371 JP NZ,$9F76   ;
+ $A374 JP $910E      ;
