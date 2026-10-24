@@ -1,6 +1,6 @@
 # l'Abbaye des Morts (ZX Spectrum, 2014): how it works
 
-![Jean in The Altar, room 8, with a bat, a checkpoint and a parchment](img/play-church.png)
+![Jean in The Altar, room 8, with bats, a checkpoint and a parchment](img/play-church.png)
 
 l'Abbaye des Morts for the 48K ZX Spectrum was written by DaRkHoRaCe and
 Jerri and released as freeware in 2014, after Locomalito's PC game of 2010.
@@ -11,10 +11,10 @@ explains the program top-down from a full disassembly whose sources in
 [`src/`](../src) rebuild the original tape byte for byte, the loader and its
 packer included.
 
-The tape holds a BASIC line, a string variable with the first loader stage,
-and two blocks packed with MegaLZ: the second stage reveals a picture cell by
-cell and loads the game with a patched copy of the ROM loader that animates
-an hourglass. The game logic runs inside the 50 Hz IM 2 interrupt: every
+The tape holds a BASIC line, a string variable with the first loader stage
+and the packed second stage, and a block of four MegaLZ streams: the second
+stage reveals a picture cell by cell and loads that block with a patched
+copy of the ROM loader that animates an hourglass. The game logic runs inside the 50 Hz IM 2 interrupt: every
 frame it reads the keys, moves Jean and the eleven object slots of the room
 and leaves the sprites as a chain of draw commands, which the foreground loop
 runs by `RET` and draws when it can, skipping pictures but never logic

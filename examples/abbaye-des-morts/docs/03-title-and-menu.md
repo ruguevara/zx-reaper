@@ -189,9 +189,10 @@ ENTER on the title returns to [StartGame](../src/mainloop.asm#L65), which makes
 [RoomState](../src/variables.asm#L116) and calls [RunIntro](../src/sequences.asm#L21). That routine sets [PlayerState](../src/player.asm#L30) to 0
 (no player), enters room 0 and draws it: [RoomScript00](../src/roomscripts.asm#L97) clears the screen,
 prints strings 38-42 centred and clears every redraw mark, so the room
-drawing that follows ([RedrawRoom](../src/sprites.asm#L1147) draws only marked cells) leaves the
-text alone. The runners pass between the two blocks of text. The room objects of room 0 are four runners of kind 0
-([UpdateIntroRunner](../src/entities.asm#L1116)): Jean at x $F7 and three crusaders at $E3, $D7 and
+drawing that follows ([RedrawRoom](../src/sprites.asm#L1147) draws only marked cells) leaves
+the text alone. The room objects of room 0 are four runners of kind 0
+([UpdateIntroRunner](../src/entities.asm#L1116)), which pass between the two blocks of text: Jean
+at x $F7 and three crusaders at $E3, $D7 and
 $CB, all left of the room, running right until x reaches $80, where each
 frees its slot. Jean runs at 1 pixel per frame and the crusaders at 0.75, so
 he pulls ahead; they have no hit test (F92). Once they have gone the text
@@ -219,7 +220,7 @@ respawn position is copied to Jean, [EnterRoom](../src/mainloop.asm#L188) builds
 ```mermaid
 flowchart TD
     SU["StartUp (first start)"] --> NT
-    END["Game Over screen or ending"] --> SG["StartGame: ScriptTitle (48K only)"]
+    GE["Game Over screen or ending"] --> SG["StartGame: ScriptTitle (48K only)"]
     SG --> NT["StartGame_NoTitle: MenuFrame, track 3, clear $8512-$854D, 9 lives"]
     NT --> TW{"TitleWaitKey"}
     TW -- "C" --> CS["controls screen: 1 Kempston, 2 redefine (cheat check), ENTER back"]
@@ -233,10 +234,10 @@ flowchart TD
     ER --> ML["MainLoop"]
 ```
 
-What a new game resets was checked by playing a game with the flags, the
-crosses, the lives, the cheat and the cross ring changed, ending it with R
-and Y, starting a second one and comparing its memory with a fresh start
-(F123). The block $8512-$854D is cleared: the respawn position, the church
+What a new game resets was checked by poking the flags, the crosses, the
+lives, the cheat byte and the cross ring into a game in progress, ending it
+with R and Y, starting a second game and comparing its memory with a fresh
+start (F123). The block $8512-$854D is cleared: the respawn position, the church
 door, the bell, the levers, the wheel, the chalice and Satan flags, the
 arches, every item flag, the cross ring, the checkpoints and the crosses;
 the lives become 9 and the two status bar redraws are armed. Not reset: the

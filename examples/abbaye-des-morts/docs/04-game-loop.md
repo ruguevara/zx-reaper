@@ -1,7 +1,7 @@
 # 4. The game loop
 
-The game runs in two halves that meet at one byte. The game logic runs in
-the 50 Hz interrupt: every frame the IM 2 handler plays a step of the beeper
+The program runs in two halves that hand over work through a list and two
+self-modified bytes. The game logic runs in the 50 Hz interrupt: every frame the IM 2 handler plays a step of the beeper
 effect, reads the keys, moves Jean and every object, and leaves the sprites
 of the frame as a list of draw commands. The foreground loop only draws: it
 waits until a list is complete, runs it, and copies the changed cells to the
@@ -13,7 +13,8 @@ fewer pictures instead (F103).
 
 [StartUp](../src/startup.asm#L39) sets I = $84; the 257 bytes of [Im2Table](../src/im2table.asm#L11) are all $85, so the
 vector is $8585 whatever the data bus holds. [InterruptHandler](../src/interrupt.asm#L30) at $8585
-works on its own stack and leaves nothing on the interrupted one:
+saves the registers on its own stack and reads nothing back from the
+interrupted one:
 
 ```
 InterruptHandler:
@@ -21,7 +22,7 @@ InterruptHandler:
   LD (SmcInterruptReturn+$0001),HL ; return address: operand of the JP at $85B9
   POP HL                  ; HL as it was
   LD (SmcInterruptSP+$0001),SP ; interrupted SP: operand of the LD SP at $85B6
-  PUSH BC                 ; no effect: writes BC below the interrupted SP,
+  PUSH BC                 ; no effect: writes BC below the interrupted SP
   DI
   LD SP,InterruptHandler  ; interrupt stack, InterruptStack-$8584
   PUSH IX
@@ -145,12 +146,13 @@ Two bytes of code are the whole handshake (F54):
 When the foreground is late the other way, still drawing when the next frame
 closes a new list, the new list simply replaces the waiting one: every frame
 starts the list again at $BE5A. The foreground always draws the newest
-complete frame.
+complete frame (read from the code; the counts in
+[Timing and speed](#timing-and-speed) agree).
 
 ```mermaid
 sequenceDiagram
-    participant I as Interrupt: GameFrame
-    participant F as Foreground: MainLoop
+    participant I as Interrupt (GameFrame)
+    participant F as Foreground (MainLoop)
     I->>I: keys, Jean's probes, slots, Jean: commands into FrameList
     I->>F: EndFrameList: FrameListGate = NOP
     F->>F: RunFrameList: FrameListGate = RET, QueueDrawCmd = RET
@@ -201,7 +203,8 @@ object slots, sets the room state to 0, runs the room's script, spawns the
 room's items and objects, sets the music track and closes
 [FrameListGate](../src/templates.asm#L252). [RedrawRoom](../src/sprites.asm#L1147) then draws every marked cell in a sweep
 from the side Jean entered by, which takes 8-9 frames (F42). Meanwhile the
-interrupt only reads the keys, because the room state is 0. How a room is
+interrupt only plays the beeper step and reads the keys, because the room
+state is 0. How a room is
 built is described in [Rooms](05-rooms.md).
 
 ### One pass of play
@@ -300,6 +303,7 @@ What follows from this design:
   while a room is swept in (8-9 frames, F42), while a parchment or a text
   window waits for a key, and on the Game Over screen; beeper effects only
   delay it within the frame.
-- **No double buffering.** The cells are written to the screen whenever the
-  foreground gets to them, with no regard to the beam; only changed cells
-  are written, so a frame touches a small part of the screen.
+- **No double buffering.** Nothing in the drawing waits for a point of the
+  TV frame: the cells are written to the screen whenever the foreground
+  reaches them. Only changed cells are written, so a picture touches a small
+  part of the screen.

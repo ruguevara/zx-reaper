@@ -67,8 +67,8 @@ write keeps the border bits 0.
 
 ## Memory map
 
-The game occupies $5B00-&#36;FFFF after loading; the screen is the only other
-memory it uses. Addresses below are those of the original; `$85BC-$BFFF`
+On a 48K the game occupies $5B00-&#36;FFFF after loading; the screen is the
+only other memory it uses. Addresses below are those of the original; `$85BC-$BFFF`
 can be moved as a block (`make shift-test`), the rest stays where it is
 (see [`re/layout.mk`](../re/layout.mk)).
 
@@ -228,7 +228,9 @@ screen layout on the fly.
 3. **Tape loader** ([InstallLoader](../src/stage2.asm#L673)). LD-BYTES is copied from
    the ROM ($0556-$05E2) to $FE00 and patched: the border colour operand
    becomes 0, the `PUSH HL` of the SA/LD-RET return address becomes a `NOP`
-   (the copy returns straight to its caller), the closing `JP NC,LD-8-BITS`
+   (the copy returns straight to its caller; with a non-standard ROM the same
+   store writes $70, `LD (HL),B`, a case the source leaves unexplained), the
+   closing `JP NC,LD-8-BITS`
    is pointed at the copy, and, when the ROM's LD-EDGE-1 is the standard one
    (no $C3 at $05E9), the `CALL LD-EDGE-2` inside LD-8-BITS is pointed at new
    edge routines copied to $FE8D ([LdEdge2](../src/stage2.asm#L564), [LdEdge1](../src/stage2.asm#L567)).
@@ -279,7 +281,7 @@ On a 48K the info screen is never unpacked: the game overwrites it.
 
 ### The 128K tail
 
-[Start128](../src/stage2.asm#L110) runs instead of steps 6 and 7's screen part: it
+[Start128](../src/stage2.asm#L110) runs instead of step 6: it
 pages in the bank chosen by the machine check, copies
 [DepackScreen](../src/stage2.asm#L285) to $C000 and the two packed screens after it
 (the loading screen at $C09D, the info screen at $CA8A), unpacks the music
@@ -312,8 +314,8 @@ tile flag map and are overwritten when the first room is entered. It:
    set, a Kempston interface is assumed and the byte [KempstonSwitch](../src/controls.asm#L46) at the
    end of the key reader is a `NOP`; otherwise (floating bus, no interface)
    it becomes a `RET`. A joystick moved during the probe also switches it off
-   (F35). The probe takes most of the 43 frames the start-up lasts in the
-   simulator (observed);
+   (F35). The start-up lasts 43 frames in the simulator (observed), nearly
+   all of it this loop: 65536 passes of 46 T-states;
 7. jumps to [StartGame_NoTitle](../src/mainloop.asm#L70), past the drawing of the title script: the
    loading screen is the title the first time
    ([Title and menus](03-title-and-menu.md)).

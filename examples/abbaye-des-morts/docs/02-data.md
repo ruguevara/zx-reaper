@@ -17,7 +17,7 @@ follow.
 | position word | 8.8 fixed point: the low byte is a fraction of a unit. Jean, the creatures and the projectiles keep x and y as words; speeds are 8.8 words in units per frame | |
 
 The room area is 256 x 176 pixels (128 x 88 units). A coordinate just left
-of or above the room wraps to $FC-&#36;FF or $FA-&#36;FF ([PlayerState](../src/player.asm#L30), F76).
+of or above the room wraps to $FC-&#36;FF or $FA-&#36;FF ([CheckRoomExit](../src/player.asm#L1015), F76).
 
 ## Game variables
 
@@ -225,7 +225,7 @@ record of the room whose flag byte is not $FF ([SpawnItem](../src/sequences.asm#
 | 3 | checkpoint | 8 | [ActionCheckpoint](../src/gameframe.asm#L273) | 2 when active |
 | 4 | bell (room 2) | 1 | [ActionBellOrLever](../src/gameframe.asm#L496) | 1 when rung |
 | 5 | parchment | 6 | [ParchmentHandler](../src/gameframe.asm#L757), [ActionParchment](../src/gameframe.asm#L785) | $FF when read |
-| 6 | red scroll (room 24) | 1 | [ActionFinalScroll](../src/gameframe.asm#L236) | |
+| 6 | red scroll (room 24) | 1 | [ActionFinalScroll](../src/gameframe.asm#L236) | $FF when touched |
 | 7 | church door trigger (room 7), no sprite | 1 | [ActionChurchDoor](../src/gameframe.asm#L173) | checkpoint flag 0 |
 | 8 | arch (rooms 10, 19) | 2 | [ActionArchToRiver](../src/gameframe.asm#L365), [ActionArchToBeast](../src/gameframe.asm#L339) | bit 7 latch |
 | 9 | lever (rooms 9, 10, 20) | 3 | [ActionBellOrLever](../src/gameframe.asm#L496), [ActionGateLever](../src/gameframe.asm#L524) | 1 when pulled |
@@ -374,8 +374,8 @@ A flag map byte:
 | 3 | $83 | the walls and floors: $00-$04, $06-$0F, $11-$24, $27-$3A, $3D-$4D, $77-$7A, $7D, $B8-&#36;BF | bit 1 blocks walking and the head, bit 0 can be stood on (F7, F74) |
 | 4 | $84 | $05, $3B-$3C, $4E-$74 | harmful: kills Jean, removes a scythe (F56) |
 
-Class 2 (bit 1 alone) is used by no tile; script command $8A gives it to the
-border cells of a room. Every tile flag has bit 7 set, so a room that has
+Class 2 (bit 1 alone) is used by no tile; script command $8A sets bit 1 on
+the border cells of a room, which makes an edge a wall. Every tile flag has bit 7 set, so a room that has
 just been built is drawn in full. [TileMapAddress](../src/helpers.asm#L141) and [FlagMapAddress](../src/helpers.asm#L166)
 give the address of a cell; [FlagRowTable](../src/startup.asm#L171) holds the address of each flag
 map row for the creature code.
