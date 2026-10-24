@@ -25,7 +25,9 @@ and `template/skills/`, which get copied into each project.
   Z80 records and web pages in `build/`) or split tape blocks (`re/tape/`).
 - `docs/method.md` (the method) and `docs/hungry-horace-run.md` (the
   reference run) are the master copies; `docs/*.ru.md` are their Russian
-  versions. Keep both languages in step when a stage changes.
+  versions. Keep both languages in step when a stage changes. `README.md`
+  and `README.ru.md` are kept in step on every change, whichever was edited
+  first.
 
 ## Port everywhere
 

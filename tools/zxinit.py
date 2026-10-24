@@ -64,11 +64,12 @@ def main():
     shutil.copytree(os.path.join(KIT, 'zxpyxel'), os.path.join(p, 'port', 'zxpyxel'),
                     dirs_exist_ok=True, ignore=shutil.ignore_patterns('__pycache__', 'test_*'))
     for d in ('original', 're/tape', 're/maps', 're/rzx', 'src', 'data', 'tape',
-              'tests/inputs', 'tests/expected', 'scripts', '.claude'):
+              'tests/inputs', 'tests/expected', 'scripts', '.claude', '.agents'):
         os.makedirs(os.path.join(p, d), exist_ok=True)
-    skills = os.path.join(p, '.claude', 'skills')
-    if not os.path.exists(skills):
-        os.symlink('../skills', skills)
+    for agent in ('.claude', '.agents'):   # Claude Code, Codex
+        skills = os.path.join(p, agent, 'skills')
+        if not os.path.lexists(skills):
+            os.symlink('../skills', skills)
     os.chdir(p)
     p = '.'
     ext = os.path.splitext(tape)[1].lower()

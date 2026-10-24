@@ -2,31 +2,54 @@
 
 **R**etro **E**ngineer **A**nything, **P**ort **E**verywhere **R**ightnow.
 
-An agent harness for ZX Spectrum games, in two halves. Reverse engineering
-turns a tape into sources that rebuild it byte for byte, are relocatable and
-free of magic numbers, and come with an article and a graphics gallery.
-Porting then takes the game off the Spectrum in stages, each checked against
-the one before it: Python with the original's memory layout, then clean game
-logic, then C or JS. A lead agent and subagents do the work from skills;
-scripts do the mechanics.
+Russian version: [README.ru.md](README.ru.md).
 
-## Port everywhere
+An agent harness for analysing and porting ZX Spectrum 48K games.
+
+## Retro Engineer Anything
+
+Reverse engineering first. One prompt turns a game file into annotated,
+readable sources that rebuild it byte for byte, relocatable where possible
+and free of magic numbers.
+
+They come with documentation on how the game works: top down, end to end,
+with links into the sources, a gallery of all the graphics, the level maps
+and the bugs found in the original game.
+
+## Port Everywhere Rightnow
+
+Then, again with one prompt, the agent ports the asm sources to Python.
+Each porting stage rests strictly on the one before it and is tested
+routine by routine.
+
+The first port: Python with the original's memory layout, as if the Python
+were written within the ZX Spectrum's memory model and limits. It uses
+[Pyxel](https://github.com/kitao/pyxel) and a ZX-like wrapper over it. This
+is already a multi-platform port: it runs anywhere, the browser included.
+
+The second port: clean, portable game logic in Python and a ZX-like
+presentation layer (graphics, sound). A lead agent and subagents do the work
+from skills; scripts do the mechanics.
+
+After that the presentation layer can change: better graphics, a remaster,
+a remake. Or change the game logic, or add new levels. Then, if you like,
+port it to C/C++, Rust or JS, for whatever platform you want.
 
 | # | From → to | Check | Status |
 | --- | --- | --- | --- |
 | 1 | tape → automatic disassembly (SkoolKit) → tape | tape and snapshot byte-identical | built |
 | 2 | automatic disassembly → annotated, relocatable asm without magic numbers → tape | the same, plus `make shift-test` and routine models (`make diff`) | built |
-| 3 | asm → Python on `zxpyxel`, a stand-in for the 48K hardware on [Pyxel](https://github.com/kitao/pyxel): the original memory layout, the same screens and behaviour, code that follows the asm routine by routine | routines against the Z80 code (`zxdiff.py`); the whole game by replaying a Z80 run's input and comparing game memory at every pass of the main loop (`make port-test`) | built ([docs/stage3.md](docs/stage3.md)) |
-| 4 | Python on `zxpyxel` → clean game logic over plain state (no addresses, registers or T-states), the Spectrum look kept, on any framework | stage 3 as the oracle: every routine call and every step of the recorded runs, state, sound and screen (`make game-test`) | built in faithful mode ([docs/stage4.md](docs/stage4.md)) |
-| 5 | game logic → C/C++ with SDL2 or platform libraries, or JS for the web | the stage 4 golden runs | design |
+| 3 | asm → Python on `zxpyxel`, a stand-in for the 48K hardware on [Pyxel](https://github.com/kitao/pyxel): the original memory layout, the same screens and behaviour, the code a routine-by-routine tracing of the asm | routines against the Z80 code (`zxdiff.py`); the whole game by replaying a Z80 run's input and comparing game memory at every pass of the main loop (`make port-test`) | built ([docs/stage3.md](docs/stage3.md)) |
+| 4 | Python on `zxpyxel` → clean game logic over plain state (no addresses, registers or T-states), the Spectrum look kept, on any framework | stage 3 as the oracle: every routine call and every step of the recorded runs, state, sound and screen (`make game-test`) | built ([docs/stage4.md](docs/stage4.md)) |
+| 5 | game logic → C/C++ with SDL2 or platform libraries, or JS for the web | the stage 4 golden runs | trivial with an agent |
 
-Each check uses the stage before as its oracle, so the chain runs back to
-the original: stage 3 replays the input a Z80 run read and must hold the
-same memory at every pass of the main loop; stage 4 runs next to stage 3 on
-the same recorded runs and must reach the same state and sounds at every
-step, and every call of a stage 3 routine is a test case for its stage 4
-version. What a run finds hard becomes a rule in a skill or a check in the
-tools.
+At every stage the check takes the stage before as its oracle, so the chain
+runs back to the original: stage 3 replays the input a Z80 run read and must
+hold the same memory at every pass of the main loop; stage 4 is checked
+against stage 3 on the same recorded runs and must reach the same game
+variables, screen and sounds at every step, and every call of a stage 3
+routine is a test for its stage 4 version. What a run finds hard becomes a
+rule in a skill or a new test in the tools. *The harness teaches itself.*
 
 Any stage is a place to stop, fork and ship. Change the stage 3 or stage 4
 Python, play it, ship it (Pyxel makes a desktop app or a single HTML page:
@@ -37,11 +60,11 @@ other way.
 
 ## Examples
 
-Three games so far, in the order they were done. Every run ended with a
-comparison against the existing work, and what the run got wrong became a
-rule in a skill or a check in the tools before the next game: the harness
-learns from its own runs and their mistakes. Each example is the record of
-its run.
+Three games, in the order they were done. Every run ended with a comparison
+against the existing open analyses, and what the run got wrong became a
+rule in a skill or a test in the tools before the next game: the harness
+learns from its own runs and their mistakes. Each example holds the record
+of its run.
 
 1. **Hungry Horace** (Psion/Melbourne House, 1982),
    [`examples/hungry-horace/`](examples/hungry-horace/): the reference run.
@@ -58,24 +81,29 @@ its run.
    [`examples/the-hobbit/`](examples/the-hobbit/): the most recent, a text
    adventure with a parser, characters that act on their own and vector
    pictures, done blind through stages 1 to 4 with no help from the author
-   beyond the stage 4 interview on graphics, input and sound. The stage 3
+   beyond a short stage 4 interview on graphics, input and sound. The stage 3
    port is identical to the Z80 at every main-loop pass of six recorded runs
    (one plays the game to the end), the stage 4 game identical to stage 3 at
    every pass, the screen included; both play on the desktop and in the
-   browser. Compared afterwards with the existing disassemblies, a C port and
-   the author's account: the bytes, the code map and the meaning agree with
-   the most complete reference wherever both describe something; the run
-   named two record fields the wrong way round, missed 17 of 50 known bugs
-   and found 14 that no reference has
+   browser. Then compared with the existing disassembly projects, a C port
+   and the account by the game's co-author Veronika Megler: the bytes, the
+   code map and the meaning agree with the most complete reference wherever
+   both describe something; the single run mixed up the names of only two
+   fields, missed 17 of the 50 known bugs in the original game and found 14
+   new ones that no reference has
    ([comparison](examples/the-hobbit/re/comparison.md)). The errors are
-   listed, not corrected in the example; the
+   listed but not corrected in the example; the
    [run report](docs/the-hobbit-run.md) shows what each one changed in the
-   harness.
+   harness. A second session after the full run, with a prompt such as
+   "Review the sources, logic, messages, sprites and graphics and rename
+   variables, fields, routines and so on to more accurate names", would fix
+   the shortcomings above in this run.
 
-Scope: the 48K Spectrum. AY music and effects (128K) come later, through
-[pyayay](https://github.com/ruguevara/pyayay) (Ayumi). Out of scope: stage 5
-for now, 128K and AY, protected and turbo loaders (such games start from a
-snapshot instead of the tape), games that need contention-exact timing.
+Current limits: the 48K ZX Spectrum. AY music and effects (128K) come later,
+through [pyayay](https://github.com/ruguevara/pyayay) (Ayumi). Out of scope:
+stage 5, 128K and AY, protected and turbo loaders (such games are better
+started from a snapshot than from the tape), games that need timing exact
+to memory contention.
 
 ## Documents
 
@@ -89,39 +117,94 @@ snapshot instead of the tape), games that need contention-exact timing.
 | [examples/hungry-horace/docs/](examples/hungry-horace/docs/README.md) | the article on how Hungry Horace works, with its gallery |
 | [examples/the-hobbit/docs/](examples/the-hobbit/docs/README.md) | the article on how The Hobbit works, with its gallery |
 
-The method and the run report are also in Russian (`docs/*.ru.md`).
+The method and the run reports are also in Russian (`docs/*.ru.md`).
 
 ## Setup
 
+Needed: Python 3.9 or later, [sjasmplus](https://github.com/z00m128/sjasmplus)
+(tested with 1.20.1 and 1.24.0) and make. Optional: Fuse, for playing,
+recording RZX and checking T-state-dependent effects by eye.
+
 ```sh
+git clone https://github.com/ruguevara/zx-reaper.git && cd zx-reaper
 python3 -m venv .venv && . .venv/bin/activate
 pip install -r requirements.txt   # SkoolKit (its scripts go on PATH) and Pyxel
 tools/zxdoctor.py                 # checks Python, SkoolKit, sjasmplus, make
 selftest/run.sh                   # must end with SELFTEST PASSED
 ```
 
-Also needed: [sjasmplus](https://github.com/z00m128/sjasmplus) (tested with
-1.20.1 and 1.24.0) and make. Optional: Fuse for playing and recording RZX.
-Keep the venv active when working in a game project: its tools import SkoolKit.
+`zxdoctor.py` prints the installing command for every tool that is missing.
+`selftest/run.sh` builds a small fixture game and takes it through the whole
+pipeline without an agent; when it passes, the harness is ready. Keep the
+venv active when working in a game project: its tools import SkoolKit.
+
+### Try an example
+
+The examples build and play without an agent. The tape is not in git: get it
+yourself (for The Hobbit, `HobbitTheV1.2.tzx` from Spectrum Computing) and
+put it into `original/game.tzx`.
+
+```sh
+cd examples/the-hobbit
+make restore          # re/tape/, re/orig.z80, re/image.z80 from the tape
+make                  # must print IDENTICAL
+make port-test        # stage 3: the Python port against the Z80 runs
+make game-test        # stage 4: the clean game against stage 3
+python3 port/play.py  # play stage 3 (Pyxel); python3 game/play.py for stage 4
+```
+
+The example's other checks are in its [README](examples/the-hobbit/README.md).
 
 ## Start a project
 
-```sh
-python3 <zx-reaper>/tools/zxinit.py game.tzx game-re/ [--rzx play.rzx]
-cd game-re && make            # must print IDENTICAL
-git init && git add -A && git commit -m "re: init"
-claude                        # AGENTS.md + skills/ drive the rest
-```
+1. **The tape.** A TAP or TZX of a 48K game. Blocks with standard headers
+   are handled automatically; custom loaders, headerless and encrypted
+   blocks are handled by the agent with the `zx-init` skill. If there is a
+   recorded playthrough (an RZX, from the RZX Archive for instance), pass it
+   too: it opens the code of late levels that random play does not reach.
+2. **The project.**
 
-`zxinit.py` copies `template/` and `tools/` into the project, and `zxpyxel/`
-into `port/`, so each project is self-contained and keeps working when
-zx-reaper changes. The original tape stays out of git: put it into
-`original/` and run `make restore`.
+   ```sh
+   python3 <zx-reaper>/tools/zxinit.py game.tzx game-re/ [--rzx play.rzx]
+   cd game-re && make            # must print IDENTICAL
+   git init && git add -A && git commit -m "re: init"
+   ```
+
+   `zxinit.py` copies `template/` and `tools/` into the project and
+   `zxpyxel/` into `port/`; it splits the tape, simulates the load, maps the
+   code executed under random play and writes the automatic disassembly, one
+   file per entry (`re/skool/`). The project is self-contained and keeps
+   working when zx-reaper changes. From the first minute `make` builds a tape
+   byte-identical to the original, and every later edit is checked by the
+   same `make`. The original tape stays out of git: on another machine put it
+   into `original/` and run `make restore`.
+3. **The agent.** Start the agent in the project directory (`claude`) and
+   give it the task, for instance "Take the game through stages 1 and 2 and
+   write the article", then "Stage 3: the Python port", then "Stage 4". The
+   agent reads `AGENTS.md`, takes the skill for each phase from `skills/` and
+   hands batches of work to subagents. The person does little: answers the
+   stage 4 interview on graphics, input and sound, gives an RZX if coverage
+   stalls at late levels, and at the end plays the game and listens to it. If
+   the agents stall, "continue" is usually enough.
+4. **The checks.** A stage is not done without its check:
+
+   | Stage | Check |
+   | --- | --- |
+   | 1, 2 | `make` (IDENTICAL), `make test` (frame hashes of the input scripts), `make shift-test`, `make diff`, `make audit` |
+   | 3 | `make port-test` |
+   | 4 | `make game-test` |
+
+5. **Play and ship.** `python3 port/play.py` or `python3 game/play.py` on the
+   desktop; `make port-html` or `make game-html` builds one HTML page in
+   `build/web/` (serve it with `python3 -m http.server -d build/web`). Web
+   builds hold the game's data and stay out of git.
+
+Every `make` target is listed by `make help`.
 
 ## Skills
 
 Each skill is one procedure with a done criterion, copied into every project
-(`skills/`, linked as `.claude/skills`) and loaded only when needed.
+(`skills/`, linked as `.claude/skills` for Claude Code and `.agents/skills` for Codex) and loaded only when needed.
 
 | Skill | Stage | What it does | Done when |
 | --- | --- | --- | --- |

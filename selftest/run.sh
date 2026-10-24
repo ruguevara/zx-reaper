@@ -11,6 +11,7 @@ work=${1:-$here/out/proj}
 rm -rf "$work"
 python3 "$kit/tools/zxinit.py" "$here/out/demo.tap" "$work" --frames 3000
 cd "$work"
+for a in .claude .agents; do test -f $a/skills/zx-init/SKILL.md || { echo "no skills in $a"; exit 1; }; done
 cp "$here/wander.txt" tests/inputs/
 make -s expected
 make -s test
