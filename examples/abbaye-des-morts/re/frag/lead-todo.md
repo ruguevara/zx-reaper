@@ -49,3 +49,25 @@
 - Script operand lengths (W5, observed F13): $8D 5+c, $92 3+2k, $94 5+c,
   $9D 5 bytes.
 - Open: why $9C58 sets $850C to 0 while the window is up; flag class 2.
+- W7 splits: $A339 "Title: wait for ENTER, SPACE or C" (called from $85FC),
+  $A354 "Controls screen: draw and menu loop", $A37A "Redefine the four
+  keys", $A45E "Copy the menu area", $A71F "Free the object slot with sound
+  5", $A724 "Free the object slot" (used by $A849), $A78B "Take a cross",
+  $A799 "Draw a cross of the lever-off set", $A6F2 "Enter a room at an arch".
+- $AABE: SMC byte JR ($18) / JR Z ($28) when the cheat is on: label it.
+- $8502/$8503: mask and row of the first key found by $A29C (set by $A43D,
+  read by $A3B9): label.
+- Flags: $851A church door shut; $851B bell; $851C, $851D levers; $851E
+  lever of room 17; $851F gate lever; $8521 chalice taken; $8523, $8524 arch
+  latches (bit 7); $8534 final scroll. $8512/$8514 arrival position (set by
+  $A6BC, $A6D8). Checkpoint flag $8543 set to 1 by the church door $A615,
+  $8544-$854B set to 2 by $A688 (clears all nine first).
+- Title script $A526 drawn only when $85FC runs from the top (after game
+  over or the ending); the first start enters at $8606 and the loader
+  picture is the title.
+- Bugs (W7): cheat check XORs 8 bytes (any keys with the same XOR, e.g.
+  Z X C 5); chalice at $A734 takeable with < 12 crosses by position poke;
+  $A29C/$A304 scan orders differ (two keys in a row); attribute fill at $A450
+  overwritten; $A31E loses the key code; Kempston up ignored; SP as data
+  pointer in $A5E9.
+- Copied the RAGE cheat run to tests/inputs/cheat.txt (make expected!).

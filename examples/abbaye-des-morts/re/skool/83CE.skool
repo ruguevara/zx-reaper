@@ -6,15 +6,16 @@
 ; to normal play through #R$AD82; otherwise the low four bits (right, left, down, up) call #R$AD71, which moves
 ; #R$8509 one room that way and starts the room change, and the room number is then reduced modulo 25.
 @label=DebugWarpRoom
-c$83CE LD A,($A2D1)  ;
- $83D1 BIT 5,A       ;
+c$83CE LD A,($A2D1)         ; keys newly pressed this frame
+ $83D1 BIT 5,A              ; bit 5: back to normal play
  $83D3 JP NZ,$AD82   ;
- $83D6 AND $0F       ;
+ $83D6 AND $0F              ; direction bits: right, left, down, up
  $83D8 RET Z         ;
- $83D9 CALL $AD71    ;
- $83DC LD HL,$8509   ;
+ $83D9 CALL $AD71           ; move one room that way
+ $83DC LD HL,$8509          ; wrap the room number modulo 25
 @label=DebugWarpRoom_Wrap
 *$83DF LD A,(HL)     ;
+@isub=SUB GRID_ROOMS
  $83E0 SUB $19       ;
  $83E2 RET C         ;
  $83E3 LD (HL),A     ;

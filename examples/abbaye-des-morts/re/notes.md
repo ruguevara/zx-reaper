@@ -81,8 +81,8 @@ Details and evidence: `re/frag/[ABCD]-report.md` (classification reports).
 - Rooms: a 5x5 grid, 25 rooms, number in $8509 (left/right ±1, up/down ±5,
   wrapped modulo 25). Room 0 is the intro text. $850C is the room state
   checked by the main loop at $8664: $80 playing, 1 enter the room, 2 back to
-  the checkpoint, 3 game over, 4 (unknown), 5 the ending; bit 7 keeps the
-  frame routines running.
+  the checkpoint, 3 the ending ($887B), 4 restart the room after a death,
+  5 game over (script $A57E); bit 7 keeps the frame routines running.
 - Keys: $A2BF holds 8 (row, mask) pairs of the redefinable keys (default
   QAOP...), $A2CF the control bits read each frame; the Kempston read at
   $A290 is cut off by a RET at $A28F when no interface answers on port $1F.

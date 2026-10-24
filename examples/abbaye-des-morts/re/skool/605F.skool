@@ -10,8 +10,8 @@
 ; #R$85D5 ($C3 stored), which sends sound effects to the AY player instead of the beeper.
 ;
 ; L 1 if the loader found an AY chip, 0 if not (the beeper effects stay)
-; O:A $C3 or $CD
 @label=Patch128KHooks
+@isub=LD A,OP_CALL
 c$605F LD A,$CD             ; opcode of CALL
  $6061 LD ($860C),A         ; the instruction at $860C (LD HL,$85F3) becomes CALL $85F3
  $6064 LD ($88D5),A         ; $88D5 (LD HL,$85E8) becomes CALL $85E8
@@ -19,6 +19,7 @@ c$605F LD A,$CD             ; opcode of CALL
  $606A LD A,L        ;
  $606B OR A          ;
  $606C RET Z         ;
+@isub=LD A,OP_JP
  $606D LD A,$C3             ; opcode of JP
  $606F LD ($871A),A         ; $871A (LD HL,$85D5) becomes JP $85D5
  $6072 RET           ;

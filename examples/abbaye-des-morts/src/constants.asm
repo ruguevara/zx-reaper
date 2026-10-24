@@ -81,3 +81,6 @@ TILE_CLASS_MASK          EQU 7 ; mask of the tile class in a tile flag (bits 0-2
 MUSIC_TRACK_7            EQU 7 ; music track 7 (also set by the Game Over code at $86AB)
 PLAYER_DYING             EQU 1 ; player state: dying
 PLAYER_STANDING          EQU 4 ; player state: standing or walking
+OP_CALL                  EQU 0xCD ; opcode of CALL, stored over the first byte of a 3-byte instruction to turn it into a call
+OP_JP                    EQU 0xC3 ; opcode of JP
+GRID_ROOMS               EQU 25 ; rooms of the 5x5 map: a room number wraps modulo this (room 25 is the ending room outside the grid)
