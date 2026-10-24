@@ -1,11 +1,12 @@
 ; Add the three pre-shifted copies of a frame
 ;
 ; Does nothing unless flag bit 7 of the set is set (A). The frame (N columns, rows of pixel pages) is at HL; the copies
-; are written after it at DE, one pixel line (page) at a time: copy 1 is the frame shifted right by 2 pixels and is N + 1
-; columns wide (a zero byte is appended to take the bits shifted out), copy 2 is copy 1 shifted by 2 more pixels and copy 3
-; copy 2 shifted by 2 more, both N + 1 columns wide as well (the bits that leave the last column are lost). The 2-pixel
-; shift is two calls of #R$AFFC. A frame so takes N + 3 x (N + 1) columns, which the entity code relies on when it picks the copy for
-; x AND 3 (#R$ACA7 pair tables). On return DE is the destination after the copies and HL the source plus 3 x N + 3.
+; are written after it at DE, one pixel line (page) at a time: copy 1 is the frame shifted right by 2 pixels and is
+; N + 1 columns wide (a zero byte is appended to take the bits shifted out), copy 2 is copy 1 shifted by 2 more pixels
+; and copy 3 copy 2 shifted by 2 more, both N + 1 columns wide as well (the bits that leave the last column are lost).
+; The 2-pixel shift is two calls of #R$AFFC. A frame so takes N + 3 x (N + 1) columns, which the entity code relies on
+; when it picks the copy for x AND 3 (the shift tables, #R$AC9F). On return DE is the destination after the copies and
+; HL the source plus 3 x N + 3.
 ;
 ; A Flags of the set: bit 7 makes the copies
 ; A' Frame width N

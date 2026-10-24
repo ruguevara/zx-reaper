@@ -2,7 +2,8 @@
 ;
 ; Used by the drops that fall from the roof of Gloomy tunels and Underground river (cyan, attribute $45). This kind does
 ; not have the layout of #R$93D3: after the 5 header bytes (same meaning as there) come the attribute and the sprite
-; height (read by #R$B56D), then sprite addresses and 3-byte entries (attribute, sprite address) that #R$B56D indexes by the
+; height (read by #R$B56D), then sprite addresses and 3-byte entries (attribute, sprite address) that #R$B56D indexes
+; by the
 ; animation step. What each entry is (falling drop, splash on the ground) was not worked out: Unknown.
 @label=BehaviourDrop
 b$94E3 DEFB $00,$03,$03,$05,$02  ; hit box top, left, bottom, right (2-pixel units); slot +$15 (Unknown)

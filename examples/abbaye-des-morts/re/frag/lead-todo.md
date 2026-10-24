@@ -118,3 +118,15 @@
 - $B426 duplicates $A724 (FreeSlot).
 - Bugs (W10): patrol limit tests are equalities (latent); chaser flag
   probes wrap rows at columns 0, 30, 31; rope INC L wraps at column 31.
+- W2 splits: $8664 main loop proper, $869F ending and game over branches,
+  $85EE and $85F3 128K music stubs, $8754 noise step, $876E tone step.
+- $854E description wrong: a request replaces a playing effect at once.
+- $83A8 and $8552 descriptions: records are (template, y, x).
+- Bugs (W2): $87D7 stores A over the low byte of the noise pointer (noise is
+  R XOR 1; effect 1 never requested); spawners skip the carry test after
+  $8A6E (harmless, <= 10 records vs 11 slots); PUSH BC at $858E useless; a
+  second interrupt between EI at $85B5 and JP at $85B9 would hang
+  (theoretical); 128K title not redrawn after game over (inferred); R+Y
+  ignored in the intro; $861E redundant.
+- Timing (F103): logic once per interrupt; the foreground draws; a busy
+  frame overruns and its sprites are not queued (586 draws / 800 frames).

@@ -1,6 +1,7 @@
 ; Behaviour block: Jean walking across the intro screen (kind 0, room 0)
 ;
-; Used by the first walker of room 0 (#R$8B8F): the monk of the intro, drawn with the same frames and shift table as the player (#R$AC9F, #R$ACA7).
+; Used by the first walker of room 0 (#R$8B8F): the monk of the intro, drawn with the same frames and shift table as
+; the player (#R$AC9F, #R$ACA7).
 ; .
 ; Behaviour blocks (#R$93D3 to #R$95FE) say how a room object kind (#R$8B8F) looks and where it can be hit. A room
 ; object record points to one (record +9). #R$89ED copies bytes 0-3 into the slot (+$0C to +$0F), byte 4 into slot
@@ -8,7 +9,8 @@
 ; The blocks of the walking and flying kinds (0, 2-6 and 8) have this layout (read from #R$B2D4, #R$B3D2 and #R$A851):
 ; .
 ; +0 byte: top edge of the hit box, +1 left edge, +2 bottom edge, +3 right edge: all relative to the object's position,
-; in 2-pixel units (the handler adds them to x and y and #R$A851 compares the box with Jean's)
+; in 2-pixel units (the handler adds them to x and y and #R$A851 compares the box with Jean's). Read from #R$A851: the
+; documentation of some handlers calls the second pair a size, which is the same only while the first pair is 0.
 ; .
 ; +4 byte: Unknown, copied to slot +$15 (the values are 1 and 2)
 ; .

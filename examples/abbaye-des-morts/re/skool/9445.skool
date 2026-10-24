@@ -1,6 +1,7 @@
 ; Behaviour block: a spider on its thread (kind 4, rooms 3, 14, 16 and 19)
 ;
-; Used by the green spiders that move up and down (attribute $44). The two frames are at $F338 and $F33A (rows 24-39 of the sprite sheet, 2 bytes wide); the shift table is #R$9463.
+; Used by the green spiders that move up and down (attribute $44). The two frames are at $F338 and $F33A (rows 24-39
+; of the sprite sheet, 2 bytes wide); the shift table is #R$9463.
 ; .
 ; Layout: see #R$93D3.
 @label=BehaviourSpider

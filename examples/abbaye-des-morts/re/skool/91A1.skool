@@ -1,7 +1,8 @@
 ; Parchment texts: strings 25-36, two lines for each of the six parchments
 ;
 ; A parchment (room item type 5, #R$8EDF) names its two lines by string number; the text is shown by #R$9C52 in the
-; parchment frame when Jean touches the item (the item action #R$A836 copies the numbers to #R$850E). The pairs: 25-26 room 3 (Wine supplies), 27-28 room 8 (The Altar), 29-30
+; parchment frame when Jean touches the item (the item action #R$A836 copies the numbers to #R$850E). The pairs: 25-26
+; room 3 (Wine supplies), 27-28 room 8 (The Altar), 29-30
 ; room 12 (Plagued ruins), 31-32 room 14 (Hidden garden), 33-34 room 16 (Lake of despair), 35-36 room 21 (Evil church).
 ; The first parchment says to collect twelve crosses; the others are hints about the abbey.
 @label=ParchmentTexts

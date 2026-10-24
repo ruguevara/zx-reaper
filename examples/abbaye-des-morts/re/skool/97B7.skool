@@ -15,7 +15,8 @@
 ; into the redraw cell buffers on top of the tiles. The tail of the queue (the operand of the first instruction of
 ; #R$98B1) is set back to the start of the queue.
 ; .
-; The scan uses the alternate register set (one EXX that is not undone here). #R$95FF later puts the cells on the screen.
+; The scan uses the alternate register set (one EXX that is not undone here). #R$95FF later puts the cells on the
+; screen.
 ; .
 ; Hardware: none.
 ;

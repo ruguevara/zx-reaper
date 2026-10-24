@@ -1,26 +1,39 @@
-; Routine at B1AC
-c$B1AC POP HL        ;
- $B1AD LD A,(HL)     ;
+; Crusader jump: read the sprite description after the hit test and draw frame 0
+;
+; Where the hit test #R$A851 goes on after #R$B18E (SP at slot + $10, the hit box words popped). The same as #R$B3AD
+; (the sprite description read for creatures facing right) up to the end: it puts the attribute, the width and the
+; height of the sprite in the draw command and finds the column offset of the shift phase of x, but it does not step
+; the animation counters (a crusader in the air keeps its first frame) and goes to the frame picker with E = 0, frame 0,
+; instead of through #R$A883.
+; .
+; Hardware: none.
+;
+; A' x in 2-pixel units (its low two bits are the shift phase)
+; SP Slot address + $10
+@label=ReadSpriteCrusaderJump
+c$B1AC POP HL        ; address of the sprite description (slot + $10)
+ $B1AD LD A,(HL)     ; attribute
  $B1AE INC HL        ;
- $B1AF LD ($ACDA),A  ;
+ $B1AF LD ($ACDA),A  ; into the draw command
  $B1B2 LD C,(HL)     ;
  $B1B3 INC HL        ;
- $B1B4 LD B,(HL)     ;
+ $B1B4 LD B,(HL)     ; BC = shift table
  $B1B5 INC HL        ;
- $B1B6 EX DE,HL      ;
- $B1B7 EX AF,AF'     ;
- $B1B8 AND $03       ;
+ $B1B6 EX DE,HL      ; DE = description, at its height byte
+ $B1B7 EX AF,AF'     ; A = x
+ $B1B8 AND $03       ; shift phase
  $B1BA ADD A,A       ;
  $B1BB LD L,A        ;
  $B1BC LD H,$00      ;
- $B1BE ADD HL,BC     ;
- $B1BF LD A,(HL)     ;
- $B1C0 EX AF,AF'     ;
+ $B1BE ADD HL,BC     ; entry of the shift table
+ $B1BF LD A,(HL)     ; byte offset of this phase
+ $B1C0 EX AF,AF'     ; kept in A' for the frame picker
  $B1C1 INC HL        ;
- $B1C2 LD C,(HL)     ;
+ $B1C2 LD C,(HL)     ; width
  $B1C3 EX DE,HL      ;
- $B1C4 LD B,(HL)     ;
+ $B1C4 LD B,(HL)     ; height
  $B1C5 INC HL        ;
- $B1C6 LD ($ACD7),BC ;
- $B1CA LD E,$00      ;
- $B1CC JP $B3D2      ;
+ $B1C6 LD ($ACD7),BC ; draw command: width, height
+@isub=LD E,0
+ $B1CA LD E,$00      ; frame 0
+ $B1CC JP $B3D2      ; SelectFrameRight: the crusaders face right

@@ -1,28 +1,50 @@
-; Routine at B10C
-c$B10C POP BC        ;
- $B10D POP DE        ;
- $B10E POP HL        ;
- $B10F LD BC,$0150   ;
+; Entity handler: crusader hopping (path command 2)
+;
+; The handler that the path command 2 puts in the slot (#R$B1F3) for six frames: the crusader jumps over a pit. x goes
+; up by the fixed speed $0150 (faster than the walking speed, CRUSADER_HOP_SPEED; the speed word of the slot is
+; skipped, as is the path pointer), y changes by the next value of the speed curve #R$B100 (the hop: up, then down,
+; net zero) and the hit test and drawing go on at #R$B18E. The state word +$A counts the frames: low byte = index in
+; the curve, high byte = frames left. On the sixth frame the handler word of the slot is set back to #R$B1D4 and the
+; state to 6 frames left, index 0, ready for the next command. Observed in room 6 at x = $24, $3C and $4C: y goes
+; $4400, $42DB, $4249, $4200, $4249, $42DB, $4400 over six frames while x gains $0150 each frame.
+; .
+; The same code, with another speed and curve, is #R$B139 (command 3) and #R$B163 (command 1).
+; .
+; Slot fields used: +4 path pointer (skipped), +6 word x, +8 word y, +$A word jump state. The others are used by
+; #R$B18E and the code after it, as for #R$B1D4.
+; .
+; Hardware: none.
+;
+; SP Slot address + 2
+@label=UpdateCrusaderHop
+c$B10C POP BC        ; skip +2: the speed, not used in a jump
+ $B10D POP DE        ; skip +4: the path pointer
+ $B10E POP HL        ; x (8.8)
+@isub=LD BC,CRUSADER_HOP_SPEED
+ $B10F LD BC,$0150   ; fixed x speed of the hop
  $B112 ADD HL,BC     ;
- $B113 PUSH HL       ;
- $B114 LD A,H        ;
- $B115 POP HL        ;
- $B116 POP DE        ;
- $B117 POP BC        ;
+ $B113 PUSH HL       ; store x (SP at slot + 6)
+ $B114 LD A,H        ; A = x in 2-pixel units
+ $B115 POP HL        ; SP back at slot + 8
+ $B116 POP DE        ; DE = y (8.8)
+ $B117 POP BC        ; BC = state: B frames left, C index in the curve
  $B118 LD L,C        ;
- $B119 LD H,$00      ;
+ $B119 LD H,$00      ; HL = index
  $B11B INC C         ;
- $B11C DJNZ $B133    ;
- $B11E LD BC,$0600   ;
+ $B11C DJNZ $B133    ; not the last frame: keep the state with the next index
+@isub=LD BC,CRUSADER_JUMP_FRAMES*256
+ $B11E LD BC,$0600   ; the last frame: the state is reset for the next jump
  $B121 EXX           ;
- $B122 LD ($B131),SP ;
- $B126 LD HL,$FFF6   ;
+@isub=LD (SmcHopRestoreSP+1),SP
+ $B122 LD ($B131),SP ; SP (slot + $C) for the LD SP below
+ $B126 LD HL,$FFF6   ; -10: SP to slot + 2
  $B129 ADD HL,SP     ;
  $B12A LD SP,HL      ;
  $B12B LD HL,$B1D4   ;
- $B12E PUSH HL       ;
+ $B12E PUSH HL       ; written over the handler word at slot + 0: back to walking
  $B12F EXX           ;
- $B130 LD SP,$B130   ;
-*$B133 PUSH BC       ;
- $B134 LD BC,$B100   ;
- $B137 JR $B18E      ;
+@label=SmcHopRestoreSP
+ $B130 LD SP,$B130   ; the operand is stored by #R$B122 just above: SP = slot + $C again
+*$B133 PUSH BC       ; store the state at slot + $A
+ $B134 LD BC,$B100   ; the curve of the hop
+ $B137 JR $B18E      ; apply it

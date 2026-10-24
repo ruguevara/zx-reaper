@@ -1,6 +1,7 @@
 ; Behaviour block: a white walker near the ceiling (kind 2, rooms 22 and 23)
 ;
-; Used by the patrollers at the top of rooms 22 and 23 (attribute $47, 20 pixels tall; seen hanging near the ceiling in room 22).
+; Used by the patrollers at the top of rooms 22 and 23 (attribute $47, 20 pixels tall; seen hanging near the ceiling
+; in room 22).
 ; .
 ; Layout: see #R$93D3.
 @label=BehaviourWhiteFlyer

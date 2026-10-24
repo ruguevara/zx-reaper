@@ -1,6 +1,7 @@
 ; Behaviour block: a white walker (kind 2, rooms 13 and 22)
 ;
-; Used by the patrollers of room 13 (skeletons, seen) and one in room 22 (white, attribute $47). The sprite addresses are the same as the crusader's.
+; Used by the patrollers of room 13 (skeletons, seen) and one in room 22 (white, attribute $47). The sprite addresses
+; are the same as the crusader's.
 ; .
 ; Layout: see #R$93D3.
 @label=BehaviourSkeleton

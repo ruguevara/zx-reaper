@@ -13,7 +13,8 @@
 ; +2 byte: speed, times 4 it becomes the speed word of the slot (+2, 8.8 fixed point, 2-pixel units per frame)
 ; .
 ; +3 byte: frames between two animation steps or other timer (slot +$12 counts down, +$13 reloads); for the crusader
-; spawner (kind 1) it is the delay before the first crusader, then a new one comes every $28 frames
+; spawner (kind 1) it is the delay before the first crusader, then a new one comes every $28 frames (inferred from
+; #R$B099, not timed)
 ; .
 ; +4 byte: x position in 2-pixel units (high byte of the slot's x word at +6/+7)
 ; .
@@ -21,23 +22,23 @@
 ; .
 ; +6 byte: initial animation state (slot +$0A and +$0B)
 ; .
-; +7 byte: lower limit of the patrol (slot +4): x for kinds 2 and 3, y for kinds 4-7; low byte of the entity template
-; address for kind 1
+; +7 byte: slot +4: lower limit of the patrol (x for kinds 2 and 3, y for kinds 4-7); the countdown of the timer kinds
+; (13-15); low byte of the entity template address for kind 1
 ; .
-; +8 byte: upper limit of the patrol (slot +5); high byte of the template address for kind 1
+; +8 byte: slot +5: upper limit of the patrol; the reload of the countdown (kinds 13-15); high byte of the template address
+; for kind 1; the x position where a runner of kind 0 ends ($80)
 ; .
 ; +9 word: behaviour block (#R$93D3 to #R$95E6) that tells how the kind looks and how large its hit box is
 ; .
-; Kinds (what was seen on the screen after warping to the room): 0 the walkers of the intro in room 0 (Jean and
-; crusaders crossing the screen); 1 spawns a running crusader every 40 frames (rooms 5, 6 and 25, where crusaders
-; chase Jean in from the left edge); 2 and 3 patrol horizontally (rats, bats, skeletons, soldiers, worms, birds,
-; demons: the behaviour block tells which sprite); 4 and 5 patrol vertically (spiders on a thread, flies, fire
-; wheels); 6 the hanged men of room 9 (bob on their ropes); 7 is the up-moving state of 6 and 5 the up-moving state of
-; 4 (no record starts in state 7); 8 the ghost of room 11 (bounces off tiles); 9 the water drops of rooms 15 and 19;
-; 10 skeleton archers; 11 the dragon heads of rooms 20 and 22 that spit bolts; 12 the spore plants of room 14; 13 the
-; leaping imps of room 16 (and the river room 19); 14 the head of the Pestilent Beast (its timer runs
-; for 110 frames, then flames run along the platform below); 15 the object of room 10 whose handler spawns the
-; flame that runs left (#R$BD22); 16 Death of room 18; 17 Satan of room 24.
+; Kinds (what was seen on the screen after warping to the room, and the titles of the handlers): 0 the runners of the
+; intro in room 0 (Jean and three crusaders crossing the screen); 1 spawns a running crusader every 40 frames (rooms 5,
+; 6 and 25, where crusaders chase Jean in from the left edge); 2 and 3 patrol horizontally (rats, bats, skeletons,
+; soldiers, worms, birds, demons: the behaviour block tells which sprite); 4 and 5 patrol vertically (spiders on a
+; thread, flies, fire wheels); 6 and 7 the hanged men of room 9 (bob on their ropes; no record starts as kind 7); 8 the
+; grinning ghost of room 11 that chases Jean; 9 the water drops of rooms 15 and 19; 10 skeleton archers; 11 the stone
+; dragon heads in the wall of rooms 20 and 22 that shoot arrows; 12 the spitting plants of room 14; 13 the fish of rooms
+; 16 and 19 that jump out of the water; 14 the head of the Pestilent Beast; 15 the fire breath of the Beast (room 10;
+; its timer is 110 frames); 16 Death of room 18; 17 Satan of room 24.
 ; .
 ; Positions are in 2-pixel units (0-127 across, 0-87 down). The lists below give per record: room, kind, creature,
 ; start x and y, and the patrol limits.
@@ -102,7 +103,7 @@ b$8B8F DEFB $00,$00,$20,$08,$F7,$30,$00,$00,$80  ; room 0: Jean walker, x $F7 y 
  $8CCC DEFW $9487
  $8CCE DEFB $0C,$05,$30,$03,$58,$40,$00,$05,$48  ; room 12: fly (vertical patroller, starts up), x $58 y $40, y limits $05-$48
  $8CD7 DEFW $9487
- $8CD9 DEFB $0B,$08,$10,$08,$40,$24,$00,$00,$1E  ; room 11: bouncing ghost (ghost), x $40 y $24, params $00 $00 $1E
+ $8CD9 DEFB $0B,$08,$10,$08,$40,$24,$00,$00,$1E  ; room 11: chaser (ghost), x $40 y $24, params $00 $00 $1E
  $8CE2 DEFW $94B1
  $8CE4 DEFB $0D,$02,$20,$08,$2C,$2C,$00,$28,$60  ; room 13: skeleton (patroller, starts left), x $2C y $2C, x limits $28-$60
  $8CED DEFW $93F5
@@ -158,15 +159,15 @@ b$8B8F DEFB $00,$00,$20,$08,$F7,$30,$00,$00,$80  ; room 0: Jean walker, x $F7 y 
  $8E00 DEFW $953D
  $8E02 DEFB $0E,$0C,$00,$78,$38,$38,$78,$00,$00  ; room 14: spore plant (spore plant), x $38 y $38, timer $78
  $8E0B DEFW $953D
- $8E0D DEFB $13,$0D,$00,$04,$48,$4C,$3B,$54,$54  ; room 19: jumper (jumper), x $48 y $4C
+ $8E0D DEFB $13,$0D,$00,$04,$48,$4C,$3B,$54,$54  ; room 19: fish (fish), x $48 y $4C
  $8E16 DEFW $9549
- $8E18 DEFB $13,$0D,$00,$04,$60,$4C,$3B,$7C,$54  ; room 19: jumper (jumper), x $60 y $4C
+ $8E18 DEFB $13,$0D,$00,$04,$60,$4C,$3B,$7C,$54  ; room 19: fish (fish), x $60 y $4C
  $8E21 DEFW $9549
- $8E23 DEFB $10,$0D,$00,$04,$1C,$4C,$3B,$54,$54  ; room 16: jumper (jumper), x $1C y $4C
+ $8E23 DEFB $10,$0D,$00,$04,$1C,$4C,$3B,$54,$54  ; room 16: fish (fish), x $1C y $4C
  $8E2C DEFW $9549
- $8E2E DEFB $10,$0D,$00,$04,$3C,$4C,$3B,$7C,$54  ; room 16: jumper (jumper), x $3C y $4C
+ $8E2E DEFB $10,$0D,$00,$04,$3C,$4C,$3B,$7C,$54  ; room 16: fish (fish), x $3C y $4C
  $8E37 DEFW $9549
- $8E39 DEFB $10,$0D,$00,$04,$50,$4C,$3B,$68,$54  ; room 16: jumper (jumper), x $50 y $4C
+ $8E39 DEFB $10,$0D,$00,$04,$50,$4C,$3B,$68,$54  ; room 16: fish (fish), x $50 y $4C
  $8E42 DEFW $9549
  $8E44 DEFB $15,$02,$20,$08,$2D,$14,$00,$08,$30  ; room 21: demon (patroller, starts left), x $2D y $14, x limits $08-$30
  $8E4D DEFW $9555
@@ -190,7 +191,7 @@ b$8B8F DEFB $00,$00,$20,$08,$F7,$30,$00,$00,$80  ; room 0: Jean walker, x $F7 y 
  $8EB0 DEFW $956A
  $8EB2 DEFB $0A,$0E,$00,$6E,$3C,$04,$00,$00,$00  ; room 10: beast head (beast head), x $3C y $04
  $8EBB DEFW $957B
- $8EBD DEFB $0A,$0F,$03,$02,$40,$18,$48,$6E,$6E  ; room 10: beast part (beast part), x $40 y $18
+ $8EBD DEFB $0A,$0F,$03,$02,$40,$18,$48,$6E,$6E  ; room 10: fire breath (fire breath), x $40 y $18
  $8EC6 DEFW $9585
  $8EC8 DEFB $12,$10,$20,$05,$09,$04,$28,$08,$68  ; room 18: Death (Death), x $09 y $04
  $8ED1 DEFW $95B9

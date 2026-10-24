@@ -1,6 +1,7 @@
 ; Behaviour block: a yellow spider (kind 5, room 3)
 ;
-; Used by the yellow spiders of Wine supplies (attribute $06); the sprites and the table #R$9463 at the end of this block are shared with #R$9445.
+; Used by the yellow spiders of Wine supplies (attribute $06); the sprites and the table #R$9463 at the end of this
+; block are shared with #R$9445.
 ; .
 ; Layout: see #R$93D3.
 @label=BehaviourSpiderYellow

@@ -1,10 +1,12 @@
-; Behaviour block: a second part of the Pestilent Beast (kind 15, room 10)
+; Behaviour block: the fire breath of the Pestilent Beast (kind 15, room 10)
 ;
-; Used by the second object of room 10 (attribute $42), whose handler #R$B8C5 spawns the flame that runs left along the
-; platform (#R$BD22) on a timer (hit box 46 x 14 pixels). It has a long list of sprites. After the 5 header bytes: attribute, width, height and four sprite addresses, then five groups of
-; (attribute, shift table pointer #R$AC9F, height, sprites), the last four with the sprites of the monk and of the
-; crusaders. Unknown: what this object shows and does (TODO).
-@label=BehaviourBeastPart
+; Used by the fire breath of the Beast (attribute $42): a red jet of two sprites, one under the other, that comes down
+; from the mouth for the last 38 frames of a 110-frame cycle and kills Jean on contact; at the end of the cycle
+; #R$B8C5 makes the two flames of #R$BD22 and #R$BD34 (hit box 46 x 14 pixels). After the 5 header bytes: attribute,
+; width in bytes, height in 2-pixel units, and the four sprite addresses of the jet (two frames of each of the two
+; sprites). Five groups of (attribute, shift table #R$AC9F, height, sprite addresses) follow, the last four with the
+; sprites of the monk and of the crusaders: Unknown whether anything reads them (TODO).
+@label=BehaviourBeastFire
 b$9585 DEFB $00,$00,$17,$07,$02  ; hit box top, left, bottom, right (2-pixel units); slot +$15 (Unknown)
  $958A DEFB $42,$02,$0C  ; attribute, width (bytes), height (2-pixel units)
  $958D DEFW $D768    ; sprite $D768

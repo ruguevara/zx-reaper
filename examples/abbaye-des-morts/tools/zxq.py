@@ -421,12 +421,57 @@ def cmd_check(files=()):
                 sys.exit('git archive failed: %s' % git.stderr)
             for f in files:
                 shutil.copy(f, os.path.join(tmp, SKOOL_DIR, os.path.basename(f)))
+        # first the assembled blocks against the image: fast, and names the
+        # entries that differ (a tape built from them may take long, e.g. a
+        # packer, and only says which block differs)
+        r = subprocess.run(['make', '-s', 'build/blocks.stamp'], cwd=tmp, capture_output=True,
+                           text=True)
+        if r.returncode:
+            out = (r.stdout + r.stderr).strip().splitlines()
+            print('\n'.join(out[-15:]))
+            return r.returncode
+        bad = image_diffs(tmp)
+        if bad:
+            print('DIFF from %s:' % IMAGE)
+            for line in bad[:20]:
+                print('  ' + line)
+            return 1
         r = subprocess.run(['make', '-s', 'verify'], cwd=tmp, capture_output=True, text=True)
         out = (r.stdout + r.stderr).strip().splitlines()
         print('\n'.join(out[-15:]))
         return r.returncode
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
+
+
+def image_diffs(root):
+    """Ranges where the files SAVEBIN writes (src/build.asm, unshifted)
+    differ from the image, with the entries they fall in."""
+    from skoolkit.snapshot import get_snapshot
+    mem = get_snapshot(IMAGE)
+    text = open(os.path.join(root, 'src/build.asm')).read().split('ELSE')[0]
+    entries = load()
+    out = []
+    for m in re.finditer(r'SAVEBIN\s+"([^"]+)"\s*,\s*([$\w]+)\s*,\s*([$\w]+)', text):
+        path, start = os.path.join(root, m.group(1)), m.group(2)
+        try:
+            start = int(start[1:], 16) if start.startswith('$') else int(start, 0)
+        except ValueError:
+            continue          # a label: not an address of the image
+        if not os.path.exists(path):
+            continue
+        data = open(path, 'rb').read()
+        diff = [start + i for i, b in enumerate(data) if start + i < 65536 and mem[start + i] != b]
+        runs = []
+        for a in diff:
+            if runs and a <= runs[-1][1] + 1:
+                runs[-1][1] = a
+            else:
+                runs.append([a, a])
+        for lo, hi in runs:
+            e = next((e for e in entries if e.addr <= lo <= e.end), None)
+            out.append('$%04X-$%04X%s' % (lo, hi, '  in %s' % e.name if e else ''))
+    return out
 
 
 EQU = re.compile(r'^@equ=([A-Za-z_][A-Za-z0-9_]*)=(.+?)\s*$')

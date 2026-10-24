@@ -15,8 +15,10 @@
 ; .
 ; +7 byte: sprite height in 2-pixel units (slot +$0F)
 ; .
-; Only the heart, the crosses and the arch step through their frames by themselves (delays of 20, 5 and 3 frames; 2, 6 and
-; 9 frames each). The other types have a frame count of 0: their action routine chooses the frame from the item's flag (the
+; Only the heart, the crosses and the arch step through their frames by themselves (delays of 20, 5 and 3 frames; 2, 6
+; and
+; 9 frames each). The other types have a frame count of 0: their action routine chooses the frame from the item's flag
+; (the
 ; checkpoint, bell, levers, wheel) or there is only one. The church door trigger (type 7) has no frame list: it draws
 ; nothing.
 @label=ObjectTypeRecords

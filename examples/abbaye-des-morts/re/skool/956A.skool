@@ -1,6 +1,8 @@
 ; Behaviour block: a falling red flame (kind 4, rooms 22 and 23)
 ;
-; Used by the small red spinning flames that move up and down in Tortured souls and Ashes to ashes (attribute $42). The same sprite address is used for both directions: the sprite sheet has one for each row of the sheet ($DBE7 and $EBE7: frames 0 and 1).
+; Used by the small red spinning flames that move up and down in Tortured souls and Ashes to ashes (attribute $42).
+; The same sprite address is used for both directions: the sprite sheet has one for each row of the sheet ($DBE7 and
+; $EBE7: frames 0 and 1).
 ; .
 ; Layout: see #R$93D3.
 @label=BehaviourFireWheel

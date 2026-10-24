@@ -1,9 +1,9 @@
-; Behaviour block: the ghost (kind 8, room 11)
+; Behaviour block: the grinning ghost that chases Jean (kind 8, room 11)
 ;
-; Used by the smiling cyan ghost of Cave of illusions (attribute $45), which bounces off the tiles.
+; Used by the smiling cyan ghost of Cave of illusions (attribute $45), which floats toward Jean through free space (#R$B44B).
 ; .
 ; Layout: see #R$93D3.
-@label=BehaviourGhost
+@label=BehaviourChaser
 b$94B1 DEFB $01,$01,$06,$06,$02  ; hit box top, left, bottom, right; slot +$15 (Unknown)
  $94B6 DEFB $45      ; attribute
  $94B7 DEFW $AC9F    ; table of (first column, width) for x AND 3

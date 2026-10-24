@@ -12,7 +12,8 @@
 ;
 ; HL Popped from the call list: L = character row (0-21), H = column (0-30) of the top-left cell
 ; DE Popped: address of the 16-pixel-wide graphics (16 bytes for each character row)
-; BC Popped: B = height in 2-pixel units (a multiple of 4: 8 for the items, 12 for the arch), C = width (not used: it is always 2)
+; BC Popped: B = height in 2-pixel units (a multiple of 4: 8 for the items, 12 for the arch), C = width (not used: it
+; is always 2)
 ; AF Popped: A = attribute of the sprite's cells (F unused)
 @label=QueueBlockSprite
 c$97FD POP HL        ;

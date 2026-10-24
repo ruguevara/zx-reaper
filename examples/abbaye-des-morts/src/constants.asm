@@ -159,3 +159,6 @@ THIRD_MASK               EQU 0x18 ; mask of the screen third bits in the high by
 PIXEL_ROW_PAIRS          EQU 4 ; pairs of pixel rows (a cell has 8) copied by the redraw loop
 CTRL_MOVES               EQU 0x1F ; control bits 0-4: right, left, crouch and jump; any of them ends the intro
 CRUSADER_PERIOD          EQU 40 ; frames between two crusaders made by the spawner of rooms 5, 6 and 25
+CRUSADER_JUMP_FRAMES     EQU 6 ; frames of a crusader's jump along a speed curve (also the number of values of a curve)
+CRUSADER_STEP_SPEED      EQU 0x00A0 ; x speed of a crusader during a step up (8.8: 0.625 units a frame)
+CRUSADER_HOP_SPEED       EQU 0x0150 ; x speed of a crusader during a hop (8.8: 1.3 units a frame)

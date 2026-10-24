@@ -1,56 +1,71 @@
-; Spawn an object
+; Make the object slot of a room item
 ;
-; Used by the routine at #R$896B.
-c$897E INC HL        ;
- $897F LD A,(HL)     ;
- $8980 INC HL        ;
- $8981 PUSH HL       ;
- $8982 ADD A,A       ;
- $8983 LD HL,$8A8F   ;
- $8986 CALL $A1D9    ;
- $8989 LD E,(HL)     ;
- $898A INC HL        ;
- $898B LD D,(HL)     ;
- $898C POP HL        ;
- $898D CALL $8A6E    ;
- $8990 LD A,(HL)     ;
- $8991 INC HL        ;
- $8992 LD (IX+$02),A ;
- $8995 LD A,(HL)     ;
- $8996 INC HL        ;
- $8997 LD (IX+$03),A ;
- $899A LD A,(HL)     ;
- $899B INC HL        ;
- $899C LD (IX+$04),A ;
- $899F LD A,(HL)     ;
- $89A0 INC HL        ;
- $89A1 LD (IX+$05),A ;
- $89A4 LD (IX+$06),C ;
- $89A7 LD (IX+$07),B ;
- $89AA LD A,(DE)     ;
- $89AB INC DE        ;
- $89AC LD (IX+$08),A ;
- $89AF LD (IX+$09),A ;
- $89B2 XOR A         ;
- $89B3 LD (IX+$0A),A ;
- $89B6 LD A,(DE)     ;
- $89B7 INC DE        ;
- $89B8 LD (IX+$0B),A ;
- $89BB LD A,(DE)     ;
- $89BC INC DE        ;
- $89BD LD (IX+$00),A ;
- $89C0 LD A,(DE)     ;
- $89C1 INC DE        ;
- $89C2 LD (IX+$01),A ;
- $89C5 LD A,(DE)     ;
- $89C6 INC DE        ;
- $89C7 LD (IX+$0C),A ;
- $89CA LD A,(DE)     ;
- $89CB INC DE        ;
- $89CC LD (IX+$0D),A ;
- $89CF LD A,(DE)     ;
- $89D0 INC DE        ;
- $89D1 LD (IX+$0E),A ;
- $89D4 LD A,(DE)     ;
- $89D5 LD (IX+$0F),A ;
- $89D8 RET           ;
+; Finds a free slot (#R$8A6E) and fills it from the room item record (#R$8EDF) and the type record of its type
+; (#R$8AA7, found through the table #R$8A8F). Slot layout, as the handler #R$A600 and #R$A5E9 use it:
+; .
+; +0 word: handler (type record +2); +2 byte: row (record +4); +3 byte: column (record +5); +4 word: action routine
+; (record +6; for parchments the two text line numbers); +6 word: address of the item's flag byte (BC);
+; +8 byte: frame countdown and +9 byte: its reload (type record +0); +$A byte: current frame, 0; +$B byte: number of
+; frames (type +1); +$C word: frame list (type +4); +$E byte: sprite width and +$F byte: height (type +6, +7).
+; .
+; The carry of #R$8A6E is not tested: with no free slot the routine would write into the slot IX held before. It cannot
+; happen with the shipped tables, which have at most 10 records in a room (room 15), for 11 slots, all free on room
+; entry (checked from the tables).
+;
+; HL Address of the record + 2 (the high byte of the flag pointer: #R$896B has read the pointer)
+; BC Address of the item's flag byte
+; O:IX Address of the slot
+@label=MakeItemSlot
+c$897E INC HL               ; HL = record + 3: the type
+ $897F LD A,(HL)            ; type
+ $8980 INC HL
+ $8981 PUSH HL              ; save the pointer to the record + 4
+ $8982 ADD A,A              ; two bytes per entry
+ $8983 LD HL,$8A8F          ; ObjectTypeTable
+ $8986 CALL $A1D9           ; = #R$A1D9, HL += A
+ $8989 LD E,(HL)            ; DE = type record
+ $898A INC HL
+ $898B LD D,(HL)
+ $898C POP HL               ; HL = record + 4
+ $898D CALL $8A6E           ; IX = a free slot
+ $8990 LD A,(HL)            ; row
+ $8991 INC HL
+ $8992 LD (IX+$02),A
+ $8995 LD A,(HL)            ; column
+ $8996 INC HL
+ $8997 LD (IX+$03),A
+ $899A LD A,(HL)            ; action routine, low byte
+ $899B INC HL
+ $899C LD (IX+$04),A
+ $899F LD A,(HL)            ; ... high byte
+ $89A0 INC HL
+ $89A1 LD (IX+$05),A
+ $89A4 LD (IX+$06),C        ; flag address
+ $89A7 LD (IX+$07),B
+ $89AA LD A,(DE)            ; frame countdown ...
+ $89AB INC DE
+ $89AC LD (IX+$08),A
+ $89AF LD (IX+$09),A        ; ... and its reload
+ $89B2 XOR A                ; frame 0
+ $89B3 LD (IX+$0A),A
+ $89B6 LD A,(DE)            ; number of frames
+ $89B7 INC DE
+ $89B8 LD (IX+$0B),A
+ $89BB LD A,(DE)            ; handler (low byte)
+ $89BC INC DE
+ $89BD LD (IX+$00),A
+ $89C0 LD A,(DE)            ; handler (high byte)
+ $89C1 INC DE
+ $89C2 LD (IX+$01),A
+ $89C5 LD A,(DE)            ; frame list (low)
+ $89C6 INC DE
+ $89C7 LD (IX+$0C),A
+ $89CA LD A,(DE)            ; frame list (high)
+ $89CB INC DE
+ $89CC LD (IX+$0D),A
+ $89CF LD A,(DE)            ; width
+ $89D0 INC DE
+ $89D1 LD (IX+$0E),A
+ $89D4 LD A,(DE)            ; height
+ $89D5 LD (IX+$0F),A
+ $89D8 RET

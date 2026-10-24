@@ -1,19 +1,19 @@
 ; Animate the bubbling blood tiles of the bottom row
 ;
-; Called once per frame by the main loop #R$85FC. The byte at #R$AE20 is RET until the room script uses op $9E
+; Called once per pass by the main loop #R$85FC. The byte at #R$AE20 is RET until the room script uses op $9E
 ; (#R$A1B9, rooms 21, 22 and 23: the red blood at the foot of the room), which makes it NOP; room entry (#R$86B9) puts
-; the RET back. Every second frame (#R$8510) it goes along the bottom row of the tile map (row 21) and swaps tile $3B
+; the RET back. Every second pass (#R$8510) it goes along the bottom row of the tile map (row 21) and swaps tile $3B
 ; for $3C and $3C for $3B, and sets the redraw bit in the tile flag map for each cell it changed, so that the blood
 ; flickers. The cells keep their flag class, the swap only changes what is drawn.
 ;
 ; Hardware: none directly (the redraw routine #R$9B5A paints the marked cells).
 @label=AnimateBloodTiles
 c$AE20 NOP           ; RET unless op $9E of the room script switched the animation on
- $AE21 LD HL,$8510   ; frame counter
+ $AE21 LD HL,$8510   ; pass counter
  $AE24 DEC (HL)      ;
  $AE25 RET NZ        ;
 @isub=LD (HL),LIQUID_ANIM_PERIOD
- $AE26 LD (HL),$02   ; every second frame
+ $AE26 LD (HL),$02   ; every second pass
 @isub=LD BC,SCREEN_COLS*256+1
  $AE28 LD BC,$2001   ; B = 32 cells of the row (C is not used)
 @isub=LD DE,TILE_MAP+(MAP_ROWS-1)*SCREEN_COLS

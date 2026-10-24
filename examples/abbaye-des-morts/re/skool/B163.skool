@@ -1,50 +1,67 @@
-; Routine at B163
-c$B163 POP BC        ;
- $B164 POP DE        ;
- $B165 POP HL        ;
- $B166 LD BC,$00A0   ;
+; Entity handler: crusader stepping up (path command 1), and the jump's common tail
+;
+; The handler that the path command 1 puts in the slot (#R$B1F3) for six frames: the crusader climbs a block 8 pixels
+; high. It is #R$B10C with the fixed x speed $00A0 (CRUSADER_STEP_SPEED) and the curve #R$B0E8 (up with decreasing
+; speed, sum -$400). Observed in room 5 at x = $48 and $50: y goes from $4400 to $4000 and from $4000 to $3C00. After
+; the sixth frame the handler goes back to #R$B1D4. The three jump handlers enter #R$B18E with HL = index in the curve,
+; BC = the curve, DE = y and A = x.
+; .
+; Hardware: none.
+;
+; SP Slot address + 2
+@label=UpdateCrusaderStepUp
+c$B163 POP BC        ; skip +2: the speed
+ $B164 POP DE        ; skip +4: the path pointer
+ $B165 POP HL        ; x (8.8)
+@isub=LD BC,CRUSADER_STEP_SPEED
+ $B166 LD BC,$00A0   ; fixed x speed of the step
  $B169 ADD HL,BC     ;
- $B16A PUSH HL       ;
- $B16B LD A,H        ;
+ $B16A PUSH HL       ; store x
+ $B16B LD A,H        ; A = x in 2-pixel units
  $B16C POP HL        ;
- $B16D POP DE        ;
- $B16E POP BC        ;
+ $B16D POP DE        ; DE = y (8.8)
+ $B16E POP BC        ; BC = state: B frames left, C index in the curve
  $B16F LD L,C        ;
- $B170 LD H,$00      ;
+ $B170 LD H,$00      ; HL = index
  $B172 INC C         ;
- $B173 DJNZ $B18A    ;
- $B175 LD BC,$0600   ;
+ $B173 DJNZ $B18A    ; not the last frame
+@isub=LD BC,CRUSADER_JUMP_FRAMES*256
+ $B175 LD BC,$0600   ; the last frame: reset the state
  $B178 EXX           ;
- $B179 LD ($B188),SP ;
- $B17D LD HL,$FFF6   ;
+@isub=LD (SmcStepRestoreSP+1),SP
+ $B179 LD ($B188),SP ; SP (slot + $C) for the LD SP below
+ $B17D LD HL,$FFF6   ; -10: SP to slot + 2
  $B180 ADD HL,SP     ;
  $B181 LD SP,HL      ;
  $B182 LD HL,$B1D4   ;
- $B185 PUSH HL       ;
+ $B185 PUSH HL       ; back to walking
  $B186 EXX           ;
- $B187 LD SP,$B187   ;
-*$B18A PUSH BC       ;
- $B18B LD BC,$B0E8   ;
-; This entry point is used by the routines at #R$B10C and #R$B139.
-*$B18E ADD HL,HL     ;
+@label=SmcStepRestoreSP
+ $B187 LD SP,$B187   ; the operand is stored by #R$B179
+*$B18A PUSH BC       ; store the state
+ $B18B LD BC,$B0E8   ; the curve of the step
+; Common tail of the three jumps: BC = curve, HL = index, DE = y (8.8), A = x in 2-pixel units, SP = slot + $A.
+; Adds the curve value to y and stores it, puts (y, x/4) in the draw command, tests the hit box and goes on at #R$B1AC.
+@label=UpdateCrusaderJump
+*$B18E ADD HL,HL     ; 2 bytes per curve value
  $B18F ADD HL,BC     ;
  $B190 LD C,(HL)     ;
  $B191 INC HL        ;
- $B192 LD B,(HL)     ;
- $B193 EX DE,HL      ;
- $B194 ADD HL,BC     ;
- $B195 POP BC        ;
- $B196 PUSH BC       ;
- $B197 PUSH HL       ;
- $B198 POP HL        ;
- $B199 POP BC        ;
- $B19A LD E,H        ;
- $B19B LD L,H        ;
- $B19C LD H,A        ;
- $B19D LD D,A        ;
- $B19E EX AF,AF'     ;
+ $B192 LD B,(HL)     ; BC = vertical speed
+ $B193 EX DE,HL      ; HL = y
+ $B194 ADD HL,BC     ; y moves
+ $B195 POP BC        ; SP slot + $C
+ $B196 PUSH BC       ; SP slot + $A again
+ $B197 PUSH HL       ; store y at slot + 8
+ $B198 POP HL        ; SP slot + $A
+ $B199 POP BC        ; SP slot + $C: the hit box words come next
+ $B19A LD E,H        ; E = y in 2-pixel units
+ $B19B LD L,H        ; L = y
+ $B19C LD H,A        ; H = x
+ $B19D LD D,A        ; D = x
+ $B19E EX AF,AF'     ; A' = x: its low two bits select the shifted copy
  $B19F SRA H         ;
- $B1A1 SRA H         ;
- $B1A3 LD ($ACD3),HL ;
- $B1A6 LD HL,$B1AC   ;
- $B1A9 JP $A851      ;
+ $B1A1 SRA H         ; x / 4: byte column
+ $B1A3 LD ($ACD3),HL ; draw command position: (y, x/4)
+ $B1A6 LD HL,$B1AC   ; where the hit test goes on
+ $B1A9 JP $A851      ; HitTest

@@ -1,6 +1,7 @@
 ; Attribute copy chain (first 21 of 31 LDI)
 ;
-; Part of #R$95FF: the unrolled copy of the attribute bytes of a run of cells, entered in the middle by the JR at #R$9634
+; Part of #R$95FF: the unrolled copy of the attribute bytes of a run of cells, entered in the middle by the JR at
+; #R$9634
 ; whose offset is 2 x (32 - run length). Every LDI copies one attribute from the redraw attribute buffer (#R$C400 +
 ; index) to the attribute file. The chain goes on at #R$9660, whose last instructions finish the run.
 ; .
