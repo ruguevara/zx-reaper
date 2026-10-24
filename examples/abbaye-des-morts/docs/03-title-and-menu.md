@@ -74,7 +74,7 @@ The menu loop ([ControlsMenuLoop](../src/controls.asm#L339)) waits for a key wit
 
 | Key | Effect |
 | --- | --- |
-| 1 | [ToggleKempston](../src/controls.asm#L260): flips [KempstonSwitch](../src/controls.asm#L45) between `RET` and `NOP` and redraws the line |
+| 1 | [ToggleKempston](../src/controls.asm#L260): flips [KempstonSwitch](../src/controls.asm#L45) between `RET` and `NOP` and redraws the line (observed: "Kempston disabled" after one press) |
 | 2 | [RedefineKeys](../src/controls.asm#L353) |
 | ENTER | back to the title ([TitleMenu](../src/controls.asm#L295): [RestoreMenuArea](../src/controls.asm#L574), then the title loop) |
 
@@ -190,8 +190,9 @@ ENTER on the title returns to [StartGame](../src/mainloop.asm#L70), which makes
 (no player), enters room 0 and draws it: [RoomScript00](../src/roomscripts.asm#L97) clears the screen,
 prints strings 38-42 centred and clears every redraw mark, so the room
 drawing that follows ([RedrawRoom](../src/sprites.asm#L1162) draws only marked cells) leaves
-the text alone. The room objects of room 0 are four runners of kind 0
-([UpdateIntroRunner](../src/entities.asm#L1147)), which pass between the two blocks of text: Jean
+the text alone; only the blank cell at row 16, column 0, whose mark the
+command skips, is drawn (F5, F152). The room objects of room 0 are four runners of kind 0
+([UpdateIntroRunner](../src/entities.asm#L1148)), which pass between the two blocks of text: Jean
 at x $F7 and three crusaders at $E3, $D7 and
 $CB, all left of the room, running right until x reaches $80, where each
 frees its slot. Jean runs at 1 pixel per frame and the crusaders at 0.75, so
@@ -200,7 +201,7 @@ stays alone on the screen.
 
 The loop of [RunIntro](../src/sequences.asm#L21) is the main loop's drawing half without its gates:
 wait for a complete frame list ([WaitFrameList](../src/sequences.asm#L56)), run it, build and draw
-the changed cells, read [KeyCode](../src/controls.asm#L179). It returns when any key is held, when a
+the changed cells, read the key code into [KeyCode](../src/controls.asm#L179) ([GetKeyCode](../src/controls.asm#L209)). It returns when any key is held, when a
 control bit 0-4 is set (which includes the joystick), or when the room state
 is 5. There is no demo: the intro waits for a key as long as it takes (F108).
 R and Y held during the intro do not end the game there, because the start

@@ -16,7 +16,8 @@
 ;
 ; class 1 ($81, bit 0 TILE_STANDABLE alone): tiles $10, $26 and $87, a one-way
 ; platform: Jean jumps up through it and walks through it from the sides, and
-; lands on it only when falling across its top edge (observed, F74); the scythe
+; lands on it only when falling across its top edge (observed, F74): a jump
+; that leaves his feet inside its row falls back through it (F141); the scythe
 ; of UpdateScytheFalling lands on it like on class 3
 ;
 ; class 3 ($83, bits 0 and 1): the walls and floors, solid from every side (bit

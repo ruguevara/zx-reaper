@@ -33,20 +33,20 @@ clears $8512-$854D and then sets the lives to 9 (F123).
 | $8507 | [PagingState](../src/variables.asm#L53) | last value written to port $7FFD |
 | $8508 | [UnusedByte](../src/variables.asm#L63) | unused |
 | $8509 | [RoomNumber](../src/variables.asm#L80) | current room, 0-25 |
-| $850A | [RoomTableEnd](../src/variables.asm#L91) | constant $1A, read together with the room as a word: the end mark of the room tables |
-| $850B | [ExitDirection](../src/variables.asm#L104) | side of the last room exit: 0 right, 1 left, 2 down, 3 up; the next room is swept in from it (F41) |
+| $850A | [RoomTableEnd](../src/variables.asm#L91) | constant $1A, read together with the room as a word: the end mark of the room tables, which are not sorted by room and are scanned to the end |
+| $850B | [ExitDirection](../src/variables.asm#L104) | side of the last room exit: 0 right, 1 left, 2 down, 3 up; the next room is swept in from it (F41). A text window clears it, so the room comes back from the left |
 | $850C | [RoomState](../src/variables.asm#L125) | what the main loop does next; bit 7 lets the frame routine run the game logic ([Game loop](04-game-loop.md)) |
 | $850D | [RoomNameString](../src/variables.asm#L134) | string number of the room name in the status bar |
 | $850E | [ParchmentLine1](../src/variables.asm#L146), [ParchmentLine2](../src/variables.asm#L148) | string numbers of the two lines of the parchment being read |
-| $8510 | [BloodAnimTimer](../src/variables.asm#L161) | countdown of the bubbling blood (rooms 21-23) |
-| $8511 | [CrossFlashTimer](../src/variables.asm#L173) | countdown of the colour step of the ring of crosses |
+| $8510 | [BloodAnimTimer](../src/variables.asm#L161) | countdown of the bubbling blood (rooms 21-23), one step per pass of the main loop |
+| $8511 | [CrossFlashTimer](../src/variables.asm#L173) | countdown of the colour step of the ring of crosses, one step per pass of the main loop |
 | $8512 | [RespawnX](../src/variables.asm#L191), [RespawnY](../src/variables.asm#L195) | two words: where Jean appears when a room is entered in state 2 or 4 |
-| $8516 | [PlayerBoxXMax](../src/variables.asm#L213) | 4 bytes: Jean's hit box, right, left, bottom and top edge, rebuilt every frame |
-| $851A | [ChurchDoorShut](../src/variables.asm#L233) | $FF once Jean has entered the Abandoned church (room 7) |
-| $851B | [BellRung](../src/variables.asm#L265) | the bell of room 2: 0 or 1 |
-| $851C | [LeverRoom9](../src/variables.asm#L267), [LeverRoom10](../src/variables.asm#L269) | the levers of rooms 9 and 10: 0 or 1 |
+| $8516 | [PlayerBoxXMax](../src/variables.asm#L213) | 4 bytes: Jean's hit box, right, left, bottom and top edge, rebuilt every frame (lower and wider while he crouches) |
+| $851A | [ChurchDoorShut](../src/variables.asm#L233) | $FF once Jean has touched the trigger inside the Abandoned church (room 7), which shuts the door behind him |
+| $851B | [BellRung](../src/variables.asm#L265) | the bell of room 2: 0 or 1; when set, the script of room 8 opens its floor down to room 13 (F142) |
+| $851C | [LeverRoom9](../src/variables.asm#L267), [LeverRoom10](../src/variables.asm#L269) | the levers of rooms 9 and 10: 0 or 1; when set, the scripts of rooms 19 and 8 no longer draw their red doors (F145) |
 | $851E | [WheelState](../src/variables.asm#L271) | the wheel of faith of room 17: 0 at rest, 6 turned, bit 7 = still touched (F31) |
-| $851F | [LeverRoom20](../src/variables.asm#L273) | the lever of room 20 |
+| $851F | [LeverRoom20](../src/variables.asm#L273) | the lever of room 20: 0 or 1; its pull removes the gate of that room at once (F145) |
 | $8520 | | unused |
 | $8521 | [ChaliceTaken](../src/variables.asm#L289) | $FF once the chalice is taken |
 | $8522 | [SatanSmoked](../src/variables.asm#L302) | $FF once Satan has turned to smoke |
@@ -63,7 +63,7 @@ clears $8512-$854D and then sets the lives to 9 (F123).
 | $8551 | [MusicTrack](../src/variables.asm#L529) | track for the 128K music player; not read on a 48K |
 | $8552 | [SpawnQueueCount](../src/variables.asm#L543) | requests waiting in the object list |
 | $8553 | [CrossColours](../src/variables.asm#L553) | 6 attributes the ring of crosses cycles through |
-| $8559 | [ProbeRight](../src/variables.asm#L568) | 4 bytes: tile flags around the chasing face of room 11 |
+| $8559 | [ProbeRight](../src/variables.asm#L568) | 4 bytes: tile flags around the chasing ghost of room 11 |
 | $855D | [RedrawListPtr](../src/variables.asm#L584) | word: write pointer of the redraw run list |
 | $855F-$8584 | [InterruptStack](../src/variables.asm#L595) | the interrupt handler's stack |
 
@@ -71,7 +71,7 @@ Jean's variables are in the player module (&#36;A894-&#36;A8A4), next to his cod
 
 | Address | Name | Meaning |
 | --- | --- | --- |
-| $A894 | [PlayerState](../src/player.asm#L33) | 0 none (intro, ending), 1 dying, 2 jumping, 3 crouching, 4 standing or walking, 5 falling, $FF debug room warp |
+| $A894 | [PlayerState](../src/player.asm#L33) | 0 no player (intro, ending), 1 dying, 2 jumping, 3 crouching, 4 standing or walking, 5 falling, $FF debug room warp |
 | $A895 | [PlayerAnimTimer](../src/player.asm#L37) | frames to the next animation frame |
 | $A896 | [PlayerFrame](../src/player.asm#L39) | animation frame |
 | $A897 | [PlayerFacing](../src/player.asm#L41) | 0 right, 1 left |
@@ -124,7 +124,7 @@ list of k positions. The short names are those of the comments in
 | $8D | RUNS | y x t c, c counts | tile t along the rows from (y, x): the counts alternate between cells drawn and cells skipped | [OpTileStripes](../src/script.asm#L456) |
 | $8E | CURSOR | y x | text cursor at pixel row y, pixel column x | [OpSetTextCursor](../src/script.asm#L774) |
 | $8F | FILLATTR | y x w h a | fill attribute cells with a | [OpFillAttrs](../src/script.asm#L169) |
-| $90 | REDRAWMARK | f | 1: mark every cell for redraw; 0: clear the marks | [OpMarkRedraw](../src/script.asm#L987) |
+| $90 | REDRAWMARK | f | 1: mark every cell for redraw; 0: clear the marks (the cell at $6000 is skipped, F5) | [OpMarkRedraw](../src/script.asm#L987) |
 | $91 | PICTURES | t w h k, (y x)*k | a block of w x h tiles numbered t, t+1, ... at k positions | [OpStampTileBlock](../src/script.asm#L1020) |
 | $92 | STAMP1 | t k, (y x)*k | tile t at k positions | [OpStampOne](../src/script.asm#L342) |
 | $93 | ROW | y x n, t1..tn | a row of n listed tiles | [OpTileRow](../src/script.asm#L422) |
@@ -163,7 +163,8 @@ How the interpreter runs and what each room's script draws is in
 ## Room objects
 
 The creatures and moving things of every room are 77 records of 11 bytes in
-[RoomObjects](../src/objects.asm#L276), ended by the room byte $1A. [SpawnRoomObjects](../src/sequences.asm#L424) scans the
+[RoomObjects](../src/objects.asm#L276), ended by the room byte $1A. The table
+is not sorted by room: [SpawnRoomObjects](../src/sequences.asm#L424) scans the
 whole table on room entry and makes a slot for every record of the current
 room ([SpawnRoomObject](../src/sequences.asm#L456), F96, F102).
 
@@ -175,27 +176,27 @@ room ([SpawnRoomObject](../src/sequences.asm#L456), F96, F102).
 | +3 | 1 | animation delay or timer; for kind 1 the delay before the first crusader | +$12, +$13 |
 | +4 | 1 | x, 2-pixel units | +7 |
 | +5 | 1 | y, 2-pixel units | +9 |
-| +6 | 1 | initial timer or animation state | +&#36;A, +&#36;B |
-| +7 | 1 | lower patrol limit; countdown of the timer kinds; template low byte for kind 1 | +4 |
-| +8 | 1 | upper patrol limit; its reload; template high byte for kind 1; end x of a kind 0 runner | +5 |
+| +6 | 1 | a timer and its reload: the start delay of a drop, the plants' spit reload, the delay of the Beast's fire, the first attack of Death and of Satan; 0 for the other kinds | +&#36;A, +&#36;B |
+| +7 | 1 | lower patrol limit (x or y); y of a drop's stalactite tip; cycle countdown of the fish and of the Beast's fire; template low byte for kind 1 | +4 |
+| +8 | 1 | upper patrol limit; y where a drop's fall ends; reload of the fish and fire countdown; template high byte for kind 1; end x of a kind 0 runner; start delay of the chasing ghost | +5 |
 | +9 | 2 | behaviour block: how the kind looks and its hit box | +&#36;C-+&#36;F from the block, +$10 pointer |
 
 | Kind | Handler | What (rooms) |
 | --- | --- | --- |
-| 0 | [UpdateIntroRunner](../src/entities.asm#L1147) | Jean and three crusaders crossing the intro screen (0) |
-| 1 | [UpdateCrusaderSpawner](../src/entities.asm#L139) | makes a running crusader every 40 frames from a template (5, 6, 25) |
-| 2, 3 | [UpdatePatrolLeft](../src/entities.asm#L788), [UpdatePatrolRight](../src/entities.asm#L1068) | horizontal patrols starting left or right: rats, bats, worms, skeletons, soldiers, ghosts, flyers, devils |
-| 4, 5 | [UpdatePatrolDown](../src/entities.asm#L1020), [UpdatePatrolUp](../src/entities.asm#L722) | vertical patrols starting down or up: spiders, fireballs, flies |
-| 6, 7 | [UpdateHangedDown](../src/entities.asm#L937), [UpdateHangedUp](../src/entities.asm#L648) | the hanged men of room 9 on their ropes (no record starts as kind 7) |
-| 8 | [UpdateChaser](../src/entities.asm#L1449) | the grinning face of room 11 that follows Jean |
-| 9 | [UpdateDropHanging](../src/entities.asm#L1631) | water drops (15, 19) |
-| 10 | [UpdateArcher](../src/entities.asm#L1900) | skeleton archers (17, 21) |
-| 11 | [UpdateStoneHead](../src/entities.asm#L1853) | stone heads in the wall that shoot arrows (20, 22) |
-| 12 | [UpdatePlant](../src/entities.asm#L2057) | plants that spit seeds (14) |
-| 13 | [UpdateFishWaiting](../src/entities.asm#L2510) | fish that jump out of the water (16, 19) |
-| 14, 15 | [UpdateBeastHead](../src/entities.asm#L2706), [UpdateBeastFire](../src/entities.asm#L2792) | the Pestilent Beast and its fire breath (10) |
-| 16 | [UpdateDeathLeft](../src/entities.asm#L3193) | Death (18) |
-| 17 | [UpdateSatan](../src/entities.asm#L3632) | Satan (24) |
+| 0 | [UpdateIntroRunner](../src/entities.asm#L1148) | Jean and three crusaders crossing the intro screen (0) |
+| 1 | [UpdateCrusaderSpawner](../src/entities.asm#L140) | makes a running crusader every 40 frames from a template (5, 6, 25) |
+| 2, 3 | [UpdatePatrolLeft](../src/entities.asm#L789), [UpdatePatrolRight](../src/entities.asm#L1069) | horizontal patrols starting left or right: rats, bats, worms, skeletons, knights, ceiling ghosts, birds, demons (kind 3 only for one rat, one bat and one demon) |
+| 4, 5 | [UpdatePatrolDown](../src/entities.asm#L1021), [UpdatePatrolUp](../src/entities.asm#L723) | vertical patrols starting down or up: green spiders and fire wheels (kind 4), yellow spiders and flies (kind 5) |
+| 6, 7 | [UpdateHangedDown](../src/entities.asm#L938), [UpdateHangedUp](../src/entities.asm#L649) | the hanged men of room 9 on their ropes (no record starts as kind 7) |
+| 8 | [UpdateChaser](../src/entities.asm#L1450) | the chasing ghost of room 11, a grinning head that follows Jean |
+| 9 | [UpdateDropHanging](../src/entities.asm#L1632) | water drops (15, 19) |
+| 10 | [UpdateArcher](../src/entities.asm#L1901) | skeleton archers (17, 21) |
+| 11 | [UpdateStoneHead](../src/entities.asm#L1854) | stone heads in the wall that shoot arrows (20, 22) |
+| 12 | [UpdatePlant](../src/entities.asm#L2058) | plants that spit seeds (14) |
+| 13 | [UpdateFishWaiting](../src/entities.asm#L2511) | fish that jump out of the water (16, 19) |
+| 14, 15 | [UpdateBeastHead](../src/entities.asm#L2707), [UpdateBeastFire](../src/entities.asm#L2793) | the head of the Pestilent Beast, only drawn (no hit test), and its fire breath (10) |
+| 16 | [UpdateDeathLeft](../src/entities.asm#L3194) | Death (18) |
+| 17 | [UpdateSatan](../src/entities.asm#L3633) | Satan (24) |
 
 A patrol is one creature with two handlers that swap themselves in the
 slot's first word at the limits (F86, F97). The creatures are described in
@@ -203,8 +204,8 @@ slot's first word at the limits (F86, F97). The creatures are described in
 
 ## Room items
 
-The things Jean can touch are 45 records of 8 bytes in [RoomItems](../src/objects.asm#L616), ended
-by the room byte $1A. On room entry [SpawnRoomItems](../src/sequences.asm#L295) makes a slot for every
+The things Jean can touch are 45 records of 8 bytes in [RoomItems](../src/objects.asm#L616), in the
+order of their flags rather than of their rooms, ended by the room byte $1A. On room entry [SpawnRoomItems](../src/sequences.asm#L295) makes a slot for every
 record of the room whose flag byte is not $FF ([SpawnItem](../src/sequences.asm#L320),
 [MakeItemSlot](../src/sequences.asm#L360), F98).
 
@@ -236,14 +237,20 @@ Every record touched in the simulator did what its type says (F69). The
 type records ([ItemTypeRecords](../src/objects.asm#L57), 8 bytes each) give what goes into the
 slot: +0 frames between animation steps, +1 number of frames, +2 the slot
 handler ([RoomItemHandler](../src/gameframe.asm#L132), or [ParchmentHandler](../src/gameframe.asm#L788) for type 5), +4 the
-frame list, +6 sprite width in bytes (2), +7 height in units (8). Only the
-heart (2 frames every 20), the crosses (6 every 5) and the arch (9 every 3)
-animate by themselves; the other actions pick their frame from the flag. A
-frame list ([FramesHeart](../src/objects.asm#L129) and on, 34 frames in all) has 4 bytes per frame:
-the address of a 16 x 16 sprite in [SpriteArch](../src/graphics.asm#L44) and on (2 bytes per pixel
-row, no mask), the attribute and a 0. The cross list has 12 frames: six
-colours of the solid cross, then six of the thin one drawn while the cross
-cannot be taken (F31). What each action does is in
+frame list, +6 sprite width in bytes (2), +7 height in units (8, 12 for the
+arch). The church door trigger (type 7) draws nothing: its +0 byte, 1, is the
+first countdown of the door's rattle, which therefore comes on the frame
+after the door shuts (F146). The records of types 1 and 2 are identical; the
+action word of the room item record decides which set a cross belongs to.
+Only the heart (2 frames every 20), the crosses (6 every 5) and the arch (9
+every 3) animate by themselves; the other actions pick their frame from the
+flag. A frame list ([FramesHeart](../src/objects.asm#L129) and on, 34 frames in all) has 4 bytes per frame:
+the address of a 16 x 16 sprite (the arch is 16 x 24) in [SpriteArch](../src/graphics.asm#L44) and on (2 bytes per pixel
+row, no mask and no outline: an item replaces the background of its two cell
+columns), the attribute and a 0. The cross list has 12 frames: six colours
+of the cross that can be taken, then six of an inverted cross
+([SpriteInvertedCross](../src/graphics.asm#L273)), drawn while the cross
+cannot be taken (F31, F156). What each action does is in
 [Items and the ending](05-items-ending.md).
 
 ## Behaviour blocks
@@ -257,7 +264,7 @@ one layout:
 | Offset | Size | Meaning |
 | --- | --- | --- |
 | +0 | 4 | hit box: top, left, bottom and right edge relative to the position, in units (F100) |
-| +4 | 1 | number of animation frames, copied to slot +$15 (1 for the hanged men and the Beast's head, 2 for the others; the block's comment calls the byte unknown, [SpawnRoomObject](../src/sequences.asm#L456) and [StepAnimation](../src/gameframe.asm#L936) use it as the frame count; inferred) |
+| +4 | 1 | number of animation frames, copied to slot +$15, the frame count of [StepAnimation](../src/gameframe.asm#L936): 1 for the hanged men and the Beast's head, 2 for the others (Death shows a third frame all the same, F143) |
 | +5 | 1 | attribute |
 | +6 | 2 | table of (first column, width) pairs, one per x AND 3, into the pre-shifted copies of the sprite sheet ([ShiftPairs](../src/player.asm#L928)) |
 | +8 | 1 | height in units |
@@ -268,9 +275,14 @@ The other kinds keep the hit box and byte 4 and differ after it (attribute,
 height and width, then the sprite addresses): the drops, the archers, the
 stone heads, the plants, the fish, the Beast, Death (with its own shift table
 for a sprite 19 columns wide per frame) and Satan (two sprite halves). The
-same area holds the sprite blocks of the projectiles and the ending's actors
-(attribute, shift table, height, sprites), which the templates point to, for
-example [SpriteBlockFireball](../src/behaviours.asm#L344) and [SpriteBlockScythe](../src/behaviours.asm#L602).
+same area holds the sprite blocks that the templates point to: 3 bytes for a
+projectile (attribute, then the column and page of the first of four copies,
+each shifted 2 pixels and 4 pages further on; the fireballs and the seeds
+share [SpriteBlockFireball](../src/behaviours.asm#L344)'s sprite), and
+attribute, shift table, height and sprites for the scythe
+([SpriteBlockScythe](../src/behaviours.asm#L602)), the flames and the ending's
+actors; the smoke that replaces Satan has the attribute and four sprite
+addresses.
 
 ## Object slots
 
@@ -283,7 +295,7 @@ next word: the handler `POP`s its own state and ends with a jump to the next
 slot (F34; [Creatures](05-creatures.md)). The layout after word 0 belongs to
 the handler; three layouts are made by the three spawners (F80):
 
-| Offset | Room item ([MakeItemSlot](../src/sequences.asm#L360)) | Room object ([SpawnRoomObject](../src/sequences.asm#L456)) | From a template ([SpawnQueuedObjects](../src/sequences.asm#L225)) |
+| Offset | Room item ([MakeItemSlot](../src/sequences.asm#L360)) | Room object ([SpawnRoomObject](../src/sequences.asm#L456)) | From a template, the scythe for instance ([SpawnQueuedObjects](../src/sequences.asm#L225)) |
 | --- | --- | --- | --- |
 | +0 | handler [RoomItemHandler](../src/gameframe.asm#L132) | handler of the kind | handler |
 | +2 | row, column (bytes) | speed (word) | x speed (word) |
@@ -297,8 +309,12 @@ the handler; three layouts are made by the three spawners (F80):
 | +$12 | | animation counter, reload | frame, number of frames |
 | +$14 | | frame, number of frames | not set by the spawner |
 
-The hit box words hold edges, not sizes: [HitTest](../src/gameframe.asm#L856) adds both to the
-position to get the near and the far corner (F100). With 11 slots for at most
+Template slots differ after the hit box: a projectile (arrow, seed,
+fireball) has its sprite width and height at +&#36;E and the address of its
+3-byte sprite block at +$10; a splash has no hit box and keeps its animation
+words at +&#36;A and +&#36;C ([ArrowLeftTemplate](../src/templates.asm#L49)).
+The hit box words hold edges, not sizes: [HitTest](../src/gameframe.asm#L856)
+adds both to the position to get the near and the far corner (F100). With 11 slots for at most
 10 items and objects in one room (room 15) the room spawners never run out;
 spawns during play are dropped when every slot is busy (F110, F126).
 
@@ -316,7 +332,7 @@ frame [SpawnQueuedObjects](../src/sequences.asm#L225) turns every request into a
 | 0-5: handler, x speed, y speed | +0 to +5 |
 | 6: x offset (signed, units) | +6 = 0, +7 = x + offset |
 | 7: y offset | +8 = 0, +9 = y + offset |
-| 8-17: hit box, sprite block, animation | +&#36;A to +$13 |
+| 8-17: laid out per handler: hit box, size, sprite block, animation | +&#36;A to +$13 |
 
 A template of 16 bytes is followed directly by the next one, so the copy
 takes that template's first two bytes into slot +$12/+$13; the projectile
@@ -355,9 +371,9 @@ cell; the flag map three pages higher, at $5E00, holds a flag byte per cell
 
 | Table | Address | Contents |
 | --- | --- | --- |
-| [TileFlags](../src/tiles.asm#L36) | $CD00 | the flag byte a cell gets when the tile is placed |
-| [TileAttrs](../src/tiles.asm#L63) | $CE00 | the attribute of the tile |
-| [TileGfx](../src/tiles.asm#L92) | $CF00 | 8 bytes of bitmap, tile n at $CF00 + 8n |
+| [TileFlags](../src/tiles.asm#L37) | $CD00 | the flag byte a cell gets when the tile is placed |
+| [TileAttrs](../src/tiles.asm#L64) | $CE00 | the attribute of the tile |
+| [TileGfx](../src/tiles.asm#L93) | $CF00 | 8 bytes of bitmap, tile n at $CF00 + 8n |
 
 A flag map byte:
 
@@ -370,15 +386,17 @@ A flag map byte:
 | Class | Byte | Tiles | Meaning |
 | --- | --- | --- | --- |
 | 0 | $80 | $25, $75-$76, $7B-$7C, $7E-$86, $88-&#36;B7, $C0-&#36;FF | background |
-| 1 | $81 | $10, $26, $87 | platform solid from above only (F74) |
+| 1 | $81 | $10, $26, $87 | platform solid from above only (F74); a jump that leaves the feet inside its row falls back through it (F141) |
 | 3 | $83 | the walls and floors: $00-$04, $06-$0F, $11-$24, $27-$3A, $3D-$4D, $77-$7A, $7D, $B8-&#36;BF | bit 1 blocks walking and the head, bit 0 can be stood on (F7, F74) |
 | 4 | $84 | $05, $3B-$3C, $4E-$74 | harmful: kills Jean, removes a scythe (F56) |
 
 Class 2 (bit 1 alone) is used by no tile; script command $8A sets bit 1 on
-the border cells of a room, which makes an edge a wall. Every tile flag has bit 7 set, so a room that has
-just been built is drawn in full. [TileMapAddress](../src/helpers.asm#L141) and [FlagMapAddress](../src/helpers.asm#L166)
+the border cells of a room, which makes an edge a wall (a class 2 floor would
+hold Jean in place, a latent quirk, F140). Every tile flag has bit 7 set, so
+a placed tile is drawn; a new room is drawn in full because the room panel
+script (in room 4 the room's own script) marks every cell ($90 1, F152). [TileMapAddress](../src/helpers.asm#L141) and [FlagMapAddress](../src/helpers.asm#L166)
 give the address of a cell; [FlagRowTable](../src/startup.asm#L174) holds the address of each flag
-map row for the creature code.
+map row for the creature code and Jean's probes.
 
 ![The 256 tiles in their attributes](img/tiles.png)
 
@@ -425,11 +443,11 @@ the first pixel row in the high byte and the first column in the low byte.
 | --- | --- | --- |
 | $00-$62 | 0-23 | Jean: 9 frames of 11 columns, each frame as four copies shifted by 0, 2, 4 and 6 pixels (2, 3, 3 and 3 columns); frames 6-8 are the flames of his death |
 | $00-$2F | 24-39 | Jean crouching: 4 frames of 12 columns |
-| $30-$62 | 24-39 | small sprites: projectiles, drops, flames, stone heads, plants, fish |
+| $30-$62 | 24-39 | small sprites: spiders, projectiles, drops, splash, flames, stone heads, plants, fish |
 | $63-&#36;FF | 0-39 | the room's sprites, unpacked from the packed sets on room entry |
 
-The 20 packed sets ([PackedSetArcher](../src/graphics.asm#L333)-[PackedSetWorm](../src/graphics.asm#L686), $68CC-$717E) are
-unpacked by script command $97 through [UnpackSpriteSet](../src/unpack.asm#L92), with the record
+The 20 packed sets ([PackedSetArcher](../src/graphics.asm#L333)-[PackedSetWorm](../src/graphics.asm#L686), $68CC-$717E), whose
+contents F154 lists, are unpacked by script command $97 through [UnpackSpriteSet](../src/unpack.asm#L92), with the record
 of the set in [UnpackRecords](../src/unpack.asm#L24) (6 bytes each):
 
 | Offset | Size | Meaning |
@@ -458,6 +476,6 @@ Three lists pass the sprites of a frame from the game logic to the screen;
 
 | List | Address | Entry |
 | --- | --- | --- |
-| frame call list | [FrameList](../src/buffers.asm#L50) $BE5A, pointer [FrameListPtr](../src/buffers.asm#L28) | 10 bytes: routine ([QueueSprite](../src/sprites.asm#L50) or [QueueBlockSprite](../src/redraw.asm#L639)), position (y, x/4), sprite address, width in bytes, height in units, an unused byte, attribute ([SpriteCmd](../src/player.asm#L974)); closed by the word [LeaveFrameList](../src/templates.asm#L182); room for 16 (F38, F44) |
+| frame call list | [FrameList](../src/buffers.asm#L50) $BE5A, pointer [FrameListPtr](../src/buffers.asm#L28) | 10 bytes: routine ([QueueSprite](../src/sprites.asm#L50) or [QueueBlockSprite](../src/redraw.asm#L639)), position (y, x/4; cell row and column for [QueueBlockSprite](../src/redraw.asm#L639)), sprite address, width in bytes, height in units, an unused byte, attribute ([SpriteCmd](../src/player.asm#L974)); closed by the word [LeaveFrameList](../src/templates.asm#L182); room for 16 (F38, F44) |
 | draw queue | [DrawQueue](../src/buffers.asm#L75) $C000 | 16 jobs of 16 bytes: routine, graphics, rows, position, offset, height, width, attribute ([SpriteJob](../src/sprites.asm#L197), F39) |
 | redraw run list | [RedrawRuns](../src/buffers.asm#L150) $C200 | per row: row, number of runs, then (first column, cell index) per run; $FF ends it. The cells' lengths, attributes and 8 pixel rows are at $C300, $C400 and the pages $C500-&#36;CC00 (F99) |

@@ -402,9 +402,13 @@ def main():
         attr, pairs, height = mem[b], word(mem, b + 1), mem[b + 3]
         width = mem[pairs + 1]
         frames = []
-        for t in (word(mem, b + 4), word(mem, b + 6)):
+        tables = (word(mem, b + 4), word(mem, b + 6))
+        # frames per table: the second table follows the first (Death has 3,
+        # the throwing pose included, F143), else 2
+        count = (tables[1] - tables[0]) // 2 if 0 < tables[1] - tables[0] <= 8 else 2
+        for t in tables:
             if 0x6000 <= t < 0xC000:
-                for f in range(2):
+                for f in range(count):
                     g = word(mem, t + 2 * f)
                     if 0xD700 <= g < 0xFF00:
                         frames.append(sheet_sprite(mem, g + mem[pairs], width, 2 * height, attr))

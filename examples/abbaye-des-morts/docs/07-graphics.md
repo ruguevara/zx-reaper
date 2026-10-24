@@ -22,7 +22,8 @@ The hourglass of the tape loader: the outline of 3 x 3 cells
 frames. The frame follows the number of pages still to load; two sets of
 frames ([HourglassFramesEven](../src/stage2.asm#L775) and [HourglassFramesOdd](../src/stage2.asm#L806), top and
 bottom row of the strip below) differ in the falling grains and alternate with
-bit 0 of the byte counter, so the stream flickers while a frame is shown.
+bit 0 of the byte counter (even and odd counts), so the stream flickers while
+a frame is shown; frame 0, all the sand below, is the end of the load (F158).
 The loader's edge routine draws one quarter of the current frame (8 bytes)
 per call instead of the ROM's delay loop ([EdgeRoutines](../src/stage2.asm#L568)).
 
@@ -80,8 +81,8 @@ name panel (F124, F67).
 
 ![The 256 tiles of TileGfx, 32 to a row, each in its attribute from TileAttrs](img/tiles.png)
 
-The 256 tiles at [TileGfx](../src/tiles.asm#L92) (&#36;CF00), three times enlarged, tile n at row n /
-32, column n mod 32, each drawn in its attribute from [TileAttrs](../src/tiles.asm#L63). Tile
+The 256 tiles at [TileGfx](../src/tiles.asm#L93) (&#36;CF00), three times enlarged, tile n at row n /
+32, column n mod 32, each drawn in its attribute from [TileAttrs](../src/tiles.asm#L64). Tile
 $00 is the black solid cell of room 20's invisible bridge (F135), $3B and
 $3C the bubbling blood (F116), $4C the cross of the ring (F125), $7B and
 $7C the heart and the cross of the status bar, $80 the blank cell, $B7 the
@@ -93,13 +94,16 @@ rope of the hanged men (F88).
 
 The 34 frames of the lists at [FramesHeart](../src/objects.asm#L129) and after it, each a 16 x 16
 sprite (the arch 16 x 24) in its attribute: the heart (2 frames,
-[FramesHeart](../src/objects.asm#L129)); the cross in six bright colours, then the thin plus sign
-in the same six, shown for the crosses that cannot be taken with the wheel
-of faith as it is ([FramesCross](../src/objects.asm#L134), F31); the checkpoint, not active and
-active; the arch in its nine colour steps ([FramesArch](../src/objects.asm#L164)); the parchment;
-the red scroll (the same sprite, red); the bell at rest and ringing; the
-lever up and pulled; the wheel of faith in its two positions; the chalice
-([Items and the ending](05-items-ending.md)).
+[FramesHeart](../src/objects.asm#L129)); the cross in six bright colours, then the inverted cross
+(long arm up, the crossbar low) in the same six, not bright, shown for the
+crosses that cannot be taken with the wheel of faith as it is
+([FramesCross](../src/objects.asm#L134), F31, F156); the checkpoint, not active and active; the
+arch in its nine colour steps ([FramesArch](../src/objects.asm#L164)); the parchment; the red scroll
+(the same sprite, red); the bell at rest and rung; the lever leaning left
+and, pulled, leaning right; the wheel of faith in its two positions; the
+chalice ([Items and the ending](05-items-ending.md)). Items are drawn without a
+mask or an outline: each replaces the background of its two cell columns
+([Screen drawing](05-drawing.md)).
 
 ## Jean
 
@@ -125,26 +129,28 @@ in [`src/behaviours.asm`](../src/behaviours.asm):
 | --- | --- | --- |
 | $93D3 r0 | [BehaviourJean](../src/behaviours.asm#L45) | Jean walking across the intro screen (kind 0, room 0) |
 | $93E0 r0 | [BehaviourCrusader](../src/behaviours.asm#L65) | a crusader (kinds 0 and 1, rooms 0, 5, 6 and 25) |
-| $93F5 r13 | [BehaviourSkeleton](../src/behaviours.asm#L86) | a white walker (kind 2, rooms 13 and 22) |
-| $940A r22 | [BehaviourCeilingGhost](../src/behaviours.asm#L107) | a white walker near the ceiling (kind 2, rooms 22 and 23) |
+| $93F5 r13 | [BehaviourSkeleton](../src/behaviours.asm#L86) | a skeleton (kind 2, rooms 13 and 22) |
+| $940A r22 | [BehaviourCeilingGhost](../src/behaviours.asm#L107) | a ceiling ghost (kind 2, rooms 22 and 23) |
 | $941F r8 | [BehaviourBat](../src/behaviours.asm#L127) | a bat (kinds 2 and 3, room 8) |
 | $9430 r2 | [BehaviourRat](../src/behaviours.asm#L144) | a rat (kinds 2 and 3, room 2) |
 | $9445 r3 | [BehaviourSpider](../src/behaviours.asm#L165) | a spider on its thread (kind 4, rooms 3, 14, 16 and 19) |
 | $9452 r3 | [BehaviourSpiderYellow](../src/behaviours.asm#L181) | a yellow spider (kind 5, room 3) |
 | $9465 r9 | [BehaviourHangedMan](../src/behaviours.asm#L202) | a hanged man (kind 6, room 9) |
 | $9476 r9 | [BehaviourWorm](../src/behaviours.asm#L221) | a worm (kind 2, rooms 9 and 14) |
-| $9487 r12 | [BehaviourFlyA](../src/behaviours.asm#L238) | a fly (kind 5, room 12) |
+| $9487 r12 | [BehaviourFlyA](../src/behaviours.asm#L238) | a fly, bright (kind 5, room 12) |
 | $949C r12 | [BehaviourFlyB](../src/behaviours.asm#L257) | a fly, darker colour (kind 5, room 12) |
-| $94B1 r11 | [BehaviourChaser](../src/behaviours.asm#L277) | the grinning ghost that chases Jean (kind 8, room 11) |
-| $94C6 r20 | [BehaviourBird](../src/behaviours.asm#L298) | a flying creature (kind 2, rooms 20 and 23) |
-| $9506 r15 | [BehaviourKnight](../src/behaviours.asm#L372) | a soldier (kind 2, rooms 15 and 20) |
+| $94B1 r11 | [BehaviourChaser](../src/behaviours.asm#L277) | the chasing ghost (kind 8, room 11) |
+| $94C6 r20 | [BehaviourBird](../src/behaviours.asm#L298) | a bird (kind 2, rooms 20 and 23) |
+| $9506 r15 | [BehaviourKnight](../src/behaviours.asm#L372) | a knight (kind 2, rooms 15 and 20) |
 | $9555 r21 | [BehaviourDemon](../src/behaviours.asm#L454) | a demon (kinds 2 and 3, rooms 21 and 22) |
-| $956A r22 | [BehaviourFireWheel](../src/behaviours.asm#L476) | a falling red flame (kind 4, rooms 22 and 23) |
+| $956A r22 | [BehaviourFireWheel](../src/behaviours.asm#L476) | a fire wheel (kind 4, rooms 22 and 23) |
 
 ![Death](img/creature-95B9.png)
 
 [BehaviourDeath](../src/behaviours.asm#L585): Death (kind 16, room 18), drawn on its own because it is
-28 pixel rows high.
+28 pixel rows high: frames 0, 1 and 2 facing left, then the same facing
+right; frame 2 is the throwing pose, shown for 20 frames from each throw
+(F143).
 
 The other kinds have blocks of another layout and are shown in play, rooms
 entered directly with enemy hits switched off (&#36;A87A := $18):
@@ -172,10 +178,12 @@ and 22; see the room pictures above.
 [SpriteSheet](../src/spritesheet.asm#L25) in room 22, white on black, in four bands of 64 columns
 ($00-$3F, $40-$7F, $80-&#36;BF, $C0-&#36;FF), each band the 40 pixel rows $D7-&#36;FE.
 The first band holds the fixed sprites (Jean in his four shifted copies per
-frame, crouching, the small projectiles), the second starts with the flames
-of the dying animation; from column $63 come the four sets room 22 unpacks:
-devils, fireballs, skeletons and white ghosts, with their shifted and
-mirrored copies ([Screen drawing](05-drawing.md)).
+frame, crouching, the projectiles and the small creatures of
+[SpriteSheetLower](../src/spritesheet.asm#L281)), the second starts with the flames of the dying
+animation; from column $63 come the four sets room 22 unpacks: demons, fire
+wheels, skeletons and ceiling ghosts ([PackedSetDemon](../src/graphics.asm#L397),
+[PackedSetFireWheel](../src/graphics.asm#L470), [PackedSetSkeleton](../src/graphics.asm#L652), [PackedSetCeilingGhost](../src/graphics.asm#L669)), with their shifted
+and mirrored copies ([Screen drawing](05-drawing.md)).
 
 ## The font
 

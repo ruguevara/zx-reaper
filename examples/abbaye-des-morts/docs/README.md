@@ -97,18 +97,19 @@ notes for porting.
 | [`src/buffers.asm`](../src/buffers.asm) | $BE56: frame call list, draw queue, object slots, redraw buffers |
 | [`src/tiles.asm`](../src/tiles.asm) | $CD00: tile flags, attributes and bitmaps |
 | [`src/spritesheet.asm`](../src/spritesheet.asm) | $D700: the sprite sheet |
-| [`re/findings.md`](../re/findings.md) | 132 claims with status and evidence (F1-F132, cited in this article) |
+| [`re/findings.md`](../re/findings.md) | 158 claims with status and evidence (F1-F158, cited in this article) |
 | [`re/notes.md`](../re/notes.md), [`re/questions.md`](../re/questions.md) | memory map and loader notes; the questions the work answered |
 
 Links in this article point at labels in these files
 (`../src/file.asm#Lnn`). Statements come from the annotated sources, from the
 finding register or from runs of the game in the project's simulator
 (`tools/zxrun.py`). **Observed** means seen in such a run or a byte check;
-**inferred** means read from the code and not run. Finding numbers (F1-F132)
+**inferred** means read from the code and not run. Finding numbers (F1-F158)
 and question numbers (Q1-Q23) point into [`re/findings.md`](../re/findings.md)
 and [`re/questions.md`](../re/questions.md). Names are those of the sources;
 texts the game prints are quoted as printed, with its spelling. The 128K music
-bank is kept as data and its code paths were read, not run: the simulator is
+bank is kept as data; its screen and ending routines were run on their own in
+the simulator, but the game's 128K paths were read, not run: the simulator is
 a 48K.
 
 Images in [`img/`](img) are made from the game's bytes and runs by

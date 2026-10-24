@@ -27,13 +27,14 @@ the ROM tape loader that animates an hourglass.
   restarts at the last checkpoint touched, or in room 5 (F33).
 - **Crosses.** Twelve crosses lie in the rooms; the status bar counts them.
   Eight can be taken while the wheel of faith in room 17 is at rest and four
-  only after it has been turned (F31). With twelve crosses a ring of crosses
+  only while it is turned (F31). With twelve crosses a ring of crosses
   appears in Satan's room (24) and leads up to the chalice; taking it turns
   Satan to smoke and brings the red scroll that starts the ending (F29, F53,
   F125). See [Items and the ending](05-items-ending.md).
 - **Other items.** Eight checkpoints (a cross in a ring) and a trigger in the
-  Abandoned church, six parchments with hints, three levers and a bell that
-  open doors, two arches that join rooms 10 and 19 (F58, F69).
+  Abandoned church, six parchments with hints, three levers that open doors,
+  a bell that opens the floor of The Altar (room 8) down to the Catacombs
+  (room 13), two arches that join rooms 10 and 19 (F58, F69, F142, F145).
 - **No score, no levels, no demo, no high score, no pause, no sound toggle**
   (Q3, Q8). The intro (room 0) runs until a key is pressed.
 - **Controls.** P right, O left, A crouch, Q jump by default; the four can be
@@ -58,7 +59,7 @@ the right part shows the room name in the game's proportional font.
 | Port $FE in | keyboard: eight half-rows read with `INI` into [KeyRows](../src/controls.asm#L190) every frame ([ScanKeyboard](../src/helpers.asm#L221)) |
 | Port $1F in | Kempston joystick: probed 65536 times at start-up, then read every frame while it is switched on ([ReadKempston](../src/controls.asm#L59), F35) |
 | Port $7FFD out | 128K paging, written on every machine at start-up ([PageInBank0](../src/interrupt.asm#L108)); used for the music bank on a 128K only |
-| AY ports $FFFD / $BFFD | only through code in the 128K music bank (not disassembled) |
+| AY ports $FFFD / $BFFD | the loader's AY probe ([WriteAY](../src/stage2.asm#L161)); in the game only through code in the 128K music bank (not disassembled) |
 | R register | the only random source: Death's throw side, the church door flicker, the unused noise effect (Q12) |
 | ROM | the loader copies and patches LD-BYTES and reads ROM bytes as click data; the game calls no ROM routine (Q14) |
 
@@ -102,7 +103,7 @@ can be moved as a block (`make shift-test`), the rest stays where it is
 | $C100-&#36;C1F3 | 244 | 11 object slots of 22 bytes and their end mark | [ObjectSlots](../src/buffers.asm#L125) |
 | $C1F4-&#36;C1FF | 12 | unused (&#36;FF) | [SpareFill2](../src/buffers.asm#L132) |
 | $C200-&#36;CCFF | 2816 | redraw buffers: run list, lengths, attributes, 8 pixel-row pages | [RedrawRuns](../src/buffers.asm#L150) to [RedrawPixels](../src/buffers.asm#L182) |
-| $CD00-&#36;D6FF | 2560 | tile flags, tile attributes, tile bitmaps (256 tiles) | [TileFlags](../src/tiles.asm#L36), [TileAttrs](../src/tiles.asm#L63), [TileGfx](../src/tiles.asm#L92) |
+| $CD00-&#36;D6FF | 2560 | tile flags, tile attributes, tile bitmaps (256 tiles) | [TileFlags](../src/tiles.asm#L37), [TileAttrs](../src/tiles.asm#L64), [TileGfx](../src/tiles.asm#L93) |
 | $D700-&#36;FEFF | 10240 | sprite sheet: 40 pages, one per pixel row; columns $63-&#36;FF filled per room | [SpriteSheet](../src/spritesheet.asm#L25), [SpriteSheetLower](../src/spritesheet.asm#L281) |
 | $FF00-&#36;FFFF | 256 | outline mask table, built at start-up | [OutlineMasks](../src/game.asm#L13) |
 
@@ -130,7 +131,7 @@ flowchart TD
     S1 --> D["Stage2 $6000: DetectMachine"]
     D --> R["RevealPicture: picture at $7000 shown cell by cell"]
     R --> I["InstallLoader: LD-BYTES copied to $FE00 and patched"]
-    I --> L["block 3 to $625E, hourglass animated; retried on a tape error"]
+    I --> L["block 3 to $625E, hourglass animated; retried after a tape error only in its first 1764 bytes"]
     L --> M{"48K?"}
     M -- "yes" --> T["attributes black, loading screen unpacked to the screen"]
     M -- "no" --> K["screens and their depacker to the music bank, music unpacked, AY probe"]
@@ -211,7 +212,7 @@ screen layout on the fly.
    `CALL` of the counting loop, and keeps the fastest bank. Banks 1 and 3 are
    contended on the original 128K and banks 4 and 6 on the +2A/+3, so the
    fastest of the four is an uncontended one on either (inferred). The machine
-   type is then the port $7FFD value of that bank ($11-$16).
+   type is then the port $7FFD value of that bank ($11, $13, $14 or $16).
 2. **Picture** ([RevealPicture](../src/stage2.asm#L433)). The picture stored at $7000
    (RCS order, attributes at $8800) is copied to the screen one cell at a
    time, in the order of the 768 cell numbers at [RevealOrder](../src/stage2.asm#L497),
@@ -246,14 +247,21 @@ screen layout on the fly.
    $FD00. [BuildFrameTable](../src/stage2.asm#L651) fills the page at $FB00 so that the
    high byte of the count of bytes still to load selects a frame: the frame
    steps on once per tenth of the block. Bit 0 of the low byte selects the
-   frame set; the two sets differ in the falling sand, so the middle of the
-   hourglass changes with every byte loaded.
+   frame set ([HourglassFramesEven](../src/stage2.asm#L775) for an even
+   count, [HourglassFramesOdd](../src/stage2.asm#L806) for an odd one): the
+   two sets are two phases of the falling grains, so the middle of the
+   hourglass changes with every byte loaded. Frame 9 has all the sand above,
+   frame 0, the end of the load, all of it below (observed, F158).
 
    ![The hourglass as DrawHourglass leaves it before the first byte (simulator)](img/overview-hourglass.png)
 
 5. **Block 3** is loaded at $625E, over the code that has finished its work
-   (from [RevealExit](../src/stage2.asm#L424) on); a tape error loads it again. It holds
-   four MegaLZ streams ([`scripts/block3.py`](../scripts/block3.py)):
+   (from [RevealExit](../src/stage2.asm#L424) on). A tape error loads it
+   again, but only in its first 1764 bytes: further on block 3 has overwritten
+   [BuildFrameTable](../src/stage2.asm#L651) and
+   [DrawHourglass](../src/stage2.asm#L705), and the retry runs block-3 data
+   as code (observed with a simulated error, F157). The block holds four
+   MegaLZ streams ([`scripts/block3.py`](../scripts/block3.py)):
 
    | Address | Packed | Unpacked | Contents |
    | --- | --- | --- | --- |
@@ -323,14 +331,16 @@ tile flag map and are overwritten when the first room is entered. It:
 ## 48K and 128K
 
 The game is one program for both machines. On a 128K, [Patch128KHooks](../src/startup.asm#L122)
-turns four instructions of the 48K code into calls; on a 48K they stay inert
+turns three instructions of the 48K code into calls and, when the loader
+found an AY, a fourth into a jump; on a 48K they stay inert
 (the `LD HL,nn` of a stub only loads a register, F111). The table lists what
 differs; the 128K column is read from the code, and for the bank's side from
-its bytes in [`data/music128.bin`](../data/music128.bin), not run.
+its bytes in [`data/music128.bin`](../data/music128.bin) and from runs of
+single bank routines; the game's 128K paths were not run.
 
 | | 48K | 128K |
 | --- | --- | --- |
-| [MachineType](../src/variables.asm#L44) | 1 | port $7FFD value of the music bank, $11-$16 |
+| [MachineType](../src/variables.asm#L44) | 1 | port $7FFD value of the music bank, $11, $13, $14 or $16 |
 | [StartGame_Music](../src/mainloop.asm#L79) (start of every game) | `LD HL,BankShowTitle` | `CALL` [BankShowTitle](../src/interrupt.asm#L218): bank routine $F9D7 with HL = $C09D |
 | [ShowInfoScreen](../src/controls.asm#L242) (SPACE on the title) | `RET`: SPACE does nothing | `CALL` [BankShowInfo](../src/interrupt.asm#L215): bank routine $F9D7 with HL = $CA8A, then [BankShowTitle](../src/interrupt.asm#L218) when SPACE is released |
 | [RunEnding_Music](../src/sequences.asm#L148) (end of the ending) | `LD HL,BankEndingDoor` | `CALL` [BankEndingDoor](../src/interrupt.asm#L212): bank routine $FC4B |
@@ -343,9 +353,15 @@ a loop that clears the 768 attributes, and `JP $C000`, the copy of
 [DepackScreen](../src/stage2.asm#L290); $C09D and $CA8A are where [Start128](../src/stage2.asm#L114)
 put the packed loading and info screens. So on a 128K these two entries
 unpack a screen: the title at the start of every game (which is why the
-title script is not needed) and the info screen while SPACE is held
-(inferred from the bytes, not run; hence the names [BankShowTitle](../src/interrupt.asm#L218) and
-[BankShowInfo](../src/interrupt.asm#L215)). What $CF7D and $FC4B do in the
-bank was not worked out; $CF7D reads two bytes of [KeyRows](../src/controls.asm#L190) (&#36;A2D4 and
-$A2D9) and $FC4B calls [BuildMirrorTable](../src/templates.asm#L286) at $BE48 and writes
-[MusicTrack](../src/variables.asm#L529) at $8551, all at fixed addresses (by their bytes).
+title script is not needed) and the info screen while SPACE is held (hence
+the names [BankShowTitle](../src/interrupt.asm#L218) and
+[BankShowInfo](../src/interrupt.asm#L215)). Run on its own in the simulator,
+the routine gives exactly [`data/loading.scr`](../data/loading.scr) from
+$C09D and [`data/info.scr`](../data/info.scr) from $CA8A. The routine at
+$FC4B, run on its own, is a scene of the ending that only the 128K shows, a
+door that opens, 210 frames long; it calls
+[BuildMirrorTable](../src/templates.asm#L286) at $BE48 and sets
+[MusicTrack](../src/variables.asm#L529) ($8551) to 2 (hence
+[BankEndingDoor](../src/interrupt.asm#L212)). What $CF7D does was not worked
+out; it reads two bytes of [KeyRows](../src/controls.asm#L190), $A2D4 and
+$A2D9, at fixed addresses (by its bytes).

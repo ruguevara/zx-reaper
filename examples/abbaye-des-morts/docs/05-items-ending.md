@@ -9,7 +9,7 @@ flags open the doors of the room scripts, choose the checkpoint, decide which
 crosses can be taken and drive the chain that ends the game: twelve crosses,
 the ring, the chalice, Satan's smoke, the red scroll and two cutscenes.
 
-![The item sprites: hearts, the twelve cross frames (bright, then thin), checkpoint, the arch in its colours, parchment, red scroll, bell, lever, wheel, chalice](img/items.png)
+![The item sprites: hearts, the twelve cross frames (bright crosses, then inverted ones), checkpoint, the arch in its colours, parchment, red scroll, bell, lever, wheel, chalice](img/items.png)
 
 ## Item records and slots
 
@@ -28,7 +28,7 @@ Every item but the parchments has the handler [RoomItemHandler](../src/gameframe
 ```asm
 RoomItemHandler:
   POP HL                  ; L = row, H = column
-  LD (ItemCmdPos),HL      ; sprite command position (y, x/4)
+  LD (ItemCmdPos),HL      ; sprite command position (row, column)
   ADD HL,HL               ; x2
   ADD HL,HL               ; x4: D = column * 4, E = row * 4
   EX DE,HL
@@ -57,12 +57,12 @@ F58).
 | 1 | cross | 3, 10, 13, 14, 16, 17, 18, 19 | [ActionCrossWheelRest](../src/gameframe.asm#L594) | in $8535-$8540 | taken if the wheel is at rest |
 | 2 | cross | 9, 15, 17, 22 | [ActionCrossWheelTurned](../src/gameframe.asm#L576) | in $8535-$8540 | taken if the wheel is turned |
 | 3 | checkpoint (a gravestone cross) | 8, 11, 12, 14, 15, 19, 21, 23 | [ActionCheckpoint](../src/gameframe.asm#L280) | $8544-$854B | becomes the active checkpoint, sound 9 |
-| 4 | bell | 2 | [ActionBellOrLever](../src/gameframe.asm#L516) | [BellRung](../src/variables.asm#L265) $851B | 0 to 1 once, sound 3 |
+| 4 | bell | 2 | [ActionBellOrLever](../src/gameframe.asm#L516) | [BellRung](../src/variables.asm#L265) $851B | 0 to 1 once, sound 3; opens the floor of room 8 (F142) |
 | 5 | parchment | 3, 8, 12, 14, 16, 21 | [ActionParchment](../src/gameframe.asm#L816) | $852E-$8533 | shows two lines of text, gone |
 | 6 | red scroll | 24 | [ActionFinalScroll](../src/gameframe.asm#L243) | [RedScrollTaken](../src/variables.asm#L378) $8534 | starts the ending |
-| 7 | church door trigger (no sprite) | 7 | [ActionChurchDoor](../src/gameframe.asm#L180) | [CheckpointFlag0](../src/variables.asm#L439) $8543 | shuts the door behind Jean |
+| 7 | church door trigger (no sprite) | 7 | [ActionChurchDoor](../src/gameframe.asm#L180) | [CheckpointFlag0](../src/variables.asm#L439) $8543 | shuts the door behind Jean, sound 8 on the next frame (F146) |
 | 8 | arch | 10, 19 | [ActionArchToRiver](../src/gameframe.asm#L372), [ActionArchToBeast](../src/gameframe.asm#L346) | $8523, $8524 | moves Jean to the other arch, sound 4 |
-| 9 | lever | 9, 10, 20 | [ActionBellOrLever](../src/gameframe.asm#L516), [ActionGateLever](../src/gameframe.asm#L545) | $851C, $851D, $851F | 0 to 1 once, sound 3 (room 20: 5) |
+| 9 | lever | 9, 10, 20 | [ActionBellOrLever](../src/gameframe.asm#L516), [ActionGateLever](../src/gameframe.asm#L545) | $851C, $851D, $851F | 0 to 1 once, sound 3 (room 20: 5); open doors of rooms 19, 8 and 20 (F145) |
 | 10 | wheel of faith | 17 | [ActionWheel](../src/gameframe.asm#L311) | [WheelState](../src/variables.asm#L271) $851E | 0 and 6 in turn, sound 5 |
 | 11 | chalice | 24 | [ActionChalice](../src/gameframe.asm#L484) | [ChaliceTaken](../src/variables.asm#L289) $8521 | Satan turns to smoke |
 
@@ -89,10 +89,13 @@ back, and bit 7 is a latch, set while Jean stays on the wheel and cleared
 when he leaves it, so standing on it turns it only once. The eight crosses of
 type 1 can be taken only with the wheel at rest, the four of type 2 only with
 it turned (F31). Both sets are drawn: a cross that cannot be taken now
-is shown thin, frames 6-11 of [FramesCross](../src/objects.asm#L134) instead of the bright 0-5. The
+is shown as an inverted cross, long arm up and the crossbar low, not bright
+(frames 6-11 of [FramesCross](../src/objects.asm#L134), sprite [SpriteInvertedCross](../src/graphics.asm#L273), F156) instead of the
+bright cross of frames 0-5. The
 action adds (wheel AND 7) to the frame for type 1 ([DrawCrossWheelRest](../src/gameframe.asm#L626)) and
 ((wheel AND 7) XOR 6) for type 2 ([DrawCrossWheelTurned](../src/gameframe.asm#L656)), and both step
-through the six colours every 5 frames. The parchment of room 12 reads "Four
+through the six colours every 5 game frames (the item animation runs in the
+interrupt, unlike the ring of room 24). The parchment of room 12 reads "Four
 brothers / changed their faith", which fits the four crosses of type 2
 (inference from the text).
 
@@ -114,23 +117,29 @@ The Abandoned church has an item with no sprite at row 15, column 2, just
 inside its left door. While the door is open ([ChurchDoorShut](../src/variables.asm#L233) is 0) a
 touch sets checkpoint flag 0 to 1 and [ChurchDoorShut](../src/variables.asm#L233) to $FF, and starts
 [DoorLeftShut](../src/roomscripts.asm#L474) through the one-shot runner [RunEventScript](../src/hud.asm#L287), which draws
-the door at once. From then on the item makes the door rattle: a countdown of
-32 to 63 frames (R AND $1F plus $20, the R register as a random number) ends
-in sound effect 8 and three frames of the other door picture
-[DoorLeftRattle](../src/roomscripts.asm#L485), then the normal one again (F28). The scripts of rooms 6
+the door at once. From then on the item makes the door rattle: when a
+countdown runs out, sound effect 8 plays and the other door picture
+[DoorLeftRattle](../src/roomscripts.asm#L485) is shown for three frames, then the normal one again, and
+the countdown restarts at 32 to 63 frames (R AND $1F plus $20, the R register
+as a random number; F28). The first countdown is 1, from the type record, so
+the first rattle comes on the frame after the door shuts, or on the first
+frame in room 7 with the door shut: the shutting itself requests no sound and
+is heard as that first sound 8 (observed: shut at frame 21, rattles at frames
+22, 60 and 111, F146). The scripts of rooms 6
 and 7 draw a door on their common edge whenever [ChurchDoorShut](../src/variables.asm#L233) is set, so
 Jean cannot go back to the forest ([Rooms](05-rooms.md)).
 
 ## Bell and levers
 
 [ActionBellOrLever](../src/gameframe.asm#L516) sets the flag from 0 to 1 at the first touch with sound
-effect 3; the picture is the flag (rest or rung, up or pulled). Nothing
-happens at once: the scripts of other rooms test the flags when they are
-entered ([Rooms](05-rooms.md)):
+effect 3; the picture is the flag (the bell at rest or rung, the lever
+leaning left or right; the second picture is not bright). Nothing happens at
+once: the scripts of other rooms test the flags when they are entered
+([Rooms](05-rooms.md); flag maps read with each flag 0 and 1, F142, F145):
 
 | Item | Room | Opens |
 | --- | --- | --- |
-| bell | 2 Tower of the Bell | a 2 x 2 wall block of room 8 (row 20, column 26) |
+| bell | 2 Tower of the Bell | the floor of room 8 at row 20, column 26 (2 x 2 cells): the way down from The Altar to room 13, Catacombs |
 | lever | 9 Hangman tree | the left door of room 19 (to room 18) |
 | lever | 10 Pestilent Beast | the right door of room 8 (to room 9) |
 | lever | 20 Unexpected gate | the gate at the right edge of room 20 (to room 21) |
@@ -162,10 +171,13 @@ box test and enters [ActionParchment](../src/gameframe.asm#L816). A touch copies
 over [ParchmentGate](../src/hud.asm#L87), requests sound effect 5 and frees the slot. On its
 next pass the main loop falls through the gate into [ShowParchment](../src/hud.asm#L103):
 [ShowTextWindow](../src/hud.asm#L125) sets the room state to 0, so the game frame stops running
-the game logic, runs [ScriptParchment](../src/roomscripts.asm#L1554) (black screen, the two lines
-centred at pixel rows 65 and 85), draws the 24 x 11 cell frame in black on
-yellow ([DrawParchmentFrame](../src/hud.asm#L175)), waits for a key, redraws the room and the
-status bar and restores the room state (F19).
+the game logic, runs [ScriptParchment](../src/roomscripts.asm#L1554) (all attributes black, the bitmap
+cleared above the status bar, the two lines centred at pixel rows 65 and 85),
+draws the 24 x 11 cell frame in black on yellow ([DrawParchmentFrame](../src/hud.asm#L175)), waits
+for a key, re-arms the hearts and crosses, redraws the room with
+[RedrawRoom](../src/sprites.asm#L1162) and restores the room state (F19). The room script is not run
+again: the pixels of the room name were never cleared, and the window gives
+the name back its white attributes (F148).
 
 | Room | Text |
 | --- | --- |
@@ -223,26 +235,27 @@ room state to 3, the ending (F29).
 
 Room state 3 makes the main loop call [RunEnding](../src/sequences.asm#L112) ($887B), which runs two
 cutscenes between text windows and returns to [StartGame](../src/mainloop.asm#L70) (F109). Jean's
-state is 0 throughout, so the player code does nothing and the keys only
-close the windows.
+state is 0 except at the end of the pyre scene (step 4), so the player code
+does nothing and the keys only close the windows.
 
-1. Room 25 is entered: its script is room 24's ([RoomScript25](../src/roomscripts.asm#L1478)), and its
+1. Room 25 is entered (music track 7 from [RoomMusicTable](../src/cutscenelists.asm#L63)): its script
+   is room 24's ([RoomScript25](../src/roomscripts.asm#L1478)), and its
    object record is the crusader spawner with the path of
-   [PathScriptRoom25](../src/entities.asm#L613). The window [ScriptEnding1](../src/roomscripts.asm#L1575), black on bright red:
+   [PathScriptRoom25](../src/entities.asm#L614). The window [ScriptEnding1](../src/roomscripts.asm#L1575), black on bright red:
    "your doom will come / not by my hand / but by human hands". A key closes
    it.
 2. Music track 5 (128K). [LoadCutsceneList](../src/sequences.asm#L72) queues [CutsceneList1](../src/cutscenelists.asm#L14), one
    actor: Jean standing on the steps ([ActorMonkTemplate](../src/templates.asm#L111), moved by
-   [UpdateMovingSprite](../src/entities.asm#L3029) with speed 0). [RunCutscene](../src/sequences.asm#L170) sets the room state
+   [UpdateMovingSprite](../src/entities.asm#L3030) with speed 0). [RunCutscene](../src/sequences.asm#L170) sets the room state
    to $80 and runs the foreground of the game frame until [CutsceneDone](../src/variables.asm#L7) is
    set. The crusaders climb the stairs; the path command 5 at x $64 sets the
    flag (about 365 frames).
-3. Room 4 is entered, the window [ScriptEnding2](../src/roomscripts.asm#L1597) in cyan: "Heresy!!! The
+3. Room 4 is entered (track 7 again), the window [ScriptEnding2](../src/roomscripts.asm#L1597) in cyan: "Heresy!!! The
    Cathar / is hidden on the throne / of Satan, burn him". Jean's X and Y are
    set to $3E and $3A, the top of the pyre.
 4. [CutsceneList2](../src/cutscenelists.asm#L17) queues eight actors: the monk on the pyre
-   ([ActorPyreMonkTemplate](../src/templates.asm#L116), [UpdatePyreMonk](../src/entities.asm#L2959)), three flames and four
-   crusaders, which only animate. After 280 frames [UpdatePyreMonk](../src/entities.asm#L2959) stops
+   ([ActorPyreMonkTemplate](../src/templates.asm#L116), [UpdatePyreMonk](../src/entities.asm#L2960)), three flames and four
+   crusaders, which only animate. After 280 frames [UpdatePyreMonk](../src/entities.asm#L2960) stops
    drawing itself and sets [PlayerHit](../src/player.asm#L55) and [PlayerState](../src/player.asm#L33) to 2, so the
    game's own player code takes over at the same position: in the same game
    frame [UpdatePlayer](../src/player.asm#L557) finds the hit flag, [KillPlayer](../src/player.asm#L479) runs, and Jean

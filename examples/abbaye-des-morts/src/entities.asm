@@ -53,7 +53,7 @@ EntityHandlers:
 ; Crusader templates: the initial object slot of a crusader, one per chase room
 ;
 ; The spawner UpdateCrusaderSpawner copies one of these 22 bytes into a free
-; slot of ObjectSlots every 40 passes of the main loop (the room object record
+; slot of ObjectSlots every 40 frames (the room object record
 ; of room 5, 6 or 25 holds the address in its parameter bytes 5 and 6 at 8BC2,
 ; 8BCD and 8BD8). The templates differ only in the path script of word +4. A
 ; slot is a stack frame (see ObjectSlots): its 11 words are popped by the
@@ -116,18 +116,19 @@ FreeEntitySlotAtEntry:
 
 ; Entity handler: the spawner of the crusaders (kind 1, rooms 5, 6 and 25)
 ;
-; An invisible object that makes a new crusader from a template every 40 passes
-; of the main loop (one pass per frame in the chase rooms): the slot counts
-; down the animation counter at +$12 (the first count, 90 passes, is the
-; parameter byte 1 of the room object record: the first crusader appears 90
-; passes after the room is entered; the reload at +$13 is not used afterwards,
+; An invisible object that makes a new crusader from a template every 40
+; frames (the slots run in the game frame, once per interrupt; observed: the
+; counter at +$12 drops by one every frame in room 5): the slot counts down
+; the animation counter at +$12 (the first count, 90 frames, is the parameter
+; byte 1 of the room object record: the first crusader appears 90 frames
+; after the room is entered; the reload at +$13 is not used afterwards,
 ; a constant 40 is loaded instead). When the counter reaches 0 it asks
 ; FindFreeSlot_IY for a free slot and goes on at SpawnCrusader, which copies
 ; the template into it. The template (CrusaderTemplateRoom5) is pointed to by
 ; the slot word +4, from the parameter bytes 5 and 6 of the record (8BBB, 8BC6,
 ; 8BD1); each room has its own path script. The slot never changes: crusaders
 ; keep coming for as long as Jean stays in the room (observed in room 5: four
-; or five on the screen at a time, a new one every 40 passes).
+; or five on the screen at a time, a new one every 40 frames).
 ;
 ; Slot fields used: +4 word template address; +$12 byte counter, +$13 byte
 ; reload (not used). Its x, y and sprite fields are not used (nothing is
@@ -146,7 +147,7 @@ UpdateCrusaderSpawner:
   POP BC                  ; C = counter, B = reload
   DEC C
   JR NZ,UpdateCrusaderSpawner_0
-  LD C,CRUSADER_PERIOD    ; every 40 passes from now on
+  LD C,CRUSADER_PERIOD    ; every 40 frames from now on
 UpdateCrusaderSpawner_0:
   PUSH BC                 ; store the counter (SP back at slot + $12)
   JP NZ,NextSlotAfterAnim ; NextSlotAfterAnim: not yet

@@ -46,8 +46,13 @@ list at $BE5A as a data pointer ([below](#the-frame-call-list)), and just
 under the start of the list lie the list pointers, the checkpoint table and
 the code of [BuildMirrorTable](../src/templates.asm#L286). A handler that pushed its registers on the
 interrupted stack would write over them (inferred). Here only the CPU's own
-two-byte push and the stray `PUSH BC` land there, at worst on
-[FrameListPtr](../src/buffers.asm#L28), which every game frame sets again. Interrupts stay disabled
+two-byte push and the `PUSH BC` land below the interrupted SP. In the
+`POP BC` loops that read tile bitmaps and item sprites, BC holds the two
+bytes the CPU overwrote and `PUSH BC` puts them back (F139). In the frame
+call list BC is not the popped pair and stays there, over bytes of commands
+that have already run, so nothing is lost (F151); at the start of the list
+the two bytes are [FrameListPtr](../src/buffers.asm#L28), which every game
+frame sets again. Interrupts stay disabled
 for the whole handler, so a frame routine is never interrupted. The `EI`
 before `LD SP` leaves a window of one instruction: an interrupt accepted
 there would store $85B9 as the return address and hang on `JP $85B9`; it
@@ -81,7 +86,7 @@ the ending and the Game Over screen; the room state decides how much of
 | 6 | [RunObjectSlots](../src/gameframe.asm#L94) | every busy slot: items test Jean's box and act, creatures move, test their hit box and queue their sprites ([Creatures](05-creatures.md), [Items](05-items-ending.md)) |
 | 7 | [UpdatePlayer](../src/player.asm#L557) | Jean's state machine: death on a hit, walking, jumping, falling, crouching; queues his sprite |
 | 8 | [EndFrameList](../src/gameframe.asm#L61) | closes the list and opens the gate for the foreground, unless the foreground is running the previous list |
-| 9 | [SpawnQueuedObjects](../src/sequences.asm#L225) | turns the requests of shooting creatures into slots, when [SpawnQueueCount](../src/variables.asm#L543) is not 0 |
+| 9 | [SpawnQueuedObjects](../src/sequences.asm#L225) | turns the requests waiting in the object list (arrows, seeds, fireballs, scythes, flames, splashes, the ending's actors) into slots, when [SpawnQueueCount](../src/variables.asm#L543) is not 0 |
 | 10 | [CheckRoomExit](../src/player.asm#L1037) | Jean beyond an edge: next room, room state 1 |
 
 The order has consequences that the later sections rely on:
@@ -96,10 +101,13 @@ The order has consequences that the later sections rely on:
 - The room exit (10) comes last: a frame in which Jean leaves still runs
   every creature of the old room.
 
-The frame logic takes from about 5,500 T-states (the intro) to about
-16,000 (rooms 10 and 15) of the 69,888 of a frame, plus 7,000-9,000 for a
-beeper effect, which plays before [GameFrame](../src/gameframe.asm#L22) (F105; measurements in
-[Timing and speed](#timing-and-speed)).
+The frame routine, beeper step and logic together, returns at about T 7,550
+of the 69,888 of a frame in a quiet room (room 7, Jean standing) and at a
+median of 9,300-15,700, up to about 24,000 (room 14), in rooms with enemies
+(F147). A beeper effect plays before [GameFrame](../src/gameframe.asm#L22)
+and takes 7,000-9,000 of that while one is playing (F105); more measurements
+are in
+[Timing and speed](#timing-and-speed).
 
 ## The frame call list
 
@@ -165,8 +173,9 @@ sequenceDiagram
 
 ## The main loop
 
-The foreground is [StartGame](../src/mainloop.asm#L70) and [MainLoop](../src/mainloop.asm#L124): it starts a game and never
-returns ([Title and menus](03-title-and-menu.md)). Each pass reads the low
+The foreground is [StartGame](../src/mainloop.asm#L70), which starts a game
+([Title and menus](03-title-and-menu.md)), and [MainLoop](../src/mainloop.asm#L124),
+the loop it runs into, which never returns. Each pass reads the low
 7 bits of [RoomState](../src/variables.asm#L125); bit 7 only tells [GameFrame](../src/gameframe.asm#L22) to run the logic
 (F25):
 
@@ -174,9 +183,9 @@ returns ([Title and menus](03-title-and-menu.md)). Each pass reads the low
 | --- | --- | --- |
 | $80 | the main loop, once a room is drawn | one pass of play: see below |
 | 1 | [CheckRoomExit](../src/player.asm#L1037) when Jean crosses an edge (also the debug warp) | [EnterRoom](../src/mainloop.asm#L192), [RedrawRoom](../src/sprites.asm#L1162), state $80 |
-| 2 | the arches between rooms 10 and 19 ([ActionArchToRiver](../src/gameframe.asm#L372), [ActionArchToBeast](../src/gameframe.asm#L346)) | Jean to the respawn position ([RespawnX](../src/variables.asm#L191)), then as 1 |
+| 2 | the arches between rooms 10 and 19 ([EnterRoomAtArch](../src/gameframe.asm#L398), the tail of [ActionArchToRiver](../src/gameframe.asm#L372) and [ActionArchToBeast](../src/gameframe.asm#L346)) | Jean to the respawn position ([RespawnX](../src/variables.asm#L191)), then as 1 |
 | 3 | the red scroll of room 24 ([ActionFinalScroll](../src/gameframe.asm#L243)) | [RunEnding](../src/sequences.asm#L112), then a new game at [StartGame](../src/mainloop.asm#L70) |
-| $84 | the end of the dying animation with lives left ([UpdateDying_End](../src/player.asm#L530)) | [SelectCheckpoint](../src/templates.asm#L209): room and position of the active checkpoint, then as 2 |
+| $84 | the end of the dying animation with lives left ([UpdateDying_End](../src/player.asm#L530)); also the pyre scene of the ending, where [RunCutscene](../src/sequences.asm#L170) ignores it | [SelectCheckpoint](../src/templates.asm#L209): room and position of the active checkpoint, then as 2 |
 | $85, 5 | the end of the dying animation with no life left; R and Y in [GameFrame](../src/gameframe.asm#L22) | Game Over screen, then [StartGame](../src/mainloop.asm#L70) |
 | 0 | [EnterRoom](../src/mainloop.asm#L192) while it builds a room, [SelectCheckpoint](../src/templates.asm#L209), a text window ([ShowTextWindow](../src/hud.asm#L125) saves and restores the state), the end of a cutscene | not seen by the main loop: the code that sets it sets another state before the loop looks |
 
@@ -202,7 +211,8 @@ byte table at $C500 ([BuildMirrorTable](../src/templates.asm#L286)), writes `RET
 one-shot routines of the previous room, clears the draw queue, frees the 11
 object slots, sets the room state to 0, runs the room's script, spawns the
 room's items and objects, sets the music track and closes
-[FrameListGate](../src/templates.asm#L143). [RedrawRoom](../src/sprites.asm#L1162) then draws every marked cell in a sweep
+[FrameListGate](../src/templates.asm#L143). [RedrawRoom](../src/sprites.asm#L1162) then draws every marked cell (the room's
+script has marked them, F152) in a sweep
 from the side Jean entered by, which takes 8-9 frames (F42). Meanwhile the
 interrupt only plays the beeper step and reads the keys, because the room
 state is 0. How a room is
@@ -224,7 +234,7 @@ built is described in [Rooms](05-rooms.md).
 | [DrawRedrawList](../src/redraw.asm#L32) | copies the buffered cells to the screen |
 | [DrawWaterReflection](../src/effects.asm#L31) | rooms 16 and 19 only: the reflection in the water |
 | [AnimateBloodTiles](../src/effects.asm#L191) | rooms 21-23 only: the bubbling blood |
-| [ShowCrossRing](../src/effects.asm#L245) | room 24 only: the ring of crosses |
+| [ShowCrossRing](../src/effects.asm#L245) | rooms 24 and 25 only (room 25 runs room 24's script): the ring of crosses |
 
 The four one-shot routines are called again and again while the loop waits
 for the gate, so a parchment opens without waiting for a frame list. The
@@ -246,7 +256,7 @@ or runs, and a one-shot routine writes `RET` back over itself as it starts.
 | --- | --- | --- | --- |
 | $BDDA | [FrameListGate](../src/templates.asm#L143) | [EndFrameList](../src/gameframe.asm#L61) | [RunFrameList](../src/templates.asm#L163), [EnterRoom](../src/mainloop.asm#L192) |
 | $AA1F | [QueueDrawCmd](../src/player.asm#L446) (on while `NOP`) | [LeaveFrameList](../src/templates.asm#L182) | [RunFrameList](../src/templates.asm#L163) |
-| $9CE7 | [RunEventScript](../src/hud.asm#L287) | [ActionChurchDoor](../src/gameframe.asm#L180), [ActionGateLever](../src/gameframe.asm#L545), [UpdateSatan](../src/entities.asm#L3632) | itself, [EnterRoom](../src/mainloop.asm#L192) |
+| $9CE7 | [RunEventScript](../src/hud.asm#L287) | [ActionChurchDoor](../src/gameframe.asm#L180), [ActionGateLever](../src/gameframe.asm#L545), [UpdateSatan](../src/entities.asm#L3633) | itself, [EnterRoom](../src/mainloop.asm#L192) |
 | $9C51 | [ParchmentGate](../src/hud.asm#L87) | [ActionParchment](../src/gameframe.asm#L816) | [ShowTextWindow](../src/hud.asm#L125), [EnterRoom](../src/mainloop.asm#L192) |
 | $9BF3 | [DrawLivesBar](../src/sprites.asm#L1337) | [StartGame](../src/mainloop.asm#L70), [ActionHeart](../src/gameframe.asm#L428), [UpdateDying_End](../src/player.asm#L530), [ShowTextWindow](../src/hud.asm#L125) | itself |
 | $9C1B | [DrawCrossesHud](../src/hud.asm#L17) | [StartGame](../src/mainloop.asm#L70), [TakeCross](../src/gameframe.asm#L608), [ShowTextWindow](../src/hud.asm#L125) | itself |
@@ -278,10 +288,14 @@ it (frames 40-300), and the number of lists drawn in 1000 frames:
 | 18 Banquet of Death | 6,800-11,300 | 44,000-126,000 | 493 | 25 |
 | 24 Satan !!! | 8,100-13,700 | 89,000-161,000 | 528 | 26 |
 
-The logic takes a tenth to a quarter of a frame; a foreground pass takes
-between two thirds of a frame and nearly three frames, so the screen shows
-every second or third frame of the logic. In the intro, with four runners on
-an empty screen, the list is closed at T 5,700-7,300 (F103). Over frames
+The logic takes a tenth to a quarter of a frame in these rooms, and up to a
+third in room 14, where the frame routine returns as late as T 24,000
+(F147). A foreground pass takes between two thirds of a frame and nearly
+three frames, so these rooms show every second or third frame of the logic.
+A quiet room shows every frame: in room 7 with Jean standing the main loop
+is back at its start by T 54,700-54,850 and drew 301 lists in 300 frames,
+against 128 in room 10 and 145 in room 14 (F147). In the intro, with four
+runners on an empty screen, the list is closed at T 5,700-7,300 (F103). Over frames
 700-1500 of `tests/inputs/play.txt` the counts are 800 frames of logic, 708
 lists closed and 586 drawn (F103). A list is not closed when the interrupt
 arrives while the previous one is being run, and a closed list is not drawn
@@ -297,8 +311,8 @@ T-state at those addresses and at [MainLoop](../src/mainloop.asm#L124).
 What follows from this design:
 
 - **Constant speed.** Jean walks 1 pixel and falls up to about 4 pixels per
-  logic frame (F70, F72), 50 frames a second, whatever the room holds; the
-  screen shows every second or third position. Nothing waits for the
+  logic frame (F70, F72), 50 frames a second, whatever the room holds; in a
+  busy room the screen shows every second or third position. Nothing waits for the
   drawing, so a busy room does not slow the game down.
 - **Pauses of the logic.** The logic stops (room state without bit 7)
   while a room is swept in (8-9 frames, F42), while a parchment or a text

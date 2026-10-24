@@ -31,10 +31,10 @@ effect after the `LD SP`. An interrupt accepted between the `LD SP` and the
 `JP` would push $85B9 (the JP) as its return address, the second run of the
 handler would store it as the operand of that JP, and the program would hang
 on `JP $85B9`. It needs a frame routine that ends exactly as the next frame
-starts. The frame routine takes at most about 25,000 of the 69,888
-T-states of a frame (the logic up to 15,800 T-states in the rooms measured
-in [The game loop](04-game-loop.md), a sound step up to 9,000), so this was
-not seen (F112, inferred).
+starts. The frame routine ([GameFrameRoutine](../src/interrupt.asm#L181), sound step and game logic)
+returned by T 7,550 of the 69,888 T-states of a frame in a quiet room and by
+T 24,000 at the latest (room 14) in the rooms measured (F147), so this was not
+seen (F112, inferred).
 
 ## The stack pointer as a data pointer
 
@@ -47,7 +47,9 @@ can point SP at data:
   is a routine address followed by its parameters; the routine POPs the
   parameters and its RET jumps to the next entry. The list ends with the
   address of [LeaveFrameList](../src/templates.asm#L182), which restores SP. A call list without
-  CALLs.
+  CALLs. The routines it enters use the bytes below SP as their stack: the
+  CALL FlagMapAddress and PUSH BC of [QueueSprite](../src/sprites.asm#L50) write over their own
+  command, already popped (F151).
 - **The object slots.** [RunObjectSlots](../src/gameframe.asm#L94) points SP at each 22-byte slot
   and RETs: the first word of the slot is its handler. The handler POPs its
   own fields, PUSHes back the changed ones and jumps to [RunObjectSlot](../src/gameframe.asm#L99)
@@ -60,8 +62,8 @@ can point SP at data:
 - **Handlers that rewrite themselves.** A creature changes its behaviour by
   replacing its slot's handler word: the crusader's path commands and the
   water drop move SP back to the slot and PUSH the new handler, then restore
-  SP from a patched `LD SP,nn` ([SmcHopRestoreSP](../src/entities.asm#L278), [SmcFallRestoreSP](../src/entities.asm#L322),
-  [SmcStepRestoreSP](../src/entities.asm#L367), [SmcDropSP](../src/entities.asm#L1790)). The patrolling creatures swap
+  SP from a patched `LD SP,nn` ([SmcHopRestoreSP](../src/entities.asm#L279), [SmcFallRestoreSP](../src/entities.asm#L323),
+  [SmcStepRestoreSP](../src/entities.asm#L368), [SmcDropSP](../src/entities.asm#L1791)). The patrolling creatures swap
   between two handler words at their turning points (F86).
 - **POP as a fast read.** In the foreground, with interrupts on,
   [CopyRunCells](../src/redraw.asm#L460) reads tile bitmaps and [DrawBlockJob](../src/sprites.asm#L274) item sprites by
@@ -80,7 +82,7 @@ and font were identical to the image after the run (and after the 8000
 frames of `tests/inputs/fuzz.txt`, 134 such interrupts).
 
 The repair is the `PUSH BC` near the start of the handler (F139; the
-annotation first called it an instruction with no effect). After `EX (SP),HL / POP HL`
+first annotation called it an instruction with no effect). After `EX (SP),HL / POP HL`
 SP is back where it was interrupted, and `PUSH BC` writes BC over the same
 two bytes the CPU overwrote. Both copy loops keep in BC exactly those two
 bytes: each `POP BC` loads the pair just below the new SP, and before the
@@ -93,9 +95,13 @@ item sprites changed, and blank tile $80 is no longer blank:
 ![play.txt at frame 1500 with the PUSH BC of the interrupt handler replaced by NOP: wrong pixels around the bat and Jean](img/tricks-no-push-bc.png)
 
 Compare `play-church.png` in the [gallery](07-graphics.md). These runs were
-made while writing this article; the comments of [InterruptHandler](../src/interrupt.asm#L35) and
-[CopyRunCells](../src/redraw.asm#L460) and the evidence of F112 still describe the `PUSH BC` as
-unused.
+made while writing this article; [InterruptHandler](../src/interrupt.asm#L35) and [CopyRunCells](../src/redraw.asm#L460) now
+describe the repair.
+
+The repair covers only the POP BC loops. In the frame call list BC is not the
+pair just popped, so an interrupt there leaves BC in the two bytes below SP
+(observed: the word $98AC of a command became $0203). Nothing is lost,
+because those bytes belong to commands that have already run (F151).
 
 ## Self-modifying code
 
@@ -110,7 +116,7 @@ routine disarms itself by writing RET back. A flag and a branch in one byte:
 | --- | --- | --- |
 | [DrawLivesBar](../src/sprites.asm#L1337), [DrawCrossesHud](../src/hud.asm#L17) | a new game, a heart, a cross, the end of a death, a closed text window | itself |
 | [ParchmentGate](../src/hud.asm#L87) | a parchment touched ([ActionParchment](../src/gameframe.asm#L816)) | [ShowTextWindow](../src/hud.asm#L125), [EnterRoom](../src/mainloop.asm#L192) |
-| [RunEventScript](../src/hud.asm#L287) | the church door, a gate lever, Satan's smoke (the script address goes into [SmcEventScript](../src/hud.asm#L293)) | itself, [EnterRoom](../src/mainloop.asm#L192) |
+| [RunEventScript](../src/hud.asm#L287) | the church door, the gate lever of room 20, Satan's smoke (the script address goes into [SmcEventScript](../src/hud.asm#L293)) | itself, [EnterRoom](../src/mainloop.asm#L192) |
 | [FrameListGate](../src/templates.asm#L143) | [EndFrameList](../src/gameframe.asm#L61) (a frame list complete) | [RunFrameList](../src/templates.asm#L163), [EnterRoom](../src/mainloop.asm#L192) |
 | [QueueDrawCmd](../src/player.asm#L446) | [LeaveFrameList](../src/templates.asm#L182) | [RunFrameList](../src/templates.asm#L163); read as a flag by [GameFrame](../src/gameframe.asm#L22) |
 | [DrawWaterReflection](../src/effects.asm#L31), [AnimateBloodTiles](../src/effects.asm#L191), [ShowCrossRing](../src/effects.asm#L245) | room script opcodes $9D, $9E, $9F | [EnterRoom](../src/mainloop.asm#L192) |
@@ -195,9 +201,11 @@ these shows in play.
 
 | Finding | Status | What |
 | --- | --- | --- |
-| F51 | observed (forced) | The sliding scythe of Death ([UpdateScytheSliding](../src/entities.asm#L3521)) loads both coordinates from x on one path, so the scythe is drawn at y = x. The path needs a solid cell at the scythe's own row, which its fall-and-slide movement in room 18 never meets (F50); seen with poked flags. |
+| F51 | observed (forced) | The sliding scythe of Death ([UpdateScytheSliding](../src/entities.asm#L3522)) loads both coordinates from x on one path, so the scythe is drawn at y = x. The path needs a solid cell at the scythe's own row, which its fall-and-slide movement in room 18 never meets (F50); seen with poked flags. |
 | F94 | observed (forced) | The horizontal patrols and the intro runners test the turning point with equality: a creature that starts outside its limits walks until x wraps round 256. No room record does this; seen with a poked start. |
 | F106 | observed (forced) | The noise effect's random bytes are R XOR $01 ([Sound](05-sound.md)). Effect 1 is never requested. |
+| F140 | observed (forced) | A class 2 cell under Jean's feet holds him in the air in state 5: the falling code lands him on bit 1, the standing code tests bit 0 and sets him falling again, and he cannot jump or crouch. No tile and no reachable room cell has class 2. |
+| F141 | observed | A one-way platform is passed only by a jump that lifts the feet above its top; a jump that ends with the feet inside the platform's row falls back through it, so from a floor a platform 5 rows up cannot be reached. |
 | F120 | observed | When Jean stops crouching and starts to fall in one frame, frame 2 of a two-frame table is read: the word after the table is a routine address, and for one frame he is drawn from the code bytes of [QueueSprite](../src/sprites.asm#L50). |
 | F121 | observed | The dying monk still touches items: a heart taken during the 32 frames of the death gives the life back, and with the last life lost the game goes on with one life. |
 | F122 | observed | A heart adds a life only below 9; lives are decremented with no floor (only a poke gives 0, which wraps to 255); more than 9 lives turn the blank cells of the bar red. |
@@ -213,10 +221,13 @@ these shows in play.
 | F77 | observed (warp only) | Room numbers are reduced modulo 25 as a byte, so going left from room 0 enters room 5 and up from rooms 2 and 3 enters 3 and 4. None of these exits can be reached in play (F124). |
 | F67 | observed (warp only) | Room 4 clears the status bar and redraws nothing, so the hearts and crosses stay blank afterwards. Room 4 is only reached by the debug warp and in the ending. |
 | F129 | observed | Spelling: "Lanquedoc" in the intro, "Gloomy tunels" (room 15); the room names of rooms 0 and 4 are ":)" and ":&#36;", never shown. |
+| F150 | observed (forced) | Script opcodes $8D and $94 place tiles wrongly past column 31 (a run of $8D carries into the wrong row from rows 7 and 15; a skip of $94 from an unaligned column drops cells); the shipped scripts never hit either. |
+| F157 | observed (forced) | The loader retries a block after a tape error, but the retry code at $6942-$69FF is overwritten by block 3 once more than 1764 bytes of it have loaded; a later error runs block-3 data as code. |
 | F6 | observed (forced) | Script opcode $8A with bit 3 (bottom edge) writes into the main stack and crashes; no room uses it. |
 | F5 | observed | Script opcode $90 never changes the cell at $6000 (row 16, column 0); no room depends on it. |
 | F12 | observed | [BitmapAddress](../src/helpers.asm#L66) is right only for pixel rows that are multiples of 8; every script uses such rows. |
 | F55 | observed, harmless | A 16-byte template brings two bytes of the next template into the slot. |
+| F151 | observed, harmless | The interrupt's PUSH BC, and the stack use of the list routines, write into the frame call list below SP: bytes of commands already run. |
 | F85 | observed, harmless | The countdown of the pyre monk in the ending wraps to $FFFF after use. |
 | F111 | observed (poke) | On a 128K the title script is not drawn after Game Over or the ending; the 128K bank unpacks the title picture instead ([Sound](05-sound.md)). |
 | F44 | inferred | Nothing checks for a 17th draw job in a frame (14 is the most seen). |
@@ -235,7 +246,7 @@ these shows in play.
 | $ADA1 [WaterCopyChain](../src/effects.asm#L72) | the first 16 LDIs of the water copy: both water strips are 16 cells wide | F130 |
 | $A1A2, $AE13 | the water source in another screen third and the row step: both strips are in row 21 | F130 |
 | $AFF1 in [MirrorFrame](../src/unpack.asm#L304) | a branch no sprite set needs | F130 |
-| $8508 [UnusedByte](../src/variables.asm#L63), $8520 | variable bytes no code uses; [BankMusicTrack](../src/variables.asm#L515) ($8550) is used by the 128K music bank ([Sound](05-sound.md)) | Q2 |
+| $8508 [UnusedByte](../src/variables.asm#L63), $8520 | variable bytes no instruction refers to ($8520 is only zeroed with the other flags by [StartGame](../src/mainloop.asm#L70)); [BankMusicTrack](../src/variables.asm#L515) ($8550) is used by the 128K music bank ([Sound](05-sound.md)) | Q2 |
 | [SpareFill1](../src/buffers.asm#L58) $BEFC-&#36;BFFF, [SpareFill2](../src/buffers.asm#L132) $C1F4-&#36;C1FF | fill after the frame list and the object slots | Q2 |
 
 Code that the game can reach but no input of this project ran is listed in
@@ -247,13 +258,16 @@ of the chasing ghost and the archers for negative x.
 ## Open questions
 
 - Still **inferred** in the finding register: F44 (draw queue overflow),
-  F45 (consecutive run list records for one job), F65 (which set is the
-  crusaders), F66 (what the loader leaves on the stack on a 128K), F93 and
-  F101 (frame tables of the walkers), F110 (spawner without a free slot),
-  F112 (interrupt race), F131 (code not run). F22 (font format) and F47
-  (sprite rows inside a character row) were checked by models while writing
-  this article ([Screen drawing](05-drawing.md)) and can be marked observed;
-  the drawing model found no frame where F45's assumption fails.
+  F66 (what the loader leaves on the stack on a 128K), F101 (layout of the
+  walkers' behaviour blocks), F110 (spawner without a free slot), F112
+  (interrupt race), F131 (code not run). F22 (font format) was checked by a
+  model while writing this article ([Screen drawing](05-drawing.md)) and can
+  be marked observed. F45, F47, F65 and F93 were observed in the second
+  review.
+- Not run: a projectile with y of $58-$5F reads flag-map row words 22-23 of
+  [FlagRowTable](../src/startup.asm#L174), which point into the main stack ([UpdateArrow](../src/entities.asm#L2230)
+  accepts y up to $5F); at worst such a projectile is removed a frame early
+  (inferred from the code).
 - The 128K machine (Q22, partial): nothing of the bank was run on a 128K
   model. The AY output, the F + H mute toggle and the AY effects are read
   from a few instructions of the bank ([Sound](05-sound.md)).

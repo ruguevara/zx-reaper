@@ -23,17 +23,18 @@ plays one step of the effect in [SoundPlaying](../src/variables.asm#L483) until 
 | --- | --- | --- | --- |
 | 1 | (none) | nothing: no store of 1 in the image (F106) | forced by a poke |
 | 2 | SFX_JUMP | a jump starts ([PlayerStanding](../src/player.asm#L771)) | yes |
-| 3 | SFX_TRIGGER | the bell or a lever touched ([ActionBellOrLever](../src/gameframe.asm#L516)) | yes |
-| 4 | SFX_PORTAL | the arch between rooms 10 and 19 ([EnterRoomAtArch](../src/gameframe.asm#L398)) | yes |
-| 5 | SFX_PICKUP | a heart, a cross, the chalice or the final parchment taken ([FreeSlotWithSound](../src/gameframe.asm#L447)), the wheel ([ActionWheel](../src/gameframe.asm#L311)), a gate lever ([ActionGateLever](../src/gameframe.asm#L545)), a parchment ([ActionParchment](../src/gameframe.asm#L816)), a cross of the ring added ([ShowCrossRing](../src/effects.asm#L245)), a key accepted in the controls menu ([RedefineOneKey](../src/controls.asm#L408)) | yes |
+| 3 | SFX_TRIGGER | the bell or the lever of room 9 or 10 touched ([ActionBellOrLever](../src/gameframe.asm#L516)) | yes |
+| 4 | SFX_PORTAL | either arch between rooms 10 and 19 ([EnterRoomAtArch](../src/gameframe.asm#L398)) | yes |
+| 5 | SFX_PICKUP | a heart, a cross, the chalice or the final parchment taken ([FreeSlotWithSound](../src/gameframe.asm#L447)), the wheel ([ActionWheel](../src/gameframe.asm#L311)), the gate lever of room 20 ([ActionGateLever](../src/gameframe.asm#L545)), a parchment ([ActionParchment](../src/gameframe.asm#L816)), a cross of the ring added ([ShowCrossRing](../src/effects.asm#L245)), a key accepted in the controls menu ([RedefineOneKey](../src/controls.asm#L408)) | yes |
 | 6 | SFX_DEATH | Jean dies ([KillPlayer](../src/player.asm#L479)) | yes |
-| 7 | SFX_ENEMY_SHOT | Death throws a scythe ([ThrowDeathScythe](../src/entities.asm#L3344)), Satan fires ([UpdateSatan](../src/entities.asm#L3632)), an archer or a stone head shoots ([UpdateShooter_Tail](../src/entities.asm#L1987)), a plant spits ([UpdatePlant](../src/entities.asm#L2057)), a fish splashes ([UpdateFishWaiting](../src/entities.asm#L2510), [UpdateFishJumping](../src/entities.asm#L2595)), the Beast breathes fire ([UpdateBeastFire](../src/entities.asm#L2792)) | yes |
-| 8 | SFX_DOOR | the church door flickers ([ActionChurchDoor](../src/gameframe.asm#L180)) | yes |
+| 7 | SFX_ENEMY_SHOT | Death throws a scythe ([ThrowDeathScythe](../src/entities.asm#L3345)), Satan fires ([UpdateSatan](../src/entities.asm#L3633)), an archer or a stone head shoots ([UpdateShooter_Tail](../src/entities.asm#L1988)), a plant spits ([UpdatePlant_Spit](../src/entities.asm#L2108)), a fish leaves or falls back into the water ([UpdateFishWaiting_Jump](../src/entities.asm#L2536), [UpdateFishJumping](../src/entities.asm#L2596)), the Beast's fire, every second frame while the jet burns ([UpdateBeastFire_Draw](../src/entities.asm#L2871)) | yes |
+| 8 | SFX_DOOR | each rattle of the shut church door, the first one on the frame after it shuts ([ActionChurchDoor](../src/gameframe.asm#L180), F146) | yes |
 | 9 | SFX_CHECKPOINT | a checkpoint touched ([ActionCheckpoint](../src/gameframe.asm#L280)) | yes |
 
 "Observed" means the request was seen in [SoundRequest](../src/variables.asm#L506) in a simulator
-run (F107: rooms entered directly, items touched with Jean held on them);
-the list of requesters comes from the stores of each number in the code.
+run (F107: rooms entered directly, each of the 45 items touched with Jean
+held on it; F145 for the bell and the levers, F146 for the door); the list of
+requesters comes from the stores of each number in the code.
 
 ## One step of a tone
 
@@ -87,7 +88,7 @@ $87F2 + 8 (n - 2)); the fields, as described at [SoundPeriod](../src/mainloop.as
 | Effect | Record | Bursts | PERIOD per burst | Sound |
 | --- | --- | --- | --- | --- |
 | 2 jump, 8 door | `00 02 02 01 00 00 00 00` | 2 | 0, 2 | a click, then 127 flips 83 T apart (about 21 kHz) |
-| 3 bell, lever | `A0 50 1E 01 00 00 00 00` | 30 | $A0, $F0, $40, $90, $E0, $30, ... | the period jumps by $50 with wrap-around and runs through all 16 multiples of $10: a warble between about 270 Hz and 3.8 kHz, with a click where it passes 0 |
+| 3 bell, levers of rooms 9 and 10 | `A0 50 1E 01 00 00 00 00` | 30 | $A0, $F0, $40, $90, $E0, $30, ... | the period jumps by $50 with wrap-around and runs through all 16 multiples of $10: a warble between about 270 Hz and 3.8 kHz, with a click where it passes 0 |
 | 4 arch | `E6 E6 0A 01 02 00 00 00` | 10 | 230, 204, ... 22, then 252 | rising from about 280 Hz to 2.8 kHz, the last burst low |
 | 5 item, 9 checkpoint | `28 FA 08 01 00 00 00 00` | 8 | 40, 34, 28, 22, 16, 10, 4, 254 | rising from 1.6 kHz to 12.8 kHz, then a low blip (observed, F105) |
 | 6 death | `04 F2 28 03 02 50 08 00` | 40 + 8 + 8 | 4, 246, 232, ... (STEP -14, wrapping about every 18 bursts); then 82, 68, ...; then 84, 70, ... | the pitch rises again and again; the longest effect, 56 frames (1.1 s) |
@@ -208,14 +209,16 @@ The table at $D892 holds 9 module addresses, tracks 1-9. Eight of the
 modules start with the header of a Vortex Tracker II 1.0 module; one of
 them has a title, track 2, "Prayer Of Hope" by Darkhorace. Track 9 starts
 with "ProTracker 3.5 compilation of Evil Fight" by DaRkHoRaCe. The game
-chooses the track in [MusicTrack](../src/variables.asm#L529):
+chooses the track in [MusicTrack](../src/variables.asm#L529) (in the ending: 7 for room 25, 5, 7 for room 4,
+then 2; observed):
 
 | Track | When |
 | --- | --- |
 | 3 | the title and the controls menu ([StartGame](../src/mainloop.asm#L70)) |
-| per room | on entering a room, from [RoomMusicTable](../src/cutscenelists.asm#L63): rooms 0:1, 1:2, 2-3:4, 4:7, 5-6:5, 7-8:4, 9:7, 10-11:8, 12-13:4, 14-16:8, 17:4, 18:9, 19-20:8, 21-23:6, 24:9 |
-| 7 | Satan turned into smoke ([UpdateSatan](../src/entities.asm#L3632)), the Game Over screen |
-| 5, then 2 | the two parts of the ending ([RunEnding](../src/sequences.asm#L112)); the bank's ending routine sets 2 again |
+| per room | on entering a room, from [RoomMusicTable](../src/cutscenelists.asm#L63): rooms 0:1, 1:2, 2-3:4, 4:7, 5-6:5, 7-8:4, 9:7, 10-11:8, 12-13:4, 14-16:8, 17:4, 18:9, 19-20:8, 21-23:6, 24:9, 25:7 |
+| 7 | Satan turned into smoke ([UpdateSatan](../src/entities.asm#L3633)), the Game Over screen |
+| 5 | the first cutscene of the ending, after the first text window ([RunEnding](../src/sequences.asm#L112)) |
+| 2 | the last text of the ending ([RunEnding](../src/sequences.asm#L112)); the bank's ending routine sets 2 again |
 
 Room 1, "A prayer of Hope", plays track 2, the module titled "Prayer Of
 Hope"; Death (room 18) and Satan (room 24) get track 9, "Evil Fight". As

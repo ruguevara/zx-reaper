@@ -13,12 +13,12 @@ at once; falls never do.
 
 | Variable | Contents |
 | --- | --- |
-| [PlayerState](../src/player.asm#L33) (&#36;A894) | 0 none (intro, ending), 1 dying, 2 jumping (rising), 3 crouching, 4 standing or walking, 5 falling, $FF the debug room warp |
-| [PlayerAnimTimer](../src/player.asm#L37), [PlayerFrame](../src/player.asm#L39) | frames to the next picture; picture 0-1 walking or crouching, 2 in the air, 0-7 dying |
+| [PlayerState](../src/player.asm#L33) (&#36;A894) | 0 no player (intro, ending), 1 dying, 2 jumping (rising), 3 crouching, 4 standing or walking, 5 falling, $FF the debug room warp |
+| [PlayerAnimTimer](../src/player.asm#L37), [PlayerFrame](../src/player.asm#L39) | frames to the next picture; picture 0-1 walking or crouching, 2 in the air, 0-8 dying (7 is not drawn, 8 ends the death) |
 | [PlayerFacing](../src/player.asm#L41) | 0 right, 1 left |
 | [PlayerSpeedY](../src/player.asm#L43) | vertical speed, 8.8, up while jumping and down while falling |
 | [PlayerTileHead](../src/player.asm#L47), [PlayerTileRight](../src/player.asm#L49), [PlayerTileFeet](../src/player.asm#L51), [PlayerTileLeft](../src/player.asm#L53) | the probe results of this frame: the OR of the flag bytes at the probe points |
-| [PlayerHit](../src/player.asm#L55) | 0, 4 (a harmful cell), $FF (a creature), 2 (the pyre of the ending); not 0 kills |
+| [PlayerHit](../src/player.asm#L55) | 0, 4 (a harmful cell), $FF (a creature or a plant), 2 (the pyre of the ending); not 0 kills |
 | [PlayerX](../src/player.asm#L57), [PlayerY](../src/player.asm#L59) | position, 8.8; the high byte counts units of 2 pixels |
 | [PlayerBoxXMax](../src/variables.asm#L213) .. [PlayerBoxYMin](../src/variables.asm#L219) | the hit box of this frame, which creatures and items compare with theirs |
 | [Lives](../src/variables.asm#L466), [RespawnX](../src/variables.asm#L191), [RespawnY](../src/variables.asm#L195) | lives left; where the next respawn puts him |
@@ -87,7 +87,7 @@ flowchart LR
     C -- "crouch released, head free" --> ST
     C -- "no floor" --> F
     ST & J & C & F -- "PlayerHit not 0" --> DY["1 dying"]
-    DY -- "32 frames" --> R["room state $84 (or $85: Game Over)"]
+    DY -- "32 frames" --> R["room state $84: restart at the active checkpoint (or $85: Game Over)"]
 ```
 
 ## Probes and hit box
@@ -153,17 +153,29 @@ speed while its high byte is below 2, so the speed ends at $021C, 4.2 pixels
 per frame (F72). There is no fall damage and no height limit: in room 5 a
 fall from Y $08 to the floor at Y $44 just lands (F72).
 
-Landing takes two steps. After moving Y, [LandPlayer](../src/player.asm#L180) probes the two feet
-points again and, if a cell there has bit 0 or 1, rounds Y down to a multiple
-of 4 with a zero fraction, which puts the feet exactly on top of that cell
-row. In the next frame the feet result shows the floor and Jean stands again
-(state 4). Class 1 cells set only bit 0, so they block neither the sides nor the
+A fall ends at once when the feet result has bit 1 (classes 2 and 3).
+Otherwise Y moves by the speed and [LandPlayer](../src/player.asm#L180) probes the two feet points
+again and, if a cell there has bit 0 or 1, rounds Y down to a multiple of 4
+with a zero fraction, which puts the feet exactly on top of that cell row. In
+the next frame the feet result shows the floor and Jean stands again (state
+4). Class 1 cells set only bit 0, so they block neither the sides nor the
 head: Jean jumps up through them and walks through them, and lands on one
-when his feet come down onto its top edge from the free row above (observed:
-he jumped up through two class 1 cells, fell back and stood on them, F74). If
-his feet are already inside such a cell, [PlayerFalling](../src/player.asm#L702) calls
-[LandPlayer](../src/player.asm#L180) only in a frame that carries Y into the next cell row (read
-from the code).
+when his feet come down into it from the free row above (observed: he jumped
+up through two class 1 cells, fell back and stood on them, F74).
+
+If his feet are still inside the platform's cell row at the top of the jump,
+[PlayerFalling](../src/player.asm#L702) lands him only when he is exactly on its top (Y mod 4 = 0) or
+when the fall carries the feet into the next cell row and that row is a
+floor. So a platform is reached only by a jump that lifts the feet above it:
+from a floor, a platform 3 or 4 cell rows higher is landed on, one 5 rows
+higher is jumped into and fallen back through (observed with poked flags,
+F141).
+
+A class 2 cell (bit 1 without bit 0) under the feet would hold Jean in the
+air: [PlayerFalling](../src/player.asm#L702) lands him on bit 1 and the standing code, which tests
+only bit 0, sets him falling again in every frame, so he stays in state 5 and
+cannot jump or crouch (observed with poked flags). No tile and no room cell
+with a free cell above it has class 2, so this never happens in play (F140).
 
 ## Crouching
 
@@ -178,28 +190,33 @@ When the crouch ends in a fall in the same frame, the fall sets picture 2 and
 the crouching drawer reads entry 2 of [CrouchFramesRight](../src/player.asm#L946), which has only
 two: the word after it is the routine address in [SpriteCmd](../src/player.asm#L974), so for one
 frame Jean is drawn from the code bytes at $983C (F120,
-[Tricks](06-tricks.md)). Facing left the read lands on a real frame.
+[Tricks](06-tricks.md)). Facing left the read lands on a real frame, but
+one that faces right (entry 0 of [CrouchFramesRight](../src/player.asm#L946)).
 
 ## Dying
 
-[PlayerHit](../src/player.asm#L55) is set in two places: [ProbePlayer](../src/player.asm#L85) stores bit 2 of the
-harmful probe (4 on a class 4 cell), and [HitTestDone](../src/gameframe.asm#L913) stores $FF when a
-creature's box overlaps Jean's ([Creatures](05-creatures.md)). In the ending
-the pyre monk stores 2 ([Ending](05-items-ending.md)).
+[PlayerHit](../src/player.asm#L55) is set in three places: [ProbePlayer](../src/player.asm#L85) stores bit 2 of the
+harmful probe (4 on a class 4 cell), [HitTestDone](../src/gameframe.asm#L913) stores $FF when a
+creature's box overlaps Jean's, and [UpdatePlant_Spit](../src/entities.asm#L2108) does the same for the
+plants, which run their own overlap test ([Creatures](05-creatures.md)). In
+the ending the pyre monk stores 2 ([Ending](05-items-ending.md)).
 
 [UpdatePlayerActive](../src/player.asm#L642) tests the flag first; if it is not 0, [KillPlayer](../src/player.asm#L479)
 takes a life from [Lives](../src/variables.asm#L466) at once, requests sound effect 6, clears the flag
 and sets state 1. [UpdateDying](../src/player.asm#L494) then runs every frame:
 
-- Y goes up by $0080, one pixel per frame;
-- every 4 frames the picture advances; the 7 pictures of
-  [MonkDyingFrames](../src/player.asm#L937) are three flames (large, medium, small) in the order
-  0 1 0 1 2 1 2, drawn in bright red instead of bright yellow;
-- picture 7 is not drawn, and at picture 8 [UpdateDying_End](../src/player.asm#L530) sets the room
-  state to $84, restart after a death, or $85, Game Over, when [Lives](../src/variables.asm#L466) is 0,
-  and asks for the hearts to be redrawn.
+- Y goes up by $0080, one pixel per frame, while a picture is drawn;
+- the 7 pictures of [MonkDyingFrames](../src/player.asm#L937) are three flames (large, medium,
+  small) in the order 0 1 0 1 2 1 2, drawn in bright red instead of bright
+  yellow. The timer starts at 4 but is first counted down in the frame of the
+  hit, so picture 0 lasts 3 frames and pictures 1-6 4 frames each: 27 frames
+  and 27 pixels (Y $4400 to $3680);
+- picture 7 draws nothing for 4 frames, and in the 32nd frame, at picture 8,
+  [UpdateDying_End](../src/player.asm#L530) sets the room state to $84, restart at the active
+  checkpoint, or $85, Game Over, when [Lives](../src/variables.asm#L466) is 0, and asks for the hearts
+  to be redrawn.
 
-The animation lasts 32 frames (F73). Jean cannot leave the room while dying
+The animation lasts 32 frames in all (F73). Jean cannot leave the room while dying
 ([CheckRoomExit](../src/player.asm#L1037) ignores states 0 and 1), but the items still see his box:
 a heart touched in the frame of the death or during the animation gives the
 life back, even the last one, and then no Game Over follows (F121).
@@ -207,7 +224,8 @@ life back, even the last one, and then no Game Over follows (F121).
 ## Checkpoints and respawn
 
 Room state 4 makes the main loop call [SelectCheckpoint](../src/templates.asm#L209)
-([MainLoop_AfterDeath](../src/mainloop.asm#L111)). It clears the room state and the hit flag, turns a
+([MainLoop_AfterDeath](../src/mainloop.asm#L111)); the start of every game passes there once too,
+which is how the first room is chosen. It clears the room state and the hit flag, turns a
 dying monk into a standing one, and scans the nine checkpoint flags
 [CheckpointFlag0](../src/variables.asm#L439)-[CheckpointFlag8](../src/variables.asm#L455) for the first one that is not 0. Its
 index selects a 3-byte record of [Checkpoints](../src/templates.asm#L259) (room, row, column); with all
@@ -231,7 +249,9 @@ the room, which rebuilds it with all its creatures at their start.
 
 Touching a checkpoint clears all nine flags and sets its own to 2, so at most
 one is active ([Items](05-items-ending.md)). A death always returns Jean to
-that checkpoint, whatever room he died in. The arches of rooms 10 and 19 also
+that checkpoint, whatever room he died in, never to the room of the death
+(observed: killed in room 6 with no checkpoint touched, he restarted in room 5,
+F73). The arches of rooms 10 and 19 also
 write [RespawnX](../src/variables.asm#L191) and [RespawnY](../src/variables.asm#L195), but only for their own move (room state
 2); a death after an arch goes through [SelectCheckpoint](../src/templates.asm#L209) and overwrites
 them (observed: Jean placed on the arch of room 19 arrived in room 10 at

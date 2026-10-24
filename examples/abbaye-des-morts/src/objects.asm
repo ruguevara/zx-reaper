@@ -118,7 +118,7 @@ ItemTypeRecords:
 ; DrawItemFrame. The lists:
 ;
 ; FramesHeart (2 frames), FramesCross (12: 6 bright crosses in the colours of
-; CrossColours, then 6 thin ones, the plus sign sprite), FramesCheckpoint (2:
+; CrossColours, then 6 thin ones, the inverted cross sprite SpriteInvertedCross), FramesCheckpoint (2:
 ; not active, active), FramesArch (9, all the arch with changing ink),
 ; FramesScroll (1: the parchment), FramesRedScroll (1: the same sprite in red,
 ; attribute $42), FramesBell (2: before and after the touch, the second not

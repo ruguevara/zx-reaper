@@ -49,32 +49,33 @@ respawn code has set it ([Jean](05-player.md)).
 | $5B00 | 22 rows x 32 | tile numbers, 0-255; [TileMapAddress](../src/helpers.asm#L141) gives $5B00 + 32 row + column |
 | $5E00 | 22 rows x 32 | one flag byte per cell; [FlagMapAddress](../src/helpers.asm#L166) gives $5E00 + 32 row + column |
 | $6100 | 24 words | [FlagRowTable](../src/startup.asm#L174): the address of each row of the flag map, built at start-up |
-| $CD00 | 256 bytes | [TileFlags](../src/tiles.asm#L36): the flag byte of each tile |
-| $CE00 | 256 bytes | [TileAttrs](../src/tiles.asm#L63): the attribute of each tile |
-| $CF00 | 256 x 8 bytes | [TileGfx](../src/tiles.asm#L92): the 8 x 8 bitmap of each tile |
+| $CD00 | 256 bytes | [TileFlags](../src/tiles.asm#L37): the flag byte of each tile |
+| $CE00 | 256 bytes | [TileAttrs](../src/tiles.asm#L64): the attribute of each tile |
+| $CF00 | 256 x 8 bytes | [TileGfx](../src/tiles.asm#L93): the 8 x 8 bitmap of each tile |
 
 Every tile command of a script ends in [PlaceTile](../src/script.asm#L514), which stores the tile
-number in the tile map and copies its byte of [TileFlags](../src/tiles.asm#L36) into the same cell
+number in the tile map and copies its byte of [TileFlags](../src/tiles.asm#L37) into the same cell
 of the flag map, three pages higher (F68). The flag map overlays the start-up
 code at $6000, which has run by then. A flag byte has three parts:
 
-- bit 7: the cell must be redrawn. Every tile starts with it set, so a new
-  room is drawn in full;
+- bit 7: the cell must be redrawn. Every tile of [TileFlags](../src/tiles.asm#L37) has it set, so a
+  placed tile is drawn; the full draw of a new room comes from the $90 1 of
+  the panel script below (F152);
 - bit 6: a sprite covers the cell this frame; the next frame turns it into
   bit 7 so the cell is redrawn and the sprite erased (F40,
   [Drawing](05-drawing.md));
-- bits 0-2: the class, which Jean, the projectiles and the face of room 11
-  test.
+- bits 0-2: the class, which Jean, the projectiles and the chasing ghost of
+  room 11 test.
 
 | Class | Flag | Tiles | Meaning |
 | --- | --- | --- | --- |
 | 0 | $80 | 126 | empty |
-| 1 | $81 | 3: $10, $26, $87 | one-way platform: Jean jumps up through it, walks through it and lands on it only when falling across its top edge (F74) |
-| 2 | ($82) | none | blocks walking and the head, is not a floor; only made by script op $8A |
-| 3 | $83 | 85 | wall and floor (bit 1 blocks, bit 0 can be stood on; F7, F74) |
+| 1 | $81 | 3: $10, $26, $87 | one-way platform: Jean jumps up through it, walks through it and lands on it when his feet come into it from above; a jump that leaves his feet inside it falls back through (F74, F141) |
+| 2 | ($82) | none | blocks walking and the head, is not a floor; only made by script op $8A. Under Jean's feet it would hold him in the air, unable to jump (F140, latent) |
+| 3 | $83 | 85 | wall and floor (bit 1 blocks and stops a fall, bit 0 can be stood on; F7, F74) |
 | 4 | $84 | 42: $05, $3B-$3C, $4E-$74 | harmful: kills Jean (F73), removes a scythe (F56) |
 
-The tile counts are from the 256 bytes of [TileFlags](../src/tiles.asm#L36). Drawing reads only
+The tile counts are from the 256 bytes of [TileFlags](../src/tiles.asm#L37). Drawing reads only
 the tile map, and the collision tests read only the flag map. A script can therefore make
 a cell look like one thing and behave like another, which the game uses for
 its hidden passages (below).
@@ -86,7 +87,12 @@ rooms, the parchment and ending windows, the menus and the title. A byte
 below $80 is a character, drawn at the text cursor by [DrawGlyph](../src/script.asm#L555); a byte
 of $80 or more is a command, whose handler is word (code - $80) of
 [ScriptOpTable](../src/hud.asm#L331). The opcodes and their operands are listed in
-[Data structures](02-data.md). The interpreter does not call its handlers in
+[Data structures](02-data.md); each of the 32 codes was run on hand-made
+scripts and does what its line in the [RunScript](../src/script.asm#L99) table says (F149). Two
+of them misplace tiles past column 31: a run of $8D carries into the wrong
+row from rows 7 and 15, and a skip of $94 from a column that is not a
+multiple of 8 drops cells; no shipped script does either (F150). The
+interpreter does not call its handlers in
 a loop: it pushes its own address as their return address, so every handler
 ends with a plain RET and lands back at the top.
 
@@ -130,7 +136,9 @@ ScriptRoomPanel:
 ```
 
 The panel (the room name, right-aligned in rows 22-23) is written to the
-screen directly; everything else goes into the tile map. The rest of a script
+screen directly; everything else goes into the tile map. Its `$90 1` marks
+every cell for redraw, so that [RedrawRoom](../src/sprites.asm#L1162) draws the whole room (F152); room 4,
+which has no panel, does the same in its own script. The rest of a script
 paints the room from a few kinds of commands: rectangles of one tile ($86,
 $98), a block pattern defined once ($88) and repeated over rectangles ($89,
 $99: 61 uses, the stone, rock and earth of most rooms), rows and pictures of
@@ -140,7 +148,8 @@ the foliage of room 9 ($94, F3). Small shared subscripts draw the night sky
 ([ScriptSky](../src/roomscripts.asm#L1533): the moon and seven stars of rooms 1-4 and 6) and the block
 patterns. Room 25 is a single call of room 24's script ([RoomScript24](../src/roomscripts.asm#L1443))
 ([RoomScript25](../src/roomscripts.asm#L1478)); room 0 ([RoomScript00](../src/roomscripts.asm#L97)) prints the intro text straight
-to the screen and clears the redraw marks so that nothing is drawn over it.
+to the screen and clears the redraw marks so that nothing is drawn over it
+(all but the cell at $6000, which op $90 never changes: F5, F152).
 
 ## Cells that look different from what they are
 
@@ -152,16 +161,17 @@ finds only these cells:
 | Room | Cells | Command | Looks like | Is |
 | --- | --- | --- | --- | --- |
 | 5 | column 0, rows 0-19 | $8A, [OpFlagEdges](../src/script.asm#L1205) | sky and forest | class 2: the left edge is closed (F62); rows 20-21 are ground anyway |
-| 10 | row 5, columns 28-31 | $96, [OpSetFlagRect](../src/script.asm#L1449) | rock | class 0: a tunnel one cell high out of the right edge |
-| 11 | row 5, columns 0-1 | $96 | rock | class 0: the same tunnel, arriving from room 10 |
-| 11 | rows 20-21, columns 2-3 | $96 | spikes over rock | class 0: a hole in the floor |
-| 16 | rows 0-3, columns 2-3 | $96 | rock | class 0: the shaft under that hole |
+| 10 | row 5, columns 28-31 | $96, [OpSetFlagRect](../src/script.asm#L1449) | rock | class 0: a tunnel one cell high out of the right edge (F133) |
+| 11 | row 5, columns 0-1 | $96 | rock | class 0: the same tunnel, arriving from room 10 (F133) |
+| 11 | rows 20-21, columns 2-3 | $96 | spikes over rock | class 0: a hole in the floor; the other spikes of the row are class 4 (F134) |
+| 16 | rows 0-3, columns 2-3 | $96 | rock | class 0: the shaft under that hole (F134) |
 | 16 | row 21, columns 6-21 | $9D, [OpSetupWater](../src/script.asm#L1589) | blank, then the water strip | class 4 |
 | 19 | row 21, columns 14-29 | $9D | blank, then the water strip | class 4 |
 
 Room 11 is right of room 10 and room 16 under room 11, so the hidden cells
 form a tunnel from the Beast's cave into the Cave of illusions and a drop from
-there into the Lake of despair. Both were tried in the simulator. The tunnel
+there into the Lake of despair. Both were tried in the simulator (F133,
+F134). The tunnel
 starts in the two-column gap between the Beast and the rock (columns 26-27)
 and is one cell high: standing, Jean's side probes hit the rock of rows 3-4,
 but crouched his only side probe is at Y+11, in row 5, so he crawls through
@@ -176,7 +186,7 @@ inference from the texts.
 A fourth trick needs no command: tile $00 has class 3 and the attribute $00,
 black ink on black paper. Room 20 has six of them at row 8, columns 15-20, a
 bridge that cannot be seen; Jean dropped onto it in the simulator stands in
-the air at Y $14. The only other uses are the whole tile map of room 0 and
+the air at Y $14 (F135). The only other uses are the whole tile map of room 0 and
 tile $4D (also class 3, attribute 0) once in room 10. The parchment of room 14
 says "An invisible path / over a wood bridge", and the invisible cells of
 room 20 lie above its red wooden bridge (inference).
@@ -196,15 +206,16 @@ entered:
 | --- | --- | --- | --- |
 | 6 | [DoorRight](../src/roomscripts.asm#L578), column 31, rows 14-17 | [ChurchDoorShut](../src/variables.asm#L233) is not 0 | the way back into the church is shut |
 | 7 | [DoorLeftShut](../src/roomscripts.asm#L474), column 0, rows 14-17 | [ChurchDoorShut](../src/variables.asm#L233) is not 0 | the church door, shut behind Jean (F28) |
-| 8 | [DoorRight](../src/roomscripts.asm#L578) | the lever of room 10 ([LeverRoom10](../src/variables.asm#L269)) is 0 | the way right to room 9 |
-| 8 | [OpenAltarFloor](../src/roomscripts.asm#L568), 2 x 2 at row 20, column 26 | the bell of room 2 ([BellRung](../src/variables.asm#L265)) is not 0 | erases a wall block |
-| 19 | [DoorLeftLow](../src/roomscripts.asm#L1162), column 0, rows 16-19 | the lever of room 9 ([LeverRoom9](../src/variables.asm#L267)) is 0 | the way left to room 18 |
+| 8 | [DoorRight](../src/roomscripts.asm#L578) | the lever of room 10 ([LeverRoom10](../src/variables.asm#L269)) is 0 | the way right to room 9 (F145) |
+| 8 | [OpenAltarFloor](../src/roomscripts.asm#L568), 2 x 2 at row 20, column 26 | the bell of room 2 ([BellRung](../src/variables.asm#L265)) is not 0 | blank class 0 cells in the floor: Jean drops through into room 13, Catacombs (F142) |
+| 19 | [DoorLeftLow](../src/roomscripts.asm#L1162), column 0, rows 16-19 | the lever of room 9 ([LeverRoom9](../src/variables.asm#L267)) is 0 | the way left to room 18 (F145) |
 | 20 | [DoorRight](../src/roomscripts.asm#L578) | the lever of room 20 ([LeverRoom20](../src/variables.asm#L273)) is 0 | the gate right to room 21 |
 
 The door tiles are class 3, so a door is a wall. Two items do not wait for the
 next visit: the church trigger and the lever of room 20 store a script
 address in [SmcEventScript](../src/hud.asm#L293) and write a NOP over [RunEventScript](../src/hud.asm#L287), and the
-main loop runs that script once, so the door appears or vanishes at once.
+main loop runs that script once, so the door appears or vanishes at once
+(F145, F146).
 
 ## Room effects
 
@@ -243,8 +254,9 @@ never run (F130).
 
 ### The bubbling blood (rooms 21, 22, 23)
 
-Op $9E switches on [AnimateBloodTiles](../src/effects.asm#L191). Every second pass
-([BloodAnimTimer](../src/variables.asm#L161)) it walks row 21 of the tile map, turns each tile $3B into
+Op $9E switches on [AnimateBloodTiles](../src/effects.asm#L191). Every second pass of the main loop
+([BloodAnimTimer](../src/variables.asm#L161); in room 22 a swap every 4 or 5 interrupt frames) it
+walks row 21 of the tile map, turns each tile $3B into
 $3C and each $3C into $3B, and sets the redraw bit of those cells (F116). The
 two tiles are class 4: the blood at the foot of these rooms kills. See
 [room 22](img/room-22.png).
@@ -257,7 +269,7 @@ fifth pass ([CrossFlashTimer](../src/variables.asm#L173)) it:
 
 1. advances a colour index 0-5 kept in the operand of the instruction at
    [SmcCrossColour](../src/effects.asm#L256) and copies that attribute of [CrossColours](../src/variables.asm#L553) (yellow,
-   red, magenta, blue, cyan, green, all bright) into [TileAttrs](../src/tiles.asm#L63) for tile
+   red, magenta, blue, cyan, green, all bright) into [TileAttrs](../src/tiles.asm#L64) for tile
    $4C, so all the crosses of the ring change colour together;
 2. unless the chalice has been taken ([ChaliceTaken](../src/variables.asm#L289)), adds one cross to the
    ring ([CrossRingCount](../src/variables.asm#L422), up to 12, with sound effect 5) and stamps that
@@ -314,6 +326,8 @@ grid and the map differ:
 
 - room 5's left edge is closed by op $8A (F62), so the chase of rooms 5 and 6
   only goes one way;
+- the bell of room 2 opens a way down from room 8 to room 13 (F142), and the
+  levers of rooms 9 and 10 open the doors of rooms 19 and 8 (F145);
 - rooms 0 and 4 cannot be entered in play, and room 1 has no floor or walls in
   its flag map: it is seen only through the window in the left wall of room 2,
   where Jean stops in a one-cell pocket (F124);

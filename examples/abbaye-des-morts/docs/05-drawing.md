@@ -4,7 +4,8 @@ No routine of the game draws a sprite straight onto the screen. The game
 frame, which runs in the interrupt, only queues draw commands. The main loop
 then finds every character cell that changed or that a sprite covers,
 rebuilds those cells from the tile map in buffers, draws the sprites into the
-buffers with a one-pixel black outline, and copies the cells to the screen.
+buffers with a one-pixel black outline (the items with none), and copies the
+cells to the screen.
 The sprites come from a 10 KB sprite sheet that every room fills by
 unpacking its sprite sets, with pre-shifted and mirrored copies made at
 that moment.
@@ -32,10 +33,11 @@ flowchart TD
 The game frame ([GameFrame](../src/gameframe.asm#L22)) runs once per 50 Hz interrupt (F103). Each
 object handler and the player routine fill a draw command and append it to
 the frame call list [FrameList](../src/buffers.asm#L50): Jean through [QueueDrawCmd](../src/player.asm#L446), the
-creatures through their own copy loops ([QueueOneCommand](../src/entities.asm#L1322),
-[QueueTwoCommands](../src/entities.asm#L1305)), the items through [AnimateItem](../src/gameframe.asm#L696). [EndFrameList](../src/gameframe.asm#L61)
+creatures through their own copy loops ([QueueOneCommand](../src/entities.asm#L1323) for one sprite,
+[QueueTwoCommands](../src/entities.asm#L1306) for the two of the falling drop, the Beast's fire and
+Satan), the items through [DrawItemFrame](../src/gameframe.asm#L734) (which [AnimateItem](../src/gameframe.asm#L696) leads into). [EndFrameList](../src/gameframe.asm#L61)
 closes the list and writes a NOP over the RET at [FrameListGate](../src/templates.asm#L143). The main
-loop ([StartGame](../src/mainloop.asm#L70), the part at [MainLoop_Play](../src/mainloop.asm#L137)) spins on
+loop ([MainLoop](../src/mainloop.asm#L124), the part at [MainLoop_Play](../src/mainloop.asm#L137)) spins on
 that byte, then calls it: the NOP falls into [RunFrameList](../src/templates.asm#L163), which turns
 the gate back into a RET, points SP at the list and RETs into the first
 command (the mechanism is in [Tricks](06-tricks.md)). After
@@ -48,17 +50,20 @@ creatures in slot order, then Jean, because [UpdatePlayer](../src/player.asm#L55
 [RunObjectSlots](../src/gameframe.asm#L94). Sprites are drawn in that order, so Jean is drawn over
 everything else.
 
-A frame whose drawing is not finished when the next interrupt comes loses
-its drawing, not its logic: the game frame still runs, but while the list
-is being drawn [QueueDrawCmd](../src/player.asm#L446) is a RET and [GameFrame](../src/gameframe.asm#L22) skips
-[EndFrameList](../src/gameframe.asm#L61). In 800 frames of `tests/inputs/play.txt` the screen was
-drawn 586 times (F103).
+The game logic never waits for the drawing. Every game frame starts its list
+again, so the main loop draws only the latest complete list, and a game frame
+whose interrupt comes while the list is being drawn queues nothing:
+[QueueDrawCmd](../src/player.asm#L446) is a RET then and [GameFrame](../src/gameframe.asm#L22) skips [EndFrameList](../src/gameframe.asm#L61). In 800
+frames of `tests/inputs/play.txt` the screen was drawn 586 times (F103). In
+300 frames per room with enemy hits off, a quiet room (7, Jean standing) was
+drawn 301 times, its drawing done by T 54,850 of each frame; rooms 5, 8, 13
+and 22 224-243 times, room 14 145 and room 10 128 times (F147).
 
 ## Buffers
 
 | Address | Size | What | Written by | Read by |
 | --- | --- | --- | --- | --- |
-| $5B00 tile map | 704 | 22 rows x 32 tile numbers | room scripts ([PlaceTile](../src/script.asm#L514)), hanged men's ropes, blood tiles | [CopyRunCells](../src/redraw.asm#L460), [RedrawCell](../src/sprites.asm#L1246) |
+| $5B00 tile map | 704 | 22 rows x 32 tile numbers | room scripts ([PlaceTile](../src/script.asm#L514)), hanged men's ropes, blood tiles, the ring of crosses | [CopyRunCells](../src/redraw.asm#L460), [RedrawCell](../src/sprites.asm#L1246) |
 | $5E00 flag map | 704 | one byte per cell, 3 pages above the tile map: bits 0-2 tile class, bit 6 "a sprite is here", bit 7 "redraw" | [PlaceTile](../src/script.asm#L514), [QueueSprite](../src/sprites.asm#L50), [CollectRedrawRun](../src/redraw.asm#L363), [RedrawCell](../src/sprites.asm#L1246) | the same, collision code |
 | $BE5A [FrameList](../src/buffers.asm#L50) | 162 | up to 16 draw commands of 10 bytes and the closing word | game frame | [RunFrameList](../src/templates.asm#L163) |
 | $C000 [DrawQueue](../src/buffers.asm#L75) | 256 | 16 jobs of 16 bytes | [AddQueueJob](../src/sprites.asm#L162) | [RunDrawQueue](../src/redraw.asm#L588) |
@@ -66,7 +71,7 @@ drawn 586 times (F103).
 | $C300 [RedrawLengths](../src/buffers.asm#L159) | 256 | run length at the index of a run's first cell | [CopyRunCells](../src/redraw.asm#L460) | [DrawRedrawList](../src/redraw.asm#L32) |
 | $C400 [RedrawAttrs](../src/buffers.asm#L168) | 256 | attribute of each queued cell | [CopyRunCells](../src/redraw.asm#L460), the drawers | [DrawRedrawList](../src/redraw.asm#L32) |
 | $C500 [RedrawPixels](../src/buffers.asm#L182) | 2048 | pixel row r of each queued cell at $C500 + 256 r + index | [CopyRunCells](../src/redraw.asm#L460), the drawers | [DrawRedrawList](../src/redraw.asm#L32) |
-| $CD00 [TileFlags](../src/tiles.asm#L36), $CE00 [TileAttrs](../src/tiles.asm#L63), $CF00 [TileGfx](../src/tiles.asm#L92) | 256 + 256 + 2048 | class, attribute and 8 bitmap bytes of each of the 256 tiles | (data) | the drawing and collision code |
+| $CD00 [TileFlags](../src/tiles.asm#L37), $CE00 [TileAttrs](../src/tiles.asm#L64), $CF00 [TileGfx](../src/tiles.asm#L93) | 256 + 256 + 2048 | class, attribute and 8 bitmap bytes of each of the 256 tiles | (data) | the drawing and collision code |
 | $D700 [SpriteSheet](../src/spritesheet.asm#L25) | 10240 | 40 pages, one per pixel row | the image, [UnpackSpriteSet](../src/unpack.asm#L92) | the drawers |
 | $FF00 OutlineMasks | 256 | outline mask of every byte | [StartUp](../src/startup.asm#L39) | the drawers |
 
@@ -174,7 +179,8 @@ pixel of g (F37):
 and every byte of a sprite is combined with the background as
 `(OutlineMasks[g] AND background) OR g`. The background is cleared under
 the sprite's pixels and one pixel to the left and right of each of them,
-which leaves a black outline. The code of one pair of pixel rows of a
+which leaves a black outline. The table works on one byte, so the outline
+stops at a byte edge and there is none above or below a pixel (F37). The code of one pair of pixel rows of a
 1-byte-wide sprite ([DrawStripW1](../src/sprites.asm#L621)):
 
 ```asm
@@ -207,9 +213,10 @@ from width 2 on, the first row goes left to right and the second right to
 left, so the pointers end in the column where they started. The drawers work in the alternate register set with B'
 = $FF fixed, so BC' addresses the mask table by the graphics byte in C'.
 
-Items are drawn by [DrawBlockJob](../src/sprites.asm#L274) without a mask: 16 pixels wide, on the
-character grid, replacing the cells' pixels. It reads the graphics with
-POP, 16 bytes per character row.
+Items are drawn by [DrawBlockJob](../src/sprites.asm#L274) without a mask and without an outline: 16
+pixels wide, on the character grid, replacing the cells' pixels (observed:
+every screen byte of a queued block equals its graphics byte). It reads the
+graphics with POP, 16 bytes per character row.
 
 Checked while writing this article: a Python model of the whole pass (tiles
 of the flagged cells, then every command of the frame list in order, masked
@@ -219,7 +226,9 @@ the screen after [DrawRedrawList](../src/redraw.asm#L32) in four consecutive fra
 rooms 1-24 entered directly and in two frames of `play.txt`: 336 masked
 sprites (all four values of y AND 3, three of them clipped) and 160 items,
 28,683 screen bytes, no difference. This confirms the drawing rule of F37
-and the row offsets of F47; F47 is still marked inferred in the register.
+and the row offsets of F47, which the second review observed again with 903
+sprites queued by hand (widths 1-5, all four values of y AND 3, clipped
+edges).
 
 ## Copying the cells to the screen
 
@@ -265,7 +274,7 @@ the table at row 24 ([SpriteSheetLower](../src/spritesheet.asm#L281)).
 | --- | --- | --- |
 | $00-$62 | 0-23 | the monk: 9 frames of 11 columns. Left: walking 0, walking 1, in the air ([MonkFramesLeft](../src/player.asm#L933)); the same facing right ([MonkFramesRight](../src/player.asm#L935)); three flames of the dying animation ([MonkDyingFrames](../src/player.asm#L937), drawn bright red) |
 | $00-$2F | 24-39 | the crouching monk: 4 frames of 12 columns ([CrouchFramesLeft](../src/player.asm#L944), [CrouchFramesRight](../src/player.asm#L946)) |
-| $30-$62 | 24-39 | small sprites: arrows, seeds, fireballs, the splash, the red flames ([BehaviourDrop](../src/behaviours.asm#L337) and the sprite blocks after it) |
+| $30-$62 | 24-39 | small sprites ([SpriteSheetLower](../src/spritesheet.asm#L281)): arrows, seeds, fireballs, the splash, the red flames ([BehaviourDrop](../src/behaviours.asm#L337) and the sprite blocks after it), and the stone head, the plant, the fish and the drop |
 | $63-&#36;FF | 0-39 | zero in the image; filled on room entry from the room's packed sprite sets |
 
 A frame of a 16-pixel sprite is stored four times, each copy shifted two
@@ -278,7 +287,8 @@ the pair table their behaviour block points to ([Creatures](05-creatures.md)).
 ## Unpacking the sprite sets
 
 Script opcode $97 ([OpUnpackSprites](../src/script.asm#L1503)) unpacks one of 20 packed sets
-([PackedSetArcher](../src/graphics.asm#L333) to [PackedSetWorm](../src/graphics.asm#L686), $68CC-$717E) into the sheet with
+([PackedSetArcher](../src/graphics.asm#L333) to [PackedSetWorm](../src/graphics.asm#L686), $68CC-$717E, each named after what it
+holds) into the sheet with
 [UnpackSpriteSet](../src/unpack.asm#L92). Record n of [UnpackRecords](../src/unpack.asm#L24) gives the destination,
 the packed set, flags and the frame width N in columns:
 
@@ -301,28 +311,28 @@ overwritten by the first frame drawn. A model of the format, of the shifted
 and of the mirrored copies reproduced every byte the Z80 code writes for all
 20 records (F114).
 
-| Set | Contents (comments of [UnpackRecords](../src/unpack.asm#L24)) | Flags | Width | Destination |
-| --- | --- | --- | --- | --- |
-| 0 | skeleton archers (rooms 17, 21) | mirror | 2 | $D7F8 |
-| 1 | crusaders (rooms 0, 4, 5, 6, 24, 25) | shift, mirror | 2 | $D763 |
-| 2 | Death (room 18) | shift, mirror | 4 | $D763 |
-| 3 | red winged devils (rooms 21, 22) | shift, mirror | 2 | $D7BB |
-| 4 | magenta winged flyers (rooms 20, 23) | shift, mirror | 3 | $EF63 |
-| 5 | unidentified, room 10 | none | 2 | $D768 |
-| 6 | head of the Pestilent Beast (room 10) | none | 5 | $D763 |
-| 7 | red whirling fireballs (rooms 22, 23) | none | 2 | $D7E7 |
-| 8 | green flies (room 12) | mirror | 2 | $D763 |
-| 9 | green flies, second kind (room 12) | mirror | 2 | $D76B |
-| 10 | hanged men (room 9) | mirror | 2 | $D763 |
-| 11 | green zombies (rooms 15, 20) | shift, mirror | 2 | $D763 |
-| 12 | grinning cyan ghost (room 11) | shift, mirror | 2 | $D763 |
-| 13 | rats (room 2) | shift, mirror | 2 | $D763 |
-| 14 | Satan's pieces (room 24) | none | 30 | $D78F |
-| 15 | red bats (room 8) | shift | 2 | $D763 |
-| 16 | scythe pieces (room 18) | shift | 2 | $D7EA |
-| 17 | skeletons (rooms 13, 22) | shift, mirror | 2 | $D763 |
-| 18 | white ghosts (rooms 22, 23) | shift, mirror | 2 | $D78F |
-| 19 | cyan worms (rooms 9, 14) | shift | 2 | $D7F5 |
+| Set | Packed set: contents (F154) | Rooms | Flags | Width | Destination |
+| --- | --- | --- | --- | --- | --- |
+| 0 | [PackedSetArcher](../src/graphics.asm#L333): skeleton archer | 17, 21 | mirror | 2 | $D7F8 |
+| 1 | [PackedSetCrusader](../src/graphics.asm#L349): crusader | 0, 4, 5, 6, 24, 25 | shift, mirror | 2 | $D763 |
+| 2 | [PackedSetDeath](../src/graphics.asm#L367): Death, three frames | 18 | shift, mirror | 4 | $D763 |
+| 3 | [PackedSetDemon](../src/graphics.asm#L397): demon | 21, 22 | shift, mirror | 2 | $D7BB |
+| 4 | [PackedSetBird](../src/graphics.asm#L414): bird | 20, 23 | shift, mirror | 3 | $EF63 |
+| 5 | [PackedSetBeastFire](../src/graphics.asm#L430): fire jet of the Pestilent Beast (F153) | 10 | none | 2 | $D768 |
+| 6 | [PackedSetBeastHead](../src/graphics.asm#L451): head of the Pestilent Beast | 10 | none | 5 | $D763 |
+| 7 | [PackedSetFireWheel](../src/graphics.asm#L470): fire wheel | 22, 23 | none | 2 | $D7E7 |
+| 8 | [PackedSetFlyB](../src/graphics.asm#L483): darker fly | 12 | mirror | 2 | $D763 |
+| 9 | [PackedSetFlyA](../src/graphics.asm#L497): bright fly | 12 | mirror | 2 | $D76B |
+| 10 | [PackedSetHangedMan](../src/graphics.asm#L511): hanged man | 9 | mirror | 2 | $D763 |
+| 11 | [PackedSetKnight](../src/graphics.asm#L525): knight | 15, 20 | shift, mirror | 2 | $D763 |
+| 12 | [PackedSetChaser](../src/graphics.asm#L543): chasing ghost | 11 | shift, mirror | 2 | $D763 |
+| 13 | [PackedSetRat](../src/graphics.asm#L559): rat | 2 | shift, mirror | 2 | $D763 |
+| 14 | [PackedSetSatan](../src/graphics.asm#L574): Satan and his smoke | 24, 25 | none | 30 | $D78F |
+| 15 | [PackedSetBat](../src/graphics.asm#L622): bat | 8 | shift | 2 | $D763 |
+| 16 | [PackedSetScythe](../src/graphics.asm#L636): Death's scythe, two 32-row frames drawn as 16-row halves (F153) | 18 | shift | 2 | $D7EA |
+| 17 | [PackedSetSkeleton](../src/graphics.asm#L652): skeleton | 13, 22 | shift, mirror | 2 | $D763 |
+| 18 | [PackedSetCeilingGhost](../src/graphics.asm#L669): ceiling ghost | 22, 23 | shift, mirror | 2 | $D78F |
+| 19 | [PackedSetWorm](../src/graphics.asm#L686): worm | 9, 14 | shift | 2 | $D7F5 |
 
 The sets of one room have different destinations; sets of different rooms
 reuse them. Unpacking takes time: measured in the simulator, entering room 8
@@ -333,8 +343,10 @@ reuse them. Unpacking takes time: measured in the simulator, entering room 8
 
 ![Room 8 drawn after an exit to the right: one image per frame, slowed down five times](img/drawing-sweep.gif)
 
-A new room is not drawn through the redraw list. The room script marks every
-cell, and [RedrawRoom](../src/sprites.asm#L1162) visits all 704 cells in an order taken from
+A new room is not drawn through the redraw list. The `$90 1` of the panel
+script [ScriptRoomPanel](../src/roomscripts.asm#L1517) (or of room 4's own script) marks every cell, except
+the water cells of rooms 16 and 19, which [OpSetupWater](../src/script.asm#L1589) flags afterwards and
+the water routine paints, and in room 0 all but one (F152). [RedrawRoom](../src/sprites.asm#L1162) visits all 704 cells in an order taken from
 [SweepSetups](../src/sprites.asm#L1313) by the direction of the last exit ([ExitDirection](../src/variables.asm#L104),
 F41):
 
@@ -421,8 +433,11 @@ right alignment.
 ## Text windows and the parchment frame
 
 [ShowTextWindow](../src/hud.asm#L125) shows a script's text on its own screen: it runs the
-script (which clears the screen and prints), draws a 24 x 11 cell frame with
-[DrawParchmentFrame](../src/hud.asm#L175), waits for a key and redraws the room. The frame is
+script (which blacks out all attributes, clears the bitmap of rows 0-21 and
+prints), draws a 24 x 11 cell frame with [DrawParchmentFrame](../src/hud.asm#L175), waits for a
+key, redraws the room and makes the attributes of the room name white again;
+the name's pixels were left alone, so it comes back without the room script
+(F148). The frame is
 coded in [ParchmentLayout](../src/graphics.asm#L730): the top-left cell (row 5, column 4), then 11
 rows of codes, where code 1 n is a run of n blank cells (only the attribute
 is set) and code k is frame tile k - 2 of the 12 at [ParchmentFrameTiles](../src/graphics.asm#L702)

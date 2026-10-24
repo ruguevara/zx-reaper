@@ -506,7 +506,7 @@ SoundNext:
 ; faith turned, the gate lever of room 20 pulled, a cross added to the ring of
 ; room 24 (ShowCrossRing), a key accepted in the controls menu; 6 Jean dies; 7
 ; an enemy shoots: Death's scythe, Satan's fireballs, the arrows of the
-; skeleton archers and of the stone head (UpdateShooter), the plants' seeds,
+; skeleton archers and of the stone head (UpdateShooter_Tail), the plants' seeds,
 ; the fish's splash as it leaves the water and as it falls back (room 19: 7 at
 ; frames 47 and 100 for one fish), and the Pestilent Beast's fire
 ; (every second frame while its jet burns); 8 the church door, when it shuts and

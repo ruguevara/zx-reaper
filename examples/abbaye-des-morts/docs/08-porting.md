@@ -25,8 +25,9 @@ commands is complete), [QueueDrawCmd](../src/player.asm#L446) (the list is being
 queue), [RoomState](../src/variables.asm#L125) (bit 7: run the logic; low bits: what the main loop
 does next). Logic never waits for drawing: a frame whose list is not drawn
 in time is simply not shown ([The game loop](04-game-loop.md), F103). A port that draws after
-every tick shows every logic frame (50 pictures a second against the
-original's 21-38) without changing the game.
+every tick shows every logic frame (50 pictures a second; the original shows
+all 50 only in a quiet room and 21-38 in the busy rooms measured, F147)
+without changing the game.
 
 For a check against the original frame by frame, the logic state is what
 should be compared: the variables at $8501-$855E, the object slots, Jean's
@@ -49,7 +50,7 @@ which depends on T-states.
 | ports $FFFD, $BFFD (AY) | only the loader's [WriteAY](../src/stage2.asm#L161) and the music bank | an AY emulator or a module player |
 | IM 2 and I | [StartUp](../src/startup.asm#L39), [Im2Table](../src/im2table.asm#L11), [InterruptHandler](../src/interrupt.asm#L35) | the platform's tick |
 | HALT | [WaitKeyPress](../src/helpers.asm#L10), [WaitKeyRelease](../src/helpers.asm#L28), [ShowInfoScreen](../src/controls.asm#L242), [TitleMenu](../src/controls.asm#L295), [RedefineOneKey](../src/controls.asm#L408) | wait for the next tick |
-| R register | [ThrowDeathScythe](../src/entities.asm#L3344) (bit 0: the side Death throws to, F49), [ActionChurchDoor](../src/gameframe.asm#L180) (the 32-63 frame flicker interval, F28), [NoiseByte](../src/mainloop.asm#L425) (unused effect) | any random bit; for a frame-exact check, the values the original read (`tools/zxrun.py --take`) |
+| R register | [ThrowDeathScythe](../src/entities.asm#L3345) (bit 0: the side Death throws to, F49), [ActionChurchDoor](../src/gameframe.asm#L180) (the 32-63 frame flicker interval, F28), [NoiseByte](../src/mainloop.asm#L425) (unused effect) | any random bit; for a frame-exact check, the values the original read (`tools/zxrun.py --take`) |
 | ROM | the loader's copy of LD-BYTES; [NoiseByte](../src/mainloop.asm#L425) reads $0001 | nothing; the game itself does not call the ROM |
 
 The keyboard is read as (half-row, mask) pairs ([ControlKeys](../src/controls.asm#L128)): RIGHT,
@@ -89,13 +90,13 @@ block $6000-&#36;FEFF from `re/image.z80` and read:
 | Data | Address | Format |
 | --- | --- | --- |
 | room scripts | [RoomScriptTable](../src/roomscripts.asm#L8) $7236, bytecode to $83A7 | 26 words, then bytecode of 32 opcodes for [RunScript](../src/script.asm#L99) ([Rooms](05-rooms.md)); the port either runs the interpreter or stores the 25 resulting tile maps, flag maps and room effects |
-| tiles | [TileFlags](../src/tiles.asm#L36) $CD00, [TileAttrs](../src/tiles.asm#L63) $CE00, [TileGfx](../src/tiles.asm#L92) $CF00 | 256 classes, attributes, 8-byte bitmaps |
+| tiles | [TileFlags](../src/tiles.asm#L37) $CD00, [TileAttrs](../src/tiles.asm#L64) $CE00, [TileGfx](../src/tiles.asm#L93) $CF00 | 256 classes, attributes, 8-byte bitmaps |
 | room objects, room items | [RoomObjects](../src/objects.asm#L276) $8B8F, [RoomItems](../src/objects.asm#L616) $8EDF | 11- and 8-byte records |
-| item types and frames | [ItemTypeTable](../src/objects.asm#L17) $8A8F, [FramesHeart](../src/objects.asm#L129) $8B07 | 8-byte type records, 4-byte frames |
-| item sprites | [SpriteArch](../src/graphics.asm#L44) $66DC | 16 pixels wide, 2 bytes per pixel row |
+| item types and frames | [ItemTypeTable](../src/objects.asm#L17) $8A8F, [FramesHeart](../src/objects.asm#L129) $8B07 | 12 pointers to 8-byte type records, 4-byte frames |
+| item sprites | [SpriteArch](../src/graphics.asm#L44) $66DC | 16 pixels wide, 2 bytes per pixel row, drawn without mask or outline |
 | behaviour blocks, templates | [BehaviourJean](../src/behaviours.asm#L45) $93D3, [ArrowLeftTemplate](../src/templates.asm#L49) $BC92 | per kind ([Data structures](02-data.md)); they hold sprite sheet addresses |
 | sprite sets | [PackedSetArcher](../src/graphics.asm#L333) $68CC, [UnpackRecords](../src/unpack.asm#L24) $AE9D | packed columns; unpack with shifted and mirrored copies ([Screen drawing](05-drawing.md)) |
-| fixed sprites | [SpriteSheet](../src/spritesheet.asm#L25) $D700 columns $00-$62 | Jean, the small projectiles |
+| fixed sprites | [SpriteSheet](../src/spritesheet.asm#L25) $D700 columns $00-$62 | Jean, the spiders and the small sprites: projectiles, drops, splash, flames, stone heads, plants, fish |
 | font | [FontIndex](../src/font.asm#L11) $6130 | index of 96 words, masked 16-row glyphs |
 | texts | [RoomNames](../src/text.asm#L19) $9048 | 53 strings, a length byte and the characters |
 | parchment frame | [ParchmentFrameTiles](../src/graphics.asm#L702) $717F, [ParchmentLayout](../src/graphics.asm#L730) $71DF | 12 tiles, run-coded layout |
@@ -116,9 +117,10 @@ translate these addresses.
 These come from where things are in memory; a port with separate arrays
 loses them silently. None of them shows in normal play except F120.
 
-- **F120** For one frame, when Jean stops crouching and starts to fall, his
-  graphics are read from the code bytes of [QueueSprite](../src/sprites.asm#L50) at $983C.
-  Reproducing it needs those bytes.
+- **F120** For one frame, when Jean stops crouching and starts to fall
+  facing right, his graphics are read from the code bytes of
+  [QueueSprite](../src/sprites.asm#L50) ($9836 plus the shift offset, for
+  instance $9839 or $983C). Reproducing it needs those bytes.
 - **F51** The sliding scythe's draw path uses x for y (not reached in
   play).
 - **F95** The chasing ghost reads the flag map as a flat array: at the edges

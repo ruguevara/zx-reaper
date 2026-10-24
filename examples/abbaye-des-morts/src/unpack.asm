@@ -54,7 +54,7 @@ UnpackRecords:
   DEFB $C0,$02
   DEFW $D763,PackedSetRat  ; set 13: rats (room 2)
   DEFB $C0,$02
-  DEFW $D78F,PackedSetSatan  ; set 14: Satan's pieces (room 24)
+  DEFW $D78F,PackedSetSatan  ; set 14: Satan's two halves and his smoke (room 24)
   DEFB $00,$1E
   DEFW $D763,PackedSetBat  ; set 15: red bats (room 8)
   DEFB $80,$02

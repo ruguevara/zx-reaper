@@ -213,7 +213,7 @@ SpawnQueued_NoSlot:
 ; box, sprite pointer, animation counters); then it decrements SpawnQueueCount.
 ; The same list is filled by the cutscene loader LoadCutsceneList and by the
 ; enemies that shoot or throw, which append through ObjectListPtr: Death (a
-; scythe), Satan (three fireballs), UpdateShooter (an arrow of a skeleton
+; scythe), Satan (three fireballs), UpdateShooter_Tail (an arrow of a skeleton
 ; archer or of the stone head), the plants (two seeds), the fish (a splash) and
 ; the Pestilent Beast's fire (two flames). When no slot is free the rest of the
 ; list is dropped (SpawnQueued_NoSlot).

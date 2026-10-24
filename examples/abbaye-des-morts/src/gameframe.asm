@@ -156,8 +156,8 @@ ItemActionEntry:
 ; The room item of room 7 (Abandoned church) at row 15, column 2 with flag
 ; $8543; it has no sprite. While the door is open ($851A = 0), Jean touching
 ; the item (observed with Jean placed on that spot; in play Jean enters the
-; room from the left) sets its flag to 1 (checkpoint 1: SelectCheckpoint uses
-; the first nonzero checkpoint flag among the nine at $8543), $851A to $FF, and
+; room from the left) sets its flag, CheckpointFlag0, to 1 (SelectCheckpoint
+; uses the first nonzero checkpoint flag among the nine at $8543), $851A to $FF, and
 ; arms the one-shot script runner RunEventScript with the subscript at $76A0,
 ; which draws the door (tiles at column 0, rows 14-17); the room script of room
 ; 7 draws it again whenever the room is entered with $851A nonzero. Once the
@@ -183,7 +183,7 @@ ActionChurchDoor:
   INC A
   JR Z,ActionChurchDoor_Flicker ; shut: flicker
   POP HL                  ; flag pointer
-  LD (HL),$01             ; checkpoint 1 reached
+  LD (HL),$01             ; CheckpointFlag0: this checkpoint reached
   SBC A,A                 ; carry is set: A = $FF
   LD (ChurchDoorShut),A   ; door shut
   LD HL,DoorLeftShut      ; subscript: the shut door
