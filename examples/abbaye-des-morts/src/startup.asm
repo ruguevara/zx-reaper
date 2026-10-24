@@ -108,7 +108,7 @@ StartUp_0:
 ; one-instruction stubs of the 48K code into CALLs (store $CD, the opcode of
 ; CALL, over the first byte): StartGame_Music (start of the game: the call
 ; enters the music bank through BankShowTitle), $88D5 in RunEnding (end of the
-; ending sequence, through MusicEntryEnding) and $A31E in the key-release wait
+; ending sequence, through BankEndingDoor) and $A31E in the key-release wait
 ; (through BankShowInfo). Each stub is a 3-byte instruction whose operand
 ; already is the address of the 128K entry routine, and each of those pages in
 ; the music bank and calls the player there with CallInMusicBank.

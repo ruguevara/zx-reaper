@@ -59,13 +59,13 @@ clears $8512-$854D and then sets the lives to 9 (F123).
 | $854D | [Crosses](../src/variables.asm#L444) | crosses collected, 0-12 |
 | $854E | [SoundPlaying](../src/variables.asm#L452) | beeper effect playing (0 none) |
 | $854F | [SoundRequest](../src/variables.asm#L470) | effect requested by the game; replaces the one playing (F104, F107) |
-| $8550 | [UnusedByte2](../src/variables.asm#L476) | unused |
-| $8551 | [MusicTrack](../src/variables.asm#L488) | track for the 128K music player; not read on a 48K |
-| $8552 | [SpawnQueueCount](../src/variables.asm#L501) | requests waiting in the object list |
-| $8553 | [CrossColours](../src/variables.asm#L510) | 6 attributes the ring of crosses cycles through |
-| $8559 | [ProbeRight](../src/variables.asm#L524) | 4 bytes: tile flags around the chasing face of room 11 |
-| $855D | [RedrawListPtr](../src/variables.asm#L540) | word: write pointer of the redraw run list |
-| $855F-$8584 | [InterruptStack](../src/variables.asm#L550) | the interrupt handler's stack |
+| $8550 | [BankMusicTrack](../src/variables.asm#L477) | not used by the game; the 128K music bank keeps its track here |
+| $8551 | [MusicTrack](../src/variables.asm#L489) | track for the 128K music player; not read on a 48K |
+| $8552 | [SpawnQueueCount](../src/variables.asm#L502) | requests waiting in the object list |
+| $8553 | [CrossColours](../src/variables.asm#L511) | 6 attributes the ring of crosses cycles through |
+| $8559 | [ProbeRight](../src/variables.asm#L525) | 4 bytes: tile flags around the chasing face of room 11 |
+| $855D | [RedrawListPtr](../src/variables.asm#L541) | word: write pointer of the redraw run list |
+| $855F-$8584 | [InterruptStack](../src/variables.asm#L551) | the interrupt handler's stack |
 
 Jean's variables are in the player module (&#36;A894-&#36;A8A4), next to his code:
 
@@ -90,7 +90,7 @@ or a `NOP` as the first byte of a routine); they are listed in
 ## Room scripts
 
 Each room is drawn by a script: [RoomScriptTable](../src/roomscripts.asm#L8) holds 26 words, the
-script of room n at $7236 + 2n, and [EnterRoom](../src/mainloop.asm#L188) runs it with the
+script of room n at $7236 + 2n, and [EnterRoom](../src/mainloop.asm#L189) runs it with the
 interpreter [RunScript](../src/script.asm#L84) (F13). The same bytecode draws the title, the
 menus, the parchments, the Game Over screen and the ending texts. A byte
 below $80 is a character, printed in the proportional font at the text
@@ -308,7 +308,7 @@ Objects made during play (arrows, seeds, fireballs, scythes, flames, splashes,
 the smoke, the ending's actors) are copied from templates in $BC92-&#36;BDD9
 ([ArrowLeftTemplate](../src/templates.asm#L26) and on). A creature that shoots writes a 4-byte
 request (template address, y, x) to the object list at $5DC0 through
-[ObjectListPtr](../src/buffers.asm#L15) and counts it in [SpawnQueueCount](../src/variables.asm#L501); at the end of the
+[ObjectListPtr](../src/buffers.asm#L15) and counts it in [SpawnQueueCount](../src/variables.asm#L502); at the end of the
 frame [SpawnQueuedObjects](../src/sequences.asm#L221) turns every request into a slot (F55):
 
 | Template bytes | Slot |

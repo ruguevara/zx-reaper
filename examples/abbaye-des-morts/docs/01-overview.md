@@ -54,10 +54,10 @@ the right part shows the room name in the game's proportional font.
 | Z80 at 3.5 MHz, IM 2 | [StartUp](../src/startup.asm#L39) sets I = $84 and IM 2; every vector of the 257-byte table [Im2Table](../src/im2table.asm#L11) is $8585, the handler [InterruptHandler](../src/interrupt.asm#L30). The game logic runs inside the interrupt, once per 50 Hz frame ([Game loop](04-game-loop.md), F103) |
 | Screen bitmap $4000-$57FF, attributes $5800-$5AFF | written directly: changed cells by [DrawRedrawList](../src/redraw.asm#L32), text and frames by the script interpreter [RunScript](../src/script.asm#L84), the status bar by [DrawLivesBar](../src/sprites.asm#L1321) and [DrawCrossesHud](../src/hud.asm#L17) |
 | RAM $5B00-$60FF | tile map, object list and tile flag map of the room, over the printer buffer and the system variables (the game never returns to BASIC) |
-| Port $FE out | border (black from the start-up on) and the speaker, bit 4 ([PlaySoundStep](../src/mainloop.asm#L287), F105) |
+| Port $FE out | border (black from the start-up on) and the speaker, bit 4 ([PlaySoundStep](../src/mainloop.asm#L288), F105) |
 | Port $FE in | keyboard: eight half-rows read with `INI` into [KeyRows](../src/controls.asm#L191) every frame ([ScanKeyboard](../src/helpers.asm#L221)) |
 | Port $1F in | Kempston joystick: probed 65536 times at start-up, then read every frame while it is switched on ([ReadKempston](../src/controls.asm#L61), F35) |
-| Port $7FFD out | 128K paging, written on every machine at start-up ([PageInBank0](../src/interrupt.asm#L102)); used for the music bank on a 128K only |
+| Port $7FFD out | 128K paging, written on every machine at start-up ([PageInBank0](../src/interrupt.asm#L105)); used for the music bank on a 128K only |
 | AY ports $FFFD / $BFFD | only through code in the 128K music bank (not disassembled) |
 | R register | the only random source: Death's throw side, the church door flicker, the unused noise effect (Q12) |
 | ROM | the loader copies and patches LD-BYTES and reads ROM bytes as click data; the game calls no ROM routine (Q14) |
@@ -87,8 +87,8 @@ can be moved as a block (`make shift-test`), the rest stays where it is
 | $7236-$83A7 | 4466 | room script table (26 words) and the scripts | [RoomScriptTable](../src/roomscripts.asm#L8) |
 | $83A8-$83FF | 88 | ending actor lists, the debug room warp, music track of each room | [CutsceneList1](../src/cutscenelists.asm#L14), [DebugWarpRoom](../src/cutscenelists.asm#L39), [RoomMusicTable](../src/cutscenelists.asm#L63) |
 | $8400-$8500 | 257 | IM 2 vector table, all $85 | [Im2Table](../src/im2table.asm#L11) |
-| $8501-$855E | 94 | game variables | [CutsceneDone](../src/variables.asm#L7) to [RedrawListPtr](../src/variables.asm#L540) |
-| $855F-$8584 | 38 | interrupt stack | [InterruptStack](../src/variables.asm#L550) |
+| $8501-$855E | 94 | game variables | [CutsceneDone](../src/variables.asm#L7) to [RedrawListPtr](../src/variables.asm#L541) |
+| $855F-$8584 | 38 | interrupt stack | [InterruptStack](../src/variables.asm#L551) |
 | $8585-$8A8E | 1290 | interrupt handler, 128K hooks, new game, main loop, room entry, beeper effects, intro, ending, spawning | [InterruptHandler](../src/interrupt.asm#L30), [StartGame](../src/mainloop.asm#L65) |
 | $8A8F-$9047 | 1465 | item types and frame lists, room objects (77 x 11 bytes), room items (45 x 8 bytes) | [ObjectTypeTable](../src/objects.asm#L14), [RoomObjects](../src/objects.asm#L259), [RoomItems](../src/objects.asm#L580) |
 | $9048-$93D2 | 907 | 53 length-prefixed strings | [RoomNames](../src/text.asm#L18) |
@@ -106,7 +106,7 @@ can be moved as a block (`make shift-test`), the rest stays where it is
 | $D700-&#36;FEFF | 10240 | sprite sheet: 40 pages, one per pixel row; columns $63-&#36;FF filled per room | [SpriteSheet](../src/spritesheet.asm#L25), [SpriteSheetLower](../src/spritesheet.asm#L278) |
 | $FF00-&#36;FFFF | 256 | outline mask table, built at start-up | [OutlineMasks](../src/game.asm#L13) |
 
-Unused bytes inside the variable block: $8508, $8520 and $8550. The details
+Unused bytes inside the variable block: $8508 and $8520 ($8550 is used only by the 128K music bank). The details
 of every structure are in [Data structures](02-data.md).
 
 ## How it loads
@@ -300,10 +300,10 @@ tile flag map and are overwritten when the first room is entered. It:
 
 1. pops the word, keeps the machine type in [MachineType](../src/variables.asm#L44) and, on a 128K,
    calls [Patch128KHooks](../src/startup.asm#L122) (below);
-2. pages bank 0 in ([PageInBank0](../src/interrupt.asm#L102), harmless on a 48K), sets the border
+2. pages bank 0 in ([PageInBank0](../src/interrupt.asm#L105), harmless on a 48K), sets the border
    black and the speaker off;
 3. sets I = $84 and IM 2, and puts the address of a `RET`
-   ([NoFrameRoutine](../src/mainloop.asm#L241)) in [InterruptRoutine](../src/variables.asm#L34), the word the interrupt
+   ([NoFrameRoutine](../src/mainloop.asm#L242)) in [InterruptRoutine](../src/variables.asm#L34), the word the interrupt
    handler calls through. Interrupts stay disabled until the title menu
    ([TitleWaitKey](../src/controls.asm#L305) executes the first `EI`);
 4. builds [FlagRowTable](../src/startup.asm#L171), the address of each row of the flag map;
@@ -331,10 +331,10 @@ its bytes in [`data/music128.bin`](../data/music128.bin), not run.
 | | 48K | 128K |
 | --- | --- | --- |
 | [MachineType](../src/variables.asm#L44) | 1 | port $7FFD value of the music bank, $11-$16 |
-| [StartGame_Music](../src/mainloop.asm#L74) (start of every game) | `LD HL,BankShowTitle` | `CALL` [BankShowTitle](../src/interrupt.asm#L209): bank routine $F9D7 with HL = $C09D |
-| [WaitSpaceRelease](../src/controls.asm#L245) (SPACE on the title) | `RET`: SPACE does nothing | `CALL` [BankShowInfo](../src/interrupt.asm#L206): bank routine $F9D7 with HL = $CA8A, then [BankShowTitle](../src/interrupt.asm#L209) when SPACE is released |
-| [RunEnding_Music](../src/sequences.asm#L149) (end of the ending) | `LD HL,MusicEntryEnding` | `CALL` [MusicEntryEnding](../src/interrupt.asm#L203): bank routine $FC4B |
-| [PlaySoundStep](../src/mainloop.asm#L287) (every frame) | beeper effects | with an AY: `JP` [PlayEffectOnAY](../src/interrupt.asm#L157), bank routine $CF7D |
+| [StartGame_Music](../src/mainloop.asm#L74) (start of every game) | `LD HL,BankShowTitle` | `CALL` [BankShowTitle](../src/interrupt.asm#L215): bank routine $F9D7 with HL = $C09D |
+| [WaitSpaceRelease](../src/controls.asm#L245) (SPACE on the title) | `RET`: SPACE does nothing | `CALL` [BankShowInfo](../src/interrupt.asm#L212): bank routine $F9D7 with HL = $CA8A, then [BankShowTitle](../src/interrupt.asm#L215) when SPACE is released |
+| [RunEnding_Music](../src/sequences.asm#L149) (end of the ending) | `LD HL,BankEndingDoor` | `CALL` [BankEndingDoor](../src/interrupt.asm#L209): bank routine $FC4B |
+| [PlaySoundStep](../src/mainloop.asm#L288) (every frame) | beeper effects | with an AY: `JP` [PlayEffectOnAY](../src/interrupt.asm#L160), bank routine $CF7D |
 | title after Game Over or the ending | [ScriptTitle](../src/controls.asm#L741) is drawn | not drawn (F111) |
 | loading and info screens | loading screen unpacked by the loader; info screen lost | both kept packed in the music bank |
 
@@ -344,8 +344,8 @@ a loop that clears the 768 attributes, and `JP $C000`, the copy of
 put the packed loading and info screens. So on a 128K these two entries
 unpack a screen: the title at the start of every game (which is why the
 title script is not needed) and the info screen while SPACE is held
-(inferred from the bytes, not run; hence the names [BankShowTitle](../src/interrupt.asm#L209) and
-[BankShowInfo](../src/interrupt.asm#L206)). What $CF7D and $FC4B do in the
+(inferred from the bytes, not run; hence the names [BankShowTitle](../src/interrupt.asm#L215) and
+[BankShowInfo](../src/interrupt.asm#L212)). What $CF7D and $FC4B do in the
 bank was not worked out; $CF7D reads two bytes of [KeyRows](../src/controls.asm#L191) (&#36;A2D4 and
 $A2D9) and $FC4B calls [BuildMirrorTable](../src/templates.asm#L388) at $BE48 and writes
-[MusicTrack](../src/variables.asm#L488) at $8551, all at fixed addresses (by their bytes).
+[MusicTrack](../src/variables.asm#L489) at $8551, all at fixed addresses (by their bytes).

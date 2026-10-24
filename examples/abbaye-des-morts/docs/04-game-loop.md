@@ -14,7 +14,8 @@ fewer pictures instead (F103).
 [StartUp](../src/startup.asm#L39) sets I = $84; the 257 bytes of [Im2Table](../src/im2table.asm#L11) are all $85, so the
 vector is $8585 whatever the data bus holds. [InterruptHandler](../src/interrupt.asm#L30) at $8585
 saves the registers on its own stack and reads nothing back from the
-interrupted one:
+interrupted one; its `PUSH BC` repairs the two bytes the CPU wrote below the
+interrupted SP when SP was a data pointer ([Tricks](06-tricks.md)):
 
 ```
 InterruptHandler:
@@ -22,7 +23,7 @@ InterruptHandler:
   LD (SmcInterruptReturn+$0001),HL ; return address: operand of the JP at $85B9
   POP HL                  ; HL as it was
   LD (SmcInterruptSP+$0001),SP ; interrupted SP: operand of the LD SP at $85B6
-  PUSH BC                 ; no effect: writes BC below the interrupted SP
+  PUSH BC                 ; repair: BC back over the two bytes below the interrupted SP
   DI
   LD SP,InterruptHandler  ; interrupt stack, InterruptStack-$8584
   PUSH IX
@@ -38,7 +39,7 @@ SmcInterruptReturn:
 ```
 
 The return address and the interrupted SP are stored in the operands of the
-last two instructions, the registers go on [InterruptStack](../src/variables.asm#L550) ($855F-$8584),
+last two instructions, the registers go on [InterruptStack](../src/variables.asm#L551) ($855F-$8584),
 and the handler leaves with `LD SP,nn` and `JP nn` instead of `RET`. The
 reason is the foreground: while it runs a frame list, SP walks up through the
 list at $BE5A as a data pointer ([below](#the-frame-call-list)), and just
@@ -57,11 +58,11 @@ The word [InterruptRoutine](../src/variables.asm#L34) selects what a frame does:
 
 | Routine | Installed by | Does |
 | --- | --- | --- |
-| [NoFrameRoutine](../src/mainloop.asm#L241) | [StartUp](../src/startup.asm#L39) | a `RET`; replaced by [MenuFrame](../src/controls.asm#L548) before interrupts are first enabled, so never called |
+| [NoFrameRoutine](../src/mainloop.asm#L242) | [StartUp](../src/startup.asm#L39) | a `RET`; replaced by [MenuFrame](../src/controls.asm#L548) before interrupts are first enabled, so never called |
 | [MenuFrame](../src/controls.asm#L548) | [StartGame_NoTitle](../src/mainloop.asm#L70) | beeper step, key scan for the menus ([Title and menus](03-title-and-menu.md)) |
-| [GameFrameRoutine](../src/interrupt.asm#L175) | [StartGame](../src/mainloop.asm#L65) after ENTER on the title | beeper step ([PlaySoundStep](../src/mainloop.asm#L287)), then [GameFrame](../src/gameframe.asm#L20) |
+| [GameFrameRoutine](../src/interrupt.asm#L178) | [StartGame](../src/mainloop.asm#L65) after ENTER on the title | beeper step ([PlaySoundStep](../src/mainloop.asm#L288)), then [GameFrame](../src/gameframe.asm#L20) |
 
-[GameFrameRoutine](../src/interrupt.asm#L175) stays installed for the intro, the game, the parchments,
+[GameFrameRoutine](../src/interrupt.asm#L178) stays installed for the intro, the game, the parchments,
 the ending and the Game Over screen; the room state decides how much of
 [GameFrame](../src/gameframe.asm#L20) runs.
 
@@ -80,7 +81,7 @@ the ending and the Game Over screen; the room state decides how much of
 | 6 | [RunObjectSlots](../src/gameframe.asm#L92) | every busy slot: items test Jean's box and act, creatures move, test their hit box and queue their sprites ([Creatures](05-creatures.md), [Items](05-items-ending.md)) |
 | 7 | [UpdatePlayer](../src/player.asm#L554) | Jean's state machine: death on a hit, walking, jumping, falling, crouching; queues his sprite |
 | 8 | [EndFrameList](../src/gameframe.asm#L59) | closes the list and opens the gate for the foreground, unless the foreground is running the previous list |
-| 9 | [SpawnQueuedObjects](../src/sequences.asm#L221) | turns the requests of shooting creatures into slots, when [SpawnQueueCount](../src/variables.asm#L501) is not 0 |
+| 9 | [SpawnQueuedObjects](../src/sequences.asm#L221) | turns the requests of shooting creatures into slots, when [SpawnQueueCount](../src/variables.asm#L502) is not 0 |
 | 10 | [CheckRoomExit](../src/player.asm#L1015) | Jean beyond an edge: next room, room state 1 |
 
 The order has consequences that the later sections rely on:
@@ -134,7 +135,7 @@ Two bytes of code are the whole handshake (F54):
 - [FrameListGate](../src/templates.asm#L252) is a flag and an entry point at once. The foreground
   reads it with `LD A,(nn)`: 0 means a complete list is waiting, and a
   `CALL` to it then falls through into [RunFrameList](../src/templates.asm#L272). [RunFrameList](../src/templates.asm#L272)
-  writes `RET` there first, so a list is taken once; [EnterRoom](../src/mainloop.asm#L188) also
+  writes `RET` there first, so a list is taken once; [EnterRoom](../src/mainloop.asm#L189) also
   writes `RET`, so the first list of a room comes from a complete frame of
   that room.
 - The first byte of [QueueDrawCmd](../src/player.asm#L445) is `RET` while the list runs. The
@@ -164,7 +165,7 @@ sequenceDiagram
 
 ## The main loop
 
-The foreground is [StartGame](../src/mainloop.asm#L65) and [MainLoop](../src/mainloop.asm#L118): it starts a game and never
+The foreground is [StartGame](../src/mainloop.asm#L65) and [MainLoop](../src/mainloop.asm#L119): it starts a game and never
 returns ([Title and menus](03-title-and-menu.md)). Each pass reads the low
 7 bits of [RoomState](../src/variables.asm#L116); bit 7 only tells [GameFrame](../src/gameframe.asm#L20) to run the logic
 (F25):
@@ -172,12 +173,12 @@ returns ([Title and menus](03-title-and-menu.md)). Each pass reads the low
 | State | Set by | The main loop |
 | --- | --- | --- |
 | $80 | the main loop, once a room is drawn | one pass of play: see below |
-| 1 | [CheckRoomExit](../src/player.asm#L1015) when Jean crosses an edge (also the debug warp) | [EnterRoom](../src/mainloop.asm#L188), [RedrawRoom](../src/sprites.asm#L1147), state $80 |
+| 1 | [CheckRoomExit](../src/player.asm#L1015) when Jean crosses an edge (also the debug warp) | [EnterRoom](../src/mainloop.asm#L189), [RedrawRoom](../src/sprites.asm#L1147), state $80 |
 | 2 | the arches between rooms 10 and 19 ([ActionArchToRiver](../src/gameframe.asm#L365), [ActionArchToBeast](../src/gameframe.asm#L339)) | Jean to the respawn position ([RespawnX](../src/variables.asm#L177)), then as 1 |
 | 3 | the red scroll of room 24 ([ActionFinalScroll](../src/gameframe.asm#L236)) | [RunEnding](../src/sequences.asm#L113), then a new game at [StartGame](../src/mainloop.asm#L65) |
 | $84 | the end of the dying animation with lives left ([UpdateDying_End](../src/player.asm#L525)) | [SelectCheckpoint](../src/templates.asm#L315): room and position of the active checkpoint, then as 2 |
 | $85, 5 | the end of the dying animation with no life left; R and Y in [GameFrame](../src/gameframe.asm#L20) | Game Over screen, then [StartGame](../src/mainloop.asm#L65) |
-| 0 | [EnterRoom](../src/mainloop.asm#L188) while it builds a room, [SelectCheckpoint](../src/templates.asm#L315), a text window ([ShowTextWindow](../src/hud.asm#L116) saves and restores the state), the end of a cutscene | not seen by the main loop: the code that sets it sets another state before the loop looks |
+| 0 | [EnterRoom](../src/mainloop.asm#L189) while it builds a room, [SelectCheckpoint](../src/templates.asm#L315), a text window ([ShowTextWindow](../src/hud.asm#L116) saves and restores the state), the end of a cutscene | not seen by the main loop: the code that sets it sets another state before the loop looks |
 
 ```mermaid
 flowchart TD
@@ -196,7 +197,7 @@ flowchart TD
     GO --> SG
 ```
 
-[EnterRoom](../src/mainloop.asm#L188) builds a room without drawing it: it builds the bit-reversed
+[EnterRoom](../src/mainloop.asm#L189) builds a room without drawing it: it builds the bit-reversed
 byte table at $C500 ([BuildMirrorTable](../src/templates.asm#L388)), writes `RET` over the five
 one-shot routines of the previous room, clears the draw queue, frees the 11
 object slots, sets the room state to 0, runs the room's script, spawns the
@@ -209,7 +210,7 @@ built is described in [Rooms](05-rooms.md).
 
 ### One pass of play
 
-[MainLoop_Play](../src/mainloop.asm#L131) runs these in order:
+[MainLoop_Play](../src/mainloop.asm#L132) runs these in order:
 
 | Code | Does |
 | --- | --- |
@@ -243,15 +244,15 @@ or runs, and a one-shot routine writes `RET` back over itself as it starts.
 
 | Byte | Routine | Armed (NOP) by | Disarmed (RET) by |
 | --- | --- | --- | --- |
-| $BDDA | [FrameListGate](../src/templates.asm#L252) | [EndFrameList](../src/gameframe.asm#L59) | [RunFrameList](../src/templates.asm#L272), [EnterRoom](../src/mainloop.asm#L188) |
+| $BDDA | [FrameListGate](../src/templates.asm#L252) | [EndFrameList](../src/gameframe.asm#L59) | [RunFrameList](../src/templates.asm#L272), [EnterRoom](../src/mainloop.asm#L189) |
 | $AA1F | [QueueDrawCmd](../src/player.asm#L445) (on while `NOP`) | [LeaveFrameList](../src/templates.asm#L291) | [RunFrameList](../src/templates.asm#L272) |
-| $9CE7 | [RunEventScript](../src/hud.asm#L279) | [ActionChurchDoor](../src/gameframe.asm#L173), [ActionGateLever](../src/gameframe.asm#L524), [UpdateSatan](../src/entities.asm#L3519) | itself, [EnterRoom](../src/mainloop.asm#L188) |
-| $9C51 | [ParchmentGate](../src/hud.asm#L88) | [ActionParchment](../src/gameframe.asm#L785) | [ShowTextWindow](../src/hud.asm#L116), [EnterRoom](../src/mainloop.asm#L188) |
+| $9CE7 | [RunEventScript](../src/hud.asm#L279) | [ActionChurchDoor](../src/gameframe.asm#L173), [ActionGateLever](../src/gameframe.asm#L524), [UpdateSatan](../src/entities.asm#L3519) | itself, [EnterRoom](../src/mainloop.asm#L189) |
+| $9C51 | [ParchmentGate](../src/hud.asm#L88) | [ActionParchment](../src/gameframe.asm#L785) | [ShowTextWindow](../src/hud.asm#L116), [EnterRoom](../src/mainloop.asm#L189) |
 | $9BF3 | [DrawLivesBar](../src/sprites.asm#L1321) | [StartGame](../src/mainloop.asm#L65), [ActionHeart](../src/gameframe.asm#L415), [UpdateDying_End](../src/player.asm#L525), [ShowTextWindow](../src/hud.asm#L116) | itself |
 | $9C1B | [DrawCrossesHud](../src/hud.asm#L17) | [StartGame](../src/mainloop.asm#L65), [TakeCross](../src/gameframe.asm#L581), [ShowTextWindow](../src/hud.asm#L116) | itself |
-| $AD88 | [DrawWaterReflection](../src/effects.asm#L29) | script command $9D | [EnterRoom](../src/mainloop.asm#L188) |
-| $AE20 | [AnimateBloodTiles](../src/effects.asm#L187) | script command $9E | [EnterRoom](../src/mainloop.asm#L188) |
-| $AE4B | [ShowCrossRing](../src/effects.asm#L240) | script command $9F | [EnterRoom](../src/mainloop.asm#L188) |
+| $AD88 | [DrawWaterReflection](../src/effects.asm#L29) | script command $9D | [EnterRoom](../src/mainloop.asm#L189) |
+| $AE20 | [AnimateBloodTiles](../src/effects.asm#L187) | script command $9E | [EnterRoom](../src/mainloop.asm#L189) |
+| $AE4B | [ShowCrossRing](../src/effects.asm#L240) | script command $9F | [EnterRoom](../src/mainloop.asm#L189) |
 
 The same device switches the joystick ([KempstonSwitch](../src/controls.asm#L46)), the 128K hooks
 and the cheat ([Title and menus](03-title-and-menu.md)); the full list of
@@ -265,7 +266,7 @@ beeper effect is playing (F105). How long the rest takes depends on the
 room. The table was measured in the simulator, entering each room directly
 with Jean standing still and hits switched off: the T-states from the start
 of [GameFrame](../src/gameframe.asm#L20) to [EndFrameList](../src/gameframe.asm#L59) and the length of one foreground pass,
-from [RunFrameList](../src/templates.asm#L272) back to [MainLoop](../src/mainloop.asm#L118) with the interrupts that fall into
+from [RunFrameList](../src/templates.asm#L272) back to [MainLoop](../src/mainloop.asm#L119) with the interrupts that fall into
 it (frames 40-300), and the number of lists drawn in 1000 frames:
 
 | Room | Logic, T | Foreground pass, T | Lists drawn per 1000 frames | Pictures per second |
@@ -291,7 +292,7 @@ The counts come from `tools/zxrun.py build/docs/play400.z80 --poke
 ADDR:FILE` with ADDR = $A596 ([GameFrame](../src/gameframe.asm#L20)), $A5DB ([EndFrameList](../src/gameframe.asm#L59)) and
 $BDDB ([RunFrameList](../src/templates.asm#L272)), counting the lines of each file; the T-states from
 a run of the same snapshot in the project's Python simulator that logged the
-T-state at those addresses and at [MainLoop](../src/mainloop.asm#L118).
+T-state at those addresses and at [MainLoop](../src/mainloop.asm#L119).
 
 What follows from this design:
 

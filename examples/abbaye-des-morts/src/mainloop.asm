@@ -72,8 +72,9 @@ StartGame_NoTitle:
                           ; title
   LD (InterruptRoutine),HL ; InterruptRoutine
 StartGame_Music:
-  LD HL,BankShowTitle    ; 128K: becomes CALL $85F3 (start the music), written
-                          ; by Patch128KHooks; on a 48K it only loads HL
+  LD HL,BankShowTitle     ; 128K: becomes CALL $85F3 (BankShowTitle: the title
+                          ; screen from the bank), written by Patch128KHooks;
+                          ; on a 48K it only loads HL
   LD A,MUSIC_TRACK_TITLE
   LD (MusicTrack),A       ; MusicTrack
   LD HL,RespawnX          ; first byte to clear: RespawnX

@@ -101,7 +101,7 @@ LoadCutsceneList:
 ;
 ; 4 Music track 2, the script ScriptEnding3 ("Your body has burned in the
 ; flames, but your soul has found a place in Heaven."), the stub at
-; RunEnding_Music (on a 128K it calls the music routine MusicEntryEnding), then
+; RunEnding_Music (on a 128K it calls the music routine BankEndingDoor), then
 ; wait for a key and its release.
 ;
 ; It returns to the main loop, which starts a new game at StartGame. The text
@@ -147,8 +147,8 @@ RunEnding:
   LD HL,ScriptEnding3     ; ScriptEnding3
   CALL RunScript          ; = RunScript, run the final text script
 RunEnding_Music:
-  LD HL,MusicEntryEnding  ; 128K: becomes CALL $85E8 (Patch128KHooks,
-                          ; MusicEntryEnding); on a 48K it only loads HL
+  LD HL,BankEndingDoor  ; 128K: becomes CALL $85E8 (Patch128KHooks,
+                          ; BankEndingDoor); on a 48K it only loads HL
   CALL WaitKeyPress       ; wait for a key
   JP WaitKeyRelease       ; ... and for its release; returns to the main loop
 

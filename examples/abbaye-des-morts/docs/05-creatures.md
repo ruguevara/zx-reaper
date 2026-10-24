@@ -93,7 +93,7 @@ all free at entry, are enough; neither spawner checks for a full table
 
 During play a creature that shoots builds a 4-byte record (template address,
 y, x) at [SPAWN_TEMPLATE](../src/game.asm#L9) and [SPAWN_POSITION](../src/game.asm#L10), appends it to the object
-list at [OBJECT_LIST](../src/game.asm#L8) ($5DC0) and increments [SpawnQueueCount](../src/variables.asm#L501). At the end
+list at [OBJECT_LIST](../src/game.asm#L8) ($5DC0) and increments [SpawnQueueCount](../src/variables.asm#L502). At the end
 of the game frame [SpawnQueuedObjects](../src/sequences.asm#L221) copies each template of
 `src/templates.asm` into a free slot: bytes 0-5, then x and y plus the
 template's two signed offsets, then bytes 8-17 (F55). The templates of the

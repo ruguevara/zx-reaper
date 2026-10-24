@@ -32,8 +32,11 @@ InterruptHandler:
   LD (SmcInterruptReturn+$0001),HL ; return address: operand of the JP at $85B9
   POP HL                  ; HL as it was
   LD (SmcInterruptSP+$0001),SP ; interrupted SP: operand of the LD SP at $85B6
-  PUSH BC                 ; no effect: writes BC below the interrupted SP,
-                          ; never read back (BC is pushed again at $8597)
+  PUSH BC                 ; repair: puts BC back over the two bytes below the
+                          ; interrupted SP, which the CPU overwrote with the
+                          ; return address; when SP was a data pointer (POP
+                          ; BC loops over tile bitmaps and sprites) BC holds
+                          ; exactly those two bytes (observed, F139)
   DI                      ; (the CPU disabled interrupts when it accepted this
                           ; one)
   LD SP,InterruptHandler  ; interrupt stack, InterruptStack-$8584
@@ -115,7 +118,7 @@ PageInBank0:
 ;
 ;   DE Address of the routine in the music bank ($C000-$FFFF)
 ;   HL Argument passed on to that routine (module address, see
-;      MusicEntryEnding)
+;      BankEndingDoor)
 ; O:BC Changed
 CallInMusicBank:
   LD BC,PageInBank0       ; return address of the music routine
@@ -183,12 +186,14 @@ GameFrameRoutine:
 ; disassembled, and not run: the simulator is a 48K machine). The bank also
 ; holds a copy of DepackScreen at $C000 and the two packed screens of tape
 ; block 3 after it, the title at $C09D and the info screen at $CA8A (copied
-; there by the loader, Start128).
+; there by the loader, Start128). The bank keeps the track it plays in
+; BankMusicTrack ($8550).
 ;
-; MusicEntryEnding: DE = $FC4B, HL as the caller left it; called by RunEnding
+; BankEndingDoor: DE = $FC4B, HL as the caller left it; called by RunEnding
 ; at the end of the ending (the stub at $88D5 that Patch128KHooks turns into
-; CALL $85E8). The bank routine there calls BuildMirrorTable and sets
-; MusicTrack to 2 (read from its bytes; the rest is not known).
+; CALL $85E8). The bank routine there, run on its own in the simulator, is a
+; 128K-only scene of the ending: a door that opens, 210 frames; it calls
+; BuildMirrorTable and sets MusicTrack to 2.
 ;
 ; BankShowInfo: HL = $CA8A, then as BankShowTitle; called through the stub at
 ; WaitSpaceRelease when SPACE is held on the title: the info screen.
@@ -196,11 +201,12 @@ GameFrameRoutine:
 ; BankShowTitle: HL = $C09D, DE = $F9D7; called through the stub at
 ; StartGame_Music when a game starts and by WaitSpaceRelease when SPACE is
 ; released. The bank routine at $F9D7 clears the attributes and jumps to $C000,
-; the copy of DepackScreen, with HL: it draws the title screen (read from the
-; bytes of the bank: LD B,3 / LD DE,$5800 / XOR A / fill / JP $C000).
+; the copy of DepackScreen, with HL: it draws the title screen (the bank's
+; bytes: LD B,3 / LD DE,$5800 / XOR A / fill / JP $C000; run on its own in the
+; simulator it gives exactly data/loading.scr).
 ;
 ; Hardware: 128K paging port, through CallInMusicBank.
-MusicEntryEnding:
+BankEndingDoor:
   LD DE,$FC4B             ; music bank routine at $FC4B
   JP CallInMusicBank
 BankShowInfo:

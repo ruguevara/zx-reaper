@@ -444,11 +444,11 @@ SmcRunCount:
 ; The 8 bitmap bytes are fetched with POP: SP is pointed at byte 2 of the tile
 ; bitmap and saved in the operand of the LD SP at SmcRestoreSP (SmcRestoreSP),
 ; which puts it back. For about 130 T-states per cell SP is inside the tile
-; bitmaps; an interrupt that came then would push over bitmap bytes
-; (InterruptHandler pushes below the interrupted SP). It does not come in
-; practice, because the main loop does this work right after the interrupt and
-; finishes long before the next one (inferred from the main loop, not
-; measured).
+; bitmaps; an interrupt that comes then has its return address written over
+; the two bitmap bytes below SP, which are the pair just loaded into BC, and
+; the PUSH BC at the start of InterruptHandler writes them back. This happens:
+; 32 times over the 3000 frames of tests/inputs/play.txt, every time repaired
+; (F139).
 ;
 ; Hardware: none.
 ;

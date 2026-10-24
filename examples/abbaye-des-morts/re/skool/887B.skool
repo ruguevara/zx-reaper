@@ -62,6 +62,6 @@ c$887B XOR A                ; PlayerState 0
  $88CF LD HL,$8381          ; ScriptEnding3
  $88D2 CALL $9D5F           ; = #R$9D5F, run the final text script
 @label=RunEnding_Music
- $88D5 LD HL,$85E8          ; 128K: becomes CALL $85E8 (#R$605F, MusicEntryEnding); on a 48K it only loads HL
+ $88D5 LD HL,$85E8          ; 128K: becomes CALL $85E8 (#R$605F, BankEndingDoor); on a 48K it only loads HL
  $88D8 CALL $A1C3           ; wait for a key
  $88DB JP $A1CE             ; ... and for its release; returns to the main loop

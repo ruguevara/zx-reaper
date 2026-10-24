@@ -14,7 +14,7 @@ text, not a place in the abbey.
 
 ## Entering a room
 
-[EnterRoom](../src/mainloop.asm#L188) ($86B9) builds the room whose number is in [RoomNumber](../src/variables.asm#L77)
+[EnterRoom](../src/mainloop.asm#L189) ($86B9) builds the room whose number is in [RoomNumber](../src/variables.asm#L77)
 ($8509) from nothing. It draws nothing itself:
 
 1. [BuildMirrorTable](../src/templates.asm#L388) fills $C500 with the 256 bit-reversed bytes, which the
@@ -210,7 +210,7 @@ main loop runs that script once, so the door appears or vanishes at once.
 
 [DrawWaterReflection](../src/effects.asm#L29), [AnimateBloodTiles](../src/effects.asm#L187) and [ShowCrossRing](../src/effects.asm#L240)
 (`src/effects.asm`) are called by the main loop on every pass, after the
-redraw, and each starts with the byte that [EnterRoom](../src/mainloop.asm#L188) sets to RET and the
+redraw, and each starts with the byte that [EnterRoom](../src/mainloop.asm#L189) sets to RET and the
 script opcode sets to NOP. They run in the foreground, so their speed depends
 on how fast the main loop goes, not on the 50 Hz interrupt.
 
@@ -256,7 +256,7 @@ It does nothing until Jean holds twelve crosses ([Crosses](../src/variables.asm#
 fifth pass ([CrossFlashTimer](../src/variables.asm#L159)) it:
 
 1. advances a colour index 0-5 kept in the operand of the instruction at
-   [SmcCrossColour](../src/effects.asm#L251) and copies that attribute of [CrossColours](../src/variables.asm#L510) (yellow,
+   [SmcCrossColour](../src/effects.asm#L251) and copies that attribute of [CrossColours](../src/variables.asm#L511) (yellow,
    red, magenta, blue, cyan, green, all bright) into [TileAttrs](../src/tiles.asm#L61) for tile
    $4C, so all the crosses of the ring change colour together;
 2. unless the chalice has been taken ([ChaliceTaken](../src/variables.asm#L266)), adds one cross to the
@@ -297,7 +297,7 @@ The horizontal tests come first and only on the side Jean faces; the edge
 values were checked one by one in the simulator (F76). At an exit half of
 Jean's sprite is already outside, and he appears half outside the opposite
 edge of the new room. The room state becomes 1 and the main loop enters the
-room ([MainLoop](../src/mainloop.asm#L118)). Jean keeps his state and speed, so a jump or a fall goes
+room ([MainLoop](../src/mainloop.asm#L119)). Jean keeps his state and speed, so a jump or a fall goes
 on in the next room (observed through the top edge of room 3, F124).
 
 [WrapRoomNumber](../src/player.asm#L1093) then subtracts 25 until the number is below 25. It works on

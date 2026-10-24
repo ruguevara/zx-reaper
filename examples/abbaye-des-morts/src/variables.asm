@@ -55,8 +55,8 @@ PagingState:
 
 ; Unused byte
 ;
-; No code reads or writes $8508, nor $8520 and $8550 further on (see BellRung
-; and SoundRequest): they are padding of the variable block. ($8503 is
+; No code reads or writes $8508, nor $8520 further on (see BellRung): they are
+; padding of the variable block ($8550 is used by the 128K music bank). ($8503 is
 ; PressedKeyRow, $8505 the high byte of InterruptRoutine.)
 UnusedByte:
   DEFB $00
@@ -470,10 +470,11 @@ SoundPlaying:
 SoundRequest:
   DEFB $00
 
-; Unused byte
+; Track of the 128K music bank
 ;
-; No code reads or writes $8550.
-UnusedByte2:
+; No code of the game reads or writes $8550; the 128K music bank keeps the
+; track it plays here (read from the bank's bytes).
+BankMusicTrack:
   DEFB $00
 
 ; Music track number

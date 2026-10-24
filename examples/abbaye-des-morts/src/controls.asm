@@ -229,17 +229,17 @@ GetKeyCode_Found:
   LD (KeyCode),A
   RET
 
-; Title: SPACE pressed, wait for it to be released (128K music only)
+; Title: SPACE held, show the info screen until it is released (128K only)
 ;
 ; Called from TitleMenu when SPACE is pressed on the title screen. On the 48K
 ; the first byte is a RET, so SPACE does nothing. On the 128K the start-up code
 ; Patch128KHooks turns the RET into CALL $85EE (the two bytes after it are that
-; address), which calls into the music bank at $CA8A; the routine then waits
-; for the key to be released and calls BankShowTitle (music bank routine at
-; $C09D). What the two music calls do is Unknown (the 128K code was not run:
-; the simulator is 48K).
+; address), BankShowInfo: the music bank unpacks the info screen ($CA8A); the
+; routine then waits for the key to be released and calls BankShowTitle, which
+; unpacks the title again ($C09D). The bank routine was run on its own in the
+; simulator and gives exactly data/info.scr and data/loading.scr.
 ;
-; Hardware: 128K only: calls into the music player.
+; Hardware: 128K only: calls into the music bank.
 ;
 ; O:A 0 (the key code is lost, so the caller's tests for C fail)
 WaitSpaceRelease:

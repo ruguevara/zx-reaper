@@ -271,7 +271,7 @@ clears the status bar rows, which nothing redraws during the ending (F67).
 
 Room state 5 comes from the end of the dying animation with no life left
 ([UpdateDying_End](../src/player.asm#L525), F73) or from R and Y held together during play (F26).
-The main loop ([MainLoop_GameOver](../src/mainloop.asm#L152)) runs [ScriptGameOver](../src/controls.asm#L761), `G a m e  O v e r`
+The main loop ([MainLoop_GameOver](../src/mainloop.asm#L153)) runs [ScriptGameOver](../src/controls.asm#L761), `G a m e  O v e r`
 in the middle of a black screen, sets music track 7, waits for a key and
 its release, and jumps to [StartGame](../src/mainloop.asm#L65). There is no high score table.
 

@@ -1,5 +1,8 @@
 # Fixes reported by the article writers (lead)
 
+All applied (lead), with F133-F139 and the 128K bank entries renamed
+(BankShowTitle, BankShowInfo, BankEndingDoor, BankMusicTrack).
+
 Writer B:
 - variables.asm RespawnX: a death after an arch does not return Jean to the
   arch (the forced restart went to room 5).

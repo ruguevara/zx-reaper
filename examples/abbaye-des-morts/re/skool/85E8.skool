@@ -14,7 +14,7 @@
 ; released. Probably starts the module at HL (the music is a Vortex Tracker II module).
 ; .
 ; Hardware: 128K paging port, through #R$85C2.
-@label=MusicEntryEnding
+@label=BankEndingDoor
 c$85E8 LD DE,$FC4B          ; music bank routine at $FC4B
  $85EB JP $85C2
 @label=MusicEntryInfo

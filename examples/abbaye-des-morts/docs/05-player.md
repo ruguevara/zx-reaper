@@ -126,7 +126,7 @@ every state from 2 to 5, so he can be steered in the air:
 - while he moves, [PlayerFrame](../src/player.asm#L35) toggles between 0 and 1 every 8 frames;
   standing still it is 0. In the air the state code sets picture 2.
 
-![Jean walking: pictures 0, 1, 2, 1](img/monk-walk.gif)
+![Jean walking: pictures 0 and 1, eight frames each](img/monk-walk.gif)
 
 ## Jumping
 
@@ -207,7 +207,7 @@ life back, even the last one, and then no Game Over follows (F121).
 ## Checkpoints and respawn
 
 Room state 4 makes the main loop call [SelectCheckpoint](../src/templates.asm#L315)
-([MainLoop_AfterDeath](../src/mainloop.asm#L105)). It clears the room state and the hit flag, turns a
+([MainLoop_AfterDeath](../src/mainloop.asm#L106)). It clears the room state and the hit flag, turns a
 dying monk into a standing one, and scans the nine checkpoint flags
 [CheckpointFlag0](../src/variables.asm#L408)-[CheckpointFlag8](../src/variables.asm#L424) for the first one that is not 0. Its
 index selects a 3-byte record of [Checkpoints](../src/templates.asm#L364) (room, row, column); with all

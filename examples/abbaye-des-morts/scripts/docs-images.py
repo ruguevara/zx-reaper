@@ -206,18 +206,14 @@ def article_images():
                     [scaled(glass(sets[s][k]), 4) for k in range(9, -1, -1) for _ in range(3) for s in (0, 1)],
                     8)
 
-    # Creatures in play: rooms entered directly with enemy hits off
-    # ($A87A := $18) and Jean taken out of play (state 0) where he would fall
-    # or die; the frame numbers count from the warp
-    for room, frame, name, more in ((10, 100, 'beast', ('--poke', '0xA894,0')),
-                                    (10, 300, 'beast-flames', ('--poke', '0xA894,0')),
+    # Creatures in play that the creatures-*.png of 05-creatures.md do not
+    # show: rooms entered directly with enemy hits off ($A87A := $18) and Jean
+    # taken out of play (state 0) where he would fall or drown; the frame
+    # numbers count from the warp
+    for room, frame, name, more in ((10, 300, 'beast-flames', ('--poke', '0xA894,0')),
                                     (9, 60, 'hanged-men', ()),
-                                    (14, 135, 'plants', ()),
                                     (17, 110, 'archers', ()),
-                                    (18, 100, 'death', ('--poke', '0xA894,0')),
-                                    (19, 80, 'fish', ('--poke', '0xA894,0')),
-                                    (24, 180, 'satan', ()),
-                                    (24, 160, 'ring', ('--poke', '0x854D,12'))):
+                                    (19, 80, 'fish', ('--poke', '0xA894,0'))):
         run(f'{TMP}/play400.z80', '--poke', '0x8509,%d' % room, '--poke', '0x850C,0x81',
             '--poke', '0xA87A,0x18', *more, '--frames', frame + 1,
             '--shot', f'{frame}:{IMG}/graphics-play-{name}.png')
@@ -226,7 +222,7 @@ def article_images():
     # frame 1500 (compare play-church.png)
     run(*play, '--poke', '0x858E,0', '--frames', 1501, '--shot', f'1500:{IMG}/tricks-no-push-bc.png')
 
-    # The 128K ending: the music bank's routine MusicEntryEnding calls
+    # The 128K ending: the music bank's routine BankEndingDoor calls
     # ($FC4B) run in the 48K simulator with the bank's bytes at $C000 (paging
     # is not simulated), from the end of the ending; interrupts on, the frame
     # routine replaced by a RET; the screen after each picture it draws
@@ -241,15 +237,60 @@ def article_images():
     r[SP] -= 2
     mem[r[SP]], mem[r[SP] + 1] = 0x01, 0x00
     r[IFF] = 1
-    r[PC] = word(mem, syms['MusicEntryEnding'] + 1)      # LD DE,$FC4B
+    r[PC] = word(mem, syms['BankEndingDoor'] + 1)      # LD DE,$FC4B
     pictures = []
     for stop in [0xFC5C] + [0xFC6F] * 5:      # after each CALL of the drawing routine $FC78
         sim.run(r[PC], stop, True)
         pictures.append(screen_rows(mem))
         sim.run(r[PC])
-    # 50 frames, then a picture every 20 frames, then 60 frames (GIF steps of 0.2 s)
-    gif = [pictures[0]] * 5 + [p for p in pictures[1:] for _ in range(2)] + [pictures[-1]] * 6
+    # the first picture at once, the same again 70 frames later (50 + 20
+    # HALTs), four more 20 frames apart, the return 60 frames after the last:
+    # each shown for its time, in GIF steps of 0.2 s (10 frames)
+    gif = [pictures[0]] * 7 + [p for p in pictures[1:5] for _ in range(2)] + [pictures[5]] * 6
     zxgfx.write_gif(f'{IMG}/sound-ending-128k.gif', gif, 20)
+
+
+def section_images():
+    """Images of 01-overview, 03-title-and-menu and the 05 files on rooms,
+    creatures and items: the loader's second stage run on its own, scenes
+    reached by entering a room directly (W: room number and room state
+    $81), enemy hits off where Jean must survive ($A87A := $18, a JR over the
+    hit) or Jean out of play ($A894 := 0)."""
+    play = f'{TMP}/play400.z80'
+
+    def w(room):
+        return ('--poke', '0x8509,%d' % room, '--poke', '0x850C,0x81')
+    # The loader: the picture being revealed, the hourglass while loading
+    run('re/orig.z80', '--cls', '0x38', '--load', 'build/stage2.bin@0x6000', '--pc', '0x6000',
+        '--frames', 5, '--shot', f'4:{IMG}/overview-reveal.png')
+    run('re/orig.z80', '--cls', '0x38', '--load', 'build/stage2.bin@0x6000', '--pc', '0x6000',
+        '--frames', 40, '--png', f'{IMG}/overview-hourglass.png', '--crop', '29,21,3,3',
+        '--scale', 8)
+    # The title script, drawn after Game Over (room state 5)
+    with open(f'{TMP}/title.txt', 'w') as f:
+        f.write('150 SPACE\n155 -\n')
+    run(play, '--poke', '0x850C,0x85', '--input', f'{TMP}/title.txt', '--frames', 201,
+        '--shot', f'200:{IMG}/title-and-menu-script.png')
+    # Rooms and creatures
+    run(play, *w(16), '--poke', '0xA894,0', '--frames', 60, '--png', f'{IMG}/rooms-reflection.png',
+        '--crop', '4,15,20,7', '--scale', 4)
+    run(play, *w(24), '--poke', '0x854D,12', '--poke', '0xA87A,0x18', '--frames', 201,
+        '--shot', f'140:{IMG}/rooms-ring.png', '--shot', f'200:{IMG}/creatures-satan.png')
+    run(play, *w(5), '--poke', '0xA87A,0x18', '--frames', 251,
+        '--shot', f'250:{IMG}/creatures-chase.png')
+    for room, frame, name in ((10, 100, 'beast'), (14, 130, 'plants'), (18, 120, 'death')):
+        run(play, *w(room), '--poke', '0xA894,0', '--frames', frame + 1,
+            '--shot', f'{frame}:{IMG}/creatures-{name}.png')
+    # Items and the ending: Satan as smoke once the chalice is taken; the
+    # ending with SPACE pressed for each of its windows
+    run(play, *w(24), '--poke', '0x854D,12', '--poke', '0x8521,0xFF', '--poke', '0xA87A,0x18',
+        '--frames', 31, '--shot', f'30:{IMG}/items-smoke.png')
+    with open(f'{TMP}/ending-keys.txt', 'w') as f:
+        f.write('0 -\n' + ''.join('%d SPACE\n%d -\n' % (30 + 100 * k, 33 + 100 * k)
+                                   for k in range(12)))
+    run(play, '--poke', '0x850C,0x83', '--input', f'{TMP}/ending-keys.txt', '--frames', 741,
+        '--shot', f'300:{IMG}/items-ending-room25.png', '--shot', f'700:{IMG}/items-ending-pyre.png',
+        '--shot', f'740:{IMG}/items-ending-burn.png')
 
 
 def main():
@@ -272,9 +313,16 @@ def main():
     run(f'{TMP}/play400.z80', '--poke', '0x850C,0x83', '--frames', 3000,
         '--shots-every', f'100:{TMP}/ending')
 
-    # Every room, entered directly, 20 frames after the sweep-in began; room 0
-    # (the intro) when its text is up; in room 3 Jean lands on the parchment,
-    # so SPACE closes it first
+    # Every room, entered directly: snapshots 20 frames after the warp (the
+    # sprite sets are unpacked by then; other scripts use them), room 0 (the
+    # intro) when its text is up; in room 3 Jean lands on the parchment, so
+    # SPACE closes it first. The pictures are taken later: building a room
+    # and sweeping it in takes 14-27 frames (stop at $865F, after RedrawRoom
+    # in MainLoop_EnterRoom), then 12 more frames with Jean out of play
+    # (state 0, so he neither falls out of the room nor is drawn; his box,
+    # which state 0 does not update, moved off the room: PlayerBoxXMax and
+    # PlayerBoxXMin := $FF, so he touches no item) let the creatures be drawn
+    # once
     with open(f'{TMP}/close.txt', 'w') as f:
         f.write('40 SPACE\n45 -\n')
     rooms = []
@@ -282,12 +330,17 @@ def main():
         dump = f'{TMP}/room{n:02d}.z80'
         if n == 0:
             warp(n, 150, dump)
-        elif n == 3:
-            warp(n, 90, dump, '--input', f'{TMP}/close.txt')
+            view = dump
         else:
-            warp(n, 20, dump)
-        mem = get_snapshot(dump)
-        rows = screen_rows(mem)
+            if n == 3:
+                warp(n, 90, dump, '--input', f'{TMP}/close.txt')
+            else:
+                warp(n, 20, dump)
+            swept, view = f'{TMP}/swept{n:02d}.z80', f'{TMP}/view{n:02d}.z80'
+            warp(n, 60, swept, '--stop', 0x865F)
+            run(swept, '--poke', '0xA894,0', '--poke', '0x8516,0xFF', '--poke', '0x8517,0xFF',
+                '--frames', 12, '--dump', view)
+        rows = screen_rows(get_snapshot(view))
         zxgfx.write_png(f'{IMG}/room-{n:02d}.png', scaled(rows, 2))
         rooms.append(rows)
     # the map: 5 x 5 rooms, room n at row n // 5, column n % 5
@@ -315,16 +368,19 @@ def main():
 
     # The monk: frame tables at $ACA7 (left), $ACAD (right), $ACB3 (dying,
     # drawn bright red), $ACC9/$ACCD (crouching); the copy for x AND 3 = 0 is
-    # at offset 0 (2 bytes)
+    # at offset 0: 2 bytes wide, 3 for the crouching frames (ShiftPairsCrouch)
     monk = []
-    for table, count, h, attr in ((0xACA7, 3, 24, 0x46), (0xACAD, 3, 24, 0x46), (0xACB3, 7, 24, 0x42),
-                                  (0xACC9, 2, 16, 0x46), (0xACCD, 2, 16, 0x46)):
+    for table, count, w, h, attr in ((0xACA7, 3, 2, 24, 0x46), (0xACAD, 3, 2, 24, 0x46),
+                                     (0xACB3, 7, 2, 24, 0x42), (0xACC9, 2, 3, 16, 0x46),
+                                     (0xACCD, 2, 3, 16, 0x46)):
         for f in range(count):
-            monk.append(pad(sheet_sprite(mem0, word(mem0, table + 2 * f), 2, h, attr), 16, 24))
+            monk.append(pad(sheet_sprite(mem0, word(mem0, table + 2 * f), w, h, attr), 24, 24))
     zxgfx.write_png(f'{IMG}/monk.png', zxgfx.compose(monk, 17, 4))
+    # Walking: frames 0 and 1 of the right-facing table, each held for 8
+    # frames (WALK_ANIM_PERIOD, UpdatePlayerActive)
     walk = [scaled(pad(sheet_sprite(mem0, word(mem0, 0xACAD + 2 * f), 2, 24, 0x46), 16, 24), 4)
-            for f in (0, 1, 2, 1)]
-    zxgfx.write_gif(f'{IMG}/monk-walk.gif', walk, 12)
+            for f in (0, 1)]
+    zxgfx.write_gif(f'{IMG}/monk-walk.gif', walk, 16)
 
     # The creatures: for each room object, its behaviour block (record +9)
     # gives attribute, shift table, height and two frame tables; the frames
@@ -368,6 +424,7 @@ def main():
         if len(c) > 24:
             zxgfx.write_png(f'{IMG}/creature-%s.png' % t.split()[0][1:], scaled(c, 2))
 
+    section_images()
     article_images()
 
 

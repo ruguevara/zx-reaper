@@ -33,7 +33,7 @@ From [StartGame_NoTitle](../src/mainloop.asm#L70) on, both cases are the same:
    [KeyRows](../src/controls.asm#L191) ([ScanKeyboard](../src/helpers.asm#L221)), stores the first key held as (half-row,
    mask) in [PressedKeyMask](../src/variables.asm#L21) ([FindPressedKey](../src/controls.asm#L83)) and its code in
    [KeyCode](../src/controls.asm#L180) ([GetKeyCode](../src/controls.asm#L212)).
-2. [MusicTrack](../src/variables.asm#L488) is set to 3 (read by the 128K player only).
+2. [MusicTrack](../src/variables.asm#L489) is set to 3 (read by the 128K player only).
 3. The 60 bytes $8512-$854D are cleared and [Lives](../src/variables.asm#L435) is set to 9, the
    status bar redraws are armed and Jean's animation timer is set to 8 (see
    [A new game](#a-new-game)).
@@ -185,7 +185,7 @@ layout the warp keys are E, G, A and R.
 ![The intro: Jean ahead of three crusaders under the story text](img/intro.png)
 
 ENTER on the title returns to [StartGame](../src/mainloop.asm#L65), which makes
-[GameFrameRoutine](../src/interrupt.asm#L175) the frame routine, clears [ExitDirection](../src/variables.asm#L98) and
+[GameFrameRoutine](../src/interrupt.asm#L178) the frame routine, clears [ExitDirection](../src/variables.asm#L98) and
 [RoomState](../src/variables.asm#L116) and calls [RunIntro](../src/sequences.asm#L21). That routine sets [PlayerState](../src/player.asm#L30) to 0
 (no player), enters room 0 and draws it: [RoomScript00](../src/roomscripts.asm#L97) clears the screen,
 prints strings 38-42 centred and clears every redraw mark, so the room
@@ -213,7 +213,7 @@ After [RunIntro](../src/sequences.asm#L21) returns, [StartGame](../src/mainloop.
 (standing) and falls into the main loop's death branch: [SelectCheckpoint](../src/templates.asm#L315)
 finds no checkpoint flag set and takes the tenth record of [Checkpoints](../src/templates.asm#L364),
 room 5 at row 17, column 9, so Jean starts at X $2400, Y $4400 (F108). The
-respawn position is copied to Jean, [EnterRoom](../src/mainloop.asm#L188) builds room 5 and
+respawn position is copied to Jean, [EnterRoom](../src/mainloop.asm#L189) builds room 5 and
 [RedrawRoom](../src/sprites.asm#L1147) sweeps it in, and the room state becomes $80: the game runs
 ([Game loop](04-game-loop.md)).
 
@@ -248,7 +248,7 @@ crosses and the attribute of its tile $4C. None of these shows in play.
 ## Game Over
 
 Room state 5 makes the main loop run [ScriptGameOver](../src/controls.asm#L761) (string 37,
-"G a m e  O v e r", centred, white on black), set [MusicTrack](../src/variables.asm#L488) to 7, wait
+"G a m e  O v e r", centred, white on black), set [MusicTrack](../src/variables.asm#L489) to 7, wait
 for a key and its release ([WaitKeyPress](../src/helpers.asm#L9), [WaitKeyRelease](../src/helpers.asm#L27)) and jump to
 [StartGame](../src/mainloop.asm#L65): the title script, then the title menu as above. There is no
 high score. The state is set when the last life is lost (F73) or by R and Y
