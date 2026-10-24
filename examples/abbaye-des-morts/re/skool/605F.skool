@@ -15,6 +15,7 @@
 c$605F LD A,$CD             ; opcode of CALL
  $6061 LD ($860C),A         ; the instruction at $860C (LD HL,$85F3) becomes CALL $85F3
  $6064 LD ($88D5),A         ; $88D5 (LD HL,$85E8) becomes CALL $85E8
+@isub=LD (WaitSpaceRelease),A
  $6067 LD ($A31E),A         ; $A31E (a RET followed by the operand bytes of CALL $85EE) becomes CALL $85EE
  $606A LD A,L        ;
  $606B OR A          ;

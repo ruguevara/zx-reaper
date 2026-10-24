@@ -71,3 +71,12 @@
   overwritten; $A31E loses the key code; Kempston up ignored; SP as data
   pointer in $A5E9.
 - Copied the RAGE cheat run to tests/inputs/cheat.txt (make expected!).
+- Labels needed (W1): $8719 (RET at the end of $86B9), $8606, $860C, $88D5,
+  $871A (patched by $605F), $85BE, $AD71, $AD82.
+- `@isub=LD H,FlagRowTable/256` at the LD H,$61 in $A9D2 ($AA14), $B44B,
+  $B6E6, $B74B, $BAB1, $BB07.
+- Item types ($8EDF): 0 heart, 1/2 cross, 3 checkpoint, 4 bell, 5 parchment,
+  6 red scroll (ends the game), 7 church trigger (sets CheckpointFlag0), 8
+  doorway arch, 9 lever, 10 wheel, 11 chalice; the wheel swaps which
+  crosses are real.
+- Quirk F67: room 4's script clears the HUD rows and nothing redraws them.

@@ -90,5 +90,6 @@ c$6000 DI            ;
  $6055 JR Z,$6059    ;
 @isub=LD A,OP_RET
  $6057 LD A,$C9             ; RET
+@isub=LD (KempstonSwitch),A
 *$6059 LD ($A28F),A         ; 0 (NOP) when a Kempston interface answers, RET when not
  $605C JP $8606             ; start the game, skipping the title script of a 48K

@@ -14,8 +14,8 @@ for n in $(seq 0 24); do
   if [ $((n % 4)) = 3 ]; then wait; fi
 done
 wait
-# room state 5 (the ending) and 3 (the end of the game); Kempston read on
-python3 tools/zxrun.py $T/play400.z80 --poke 0x850C,0x85 --frames 3000 --fuzz 7:20:SPACE,ENTER,P --map $T/ending.map > /dev/null
-python3 tools/zxrun.py $T/play400.z80 --poke 0x850C,0x83 --frames 1500 --fuzz 8:20:SPACE,ENTER --map $T/over.map > /dev/null
+# room state 5 (game over) and 3 (the ending); Kempston read on
+python3 tools/zxrun.py $T/play400.z80 --poke 0x850C,0x85 --frames 3000 --fuzz 7:20:SPACE,ENTER,P --map $T/over.map > /dev/null
+python3 tools/zxrun.py $T/play400.z80 --poke 0x850C,0x83 --frames 1500 --fuzz 8:20:SPACE,ENTER --map $T/ending.map > /dev/null
 python3 tools/zxrun.py $T/play400.z80 --poke 0xA28F,0 --frames 3000 --fuzz 9:5:KL,KR,KU,KD,KF --map $T/kempston.map > /dev/null
 cat $T/*.map | sort -u > re/maps/warp.map
