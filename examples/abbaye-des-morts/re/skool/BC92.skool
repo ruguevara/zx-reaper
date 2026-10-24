@@ -20,9 +20,9 @@ b$BC92 DEFW $B6ED,$FE00,$0000,$0600,$0000,$0400,$0202,$94F9 ; arrow flying left 
  $BCA2 DEFW $B6ED,$0200,$0000,$0603,$0000,$0400,$0202,$94FC ; arrow flying right ($0200), same archer when the monk is to its right
 @label=WallShotTemplate
  $BCB2 DEFW $B6ED,$FE00,$0000,$05FE,$0000,$0401,$0202,$94F6 ; arrow flying left from the stone head in the wall of rooms 20 and 22 (#R$B5D6)
-@label=SporeLeftTemplate
+@label=SeedLeftTemplate
  $BCC2 DEFW $B74B,$FF91,$FE90,$0402,$0000,$0101,$0202,$94F3 ; seed spat up and left by a plant of room 14 (#R$B687), handler #R$B74B; y speed $FE90 = -1.44, changes with time
-@label=SporeRightTemplate
+@label=SeedRightTemplate
  $BCD2 DEFW $B74B,$006F,$FE90,$0404,$0000,$0101,$0202,$94F3 ; seed spat up and right
 @label=FireballUpTemplate
  $BCE2 DEFW $B6E6,$FF09,$FFBF,$09FF,$0000,$0101,$0202,$94F0 ; Satan's fireball, up and left (x speed -0.96, y speed -0.25), handler #R$B6E6 (#R$BB57)
@@ -31,9 +31,9 @@ b$BC92 DEFW $B6ED,$FE00,$0000,$0600,$0000,$0400,$0202,$94F9 ; arrow flying left 
 @label=FireballDownTemplate
  $BD02 DEFW $B6E6,$FF09,$0041,$09FF,$0000,$0101,$0202,$94F0 ; Satan's fireball, down and left (x speed -0.96, y speed +0.25)
 @label=SplashTemplate
- $BD12 DEFW $B77F,$0000,$0000,$0000,$0202,$0300,$0402,$94FF ; water splash of room 19 (thrown up by #R$B7C6 and #R$B818), handler #R$B77F; not looked at closely
+ $BD12 DEFW $B77F,$0000,$0000,$0000,$0202,$0300,$0402,$94FF ; water splash of room 19 (thrown up by #R$B7C6 and #R$B818), handler #R$B77F (observed, F83)
 @label=FlameLeftTemplate
- $BD22 DEFW $B9B0,$FFC0,$0018,$1400,$0000,$0703,$9595,$0202,$0200 ; flame moving left (x speed -0.25) until x = $18, red, 2 frames, handler #R$B9B0, spawned by #R$B8C5 (room 10; never seen to run)
+ $BD22 DEFW $B9B0,$FFC0,$0018,$1400,$0000,$0703,$9595,$0202,$0200 ; flame moving left (x speed -0.25) until x = $18, red, 2 frames, handler #R$B9B0, spawned by #R$B8C5 (the Pestilent Beast of room 10; observed, F84)
 @label=FlameRightTemplate
  $BD34 DEFW $B9B0,$0040,$0070,$1400,$0000,$0703,$9595,$0202,$0200 ; flame moving right (x speed +0.25) until x = $70
 @label=ScytheLeftTemplate

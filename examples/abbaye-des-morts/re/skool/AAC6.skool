@@ -39,6 +39,7 @@ c$AAC6 LD A,($A8A0)  ; hit flag: die
  $AAD5 LD A,C        ; state - 1
 @isub=LD DE,WALK_SPEED
  $AAD6 LD DE,$0080   ; step: one pixel
+@isub=CP PLAYER_CROUCHING-1
  $AAD9 CP $02        ; crouching (state 3)?
  $AADB JR NZ,$AAE0   ;
 @isub=LD DE,CROUCH_SPEED

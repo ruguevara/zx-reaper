@@ -1,11 +1,10 @@
 ; Beeper sound effects: one frame of the current effect
 ;
-; Called once per frame by the frame routine #R$85E2, before the game logic. On a 128K machine with an AY chip
-; #R$605F turns the first instruction into JP #R$85D5 and this code is not used. A game routine requests an effect by
-; storing its number in #R$854F (0 = none; SFX_ constants); this routine takes the request, clears it, and plays one
-; step of the effect in #R$854E every frame until the effect ends. A new request replaces the effect that is playing at
-; once (the comment of #R$854E says it is refused while one plays: the code does not do that). An effect can chain
-; another one when it ends (field +7 of its record).
+; Called once per frame by the frame routine #R$85E2, before the game logic. On a 128K machine with an AY chip #R$605F
+; turns the first instruction into JP #R$85D5 and this code is not used. A game routine requests an effect by storing
+; its number in #R$854F (0 = none; SFX_ constants); this routine takes the request, clears it, and plays one step of the
+; effect in #R$854E every frame until the effect ends. A new request replaces the effect that is playing at once
+; (observed, F104). An effect can chain another one when it ends (field +7 of its record).
 ; .
 ; Effect 1 is built in: a noise burst of 10 frames (NOISE_FRAMES), each 48 speaker samples (NOISE_SAMPLES) of bit 4 of
 ; #R$87D7, about 180 T-states apart. No code of the image requests effect 1 (by reading the stores to #R$854F).
@@ -114,7 +113,7 @@ c$871A LD HL,$85D5          ; 128K with AY: becomes JP $85D5 (#R$605F)
  $879D RET Z
  $879E LD ($854F),A         ; chain: SoundRequest = next effect, played from the next frame
  $87A1 RET
-@label=PlaySoundStep_NextSegment
+@label=PlaySoundStep_NextSeg
 *$87A2 LD A,($87EF)         ; BASE
  $87A5 LD C,A
  $87A6 LD A,($87EE)         ; MODE

@@ -1,25 +1,8 @@
-; Entity handler: crusader running along its path script (kind 1 templates), and path command 5
+; Path command 5 of the crusaders: signal the end of the cutscene, then run on
 ;
-; The handler of the crusaders made by the spawner #R$B099 (the slot is a copy of a template of #R$B04C; the slot words
-; are described there). Every frame it moves the crusader right by its speed and compares the high byte of x with the
-; target coordinate at the path pointer (slot word +4): the path script is a list of pairs (target x in 2-pixel units,
-; command), see #R$B218. Until x equals the target the crusader just runs: the hit box test (#R$A851) and the drawing
-; with the next animation step go on at #R$B3AD, facing right. When x equals the target (the compare is for equality;
-; the speed is below one unit a frame, so it cannot be skipped), the path pointer moves to the next pair and the command
-; number is turned into a handler address through the table at #R$B20C, which is written over the handler word of the
-; slot: from the next frame the crusader runs a jump (commands 1, 2, 3: #R$B163, #R$B10C, #R$B139), is removed
-; (command 4: #R$B08E) or does what command 5 does, and the frame goes on as if there had been no command. Command 0 is
-; this handler itself, a command that changes nothing.
-; .
-; Command 5 enters at #R$B1CF: it sets the cutscene-finished flag (#R$8501, which the ending's frame loop polls) and
-; then runs like #R$B1D4. As the handler word stays #R$B1CF, the flag is set again in every later frame. The room 25
-; script ends with this command (the crusaders have reached the top of the stairs).
-; .
-; Slot fields used: +2 word x speed (8.8), +4 word path pointer, +6 word x (8.8, high byte in 2-pixel units), +8 word y;
-; the state word +$A is skipped here (it belongs to the jumps); the rest is read by #R$A851, #R$B3AD and #R$A883.
-; The path scripts have no terminator: the first two end with command 4 (the crusader is removed), the third with
-; command 5, after which the path pointer runs into the code at #R$B236 and the next target x would be the byte $C1 (not
-; reached: the cutscene is over by then; read from the code, not run).
+; Command 5 of the path scripts (#R$B20C) puts this address in the slot: it sets the cutscene-finished flag (#R$8501,
+; which the ending's frame loop polls) and then runs #R$B1D4. As the handler word stays #R$B1CF, the flag is set again
+; in every later frame. The room 25 script ends with this command (the crusaders have reached the top of the stairs).
 ; .
 ; Hardware: none.
 ;
@@ -27,47 +10,3 @@
 @label=UpdateCrusaderSignal
 c$B1CF LD A,$01      ;
  $B1D1 LD ($8501),A  ; CutsceneDone: tell the cutscene it is over
-@label=UpdateCrusader
- $B1D4 POP BC        ; x speed
- $B1D5 POP DE        ; path pointer
- $B1D6 POP HL        ; x (8.8)
- $B1D7 ADD HL,BC     ;
- $B1D8 LD A,(DE)     ; target x of the next path pair
- $B1D9 CP H          ;
- $B1DA JP Z,$B1F3    ; reached: take the command
- $B1DD PUSH HL       ; PUSH then POP: stores x at slot + 6 and leaves SP at slot + 8
- $B1DE POP DE        ; DE = x
-@label=UpdateCrusader_Draw
-*$B1DF POP HL        ; y (8.8)
- $B1E0 POP BC        ; skip +$A, the jump state
- $B1E1 LD E,H        ; E = y in 2-pixel units
- $B1E2 LD L,H        ; L = y
- $B1E3 LD H,D        ; H = x
- $B1E4 LD A,H        ;
- $B1E5 EX AF,AF'     ; A' = x: its low two bits select the shifted copy
- $B1E6 SRA H         ;
- $B1E8 SRA H         ; x / 4: byte column
- $B1EA LD ($ACD3),HL ; draw command position: (y, x/4)
- $B1ED LD HL,$B3AD   ; the hit test goes on with the sprite description (facing right)
- $B1F0 JP $A851      ; HitTest
-@label=UpdateCrusader_Command
-*$B1F3 INC DE        ; the command byte of the pair
- $B1F4 LD A,(DE)     ;
- $B1F5 INC DE        ; DE = next pair
- $B1F6 PUSH HL       ; store x at slot + 6 (SP was at slot + 8) ...
- $B1F7 PUSH DE       ; ... the path pointer at slot + 4 ...
- $B1F8 PUSH BC       ; ... and the speed at slot + 2
- $B1F9 LD L,A        ;
- $B1FA LD H,$00      ;
- $B1FC ADD HL,HL     ;
- $B1FD LD DE,$B20C   ; PathCommands
- $B200 ADD HL,DE     ;
- $B201 LD E,(HL)     ;
- $B202 INC HL        ;
- $B203 LD D,(HL)     ; DE = handler of the command
- $B204 PUSH DE       ; ... and it over the handler word at slot + 0
- $B205 POP AF        ; pop the handler word again (SP at slot + 2); AF is not used
- $B206 POP BC        ; BC = speed
- $B207 POP DE        ; the path pointer
- $B208 POP DE        ; DE = x
- $B209 JP $B1DF      ; go on with this frame as if nothing had happened

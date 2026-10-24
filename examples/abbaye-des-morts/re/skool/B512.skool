@@ -1,6 +1,6 @@
 ; Entity handler: water drop hanging from a stalactite (kind 9, rooms 15 and 19)
 ;
-; The cyan drops that form at the tip of the stalactites of Gloomy tunnels (room 15) and Escape !!! (room 19), swell
+; The cyan drops that form at the tip of the stalactites of Gloomy tunnels (room 15) and Underground river (room 19), swell
 ; and fall. A drop cycles through two handlers: this one while it hangs and #R$B534 while it falls. Entered with SP
 ; at slot+2, see #R$B2A6 for the stack scheme. Slot fields used: +4 byte y of the stalactite tip, +7 byte x, +$B
 ; byte start delay; the whole layout is at #R$B56D.

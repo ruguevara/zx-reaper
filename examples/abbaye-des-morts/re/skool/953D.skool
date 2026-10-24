@@ -1,8 +1,8 @@
-; Behaviour block: a spore plant (kind 12, room 14)
+; Behaviour block: a seed-spitting plant (kind 12, room 14)
 ;
-; Used by the three magenta plants of Hidden garden that throw spores (attribute $43). After the 5 header bytes:
+; Used by the three magenta plants of Hidden garden that spit seeds (attribute $43). After the 5 header bytes:
 ; attribute, sprite height, width in bytes, then the addresses of its two sprites.
-@label=BehaviourSporePlant
+@label=BehaviourSeedPlant
 b$953D DEFB $03,$01,$07,$06,$02  ; hit box top, left, bottom, right (2-pixel units); slot +$15 (Unknown)
  $9542 DEFB $43,$08,$02  ; attribute, sprite height, width (bytes)
  $9545 DEFW $EF4B    ; sprite, frame 0

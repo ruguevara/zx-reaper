@@ -14,7 +14,7 @@
 | $B0E8-$B10B | 3 speed curves, 6 signed 8.8 words each | words |
 | $B20C-$B217 | 6 path command handlers | words |
 | $B218-$B235 | 3 path scripts: (target coordinate, command) | data |
-| $B74B, $B924, $BB07, $BC69 | handlers never executed (falling projectile, continuation, second state of $BAB1, template $BD6A) | code |
+| $B74B, $B924, $BB07, $BC69 | handlers never executed (falling projectile, continuation, second state of $BAB1, template $BD6A) [corrected later: all four run in the room runs, F50, F53, F82, F84] | code |
 | $BC92-$BDD9 | entity templates (16, 18, 22 bytes) | data |
 | $BE2A-$BE47 | 10 checkpoints x 3 bytes: room, row, column | data |
 

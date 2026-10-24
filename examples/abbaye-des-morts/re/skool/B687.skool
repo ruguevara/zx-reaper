@@ -40,14 +40,14 @@ c$B687 JR NC,$B68D   ; no overlap
  $B6A3 LD HL,$8552   ; two records waiting
  $B6A6 INC (HL)      ;
  $B6A7 INC (HL)      ;
- $B6A8 LD HL,$BCC2   ; SporeLeftTemplate
+ $B6A8 LD HL,$BCC2   ; SeedLeftTemplate
  $B6AB LD ($5DFC),HL ; SPAWN_TEMPLATE
  $B6AE LD HL,$5DFC   ; SPAWN_TEMPLATE, SPAWN_POSITION
  $B6B1 LD DE,($BE56) ; end of the object list
 @isub=LD BC,OBJECT_ENTRY_SIZE
  $B6B5 LD BC,$0004   ;
  $B6B8 LDIR          ; append the record
- $B6BA LD HL,$BCD2   ; SporeRightTemplate
+ $B6BA LD HL,$BCD2   ; SeedRightTemplate
  $B6BD LD ($5DFC),HL ;
  $B6C0 LD HL,$5DFC   ; same position
 @isub=LD C,OBJECT_ENTRY_SIZE

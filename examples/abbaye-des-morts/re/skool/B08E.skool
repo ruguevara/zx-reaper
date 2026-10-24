@@ -2,7 +2,7 @@
 ;
 ; For handlers that remove their entity before popping anything: SP is at slot + 2, so the PUSH writes the zero over the
 ; handler word at slot + 0 (the slot is free from now on) and the next slot is 22 bytes on. Used by the path command 4
-; of the crusaders (#R$B20C), the arrows and spores (#R$B6E6, #R$B77F) and by Death's scythe and Satan (#R$BAB1,
+; of the crusaders (#R$B20C), the arrows and seeds (#R$B6E6, #R$B77F) and by Death's scythe and Satan (#R$BAB1,
 ; #R$BB57) when they have to go. #R$B426 is the same for a handler that has already popped its words.
 ; .
 ; Hardware: none.

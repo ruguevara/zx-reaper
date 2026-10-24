@@ -3,7 +3,7 @@
 ; The seeds the plants of "Hidden garden" (#R$B687) spit, two at a time, up and to the left (template #R$BCC2) and up
 ; and to the right (#R$BCD2). Slot from the template (see #R$B6E6 for the whole layout): +2 word x speed ($FF91 = -0.43
 ; or $006F = +0.43), +4 word y speed (starts at $FE90 = -1.44), +6 word x, +8 word y, +$A hit box offset, +$C hit box
-; size, +$E sprite size, +$10 sprite description. Each frame SEED_GRAVITY is added to the y speed (stored back in the
+; far corner, +$E sprite size, +$10 sprite description. Each frame SEED_GRAVITY is added to the y speed (stored back in the
 ; slot), so the seed rises, turns and falls; both speeds are then added to the position as in #R$B6ED. It is removed
 ; (#R$B716) when it leaves the room (y below PROJECTILE_Y_MAX or x outside 0-$7F) or when the single cell at (x/4, y/4)
 ; has a tile class other than 0 (unlike the arrows it does not look at the cell to its right); otherwise it is drawn

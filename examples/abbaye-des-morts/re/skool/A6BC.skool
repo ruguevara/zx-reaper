@@ -1,4 +1,4 @@
-; Item action: arch from Underground river to Pestilent Beast (room 19)
+; Item action: the arch of room 19 (Underground river), leading to Pestilent Beast
 ;
 ; The blue arch of room 19 at row 15, column 21 with flag $8524. When Jean touches it (and its latch, bit 7 of the
 ; flag, is clear) the latch of the other arch ($8523) is set, #R$8512/#R$8514 are set to the position of the room 10

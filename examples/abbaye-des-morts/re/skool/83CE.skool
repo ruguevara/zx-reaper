@@ -2,7 +2,7 @@
 ;
 ; The player routine #R$AAAB jumps here while the player state #R$A894 is $FF. Only the RAGE cheat reaches that state:
 ; #R$A422 turns the JR at #R$AABE into JR Z, and then the T key during play runs #R$AAC0, which sets $FF (observed with
-; tests/inputs/cheat.txt, F78; without the cheat the JR always skips #R$AAC0). The routine reads the keys pressed this
+; tests/inputs/cheat.txt, F23; without the cheat the JR always skips #R$AAC0). The routine reads the keys pressed this
 ; frame (#R$A2D1): when bit 5 is set it returns to normal play through #R$AD82; otherwise the low four bits (right,
 ; left, down, up) call #R$AD71, which moves #R$8509 one room that way and starts the room change, and the room number is
 ; then reduced modulo 25.

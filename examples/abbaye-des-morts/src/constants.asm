@@ -74,7 +74,7 @@ ROOM_BEAST               EQU 10 ; room number of Pestilent Beast (the dragon roo
 ROOM_RIVER               EQU 19 ; room number of Underground river
 ROW_TABLE_ENTRIES        EQU 24 ; words in the flag map row address table at $6100 (22 room rows and 2 spare)
 ATTACK_PERIOD            EQU 0x32 ; frames between two throws of Death or two volleys of Satan (the timer reloads with it)
-SFX_ENEMY_SHOT           EQU 7 ; sound effect: Death throws a scythe, Satan fires
+SFX_ENEMY_SHOT           EQU 7 ; sound effect: an enemy shoots or throws (Death, Satan, archers, plants, the fish splash, the Beast's fire)
 OBJECT_ENTRY_SIZE        EQU 4 ; bytes of an entry of the object list at $5DC0: template address, y, x
 TILE_CLASS_MASK          EQU 7 ; mask of the tile class in a tile flag (bits 0-2)
 MUSIC_TRACK_GAME_OVER    EQU 7 ; music track 7: the Game Over screen ($86AB), also started when Satan turns into smoke ($BB57)

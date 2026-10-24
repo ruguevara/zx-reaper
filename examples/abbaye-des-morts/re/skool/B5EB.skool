@@ -1,6 +1,6 @@
 ; Entity handler: skeleton archer (rooms 17 and 21)
 ;
-; The skeleton archers of "The wheel of faith" (room 17, three of them) and "Escape !!!" (room 21, one): handler of room
+; The skeleton archers of "The wheel of faith" (room 17, three of them) and "Evil church" (room 21, one): handler of room
 ; object kind 10 (#R$B028, behaviour block #R$951B). They stand still, face the monk, aim and throw an arrow every 80
 ; frames; an arrow that touches the monk kills him (observed in room 17), and the archer's own hit box is tested the
 ; same way. Entity handlers are not called: the slot walker #R$A5E9 sets SP to a slot of #R$C100 and RETs, so the handler is

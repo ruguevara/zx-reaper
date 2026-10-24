@@ -1,4 +1,4 @@
-; Item action: arch from Pestilent Beast to Underground river (room 10)
+; Item action: the arch of room 10 (Pestilent Beast), leading to Underground river
 ;
 ; The blue arch of room 10 at row 17, column 23 with flag $8523; the mirror of #R$A6BC: sets the latch of the other
 ; arch ($8524), the arrival position to X $54, Y $3C (the arch in room 19) and enters room 19 through #R$A6F2.

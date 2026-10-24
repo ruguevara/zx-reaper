@@ -1,11 +1,12 @@
-; Behaviour block: a dragon head that spits bolts (kind 11, rooms 20 and 22)
+; Behaviour block: the stone head in the wall that shoots arrows (kind 11, rooms 20 and 22)
 ;
-; Used by the stone dragon heads in the right wall of Unexpected gate and Tortured souls (attribute $07). After the 5
+; Used by the stone heads (shaped like a dragon's head) in the right wall of Unexpected gate and Tortured souls
+; (attribute $07, handler #R$B5D6). After the 5
 ; header bytes: attribute, sprite height, width in bytes, then a pointer to the list of its two sprites.
-@label=BehaviourDragonHead
+@label=BehaviourStoneHead
 b$952F DEFB $00,$00,$07,$07,$02  ; hit box top, left, bottom, right (2-pixel units); slot +$15 (Unknown)
  $9534 DEFB $07,$08,$02  ; attribute, sprite height, width (bytes)
-@isub=DEFW BehaviourDragonHead+$A
+@isub=DEFW BehaviourStoneHead+$A
  $9537 DEFW $9539    ; sprites
  $9539 DEFW $EF3E    ; sprite $EF3E
  $953B DEFW $EF3C    ; sprite $EF3C
