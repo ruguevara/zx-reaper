@@ -29,9 +29,10 @@ the window) and [ReadLine](../src/main.asm#L331), and skip [DrawLocationPicture]
 There is no frame timing and no interrupt. Three waits depend on the speed of
 the Z80 code:
 
-- the idle WAIT after 3000 key scans, about 19 seconds on a 3.5 MHz Spectrum
-  (938 frames from Bag End, F36); a port should use a clock of about 19 s
-  and refill 3 s per key;
+- the idle WAIT after 3000 key scans from the start of a line, 1171 frames
+  or about 23 seconds on a 3.5 MHz Spectrum (F36); a port should use a clock
+  of about 23 s, started again at every line, and give 3.9 s back per key up
+  to the full time;
 - the scroll pause of `SCROLL_DELAY` key polls per story line, about half a
   second;
 - the picture drawing itself, which takes from under a second to a few
@@ -94,3 +95,39 @@ RUN hang (F55) can end a game. The memory-overwriting ones (long words F70,
 too many tokens F71) cannot be kept without emulating the memory and are
 better turned into "line too long" errors. The save of the blocked exit (F84)
 should be fixed in any port that offers SAVE.
+
+## The Python port
+
+[`port/`](../port) is the whole game in Python on zxpyxel (stage 3), one
+module per asm module and one function per routine, with the memory layout of
+the original. Values pass between routines as on the Z80, in shared registers
+and flags ([`port/regs.py`](../port/regs.py)): most of the 400 routines take
+and leave values in registers that many callers read, and a signature per
+routine would have been a second, unchecked model of the code.
+[`port/CONTRACT.md`](../port/CONTRACT.md) lists every routine with its
+module and whether it waits (240 are `async`: they wait for a key, the scroll
+pause, the tape or the printer, or call one that does). The message
+arguments go on a list in place of the machine stack, handlers called
+through tables go through `calls.call_at`, and the jumps that drop return
+addresses are `Goto`. `python port/play.py` plays it; `make port-test`
+replays the six runs of `tests/inputs/` recorded on the Z80 and checks every
+pass of the main loop against them, byte for byte. The value the random
+routine mixes in, which reads the code and the stack, comes from the record
+(`PORT_TAKE`).
+
+## The clean version
+
+[`game/`](../game) is the same game as plain Python (stage 4): the state as
+plain values (locations, things and characters, the characters' script
+positions, the timers, the orders, the variables, the screen as a
+`zxpyxel.display`), messages, handlers and behaviour tables by name, words
+by their dictionary offset, routines that read as the rules, and the waits
+as events (a key, the scroll pause, the tape, the printer). Its data is in
+`game/assets/`: the dictionary, messages, commands, world, verbs, handlers
+and tables as JSON, the pictures as command text with a PNG preview of each,
+the font as PNG. `python game/play.py` plays it (SAVE and LOAD use
+`hobbit.sav`, PRINT appends the story to `hobbit.txt`); `make game-test`
+checks it against the stage 3 port at every pass of the main loop, the
+screen included, then in free play; `python bridge/oracle.py routine NAME
+build/record/*.rec` checks it routine by routine. It keeps every quirk of
+the original, F85's endless message excepted (it raises instead).

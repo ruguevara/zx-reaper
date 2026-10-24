@@ -14,6 +14,8 @@ decodes its memory into the stage 4 state (bridge/decode.py). Two checks:
       on every call (the first N): run on the decoded state before the call with
       the inputs stage 3 took in it, they must give the decoded state after and
       the same result
+  python bridge/oracle.py play [FRAMES]
+      free play: random commands typed through the pacer as a host runs it
 """
 import copy
 import functools
@@ -26,7 +28,7 @@ from decode import decode
 from routines import ANY, ROUTINES, Regs
 import labels
 import main as port_main
-from hobbit.state import Mixed, ReadKey, ReadR, Step, TapeLoad, TitleKey
+from hobbit.state import Mixed, PrinterReady, ReadKey, ReadR, Step, TapeLoad, TitleKey
 from zxpyxel import Goto, T_FRAME, headless, zx
 
 PORT = [m for m in list(sys.modules.values())
@@ -51,8 +53,8 @@ class Inputs:
             if not self.queues[kind]:
                 raise Mismatch('stage 4 asks for %s, but stage 3 took no more' % type(event).__name__)
             return self.queues[kind].pop(0)
-        if isinstance(event, TapeLoad):
-            return None                     # the records play no tape
+        if isinstance(event, (TapeLoad, PrinterReady)):
+            return None                     # the records play no tape and have no printer
         return None
 
     def left(self):
@@ -188,6 +190,73 @@ def check_game(record):
     return passes[0]
 
 
+# what free play types: moves, the common verbs, orders, SAVE and LOAD
+COMMANDS = ['N', 'S', 'E', 'W', 'NE', 'SE', 'U', 'D', 'LOOK', 'INVENTORY', 'TAKE ALL', 'DROP ALL',
+            'EXAMINE MAP', 'READ MAP', 'OPEN DOOR', 'UNLOCK DOOR', 'KILL TROLL', 'KILL GOBLIN',
+            'WAIT', 'SCORE', 'HELP', 'WEAR RING', 'EAT FOOD', 'CLIMB TREE', 'FOLLOW THORIN',
+            'SAY TO THORIN "CARRY ME"', 'SAY TO GANDALF "HELP"', 'TAKE ROPE AND DROP IT',
+            'GO WEST THEN EAST', 'SAVE', 'LOAD', '@', 'XYZZY', 'QUIT']
+KEYS = {' ': {'SPACE'}, '"': {'SS', 'P'}, '@': {'SS', '2'}}
+
+
+def check_play(frames, seed=1):
+    """Free play: random commands typed through the pacer (a key a frame), for
+    `frames` host frames, as a host runs it; the main loop must keep coming
+    round and the state keep its invariants. Returns the passes run."""
+    import random
+    import tempfile
+    from hobbit.pacer import Pacer
+    from zxpyxel.display import Display
+    tmp = tempfile.mkdtemp()
+    p = Pacer(Display(), os.path.join(tmp, 'hobbit.sav'), os.path.join(tmp, 'hobbit.txt'), seed)
+    steps, last, frame = [0], [0], [0]
+
+    def checked(gen):
+        reply = None
+        while True:
+            e = gen.send(reply)
+            if isinstance(e, Step):
+                problem = invariant(p.game.state)
+                if problem:
+                    raise Mismatch('pass %d: %s' % (steps[0], problem))
+                steps[0], last[0] = steps[0] + 1, frame[0]
+            reply = yield e
+
+    p.gen = checked(p.gen)
+    rnd = random.Random(seed)
+    while frame[0] < frames:
+        line = rnd.choice(COMMANDS)
+        for held in [KEYS.get(c, {c}) for c in line] + [{'ENTER'}]:
+            for keys in (held, set()):
+                p.update(keys)
+                frame[0] += 1
+        for _ in range(rnd.randrange(20, 300)):     # reading time; may run into the idle WAIT
+            p.update(set())
+            frame[0] += 1
+        if frame[0] - last[0] > 3000:
+            raise Mismatch('no pass of the main loop in frames %d-%d' % (last[0], frame[0]))
+    return steps[0]
+
+
+def invariant(s):
+    """What must hold at every pass, whatever was typed."""
+    ids = {t.id for t in s.things}
+    if not 0 <= s.vars.player_location < len(s.locations):
+        return 'the player at location %d' % s.vars.player_location
+    for t in s.things:
+        seen, h = {t.id}, t.holder
+        while h != 0xFF:
+            if h not in ids or h in seen:
+                return 'thing %d held by %d: not a thing, or a loop' % (t.id, h)
+            seen.add(h)
+            h = next(u.holder for u in s.things if u.id == h)
+    if not 0 <= s.vars.score <= 1000:
+        return 'the score %d' % s.vars.score
+    if len(s.screen.data) != 6912 or len(s.orders) != 8:
+        return 'the screen or the orders changed size'
+    return None
+
+
 def check_routines(record, names, limit=None):
     """The stage 4 routines registered for `names` on every call of their stage 3
     routines (the first `limit` calls of each), in one replay. Returns the calls
@@ -294,6 +363,13 @@ def main():
             except Mismatch as e:
                 sys.exit('%s: MISMATCH %s' % (rec, e))
             print('%s: %s' % (rec, ', '.join('%s %d' % kv for kv in calls.items())))
+    elif a[:1] == ['play']:
+        frames = int(a[1]) if a[1:] else 30000
+        try:
+            n = check_play(frames)
+        except Mismatch as e:
+            sys.exit('play: MISMATCH %s' % e)
+        print('play: %d frames, %d passes, the invariants hold' % (frames, n))
     else:
         sys.exit(__doc__)
 

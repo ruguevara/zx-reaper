@@ -169,6 +169,10 @@ class Vars:
     subject: int
     subj_is_in: int         # the preposition word DescribeLocation writes into MsgSubjIsIn
                             # (the message's own word slot: it keeps its value between turns)
+    it: list                # PhraseBuffer: the last first noun phrase matched (3 phrase codes),
+                            # what IT means
+    saved_command: int      # SavedCommandId: the command the last match found (the Bard's
+                            # order reads it)
 
 
 @dataclass
@@ -246,14 +250,20 @@ class Printed:
 
 
 @dataclass
+class PrinterReady:
+    """PRINT asks whether a printer answers: answered True when one does (in
+    play the transcript file stands for it)."""
+
+
+@dataclass
 class TapeSave:
     """SAVE: the presentation writes the state to a file."""
 
 
 @dataclass
 class TapeLoad:
-    """LOAD: answered with a saved state, or None when there is none (the
-    original then waits for a tape forever)."""
+    """LOAD (and SAVE's verify): answered with a saved state, or None when there
+    is none: the player broke the load (BREAK on the Spectrum), a tape error."""
 
 
 @dataclass

@@ -70,6 +70,12 @@ RIDDLE_ORDER_BYTES = 24                 # the bytes of a stored order LA8F6 sear
 
 
 @functools.lru_cache(None)
+def bard_command_index():
+    """The index in the script program of the command the Bard's order rewrites
+    (its op and first two arguments are saved with the variables)."""
+    return _data()[0]['bard_command']
+
+
 def _data():
     """handlers.json (the respawn table, the Bard's command) and tables.json."""
     d = assets.load_json('handlers.json')
@@ -438,7 +444,8 @@ def la761_3(s):
     yield from text.print_message(s, 'MsgSlowlySinkingIntoBog')
     if s.timers[4].counter:
         return None
-    return (yield from verbs_end_game(s))
+    from . import verbs
+    return (yield from verbs.end_game(s))
 
 
 @handler('LA9E5_3')
@@ -619,8 +626,11 @@ def spider_eyes(s, message='SpiderEyesFromHL'):
     """Generator: print `message`; the game ends unless the player is where he
     arrived in the forest (arrival_location) or at the other forest place (3
     after 2, else 2) (stage 3: SpiderEyesFromHL). Run from a timer table (timer
-    2's handler after F85) the asm prints its own code bytes as a message: the
-    message 'SpiderEyesFromHL' (kept)."""
+    2's handler after F85) the asm prints its own code bytes as a message; they
+    jump back into themselves and print forever (the Z80 hangs; no record gets
+    there): NotImplementedError."""
+    if message == 'SpiderEyesFromHL':
+        raise NotImplementedError('F85: timer 2 prints the code at $AB22 as a message, endlessly')
     yield from text.print_message(s, message)
     here, came = _player(s).places[0], s.vars.arrival_location
     if here == came:
@@ -918,9 +928,7 @@ def la814_8(s):
     """Generator: the Bard's script: an order for him (actor_has_order 1) is
     taken (parser.run_stored_order); when usable the action is refused here
     and his script command becomes it (a verb and two objects, the op $42)
-    (stage 3: LA814_8). The asm reads the verb from SavedCommandId, the command
-    record the order matched: s.vars.command here (equal unless the order's
-    test pass changed the command)."""
+    (stage 3: LA814_8)."""
     from . import parser
     v = s.vars
     if v.actor_has_order != 1:
@@ -930,8 +938,8 @@ def la814_8(s):
     if not done:
         return None
     v.action_allowed = 0
-    c = s.program[_data()[0]['bard_command']]
-    c.op, c.args = 0x42, [v.command, v.first_object, v.second_object]
+    c = s.program[bard_command_index()]
+    c.op, c.args = 0x42, [v.saved_command, v.first_object, v.second_object]
     return None
 
 

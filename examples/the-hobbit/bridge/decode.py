@@ -203,7 +203,8 @@ def decode(mem, border=0):
         sight_state=b('SightState'), first_object_place=b('FirstObjectPlace'),
         move_flag=b('MoveFlag'), blocked_exit=blocked, command=b('CommandId'),
         first_object=b('FirstObject'), second_object=b('SecondObject'), subject=b('Subject'),
-        subj_is_in=(mem[L.MsgSubjIsIn + 1] & 15) << 8 | mem[L.MsgSubjIsIn + 2])
+        subj_is_in=(mem[L.MsgSubjIsIn + 1] & 15) << 8 | mem[L.MsgSubjIsIn + 2],
+        it=[word(mem, L.PhraseBuffer + 2 * j) for j in range(3)], saved_command=b('SavedCommandId'))
     t = Terminal(story_column=b('StoryColumn'), story_cursor=w('StoryCursor') & 0x1F,
                  story_pixel=b('StoryCursorPixel'), list_indent=b('ListIndent'),
                  story_last_char=b('StoryLastChar'), input_column=b('InputColumn'),

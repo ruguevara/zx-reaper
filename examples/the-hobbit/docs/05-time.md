@@ -31,7 +31,7 @@ the characters act between the moves.
 ## The automatic WAIT ([WaitKey](../src/keys.asm#L802))
 
 The line editor counts keyboard scans; after 3000 scans without a key (about
-19 seconds, F36) it types `WAIT` and ENTER by itself. The count is refilled at
+23 seconds, F36) it types `WAIT` and ENTER by itself. The count is refilled at
 each new line, and each key gives 500 scans back (up to 3000), so a slow typist
 is not interrupted. The effect is that the world goes on without the player:
 Gandalf wanders off, the trolls' dawn comes, Gollum's riddle runs out.

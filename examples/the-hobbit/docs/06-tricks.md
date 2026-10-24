@@ -101,7 +101,7 @@ fed the original's (F63).
   turns ([PrintChar](../src/screen.asm#L48), [LispFlag](../src/world.asm#L43), timer 7).
 - The "@" key repeats the last line without retyping or reparsing it
   ([L6E7A](../src/keys.asm#L65), F37).
-- An idle player gets an automatic WAIT after about 19 s (F36).
+- An idle player gets an automatic WAIT after about 23 s (F36).
 - A verb without a command record still works: "You sing. Time passes..."
   (F38).
 

@@ -6,14 +6,12 @@ the parse: each takes the parse (parser._Parser) and returns its next step
 import functools
 
 from . import assets, parser as P, terminal, text, world
-from .state import Show, TapeLoad, TapeSave, WaitKey
+from .state import PrinterReady, TapeLoad, TapeSave, WaitKey
 
 # The ZX printer answers PRINT (bit 6 of port $FB clear); the records were made
 # with none (an open bus reads $FF: PRINT does nothing). True sends the story
 # to the transcript (Printed events).
-PRINTER_ATTACHED = False
 BORDER_GREEN, BORDER_WHITE = 4, 7
-BARD_ORDER_TIMER = 'LA814_8'    # the script command after the one running it is the Bard's order
 
 
 @functools.lru_cache(None)
@@ -57,17 +55,17 @@ def word_except(p):
 
 
 def l82e2(p):
-    """IT: the last first noun phrase (s.scratch['it']) as a noun phrase. It
+    """IT: the last first noun phrase (s.vars.it) as a noun phrase. It
     goes into block A while block B is free, else over block B (quirk: "put
     the map in it" loses its "in"). (stage 3: L82E2)"""
-    p.slots[2:5] = p.s.scratch.get('it', [0, 0, 0])
+    p.slots[2:5] = p.v.it
     p.store_block(P.BLOCK_A if p.e & P.PF_BLOCK_B_FREE else P.BLOCK_B)
     return p.parse_next_word
 
 
 def word_print(p):
     """PRINT: the story is copied to the printer, if one answers. (stage 3: WordPrint)"""
-    if PRINTER_ATTACHED:
+    if (yield PrinterReady()):
         p.v.printer_on = 1
     return resume_dispatch(p)
 
@@ -153,22 +151,11 @@ def _saved(s):
     return s.things, s.locations, s.timers, s.npcs, [getattr(s.vars, k) for k in SAVED_VARS]
 
 
-def _bard_order(s):
-    """The index of the Bard's order command in the script program (its first
-    three bytes are saved with the variables)."""
-    return next(i for i, c in enumerate(s.program) if c.routine == BARD_ORDER_TIMER) + 1
-
-
-def _wait_for_tape():
-    """No tape: the original waits for one forever."""
-    while True:
-        yield Show(1.0)
-
-
 def save_game(p):
     """SAVE: "Start tape then press any key", the state saved, "Rewind and
-    prepare tape for verification", then the verify: read back and compared,
-    "Tape error - hit any key to continue" when it differs. (stage 3: SaveGame,
+    prepare tape for verification", then the verify: read back and compared;
+    nothing read (BREAK, no file) or a difference: "Tape error - hit any key
+    to continue", a key, and the command ends. (stage 3: SaveGame,
     VerifyBlock, SaveGame_End)"""
     s, v = p.s, p.v
     v.raw_output = 1
@@ -178,9 +165,7 @@ def save_game(p):
     yield from text.print_message(s, 'MsgRewindPrepareTapeFor')
     yield WaitKey()
     result = yield TapeLoad()
-    if result is None:
-        yield from _wait_for_tape()
-    if _saved(result) != _saved(s):
+    if result is None or _saved(result) != _saved(s):
         v.raw_output = 1
         yield from text.print_message(s, 'MsgTapeErrorHitAnyKey2')
         yield WaitKey()
@@ -191,16 +176,21 @@ def load_game(p):
     """LOAD: the saved blocks replace the game's (things, locations, timers
     and characters, the saved variables) and the Bard's order its first three
     bytes (op, verb, first object); the rest (the scripts, the orders, the
-    screen) stays. (stage 3: LoadGame, LoadBlock)"""
+    screen) stays. Nothing read (BREAK, no file): "Tape error - hit any key to
+    restart program", a key, the game again. (stage 3: LoadGame, LoadBlock)"""
     s = p.s
     result = yield TapeLoad()
     if result is None:
-        yield from _wait_for_tape()
+        s.vars.raw_output = 1
+        yield from text.print_message(s, 'MsgTapeErrorHitAnyKey')
+        yield WaitKey()
+        return 'RestartGame'
     from .flow import SAVED_VARS
     s.things, s.locations, s.timers, s.npcs = result.things, result.locations, result.timers, result.npcs
     for k in SAVED_VARS:
         setattr(s.vars, k, getattr(result.vars, k))
-    i = _bard_order(s)
+    from .handlers import bard_command_index
+    i = bard_command_index()
     mine, saved = s.program[i], result.program[i]
     mine.op, mine.args[:2] = saved.op, saved.args[:2]
     return resume_dispatch(p)

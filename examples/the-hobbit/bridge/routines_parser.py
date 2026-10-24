@@ -122,7 +122,7 @@ def match_command(s, rec):
     s.scratch.update(scratch(before('MatchCommand')))
     cmd = yield from P.match_command(s, rec)
     m = s.scratch['scan']
-    return cmd, m.words, m.phrase1, m.phrase2, m.offsets, m.has1, m.has2, s.scratch['it']
+    return cmd, m.words, m.phrase1, m.phrase2, m.offsets, m.has1, m.has2, s.vars.it
 
 
 def match_command_out(regs):

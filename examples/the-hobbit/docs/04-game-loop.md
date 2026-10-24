@@ -64,8 +64,8 @@ straight to step 4 ([L6E7A](../src/keys.asm#L65), F37).
 with 3000 (`IDLE_SCANS_MAX`); each key pressed gives 500 back, up to 3000.
 When the count runs out the game erases what was typed, types `WAIT` itself
 and returns ENTER. So an idle player still loses turns: the characters keep
-acting. Measured from Bag End: the first automatic WAIT comes after 938 frames
-(about 19 seconds) without a key (verified, F36).
+acting. Measured from the start of a line: the automatic WAIT comes after 1171
+frames (about 23 seconds) without a key (verified, F36).
 
 ## A turn ([RunSentences](../src/parser.asm#L1035))
 
@@ -123,7 +123,7 @@ game is the speed of its code. The waits it has:
 | Wait | Where | Length |
 | --- | --- | --- |
 | key scan delay | [ReadKey](../src/devices.asm#L132) starts with [DelayShort](../src/devices.asm#L92) | sets the time per scan, and so the length of the idle WAIT |
-| idle WAIT | [WaitKey](../src/keys.asm#L802) | 3000 scans, about 19 s |
+| idle WAIT | [WaitKey](../src/keys.asm#L802) | 3000 scans, about 23 s |
 | scroll pause | [OutputStoryChar](../src/screen.asm#L349) | after each story line `SCROLL_DELAY` (`$8000`) key polls, about half a second; a held key stops the scrolling until it is released; the first 9 lines after a typed line (17 after a start) have no pause ([NoPauseLines](../src/world.asm#L88), F35) |
 | picture | [WaitKeyAfterPicture](../src/engine.asm#L380) | after a location picture is drawn, until any key is down; then the border turns white |
 | PAUSE | [WordPause](../src/system.asm#L439) | green border until a key is pressed and released |

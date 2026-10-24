@@ -4,25 +4,15 @@ routine.
 
 The message arguments: stage 3 pops printer.msg_args while it prints, so the
 list as it was when PrintMessage began is noted here (PrintMessage wrapped,
-transparently) and given to the stage 4 routine. Two stand-ins until the other
-slices have them: the decoded state carries Vars.subj_is_in (the word in the
-message MsgSubjIsIn) when state.py has no such field yet, and
-hobbit.engine.check_dark is stage 3's CheckDark on its memory when there is no
-hobbit.engine with it yet."""
+transparently) and given to the stage 4 routine."""
 import functools
-import importlib
-import sys
-import types
 
 import paths  # noqa: F401
 import labels as L
 import printer as port_printer
-from regs import r
 from routines import ANY, none
-from routines_terminal import keep_registers
 from zxpyxel import mem
 from hobbit import text as T
-from hobbit.state import Vars
 
 # ---- the message names and arguments ------------------------------------
 
@@ -75,41 +65,6 @@ def args(name):
 
 def word16(a):
     return mem[a] | mem[a + 1] << 8
-
-
-# ---- stand-ins for what other slices will provide ------------------------
-
-if 'subj_is_in' not in Vars.__dataclass_fields__:       # until the lead adds the field
-    import decode as _decode_module
-    _decode = _decode_module.decode
-
-    def _decode_with_slot(m, border=0):
-        s = _decode(m, border)
-        s.vars.subj_is_in = (m[L.MsgSubjIsIn + 1] & 0x0F) << 8 | m[L.MsgSubjIsIn + 2]
-        return s
-    _decode_module.decode = _decode_with_slot
-    for _m in list(sys.modules.values()):
-        if getattr(_m, 'decode', None) is _decode:
-            _m.decode = _decode_with_slot
-
-try:
-    _engine = importlib.import_module('hobbit.engine')
-except ImportError:
-    _engine = None
-if not hasattr(_engine, 'check_dark') and sys.argv[1:2] == ['routine']:
-    def _stage3_dark(s):
-        """CheckDark of stage 3 on its memory (unchanged by the routines that ask)."""
-        import engine as port_engine
-
-        def run():
-            port_engine.CheckDark()
-            return r.cf
-        return keep_registers(run)
-    _engine = types.ModuleType('hobbit.engine')
-    _engine.check_dark = _stage3_dark
-    sys.modules['hobbit.engine'] = _engine
-    import hobbit
-    hobbit.engine = _engine
 
 
 def echo():

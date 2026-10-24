@@ -13,12 +13,7 @@ s.question), newer records follow. The parse is a chain of word-class
 handlers (`_Parser`: each step returns the next one, or the result). The work
 area of the match (stage 3 RecWork to RecPtr3) is a `Scan` in
 s.scratch['scan'], kept between calls as the original keeps it: an ALL scan
-goes on from where it stopped, even after a character's order used it.
-
-Two values the original keeps between lines are not in the state yet:
-s.scratch['it'], the last first noun phrase (PhraseBuffer, what IT means),
-and s.scratch['saved_command'], the command the last match found
-(SavedCommandId, read by the Bard's order timer)."""
+goes on from where it stopped, even after a character's order used it."""
 import inspect
 from dataclasses import dataclass, field
 
@@ -642,7 +637,7 @@ def match_sentence(s, stack, k):
     if not isinstance(cmd, int) or not cmd:
         return cmd or False
     m = scan(s)
-    v.command = m.command = s.scratch['saved_command'] = cmd
+    v.command = m.command = v.saved_command = cmd
     unpack_flags(s)
     start_noun_scan1(s)
     v.action_perform = 0
@@ -702,7 +697,7 @@ def split_noun_phrases(s, rec, record, swapped):
     m.phrase1, m.phrase2 = (rec[o // 2:o // 2 + 3] for o in m.offsets)
     m.has1 |= any(m.phrase1)
     m.has2 |= any(m.phrase2)
-    s.scratch['it'] = list(m.phrase1)
+    s.vars.it = list(m.phrase1)
 
 
 def unpack_flags(s):

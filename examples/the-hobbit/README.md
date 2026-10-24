@@ -14,7 +14,13 @@ make             # must print IDENTICAL
 make expected    # frame hashes of the scripts from the original (not in git: 19 MB)
 make test        # replays tests/inputs/*.txt against them
 make shift-test  # code assembled at +$10 plays the same, frame by frame
+make port-test   # stage 3: the Python port against the Z80 runs
+make game-test   # stage 4: the clean game against stage 3, then free play
+python3 port/play.py; python3 game/play.py   # play either (Pyxel)
+make port-html; make game-html               # either as one web page
 ```
+
+The article on how the game works is in [`docs/`](docs/README.md).
 
 Tools: sjasmplus, Python 3 with SkoolKit 10.1 (`pip install -r ../../requirements.txt`), make.
 
@@ -30,6 +36,8 @@ Tools: sjasmplus, Python 3 with SkoolKit 10.1 (`pip install -r ../../requirement
 | `re/ids.md` | location, object and character ids, NPC records, timers |
 | `re/questions.md`, `re/findings.md` | what the work had to answer; the claims with evidence |
 | `re/skool/` | the annotated SkoolKit disassembly before export (history) |
+| `port/` | stage 3: the game in Python with the original's memory layout ([porting notes](docs/08-porting.md)) |
+| `game/`, `bridge/` | stage 4: the game as clean Python, its data in `game/assets/` (made by `bridge/assets.py`, not in git); the bridge checks it against stage 3 |
 | `tests/inputs/` | input scripts: verbs (the parser), die, save, load, journey (230,000 frames of play), endgame (the game played to the end) |
 
 | Module | Range | Contents |
@@ -69,8 +77,6 @@ Tools: sjasmplus, Python 3 with SkoolKit 10.1 (`pip install -r ../../requirement
 
 ## Not explained
 
-- Why the restart zeroes the first two bytes of picture 5's data (they are
-  zero already).
 - Some record flag bits (object +7 bits 2 and 4) and state bits.
 - Code no script reached (85% of the code ran): it is listed by
   `tools/zxq.py unexec re/maps/*.map`.

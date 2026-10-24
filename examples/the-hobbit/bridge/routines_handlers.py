@@ -5,13 +5,8 @@ The table handlers take the state only; three take what the asm passes in a
 register: RespawnKilledGoblin and LA814 the dispatcher's B, SpiderEyesFromHL
 the message at HL (its own address when a timer runs it: the message
 'SpiderEyesFromHL'). PrintSpeech's message arguments are the stage 3 stack as
-it was when PrintSpeech began (noted here by a transparent wrapper).
-
-Stand-ins until the ENGINE slice has them (routine checks only): engine.
-abort_unless_perform and engine.print_message_dot, as stage 3 does them."""
+it was when PrintSpeech began (noted here by a transparent wrapper)."""
 import functools
-import importlib
-import sys
 
 import paths  # noqa: F401
 import labels as L
@@ -21,7 +16,7 @@ import printer as port_printer
 import routines_text as RT
 from routines import none, nothing
 from routines_world import rec
-from hobbit import handlers as H, registry, terminal, text
+from hobbit import handlers as H, registry
 
 # ---- PrintSpeech's arguments ---------------------------------------------
 
@@ -50,26 +45,6 @@ def speech(regs):
         if code == 0 and out[i]:
             out[i] = [RT.word16(out[i] + 2 * j) for j in range(3)]
     return name, out
-
-
-# ---- stand-ins for the ENGINE slice ----------------------------------------
-
-def _abort_unless_perform(s):
-    return bool(s.vars.action_perform & s.vars.action_allowed)
-
-
-def _print_message_dot(s, name):
-    yield from text.print_message(s, name)
-    yield from terminal.put_char(s, ord('.'))
-    yield from terminal.new_line(s)
-
-
-if sys.argv[1:2] == ['routine']:
-    _engine = sys.modules.get('hobbit.engine') or importlib.import_module('hobbit.engine')
-    for _name, _f in (('abort_unless_perform', _abort_unless_perform),
-                      ('print_message_dot', _print_message_dot)):
-        if not hasattr(_engine, _name):
-            setattr(_engine, _name, _f)
 
 
 # ---- the routines ------------------------------------------------------------

@@ -5,8 +5,9 @@ holds its pauses for the original's time.
   scanned by half-row with its masks, and a key that was up in the previous
   scan is a new key, coded through its key tables (the shifted one while CAPS
   or SYMBOL SHIFT is down). The idle time-out: the original allows 3000 scans
-  of no key (each key gives 500 back, up to 3000), a scan about 26,600
-  T-states; then ReadKey is answered None.
+  of no key from the start of a line (ReadLine, which only the main loop
+  calls, right after its Step), each key giving 500 back up to 3000; then
+  ReadKey is answered None.
 - ScrollPause: about 0.63 s ($8000 polls), cut short by a key, held while a
   key is down. WaitKey: until a key is down.
 - Printed lines go to the transcript file, SAVE and LOAD to the save file.
@@ -18,12 +19,13 @@ import random
 
 from . import assets
 from .flow import Game
-from .state import (Mixed, Printed, ReadKey, ReadR, ScrollPause, Show, Step, TapeLoad, TapeSave,
-                    WaitKey)
+from .state import (Mixed, Printed, PrinterReady, ReadKey, ReadR, ScrollPause, Show, Step, TapeLoad,
+                    TapeSave, TitleKey, WaitKey)
 
 FRAME_T = 69888
-SCAN_T = 26600              # one scan of WaitKey: DelayShort's 1000 passes and the scanner
-IDLE_SCANS, SCANS_PER_KEY = 3000, 500
+SCAN_T = 27280              # one scan of WaitKey (DelayShort's 1000 passes and ReadKey), measured:
+                            # from ReadLine's reset to the WAIT, 3000 scans take 1171 frames
+IDLE_T, KEY_T = 3000 * SCAN_T, 500 * SCAN_T
 PAUSE_FRAMES = 0x8000 * 67 // FRAME_T
 ROWS = ['CS Z X C V', 'A S D F G', 'Q W E R T', '1 2 3 4 5',
         '0 9 8 7 6', 'P O I U Y', 'ENTER L K J H', 'SPACE SS M N B']
@@ -40,7 +42,7 @@ class Pacer:
         self.gen = self.game.run()
         self.reply, self.waiting = None, None
         self.previous = [0x1F] * 8          # the last scan, as the original keeps it
-        self.idle = IDLE_SCANS
+        self.idle = IDLE_T                  # T-states of scans left before the idle WAIT
         self.frame = 0
 
     def scan(self, held):
@@ -66,10 +68,9 @@ class Pacer:
     def update(self, held):
         """One host frame with the ZX keys `held`; returns b'' (the game is silent)."""
         self.frame += 1
-        scans = FRAME_T // SCAN_T
         while True:
             if self.waiting is not None:
-                if not self.wait(self.waiting, held, scans):
+                if not self.wait(self.waiting, held):
                     break
                 self.waiting = None
             try:
@@ -83,10 +84,14 @@ class Pacer:
                     e.frames = PAUSE_FRAMES
                 elif isinstance(e, Show):
                     e.frames = round(e.seconds * 50)
+            elif isinstance(e, TitleKey):
+                self.reply = 0 if 'N' in held else 8    # N held at the title: no pictures
             elif isinstance(e, ReadR):
                 self.reply = self.frame & 0x7F
             elif isinstance(e, Mixed):
                 self.reply = self.random.randrange(256)
+            elif isinstance(e, PrinterReady):
+                self.reply = True               # the transcript file is the printer
             elif isinstance(e, Printed):
                 with open(self.transcript, 'a') as f:
                     f.write(e.text + '\n')
@@ -96,22 +101,21 @@ class Pacer:
             elif isinstance(e, TapeLoad):
                 self.reply = assets.state(json.load(open(self.save))) if os.path.exists(self.save) else None
             elif isinstance(e, Step):
-                pass
+                self.idle = IDLE_T              # ReadLine comes next: the idle count starts again
         self.display.data[:] = self.game.state.screen.data
         self.display.border = self.game.state.screen.border
         return b''
 
-    def wait(self, e, held, scans):
+    def wait(self, e, held):
         """True when the wait `e` is over this frame (its answer in self.reply)."""
         if isinstance(e, ReadKey):
             code = self.scan(held)
             if code:
-                self.idle = min(self.idle + SCANS_PER_KEY, IDLE_SCANS)
+                self.idle = min(self.idle + KEY_T, IDLE_T)
                 self.reply = code
                 return True
-            self.idle -= scans
+            self.idle -= FRAME_T
             if self.idle <= 0:
-                self.idle = IDLE_SCANS
                 self.reply = None           # the idle time-out
                 return True
             return False

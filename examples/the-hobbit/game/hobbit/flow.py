@@ -26,6 +26,9 @@ class Game:
     def __init__(self, state=None):
         self.state = state or assets.state()
         self.tables = assets.load_json('tables.json')
+        # the typed line: 128 characters and a fixed CR after them, kept from line
+        # to line as the original's buffer is (a full line reads on to that CR)
+        self.line = bytearray(INPUT_LINE_SIZE) + bytes([CHAR_CR])
 
     def run(self):
         """The whole game: the backup of the state, then restart after restart."""
@@ -70,8 +73,9 @@ class Game:
         yield from engine.init_new_game(s)          # AutoLook
         for ch in self.tables['start_command']:     # "> LOOK" in the input window
             terminal.print_input_window_char(s, ch)
-        line = bytearray(self.tables['look_command']).ljust(INPUT_LINE_SIZE + 1, b'\0')
-        target = yield from self.build_word_list(line)
+        look = self.tables['look_command']
+        self.line[:len(look)] = bytes(look)
+        target = yield from self.build_word_list(self.line)
         if target:
             return target
         return (yield from self.main_loop())
@@ -140,6 +144,8 @@ class Game:
             ok = yield from parser.parse_line(s)
             if not ok:
                 return None                                 # refused: drop the line
+            if isinstance(ok, str):
+                return ok                                   # QUIT: the flow target
             target = yield from parser.run_sentences(s)
             if target:
                 return target
@@ -173,7 +179,7 @@ class Game:
         s.vars.raw_output = s.vars.action_perform = 1
         yield from terminal.put_char(s, CHAR_PROMPT)
         yield from terminal.put_char(s, CHAR_SPACE)
-        line, pos, first = bytearray(INPUT_LINE_SIZE + 1), 0, True
+        line, pos, first = self.line, 0, True
         while True:
             key, pos = yield from words.wait_key(s, line, pos)
             if pos == 0 and key == CHAR_AT:                 # "@" on an empty line

@@ -1027,7 +1027,7 @@ async def LA814_5():
     r.a = mem[Obj29BoatLocation]
     r.cp(0x42)
     r.a = 0x42
-    if not r.zf:
+    if r.zf:
         r.a = 0x43
     mem[Obj29BoatLocation] = r.a
     r.b = r.a
