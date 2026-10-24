@@ -20,13 +20,16 @@ as it goes:
   plots a row of 57 pixels and only then steps up, and the fills next to it
   are bounded by that row.
 - **Fills.** A fill command is a colour and a seed point; its shape is
-  wherever the scan-line fill spreads. The script runs the fill, takes the
-  pixels it lit and grows them by half a pixel into the lit pixels around
-  them and past the edge of the area, so that the edge of the region runs
-  along the centres of the line pixels that bound it, under the lines'
-  strokes. It traces the boundary of the region into closed loops (each
-  pixel a unit square; holes come out the other way round, so the nonzero
-  fill rule keeps them holes) and simplifies them as the lines are.
+  wherever the scan-line fill spreads. The script runs the fill and takes
+  the pixels it lit, the pixels of the outlines drawn for it (which show in
+  its colour, below) and half a pixel into the other lit pixels around them
+  and past the edge of the area, so that the region reaches under the lines
+  that stay black. It traces the boundary of the region into closed loops
+  (each pixel a unit square; holes come out the other way round, so the
+  nonzero fill rule keeps them holes) and simplifies them one-sidedly: an
+  edge may move up to 1.5 pixels out of the region, which turns a staircase
+  into its outer edge, but only half a pixel into it, so no paper shows
+  between a fill and its lines.
 - **Paper.** The paper of every attribute cell at the end, one rectangle per
   run of cells of one paper in a row.
 
@@ -41,15 +44,18 @@ The Spectrum shows each pixel in the ink of the last pixel plotted in its
   ([PlotPixel](../src/drawing.asm#L592)'s rule: the pot of $05 at night is a
   black fill on black paper, white);
 - a line: black, white on black paper (the same rule);
-- but a line next to the pixels of a fill drawn after it takes that fill's
-  colour;
+- but a line that bounds a fill drawn after it takes that fill's colour
+  where it touches the fill, and in the cells the fill inked where another
+  of the fill's outlines is within two pixels: out to the tips where two
+  outlines meet past the fill, as at the horns of the moons of $1A and
+  $26, but not along a wall that goes on below a roof ($23);
 - and a fill seeded on a pixel already lit, which lights nothing new, only
   plots a few pixels and so gives its cells its ink: everything lit in
   those cells is drawn again in its colour. Seven fills do this: five make
   the black spire in front of the mountain ($27) green, cell by cell, two
   are by the pot of $05.
 
-The last rule came from comparing the vectors with the renders. A picture
+The third rule came from comparing the vectors with the renders. A picture
 draws the outline of a region first and fills it after; the fill gives the
 cells along the outline its ink, so the outline shows in the fill's colour
 and the edge is only the edge of the colour: the floor of Bag End ($01)
@@ -57,7 +63,8 @@ meets the wall without a black line, the red ground of the trolls' clearing
 ($05) has no box around the pot. The lines drawn after the fills are the
 black ones meant to be seen, like the chest on the floor of $01. With every
 line black, the vectors showed the hidden outlines (observed: the first
-version of the script).
+version of the script); with only the pixels next to the fill coloured,
+the horns of the moons kept black tips (observed: the second).
 
 Not kept: the clash itself. Where a black line crosses a cell of a fill it
 does not bound, the Spectrum turns the fill's pixels in that cell black, or
@@ -68,7 +75,7 @@ left out, as in the renders, and no picture sets BRIGHT.
 The simplification costs detail below a pixel: the round tops of the arches
 in $29 have fewer corners, and parts of a fill one or two pixels wide come
 out as slivers and specks (the left side of the mountain in $27). The 23 SVGs
-(with $05 after dawn) take 188K, against 10008 bytes of commands for the 22
+(with $05 after dawn) take 196K, against 10008 bytes of commands for the 22
 pictures.
 
 ## The pictures

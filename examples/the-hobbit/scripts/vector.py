@@ -5,11 +5,12 @@ The commands are drawn by game/hobbit/pictures.py, as in the game, and each
 one is also turned into a shape:
 - the lines that go on from each other are one path through the centres
   of their pixels, simplified (Douglas-Peucker);
-- a fill has no shape in the data, only a seed: the pixels it lit, grown by
-  half a pixel into the lit pixels around them, so that the edge runs along
-  the centres of the pixels that bound it, where the lines are drawn, are
-  traced into closed outlines and simplified the same way; a fill seeded on
-  a lit pixel only re-inks its cells, and is the lit pixels of those cells;
+- a fill has no shape in the data, only a seed: the pixels it lit, with the
+  pixels of the outlines drawn for it (which show in its colour) and half a
+  pixel into the other lit pixels around them, are traced into closed
+  outlines and simplified so that they may grow but hardly shrink: no
+  paper shows between a fill and its lines; a fill seeded on a lit pixel
+  only re-inks its cells, and is the lit pixels of those cells;
 - the paper is the cells' rectangles, as they are at the end.
 The SVG has the paper, then the fills, then the lines, each in its own
 colour: no attribute clash. Needs game/assets/pictures/ (make
@@ -28,7 +29,9 @@ from zxpyxel.screen import rgb  # noqa: E402
 
 W, H = 256, 128
 COLOURS = ['#%06X' % c for c in rgb()[:8]]
-EPS = 1.0       # px a line or an outline may move when simplified: a 1-pixel staircase becomes straight
+EPS = 1.0       # px a line may move when simplified: a 1-pixel staircase becomes straight
+GROW = 1.5      # px a fill's outline may move out of its region: a staircase becomes its outer edge
+CUT = 0.5       # px it may move into its region: it stays within the outline pixels
 NEAR = [(dx, dy) for dx in (-1, 0, 1) for dy in (-1, 0, 1)]
 
 
@@ -91,8 +94,12 @@ def outlines(pixels):
     return loops
 
 
-def simplify(pts, eps):
-    """Douglas-Peucker on an open run of points, both ends kept."""
+def simplify(pts, eps, cut=None):
+    """Douglas-Peucker on an open run of points, both ends kept. A point may
+    be dropped if the new edge passes within `eps` of it, or within `cut` when
+    the point is on its left (outside an outline: the region is on the right,
+    see outlines)."""
+    cut = eps if cut is None else cut
     keep = {0, len(pts) - 1}
     todo = [(0, len(pts) - 1)]
     while todo:
@@ -102,22 +109,25 @@ def simplify(pts, eps):
         best, k = 0, 0
         for m in range(i + 1, j):
             px, py = pts[m]
-            dist = (abs((bx - ax) * (py - ay) - (by - ay) * (px - ax)) / n if n
-                    else math.hypot(px - ax, py - ay))      # a closed run: from its ends
-            if dist > best:
-                best, k = dist, m
-        if best > eps:
+            if n:
+                side = ((bx - ax) * (py - ay) - (by - ay) * (px - ax)) / n
+                over = side / eps if side > 0 else -side / cut
+            else:                                   # a closed run: from its ends
+                over = math.hypot(px - ax, py - ay) / min(eps, cut)
+            if over > best:
+                best, k = over, m
+        if best > 1:
             keep.add(k)
             todo += [(i, k), (k, j)]
     return [pts[m] for m in sorted(keep)]
 
 
-def simplify_loop(loop, eps):
+def simplify_loop(loop, eps, cut):
     """A closed loop cut at its first point and the point farthest from it;
     one that would collapse to a line is kept as it is."""
     x0, y0 = loop[0]
     far = max(range(len(loop)), key=lambda m: (loop[m][0] - x0) ** 2 + (loop[m][1] - y0) ** 2)
-    out = simplify(loop[:far + 1], eps)[:-1] + simplify(loop[far:] + loop[:1], eps)[:-1]
+    out = simplify(loop[:far + 1], eps, cut)[:-1] + simplify(loop[far:] + loop[:1], eps, cut)[:-1]
     return out if len(out) >= 3 else loop
 
 
@@ -171,13 +181,30 @@ def svg(commands, border, attr):
             P.flood_fill(d, c[1], c[2], c[3])
             new = set(d.plots) - lit
             if new:
-                fills.append((fill, grown(new, lit)))
                 # a line that bounds a later fill was drawn for it: the fill's ink
-                # colours its cells, so on the Spectrum the line shows in the fill's colour
-                for px, py in new:
-                    for n in ((px + 1, py), (px - 1, py), (px, py + 1), (px, py - 1)):
-                        if n in colour:
-                            colour[n] = fill
+                # colours its cells, so on the Spectrum the line shows in the fill's
+                # colour. Here: where it touches the fill (a corner is enough: the
+                # first pixel of each run of a sloping line), and in the fill's
+                # cells where another of its outlines is within two pixels, out to
+                # the tips where two outlines meet past the fill (the moons of $1A
+                # and $26), but not a wall going on below a roof ($23). Those
+                # pixels are part of the fill's shape, which then does not depend
+                # on where the simplified strokes run
+                bounds = {(px + dx, py + dy) for px, py in new
+                          for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1))}
+                touch = {(px + dx, py + dy) for px, py in new for dx, dy in NEAR}
+                cells = {(px >> 3, py >> 3) for px, py in d.plots}
+                outline = [ln for ln in itertools.chain(*chains) if not bounds.isdisjoint(ln)]
+                owners = {}
+                for k, ln in enumerate(outline):
+                    for p in ln:
+                        owners.setdefault(p, set()).add(k)
+                hidden = {p for k, ln in enumerate(outline) for p in ln if p in touch or (
+                    (p[0] >> 3, p[1] >> 3) in cells and any(
+                        owners.get((p[0] + dx, p[1] + dy), {k}) - {k}
+                        for dx in range(-2, 3) for dy in range(-2, 3)))}
+                colour.update((p, fill) for p in hidden)
+                fills.append((fill, grown(new | hidden, lit)))
             else:
                 # seeded on a lit pixel: it only gives the cells it plotted in its
                 # ink, and everything lit in them shows in it (the spire of $27)
@@ -202,7 +229,7 @@ def svg(commands, border, attr):
             col = end
     out.append('</g>')
     for fill, halves in fills:
-        loops = [simplify_loop(lp, 2 * EPS) for lp in outlines(halves)]
+        loops = [simplify_loop(lp, 2 * GROW, 2 * CUT) for lp in outlines(halves)]
         out.append('<path fill="%s" d="%s"/>' % (COLOURS[fill], ' '.join(
             'M' + ' '.join(num(hx / 2) + ' ' + num(hy / 2) for hx, hy in lp) + 'Z' for lp in loops)))
     out.append('<g fill="none" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">')
@@ -216,7 +243,8 @@ def svg(commands, border, attr):
 def check():
     """A ring (a square with a hole) traces to two loops, the hole the other
     way round; a 1-pixel staircase simplifies to its two ends; a closed run
-    keeps its corners."""
+    keeps its corners; along the top of an outline (going right, the region
+    below) a dent is dropped and a bump kept."""
     ring = {(x, y) for x in range(4) for y in range(4)} - {(1, 1), (2, 1), (1, 2), (2, 2)}
     loops = sorted(outlines(ring), key=len)
     area = [sum(ax * by - bx * ay for (ax, ay), (bx, by) in zip(lp, lp[1:] + lp[:1])) / 2 for lp in loops]
@@ -225,6 +253,8 @@ def check():
     assert simplify(stairs, EPS) == [stairs[0], stairs[-1]]
     square = [(0, 0), (4, 0), (4, 4), (0, 4), (0, 0)]
     assert simplify(square, EPS) == square
+    assert simplify([(0, 0), (2, 1), (4, 0)], GROW, CUT) == [(0, 0), (4, 0)]
+    assert simplify([(0, 0), (2, -1), (4, 0)], GROW, CUT) == [(0, 0), (2, -1), (4, 0)]
 
 
 def main(outdir='docs/img'):
