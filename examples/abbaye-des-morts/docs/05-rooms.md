@@ -138,7 +138,7 @@ consecutive tiles ($8B, $91, $93), single tiles at lists of positions ($8C,
 $92), runs along a row ($8D), vertical lines ($9B) and one compressed bit map,
 the foliage of room 9 ($94, F3). Small shared subscripts draw the night sky
 ([ScriptSky](../src/roomscripts.asm#L1518): the moon and seven stars of rooms 1-4 and 6) and the block
-patterns. Room 25 is a single call of [room 24's script](../src/roomscripts.asm#L1428)
+patterns. Room 25 is a single call of room 24's script ([RoomScript24](../src/roomscripts.asm#L1428))
 ([RoomScript25](../src/roomscripts.asm#L1463)); room 0 ([RoomScript00](../src/roomscripts.asm#L97)) prints the intro text straight
 to the screen and clears the redraw marks so that nothing is drawn over it.
 

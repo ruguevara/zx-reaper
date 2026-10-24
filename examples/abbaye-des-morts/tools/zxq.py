@@ -27,6 +27,8 @@ The agent should read the disassembly through this tool, never whole.
                                     block=N draws each N-byte block as a separate
                                     tile (sprite banks); tiles are laid out in a
                                     square-ish grid with 1-byte gaps
+  zxq.py links [--check] DOC.md...  point [Label](../src/F.asm#Ln) links at the
+                                    label's current line (after source edits)
   zxq.py check [FILE...]            `make verify` in a private copy (safe for
                                     parallel agents: uses its own build dir);
                                     with FILEs, only those skool files from the
@@ -692,6 +694,48 @@ def cmd_dollars(paths, check):
         sys.exit(1)
 
 
+def cmd_links(paths, check):
+    """Point every [Label](../src/F.asm#Ln) link of the markdown files at the
+    line where Label is defined now (after an edit of the sources moved it);
+    report links whose text is not a label. With check, change nothing and
+    exit 1 if a link is off."""
+    import glob
+    labels = {}
+    for f in sorted(glob.glob('src/*.asm')):
+        for i, line in enumerate(open(f), 1):
+            m = (re.match(r'([A-Za-z_]\w*)(?::|\s+EQU\b)', line)
+                 or re.match(r'\s+MACRO\s+([A-Za-z_]\w*)', line))
+            if m:
+                labels.setdefault(m.group(1), {}).setdefault(os.path.basename(f), i)
+    bad = 0
+    for path in paths:
+        s = open(path).read()
+        moved = []
+
+        def fix(m):
+            nonlocal bad
+            text, f, ln = m.group(1), m.group(2), int(m.group(3))
+            name = text.strip('`')
+            if name not in labels:
+                print('%s: not a label: %s' % (path, m.group(0)))
+                bad += 1
+                return m.group(0)
+            where = labels[name]
+            nf = f if f in where else sorted(where)[0]   # the file the link names, if it has the label
+            if (nf, where[nf]) != (f, ln):
+                moved.append(name)
+            return '[%s](../src/%s#L%d)' % (text, nf, where[nf])
+        new = re.sub(r'\[([^\[\]\n]+)\]\(\.\./src/([\w.]+\.asm)#L(\d+)\)', fix, s)
+        if moved:
+            print('%s: %d links %s' % (path, len(moved), 'off' if check else 'moved'))
+            if check:
+                bad += 1
+            else:
+                open(path, 'w').write(new)
+    if check and bad:
+        sys.exit(1)
+
+
 def table_cell(text):
     return math_safe(' '.join(str(text).replace('|', '/').split()))
 
@@ -1043,6 +1087,8 @@ def main():
         cmd_gfx(parse_addr(a[1]), parse_addr(a[2]), int(a[3]), a[4], 'cells' in a[5:],
                 next((int(x) for x in a[5:] if x.isdigit()), 4),
                 next((parse_addr(x[6:]) for x in a[5:] if x.startswith('block=')), 0))
+    elif cmd == 'links' and len(a) > 1:
+        cmd_links([x for x in a[1:] if x != '--check'], '--check' in a)
     elif cmd == 'check':
         sys.exit(cmd_check(a[1:]))
     elif cmd == 'equs' and '--uses' in a:
