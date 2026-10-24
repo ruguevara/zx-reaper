@@ -421,6 +421,10 @@ def cmd_check(files=()):
                 sys.exit('git archive failed: %s' % git.stderr)
             for f in files:
                 shutil.copy(f, os.path.join(tmp, SKOOL_DIR, os.path.basename(f)))
+        dup = duplicate_labels(os.path.join(tmp, SKOOL_DIR))
+        if dup:
+            print('label set more than once: ' + '; '.join(dup))
+            return 1
         # first the assembled blocks against the image: fast, and names the
         # entries that differ (a tape built from them may take long, e.g. a
         # packer, and only says which block differs)
@@ -442,6 +446,18 @@ def cmd_check(files=()):
         return r.returncode
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
+
+
+def duplicate_labels(skool_dir):
+    """Labels that two @label lines set (the assembler would say only
+    "label redefined", with a line of the joined source)."""
+    seen = {}
+    for name in sorted(os.listdir(skool_dir)):
+        if name.endswith('.skool'):
+            for line in open(os.path.join(skool_dir, name)):
+                if line.startswith('@label='):
+                    seen.setdefault(line.strip()[7:], []).append(name[:-6])
+    return ['%s in %s' % (k, ', '.join(v)) for k, v in sorted(seen.items()) if len(v) > 1]
 
 
 def image_diffs(root):
