@@ -34,9 +34,9 @@ b$8EDF DEFB $02      ; room 2: bell, row 1 column 5, flag $851B
  $8EF0 DEFW $851D
 @isub=DEFB $09,$04,$07,low ActionBellOrLever,high ActionBellOrLever
  $8EF2 DEFB $09,$04,$07,$48,$A7
- $8EF7 DEFB $11      ; room 17: wheel lever, row 2 column 15, flag $851E
+ $8EF7 DEFB $11      ; room 17: wheel of faith, row 2 column 15, flag $851E
  $8EF8 DEFW $851E
-@isub=DEFB $0A,$02,$0F,low ActionLever,high ActionLever
+@isub=DEFB $0A,$02,$0F,low ActionWheel,high ActionWheel
  $8EFA DEFB $0A,$02,$0F,$A1,$A6
  $8EFF DEFB $14      ; room 20: lever, row 6 column 24, flag $851F
  $8F00 DEFW $851F
@@ -112,53 +112,53 @@ b$8EDF DEFB $02      ; room 2: bell, row 1 column 5, flag $851B
  $8F98 DEFW $8534
 @isub=DEFB $06,$0E,$1C,low ActionFinalScroll,high ActionFinalScroll
  $8F9A DEFB $06,$0E,$1C,$68,$A6
- $8F9F DEFB $03      ; room 3: cross (wheel off), row 18 column 28, flag $8535
+ $8F9F DEFB $03      ; room 3: cross (wheel at rest), row 18 column 28, flag $8535
  $8FA0 DEFW $8535
-@isub=DEFB $01,$12,$1C,low ActionCrossLeverOff,high ActionCrossLeverOff
+@isub=DEFB $01,$12,$1C,low ActionCrossWheelRest,high ActionCrossWheelRest
  $8FA2 DEFB $01,$12,$1C,$82,$A7
- $8FA7 DEFB $09      ; room 9: cross (wheel on), row 4 column 6, flag $8536
+ $8FA7 DEFB $09      ; room 9: cross (wheel turned), row 4 column 6, flag $8536
  $8FA8 DEFW $8536
-@isub=DEFB $02,$04,$06,low ActionCrossLeverOn,high ActionCrossLeverOn
+@isub=DEFB $02,$04,$06,low ActionCrossWheelTurned,high ActionCrossWheelTurned
  $8FAA DEFB $02,$04,$06,$77,$A7
- $8FAF DEFB $0A      ; room 10: cross (wheel off), row 4 column 26, flag $8537
+ $8FAF DEFB $0A      ; room 10: cross (wheel at rest), row 4 column 26, flag $8537
  $8FB0 DEFW $8537
-@isub=DEFB $01,$04,$1A,low ActionCrossLeverOff,high ActionCrossLeverOff
+@isub=DEFB $01,$04,$1A,low ActionCrossWheelRest,high ActionCrossWheelRest
  $8FB2 DEFB $01,$04,$1A,$82,$A7
- $8FB7 DEFB $0D      ; room 13: cross (wheel off), row 18 column 18, flag $8538
+ $8FB7 DEFB $0D      ; room 13: cross (wheel at rest), row 18 column 18, flag $8538
  $8FB8 DEFW $8538
-@isub=DEFB $01,$12,$12,low ActionCrossLeverOff,high ActionCrossLeverOff
+@isub=DEFB $01,$12,$12,low ActionCrossWheelRest,high ActionCrossWheelRest
  $8FBA DEFB $01,$12,$12,$82,$A7
- $8FBF DEFB $0E      ; room 14: cross (wheel off), row 4 column 9, flag $8539
+ $8FBF DEFB $0E      ; room 14: cross (wheel at rest), row 4 column 9, flag $8539
  $8FC0 DEFW $8539
-@isub=DEFB $01,$04,$09,low ActionCrossLeverOff,high ActionCrossLeverOff
+@isub=DEFB $01,$04,$09,low ActionCrossWheelRest,high ActionCrossWheelRest
  $8FC2 DEFB $01,$04,$09,$82,$A7
- $8FC7 DEFB $0F      ; room 15: cross (wheel on), row 8 column 28, flag $853A
+ $8FC7 DEFB $0F      ; room 15: cross (wheel turned), row 8 column 28, flag $853A
  $8FC8 DEFW $853A
-@isub=DEFB $02,$08,$1C,low ActionCrossLeverOn,high ActionCrossLeverOn
+@isub=DEFB $02,$08,$1C,low ActionCrossWheelTurned,high ActionCrossWheelTurned
  $8FCA DEFB $02,$08,$1C,$77,$A7
- $8FCF DEFB $10      ; room 16: cross (wheel off), row 6 column 2, flag $853B
+ $8FCF DEFB $10      ; room 16: cross (wheel at rest), row 6 column 2, flag $853B
  $8FD0 DEFW $853B
-@isub=DEFB $01,$06,$02,low ActionCrossLeverOff,high ActionCrossLeverOff
+@isub=DEFB $01,$06,$02,low ActionCrossWheelRest,high ActionCrossWheelRest
  $8FD2 DEFB $01,$06,$02,$82,$A7
- $8FD7 DEFB $11      ; room 17: cross (wheel off), row 18 column 28, flag $853C
+ $8FD7 DEFB $11      ; room 17: cross (wheel at rest), row 18 column 28, flag $853C
  $8FD8 DEFW $853C
-@isub=DEFB $01,$12,$1C,low ActionCrossLeverOff,high ActionCrossLeverOff
+@isub=DEFB $01,$12,$1C,low ActionCrossWheelRest,high ActionCrossWheelRest
  $8FDA DEFB $01,$12,$1C,$82,$A7
- $8FDF DEFB $11      ; room 17: cross (wheel on), row 10 column 3, flag $853D
+ $8FDF DEFB $11      ; room 17: cross (wheel turned), row 10 column 3, flag $853D
  $8FE0 DEFW $853D
-@isub=DEFB $02,$0A,$03,low ActionCrossLeverOn,high ActionCrossLeverOn
+@isub=DEFB $02,$0A,$03,low ActionCrossWheelTurned,high ActionCrossWheelTurned
  $8FE2 DEFB $02,$0A,$03,$77,$A7
- $8FE7 DEFB $12      ; room 18: cross (wheel off), row 5 column 3, flag $853E
+ $8FE7 DEFB $12      ; room 18: cross (wheel at rest), row 5 column 3, flag $853E
  $8FE8 DEFW $853E
-@isub=DEFB $01,$05,$03,low ActionCrossLeverOff,high ActionCrossLeverOff
+@isub=DEFB $01,$05,$03,low ActionCrossWheelRest,high ActionCrossWheelRest
  $8FEA DEFB $01,$05,$03,$82,$A7
- $8FEF DEFB $13      ; room 19: cross (wheel off), row 2 column 3, flag $853F
+ $8FEF DEFB $13      ; room 19: cross (wheel at rest), row 2 column 3, flag $853F
  $8FF0 DEFW $853F
-@isub=DEFB $01,$02,$03,low ActionCrossLeverOff,high ActionCrossLeverOff
+@isub=DEFB $01,$02,$03,low ActionCrossWheelRest,high ActionCrossWheelRest
  $8FF2 DEFB $01,$02,$03,$82,$A7
- $8FF7 DEFB $16      ; room 22: cross (wheel on), row 18 column 27, flag $8540
+ $8FF7 DEFB $16      ; room 22: cross (wheel turned), row 18 column 27, flag $8540
  $8FF8 DEFW $8540
-@isub=DEFB $02,$12,$1B,low ActionCrossLeverOn,high ActionCrossLeverOn
+@isub=DEFB $02,$12,$1B,low ActionCrossWheelTurned,high ActionCrossWheelTurned
  $8FFA DEFB $02,$12,$1B,$77,$A7
  $8FFF DEFB $07      ; room 7: church door trigger, row 15 column 2, flag $8543
  $9000 DEFW $8543

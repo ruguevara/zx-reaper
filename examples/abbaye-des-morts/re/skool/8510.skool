@@ -1,8 +1,8 @@
-; Timer of the animated liquid tiles
+; Timer of the bubbling blood tiles
 ;
 ; Counts down from 2 once per frame in #R$AE20; when it reaches zero it is reloaded with 2 and the cells of the bottom
 ; tile row (row 21 of the tile map) that hold tile $3B or $3C are swapped ($3B to $3C and back) and marked for redraw:
-; the liquid at the foot of the room flickers every other frame. #R$AE20 is a NOP only in the rooms whose script
+; the blood at the foot of the room bubbles every other frame. #R$AE20 is a NOP only in the rooms whose script
 ; contains op $9E (rooms 21, 22 and 23); everywhere else it starts with a RET.
-@label=LiquidAnimTimer
+@label=BloodAnimTimer
 g$8510 DEFB $02

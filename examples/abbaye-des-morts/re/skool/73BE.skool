@@ -2,7 +2,8 @@
 ;
 ; Has no room name, so the name panel is not drawn. Besides being the room of the grid it is the setting of the second
 ; part of the ending (#R$887B): the script clears the two bottom character rows with op $81 and, with op $90, forces a
-; full redraw.
+; full redraw. Quirk (F67): in play nothing redraws the status bar that op $81 has erased, so the hearts and crosses
+; stay blank, also in the next rooms, until a life or a cross is gained or lost.
 ; .
 ; Room 4: column 4, row 0 of the 5x5 map (left is room 3, right 5, up 24, down 9, counted modulo 25). Unpacks sprite
 ; set #R$6916. Subscripts: #R$830B, #R$744B, #R$7443. No items.

@@ -6,7 +6,7 @@
 ; away from it (#R$A706), so he is not sent back at once.
 ;
 ; F Carry set when Jean's box overlaps the item's box
-; SP Slot address + 4 on entry: the next stack word is the flag pointer (the action pops it); see #R$A5E9 for the slot layout
+; SP Slot address + 6 on entry (the RET of #R$A614 popped the action word at +4): the next stack word is the flag pointer (the action pops it); see #R$A5E9 for the slot layout
 @label=ActionArchToBeast
 c$A6BC POP HL        ; flag pointer
  $A6BD JR NC,$A706   ; not touching: release the latch

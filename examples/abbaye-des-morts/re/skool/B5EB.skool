@@ -7,7 +7,7 @@
 ; entered with SP at slot+2 and finds its state on the stack.
 ; .
 ; Slot (the layout of the room enemies made by #R$89ED): +2 and +4 words not used, +6 word x and +8 word y (8.8, high
-; bytes in 2-pixel units), +$A word not used (popped and dropped), +$C word hit box offset (y, x), +$E word hit box size
+; bytes in 2-pixel units), +$A word not used (popped and dropped), +$C word hit box offset (y, x), +$E word hit box far corner
 ; (y, x), +$10 pointer to the sprite block (attribute, height, width, then a pointer to the frame table for facing
 ; left and one for facing right, 2 frames each), +$12 byte shot countdown and +$13 its reload ($50), +$14 byte frame
 ; number and +$15 number of frames (2). The archer is one cell wide in x steps of 4 (x is a multiple of 4, so no

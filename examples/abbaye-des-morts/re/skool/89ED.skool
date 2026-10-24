@@ -3,7 +3,7 @@
 ; Finds a free slot (#R$8A6E) and fills it from the 11-byte record of #R$8B8F. Slot: +0 word handler, the entry of the
 ; record's kind (+1) in #R$B028; +2 word speed, the record byte +2 times 4; +4 and +5 the two limits of the patrol
 ; (record +7, +8); +6 and +8 the fractions of x and y, 0; +7 x (record +4); +9 y (record +5); +$A and +$B the timer and its
-; reload (record +6); +$C word hit box offset and +$E word hit box size, the first four bytes of the behaviour block
+; reload (record +6); +$C word hit box offset and +$E word hit box far corner, the first four bytes of the behaviour block
 ; the record points to (+9); +$10 word the address after the fifth byte of that block (where the frame data starts);
 ; +$12 and +$13 the animation counter and its reload (record +3); +$14 frame number, 0; +$15 number of frames, the fifth
 ; byte of the block. The layout is described at #R$C100.
@@ -77,7 +77,7 @@ c$89ED PUSH AF
  $8A4F LD A,(HL)
  $8A50 INC HL
  $8A51 LD (IX+$0D),A
- $8A54 LD A,(HL)            ; ... hit box size (+$E, +$F)
+ $8A54 LD A,(HL)            ; ... hit box far corner (+$E, +$F)
  $8A55 INC HL
  $8A56 LD (IX+$0E),A
  $8A59 LD A,(HL)

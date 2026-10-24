@@ -18,8 +18,8 @@
 ; +9 byte PlayerTileRight: the same at the right side
 ; +A byte PlayerTileFeet: the same just below the feet
 ; +B byte PlayerTileLeft: the same at the left side
-; +C byte PlayerHit: 0, 4 when a harmful tile (class 4) touches the body, $FF when an enemy box overlaps (#R$A87A);
-;   any other value than 0 kills the monk in #R$AAC6
+; +C byte PlayerHit: 0, 4 when a harmful tile (class 4) touches the body, $FF when an enemy box overlaps (#R$A87A),
+;   2 set by the pyre monk of the ending (#R$B97D, with PlayerState 2); any value but 0 kills the monk in #R$AAC6
 ; +D word PlayerX: horizontal position, 8.8 (high byte 0-$7F)
 ; +F word PlayerY: vertical position, 8.8 (high byte 0-$57)
 @label=PlayerState
@@ -43,7 +43,7 @@ g$A894 DEFB $04             ; State: 0 none, 1 dying, 2 jumping, 3 crouching, 4 
 @label=PlayerTileLeft
  $A89F DEFB $00             ; Tile flags at the left side
 @label=PlayerHit
- $A8A0 DEFB $00             ; Hit flag (4 harmful tile, $FF enemy)
+ $A8A0 DEFB $00             ; Hit flag (4 harmful tile, $FF enemy, 2 ending)
 @label=PlayerX
  $A8A1 DEFW $2400           ; X (8.8, high byte in 2-pixel units, 0-$7F)
 @label=PlayerY

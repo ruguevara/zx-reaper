@@ -11,7 +11,7 @@
 ; Slot (the layout of the room enemies made by #R$89ED): +2 word offset in y of the second sprite of the jet ($000C: 12
 ; units below the first), +4 byte cycle countdown (110 down to 1) and +5 its reload ($6E), +6 word x and +8 word y
 ; (8.8, high bytes in 2-pixel units; the position is the mouth: x = $40, y = $18), +$A byte countdown to the appearance
-; of the jet and +$B its reload ($48 = 72), +$C word hit box offset, +$E word hit box size (7 wide, $17 high), +$10
+; of the jet and +$B its reload ($48 = 72), +$C word hit box offset, +$E word hit box far corner (x 7, y $17 from the position), +$10
 ; pointer to the sprite block (#R$958A: attribute, height, width, then the frames of both sprites), +$12 byte
 ; animation counter and +$13 its reload (2), +$14 byte frame and +$15 number of frames (2).
 ; .

@@ -7,7 +7,7 @@
 ; and the four crusaders, #R$BDB6 and #R$BDC8: speed 0 and limit 0, so they only animate). Slot (template slot, see
 ; #R$B6E6): +2 word x speed (signed 8.8; $FFC0 = -0.25 moving left, $0040 moving right), +4 byte x limit (high byte of x
 ; at which the object is removed: $18 for the left flame, $70 for the right flame, 0 for the actors) and +5 byte not
-; used, +6 word x and +8 word y (8.8, high bytes in 2-pixel units), +$A word hit box offset (y, x), +$C word hit box size
+; used, +6 word x and +8 word y (8.8, high bytes in 2-pixel units), +$A word hit box offset (y, x), +$C word hit box far corner
 ; (y, x), +$E pointer to the sprite block (#R$9595, #R$959D, #R$95AD ...: attribute, pointer to the shift pairs,
 ; height, then one graphics address per frame), +$10 byte animation counter and +$11 its reload, +$12 byte frame and
 ; +$13 number of frames.

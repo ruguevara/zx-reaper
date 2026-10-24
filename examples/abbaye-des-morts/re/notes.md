@@ -54,7 +54,7 @@ Details and evidence: `re/frag/[ABCD]-report.md` (classification reports).
 | $68CC-$717E | 20 packed sprite sets, unpacked per room into the sprite sheet | gfx packed |
 | $717F-$7235 | parchment frame tiles and layout | gfx, layout |
 | $7236-$83A7 | room scripts: addresses (26 words) and bytecode for the interpreter $9D5F | script |
-| $83A8-$83FF | cutscene actor lists, debug room-warp routine (unused), music track per room | data, code |
+| $83A8-$83FF | cutscene actor lists, debug room-warp routine (reached with the RAGE cheat), music track per room | data, code |
 | $8400-$8500 | IM 2 vector table, 257 x $85 | table |
 | $8501-$855E | game variables | vars |
 | $855F-$8584 | interrupt stack | stack |

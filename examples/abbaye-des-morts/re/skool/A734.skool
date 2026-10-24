@@ -3,11 +3,11 @@
 ; The room item of room 24 (Satan !!!) at row 2, column 16 with flag $8521. It is drawn (frame 0) only while twelve
 ; crosses have been collected ($854D >= 12); with fewer it is not drawn. A touch takes it whatever the cross count
 ; (observed: with 0 crosses and Jean placed on its spot): the flag becomes $FF and the item is freed with sound effect
-; 5. The flag is what #R$A668 and the room script of room 24 test: Satan disappears in a cloud of smoke and the final
-; parchment appears.
+; 5. The flag is tested by #R$BB57 (Satan disappears in a cloud of smoke), #R$A668 (the final
+; parchment appears) and #R$AE4B (the ring of crosses stops).
 ;
 ; F Carry set when Jean's box overlaps the item's box
-; SP Slot address + 4 on entry: the next stack word is the flag pointer (the action pops it); see #R$A5E9 for the slot layout
+; SP Slot address + 6 on entry (the RET of #R$A614 popped the action word at +4): the next stack word is the flag pointer (the action pops it); see #R$A5E9 for the slot layout
 @label=ActionChalice
 c$A734 POP HL        ; flag pointer
  $A735 LD A,(HL)     ; flag

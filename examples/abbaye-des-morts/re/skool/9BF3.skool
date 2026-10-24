@@ -3,10 +3,10 @@
 ; Row 22 of the screen holds the lives bar, row 23 the crosses (#R$9C1B). The main loop calls this every frame, but the
 ; routine works only when its first byte is NOP: it then overwrites that byte with RET and so does nothing on the later
 ; calls. Writing 0 to $9BF3 asks for a redraw: done at the start of a game (#R$85FC), after a heart is picked up
-; (#R$A70B), at a death (#R$AA3D) and after #R$9C52 has printed text over the screen. It draws 9 heart tiles (tile
-; $7B, MAX_LIVES of them) and 3 blank cells in row 22, columns 0-11, and then sets the attributes: as many cells as the
-; player has lives ($854C) are bright red, the rest (lost hearts and the blank cells) blue. Observed with $854C = 5: five
-; red hearts, then four blue ones.
+; (#R$A70B), at the end of the dying animation (#R$AA99) and after #R$9C58 has printed text over the screen. It draws 9
+; heart tiles (tile $7B, MAX_LIVES of them) and 3 blank cells in row 22, columns 0-11, and then sets the attributes: as
+; many cells as the player has lives ($854C) are bright red, the rest (lost hearts and the blank cells) blue. Observed
+; with $854C = 5: five red hearts, then four blue ones.
 ; .
 ; Hardware: writes bitmap bytes of screen row 22 ($50C0...) and its attributes ($5AC0...).
 ; .

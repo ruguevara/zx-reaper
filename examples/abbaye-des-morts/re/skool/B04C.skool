@@ -12,7 +12,7 @@
 ; +8 word: y, 8.8 ($4400: 68 units, standing on the floor of the three rooms)
 ; +A word: state of a jump along a speed curve: low byte = index in the curve (0-5), high byte = steps left (6)
 ; +C word: hit box offset (low byte y, high byte x, in 2-pixel units): x + 1, y + 0
-; +E word: hit box size: x + 6, y + $0C (the box spans x + 1..x + 6 and y + 0..y + $0C)
+; +E word: hit box far corner: x + 6, y + $0C (the box spans x + 1..x + 6 and y + 0..y + $0C)
 ; +$10 word: pointer to the sprite description of the crusader (#R$93E0 + 5: attribute, shift table #R$AC9F, height,
 ; the two frame tables, see #R$B2D4)
 ; +$12 byte: animation counter, +$13 byte: its reload (8 frames per step)

@@ -1,11 +1,11 @@
-; Draw the cross of the lever-on set
+; Draw the cross of the wheel-turned set
 ;
-; Used by #R$A777 when the cross is not taken: steps the frame animation like #R$A799 and draws frame E + ((lever
-; state bits) XOR 6), that is the thin cross (frames 6-11) when the lever is off and the bright one when it is on.
+; Used by #R$A777 when the cross is not taken: steps the frame animation like #R$A799 and draws frame E + ((wheel
+; state bits) XOR 6), that is the thin cross (frames 6-11) when the wheel is at rest and the bright one when it is turned.
 ;
 ; F Carry set when Jean overlaps the item (not used here)
-; SP Slot address + 4 on entry (flag pointer next)
-@label=DrawCrossLeverOn
+; SP Slot address + 6 on entry (flag pointer next)
+@label=DrawCrossWheelTurned
 c$A7B1 POP HL        ; flag pointer
  $A7B2 POP BC        ; C = countdown, B = reload
  $A7B3 POP DE        ; E = frame, D = number of frames
@@ -19,11 +19,11 @@ c$A7B1 POP HL        ; flag pointer
  $A7BC JR C,$A7C0    ;
  $A7BE SUB D         ;
  $A7BF LD E,A        ;
-*$A7C0 LD L,A        ; frame without the lever offset
+*$A7C0 LD L,A        ; frame without the wheel at restset
  $A7C1 LD A,($851E)  ;
-@isub=AND LEVER_STATE_MASK
+@isub=AND WHEEL_STATE_MASK
  $A7C4 AND $07       ;
-@isub=XOR LEVER_ON
- $A7C6 XOR $06       ; 0 (lever on) or 6 (lever off)
+@isub=XOR WHEEL_TURNED
+ $A7C6 XOR $06       ; 0 (wheel turned) or 6 (wheel at rest)
  $A7C8 ADD A,L       ;
  $A7C9 JR $A7D9      ; store the counters, draw frame A (#R$A7D9)

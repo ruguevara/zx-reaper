@@ -1,10 +1,10 @@
-; Script code $9E: start the animated tiles of the bottom row
+; Script code $9E: start the bubbling blood tiles of the bottom row
 ;
 ; No operands. Writes 0 (NOP) over the RET at #R$AE20, so that routine runs from the main loop on every frame; it
 ; swaps the tiles $3B and $3C in the bottom row of the tile map (row 21) every second pass and marks those cells for
 ; redraw. Observed: $AE20 holds 0 in room 22 and $C9 in the other rooms tried (5, 16, 19, 25), so the room entry puts
 ; the RET back. Used by rooms 21, 22 and 23 ($80FB, $81C1, $8263).
-@label=OpAnimateFloor
+@label=OpAnimateBlood
 c$A1B9 XOR A         ;
  $A1BA LD ($AE20),A  ; NOP over the RET at $AE20
  $A1BD RET           ;

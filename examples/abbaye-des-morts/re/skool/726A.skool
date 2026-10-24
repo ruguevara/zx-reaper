@@ -48,8 +48,8 @@
 ; $9A t,y,x,len: RUN1, a vertical run of tile t; never used (#R$A15A)
 ; $9B t,n,(y,x,len)*n: RUNS_V, n vertical runs of tile t (#R$A14E)
 ; $9C sub,var: IFNZ, run the subscript if the byte at var is not 0 (#R$A058)
-; $9D y,x,a,w: MOD9D, start the animated liquid strip (#R$AD88): w cells at row y from column x painted with attribute
-; a (#R$A168)
+; $9D y,x,a,w: WATER, start the water strip (#R$AD88, a reflection of the scenery above it): w cells at row y from
+; column x painted with attribute a and given the harmful flag value 4 (#R$A168)
 ; $9E: enable the animation of the blood tiles in the bottom row: the RET at the start of #R$AE20 is replaced by a NOP (#R$A1B9)
 ; $9F: enable the ring of twelve crosses: the RET at the start of #R$AE4B is replaced by a NOP (#R$A1BE)
 ; .

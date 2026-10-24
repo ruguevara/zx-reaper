@@ -6,7 +6,7 @@
 ; The frame drawn is the flag.
 ;
 ; F Carry set when Jean's box overlaps the item's box
-; SP Slot address + 4 on entry: the next stack word is the flag pointer (the action pops it); see #R$A5E9 for the slot layout
+; SP Slot address + 6 on entry (the RET of #R$A614 popped the action word at +4): the next stack word is the flag pointer (the action pops it); see #R$A5E9 for the slot layout
 @label=ActionGateLever
 c$A75A POP HL        ; flag pointer
  $A75B LD A,(HL)     ; flag

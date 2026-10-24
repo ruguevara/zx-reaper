@@ -2,7 +2,7 @@
 ;
 ; Entity handler: projectile flying in a straight line (arrows, fireballs), entered with SP at slot+2. Slot from a
 ; template (#R$BC92 on): +2 word x speed and +4 word y speed (signed 8.8, 2-pixel units per frame), +6 word x and +8
-; word y (8.8, high bytes in 2-pixel units), +$A word hit box offset (y, x), +$C word hit box size (y, x), +$E word
+; word y (8.8, high bytes in 2-pixel units), +$A word hit box offset (y, x), +$C word hit box far corner (y, x), +$E word
 ; width and height of the sprite (draw command units), +$10 pointer to the sprite description (attribute, column in
 ; the sprite sheet, base page: see #R$B730). The speeds are added to the position every frame and the projectile is
 ; removed (slot freed by #R$B08E) when it leaves the room (y at or below PROJECTILE_Y_MAX, or x not in 0-$7F, which
@@ -30,6 +30,7 @@ c$B6ED POP HL        ; x speed
  $B6FF SRA H         ; y / 2
  $B701 RES 0,H       ; 2 * (y / 4): index of the row in the table of words
  $B703 LD L,H        ;
+@isub=LD H,FlagRowTable/256
  $B704 LD H,$61      ; row address table #R$6100
  $B706 LD A,D        ; x
  $B707 RRA           ;

@@ -31,6 +31,6 @@ w$9D1F DEFW $9D7F ; $80 end of script
  $9D53 DEFW $A15A ; $9A vertical line of a tile: t y x n, never used (#R$A15A)
  $9D55 DEFW $A14E ; $9B vertical lines of a tile: t k (y x n)*k (#R$A14E)
  $9D57 DEFW $A058 ; $9C run a subscript if a variable is not 0: word word (#R$A058)
- $9D59 DEFW $A168 ; $9D water or lava strip with its reflection: y x a n (#R$A168)
- $9D5B DEFW $A1B9 ; $9E start the flame animation of the bottom row, tiles $3B/$3C (#R$A1B9)
+ $9D59 DEFW $A168 ; $9D water strip with its reflection: y x a n (#R$A168)
+ $9D5B DEFW $A1B9 ; $9E start the bubbling blood of the bottom row, tiles $3B/$3C (#R$A1B9)
  $9D5D DEFW $A1BE ; $9F start the twelve-crosses effect (#R$A1BE)

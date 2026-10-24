@@ -1,6 +1,7 @@
 ; Room script 16: Lake of despair
 ;
-; Op $96 turns an area into free space (flag $80). Op $9D animates a strip of liquid at the bottom row of the room:
+; Op $96 turns an area into free space (flag $80). Op $9D makes the bottom row of the room a water strip (#R$AD88, the
+; lake of blood reflecting the scenery, harmful):
 ; row 21, from column 6, 16 cells wide, attribute $13 (#R$AD88).
 ; .
 ; Room 16: column 1, row 3 of the 5x5 map (left is room 15, right 17, up 11, down 21, counted modulo 25). Subscripts:
@@ -39,5 +40,5 @@ b$7C8F DEFB $87,$10         ; ROOMNAME 16 "Lake of despair"
  $7D4E DEFB $8C,$12,$06,$26 ; TILE1 row 18, col 6, tile $26
  $7D52 DEFB $8C,$13,$1A,$4A ; TILE1 row 19, col 26, tile $4A
  $7D56 DEFB $96,$00,$02,$02,$04,$80 ; FLAGS row 0, col 2, 2x4, flags $80
- $7D5C DEFB $9D,$15,$06,$13,$10 ; MOD9D liquid strip: row 21, col 6, attribute $13, 16 cells
+ $7D5C DEFB $9D,$15,$06,$13,$10 ; WATER strip: row 21, col 6, attribute $13, 16 cells
  $7D61 DEFB $80             ; END

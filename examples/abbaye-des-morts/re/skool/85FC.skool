@@ -33,7 +33,7 @@
 ; the foreground, which only draws. It calls the four one-shot gates (#R$9CE7 event script, #R$9C51 parchment, #R$9BF3
 ; lives bar, #R$9C1B crosses counter: each is a RET until something arms it) over and over until the interrupt has
 ; completed a frame list (#R$BDDA is NOP, written by #R$A5DB), then runs the list of queued sprite commands (#R$BDDB),
-; builds and draws the changed cells and sprites (#R$97B7, #R$95FF), steps the three tile animations (#R$AD88 liquid
+; builds and draws the changed cells and sprites (#R$97B7, #R$95FF), steps the three tile animations (#R$AD88 water
 ; strip, #R$AE20 blood tiles, #R$AE4B ring of crosses; each a RET until a room script enables it) and tests the room
 ; state again. A quiet frame is drawn by about T 55,000 of the frame; a busy one takes the whole frame or more. When the
 ; drawing outlasts the next interrupt, that frame's game logic still runs but its sprites are not queued, so the screen
@@ -118,7 +118,7 @@ c$85FC LD A,($8506)         ; machine type: 1 on a 48K Spectrum
  $868A CALL $BDDA           ; = #R$BDDB, run the frame list of sprite commands
  $868D CALL $97B7           ; build the redraw runs, draw the sprite jobs into the cells
  $8690 CALL $95FF           ; copy the cells to the screen
- $8693 CALL $AD88           ; liquid strip of rooms 16 and 19
+ $8693 CALL $AD88           ; water strip of rooms 16 and 19
  $8696 CALL $AE20           ; blood tiles of rooms 21-23
  $8699 CALL $AE4B           ; ring of crosses of room 24
  $869C JP $8664             ; next frame
@@ -128,7 +128,7 @@ c$85FC LD A,($8506)         ; machine type: 1 on a 48K Spectrum
 @label=MainLoop_GameOver
 *$86A5 LD HL,$A57E          ; Game Over screen script
  $86A8 CALL $9D5F
-@isub=LD A,MUSIC_TRACK_7
+@isub=LD A,MUSIC_TRACK_GAME_OVER
  $86AB LD A,$07             ; MusicTrack 7
  $86AD LD ($8551),A
  $86B0 CALL $A1C3           ; wait for a key press

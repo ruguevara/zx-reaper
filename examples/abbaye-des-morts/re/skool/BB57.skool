@@ -7,7 +7,7 @@
 ; Slot layout, in the order it is popped: +2 word y speed (signed 8.8, from the object's first parameter: $0080), +4
 ; byte lower limit and +5 byte upper limit of y ($05 and $28), +6 word x, +8 word y (8.8, high bytes in 2-pixel
 ; units), +$A timer counter (starts at $96, reloads with ATTACK_PERIOD) and +$B reload, +$C word hit box offset (y, x)
-; = 0, +$E word hit box size (y, x) = $17, $0F (46 by 30 pixels), +$10 pointer into the behaviour block of kind 17
+; = 0, +$E word hit box far corner (y, x) = $17, $0F (with the offset 0, a box of 46 by 30 pixels), +$10 pointer into the behaviour block of kind 17
 ; (#R$95E6 + 5: attribute $42, width 4, height 12, then the frame tables), +$12 animation counter and reload, +$14
 ; frame number and number of frames (2).
 ; .
@@ -39,7 +39,7 @@ c$BB57 LD A,($8521)  ; flag of the cross item in room 24 ($FF once taken)
  $BB62 JP NZ,$B08E   ; yes: Satan is gone, free the slot
  $BB65 LD (HL),$FF   ; remember it
  $BB67 LD HL,$8551   ;
-@isub=LD (HL),MUSIC_TRACK_7
+@isub=LD (HL),MUSIC_TRACK_GAME_OVER
  $BB6A LD (HL),$07   ; music track 7
  $BB6C LD HL,$82D4   ; start the script at $82D4
 @isub=LD (SmcEventScript+1),HL

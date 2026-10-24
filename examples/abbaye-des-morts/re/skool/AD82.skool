@@ -1,7 +1,7 @@
-; Unused debug: leave the room warp mode
+; Debug room warp: leave the warp mode
 ;
 ; Jumped to by the debug room warp #R$83CE when key T (control bit 5) is pressed: sets the player state back to 4,
-; standing (it was $FF, the warp mode). Never reached in normal play.
+; standing (it was $FF, the warp mode). Reached only through the RAGE cheat (#R$AAC0).
 @label=DebugLeaveWarp
 @isub=LD A,PLAYER_STANDING
 c$AD82 LD A,$04      ; player state standing

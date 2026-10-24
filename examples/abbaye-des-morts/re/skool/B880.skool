@@ -7,7 +7,7 @@
 ; and dropped).
 ; .
 ; Slot (the layout of the room enemies made by #R$89ED): +2 and +4 not used, +6 word x and +8 word y (8.8, high bytes in
-; 2-pixel units), +$A word, +$C word hit box offset and +$E word hit box size: not used here, +$10 pointer to the sprite
+; 2-pixel units), +$A word, +$C word hit box offset and +$E word hit box far corner: not used here, +$10 pointer to the sprite
 ; block (#R$9580: attribute, height, width, one frame), +$12 byte counter (110 down to 1) and +$13 its reload ($6E),
 ; +$14 byte the dip (0 or 1; the slot's frame number, but there is only one frame) and +$15 number of frames.
 ; .

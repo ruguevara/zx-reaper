@@ -8,7 +8,7 @@
 ; .
 ; Slot (the layout of the room enemies made by #R$89ED): +2 and +4 words not used, +6 word x and +8 word y (8.8, high
 ; bytes in 2-pixel units; x is a multiple of 4), +$A byte not used and +$B byte the reload of the spit countdown (both
-; $78), +$C word hit box offset (y, x), +$E word hit box size (y, x), +$10 pointer to the sprite block (attribute,
+; $78), +$C word hit box offset (y, x), +$E word hit box far corner (y, x), +$10 pointer to the sprite block (attribute,
 ; height, width, two frames), +$12 byte spit countdown (the other byte of the word is not used here), +$14 byte frame
 ; and +$15 number of frames (2).
 ; .
@@ -35,7 +35,7 @@ c$B665 POP BC        ; +2, not used
  $B679 POP HL        ; hit box offset
  $B67A ADD HL,DE     ; plus the position
  $B67B EX DE,HL      ;
- $B67C POP BC        ; hit box size
+ $B67C POP BC        ; hit box far corner
  $B67D ADD HL,BC     ;
  $B67E LD B,H        ; BC = far corner of the box
  $B67F LD C,L        ;

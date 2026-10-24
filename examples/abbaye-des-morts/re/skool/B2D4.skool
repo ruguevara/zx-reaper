@@ -11,8 +11,8 @@
 ; byte 3 is +$12 and +$13, byte 4 is x, byte 5 is y, byte 6 is +$A and +$B, bytes 7 and 8 are +4 and +5, the pointer
 ; at +9 is the sprite description block): +0 word handler, +2 word speed (8.8 in 2-pixel units per frame), +4 byte and
 ; +5 byte turning points (the lower and the higher coordinate; #R$B44B uses +5 as a start delay), +6 word x (8.8), +8
-; word y (8.8), +$A word not used by the walkers, +$C byte hit box y offset, +$D byte x offset, +$E byte y size, +$F
-; byte x size (2-pixel units, relative to the position), +$10 word address of the sprite description (the block from
+; word y (8.8), +$A word not used by the walkers, +$C byte hit box y offset, +$D byte x offset, +$E byte y far corner, +$F
+; byte x far corner (2-pixel units, both pairs relative to the position), +$10 word address of the sprite description (the block from
 ; its byte 5 on), +$12 byte animation countdown, +$13 byte countdown reload, +$14 byte frame number, +$15 byte number
 ; of frames.
 ; .

@@ -4,7 +4,7 @@
 ; the three flames of the pyre and the four crusaders around it are #R$B9B0). Slot (template slot, see #R$B6E6): +2 word
 ; the first countdown ($0118 = 280 frames), +4 word the second countdown ($00AF = 175 frames), +6 word x and +8 word y
 ; (8.8, high bytes in 2-pixel units: $3E and $3A, the place where the game also puts the monk's own position), +$A word
-; hit box offset and +$C word hit box size (both 0), +$E pointer to the sprite block (#R$95A5, yellow monk, 2 frames),
+; hit box offset and +$C word hit box far corner (both 0), +$E pointer to the sprite block (#R$95A5, yellow monk, 2 frames),
 ; +$10 animation counter and reload, +$12 frame and number of frames (2).
 ; .
 ; The scene has three phases:

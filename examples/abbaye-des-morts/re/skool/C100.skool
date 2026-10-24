@@ -10,24 +10,24 @@
 ; .
 ; The layout after word 0 belongs to the handler, but the handlers from #R$B9F8 to #R$BC69 all end with the same kind
 ; of words, because they jump to the same shared routines that pop them: the hit test #R$A851 pops two words, the hit
-; box offset (L = y offset, H = x offset, in 2-pixel units) and size (C = y size, B = x size), and adds them to the
+; box offset (L = y offset, H = x offset, in 2-pixel units) and far corner (C = y, B = x), and adds each of them to the
 ; position it finds in DE (D = x, E = y); the animation step #R$A883 pops the animation counter and its reload (C, B)
 ; and the frame number and number of frames (E, D). Positions are words in 8.8: the high byte is in 2-pixel units (x
 ; 0-$7F, y 0-$57), the low byte a fraction. x/4 is the byte column and x AND 3 the shift phase. The layouts seen:
 ; .
 ; Enemies from the room object table ($89ED: Death #R$BA15, Satan #R$BB57): +2 word speed, +4 byte lower and +5 byte
 ; upper limit of the patrolling coordinate, +6 word x, +8 word y, +$A byte timer counter, +$B byte its reload, +$C
-; word hit box offset, +$E word hit box size, +$10 word pointer into the sprite block, +$12 byte animation counter,
+; word hit box offset, +$E word hit box far corner, +$10 word pointer into the sprite block, +$12 byte animation counter,
 ; +$13 its reload, +$14 byte frame number, +$15 byte number of frames.
 ; .
 ; Objects from templates (Death's scythe #R$BAB1, spawned by #R$8905 from #R$BD46): +2 word x speed, +4 word y speed,
-; +6 word x, +8 word y, +$A word hit box offset, +$C word hit box size, +$E word pointer into the sprite block, +$10
+; +6 word x, +8 word y, +$A word hit box offset, +$C word hit box far corner, +$E word pointer into the sprite block, +$10
 ; animation counter and reload, +$12 frame number and number of frames, +$14 word not set by the spawner (stale). The
 ; projectiles of #R$B6E6 have the first four words of this layout. Template bytes 6 and 7 are offsets added to the
 ; start position and become the high bytes of x and y; the 10 bytes from template byte 8 are copied to +$A to +$13 as
 ; they are.
 ; .
 ; Room items (#R$897E) use slots too, filled from the item record (#R$8EDF) and the type record (#R$8AA7); their
-; layout is not described here.
+; layout is given at #R$A5E9.
 @label=ObjectSlots
 g$C100 DEFS $F4,$FF  ;

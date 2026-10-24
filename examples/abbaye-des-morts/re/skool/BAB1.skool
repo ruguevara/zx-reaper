@@ -15,7 +15,7 @@
 ; .
 ; Slot layout (from the template, see #R$BD46): +2 word x speed (signed 8.8, used by #R$BB07 only; $FF80 = left), +4
 ; word y speed ($00C0), +6 word x, +8 word y (8.8, high bytes in 2-pixel units), +$A word hit box offset (y, x), +$C
-; word hit box size (y, x), +$E word pointer to the sprite block ($95DA: attribute, pair table $AC9F, height, four
+; word hit box far corner (y, x), +$E word pointer to the sprite block ($95DA: attribute, pair table $AC9F, height, four
 ; frames), +$10 animation counter and reload, +$12 frame number and number of frames (4), +$14 unused.
 ; .
 ; The cell test reads the tile flag map: the row address table at $6100 gives the address of the row of the scythe's
@@ -38,6 +38,7 @@ c$BAB1 POP BC        ; x speed (not used while falling)
  $BABD RRA           ;
  $BABE AND $3E       ;
  $BAC0 LD L,A        ;
+@isub=LD H,FlagRowTable/256
  $BAC1 LD H,$61      ; row address table at $6100
  $BAC3 LD A,D        ; x in 2-pixel units (D')
  $BAC4 LD C,A        ;

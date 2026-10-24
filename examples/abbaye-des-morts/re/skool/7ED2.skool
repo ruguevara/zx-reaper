@@ -1,7 +1,7 @@
 ; Room script 19: Underground river
 ;
-; The door #R$7F87 is drawn at the left edge, at row 16, while the lever of room 9 (#R$851C) is 0. Op $9D animates the
-; river: row 21, from column 14, 16 cells wide, attribute $0D (blue and cyan, #R$AD88).
+; The door #R$7F87 is drawn at the left edge, at row 16, while the lever of room 9 (#R$851C) is 0. Op $9D makes the
+; river a water strip reflecting the scenery (harmful): row 21, from column 14, 16 cells wide, attribute $0D (blue and cyan, #R$AD88).
 ; .
 ; Room 19: column 4, row 3 of the 5x5 map (left is room 18, right 20, up 14, down 24, counted modulo 25). Subscripts:
 ; #R$82F0, #R$7955. Items (#R$8EDF) at row,column: doorway arch 15,21, heart 8,25, cross 2,3, checkpoint 11,8.
@@ -35,6 +35,6 @@ b$7ED2 DEFB $87,$13         ; ROOMNAME 19 "Underground river"
  $7F76 DEFW $7F87
 @isub=DEFW LeverRoom9
  $7F78 DEFW $851C
- $7F7A DEFB $9D,$15,$0E,$0D,$10 ; MOD9D liquid strip: row 21, col 14, attribute $0D, 16 cells
+ $7F7A DEFB $9D,$15,$0E,$0D,$10 ; WATER strip: row 21, col 14, attribute $0D, 16 cells
  $7F7F DEFB $91,$7E,$02,$01,$01,$0D,$08 ; PICTURES tiles from $7E, 2x1, at 1 positions
  $7F86 DEFB $80             ; END

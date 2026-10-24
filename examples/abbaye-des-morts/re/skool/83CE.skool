@@ -1,10 +1,11 @@
-; Unused debug routine: move between rooms with the direction keys
+; Debug room warp (cheat): move between rooms with the direction keys
 ;
-; Not reached in normal play: the player routine #R$AAAB jumps here when the player state #R$A894 is $FF, a state that
-; nothing sets (the code that would enter it at #R$AAC0 is skipped by a JR). Observed in the simulator by poking $FF
-; into #R$A894. The routine reads the keys pressed this frame (#R$A2D1): when bit 5 is set it returns
-; to normal play through #R$AD82; otherwise the low four bits (right, left, down, up) call #R$AD71, which moves
-; #R$8509 one room that way and starts the room change, and the room number is then reduced modulo 25.
+; The player routine #R$AAAB jumps here while the player state #R$A894 is $FF. Only the RAGE cheat reaches that state:
+; #R$A422 turns the JR at #R$AABE into JR Z, and then the T key during play runs #R$AAC0, which sets $FF (observed with
+; tests/inputs/cheat.txt, F78; without the cheat the JR always skips #R$AAC0). The routine reads the keys pressed this
+; frame (#R$A2D1): when bit 5 is set it returns to normal play through #R$AD82; otherwise the low four bits (right,
+; left, down, up) call #R$AD71, which moves #R$8509 one room that way and starts the room change, and the room number is
+; then reduced modulo 25.
 @label=DebugWarpRoom
 c$83CE LD A,($A2D1)         ; keys newly pressed this frame
  $83D1 BIT 5,A              ; bit 5: back to normal play

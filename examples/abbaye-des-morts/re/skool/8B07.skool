@@ -2,7 +2,8 @@
 ;
 ; Each frame: +0 word: graphics address of a 16 x 16 pixel sprite (32 bytes, in the sprite block at #R$66DC), +2 byte:
 ; attribute, +3 byte: 0 (unused: it is popped as the flags of the sprite command). The type records (#R$8AA7) point
-; into this table; the item's current frame number (slot +$0A) is an index in its list. The lists:
+; into this table; the item's current frame number (slot +$0A) is an index in its list, read by #R$A7DB
+; (DrawItemFrame). The lists:
 ; .
 ; FramesHeart (2 frames), FramesCross (12: 6 bright crosses in the colours of #R$8553, then 6 thin ones, the plus sign
 ; sprite), FramesCheckpoint (2: not active, active), FramesArch (9, all the arch with changing ink), FramesScroll

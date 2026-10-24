@@ -6,13 +6,13 @@
 ; for $3C and $3C for $3B, and sets the redraw bit in the tile flag map for each cell it changed, so that the blood
 ; flickers. The cells keep their flag class, the swap only changes what is drawn.
 ;
-; Hardware: none directly (the redraw routine #R$9B5A paints the marked cells).
+; Hardware: none directly (the redraw step of the main loop, #R$97B7 and #R$95FF, paints the marked cells).
 @label=AnimateBloodTiles
 c$AE20 NOP           ; RET unless op $9E of the room script switched the animation on
  $AE21 LD HL,$8510   ; pass counter
  $AE24 DEC (HL)      ;
  $AE25 RET NZ        ;
-@isub=LD (HL),LIQUID_ANIM_PERIOD
+@isub=LD (HL),BLOOD_ANIM_PERIOD
  $AE26 LD (HL),$02   ; every second pass
 @isub=LD BC,SCREEN_COLS*256+1
  $AE28 LD BC,$2001   ; B = 32 cells of the row (C is not used)

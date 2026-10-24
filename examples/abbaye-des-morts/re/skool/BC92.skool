@@ -6,7 +6,7 @@
 ; + template byte 7 (the two offsets are signed, in 2-pixel units, and make the start position relative to the object
 ; that threw the thing), then the 10 bytes from template byte 8 to slot +$A..+$13 as they are. The words of a template
 ; are therefore: +0 the handler, +2 and +4 the first two state words of the handler (for the projectiles the x and y
-; speed, signed 8.8 in 2-pixel units per frame), +6 the two offsets, +8 hit box offset (y, x), +$A hit box size (y,
+; speed, signed 8.8 in 2-pixel units per frame), +6 the two offsets, +8 hit box offset (y, x), +$A hit box far corner (y,
 ; x), then the pointer to the behaviour block with the sprite description (attribute, pair table, height, frames; see
 ; #R$93D3) or, for the handlers that keep the animation words in other places, those. A template of 8 words is
 ; followed in memory by the next template: the 10-byte copy takes two bytes too many from it and they land in slot

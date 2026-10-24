@@ -18,7 +18,8 @@
 c$A271 LD BC,$A2BF   ;
  $A274 LD DE,$A2D3   ;
  $A277 EXX           ;
- $A278 LD B,$08      ;
+@isub=LD B,CONTROL_KEYS
+ $A278 LD B,$08      ; eight key pairs
 @label=ReadKeyControls_Pair
 *$A27A EXX           ; next key pair (loop 8 times)
  $A27B LD A,(BC)     ; row index of the pair

@@ -65,7 +65,7 @@ c$A9D2 LD E,$00    ;
  $AA10 AND $3E     ; (y/4) * 2: offset in the row address table
  $AA12 LD L,A      ;
  $AA13 LD A,H      ;
-@isub=LD H,FLAG_ROW_TABLE_HIGH
+@isub=LD H,FlagRowTable/256
  $AA14 LD H,$61    ;
  $AA16 ADD A,(HL)  ; row address low + column
  $AA17 INC L       ;

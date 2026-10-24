@@ -1,9 +1,9 @@
-; Draw a cross of the lever-off set
+; Draw a cross of the wheel-at-rest set
 ;
-; Not takeable (no touch, or the lever is on): step the frame animation (countdown in +8, reload in +9, frame in +A of
-; the frame count in +B) as #R$A7CB does, and draw frame E + (lever state bits), that is the bright cross when the
-; lever is off and the thin one (frames 6-11) when it is on.
-@label=DrawCrossLeverOff
+; Not takeable (no touch, or the wheel is turned): step the frame animation (countdown in +8, reload in +9, frame in +A of
+; the frame count in +B) as #R$A7CB does, and draw frame E + (wheel state bits), that is the bright cross when the
+; wheel is at rest and the thin one (frames 6-11) when it is turned.
+@label=DrawCrossWheelRest
 c$A799 POP HL        ; flag pointer
  $A79A POP BC        ; C = countdown, B = reload
  $A79B POP DE        ; E = frame, D = number of frames
@@ -17,9 +17,9 @@ c$A799 POP HL        ; flag pointer
  $A7A4 JR C,$A7A8    ;
  $A7A6 SUB D         ;
  $A7A7 LD E,A        ;
-*$A7A8 LD L,A        ; frame without the lever offset
+*$A7A8 LD L,A        ; frame without the wheel at restset
  $A7A9 LD A,($851E)  ;
-@isub=AND LEVER_STATE_MASK
- $A7AC AND $07       ; + 0 (lever off) or + 6 (on)
+@isub=AND WHEEL_STATE_MASK
+ $A7AC AND $07       ; + 0 (wheel at rest) or + 6 (turned)
  $A7AE ADD A,L       ;
  $A7AF JR $A7D9      ; store the counters, draw frame A (#R$A7D9)

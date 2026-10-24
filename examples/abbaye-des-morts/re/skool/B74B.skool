@@ -36,6 +36,7 @@ c$B74B POP DE        ; x speed
  $B766 SRA H         ; y / 2
  $B768 RES 0,H       ; 2 * (y / 4): index of the row in the table of words
  $B76A LD L,H        ;
+@isub=LD H,FlagRowTable/256
  $B76B LD H,$61      ; row address table #R$6100
  $B76D LD A,D        ; x
  $B76E RRA           ;

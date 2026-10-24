@@ -9,15 +9,19 @@
 ; .
 ; class 0 ($80): background, nothing there (tiles $25, $75-$76, $7B-$7C, $7E-$86, $88-$B7, $C0-$FF)
 ; .
-; class 1 ($81): tiles $10, $26 and $87; meaning not found (the scythe of #R$BAB1 lands on it like on classes 2 and 3)
+; class 1 ($81, bit 0 TILE_STANDABLE alone): tiles $10, $26 and $87, a one-way platform: Jean jumps up through it and
+; walks through it from the sides, and lands on it only when falling across its top edge (observed, F74); the scythe of
+; #R$BAB1 lands on it like on class 3
 ; .
-; class 3 ($83): the walls and floors (tiles $00-$04, $06-$0F, $11-$24, $27-$3A, $3D-$4D, $77-$7A, $7D, $B8-$BF); a
-; falling scythe lands on it (observed on the ledges of room 18)
+; class 3 ($83, bits 0 and 1): the walls and floors, solid from every side (bit 1, TILE_BLOCKS, stops walking and the
+; head) (tiles $00-$04, $06-$0F, $11-$24, $27-$3A, $3D-$4D, $77-$7A, $7D, $B8-$BF); a falling scythe lands on it
+; (observed on the ledges of room 18)
 ; .
 ; class 4 ($84, FLAG_HARMFUL): harmful (tiles $05, $3B-$3C, $4E-$74); the player's code sets the hit flag $A8A0 from
 ; bit 2 (#R$A8A5), and #R$BAB1 and #R$BB07 remove a scythe that meets bit 2 (from the code, not observed)
 ; .
-; Class 2 is not used by any tile of the table.
+; Class 2 (bit 1 alone: blocks walking and the head, cannot be stood on) is not used by any tile of the table; the
+; border cells set by script op $8A (#R$A065) get bit 1.
 @label=TileFlags
 b$CD00 DEFB $83,$83,$83,$83,$83,$84,$83,$83,$83,$83,$83,$83,$83,$83,$83,$83 ;
  $CD10 DEFB $81,$83,$83,$83,$83,$83,$83,$83,$83,$83,$83,$83,$83,$83,$83,$83 ;

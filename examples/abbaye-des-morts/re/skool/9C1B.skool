@@ -1,6 +1,6 @@
 ; Redraw the crosses counter in the status bar
 ;
-; One-shot redraw gate: the first byte is NOP while a redraw is wanted and RET otherwise. The main loop (#R$85FC) calls this address on every pass; the routine puts RET over its own first byte at once, so it draws only once per request. A request is a NOP written at the start of a game (#R$85FC), when a cross is picked up (#R$A782) and at the end of a parchment or text window (#R$9C52).
+; One-shot redraw gate: the first byte is NOP while a redraw is wanted and RET otherwise. The main loop (#R$85FC) calls this address on every pass; the routine puts RET over its own first byte at once, so it draws only once per request. A request is a NOP written at the start of a game (#R$85FC), when a cross is picked up (#R$A78B, from both cross actions #R$A777 and #R$A782) and when a parchment or text window is closed (#R$9C58).
 ; .
 ; Draws twelve cross icons (tile $7C) in the last cell row of the screen (cells 0-11 of row 23), then colours them: as many as crosses collected ($854D) bright white, the rest blue.
 ; .

@@ -38,7 +38,6 @@ TILE_CROSS               EQU 0x7C ; tile number of the cross in the status bar
 GLYPH_ROWS               EQU 16 ; pixel rows of a font glyph
 WIDE_GLYPH               EQU 9 ; glyphs this wide (pixels) or wider have two bitmap bytes per new row
 PARCHMENT_COLS           EQU 24 ; cells per row of the parchment frame
-OP_FIRST                 EQU 0x80 ; script codes from here are commands, below it characters
 KEYCODE_CAPS_SHIFT       EQU 0x01 ; key code of CAPS SHIFT in the key code table (GetKeyCode)
 KEYCODE_SYMBOL_SHIFT     EQU 0x02 ; key code of SYMBOL SHIFT
 KEYCODE_ENTER            EQU 0x0D ; key code of ENTER
@@ -61,8 +60,8 @@ ITEM_BOX                 EQU 8 ; width and height of an item's collision box, in
 ITEM_GONE                EQU 0xFF ; item flag value: taken or finished, the item is not created again
 CROSSES_NEEDED           EQU 12 ; crosses to collect before the chalice appears
 CHECKPOINT_FLAGS         EQU 9 ; checkpoint flag bytes at $8543 (0 inactive, nonzero the active checkpoint)
-LEVER_STATE_MASK         EQU 7 ; lever flag bits that tell the lever state (0 off, 6 on)
-LEVER_ON                 EQU 6 ; value of the lever state bits of the lever at $851E when it is on
+WHEEL_STATE_MASK         EQU 7 ; bits of the wheel of faith flag ($851E) that tell its state (0 at rest, 6 turned)
+WHEEL_TURNED             EQU 6 ; value of the state bits of the wheel of faith ($851E) when it is turned
 STATE_RESPAWN            EQU 2 ; room state: respawn at the checkpoint position ($8512/$8514)
 STATE_ENDING             EQU 3 ; room state: ending sequence ($887B)
 STATE_GAME_OVER          EQU 5 ; room state: Game Over screen ($A57E)
@@ -78,7 +77,7 @@ ATTACK_PERIOD            EQU 0x32 ; frames between two throws of Death or two vo
 SFX_ENEMY_SHOT           EQU 7 ; sound effect: Death throws a scythe, Satan fires
 OBJECT_ENTRY_SIZE        EQU 4 ; bytes of an entry of the object list at $5DC0: template address, y, x
 TILE_CLASS_MASK          EQU 7 ; mask of the tile class in a tile flag (bits 0-2)
-MUSIC_TRACK_7            EQU 7 ; music track 7 (also set by the Game Over code at $86AB)
+MUSIC_TRACK_GAME_OVER    EQU 7 ; music track 7: the Game Over screen ($86AB), also started when Satan turns into smoke ($BB57)
 PLAYER_DYING             EQU 1 ; player state: dying
 PLAYER_STANDING          EQU 4 ; player state: standing or walking
 OP_CALL                  EQU 0xCD ; opcode of CALL, stored over the first byte of a 3-byte instruction to turn it into a call
@@ -116,7 +115,6 @@ EXIT_UP                  EQU 3 ; exit direction: through the top edge
 ROOM_WIDTH_2PX           EQU 0x80 ; width of the room in 2-pixel units (32 cells of 4)
 TILE_ROPE                EQU 0xB7 ; tile number of the dotted vertical rope of the hanged men (one pixel column at the left edge of the cell, red ink)
 TILE_BLANK               EQU 0x80 ; tile number of the empty tile (all zero bitmap)
-FLAG_ROW_TABLE_HIGH      EQU 0x61 ; high byte of the flag map row address table at $6100 (the low byte is 2 * row)
 DROP_PERIOD              EQU 0x46 ; frames from one fall of a water drop to the next (also the countdown reload of its slot)
 DROP_SWELL               EQU 0x1E ; countdown value at which a hanging water drop switches to its second frame, 30 frames before it falls
 ARCHER_AIM_TIME          EQU 0x1E ; shooter countdown value at which an archer or the stone head switches to its aiming frame (30 frames before the shot)
@@ -134,7 +132,7 @@ TILE_BLOOD_B             EQU 0x3C ; tile number of the bubbling blood, second ph
 TILE_RING_CROSS          EQU 0x4C ; tile number of the red crosses of the ring of twelve crosses in Satan's room
 CROSS_FLASH_PERIOD       EQU 5 ; frames between two colour steps of the ring of crosses (CrossFlashTimer reload)
 CROSS_COLOURS            EQU 6 ; attributes in the colour cycle of the ring of crosses (CrossColours)
-LIQUID_ANIM_PERIOD       EQU 2 ; frames between two swaps of the blood tiles (LiquidAnimTimer reload)
+BLOOD_ANIM_PERIOD        EQU 2 ; frames between two swaps of the blood tiles (BloodAnimTimer reload)
 COLUMN_MASK              EQU 0x1F ; mask of a cell column number (0-31)
 PAGING_BANK0             EQU 0x10 ; value for port $7FFD: RAM bank 0 at $C000, ROM 1 (48K BASIC), normal screen: the paging state of the game
 SPEAKER_BIT              EQU 0x10 ; bit 4 of port $FE: the speaker (EAR output); the beeper effects toggle it

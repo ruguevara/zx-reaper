@@ -26,11 +26,11 @@ b$8AA7 DEFB $14,$02  ; type 0 heart: frame delay, number of frames
  $8AA9 DEFW $A600    ; handler
  $8AAB DEFW $8B07    ; frame list
  $8AAD DEFB $02,$08  ; sprite width (bytes), height (2-pixel units)
- $8AAF DEFB $05,$06  ; type 1 cross (wheel off): frame delay, number of frames
+ $8AAF DEFB $05,$06  ; type 1 cross (wheel at rest): frame delay, number of frames
  $8AB1 DEFW $A600    ; handler
  $8AB3 DEFW $8B0F    ; frame list
  $8AB5 DEFB $02,$08  ; sprite width (bytes), height (2-pixel units)
- $8AB7 DEFB $05,$06  ; type 2 cross (wheel on): frame delay, number of frames
+ $8AB7 DEFB $05,$06  ; type 2 cross (wheel turned): frame delay, number of frames
  $8AB9 DEFW $A600    ; handler
  $8ABB DEFW $8B0F    ; frame list
  $8ABD DEFB $02,$08  ; sprite width (bytes), height (2-pixel units)
@@ -62,7 +62,7 @@ b$8AA7 DEFB $14,$02  ; type 0 heart: frame delay, number of frames
  $8AF1 DEFW $A600    ; handler
  $8AF3 DEFW $8B7B    ; frame list
  $8AF5 DEFB $02,$08  ; sprite width (bytes), height (2-pixel units)
- $8AF7 DEFB $00,$00  ; type 10 wheel lever: frame delay, number of frames
+ $8AF7 DEFB $00,$00  ; type 10 wheel of faith: frame delay, number of frames
  $8AF9 DEFW $A600    ; handler
  $8AFB DEFW $8B83    ; frame list
  $8AFD DEFB $02,$08  ; sprite width (bytes), height (2-pixel units)

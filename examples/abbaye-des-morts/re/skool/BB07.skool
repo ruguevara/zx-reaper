@@ -29,6 +29,7 @@ c$BB07 POP BC        ; x speed
  $BB14 RRA           ;
  $BB15 AND $3E       ;
  $BB17 LD L,A        ;
+@isub=LD H,FlagRowTable/256
  $BB18 LD H,$61      ; row address table at $6100
  $BB1A LD A,D        ; x in 2-pixel units
  $BB1B CP $71        ; right edge of the room

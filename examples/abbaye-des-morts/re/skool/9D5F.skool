@@ -37,8 +37,8 @@
 ; $9A       t y x n                     vertical line of n tiles t (not used by the scripts) (#R$A15A)
 ; $9B       t k, (y x n)*k              k vertical lines of tile t (#R$A14E)
 ; $9C       word1 word2                 run the subscript word1 if the byte at word2 is not 0 (#R$A058)
-; $9D       y x a n                     water or lava strip of n cells at (y,x) with attribute a: starts the per-frame reflection effect #R$AD88 and marks the cells with the harmful flag value 4 (#R$A168)
-; $9E       -                           start the flame animation of the bottom row, tiles $3B/$3C (#R$A1B9)
+; $9D       y x a n                     water strip of n cells at (y,x) with attribute a: starts the per-frame reflection effect #R$AD88 and marks the cells with the harmful flag value 4 (#R$A168)
+; $9E       -                           start the bubbling blood of the bottom row, tiles $3B/$3C (#R$A1B9)
 ; $9F       -                           start the twelve-crosses effect (#R$A1BE)
 ; .
 ; Hardware: the character and bitmap commands write the screen bitmap and the attribute commands the attribute file directly; the tile commands only write the buffers.

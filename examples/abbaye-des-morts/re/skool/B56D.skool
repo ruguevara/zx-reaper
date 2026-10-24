@@ -8,8 +8,8 @@
 ; Slot layout of the drops (made by #R$89ED from the room record; byte 3 of the record is the cycle length): +0 word
 ; handler (#R$B512 or #R$B534), +2 word speed of the fall (8.8, $0100 = 1 unit of 2 pixels per frame), +4 byte y of the
 ; stalactite tip (copy of the record's y), +5 byte y where the fall ends, +6 word x (8.8; high byte a multiple of 4),
-; +8 word y (8.8), +$A byte not used, +$B byte start delay (#R$B512), +$C..+$F hit box (y offset, x offset, y size, x
-; size), +$10 word sprite description, +$12 byte cycle countdown (70 frames, DROP_PERIOD), +$13 byte its reload, +$14
+; +8 word y (8.8), +$A byte not used, +$B byte start delay (#R$B512), +$C..+$F hit box (y offset, x offset, y far corner, x
+; far corner, relative to the position), +$10 word sprite description, +$12 byte cycle countdown (70 frames, DROP_PERIOD), +$13 byte its reload, +$14
 ; byte frame number (0, or 1 for the last 30 frames of the cycle), +$15 byte number of frames.
 ; .
 ; Sprite description of the drops (#R$94E8, after the 5-byte hit box and frame count header of the block #R$94E3): +0

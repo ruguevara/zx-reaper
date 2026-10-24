@@ -37,7 +37,7 @@ c$B44B POP DE        ; skip the speed (read again at #R$B4B3)
  $B454 SRA H         ; y / 2
  $B456 RES 0,H       ; 2 * row of cells (row = y / 4)
  $B458 LD L,H        ; L = offset into the row address table
-@isub=LD H,FLAG_ROW_TABLE_HIGH
+@isub=LD H,FlagRowTable/256
  $B459 LD H,$61      ;
  $B45B LD A,D        ; x / 4: column of cells
  $B45C RRA           ;

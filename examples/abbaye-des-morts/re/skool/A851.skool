@@ -1,12 +1,12 @@
 ; Hit test of an entity against the player, then continue where the caller says
 ;
-; Used by the enemy handlers (Death, Satan, the crusaders and the other entities), which JP here with their slot on
-; the stack: SP points at the slot's two hit box words (+$C offset, +$E size; both words have y in the low byte and x
+; Used by the enemy handlers (Death, Satan, the crusaders and the other entities), which JP here with their slot on the
+; stack: SP points at the slot's two hit box words (+$C offset, +$E far corner; both words have y in the low byte and x
 ; in the high byte, in 2-pixel units, see #R$C100). The minimum corner of the entity's box is its position plus the
-; offset, the maximum corner its position plus the size (the size is measured from the position, not from the offset
-; corner). The two corners go to DE and BC and the code falls into the overlap test #R$A85F with IX = #R$A87A. HL is
-; stored as the operand of the JP at #R$A880, so that #R$A87A goes on at the caller's address with SP just after the
-; two words.
+; offset, the maximum corner its position plus the far corner word (measured from the position, not from the offset
+; corner: it is a size only while the offset is 0). The two corners go to DE and BC and the code falls into the overlap
+; test #R$A85F with IX = #R$A87A. HL is stored as the operand of the JP at #R$A880, so that #R$A87A goes on at the
+; caller's address with SP just after the two words.
 ; .
 ; Hardware: none.
 ;
@@ -19,8 +19,8 @@ c$A851 LD ($A881),HL ; continuation address
  $A854 POP HL        ; hit box offset (y, x)
  $A855 ADD HL,DE     ; minimum corner = position + offset
  $A856 EX DE,HL      ; DE = minimum corner
- $A857 POP BC        ; hit box size (y, x)
- $A858 ADD HL,BC     ; maximum corner = position + size
+ $A857 POP BC        ; hit box far corner (y, x)
+ $A858 ADD HL,BC     ; maximum corner = position + far corner
  $A859 LD B,H        ; BC = maximum corner
  $A85A LD C,L        ;
  $A85B LD IX,$A87A   ; continue at #R$A87A after the test

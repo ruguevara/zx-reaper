@@ -5,7 +5,7 @@
 ; or pulled). The room scripts test the flags ($95/$9C opcodes at $7774, $7780, $7F78).
 ;
 ; F Carry set when Jean's box overlaps the item's box
-; SP Slot address + 4 on entry: the next stack word is the flag pointer (the action pops it); see #R$A5E9 for the slot layout
+; SP Slot address + 6 on entry (the RET of #R$A614 popped the action word at +4): the next stack word is the flag pointer (the action pops it); see #R$A5E9 for the slot layout
 @label=ActionBellOrLever
 c$A748 POP HL        ; flag pointer
  $A749 LD A,(HL)     ; flag
