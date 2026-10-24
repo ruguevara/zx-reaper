@@ -6,6 +6,8 @@
 ; .
 ; Room 4: column 4, row 0 of the 5x5 map (left is room 3, right 5, up 24, down 9, counted modulo 25). Unpacks sprite
 ; set #R$6916. Subscripts: #R$830B, #R$744B, #R$7443. No items.
+; .
+; Hardware: writes the screen bitmap and the attribute file directly (ops $81 and $8F), not through the tile map.
 @label=RoomScript04
 b$73BE DEFB $97,$01         ; SPRITESET 1
  $73C0 DEFB $86,$00,$00,$20,$16,$80 ; FILLTILE row 0, col 0, 32x22, tile $80

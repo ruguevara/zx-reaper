@@ -2,6 +2,8 @@
 ;
 ; Run at the end of the ending sequence #R$887B: clears the attributes and the screen (176 + 16 pixel rows), prints
 ; strings 49-52 centred at pixel rows 28, 48, 128 and 148 and sets the attributes to white on black.
+; .
+; Hardware: writes the screen bitmap and the attribute file directly (ops $81 and $8F), not through the tile map.
 @label=ScriptEnding3
 b$8381 DEFB $8F,$00,$00,$20,$18,$00 ; FILLATTR row 0, col 0, 32x24, attribute $00
  $8387 DEFB $81,$00,$00,$20,$C0,$00 ; FILLPIX pixel row 0, byte col 0, 32 bytes x 192 rows, byte $00

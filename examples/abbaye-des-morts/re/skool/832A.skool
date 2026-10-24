@@ -4,6 +4,8 @@
 ; status bar (176 pixel rows), prints the strings numbered #R$850E and #R$850F centred at pixel rows 65 and 85 with
 ; two PRINTVAR ops, and marks every cell for redraw so that the room comes back when the parchment is closed. The
 ; frame is drawn afterwards by #R$9C96.
+; .
+; Hardware: writes the screen bitmap and the attribute file directly (ops $81 and $8F), not through the tile map.
 @label=ScriptParchment
 b$832A DEFB $8F,$00,$00,$20,$18,$00 ; FILLATTR row 0, col 0, 32x24, attribute $00
  $8330 DEFB $81,$00,$00,$20,$B0,$00 ; FILLPIX pixel row 0, byte col 0, 32 bytes x 176 rows, byte $00

@@ -60,6 +60,8 @@
 ; the tile map, the attributes and the whole screen bitmap, prints the five lines of the story (strings 38-42, centred
 ; at pixel rows 12, 32, 52, 147 and 167), sets the attributes to white on black and clears the redraw marks (op $90
 ; with 0) so that nothing is redrawn over the text.
+; .
+; Hardware: writes the screen bitmap and the attribute file directly (ops $81 and $8F), not through the tile map.
 @label=RoomScript00
 b$726A DEFB $97,$01         ; SPRITESET 1
  $726C DEFB $86,$00,$00,$20,$16,$00 ; FILLTILE row 0, col 0, 32x22, tile $00

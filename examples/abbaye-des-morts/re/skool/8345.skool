@@ -2,6 +2,8 @@
 ;
 ; Run by the ending sequence #R$887B: clears the attributes and the screen, prints strings 43-45 centred at pixel rows
 ; 55, 75 and 95, and marks all cells for redraw.
+; .
+; Hardware: writes the screen bitmap and the attribute file directly (ops $81 and $8F), not through the tile map.
 @label=ScriptEnding1
 b$8345 DEFB $8F,$00,$00,$20,$18,$00 ; FILLATTR row 0, col 0, 32x24, attribute $00
  $834B DEFB $81,$00,$00,$20,$B0,$00 ; FILLPIX pixel row 0, byte col 0, 32 bytes x 176 rows, byte $00

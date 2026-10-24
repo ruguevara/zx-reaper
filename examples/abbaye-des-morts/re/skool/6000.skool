@@ -11,15 +11,17 @@
 ; handler #R$8585) and installs the do-nothing routine #R$8719 as the routine the handler calls (#R$8504). It then
 ; builds the row address table #R$6100 (24 words, $5E00+32*n, one per row of the tile flag map), the outline mask
 ; table at $FF00 and probes for a Kempston joystick. It ends by jumping into the game start at $8606, skipping the
-; 48K-only screen script that #R$85FC runs on a 48K machine (the loader has already shown it).
+; title screen script #R$A526 that #R$85FC draws on a 48K machine (the first time, the loader's picture serves as the
+; title).
 ; .
-; Outline mask table: byte n of the page $FF00 is NOT(n OR n<<1 OR n>>1): a pixel row with every pixel next to a set
+; Outline mask table: byte n of the page OutlineMasks ($FF00) is NOT(n OR n<<1 OR n>>1): a pixel row with every pixel next to a set
 ; pixel cleared. The sprite drawers use it to give sprites a one-pixel black outline instead of storing masks.
 ; .
 ; Kempston probe: port $1F is read 65536 times and the readings are ORed together. A machine without the interface
-; returns the floating bus, which sets some of bits 0-4, so those bits are never all zero; the routine then stores RET
-; ($C9) over the first instruction of the joystick read at $A28F, which cuts it off. With a real interface (bits 0-4
-; all zero while no direction or fire is pressed) a NOP is stored and the joystick is read each frame.
+; returns the floating bus, which sets some of bits 0-4 at some point; the routine then stores RET ($C9) at $A28F, the
+; last instruction of the key scan #R$A271, so the joystick read that follows it at $A290 is never reached. When bits
+; 0-4 stay clear (a Kempston interface with nothing pressed) a NOP is stored instead and the key scan runs on into the
+; joystick read.
 ; .
 ; Hardware: writes the border and the speaker through port $FE, sets IM 2 and the I register, writes port $7FFD
 ; through #R$85BE (128K paging; harmless on a 48K machine), reads the Kempston port $1F.
@@ -88,5 +90,5 @@ c$6000 DI            ;
  $6055 JR Z,$6059    ;
 @isub=LD A,OP_RET
  $6057 LD A,$C9             ; RET
-*$6059 LD ($A28F),A         ; NOP (0) when the joystick answers, RET when not
- $605C JP $8606             ; start the game, skipping the 48K screen script
+*$6059 LD ($A28F),A         ; 0 (NOP) when a Kempston interface answers, RET when not
+ $605C JP $8606             ; start the game, skipping the title script of a 48K
