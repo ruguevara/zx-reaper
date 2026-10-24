@@ -12,7 +12,7 @@
 ; water, so the 24 lines of the three cell rows above the water come out
 ; squashed to a third of their height and upside down). The copy is made by the
 ; chain of 32 LDI instructions at WaterCopyChain: the JR at SmcWaterJump jumps
-; into the chain so that only `width` of them run (LADC1 steps the two pointers
+; into the chain so that only `width` of them run (WaterChainTail steps the two pointers
 ; to the next line, see there). The patched operands are labelled; OpSetupWater
 ; writes them:
 ;
@@ -48,7 +48,7 @@ SmcWaterDst:
                           ; (patched)
 SmcWaterCount:
   LD BC,$0000             ; width x 8 (patched): reaches 0 after the 8th line
-; Loop head, one pixel line per pass (also jumped to from LADC1): remember the
+; Loop head, one pixel line per pass (also jumped to from WaterChainTail): remember the
 ; start of the source and destination lines, then copy the line by jumping into
 ; the LDI chain.
 DrawWaterReflection_Line:
@@ -63,8 +63,8 @@ SmcWaterJump:
 ; The chain of WaterCopyChain-ADE0 copies up to 32 bytes from (HL) to (DE) and
 ; counts BC down. The JR at SmcWaterJump of DrawWaterReflection enters it 2 x
 ; (32 - width) bytes after its start so that exactly `width` (at most 32,
-; LDI_CHAIN_LEN) bytes are copied, then execution runs on into LADC1, which
-; ends with the second half of the chain. Falls through to LADC1 after the 16th
+; LDI_CHAIN_LEN) bytes are copied, then execution runs on into WaterChainTail, which
+; ends with the second half of the chain. Falls through to WaterChainTail after the 16th
 ; LDI.
 WaterCopyChain:
   LDI                     ; the chain: 32 LDIs from here to ADE0
@@ -103,7 +103,7 @@ WaterCopyChain:
 ;             one saved by DrawWaterReflection_Line)
 ;          DE Destination line address, advanced by the LDIs
 ;          BC Bytes left to copy
-LADC1:
+WaterChainTail:
   LDI                     ; second half of the chain (16 LDIs)
   LDI
   LDI
@@ -130,34 +130,34 @@ LADC1:
                           ; source
   INC H                   ; source line + 1
   CP H
-  JR NZ,LADC1_1           ; still inside the row
+  JR NZ,WaterChainTail_1           ; still inside the row
   LD A,L                  ; reached the next row after one step: 32 to L, wrap
                           ; the third
   ADD A,$20
   LD L,A
-  JR C,LADC1_0            ; carry: next third of the screen, H is already right
+  JR C,WaterChainTail_0            ; carry: next third of the screen, H is already right
   LD A,H
   SUB $08
   LD H,A
-LADC1_0:
+WaterChainTail_0:
   INC H                   ; the other two of the three steps
   INC H
   JP DrawWaterReflection_Line ; next line
-LADC1_1:
+WaterChainTail_1:
   INC H                   ; source line + 2
   CP H
-  JR NZ,LADC1_3
+  JR NZ,WaterChainTail_3
   LD A,L                  ; reached the next row after two steps
   ADD A,$20
   LD L,A
-  JR C,LADC1_2
+  JR C,WaterChainTail_2
   LD A,H
   SUB $08
   LD H,A
-LADC1_2:
+WaterChainTail_2:
   INC H                   ; the third step
   JP DrawWaterReflection_Line ; next line
-LADC1_3:
+WaterChainTail_3:
   INC H                   ; source line + 3
   CP H
   JP NZ,DrawWaterReflection_Line ; same row: next line

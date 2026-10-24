@@ -89,7 +89,7 @@ FireballUpTemplate:
                                                                               ; UpdateFireball
                                                                               ; (UpdateSatan)
 FireballLeftTemplate:
-  DEFW UpdateFireball,OutlineMasks,$0000,$09FF,$0000,$0101,$0202,SpriteBlockFireball ; Satan's
+  DEFW UpdateFireball,$FF00,$0000,$09FF,$0000,$0101,$0202,SpriteBlockFireball ; Satan's
                                                                                      ; fireball,
                                                                                      ; straight
                                                                                      ; left (x
