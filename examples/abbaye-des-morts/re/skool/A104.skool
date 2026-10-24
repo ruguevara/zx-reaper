@@ -1,0 +1,12 @@
+; Routine at A104
+c$A104 LD C,(HL)     ;
+ $A105 INC HL        ;
+ $A106 LD B,(HL)     ;
+ $A107 INC HL        ;
+ $A108 LD ($A116),BC ;
+ $A10C LD ($A118),HL ;
+ $A10F LD E,C        ;
+ $A110 LD D,$00      ;
+*$A112 ADD HL,DE     ;
+ $A113 DJNZ $A112    ;
+ $A115 RET           ;

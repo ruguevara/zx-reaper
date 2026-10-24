@@ -1,0 +1,3 @@
+; Data block at A290
+b$A290 DEFB $01,$1F,$00,$ED,$78,$E6,$17,$B3
+ $A298 DEFB $32,$CF,$A2,$C9

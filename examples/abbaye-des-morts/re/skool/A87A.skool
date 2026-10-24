@@ -1,0 +1,5 @@
+; Routine at A87A
+c$A87A JR NC,$A880   ;
+ $A87C SBC A,A       ;
+ $A87D LD ($A8A0),A  ;
+*$A880 JP $A880      ;

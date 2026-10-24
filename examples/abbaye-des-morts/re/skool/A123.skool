@@ -1,0 +1,6 @@
+; Data block at A123
+b$A123 DEFB $CD,$1A,$A1,$7E,$23,$E5,$6F,$EB
+ $A12B DEFB $C5,$E5,$41,$E5,$CD,$3D,$A1,$E1
+ $A133 DEFB $24,$10,$F8,$E1,$C1,$2C,$10,$F0
+ $A13B DEFB $E1,$C9,$CD,$0D,$A2,$3E,$03,$84
+ $A143 DEFB $67,$73,$C9

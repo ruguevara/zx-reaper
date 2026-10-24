@@ -1,0 +1,18 @@
+; Routine at A422
+;
+; Used by the routine at #R$A336.
+c$A422 LD HL,$A2BF   ;
+ $A425 LD DE,$A2B7   ;
+ $A428 LD BC,$0800   ;
+*$A42B LD A,(DE)     ;
+ $A42C XOR (HL)      ;
+ $A42D XOR C         ;
+ $A42E LD C,A        ;
+ $A42F INC HL        ;
+ $A430 INC DE        ;
+ $A431 DJNZ $A42B    ;
+ $A433 RET NZ        ;
+ $A434 LD A,($AABE)  ;
+ $A437 XOR $30       ;
+ $A439 LD ($AABE),A  ;
+ $A43C RET           ;

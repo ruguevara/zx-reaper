@@ -1,0 +1,7 @@
+; Data block at 8559
+b$8559 DEFB $00,$00,$00,$00,$00,$00,$FF,$FF
+ $8561 DEFB $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+ $8569 DEFB $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+ $8571 DEFB $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+ $8579 DEFB $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+ $8581 DEFB $FF,$FF,$FF,$FF

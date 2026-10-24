@@ -1,0 +1,7 @@
+; Routine at A146
+c$A146 LD A,(HL)     ;
+ $A147 INC HL        ;
+ $A148 PUSH HL       ;
+ $A149 CALL $AF15    ;
+ $A14C POP HL        ;
+ $A14D RET           ;

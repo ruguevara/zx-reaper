@@ -1,0 +1,12 @@
+; Routine at 9A02
+c$9A02 CALL $99F2    ;
+ $9A05 INC H         ;
+ $9A06 CALL $99F2    ;
+ $9A09 INC H         ;
+ $9A0A CALL $99F2    ;
+ $9A0D INC H         ;
+ $9A0E CALL $99F2    ;
+ $9A11 POP AF        ;
+ $9A12 LD H,$C4      ;
+ $9A14 LD (HL),A     ;
+ $9A15 RET           ;

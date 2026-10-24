@@ -1,0 +1,6 @@
+; Data block at B436
+b$B436 DEFB $C5,$C1,$D1,$E1,$5C,$F1,$3A,$A2
+ $B43E DEFB $A8,$CB,$7F,$28,$01,$AF,$BA,$DA
+ $B446 DEFB $C3,$B2,$C3,$80,$B3,$D1,$C1,$10
+ $B44E DEFB $E7,$04,$C5,$F1,$D1,$E1,$CB,$2C
+ $B456 DEFB $CB,$84

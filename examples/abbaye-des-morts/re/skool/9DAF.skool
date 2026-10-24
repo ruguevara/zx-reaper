@@ -1,0 +1,7 @@
+; Routine at 9DAF
+c$9DAF LD A,(HL)     ;
+ $9DB0 INC HL        ;
+ $9DB1 PUSH HL       ;
+ $9DB2 CALL $9F30    ;
+ $9DB5 POP HL        ;
+ $9DB6 RET           ;

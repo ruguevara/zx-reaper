@@ -1,0 +1,6 @@
+; Data block at B646
+b$B646 DEFB $85,$34,$21,$FC,$5D,$ED,$5B,$56
+ $B64E DEFB $BE,$01,$04,$00,$ED,$B0,$ED,$53
+ $B656 DEFB $56,$BE,$D9,$48,$1C,$7B,$BA,$20
+ $B65E DEFB $02,$92,$5F,$D5,$C5,$FD,$E9,$C1
+ $B666 DEFB $C1,$E1,$54,$E1,$5C

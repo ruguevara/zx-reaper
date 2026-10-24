@@ -1,0 +1,9 @@
+; Routine at A1D9
+;
+; Used by the routines at #R$86B9, #R$897E, #R$9B5A, #R$9FA8, #R$AE4B and
+; #R$AF15.
+c$A1D9 ADD A,L       ;
+ $A1DA LD L,A        ;
+ $A1DB RET NC        ;
+ $A1DC INC H         ;
+ $A1DD RET           ;

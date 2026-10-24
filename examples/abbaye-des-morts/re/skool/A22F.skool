@@ -1,0 +1,4 @@
+; Data block at A22F
+b$A22F DEFB $7D,$0F,$0F,$0F,$6F,$E6,$E0,$84
+ $A237 DEFB $65,$6F,$7C,$E6,$03,$C6,$5E,$67
+ $A23F DEFB $C9

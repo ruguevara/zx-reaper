@@ -1,0 +1,11 @@
+; Routine at A203
+;
+; Used by the routine at #R$9BA7.
+c$A203 LD A,H        ;
+ $A204 AND $03       ;
+ $A206 ADD A,A       ;
+ $A207 ADD A,A       ;
+ $A208 ADD A,A       ;
+ $A209 OR $40        ;
+ $A20B LD H,A        ;
+ $A20C RET           ;

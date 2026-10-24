@@ -1,0 +1,12 @@
+; Routine at 9C3B
+;
+; Used by the routines at #R$9BF3 and #R$9C1B.
+c$9C3B PUSH HL       ;
+ $9C3C PUSH DE       ;
+ $9C3D CALL $9BCA    ;
+ $9C40 POP DE        ;
+ $9C41 POP HL        ;
+ $9C42 INC E         ;
+ $9C43 DEC C         ;
+ $9C44 JR NZ,$9C3B   ;
+ $9C46 RET           ;

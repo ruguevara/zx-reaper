@@ -1,0 +1,37 @@
+; Routine at A240
+;
+; Used by the routines at #R$A43D and #R$A596.
+c$A240 LD A,$FE      ;
+ $A242 LD C,A        ;
+ $A243 LD HL,$A2D3   ;
+ $A246 LD B,A        ;
+ $A247 INI           ;
+ $A249 RLCA          ;
+ $A24A LD B,A        ;
+ $A24B INI           ;
+ $A24D RLCA          ;
+ $A24E LD B,A        ;
+ $A24F INI           ;
+ $A251 RLCA          ;
+ $A252 LD B,A        ;
+ $A253 INI           ;
+ $A255 RLCA          ;
+ $A256 LD B,A        ;
+ $A257 INI           ;
+ $A259 RLCA          ;
+ $A25A LD B,A        ;
+ $A25B INI           ;
+ $A25D RLCA          ;
+ $A25E LD B,A        ;
+ $A25F INI           ;
+ $A261 RLCA          ;
+ $A262 LD B,A        ;
+ $A263 INI           ;
+ $A265 XOR A         ;
+ $A266 IN A,($FE)    ;
+ $A268 CPL           ;
+ $A269 AND $1F       ;
+ $A26B LD ($A2CF),A  ;
+ $A26E RET Z         ;
+ $A26F SCF           ;
+ $A270 RET           ;

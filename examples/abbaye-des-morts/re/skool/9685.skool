@@ -1,0 +1,7 @@
+; Data block at 9685
+b$9685 DEFB $ED,$A8,$ED,$A8,$ED,$A8,$ED,$A8
+ $968D DEFB $ED,$A8,$ED,$A8,$ED,$A8,$ED,$A8
+ $9695 DEFB $ED,$A8,$ED,$A8,$ED,$A8,$ED,$A8
+ $969D DEFB $ED,$A8,$ED,$A8,$ED,$A8,$ED,$A8
+ $96A5 DEFB $ED,$A8,$ED,$A8,$ED,$A8,$ED,$A8
+ $96AD DEFB $ED,$A8,$ED,$A8

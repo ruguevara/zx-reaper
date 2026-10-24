@@ -1,0 +1,3 @@
+; Data block at 99E8
+b$99E8 DEFB $02,$9A,$36,$9A,$7C,$9A,$D4,$9A
+ $99F0 DEFB $3E,$9B

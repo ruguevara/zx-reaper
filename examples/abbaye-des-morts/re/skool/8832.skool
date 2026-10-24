@@ -1,0 +1,26 @@
+; Routine at 8832
+;
+; Used by the routine at #R$85FC.
+c$8832 XOR A         ;
+ $8833 LD ($A894),A  ;
+ $8836 LD ($8509),A  ;
+ $8839 LD ($A2D2),A  ;
+ $883C CALL $86B9    ;
+ $883F CALL $9B5A    ;
+ $8842 LD A,$80      ;
+ $8844 LD ($850C),A  ;
+*$8847 CALL $8869    ;
+ $884A CALL $BDDA    ;
+ $884D CALL $97B7    ;
+ $8850 CALL $95FF    ;
+ $8853 CALL $A304    ;
+ $8856 LD A,($A2D2)  ;
+ $8859 OR A          ;
+ $885A RET NZ        ;
+ $885B LD A,($850C)  ;
+ $885E CP $05        ;
+ $8860 RET Z         ;
+ $8861 LD A,($A2CF)  ;
+ $8864 AND $1F       ;
+ $8866 JR Z,$8847    ;
+ $8868 RET           ;

@@ -1,0 +1,9 @@
+; Routine at 85CA
+;
+; Used by the routine at #R$85BE.
+c$85CA PUSH BC       ;
+ $85CB LD BC,$7FFD   ;
+ $85CE LD ($8507),A  ;
+ $85D1 OUT (C),A     ;
+ $85D3 POP BC        ;
+ $85D4 RET           ;

@@ -1,0 +1,11 @@
+; Routine at A5DB
+;
+; Used by the routine at #R$A596.
+c$A5DB LD HL,($BE58) ;
+ $A5DE LD DE,$BDEB   ;
+ $A5E1 LD (HL),E     ;
+ $A5E2 INC HL        ;
+ $A5E3 LD (HL),D     ;
+ $A5E4 XOR A         ;
+ $A5E5 LD ($BDDA),A  ;
+ $A5E8 RET           ;

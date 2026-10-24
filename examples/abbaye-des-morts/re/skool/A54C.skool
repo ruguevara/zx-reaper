@@ -1,0 +1,2 @@
+; Message at A54C
+t$A54C DEFM "press C for controls"

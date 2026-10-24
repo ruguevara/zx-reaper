@@ -1,0 +1,18 @@
+; Routine at 9F75
+;
+; Used by the routine at #R$9F30.
+c$9F75 LD DE,($9F26) ;
+ $9F79 LD D,$00      ;
+ $9F7B LD A,($9F93)  ;
+ $9F7E DEC A         ;
+ $9F7F JR Z,$9F8E    ;
+ $9F81 DEC A         ;
+ $9F82 LD A,C        ;
+ $9F83 JR NZ,$9F8B   ;
+ $9F85 SRL A         ;
+ $9F87 ADC A,$00     ;
+ $9F89 SUB $80       ;
+*$9F8B NEG           ;
+ $9F8D LD D,A        ;
+*$9F8E LD ($9F26),DE ;
+ $9F92 RET           ;

@@ -1,0 +1,17 @@
+; Routine at A20D
+;
+; Used by the routines at #R$9BA7 and #R$9E6A.
+c$A20D LD A,L        ;
+ $A20E RRCA          ;
+ $A20F RRCA          ;
+ $A210 RRCA          ;
+ $A211 LD L,A        ;
+ $A212 AND $E0       ;
+ $A214 ADD A,H       ;
+ $A215 LD H,L        ;
+ $A216 LD L,A        ;
+ $A217 LD A,H        ;
+ $A218 AND $03       ;
+ $A21A ADD A,$5B     ;
+ $A21C LD H,A        ;
+ $A21D RET           ;

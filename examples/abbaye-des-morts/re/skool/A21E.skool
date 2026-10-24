@@ -1,0 +1,17 @@
+; Routine at A21E
+;
+; Used by the routine at #R$9836.
+c$A21E LD A,L        ;
+ $A21F RRCA          ;
+ $A220 RRCA          ;
+ $A221 RRCA          ;
+ $A222 LD L,A        ;
+ $A223 AND $E0       ;
+ $A225 ADD A,H       ;
+ $A226 LD H,L        ;
+ $A227 LD L,A        ;
+ $A228 LD A,H        ;
+ $A229 AND $03       ;
+ $A22B ADD A,$5E     ;
+ $A22D LD H,A        ;
+ $A22E RET           ;

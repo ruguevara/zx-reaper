@@ -1,0 +1,3 @@
+; Routine at A5FC
+c$A5FC LD SP,$A5FC   ;
+ $A5FF RET           ;

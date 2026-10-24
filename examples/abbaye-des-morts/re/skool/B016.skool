@@ -1,0 +1,20 @@
+; Routine at B016
+;
+; Used by the routine at #R$AF15.
+c$B016 BIT 7,A       ;
+ $B018 RET Z         ;
+ $B019 EX AF,AF'     ;
+ $B01A PUSH AF       ;
+ $B01B PUSH BC       ;
+ $B01C LD C,A        ;
+ $B01D ADD A,A       ;
+ $B01E ADD A,C       ;
+ $B01F INC A         ;
+ $B020 INC A         ;
+ $B021 INC A         ;
+ $B022 ADD A,L       ;
+ $B023 LD L,A        ;
+ $B024 POP BC        ;
+ $B025 POP AF        ;
+ $B026 EX AF,AF'     ;
+ $B027 RET           ;

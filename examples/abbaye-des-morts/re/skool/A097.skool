@@ -1,0 +1,3 @@
+; Data block at A097
+b$A097 DEFB $CD,$1A,$A1,$7E,$23,$E5,$EB,$5F
+ $A09F DEFB $CD,$2F,$A2,$C5,$E5

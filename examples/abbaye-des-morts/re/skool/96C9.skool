@@ -1,0 +1,7 @@
+; Data block at 96C9
+b$96C9 DEFB $ED,$A0,$ED,$A0,$ED,$A0,$ED,$A0
+ $96D1 DEFB $ED,$A0,$ED,$A0,$ED,$A0,$ED,$A0
+ $96D9 DEFB $ED,$A0,$ED,$A0,$ED,$A0,$ED,$A0
+ $96E1 DEFB $ED,$A0,$ED,$A0,$ED,$A0,$ED,$A0
+ $96E9 DEFB $ED,$A0,$ED,$A0,$ED,$A0,$ED,$A0
+ $96F1 DEFB $ED,$A0,$ED,$A0

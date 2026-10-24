@@ -1,0 +1,26 @@
+; Routine at A990
+;
+; Used by the routine at #R$A8A5.
+c$A990 LD E,$00      ;
+ $A992 CALL $A9FE    ;
+ $A995 INC B         ;
+ $A996 INC B         ;
+ $A997 INC B         ;
+ $A998 CALL $A9FE    ;
+ $A99B INC B         ;
+ $A99C INC B         ;
+ $A99D INC B         ;
+ $A99E CALL $A9FE    ;
+ $A9A1 INC C         ;
+ $A9A2 INC C         ;
+ $A9A3 INC C         ;
+ $A9A4 INC C         ;
+ $A9A5 CALL $A9FE    ;
+ $A9A8 DEC B         ;
+ $A9A9 DEC B         ;
+ $A9AA DEC B         ;
+ $A9AB CALL $A9FE    ;
+ $A9AE DEC B         ;
+ $A9AF DEC B         ;
+ $A9B0 DEC B         ;
+ $A9B1 JP $A9FE      ;

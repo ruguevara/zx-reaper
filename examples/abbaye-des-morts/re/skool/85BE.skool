@@ -1,0 +1,5 @@
+; Routine at 85BE
+;
+; Used by the routine at #R$6000.
+c$85BE LD A,$10      ;
+ $85C0 JR $85CA      ;

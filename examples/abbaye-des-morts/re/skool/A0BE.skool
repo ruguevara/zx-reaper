@@ -1,0 +1,26 @@
+; Routine at A0BE
+;
+; Used by the routine at #R$A0B4.
+c$A0BE CALL $A11A    ;
+ $A0C1 PUSH HL       ;
+ $A0C2 EX DE,HL      ;
+ $A0C3 LD DE,$0000   ;
+*$A0C6 PUSH BC       ;
+ $A0C7 PUSH DE       ;
+ $A0C8 PUSH HL       ;
+ $A0C9 LD B,C        ;
+*$A0CA PUSH DE       ;
+ $A0CB CALL $A0DF    ;
+ $A0CE CALL $9E6A    ;
+ $A0D1 POP DE        ;
+ $A0D2 INC H         ;
+ $A0D3 INC E         ;
+ $A0D4 DJNZ $A0CA    ;
+ $A0D6 POP HL        ;
+ $A0D7 POP DE        ;
+ $A0D8 POP BC        ;
+ $A0D9 INC L         ;
+ $A0DA INC D         ;
+ $A0DB DJNZ $A0C6    ;
+ $A0DD POP HL        ;
+ $A0DE RET           ;

@@ -1,0 +1,44 @@
+; Routine at 95FF
+;
+; Used by the routines at #R$85FC and #R$8832.
+c$95FF LD HL,$C200   ;
+; This entry point is used by the routine at #R$96F5.
+*$9602 LD A,(HL)     ;
+ $9603 INC A         ;
+ $9604 RET Z         ;
+ $9605 DEC A         ;
+ $9606 ADD A,A       ;
+ $9607 EXX           ;
+ $9608 LD L,A        ;
+ $9609 LD H,$00      ;
+ $960B LD DE,$9CF3   ;
+ $960E ADD HL,DE     ;
+ $960F LD E,(HL)     ;
+ $9610 INC HL        ;
+ $9611 LD D,(HL)     ;
+ $9612 EXX           ;
+ $9613 INC L         ;
+ $9614 LD B,(HL)     ;
+; This entry point is used by the routine at #R$96F5.
+*$9615 PUSH BC       ;
+ $9616 INC L         ;
+ $9617 LD A,(HL)     ;
+ $9618 INC L         ;
+ $9619 PUSH HL       ;
+ $961A LD L,(HL)     ;
+ $961B LD H,$C3      ;
+ $961D EXX           ;
+ $961E LD L,A        ;
+ $961F LD H,$00      ;
+ $9621 ADD HL,DE     ;
+ $9622 PUSH HL       ;
+ $9623 EXX           ;
+ $9624 POP DE        ;
+ $9625 LD A,$20      ;
+ $9627 SUB (HL)      ;
+ $9628 ADD A,A       ;
+ $9629 LD ($96C8),A  ;
+ $962C LD ($9684),A  ;
+ $962F LD ($9635),A  ;
+ $9632 LD H,$C4      ;
+*$9634 JR $9634      ;

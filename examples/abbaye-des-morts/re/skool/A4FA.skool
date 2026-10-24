@@ -1,0 +1,2 @@
+; Data block at A4FA
+b$A4FA DEFB $80,$81,$70,$00,$20,$10,$00,$8E

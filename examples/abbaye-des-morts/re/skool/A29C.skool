@@ -1,0 +1,20 @@
+; Routine at A29C
+;
+; Used by the routine at #R$A43D.
+c$A29C LD HL,$A2D3   ;
+ $A29F LD B,$08      ;
+*$A2A1 LD C,$10      ;
+*$A2A3 LD A,(HL)     ;
+ $A2A4 AND C         ;
+ $A2A5 CP $01        ;
+ $A2A7 JR C,$A2B2    ;
+ $A2A9 RRC C         ;
+ $A2AB JR NC,$A2A3   ;
+ $A2AD INC HL        ;
+ $A2AE DJNZ $A2A1    ;
+ $A2B0 LD C,B        ;
+ $A2B1 RET           ;
+*$A2B2 LD A,$08      ;
+ $A2B4 SUB B         ;
+ $A2B5 LD B,A        ;
+ $A2B6 RET           ;

@@ -1,0 +1,8 @@
+; Routine at 9CE7
+;
+; Used by the routine at #R$85FC.
+c$9CE7 NOP           ;
+ $9CE8 LD HL,$9CE7   ;
+ $9CEB LD (HL),$C9   ;
+ $9CED LD HL,$9CED   ;
+ $9CF0 JP $9D5F      ;

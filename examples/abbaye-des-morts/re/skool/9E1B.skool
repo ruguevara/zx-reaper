@@ -1,0 +1,13 @@
+; Routine at 9E1B
+c$9E1B LD E,(HL)     ;
+ $9E1C INC HL        ;
+ $9E1D LD D,(HL)     ;
+ $9E1E INC HL        ;
+ $9E1F LD A,(HL)     ;
+ $9E20 INC HL        ;
+ $9E21 PUSH HL       ;
+ $9E22 EX DE,HL      ;
+ $9E23 LD E,A        ;
+ $9E24 CALL $9E6A    ;
+ $9E27 POP HL        ;
+ $9E28 RET           ;

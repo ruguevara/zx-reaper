@@ -1,0 +1,17 @@
+; Routine at 9C1B
+;
+; Used by the routine at #R$85FC.
+c$9C1B NOP           ;
+ $9C1C LD HL,$9C1B   ;
+ $9C1F LD (HL),$C9   ;
+ $9C21 LD DE,$50E0   ;
+ $9C24 LD HL,$D2E0   ;
+ $9C27 LD C,$0C      ;
+ $9C29 CALL $9C3B    ;
+ $9C2C LD HL,$5AE0   ;
+ $9C2F LD A,($854D)  ;
+ $9C32 INC A         ;
+ $9C33 LD C,$0C      ;
+ $9C35 LD B,A        ;
+ $9C36 LD A,$47      ;
+ $9C38 JP $9C47      ;

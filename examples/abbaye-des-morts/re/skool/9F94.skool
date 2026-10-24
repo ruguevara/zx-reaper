@@ -1,0 +1,17 @@
+; Routine at 9F94
+;
+; Used by the routine at #R$9D81.
+c$9F94 PUSH AF       ;
+ $9F95 CALL $A1DE    ;
+ $9F98 POP DE        ;
+*$9F99 PUSH HL       ;
+ $9F9A PUSH BC       ;
+ $9F9B LD B,C        ;
+*$9F9C LD (HL),D     ;
+ $9F9D INC L         ;
+ $9F9E DJNZ $9F9C    ;
+ $9FA0 POP BC        ;
+ $9FA1 POP HL        ;
+ $9FA2 CALL $9F17    ;
+ $9FA5 DJNZ $9F99    ;
+ $9FA7 RET           ;

@@ -1,0 +1,14 @@
+; Routine at 87D7
+;
+; Used by the routine at #R$871A.
+c$87D7 PUSH HL       ;
+ $87D8 LD HL,($87E8) ;
+ $87DB INC HL        ;
+ $87DC LD A,H        ;
+ $87DD AND $03       ;
+ $87DF LD H,A        ;
+ $87E0 LD ($87E8),A  ;
+ $87E3 LD A,R        ;
+ $87E5 XOR (HL)      ;
+ $87E6 POP HL        ;
+ $87E7 RET           ;

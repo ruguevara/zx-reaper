@@ -1,0 +1,4 @@
+; Data block at 9E29
+b$9E29 DEFB $5E,$23,$56,$23,$46,$23,$E5,$EB
+ $9E31 DEFB $E3,$5E,$23,$E3,$CD,$6A,$9E,$24
+ $9E39 DEFB $10,$F6,$E1,$C9

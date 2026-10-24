@@ -1,0 +1,5 @@
+; Routine at A98B
+;
+; Used by the routine at #R$A8A5.
+c$A98B LD E,$00      ;
+ $A98D JP $A9FE      ;

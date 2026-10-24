@@ -1,0 +1,6 @@
+; Routine at A43D
+c$A43D CALL $871A    ;
+ $A440 CALL $A240    ;
+ $A443 CALL $A29C    ;
+ $A446 LD ($8502),BC ;
+ $A44A JP $A304      ;

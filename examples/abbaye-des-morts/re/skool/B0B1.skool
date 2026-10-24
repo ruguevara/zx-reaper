@@ -1,0 +1,28 @@
+; Routine at B0B1
+c$B0B1 JP NC,$B41F   ;
+ $B0B4 EX DE,HL      ;
+ $B0B5 LD D,IXh      ;
+ $B0B7 LD E,IXl      ;
+ $B0B9 LDI           ;
+ $B0BB LDI           ;
+ $B0BD LDI           ;
+ $B0BF LDI           ;
+ $B0C1 LDI           ;
+ $B0C3 LDI           ;
+ $B0C5 LDI           ;
+ $B0C7 LDI           ;
+ $B0C9 LDI           ;
+ $B0CB LDI           ;
+ $B0CD LDI           ;
+ $B0CF LDI           ;
+ $B0D1 LDI           ;
+ $B0D3 LDI           ;
+ $B0D5 LDI           ;
+ $B0D7 LDI           ;
+ $B0D9 LDI           ;
+ $B0DB LDI           ;
+ $B0DD LDI           ;
+ $B0DF LDI           ;
+ $B0E1 LDI           ;
+ $B0E3 LDI           ;
+ $B0E5 JP $B41F      ;

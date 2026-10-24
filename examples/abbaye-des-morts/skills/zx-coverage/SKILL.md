@@ -1,0 +1,45 @@
+---
+name: zx-coverage
+description: Grow the code execution map of a ZX Spectrum game (input scripts, random play, RZX recordings) so code/data separation is reliable. Use after init and whenever `zxq.py unexec` shows large unexplained regions.
+---
+
+# zx-coverage
+
+Coverage tells code from data without reading it. Aim for every reachable
+routine executed at least once; 100% instruction coverage is not needed.
+
+1. Status: `make status` (code coverage line) and `tools/zxq.py unexec re/maps/*.map | head -40`.
+2. Write input scripts in `tests/inputs/NAME.txt` (format: `tools/zxrun.py -h`).
+   Find controls from screenshots: run with `--shots-every 50:/tmp/s`, view a few
+   PNGs, not all. Typical scripts: `menu` (each menu option), `play-1` (start,
+   move, fire, die), `die-all` (lose every life, game over, high score entry),
+   `pause`, `redefine-keys`.
+   End each with `N END`. Check a script does what you think by viewing
+   `--shot` frames at its key moments. Games with typed commands (adventures):
+   `+500 TYPE take the lamp` types a line and ENTER, and `--text [FONT]`
+   prints the final screen as text (the ROM's font, and the game's at FONT),
+   cheaper to read than a PNG. Play step by step from a `--dump`ed snapshot:
+   a resumed run is identical to a continuous one.
+3. `make coverage` adds maps from all scripts and RZX files.
+4. Random play reaches odd paths cheaply:
+   `tools/zxrun.py re/orig.z80 --frames 20000 --fuzz 2:3:O,P,Q,A,M,SPACE --map re/maps/fuzz2.map`
+   (use the game's real keys; try several seeds). Random keys get nowhere in
+   a game with typed commands: once its dictionary is decoded, write a
+   script that generates lines from it (each verb with the objects of the
+   place, orders to each character, the special words, refused lines
+   followed by the repeat key, junk after ALL and EXCEPT, very long lines),
+   run it over many seeds and keep the scripts that grow the map. Press
+   every key of the key tables once as the first key of a line, and once
+   in the middle.
+5. Later levels and endings need real play. Ask the human for an RZX
+   (Fuse: Recording → Record, play 10 minutes) or take one from the RZX Archive;
+   put it in `re/rzx/` and run `make coverage`.
+6. Make the important scripts regression tests: `make expected` records their
+   frame hashes from the original; `make test` replays them on the build.
+
+Coverage only bounds claims: an address missing from the maps was not run by
+these inputs, which is not proof that it is dead. Record such regions as
+`unknown` findings until the code shows them unreachable.
+
+Stop when two new scripts in a row add under 1% coverage; note what is
+still unexecuted and why in `re/notes.md`.

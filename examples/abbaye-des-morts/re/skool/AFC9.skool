@@ -1,0 +1,38 @@
+; Routine at AFC9
+;
+; Used by the routine at #R$AF15.
+c$AFC9 PUSH AF       ;
+ $AFCA PUSH HL       ;
+ $AFCB PUSH DE       ;
+ $AFCC PUSH BC       ;
+ $AFCD PUSH AF       ;
+ $AFCE LD B,C        ;
+ $AFCF LD C,A        ;
+ $AFD0 SLA B         ;
+ $AFD2 SLA B         ;
+ $AFD4 SLA B         ;
+ $AFD6 DEC A         ;
+ $AFD7 ADD A,L       ;
+ $AFD8 LD L,A        ;
+*$AFD9 PUSH HL       ;
+ $AFDA PUSH DE       ;
+ $AFDB PUSH BC       ;
+ $AFDC CALL $B006    ;
+ $AFDF POP BC        ;
+ $AFE0 POP DE        ;
+ $AFE1 POP HL        ;
+ $AFE2 INC H         ;
+ $AFE3 INC D         ;
+ $AFE4 DJNZ $AFD9    ;
+ $AFE6 POP AF        ;
+ $AFE7 POP BC        ;
+ $AFE8 POP DE        ;
+ $AFE9 POP HL        ;
+*$AFEA INC L         ;
+ $AFEB INC E         ;
+ $AFEC DEC A         ;
+ $AFED JR Z,$AFF2    ;
+ $AFEF DJNZ $AFEA    ;
+ $AFF1 INC B         ;
+*$AFF2 POP AF        ;
+ $AFF3 RET           ;

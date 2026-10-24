@@ -1,0 +1,6 @@
+; Routine at 9D99
+c$9D99 LD DE,$9F93   ;
+ $9D9C LDI           ;
+ $9D9E LD DE,$9F26   ;
+ $9DA1 LDI           ;
+ $9DA3 RET           ;

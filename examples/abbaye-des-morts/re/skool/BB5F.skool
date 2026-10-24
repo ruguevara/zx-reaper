@@ -1,0 +1,6 @@
+; Data block at BB5F
+b$BB5F DEFB $85,$7E,$B7,$C2,$8E,$B0,$36,$FF
+ $BB67 DEFB $21,$51,$85,$36,$07,$21,$D4,$82
+ $BB6F DEFB $22,$EE,$9C,$AF,$32,$E7,$9C,$32
+ $BB77 DEFB $42,$85,$F1,$F1,$E1,$D1,$6A,$CB
+ $BB7F DEFB $2C,$CB

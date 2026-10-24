@@ -1,0 +1,15 @@
+; Routine at AAAB
+;
+; Used by the routine at #R$A596.
+c$AAAB LD A,($A894)  ;
+ $AAAE INC A         ;
+ $AAAF JP Z,$83CE    ;
+ $AAB2 DEC A         ;
+ $AAB3 RET Z         ;
+ $AAB4 DEC A         ;
+ $AAB5 JR Z,$AA56    ;
+ $AAB7 LD C,A        ;
+ $AAB8 LD A,($A2D1)  ;
+ $AABB LD B,A        ;
+ $AABC BIT 5,B       ;
+ $AABE JR $AAC6      ;

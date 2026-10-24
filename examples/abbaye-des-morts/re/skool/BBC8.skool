@@ -1,0 +1,6 @@
+; Data block at BBC8
+b$BBC8 DEFB $FE,$5D,$CB,$2C,$CB,$2C,$22,$D3
+ $BBD0 DEFB $AC,$01,$0C,$01,$09,$22,$DD,$AC
+ $BBD8 DEFB $C1,$06,$32,$0D,$20,$01,$48,$C5
+ $BBE0 DEFB $C1,$20,$3D,$D9,$3E,$07,$32,$4F
+ $BBE8 DEFB $85,$21,$52,$85

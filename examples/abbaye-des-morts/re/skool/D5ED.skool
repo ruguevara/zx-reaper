@@ -1,0 +1,2 @@
+; Data block at D5ED
+b$D5ED DEFB $D2,$CA,$1C,$1C

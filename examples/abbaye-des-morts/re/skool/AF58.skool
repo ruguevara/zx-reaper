@@ -1,0 +1,31 @@
+; Routine at AF58
+;
+; Used by the routine at #R$AF15.
+c$AF58 PUSH AF       ;
+*$AF59 PUSH BC       ;
+ $AF5A PUSH DE       ;
+ $AF5B PUSH AF       ;
+ $AF5C XOR A         ;
+*$AF5D LD B,(HL)     ;
+ $AF5E INC HL        ;
+ $AF5F SCF           ;
+ $AF60 RL B          ;
+*$AF62 JR NC,$AF66   ;
+ $AF64 LD A,(HL)     ;
+ $AF65 INC HL        ;
+*$AF66 LD (DE),A     ;
+ $AF67 INC D         ;
+ $AF68 SLA B         ;
+ $AF6A JR NZ,$AF62   ;
+ $AF6C DEC C         ;
+ $AF6D JR NZ,$AF5D   ;
+ $AF6F POP AF        ;
+ $AF70 POP DE        ;
+ $AF71 POP BC        ;
+ $AF72 INC E         ;
+ $AF73 DEC A         ;
+ $AF74 JR Z,$AF79    ;
+ $AF76 DJNZ $AF59    ;
+ $AF78 INC B         ;
+*$AF79 POP AF        ;
+ $AF7A RET           ;

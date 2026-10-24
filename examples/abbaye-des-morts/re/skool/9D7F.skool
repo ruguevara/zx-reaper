@@ -1,0 +1,3 @@
+; Routine at 9D7F
+c$9D7F POP HL        ;
+ $9D80 RET           ;

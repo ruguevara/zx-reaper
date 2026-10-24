@@ -1,0 +1,3 @@
+; Data block at 9DC2
+b$9DC2 DEFB $4E,$23,$46,$23,$C5,$79,$CD,$1A
+ $9DCA DEFB $A1,$CD,$D7,$9D,$C1,$10,$F5,$C9

@@ -1,0 +1,2 @@
+; Data block at B83E
+b$B83E DEFB $FE,$5D,$21,$12,$BD,$22,$FC

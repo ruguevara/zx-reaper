@@ -1,0 +1,7 @@
+; Routine at BDDB
+c$BDDB LD A,$C9      ;
+ $BDDD LD ($AA1F),A  ;
+ $BDE0 LD ($BDDA),A  ;
+ $BDE3 LD ($BDEC),SP ;
+ $BDE7 LD SP,$BE5A   ;
+ $BDEA RET           ;

@@ -1,0 +1,3 @@
+; Data block at 97FD
+b$97FD DEFB $E1,$D1,$C1,$F1,$32,$35,$98,$ED
+ $9805 DEFB $53,$30,$98,$CB,$38,$CB

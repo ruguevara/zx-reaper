@@ -1,0 +1,3 @@
+; Data block at 6EA3
+b$6EA3 DEFB $CB,$E3,$FE,$BE,$FF,$CF,$AF,$07
+ $6EAB DEFB $2E,$7C,$38,$10

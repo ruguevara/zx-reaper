@@ -1,0 +1,2 @@
+; Data block at 7049
+b$7049 DEFB $FF,$B9,$F8,$A9,$8E,$87,$05,$00

@@ -1,0 +1,10 @@
+; Routine at AFF4
+;
+; Used by the routine at #R$AF7B.
+c$AFF4 LD B,C        ;
+*$AFF5 LD A,(HL)     ;
+ $AFF6 LD (DE),A     ;
+ $AFF7 INC L         ;
+ $AFF8 INC E         ;
+ $AFF9 DJNZ $AFF5    ;
+ $AFFB RET           ;

@@ -1,0 +1,13 @@
+; Routine at 9F43
+;
+; Used by the routine at #R$9F30.
+c$9F43 LD HL,$9048   ;
+ $9F46 OR A          ;
+ $9F47 RET Z         ;
+ $9F48 LD B,A        ;
+ $9F49 LD DE,$0000   ;
+*$9F4C LD E,(HL)     ;
+ $9F4D INC HL        ;
+ $9F4E ADD HL,DE     ;
+ $9F4F DJNZ $9F4C    ;
+ $9F51 RET           ;

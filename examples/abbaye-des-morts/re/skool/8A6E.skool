@@ -1,0 +1,26 @@
+; Routine at 8A6E
+;
+; Used by the routines at #R$897E and #R$89ED.
+c$8A6E POP IY        ;
+; This entry point is used by the routine at #R$B099.
+*$8A70 EXX           ;
+ $8A71 LD HL,$C100   ;
+ $8A74 LD BC,$0B15   ;
+*$8A77 LD A,(HL)     ;
+ $8A78 INC L         ;
+ $8A79 OR (HL)       ;
+ $8A7A JR Z,$8A85    ;
+ $8A7C LD A,L        ;
+ $8A7D ADD A,C       ;
+ $8A7E LD L,A        ;
+ $8A7F DJNZ $8A77    ;
+ $8A81 EXX           ;
+ $8A82 OR A          ;
+ $8A83 JP (IY)       ;
+*$8A85 DEC L         ;
+ $8A86 EX DE,HL      ;
+ $8A87 LD IXl,E      ;
+ $8A89 LD IXh,D      ;
+ $8A8B EXX           ;
+ $8A8C SCF           ;
+ $8A8D JP (IY)       ;

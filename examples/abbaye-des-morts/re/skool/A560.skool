@@ -1,0 +1,2 @@
+; Data block at A560
+b$A560 DEFB $8E,$B0,$00

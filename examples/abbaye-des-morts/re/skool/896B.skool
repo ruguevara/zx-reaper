@@ -1,0 +1,19 @@
+; Routine at 896B
+;
+; Used by the routine at #R$8957.
+c$896B PUSH AF       ;
+ $896C PUSH HL       ;
+ $896D PUSH DE       ;
+ $896E PUSH BC       ;
+ $896F INC HL        ;
+ $8970 LD C,(HL)     ;
+ $8971 INC HL        ;
+ $8972 LD B,(HL)     ;
+ $8973 LD A,(BC)     ;
+ $8974 CP $FF        ;
+ $8976 CALL NZ,$897E ;
+ $8979 POP BC        ;
+ $897A POP DE        ;
+ $897B POP HL        ;
+ $897C POP AF        ;
+ $897D RET           ;

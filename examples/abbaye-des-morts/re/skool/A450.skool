@@ -1,0 +1,23 @@
+; Routine at A450
+;
+; Used by the routine at #R$A336.
+c$A450 LD HL,$5800   ;
+ $A453 LD DE,$5801   ;
+ $A456 LD (HL),L     ;
+ $A457 LD BC,$02FF   ;
+ $A45A LDIR          ;
+ $A45C LD A,$EB      ;
+; This entry point is used by the routine at #R$A44D.
+*$A45E LD ($A479),A  ;
+ $A461 LD ($A46D),A  ;
+ $A464 LD HL,$4800   ;
+ $A467 LD DE,$C500   ;
+ $A46A LD BC,$0800   ;
+ $A46D NOP           ;
+ $A46E LDIR          ;
+ $A470 LD HL,$5800   ;
+ $A473 LD DE,$5B00   ;
+ $A476 LD BC,$0300   ;
+ $A479 NOP           ;
+ $A47A LDIR          ;
+ $A47C RET           ;

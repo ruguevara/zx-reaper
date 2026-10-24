@@ -1,0 +1,4 @@
+; Data block at AD71
+b$AD71 DEFB $1F,$DA,$0D,$AD,$1F,$DA,$22,$AD
+ $AD79 DEFB $1F,$DA,$53,$AD,$1F,$DA,$3C,$AD
+ $AD81 DEFB $C9,$3E,$04,$32,$94,$A8,$C9

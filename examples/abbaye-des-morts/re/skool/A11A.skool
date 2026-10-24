@@ -1,0 +1,12 @@
+; Routine at A11A
+;
+; Used by the routines at #R$9D81, #R$9D8D, #R$9DD2 and #R$A0BE.
+c$A11A LD E,(HL)     ;
+ $A11B INC HL        ;
+ $A11C LD D,(HL)     ;
+ $A11D INC HL        ;
+ $A11E LD C,(HL)     ;
+ $A11F INC HL        ;
+ $A120 LD B,(HL)     ;
+ $A121 INC HL        ;
+ $A122 RET           ;

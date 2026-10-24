@@ -1,0 +1,2 @@
+; Data block at B45C
+b$B45C DEFB $1F,$1F,$E6,$1F,$86

@@ -1,0 +1,2 @@
+; Data block at 620E
+b$620E DEFB $A8,$A0,$E0

@@ -1,0 +1,4 @@
+; Data block at 6A6B
+b$6A6B DEFB $60,$F0,$F0,$A8,$A4,$10,$00,$FF
+ $6A73 DEFB $80,$D8,$F0,$60,$80,$C0,$E8,$F5
+ $6A7B DEFB $FF

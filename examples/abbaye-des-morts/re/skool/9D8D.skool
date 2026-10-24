@@ -1,0 +1,9 @@
+; Routine at 9D8D
+c$9D8D CALL $A11A    ;
+ $9D90 LD A,(HL)     ;
+ $9D91 INC HL        ;
+ $9D92 PUSH HL       ;
+ $9D93 EX DE,HL      ;
+ $9D94 CALL $9FA8    ;
+ $9D97 POP HL        ;
+ $9D98 RET           ;

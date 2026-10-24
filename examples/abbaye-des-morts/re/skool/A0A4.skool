@@ -1,0 +1,2 @@
+; Message at A0A4
+t$A0A4 DEFM "As,"

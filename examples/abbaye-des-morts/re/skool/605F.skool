@@ -1,0 +1,13 @@
+; Routine at 605F
+;
+; Used by the routine at #R$6000.
+c$605F LD A,$CD      ;
+ $6061 LD ($860C),A  ;
+ $6064 LD ($88D5),A  ;
+ $6067 LD ($A31E),A  ;
+ $606A LD A,L        ;
+ $606B OR A          ;
+ $606C RET Z         ;
+ $606D LD A,$C3      ;
+ $606F LD ($871A),A  ;
+ $6072 RET           ;

@@ -1,0 +1,9 @@
+; Routine at A9B4
+;
+; Used by the routines at #R$A8A5 and #R$A950.
+c$A9B4 LD E,$00      ;
+ $A9B6 CALL $A9FE    ;
+ $A9B9 INC B         ;
+ $A9BA INC B         ;
+ $A9BB INC B         ;
+ $A9BC JP $A9FE      ;

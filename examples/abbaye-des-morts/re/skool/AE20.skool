@@ -1,0 +1,29 @@
+; Routine at AE20
+;
+; Used by the routine at #R$85FC.
+c$AE20 NOP           ;
+ $AE21 LD HL,$8510   ;
+ $AE24 DEC (HL)      ;
+ $AE25 RET NZ        ;
+ $AE26 LD (HL),$02   ;
+ $AE28 LD BC,$2001   ;
+ $AE2B LD DE,$5DA0   ;
+ $AE2E LD HL,$60A0   ;
+*$AE31 LD A,(DE)     ;
+ $AE32 CP $3B        ;
+ $AE34 JR Z,$AE3E    ;
+ $AE36 CP $3C        ;
+ $AE38 JR Z,$AE42    ;
+ $AE3A INC E         ;
+ $AE3B DJNZ $AE31    ;
+ $AE3D RET           ;
+*$AE3E INC A         ;
+ $AE3F LD (DE),A     ;
+ $AE40 JR $AE44      ;
+*$AE42 DEC A         ;
+ $AE43 LD (DE),A     ;
+*$AE44 LD L,E        ;
+ $AE45 SET 7,(HL)    ;
+ $AE47 INC E         ;
+ $AE48 DJNZ $AE31    ;
+ $AE4A RET           ;

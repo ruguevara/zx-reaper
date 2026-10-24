@@ -1,0 +1,4 @@
+; Data block at B5DF
+b$B5DF DEFB $FE,$5D,$D9,$FD,$21,$D4,$B3,$21
+ $B5E7 DEFB $B2,$BC,$18,$26,$C1,$C1,$E1,$54
+ $B5EF DEFB $E1,$5C

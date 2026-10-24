@@ -1,0 +1,2 @@
+; Data block at 8BFC
+b$8BFC DEFB $94,$02,$03,$20,$08,$20,$48,$00

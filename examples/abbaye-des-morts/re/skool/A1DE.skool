@@ -1,0 +1,20 @@
+; Routine at A1DE
+;
+; Used by the routine at #R$9F94.
+c$A1DE LD A,L        ;
+ $A1DF ADD A,A       ;
+ $A1E0 ADD A,A       ;
+ $A1E1 AND $E0       ;
+ $A1E3 ADD A,H       ;
+ $A1E4 LD H,A        ;
+ $A1E5 LD A,L        ;
+ $A1E6 RRCA          ;
+ $A1E7 RRCA          ;
+ $A1E8 RRCA          ;
+ $A1E9 XOR L         ;
+ $A1EA AND $F8       ;
+ $A1EC XOR L         ;
+ $A1ED OR $40        ;
+ $A1EF LD L,H        ;
+ $A1F0 LD H,A        ;
+ $A1F1 RET           ;

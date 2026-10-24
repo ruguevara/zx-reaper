@@ -1,0 +1,2 @@
+; Data block at A2FF
+b$A2FF DEFB $02

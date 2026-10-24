@@ -1,0 +1,6 @@
+; Routine at 9DF0
+c$9DF0 LD D,H        ;
+ $9DF1 LD E,L        ;
+ $9DF2 LD C,$01      ;
+ $9DF4 INC HL        ;
+ $9DF5 JR $9DFE      ;

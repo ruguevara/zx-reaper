@@ -1,0 +1,2 @@
+; Data block at 92EE
+b$92EE DEFB $1F

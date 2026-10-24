@@ -1,0 +1,6 @@
+; Data block at BA9C
+b$BA9C DEFB $85,$34,$21,$FC,$5D,$ED,$5B,$56
+ $BAA4 DEFB $BE,$01,$04,$00,$ED,$B0,$ED,$53
+ $BAAC DEFB $56,$BE,$D9,$FD,$E9,$C1,$C1,$D9
+ $BAB4 DEFB $D1,$D9,$E1,$09,$E5,$D9,$F1,$C6
+ $BABC DEFB $07,$1F,$E6

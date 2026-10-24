@@ -1,0 +1,18 @@
+; Routine at 98E4
+;
+; Used by the routine at #R$9972.
+c$98E4 LD HL,$C200   ;
+*$98E7 LD A,(DE)     ;
+ $98E8 CP (HL)       ;
+ $98E9 JR Z,$98F3    ;
+ $98EB INC L         ;
+ $98EC LD A,(HL)     ;
+ $98ED INC L         ;
+ $98EE ADD A,A       ;
+ $98EF ADD A,L       ;
+ $98F0 LD L,A        ;
+ $98F1 JR $98E7      ;
+*$98F3 INC L         ;
+ $98F4 LD A,(HL)     ;
+ $98F5 INC L         ;
+ $98F6 RET           ;

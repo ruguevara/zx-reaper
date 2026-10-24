@@ -1,0 +1,11 @@
+; Routine at B426
+;
+; Used by the routine at #R$B391.
+c$B426 LD HL,$FFFA   ;
+ $B429 ADD HL,SP     ;
+ $B42A LD SP,HL      ;
+ $B42B LD HL,$0000   ;
+ $B42E PUSH HL       ;
+ $B42F LD HL,$0016   ;
+ $B432 ADD HL,SP     ;
+ $B433 JP $A5F0      ;

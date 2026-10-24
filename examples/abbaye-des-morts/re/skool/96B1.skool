@@ -1,0 +1,15 @@
+; Routine at 96B1
+c$96B1 LDD           ;
+ $96B3 LDD           ;
+ $96B5 LDD           ;
+ $96B7 LDD           ;
+ $96B9 LDD           ;
+ $96BB LDD           ;
+ $96BD LDD           ;
+ $96BF LDD           ;
+ $96C1 LDD           ;
+ $96C3 LD A,(HL)     ;
+ $96C4 LD (DE),A     ;
+ $96C5 INC H         ;
+ $96C6 INC D         ;
+*$96C7 JR $96C7      ;

@@ -1,0 +1,2 @@
+; Message at BA80
+t$BA80 DEFM "Z ,Z"

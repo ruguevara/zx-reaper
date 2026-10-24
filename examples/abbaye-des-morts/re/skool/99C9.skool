@@ -1,0 +1,27 @@
+; Routine at 99C9
+;
+; Used by the routine at #R$9972.
+c$99C9 PUSH BC       ;
+ $99CA PUSH HL       ;
+ $99CB PUSH DE       ;
+ $99CC DEC A         ;
+ $99CD ADD A,A       ;
+ $99CE LD HL,$99E8   ;
+ $99D1 LD E,A        ;
+ $99D2 LD D,$00      ;
+ $99D4 ADD HL,DE     ;
+ $99D5 LD E,(HL)     ;
+ $99D6 INC HL        ;
+ $99D7 LD D,(HL)     ;
+ $99D8 LD HL,$0004   ;
+ $99DB EX DE,HL      ;
+ $99DC LD A,E        ;
+ $99DD SUB C         ;
+ $99DE JR Z,$99E4    ;
+ $99E0 LD B,A        ;
+*$99E1 ADD HL,DE     ;
+ $99E2 DJNZ $99E1    ;
+*$99E4 POP DE        ;
+ $99E5 EX (SP),HL    ;
+ $99E6 EXX           ;
+ $99E7 RET           ;

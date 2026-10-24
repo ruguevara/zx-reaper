@@ -1,0 +1,3 @@
+; Data block at ADF9
+b$ADF9 DEFB $C3,$9D,$AD,$24,$BC,$20,$0E,$7D
+ $AE01 DEFB $C6

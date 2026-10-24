@@ -1,0 +1,16 @@
+; Routine at AD88
+;
+; Used by the routine at #R$85FC.
+c$AD88 NOP           ;
+ $AD89 LD HL,$0000   ;
+ $AD8C LD A,$00      ;
+ $AD8E LD B,$00      ;
+*$AD90 LD (HL),A     ;
+ $AD91 INC L         ;
+ $AD92 DJNZ $AD90    ;
+ $AD94 LD HL,$0000   ;
+ $AD97 LD DE,$0000   ;
+ $AD9A LD BC,$0000   ;
+ $AD9D PUSH HL       ;
+ $AD9E PUSH DE       ;
+*$AD9F JR $AD9F      ;

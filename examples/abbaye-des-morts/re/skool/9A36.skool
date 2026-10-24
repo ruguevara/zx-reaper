@@ -1,0 +1,14 @@
+; Routine at 9A36
+c$9A36 CALL $9A16    ;
+ $9A39 INC H         ;
+ $9A3A CALL $9A16    ;
+ $9A3D INC H         ;
+ $9A3E CALL $9A16    ;
+ $9A41 INC H         ;
+ $9A42 CALL $9A16    ;
+ $9A45 POP AF        ;
+ $9A46 LD H,$C4      ;
+ $9A48 LD (HL),A     ;
+ $9A49 INC L         ;
+ $9A4A LD (HL),A     ;
+ $9A4B RET           ;

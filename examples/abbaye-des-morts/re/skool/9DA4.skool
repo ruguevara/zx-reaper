@@ -1,0 +1,10 @@
+; Routine at 9DA4
+c$9DA4 LD E,(HL)     ;
+ $9DA5 INC HL        ;
+ $9DA6 LD D,(HL)     ;
+ $9DA7 INC HL        ;
+ $9DA8 PUSH HL       ;
+ $9DA9 EX DE,HL      ;
+ $9DAA CALL $9D5F    ;
+ $9DAD POP HL        ;
+ $9DAE RET           ;

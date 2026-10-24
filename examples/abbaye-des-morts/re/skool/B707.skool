@@ -1,0 +1,2 @@
+; Data block at B707
+b$B707 DEFB $1F,$1F,$E6,$1F,$86

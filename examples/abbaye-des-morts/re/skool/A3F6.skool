@@ -1,0 +1,27 @@
+; Routine at A3F6
+;
+; Used by the routine at #R$A3B9.
+c$A3F6 PUSH HL       ;
+ $A3F7 LD HL,$A41A   ;
+ $A3FA CP $0D        ;
+ $A3FC JR Z,$A414    ;
+ $A3FE INC HL        ;
+ $A3FF INC HL        ;
+ $A400 CP $20        ;
+ $A402 JR Z,$A414    ;
+ $A404 INC HL        ;
+ $A405 INC HL        ;
+ $A406 CP $01        ;
+ $A408 JR Z,$A414    ;
+ $A40A INC HL        ;
+ $A40B INC HL        ;
+ $A40C CP $02        ;
+ $A40E JR Z,$A414    ;
+ $A410 LD (DE),A     ;
+ $A411 INC DE        ;
+ $A412 POP HL        ;
+ $A413 RET           ;
+*$A414 LDI           ;
+ $A416 LDI           ;
+ $A418 POP HL        ;
+ $A419 RET           ;

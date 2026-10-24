@@ -1,0 +1,36 @@
+; Routine at BDF3
+;
+; Used by the routine at #R$85FC.
+c$BDF3 XOR A         ;
+ $BDF4 LD ($850C),A  ;
+ $BDF7 LD ($A8A0),A  ;
+ $BDFA LD HL,$A894   ;
+ $BDFD LD A,(HL)     ;
+ $BDFE CP $01        ;
+ $BE00 JR NZ,$BE04   ;
+ $BE02 LD (HL),$04   ;
+*$BE04 LD HL,$8543   ;
+ $BE07 LD DE,$BE2A   ;
+ $BE0A LD B,$09      ;
+ $BE0C XOR A         ;
+*$BE0D CP (HL)       ;
+ $BE0E JR NZ,$BE16   ;
+ $BE10 INC HL        ;
+ $BE11 INC DE        ;
+ $BE12 INC DE        ;
+ $BE13 INC DE        ;
+ $BE14 DJNZ $BE0D    ;
+*$BE16 LD A,(DE)     ;
+ $BE17 INC DE        ;
+ $BE18 LD ($8509),A  ;
+ $BE1B LD A,(DE)     ;
+ $BE1C INC DE        ;
+ $BE1D ADD A,A       ;
+ $BE1E ADD A,A       ;
+ $BE1F LD ($8515),A  ;
+ $BE22 LD A,(DE)     ;
+ $BE23 INC DE        ;
+ $BE24 ADD A,A       ;
+ $BE25 ADD A,A       ;
+ $BE26 LD ($8513),A  ;
+ $BE29 RET           ;

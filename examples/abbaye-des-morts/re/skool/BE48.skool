@@ -1,0 +1,12 @@
+; Routine at BE48
+;
+; Used by the routine at #R$86B9.
+c$BE48 LD BC,$0800   ;
+ $BE4B LD A,L        ;
+*$BE4C RLA           ;
+ $BE4D RR C          ;
+ $BE4F DJNZ $BE4C    ;
+ $BE51 LD (HL),C     ;
+ $BE52 INC L         ;
+ $BE53 JR NZ,$BE48   ;
+ $BE55 RET           ;

@@ -1,0 +1,13 @@
+; Routine at 8957
+;
+; Used by the routine at #R$86B9.
+c$8957 LD HL,$8EDF   ;
+ $895A LD DE,$0008   ;
+ $895D LD BC,($8509) ;
+*$8961 LD A,(HL)     ;
+ $8962 CP C          ;
+ $8963 CALL Z,$896B  ;
+ $8966 ADD HL,DE     ;
+ $8967 CP B          ;
+ $8968 JR NZ,$8961   ;
+ $896A RET           ;

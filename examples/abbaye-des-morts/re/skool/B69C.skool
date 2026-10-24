@@ -1,0 +1,3 @@
+; Data block at B69C
+b$B69C DEFB $1C,$D9,$3E,$07,$32,$4F,$85,$21
+ $B6A4 DEFB $52,$85

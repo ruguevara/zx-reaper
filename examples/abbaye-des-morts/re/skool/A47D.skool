@@ -1,0 +1,12 @@
+; Routine at A47D
+;
+; Used by the routine at #R$A336.
+c$A47D LD HL,$A4B6   ;
+ $A480 CALL $9D5F    ;
+ $A483 LD HL,$A4CC   ;
+ $A486 LD DE,$A4D4   ;
+ $A489 LD A,($A28F)  ;
+ $A48C OR A          ;
+ $A48D JR Z,$A490    ;
+ $A48F EX DE,HL      ;
+*$A490 JP $9D5F      ;

@@ -1,0 +1,19 @@
+; Routine at 99F2
+;
+; Used by the routine at #R$9A02.
+c$99F2 LD A,(DE)     ;
+ $99F3 LD C,A        ;
+ $99F4 LD A,(BC)     ;
+ $99F5 AND (HL)      ;
+ $99F6 OR C          ;
+ $99F7 LD (HL),A     ;
+ $99F8 INC H         ;
+ $99F9 INC D         ;
+ $99FA LD A,(DE)     ;
+ $99FB LD C,A        ;
+ $99FC LD A,(BC)     ;
+ $99FD AND (HL)      ;
+ $99FE OR C          ;
+ $99FF LD (HL),A     ;
+ $9A00 INC D         ;
+ $9A01 RET           ;

@@ -1,0 +1,4 @@
+; Data block at D098
+b$D098 DEFB $7F,$FF,$7F,$7F,$00,$00,$00,$00
+ $D0A0 DEFB $F5,$FB,$FD,$FD,$00,$00,$00,$00
+ $D0A8 DEFB $FB,$FD,$FB,$FE,$00

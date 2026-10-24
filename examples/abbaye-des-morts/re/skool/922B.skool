@@ -1,0 +1,2 @@
+; Data block at 922B
+b$922B DEFB $0D

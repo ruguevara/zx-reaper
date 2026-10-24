@@ -1,0 +1,3 @@
+; Data block at A3A9
+b$A3A9 DEFB $0F,$A5,$C5,$A2,$14,$A5,$C3,$A2
+ $A3B1 DEFB $1B,$A5,$C1,$A2,$20,$A5,$BF,$A2

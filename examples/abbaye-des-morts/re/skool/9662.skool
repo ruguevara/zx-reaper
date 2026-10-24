@@ -1,0 +1,23 @@
+; Routine at 9662
+c$9662 LDI           ;
+ $9664 LDI           ;
+ $9666 LDI           ;
+ $9668 LDI           ;
+ $966A LDI           ;
+ $966C LDI           ;
+ $966E LDI           ;
+ $9670 LDI           ;
+ $9672 LDI           ;
+ $9674 LD A,(HL)     ;
+ $9675 LD (DE),A     ;
+ $9676 LD A,D        ;
+ $9677 ADD A,A       ;
+ $9678 ADD A,A       ;
+ $9679 ADD A,A       ;
+ $967A AND $18       ;
+ $967C ADD A,$40     ;
+ $967E LD D,A        ;
+ $967F INC H         ;
+ $9680 LD BC,$04FF   ;
+; This entry point is used by the routine at #R$96F5.
+*$9683 JR $9683      ;

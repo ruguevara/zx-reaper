@@ -1,0 +1,10 @@
+; Routine at 9DB7
+c$9DB7 LD E,(HL)     ;
+ $9DB8 INC HL        ;
+ $9DB9 LD D,(HL)     ;
+ $9DBA INC HL        ;
+ $9DBB LD A,(DE)     ;
+ $9DBC PUSH HL       ;
+ $9DBD CALL $9F30    ;
+ $9DC0 POP HL        ;
+ $9DC1 RET           ;

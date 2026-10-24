@@ -1,0 +1,5 @@
+; Routine at A44D
+;
+; Used by the routine at #R$A336.
+c$A44D XOR A         ;
+ $A44E JR $A45E      ;

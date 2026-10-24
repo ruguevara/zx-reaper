@@ -1,0 +1,8 @@
+; Routine at A090
+;
+; Used by the routine at #R$A065.
+c$A090 LD B,C        ;
+*$A091 SET 1,(HL)    ;
+ $A093 ADD HL,DE     ;
+ $A094 DJNZ $A091    ;
+ $A096 RET           ;

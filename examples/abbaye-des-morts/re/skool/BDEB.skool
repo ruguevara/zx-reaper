@@ -1,0 +1,5 @@
+; Routine at BDEB
+c$BDEB LD SP,$BDEB   ;
+ $BDEE XOR A         ;
+ $BDEF LD ($AA1F),A  ;
+ $BDF2 RET           ;

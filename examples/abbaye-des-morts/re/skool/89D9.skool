@@ -1,0 +1,13 @@
+; Routine at 89D9
+;
+; Used by the routine at #R$86B9.
+c$89D9 LD HL,$8B8F   ;
+ $89DC LD DE,$000B   ;
+ $89DF LD BC,($8509) ;
+*$89E3 LD A,(HL)     ;
+ $89E4 CP C          ;
+ $89E5 CALL Z,$89ED  ;
+ $89E8 ADD HL,DE     ;
+ $89E9 CP B          ;
+ $89EA JR NZ,$89E3   ;
+ $89EC RET           ;

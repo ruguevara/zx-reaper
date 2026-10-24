@@ -1,0 +1,33 @@
+; Routine at 9DF7
+c$9DF7 LD C,(HL)     ;
+ $9DF8 INC HL        ;
+ $9DF9 LD B,$00      ;
+ $9DFB LD D,H        ;
+ $9DFC LD E,L        ;
+ $9DFD ADD HL,BC     ;
+; This entry point is used by the routine at #R$9DF0.
+*$9DFE LD B,(HL)     ;
+ $9DFF INC HL        ;
+*$9E00 PUSH BC       ;
+ $9E01 LD B,C        ;
+ $9E02 PUSH DE       ;
+ $9E03 LD E,(HL)     ;
+ $9E04 INC HL        ;
+ $9E05 LD D,(HL)     ;
+ $9E06 INC HL        ;
+ $9E07 EX (SP),HL    ;
+ $9E08 EX DE,HL      ;
+ $9E09 PUSH DE       ;
+*$9E0A PUSH DE       ;
+ $9E0B LD A,(DE)     ;
+ $9E0C LD E,A        ;
+ $9E0D CALL $9E6A    ;
+ $9E10 POP DE        ;
+ $9E11 INC DE        ;
+ $9E12 INC H         ;
+ $9E13 DJNZ $9E0A    ;
+ $9E15 POP DE        ;
+ $9E16 POP HL        ;
+ $9E17 POP BC        ;
+ $9E18 DJNZ $9E00    ;
+ $9E1A RET           ;

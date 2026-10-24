@@ -1,0 +1,23 @@
+; Routine at A271
+;
+; Used by the routine at #R$A596.
+c$A271 LD BC,$A2BF   ;
+ $A274 LD DE,$A2D3   ;
+ $A277 EXX           ;
+ $A278 LD B,$08      ;
+*$A27A EXX           ;
+ $A27B LD A,(BC)     ;
+ $A27C INC BC        ;
+ $A27D LD L,A        ;
+ $A27E LD H,$00      ;
+ $A280 ADD HL,DE     ;
+ $A281 LD A,(BC)     ;
+ $A282 INC BC        ;
+ $A283 AND (HL)      ;
+ $A284 CP $01        ;
+ $A286 EXX           ;
+ $A287 RR E          ;
+ $A289 DJNZ $A27A    ;
+ $A28B LD A,E        ;
+ $A28C LD ($A2CF),A  ;
+ $A28F RET           ;

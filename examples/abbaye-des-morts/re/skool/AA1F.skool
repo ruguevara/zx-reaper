@@ -1,0 +1,17 @@
+; Routine at AA1F
+;
+; Used by the routine at #R$AAC6.
+c$AA1F NOP           ;
+ $AA20 LD DE,($BE58) ;
+ $AA24 LDI           ;
+ $AA26 LDI           ;
+ $AA28 LDI           ;
+ $AA2A LDI           ;
+ $AA2C LDI           ;
+ $AA2E LDI           ;
+ $AA30 LDI           ;
+ $AA32 LDI           ;
+ $AA34 LDI           ;
+ $AA36 LDI           ;
+ $AA38 LD ($BE58),DE ;
+ $AA3C RET           ;

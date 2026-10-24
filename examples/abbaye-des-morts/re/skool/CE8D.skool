@@ -1,0 +1,2 @@
+; Message at CE8D
+t$CE8D DEFM "GGGG"

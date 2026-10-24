@@ -1,0 +1,18 @@
+; Routine at B407
+;
+; Used by the routine at #R$B3D2.
+c$B407 LDI           ;
+ $B409 LDI           ;
+ $B40B LDI           ;
+ $B40D LDI           ;
+ $B40F LDI           ;
+ $B411 LDI           ;
+ $B413 LDI           ;
+ $B415 LDI           ;
+ $B417 LDI           ;
+ $B419 LDI           ;
+ $B41B LD ($BE58),DE ;
+; This entry point is used by the routines at #R$B099, #R$B0B1 and #R$B3D2.
+*$B41F LD HL,$0004   ;
+ $B422 ADD HL,SP     ;
+ $B423 JP $A5F0      ;

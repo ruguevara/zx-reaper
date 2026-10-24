@@ -1,0 +1,7 @@
+; Data block at 9636
+b$9636 DEFB $ED,$A0,$ED,$A0,$ED,$A0,$ED,$A0
+ $963E DEFB $ED,$A0,$ED,$A0,$ED,$A0,$ED,$A0
+ $9646 DEFB $ED,$A0,$ED,$A0,$ED,$A0,$ED,$A0
+ $964E DEFB $ED,$A0,$ED,$A0,$ED,$A0,$ED,$A0
+ $9656 DEFB $ED,$A0,$ED,$A0,$ED,$A0,$ED,$A0
+ $965E DEFB $ED,$A0,$ED,$A0

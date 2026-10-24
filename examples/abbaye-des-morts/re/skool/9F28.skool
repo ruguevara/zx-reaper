@@ -1,0 +1,5 @@
+; Routine at 9F28
+c$9F28 LD DE,$9F26   ;
+ $9F2B LDI           ;
+ $9F2D LDI           ;
+ $9F2F RET           ;

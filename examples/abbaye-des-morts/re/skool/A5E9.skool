@@ -1,0 +1,14 @@
+; Routine at A5E9
+;
+; Used by the routine at #R$A596.
+c$A5E9 LD ($A5FD),SP ;
+ $A5ED LD HL,$C100   ;
+; This entry point is used by the routines at #R$B407 and #R$B426.
+*$A5F0 LD SP,HL      ;
+ $A5F1 LD A,(HL)     ;
+ $A5F2 INC L         ;
+ $A5F3 OR (HL)       ;
+ $A5F4 RET NZ        ;
+ $A5F5 LD HL,$0016   ;
+ $A5F8 ADD HL,SP     ;
+ $A5F9 JP $A5F0      ;

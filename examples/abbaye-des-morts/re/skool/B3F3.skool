@@ -1,0 +1,4 @@
+; Data block at B3F3
+b$B3F3 DEFB $ED,$A0,$ED,$A0,$ED,$A0,$ED,$A0
+ $B3FB DEFB $ED,$A0,$ED,$A0,$ED,$A0,$ED,$A0
+ $B403 DEFB $ED,$A0,$ED,$A0

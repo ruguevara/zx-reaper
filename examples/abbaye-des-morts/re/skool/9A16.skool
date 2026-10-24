@@ -1,0 +1,35 @@
+; Routine at 9A16
+;
+; Used by the routine at #R$9A36.
+c$9A16 LD A,(DE)     ;
+ $9A17 LD C,A        ;
+ $9A18 LD A,(BC)     ;
+ $9A19 AND (HL)      ;
+ $9A1A OR C          ;
+ $9A1B LD (HL),A     ;
+ $9A1C INC L         ;
+ $9A1D INC E         ;
+ $9A1E LD A,(DE)     ;
+ $9A1F LD C,A        ;
+ $9A20 LD A,(BC)     ;
+ $9A21 AND (HL)      ;
+ $9A22 OR C          ;
+ $9A23 LD (HL),A     ;
+ $9A24 INC H         ;
+ $9A25 INC D         ;
+ $9A26 LD A,(DE)     ;
+ $9A27 LD C,A        ;
+ $9A28 LD A,(BC)     ;
+ $9A29 AND (HL)      ;
+ $9A2A OR C          ;
+ $9A2B LD (HL),A     ;
+ $9A2C DEC L         ;
+ $9A2D DEC E         ;
+ $9A2E LD A,(DE)     ;
+ $9A2F LD C,A        ;
+ $9A30 LD A,(BC)     ;
+ $9A31 AND (HL)      ;
+ $9A32 OR C          ;
+ $9A33 LD (HL),A     ;
+ $9A34 INC D         ;
+ $9A35 RET           ;

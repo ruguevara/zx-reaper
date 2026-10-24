@@ -1,0 +1,18 @@
+; Routine at A304
+;
+; Used by the routines at #R$8832 and #R$A43D.
+c$A304 LD DE,$A2DB   ;
+ $A307 LD HL,$A2D3   ;
+ $A30A LD C,$08      ;
+*$A30C LD A,(HL)     ;
+ $A30D INC HL        ;
+ $A30E LD B,$05      ;
+*$A310 RRA           ;
+ $A311 JR NC,$A319   ;
+ $A313 INC DE        ;
+ $A314 DJNZ $A310    ;
+ $A316 DEC C         ;
+ $A317 JR NZ,$A30C   ;
+*$A319 LD A,(DE)     ;
+ $A31A LD ($A2D2),A  ;
+ $A31D RET           ;

@@ -1,0 +1,13 @@
+; Routine at 9F30
+;
+; Used by the routines at #R$9DAF and #R$9DB7.
+c$9F30 CALL $9F43    ;
+ $9F33 CALL $9F52    ;
+ $9F36 CALL $9F75    ;
+ $9F39 LD B,(HL)     ;
+ $9F3A INC HL        ;
+*$9F3B LD A,(HL)     ;
+ $9F3C INC HL        ;
+ $9F3D CALL $9E79    ;
+ $9F40 DJNZ $9F3B    ;
+ $9F42 RET           ;

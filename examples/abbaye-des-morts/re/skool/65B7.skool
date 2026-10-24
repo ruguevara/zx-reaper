@@ -1,0 +1,2 @@
+; Data block at 65B7
+b$65B7 DEFB $40,$00,$60,$E0,$60

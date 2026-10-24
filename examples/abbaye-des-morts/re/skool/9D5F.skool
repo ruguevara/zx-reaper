@@ -1,0 +1,28 @@
+; Routine at 9D5F
+;
+; Used by the routines at #R$85FC, #R$86B9, #R$9CE7, #R$9DA4, #R$A336, #R$A3B9
+; and #R$A47D.
+c$9D5F PUSH HL       ;
+ $9D60 LD HL,$9D5F   ;
+ $9D63 EX (SP),HL    ;
+ $9D64 LD A,(HL)     ;
+ $9D65 ADD A,A       ;
+ $9D66 JR C,$9D6E    ;
+ $9D68 LD A,(HL)     ;
+ $9D69 INC HL        ;
+ $9D6A CALL $9E79    ;
+ $9D6D RET           ;
+*$9D6E INC HL        ;
+ $9D6F PUSH HL       ;
+ $9D70 PUSH DE       ;
+ $9D71 LD L,A        ;
+ $9D72 LD H,$00      ;
+ $9D74 LD DE,$9D1F   ;
+ $9D77 ADD HL,DE     ;
+ $9D78 LD A,(HL)     ;
+ $9D79 INC HL        ;
+ $9D7A LD H,(HL)     ;
+ $9D7B LD L,A        ;
+ $9D7C POP DE        ;
+ $9D7D EX (SP),HL    ;
+ $9D7E RET           ;

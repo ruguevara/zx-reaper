@@ -1,0 +1,10 @@
+; Routine at 9C47
+;
+; Used by the routines at #R$9BF3 and #R$9C1B.
+c$9C47 DJNZ $9C4B    ;
+ $9C49 LD A,$01      ;
+*$9C4B LD (HL),A     ;
+ $9C4C INC L         ;
+ $9C4D DEC C         ;
+ $9C4E JR NZ,$9C47   ;
+ $9C50 RET           ;

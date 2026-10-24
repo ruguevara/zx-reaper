@@ -1,0 +1,20 @@
+; Routine at A950
+;
+; Used by the routine at #R$AAC6.
+c$A950 LD HL,($A8A3) ;
+ $A953 LD A,H        ;
+ $A954 LD HL,($A8A1) ;
+ $A957 LD L,A        ;
+ $A958 LD D,$1F      ;
+ $A95A LD BC,$020C   ;
+ $A95D CALL $A9B4    ;
+ $A960 LD A,E        ;
+ $A961 AND $03       ;
+ $A963 RET Z         ;
+ $A964 LD HL,$A8A3   ;
+ $A967 LD (HL),$00   ;
+ $A969 INC HL        ;
+ $A96A LD A,(HL)     ;
+ $A96B AND $FC       ;
+ $A96D LD (HL),A     ;
+ $A96E RET           ;

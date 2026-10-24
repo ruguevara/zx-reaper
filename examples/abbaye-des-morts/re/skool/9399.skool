@@ -1,0 +1,2 @@
+; Data block at 9399
+b$9399 DEFB $0E

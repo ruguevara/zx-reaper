@@ -1,0 +1,4 @@
+; Data block at 85E8
+b$85E8 DEFB $11,$4B,$FC,$C3,$C2,$85,$21,$8A
+ $85F0 DEFB $CA,$18,$03,$21,$9D,$C0,$11,$D7
+ $85F8 DEFB $F9,$C3,$C2,$85

@@ -1,0 +1,8 @@
+; Routine at A32D
+;
+; Used by the routine at #R$A336.
+c$A32D LD HL,$A28F   ;
+ $A330 LD A,(HL)     ;
+ $A331 XOR $C9       ;
+ $A333 LD (HL),A     ;
+ $A334 JR $A360      ;

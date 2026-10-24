@@ -1,0 +1,19 @@
+; Routine at 9DD2
+c$9DD2 CALL $A11A    ;
+ $9DD5 LD A,(HL)     ;
+ $9DD6 INC HL        ;
+ $9DD7 PUSH HL       ;
+ $9DD8 EX DE,HL      ;
+ $9DD9 LD E,A        ;
+*$9DDA PUSH HL       ;
+ $9DDB PUSH BC       ;
+ $9DDC LD B,C        ;
+*$9DDD CALL $9E6A    ;
+ $9DE0 INC H         ;
+ $9DE1 DJNZ $9DDD    ;
+ $9DE3 POP BC        ;
+ $9DE4 POP HL        ;
+ $9DE5 INC L         ;
+ $9DE6 DJNZ $9DDA    ;
+ $9DE8 POP HL        ;
+ $9DE9 RET           ;

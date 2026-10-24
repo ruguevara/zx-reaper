@@ -1,0 +1,3 @@
+; Routine at 85E2
+c$85E2 CALL $871A    ;
+ $85E5 JP $A596      ;

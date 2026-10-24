@@ -1,0 +1,29 @@
+; Routine at A851
+;
+; Used by the routine at #R$B1D4.
+c$A851 LD ($A881),HL ;
+ $A854 POP HL        ;
+ $A855 ADD HL,DE     ;
+ $A856 EX DE,HL      ;
+ $A857 POP BC        ;
+ $A858 ADD HL,BC     ;
+ $A859 LD B,H        ;
+ $A85A LD C,L        ;
+ $A85B LD IX,$A87A   ;
+ $A85F LD HL,($8516) ;
+ $A862 LD A,B        ;
+ $A863 CP H          ;
+ $A864 JR C,$A877    ;
+ $A866 LD A,D        ;
+ $A867 CP L          ;
+ $A868 JR NC,$A877   ;
+ $A86A LD HL,($8518) ;
+ $A86D LD A,C        ;
+ $A86E CP H          ;
+ $A86F JR C,$A877    ;
+ $A871 LD A,E        ;
+ $A872 CP L          ;
+ $A873 JR NC,$A877   ;
+ $A875 JP (IX)       ;
+*$A877 OR A          ;
+ $A878 JP (IX)       ;

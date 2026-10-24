@@ -1,0 +1,19 @@
+; Routine at 9FBE
+c$9FBE LD A,(HL)     ;
+ $9FBF INC HL        ;
+ $9FC0 RRCA          ;
+ $9FC1 LD E,A        ;
+ $9FC2 LD D,$7F      ;
+ $9FC4 PUSH HL       ;
+ $9FC5 LD HL,$60BF   ;
+ $9FC8 LD B,$03      ;
+*$9FCA LD A,(HL)     ;
+ $9FCB AND D         ;
+ $9FCC OR E          ;
+ $9FCD LD (HL),A     ;
+ $9FCE DEC L         ;
+ $9FCF JR NZ,$9FCA   ;
+ $9FD1 DEC H         ;
+ $9FD2 DJNZ $9FCA    ;
+ $9FD4 POP HL        ;
+ $9FD5 RET           ;

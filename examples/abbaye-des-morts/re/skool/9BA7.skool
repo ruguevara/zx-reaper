@@ -1,0 +1,35 @@
+; Routine at 9BA7
+;
+; Used by the routine at #R$9B5A.
+c$9BA7 PUSH HL       ;
+ $9BA8 CALL $A20D    ;
+ $9BAB LD E,(HL)     ;
+ $9BAC LD D,$CE      ;
+ $9BAE LD A,$03      ;
+ $9BB0 ADD A,H       ;
+ $9BB1 LD H,A        ;
+ $9BB2 LD A,(HL)     ;
+ $9BB3 RES 7,(HL)    ;
+ $9BB5 POP HL        ;
+ $9BB6 RLA           ;
+ $9BB7 RET NC        ;
+ $9BB8 CALL $A1F2    ;
+ $9BBB LD A,(DE)     ;
+ $9BBC LD (HL),A     ;
+ $9BBD CALL $A203    ;
+ $9BC0 EX DE,HL      ;
+ $9BC1 LD H,$00      ;
+ $9BC3 ADD HL,HL     ;
+ $9BC4 ADD HL,HL     ;
+ $9BC5 ADD HL,HL     ;
+ $9BC6 LD A,H        ;
+ $9BC7 ADD A,$CF     ;
+ $9BC9 LD H,A        ;
+; This entry point is used by the routine at #R$9C3B.
+*$9BCA LD B,$08      ;
+*$9BCC LD A,(HL)     ;
+ $9BCD LD (DE),A     ;
+ $9BCE INC HL        ;
+ $9BCF INC D         ;
+ $9BD0 DJNZ $9BCC    ;
+ $9BD2 RET           ;

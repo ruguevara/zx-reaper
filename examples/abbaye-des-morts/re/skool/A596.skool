@@ -1,0 +1,32 @@
+; Routine at A596
+;
+; Used by the routine at #R$85E2.
+c$A596 CALL $A240    ;
+ $A599 CALL $A271    ;
+ $A59C LD A,($850C)  ;
+ $A59F RLA           ;
+ $A5A0 RET NC        ;
+ $A5A1 LD HL,$A2CF   ;
+ $A5A4 LD A,($A2D0)  ;
+ $A5A7 XOR (HL)      ;
+ $A5A8 AND (HL)      ;
+ $A5A9 LD ($A2D1),A  ;
+ $A5AC LD A,(HL)     ;
+ $A5AD LD ($A2D0),A  ;
+ $A5B0 AND $C0       ;
+ $A5B2 CP $C0        ;
+ $A5B4 JR NZ,$A5BB   ;
+ $A5B6 LD A,$05      ;
+ $A5B8 LD ($850C),A  ;
+*$A5BB LD HL,$BE5A   ;
+ $A5BE LD ($BE58),HL ;
+ $A5C1 CALL $A8A5    ;
+ $A5C4 CALL $A5E9    ;
+ $A5C7 CALL $AAAB    ;
+ $A5CA LD A,($AA1F)  ;
+ $A5CD OR A          ;
+ $A5CE CALL Z,$A5DB  ;
+ $A5D1 LD A,($8552)  ;
+ $A5D4 OR A          ;
+ $A5D5 CALL NZ,$8905 ;
+ $A5D8 JP $ACEF      ;

@@ -1,0 +1,9 @@
+; Routine at A96F
+;
+; Used by the routine at #R$A8A5.
+c$A96F LD E,$00      ;
+ $A971 CALL $A9FE    ;
+ $A974 INC B         ;
+ $A975 INC B         ;
+ $A976 INC B         ;
+ $A977 JP $A9FE      ;

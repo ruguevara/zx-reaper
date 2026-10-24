@@ -1,0 +1,8 @@
+; Routine at A0B4
+c$A0B4 LD B,(HL)     ;
+ $A0B5 INC HL        ;
+*$A0B6 PUSH BC       ;
+ $A0B7 CALL $A0BE    ;
+ $A0BA POP BC        ;
+ $A0BB DJNZ $A0B6    ;
+ $A0BD RET           ;

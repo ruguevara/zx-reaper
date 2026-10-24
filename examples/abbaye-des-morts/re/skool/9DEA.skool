@@ -1,0 +1,5 @@
+; Routine at 9DEA
+c$9DEA LD A,(HL)     ;
+ $9DEB INC HL        ;
+ $9DEC LD ($850D),A  ;
+ $9DEF RET           ;

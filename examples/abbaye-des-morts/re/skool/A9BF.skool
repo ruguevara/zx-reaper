@@ -1,0 +1,15 @@
+; Routine at A9BF
+;
+; Used by the routine at #R$A8A5.
+c$A9BF LD E,$00      ;
+ $A9C1 CALL $A9FE    ;
+ $A9C4 INC C         ;
+ $A9C5 INC C         ;
+ $A9C6 INC C         ;
+ $A9C7 INC C         ;
+ $A9C8 CALL $A9FE    ;
+ $A9CB INC C         ;
+ $A9CC INC C         ;
+ $A9CD INC C         ;
+ $A9CE INC C         ;
+ $A9CF JP $A9FE      ;

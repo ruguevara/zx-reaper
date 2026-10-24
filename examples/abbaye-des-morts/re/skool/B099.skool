@@ -1,0 +1,14 @@
+; Routine at B099
+c$B099 POP DE        ;
+ $B09A POP DE        ;
+ $B09B LD HL,$000C   ;
+ $B09E ADD HL,SP     ;
+ $B09F LD SP,HL      ;
+ $B0A0 POP BC        ;
+ $B0A1 DEC C         ;
+ $B0A2 JR NZ,$B0A6   ;
+ $B0A4 LD C,$28      ;
+*$B0A6 PUSH BC       ;
+ $B0A7 JP NZ,$B41F   ;
+ $B0AA LD IY,$B0B1   ;
+ $B0AE JP $8A70      ;

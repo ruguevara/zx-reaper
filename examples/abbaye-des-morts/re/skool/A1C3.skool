@@ -1,0 +1,11 @@
+; Routine at A1C3
+;
+; Used by the routine at #R$85FC.
+c$A1C3 EI            ;
+ $A1C4 HALT          ;
+ $A1C5 XOR A         ;
+ $A1C6 IN A,($FE)    ;
+ $A1C8 CPL           ;
+ $A1C9 AND $1F       ;
+ $A1CB JR Z,$A1C3    ;
+ $A1CD RET           ;

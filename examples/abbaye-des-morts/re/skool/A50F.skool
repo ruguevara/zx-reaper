@@ -1,0 +1,2 @@
+; Message at A50F
+t$A50F DEFM "JUMP"

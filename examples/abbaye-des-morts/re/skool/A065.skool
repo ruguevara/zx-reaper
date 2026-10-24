@@ -1,0 +1,22 @@
+; Routine at A065
+c$A065 LD A,(HL)     ;
+ $A066 INC HL        ;
+ $A067 PUSH HL       ;
+ $A068 LD C,$16      ;
+ $A06A LD DE,$0020   ;
+ $A06D LD HL,$5E00   ;
+ $A070 RRA           ;
+ $A071 CALL C,$A090  ;
+ $A074 LD HL,$5E1F   ;
+ $A077 RRA           ;
+ $A078 CALL C,$A090  ;
+ $A07B LD C,$20      ;
+ $A07D LD DE,$0001   ;
+ $A080 LD HL,$5E00   ;
+ $A083 RRA           ;
+ $A084 CALL C,$A090  ;
+ $A087 LD HL,$60E0   ;
+ $A08A RRA           ;
+ $A08B CALL C,$A090  ;
+ $A08E POP HL        ;
+ $A08F RET           ;

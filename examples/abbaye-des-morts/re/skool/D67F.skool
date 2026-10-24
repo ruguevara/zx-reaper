@@ -1,0 +1,2 @@
+; Data block at D67F
+b$D67F DEFB $7F,$FE,$82,$9A,$92

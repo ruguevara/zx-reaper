@@ -1,0 +1,2 @@
+; Data block at 926B
+b$926B DEFB $10

@@ -1,0 +1,2 @@
+; Data block at 68F8
+b$68F8 DEFB $40,$FF,$40,$FD
