@@ -65,7 +65,15 @@ c$9100 LD B,$10        ; 16 pixel rows
   jumps to (`DrawSprite_Loop`), not every branch.
 - Data entries: the title names the format; in the description list the
   fields (`+0 word: screen address`, `+2 byte: direction 0-3`...). Put
-  `@label=` on fields other code reads directly (struct fields).
+  `@label=` on fields other code reads directly (struct fields). Name a
+  field from what the game says when its test fails: the message printed
+  after the comparison ("too heavy to lift" makes it the weight, "too full"
+  the size). A name taken from how the field is summed or where it sits
+  can be the wrong way round, and no check catches a name.
+- Every target of a handler table (verb handlers, object and character
+  handlers, timers, script routines) is an entry of its own with a title,
+  even when the handlers sit back to back: an entry titled "Command
+  handlers" holding twenty is twenty routines nobody described.
 - Comments: only where the intent is not obvious; refer to entries as `#R$XXXX`.
 - `Unknown` is allowed; a wrong name costs more than a missing one.
 

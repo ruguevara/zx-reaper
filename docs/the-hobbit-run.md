@@ -2,7 +2,7 @@
 
 Russian version: [the-hobbit-run.ru.md](the-hobbit-run.ru.md).
 
-A run of the [method](method.md) on The Hobbit (Philip Mitchell and Veronika Megler, Beam Software, Melbourne House, 1982), version 1.2, from the tape to stage 4. The game was chosen to be unlike Hungry Horace: a text adventure with a parser, characters that act on their own, timers, and pictures drawn from command streams. The run was blind: no disassembly or write-up of the game was read, and the subagents were forbidden to search for them. The author set the task, answered the stage 4 interview, and said "retry" once when the agents stalled. The comparison with the existing work comes after the run and is not done yet.
+A run of the [method](method.md) on The Hobbit (Philip Mitchell and Veronika Megler, Beam Software, Melbourne House, 1982), version 1.2, from the tape to stage 4. The game was chosen to be unlike Hungry Horace: a text adventure with a parser, characters that act on their own, timers, and pictures drawn from command streams. The run was blind: no disassembly or write-up of the game was read, and the subagents were forbidden to search for them. The author set the task, answered the stage 4 interview, and said "retry" once when the agents stalled. The comparison with the existing work came after the run (below).
 
 ## Stages 1 and 2: reverse engineering
 
@@ -47,9 +47,20 @@ The five agents still running overnight stalled (a watchdog stopped them between
 
 The game check: identical to stage 3 at every pass of the six records, the screen included (536 passes). Free play types random commands through the pacer: 30,000 frames in 1.6 s. Integration found one bug in the game (a routine returned True, False or QUIT's flow target, and its caller took the target for a parsed line) and the rest in what the records do not vary: the pacer's answers (the title key, LOAD without a save, the printer, the idle WAIT 28% slow and not restarted per line, now measured on the Z80) and two values kept between lines outside the compared state. Not built: the time the original takes to draw a picture (about 7 s for Bag End; stage 4 shows it at once) and the fixed mode.
 
+## Comparison with the existing work
+
+After the run, the result was compared with jonsole's complete SkoolKit disassembly of 1.2 (2026), pobtastic's partial one (2023), basf-c60's disassembly of 1.0, 6elphegor's C port (2026), Icemark's format notes, Wilderland and Megler's own account of the design: [`examples/the-hobbit/re/comparison.md`](../examples/the-hobbit/re/comparison.md), with three detailed reports. Three reviewers (two Opus, one Sonnet; 0.94 million tokens, about 35 minutes) settled each disagreement with the code or a run.
+
+- **Structure.** Against jonsole's: 4 bytes differ (a wrong address on one line of our skool), code and non-code agree on 99.8% of the bytes, 307 code entries are shared; the 62 only jonsole has are labelled points inside our entries.
+- **Meaning.** Of 506 entries both describe, 474 say the same thing; 6 differ, jonsole right in all. The worst: our weight and size fields are swapped, from the annotation through stage 4, and every check passed, because names are not checked. 24 of our entries, 2,185 bytes of handlers, are left generic where jonsole names about 60 handlers.
+- **Formats.** The same almost everywhere. Ours is wrong or stale on eight facts, a reference on six; our one open item (object flag bits 2 and 4) is answered: "full" and "on".
+- **Bugs.** Of 50 items the references name that hold in 1.2, the run found 30, partly 3, missed 17: sequences no script typed, the crashes fuzzing finds, and things read but not recognised (FILL never works; "You are in in a clearing" was on a screen of our own run). 14 of our findings are in no reference.
+- **Ports.** The C port made the same choice for its faithful edition, the Z80's register interface, and goes further: it reproduces the stack bytes the random generator reads, so it matches the original without a record; ours is identical in replay. Its clean edition fixes the bugs behind a switch; ours is faithful and moves the data into editable files.
+
 ## Lessons for the method
 
 1. The genre changes the shape, not the method: the same phases, checks and orchestration carried a text adventure through, with two new shapes (the register interface, the game as one generator).
 2. A recorded run checks the game, not the host. What the pacer answers (keys, files, a printer, time) needs its own checks: free play, and each time constant measured on the Z80 rather than counted from the loops.
 3. Opus slices for stage 4 took about 0.3 million tokens each, 1.7 times Sonnet's stage 3 modules; their reports found real gaps (a stage 3 bug in a handler no record reaches, the state fields the parser needed, F85's endless message).
-4. Holes in the kit found and fixed along the way: typed text and the screen as text in `zxrun.py`; R and taken values in records; runs of repeated reads compressed; a random routine that reads code in the shift test (`SHIFT_GIVE`) and in the port (`PORT_TAKE`); `zxdiff.py` flag outputs; `zxpyxel.display` byte and pixel access.
+4. The comparison: name a field from the message its test prints; every target of a handler table is an entry of its own; the bug hunt needs sequences of commands (fuzzing from the vocabulary), a check of every command pattern against the handlers, and a reading of every screen of the recorded runs.
+5. Holes in the kit found and fixed along the way: typed text and the screen as text in `zxrun.py`; R and taken values in records; runs of repeated reads compressed; a random routine that reads code in the shift test (`SHIFT_GIVE`) and in the port (`PORT_TAKE`); `zxdiff.py` flag outputs; `zxpyxel.display` byte and pixel access.

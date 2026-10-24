@@ -1,0 +1,7 @@
+0 -
+50 SPACE
+53 -
+1453 SPACE
+1456 -
+1756 TYPE give thorin the map
+2900 END

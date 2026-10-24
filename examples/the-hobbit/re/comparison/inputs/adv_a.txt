@@ -1,0 +1,7 @@
+0 -
+50 SPACE
+53 -
+1453 SPACE
+1456 -
+1756 TYPE attack thorin
+3200 END

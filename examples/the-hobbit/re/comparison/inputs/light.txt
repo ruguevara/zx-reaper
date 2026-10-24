@@ -1,0 +1,8 @@
+0 -
+50 SPACE
+53 -
+1453 SPACE
+1456 -
+1756 TYPE light chest
+2500 TYPE turn on chest
+3300 END

@@ -49,9 +49,12 @@ stages 1 to 4 blind, with no help from the author beyond the stage 4
 interview on graphics, input and sound: the stage 3 port is identical to
 the Z80 at every main-loop pass of six recorded runs (one plays the game to
 the end), the stage 4 game identical to stage 3 at every pass, the screen
-included; both play on the desktop and in the browser. Still to do: the
-comparison with the existing disassemblies and write-ups of The Hobbit, as
-the SkoolKit reference was compared for Hungry Horace.
+included; both play on the desktop and in the browser. Compared afterwards
+with the existing disassemblies, a C port and the author's account: the
+bytes, the code map and the meaning agree with the most complete reference
+wherever both describe something; the run named two record fields the wrong
+way round and missed 17 of 50 known bugs, and found 14 that no reference
+has.
 
 Scope: the 48K Spectrum. AY music and effects (128K) come later, through
 [pyayay](https://github.com/ruguevara/pyayay) (Ayumi). Out of scope: stage 5
@@ -64,7 +67,7 @@ snapshot instead of the tape), games that need contention-exact timing.
 | --- | --- |
 | [docs/method.md](docs/method.md) | the method and its reasons: decisions, phases, evidence, the stages, what has been tested |
 | [docs/hungry-horace-run.md](docs/hungry-horace-run.md) | the reference run: Hungry Horace through every stage, time and tokens, the comparison with SkoolKit |
-| [docs/the-hobbit-run.md](docs/the-hobbit-run.md) | the blind run: The Hobbit through stages 1 to 4, time and tokens |
+| [docs/the-hobbit-run.md](docs/the-hobbit-run.md) | the blind run: The Hobbit through stages 1 to 4, time and tokens, the comparison with the existing work |
 | [docs/stage3.md](docs/stage3.md) | stage 3: the library, the port's shape, the replay check, results |
 | [docs/stage4.md](docs/stage4.md) | stage 4: the clean state, the bridge to stage 3, the checks, results |
 | [examples/hungry-horace/docs/](examples/hungry-horace/docs/README.md) | the article on how Hungry Horace works, with its gallery |

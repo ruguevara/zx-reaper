@@ -68,6 +68,18 @@ score digits, timers, list indexes):
 - check printing of multi-digit values, delay formulas for negative or
   wrapped results, and interactions of two actors (two enemies on top of each
   other, an enemy over an item).
+Then the paths no script took:
+- sequences, not single commands: type random lines from the game's own
+  vocabulary and command patterns (`TYPE` in an input script, many seeds),
+  including a refused line followed by the repeat key, junk after ALL or
+  EXCEPT, and very long lines; a hang or a reset is a finding;
+- every command pattern against the handler tables: a pattern with no
+  handler is a sentence the game accepts and cannot carry out;
+- every screen of the recorded runs read for odd text (a doubled word, a
+  wrong name): `tools/zxrun.py ... --text` at each prompt;
+- what a new game restores and what it leaves as it was (script steps,
+  self-modified operands), and what SAVE writes against what the game
+  changes.
 Record each finding with the evidence (frame, screenshot, value) and mark it
 verified or inferred.
 
