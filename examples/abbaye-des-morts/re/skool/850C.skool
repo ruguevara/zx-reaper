@@ -1,0 +1,2 @@
+; Room state ($80 playing, 1 enter, 2 checkpoint, 3 game over, 4, 5 ending)
+g$850C DEFB $00

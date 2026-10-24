@@ -1,0 +1,2 @@
+; Room name message number (script op $87)
+g$850D DEFB $00

@@ -1,0 +1,3 @@
+; Script: tiles drawn by flag $851A/$851D/$851F (rooms 6, 8, 20)
+b$778A DEFB $91,$B8,$01,$04,$01,$0E,$1F
+ $7791 DEFB $80

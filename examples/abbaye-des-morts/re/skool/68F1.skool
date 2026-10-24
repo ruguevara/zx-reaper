@@ -1,2 +1,0 @@
-; Data block at 68F1
-b$68F1 DEFB $00,$FF,$11

@@ -1,4 +1,4 @@
-; Routine at 8957
+; Spawn the room's objects (table $8EDF)
 ;
 ; Used by the routine at #R$86B9.
 c$8957 LD HL,$8EDF   ;

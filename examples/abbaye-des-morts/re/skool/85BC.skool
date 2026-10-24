@@ -1,4 +1,4 @@
-; Routine at 85BC
+; Jump to HL
 ;
-; Used by the routines at #R$8585 and #R$97B7.
+; Used by the routine at #R$8585.
 c$85BC JP (HL)       ;

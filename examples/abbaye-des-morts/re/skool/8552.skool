@@ -1,0 +1,2 @@
+; Cutscene actor count
+g$8552 DEFB $00

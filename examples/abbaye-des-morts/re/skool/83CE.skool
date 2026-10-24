@@ -1,0 +1,14 @@
+; Unused debug: move between rooms with the controls (jumped to from $AAAF when
+; $A894=$FF)
+c$83CE LD A,($A2D1)  ;
+ $83D1 BIT 5,A       ;
+ $83D3 JP NZ,$AD82   ;
+ $83D6 AND $0F       ;
+ $83D8 RET Z         ;
+ $83D9 CALL $AD71    ;
+ $83DC LD HL,$8509   ;
+*$83DF LD A,(HL)     ;
+ $83E0 SUB $19       ;
+ $83E2 RET C         ;
+ $83E3 LD (HL),A     ;
+ $83E4 JR $83DF      ;

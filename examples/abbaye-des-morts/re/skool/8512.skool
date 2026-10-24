@@ -1,0 +1,3 @@
+; Checkpoint position (two words, to $A8A1/$A8A3)
+g$8512 DEFB $00,$00
+ $8514 DEFB $00,$00

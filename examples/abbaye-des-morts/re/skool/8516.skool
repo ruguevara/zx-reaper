@@ -1,0 +1,3 @@
+; Two words for $A851/$A8A5
+g$8516 DEFB $00,$00
+ $8518 DEFB $00,$00

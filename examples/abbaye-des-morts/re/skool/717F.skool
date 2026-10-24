@@ -1,0 +1,13 @@
+; Parchment frame tiles: 12 8x8 bitmaps, read by $9CB7
+b$717F DEFB $06,$0F,$1F,$3E,$5C,$89,$93,$47
+ $7187 DEFB $00,$00,$FF,$FF,$FF,$FF,$FF,$FF
+ $718F DEFB $00,$00,$61,$FF,$FF,$FF,$FF,$FF
+ $7197 DEFB $60,$F0,$F8,$7C,$3A,$91,$C9,$E2
+ $719F DEFB $7F,$3F,$3F,$3F,$3F,$7F,$7F,$3F
+ $71A7 DEFB $FE,$FE,$FE,$FE,$FE,$FE,$FE,$FE
+ $71AF DEFB $7F,$7F,$7F,$7F,$7F,$7F,$7F,$7F
+ $71B7 DEFB $FC,$FE,$FE,$FC,$FC,$FC,$FC,$FE
+ $71BF DEFB $47,$93,$89,$5C,$3E,$1F,$0F,$06
+ $71C7 DEFB $FF,$FF,$FF,$FF,$FF,$FF,$00,$00
+ $71CF DEFB $FF,$FF,$FF,$FF,$FF,$86,$00,$00
+ $71D7 DEFB $E3,$C9,$91,$3A,$7C,$F8,$F0,$60

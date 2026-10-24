@@ -1,5 +1,0 @@
-; Data block at 6EB2
-b$6EB2 DEFB $CF,$EF,$E6,$EF,$F0,$F9,$FF,$7F
- $6EBA DEFB $BE,$CC,$70,$FF,$BF,$DF,$C7,$B0
- $6EC2 DEFB $7C,$37,$07,$0F,$FF,$02,$03,$81
- $6ECA DEFB $C1,$E0,$F0,$F8,$78,$CF

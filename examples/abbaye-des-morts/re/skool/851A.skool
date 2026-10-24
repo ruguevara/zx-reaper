@@ -1,0 +1,2 @@
+; Flag $851A (scripts, $A615)
+g$851A DEFB $00

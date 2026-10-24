@@ -1,0 +1,2 @@
+; Flag read by $A668/$A734/$BB57
+g$8521 DEFB $00

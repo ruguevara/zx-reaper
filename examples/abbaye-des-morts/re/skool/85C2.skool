@@ -1,2 +1,8 @@
-; Data block at 85C2
-b$85C2 DEFB $01,$BE,$85,$C5,$D5,$3A,$06,$85
+; 128K: call DE in the music bank
+;
+; Used by the routine at #R$85E8.
+c$85C2 LD BC,$85BE   ;
+ $85C5 PUSH BC       ;
+ $85C6 PUSH DE       ;
+; This entry point is used by the routine at #R$85D5.
+*$85C7 LD A,($8506)  ;

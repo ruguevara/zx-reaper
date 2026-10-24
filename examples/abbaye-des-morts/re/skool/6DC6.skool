@@ -1,0 +1,6 @@
+; Packed sprite set 13 (op $97): 4 columns of 2 chars; flag bytes, set bit =
+; literal byte, clear = 0
+b$6DC6 DEFB $04,$02
+ $6DC8 DEFB $03,$05,$1B,$FF,$3F,$6F,$CF,$FF,$5B,$02,$04,$00,$03,$86,$C1,$FF
+ $6DD8 DEFB $F1,$FB,$FF,$DE,$1C,$0F,$03,$06,$00,$FF,$05,$1B,$3F,$6F,$CF,$FF
+ $6DE8 DEFB $5B,$01,$01,$02,$FF,$C1,$F1,$F9,$DF,$BE,$38,$18,$70

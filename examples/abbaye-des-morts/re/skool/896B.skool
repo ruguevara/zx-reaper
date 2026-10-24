@@ -1,4 +1,4 @@
-; Routine at 896B
+; Spawn one object unless its flag is $FF
 ;
 ; Used by the routine at #R$8957.
 c$896B PUSH AF       ;

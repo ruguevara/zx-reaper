@@ -1,9 +1,8 @@
-; Routine at 8A6E
+; Find a free actor slot at $C100
 ;
 ; Used by the routines at #R$8905, #R$897E and #R$89ED.
 c$8A6E POP IY        ;
-; This entry point is used by the routine at #R$B099.
-*$8A70 EXX           ;
+ $8A70 EXX           ;
  $8A71 LD HL,$C100   ;
  $8A74 LD BC,$0B15   ;
 *$8A77 LD A,(HL)     ;

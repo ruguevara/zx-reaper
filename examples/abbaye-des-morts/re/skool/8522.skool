@@ -1,0 +1,2 @@
+; Flag read by $B6E6
+g$8522 DEFB $00

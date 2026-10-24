@@ -1,0 +1,16 @@
+; Script: the twelve crosses (tile $80 at 12 positions; $82D7 is also read by
+; $AE4B), run by $BB57
+b$82D4 DEFB $92,$80,$0C
+ $82D7 DEFB $06,$0B
+ $82D9 DEFB $06,$0C
+ $82DB DEFB $09,$05
+ $82DD DEFB $09,$06
+ $82DF DEFB $09,$09
+ $82E1 DEFB $0D,$03
+ $82E3 DEFB $0E,$0E
+ $82E5 DEFB $0F,$06
+ $82E7 DEFB $0F,$07
+ $82E9 DEFB $0F,$0A
+ $82EB DEFB $0F,$0B
+ $82ED DEFB $11,$10
+ $82EF DEFB $80

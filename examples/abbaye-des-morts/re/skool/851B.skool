@@ -1,0 +1,2 @@
+; Object flags ($FF = gone) read by $896B; $851B-$851F also test scripts
+g$851B DEFB $00,$00,$00,$00,$00,$00

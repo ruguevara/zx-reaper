@@ -1,2 +1,0 @@
-; Message at 64D0
-t$64D0 DEFM "0b0f"

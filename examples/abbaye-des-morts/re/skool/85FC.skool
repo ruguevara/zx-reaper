@@ -1,10 +1,9 @@
-; Routine at 85FC
+; Game start and main loop
 c$85FC LD A,($8506)  ;
  $85FF LD HL,$A526   ;
  $8602 DEC A         ;
  $8603 CALL Z,$9D5F  ;
-; This entry point is used by the routine at #R$6000.
-*$8606 LD HL,$A43D   ;
+ $8606 LD HL,$A43D   ;
  $8609 LD ($8504),HL ;
  $860C LD HL,$85F3   ;
  $860F LD A,$03      ;

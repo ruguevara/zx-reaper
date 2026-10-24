@@ -1,4 +1,4 @@
-; Routine at 8585
+; IM 2 interrupt handler: calls the routine at ($8504) on its own stack
 c$8585 EX (SP),HL    ;
  $8586 LD ($85BA),HL ;
  $8589 POP HL        ;

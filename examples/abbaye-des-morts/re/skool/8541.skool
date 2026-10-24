@@ -1,0 +1,2 @@
+; Twelve crosses: count drawn, done flag ($AE4B)
+g$8541 DEFB $00,$00

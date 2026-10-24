@@ -1,4 +1,4 @@
-; Routine at 88DE
+; Run a cutscene until $8501 is set
 ;
 ; Used by the routine at #R$887B.
 c$88DE XOR A         ;

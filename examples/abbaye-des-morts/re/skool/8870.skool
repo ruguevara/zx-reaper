@@ -1,4 +1,4 @@
-; Routine at 8870
+; Load a cutscene actor list
 ;
 ; Used by the routine at #R$887B.
 c$8870 LD DE,$8552   ;

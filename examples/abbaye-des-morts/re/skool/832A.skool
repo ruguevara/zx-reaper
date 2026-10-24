@@ -1,0 +1,9 @@
+; Script: parchment text (messages ($850E) and ($850F)), run by $9C52
+b$832A DEFB $8F,$00,$00,$20,$18,$00
+ $8330 DEFB $81,$00,$00,$20,$B0,$00
+ $8336 DEFB $82,$02,$41
+ $8339 DEFB $84,$0E,$85
+ $833C DEFB $82,$02,$55
+ $833F DEFB $84,$0F,$85
+ $8342 DEFB $90,$01
+ $8344 DEFB $80

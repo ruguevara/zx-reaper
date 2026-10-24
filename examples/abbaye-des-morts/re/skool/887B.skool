@@ -1,4 +1,4 @@
-; Routine at 887B
+; Ending sequence
 ;
 ; Used by the routine at #R$85FC.
 c$887B XOR A         ;

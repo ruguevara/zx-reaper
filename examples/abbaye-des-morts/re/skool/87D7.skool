@@ -1,4 +1,4 @@
-; Routine at 87D7
+; Random byte for the noise effect
 ;
 ; Used by the routine at #R$871A.
 c$87D7 PUSH HL       ;

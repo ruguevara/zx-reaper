@@ -1,6 +1,6 @@
-; Routine at 85CA
+; 128K: page in bank A
 ;
-; Used by the routine at #R$85BE.
+; Used by the routines at #R$85BE and #R$85D5.
 c$85CA PUSH BC       ;
  $85CB LD BC,$7FFD   ;
  $85CE LD ($8507),A  ;

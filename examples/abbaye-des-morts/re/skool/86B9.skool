@@ -1,4 +1,4 @@
-; Routine at 86B9
+; Enter a room
 ;
 ; Used by the routines at #R$85FC, #R$8832 and #R$887B.
 c$86B9 LD HL,$C500   ;

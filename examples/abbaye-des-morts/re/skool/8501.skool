@@ -1,0 +1,2 @@
+; Cutscene finished flag (set by $B1CF/$B97D, polled by $88DE)
+g$8501 DEFB $00

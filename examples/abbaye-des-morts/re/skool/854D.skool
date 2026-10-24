@@ -1,0 +1,2 @@
+; Crosses collected (HUD, $9C1B)
+g$854D DEFB $00

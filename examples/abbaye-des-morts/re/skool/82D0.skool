@@ -1,0 +1,3 @@
+; Room 25 script (the ending): room 24 again
+b$82D0 DEFB $83,$6C,$82
+ $82D3 DEFB $80

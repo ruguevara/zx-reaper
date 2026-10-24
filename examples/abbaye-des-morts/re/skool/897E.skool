@@ -1,4 +1,4 @@
-; Routine at 897E
+; Spawn an object
 ;
 ; Used by the routine at #R$896B.
 c$897E INC HL        ;

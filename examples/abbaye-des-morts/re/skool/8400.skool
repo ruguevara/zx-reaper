@@ -1,0 +1,2 @@
+; IM 2 vector table (I=$84): 257 bytes $85, all to $8585
+b$8400 DEFS $0101,$85

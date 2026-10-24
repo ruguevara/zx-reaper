@@ -1,0 +1,2 @@
+; Address of the routine the interrupt calls
+g$8504 DEFB $04,$85

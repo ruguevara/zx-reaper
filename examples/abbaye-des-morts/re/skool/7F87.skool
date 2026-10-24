@@ -1,0 +1,3 @@
+; Script: tiles drawn when flag $851C is 0 (room 19)
+b$7F87 DEFB $91,$BC,$01,$04,$01,$10,$00
+ $7F8E DEFB $80

@@ -1,6 +1,6 @@
-; Routine at 871A
+; Beeper sound effects
 ;
-; Used by the routines at #R$85E2 and #R$A43D.
+; Used by the routine at #R$85E2.
 c$871A LD HL,$85D5   ;
  $871D LD A,($854F)  ;
  $8720 AND A         ;

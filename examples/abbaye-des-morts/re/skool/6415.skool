@@ -1,3 +1,0 @@
-; Data block at 6415
-b$6415 DEFB $E0,$B8,$60,$BD,$60,$2E,$60,$24
- $641D DEFB $60

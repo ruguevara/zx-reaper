@@ -1,6 +1,4 @@
-; Routine at 8905
-;
-; Used by the routine at #R$A596.
+; Spawn the cutscene actors from $5DC0
 c$8905 LD HL,$5DC0   ;
  $8908 LD ($BE56),HL ;
 *$890B LD E,(HL)     ;

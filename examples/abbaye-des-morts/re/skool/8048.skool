@@ -1,0 +1,3 @@
+; Script: rectangle run by $A75A
+b$8048 DEFB $86,$0E,$1F,$01,$04,$80
+ $804E DEFB $80

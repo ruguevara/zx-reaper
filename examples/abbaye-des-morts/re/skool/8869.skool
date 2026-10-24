@@ -1,4 +1,4 @@
-; Routine at 8869
+; Wait for the frame flag at $BDDA
 ;
 ; Used by the routines at #R$8832 and #R$88DE.
 c$8869 LD A,($BDDA)  ;

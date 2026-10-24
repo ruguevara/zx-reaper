@@ -1,0 +1,3 @@
+; Script: rectangle drawn when flag $851B is set (room 8)
+b$7783 DEFB $86,$14,$1A,$02,$02,$80
+ $7789 DEFB $80

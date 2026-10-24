@@ -1,0 +1,2 @@
+; Cross animation delay for $AE4B
+g$8511 DEFB $05

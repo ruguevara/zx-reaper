@@ -1,4 +1,4 @@
-; Routine at 8832
+; Title: room 0 until a key is pressed
 ;
 ; Used by the routine at #R$85FC.
 c$8832 XOR A         ;

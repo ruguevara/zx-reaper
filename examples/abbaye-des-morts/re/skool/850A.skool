@@ -1,0 +1,2 @@
+; End marker ($1A) of the room-keyed tables, read with $8509 as a word
+g$850A DEFB $1A

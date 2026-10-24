@@ -1,0 +1,2 @@
+; Counter for $AE20
+g$8510 DEFB $02

@@ -1,2 +1,2 @@
-; Data block at 85BD
-b$85BD DEFB $C9
+; Unused RET
+c$85BD RET           ;

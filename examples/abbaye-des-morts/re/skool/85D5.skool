@@ -1,3 +1,7 @@
-; Data block at 85D5
-b$85D5 DEFB $3A,$07,$85,$F5,$CD,$C7,$85,$CD
- $85DD DEFB $7D,$CF,$F1,$18,$E8
+; 128K: sound effect through the AY player (replaces $871A)
+c$85D5 LD A,($8507)  ;
+ $85D8 PUSH AF       ;
+ $85D9 CALL $85C7    ;
+ $85DC CALL $CF7D    ;
+ $85DF POP AF        ;
+ $85E0 JR $85CA      ;

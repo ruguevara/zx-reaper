@@ -1,0 +1,3 @@
+; Script: block pattern 2x2 (op $88)
+b$7358 DEFB $88,$02,$02,$07,$08,$0A,$09
+ $735F DEFB $80

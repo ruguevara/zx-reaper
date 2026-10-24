@@ -1,0 +1,2 @@
+; Current sound effect (8 bytes, from $87F2)
+g$87EA DEFB $00,$00,$00,$00,$00,$00,$00,$00

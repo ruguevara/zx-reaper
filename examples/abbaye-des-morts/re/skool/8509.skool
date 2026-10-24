@@ -1,0 +1,2 @@
+; Room number (0-24; 25 = the ending)
+g$8509 DEFB $00

@@ -1,0 +1,3 @@
+; Script: tiles run by $A615 (room 7 animation)
+b$76A8 DEFB $91,$77,$01,$04,$01,$0E,$00
+ $76AF DEFB $80

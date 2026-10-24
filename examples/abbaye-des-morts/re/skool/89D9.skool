@@ -1,4 +1,4 @@
-; Routine at 89D9
+; Spawn the room's enemies (table $8B8F)
 ;
 ; Used by the routine at #R$86B9.
 c$89D9 LD HL,$8B8F   ;

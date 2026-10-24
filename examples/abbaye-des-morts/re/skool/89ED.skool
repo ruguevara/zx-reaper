@@ -1,4 +1,4 @@
-; Routine at 89ED
+; Spawn an enemy
 ;
 ; Used by the routine at #R$89D9.
 c$89ED PUSH AF       ;

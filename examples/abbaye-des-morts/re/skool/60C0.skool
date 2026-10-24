@@ -1,0 +1,2 @@
+; Main stack (SP starts at $6100)
+b$60C0 DEFS $40,$FF

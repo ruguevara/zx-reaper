@@ -1,0 +1,2 @@
+; Sound effect playing
+g$854E DEFB $00

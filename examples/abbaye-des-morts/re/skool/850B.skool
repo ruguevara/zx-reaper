@@ -1,0 +1,2 @@
+; Room flag read by $9B5A (cleared at game start)
+g$850B DEFB $00

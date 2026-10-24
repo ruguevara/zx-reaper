@@ -1,0 +1,8 @@
+; Row address table: 24 words $5E00+32*n into the room tile map, built at
+; start-up
+w$6100 DEFW $FFFF,$FFFF,$FFFF,$FFFF
+ $6108 DEFW $FFFF,$FFFF,$FFFF,$FFFF
+ $6110 DEFW $FFFF,$FFFF,$FFFF,$FFFF
+ $6118 DEFW $FFFF,$FFFF,$FFFF,$FFFF
+ $6120 DEFW $FFFF,$FFFF,$FFFF,$FFFF
+ $6128 DEFW $FFFF,$FFFF,$FFFF,$FFFF

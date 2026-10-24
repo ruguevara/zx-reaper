@@ -1,0 +1,8 @@
+; Script: room frame and title bar, prints the room name (message ($850D))
+b$82F0 DEFB $8F,$16,$0C,$14,$02,$07
+ $82F6 DEFB $81,$B0,$0C,$14,$10,$00
+ $82FC DEFB $86,$00,$00,$20,$16,$80
+ $8302 DEFB $82,$00,$B0
+ $8305 DEFB $84,$0D,$85
+ $8308 DEFB $90,$01
+ $830A DEFB $80

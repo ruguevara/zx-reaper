@@ -1,0 +1,2 @@
+; Title screen: word written by $A43D, read by $A3B9
+g$8502 DEFB $00,$00

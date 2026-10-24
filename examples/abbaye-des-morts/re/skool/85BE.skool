@@ -1,5 +1,3 @@
-; Routine at 85BE
-;
-; Used by the routine at #R$6000.
+; 128K: page in bank 0
 c$85BE LD A,$10      ;
  $85C0 JR $85CA      ;

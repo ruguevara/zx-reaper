@@ -1,4 +1,4 @@
-; Routine at 88FE
+; Cutscene: no free actor slot
 ;
 ; Used by the routine at #R$8905.
 c$88FE POP AF        ;

@@ -1,0 +1,13 @@
+; Cutscene actor lists for $8870: count (to $8552), then 4-byte records (word
+; $BDxx, x, y) copied to $5DC0 with one byte more
+b$83A8 DEFB $01
+ $83A9 DEFB $80,$BD,$34,$6C
+ $83AD DEFB $08
+ $83AE DEFB $92,$BD,$3A,$3E
+ $83B2 DEFB $A4,$BD,$44,$36
+ $83B6 DEFB $A4,$BD,$44,$3E
+ $83BA DEFB $A4,$BD,$44,$46
+ $83BE DEFB $C8,$BD,$44,$14
+ $83C2 DEFB $C8,$BD,$44,$24
+ $83C6 DEFB $B6,$BD,$44,$54
+ $83CA DEFB $B6,$BD,$44,$60
