@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 128" width="512" height="256">
+<g shape-rendering="crispEdges">
+<rect x="0" y="0" width="256" height="8" fill="#CDCD00"/>
+<rect x="0" y="8" width="256" height="8" fill="#CDCD00"/>
+<rect x="0" y="16" width="256" height="8" fill="#CDCD00"/>
+<rect x="0" y="24" width="256" height="8" fill="#CDCD00"/>
+<rect x="0" y="32" width="256" height="8" fill="#CDCD00"/>
+<rect x="0" y="40" width="256" height="8" fill="#CDCD00"/>
+<rect x="0" y="48" width="256" height="8" fill="#CDCD00"/>
+<rect x="0" y="56" width="256" height="8" fill="#CDCD00"/>
+<rect x="0" y="64" width="256" height="8" fill="#CDCD00"/>
+<rect x="0" y="72" width="256" height="8" fill="#CDCD00"/>
+<rect x="0" y="80" width="256" height="8" fill="#CDCD00"/>
+<rect x="0" y="88" width="256" height="8" fill="#CDCD00"/>
+<rect x="0" y="96" width="256" height="8" fill="#CDCD00"/>
+<rect x="0" y="104" width="256" height="8" fill="#CDCD00"/>
+<rect x="0" y="112" width="256" height="8" fill="#CDCD00"/>
+<rect x="0" y="120" width="256" height="8" fill="#CDCD00"/>
+</g>
+<path fill="#0000CD" d="M98 27.5 82.5 26.5 64 30.5 55.5 30.5 37 34.5 22.5 35.5 -0.5 27.5 -0.5 -0.5 256.5 -0.5 256.5 34.5 254 35.5 229 38.5 198.5 34.5 184.5 38.5 157.5 28.5 124.5 26.5 106.5 29.5Z"/>
+<path fill="#00CD00" d="M195.5 77.5 218.5 80.5 256.5 79.5 256.5 128.5 -0.5 128.5 -0.5 89.5 110.5 84.5 113.5 82.5 107.5 75.5 173 74.5Z"/>
+<g fill="none" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+<path stroke="#00CD00" d="M0.5 89.5 110.5 84.5 114.5 83.5 107 76"/>
+<path stroke="#000000" d="M107 76 108 75.5"/>
+<path stroke="#00CD00" d="M108 75.5 172.5 74.5 218.5 80.5 255.5 79.5"/>
+<path stroke="#000000" d="M101.5 83.5 105.5 75.5"/>
+<path stroke="#00CD00" d="M101.5 84.5 101.5 84"/>
+<path stroke="#000000" d="M101.5 84 105.5 76.5"/>
+<path stroke="#000000" d="M0.5 64.5 56.5 57.5 147.5 55.5 170.5 53.5 204.5 53.5 237.5 56.5 255.5 56.5"/>
+<path stroke="#000000" d="M255.5 46.5 230 38.5"/>
+<path stroke="#0000CD" d="M230 38.5 204.5 34.5 198.5 34.5 185 38.5"/>
+<path stroke="#000000" d="M185 38.5 148.5 46.5"/>
+<path stroke="#000000" d="M168.5 40.5 139.5 38.5 114.5 29.5 110 29.5"/>
+<path stroke="#0000CD" d="M110 29.5 82.5 26.5 63.5 30.5 23 35.5"/>
+<path stroke="#000000" d="M23 35.5 0.5 36.5"/>
+<path stroke="#0000CD" d="M22.5 34.5 0.5 27.5"/>
+<path stroke="#0000CD" d="M184.5 37.5 157.5 28.5 124.5 26.5 107 29.5"/>
+<path stroke="#000000" d="M107 29.5 104.5 29.5"/>
+<path stroke="#0000CD" d="M230.5 37.5 255.5 34.5"/>
+<path stroke="#000000" d="M197.5 70.5 200.5 44.5"/>
+<path stroke="#000000" d="M197.5 59.5 194.5 45.5"/>
+<path stroke="#000000" d="M200.5 53.5 205.5 43.5"/>
+<path stroke="#000000" d="M203.5 49.5 206.5 48.5"/>
+<path stroke="#000000" d="M196.5 49.5 197.5 46.5"/>
+<path stroke="#000000" d="M195.5 55.5 192.5 54.5"/>
+</g></svg>

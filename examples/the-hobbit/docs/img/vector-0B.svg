@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 128" width="512" height="256">
+<g shape-rendering="crispEdges">
+<rect x="0" y="0" width="8" height="8" fill="#000000"/>
+<rect x="8" y="0" width="248" height="8" fill="#CDCDCD"/>
+<rect x="0" y="8" width="24" height="8" fill="#000000"/>
+<rect x="24" y="8" width="232" height="8" fill="#CDCDCD"/>
+<rect x="0" y="16" width="24" height="8" fill="#000000"/>
+<rect x="24" y="16" width="232" height="8" fill="#CDCDCD"/>
+<rect x="0" y="24" width="24" height="8" fill="#000000"/>
+<rect x="24" y="24" width="232" height="8" fill="#CDCDCD"/>
+<rect x="0" y="32" width="32" height="8" fill="#000000"/>
+<rect x="32" y="32" width="224" height="8" fill="#CDCDCD"/>
+<rect x="0" y="40" width="48" height="8" fill="#000000"/>
+<rect x="48" y="40" width="208" height="8" fill="#CDCDCD"/>
+<rect x="0" y="48" width="48" height="8" fill="#000000"/>
+<rect x="48" y="48" width="208" height="8" fill="#CDCDCD"/>
+<rect x="0" y="56" width="256" height="8" fill="#CDCDCD"/>
+<rect x="0" y="64" width="256" height="8" fill="#CDCDCD"/>
+<rect x="0" y="72" width="256" height="8" fill="#CDCDCD"/>
+<rect x="0" y="80" width="256" height="8" fill="#CDCDCD"/>
+<rect x="0" y="88" width="256" height="8" fill="#CDCDCD"/>
+<rect x="0" y="96" width="256" height="8" fill="#CDCDCD"/>
+<rect x="0" y="104" width="256" height="8" fill="#CDCDCD"/>
+<rect x="0" y="112" width="256" height="8" fill="#CDCDCD"/>
+<rect x="0" y="120" width="256" height="8" fill="#CDCDCD"/>
+</g>
+<path fill="#0000CD" d="M52.5 49 49 49.5 37 45.5 23.5 32 17.5 18.5 -0.5 1.5 -0.5 -0.5 62.5 -0.5 60.5 8.5 55.5 9.5Z M31 27.5 36.5 28.5 32.5 22 32.5 18 34.5 13.5 40.5 11.5 39.5 8.5 35.5 6.5 32.5 6.5 27.5 9.5 23.5 15.5 25.5 23.5Z"/>
+<path fill="#000000" d="M-0.5 112.5 -0.5 56.5 51.5 56.5 50.5 83 45.5 128.5 -0.5 128.5Z"/>
+<path fill="#000000" d="M51.5 55.5 48.5 56.5 47.5 48.5 52.5 49.5Z"/>
+<path fill="#000000" d="M84 113 126.5 121.5 145 120.5 149 122.5 151.5 127 150.5 128.5 45.5 128.5 48.5 95.5 55.5 98.5 75.5 102.5 74.5 112.5 80 111.5Z"/>
+<path fill="#CD0000" d="M97.5 49.5 107.5 55.5 127.5 57.5 139.5 62.5 175 68.5 212.5 87.5 256.5 95.5 256.5 128.5 161.5 128.5 161.5 127 173.5 115.5 183.5 91.5 175.5 74.5 159.5 70.5 139 68.5 126.5 63.5 106 61.5 90.5 53.5 88.5 44 87.5 24 90.5 18.5 96.5 17.5 93.5 23.5 93.5 30.5Z"/>
+<g fill="none" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+<path stroke="#CD0000" d="M161.5 127.5 173.5 115.5 183.5 91.5 175.5 74.5 159.5 70.5 139.5 68.5 126.5 63.5 106.5 61.5 91 53.5"/>
+<path stroke="#000000" d="M91 53.5 90.5 53"/>
+<path stroke="#CD0000" d="M90.5 53 87.5 28.5 87.5 24.5 90.5 19"/>
+<path stroke="#000000" d="M90.5 19 91 18.5"/>
+<path stroke="#CD0000" d="M91 18.5 95.5 17.5"/>
+<path stroke="#000000" d="M96.5 17.5 96.5 18"/>
+<path stroke="#CD0000" d="M96.5 18 93.5 23.5 95.5 44.5 97.5 50.5 107.5 55.5 126.5 57.5 139.5 62.5 174.5 68.5 212.5 87.5 255.5 95.5"/>
+<path stroke="#000000" d="M97.5 16.5 105.5 0.5"/>
+<path stroke="#0000CD" d="M62.5 0.5 60.5 8"/>
+<path stroke="#000000" d="M60.5 8 60 8.5"/>
+<path stroke="#0000CD" d="M60 8.5 55.5 9.5 52.5 49"/>
+<path stroke="#000000" d="M52.5 49 45.5 127.5"/>
+<path stroke="#000000" d="M56.5 9.5 97.5 13.5"/>
+<path stroke="#000000" d="M56.5 10.5 97.5 14.5"/>
+<path stroke="#000000" d="M86.5 26.5 74.5 112.5"/>
+<path stroke="#CD0000" d="M90.5 52.5 90.5 53"/>
+<path stroke="#000000" d="M90.5 53 85.5 113.5"/>
+<path stroke="#CD0000" d="M106.5 61.5 106.5 62"/>
+<path stroke="#000000" d="M106.5 62 103.5 118.5"/>
+<path stroke="#000000" d="M137.5 68.5 130.5 120.5"/>
+<path stroke="#000000" d="M155.5 71.5 143.5 122.5"/>
+<path stroke="#000000" d="M173.5 75.5 148.5 125.5"/>
+<path stroke="#CD0000" d="M181.5 96.5 181 97"/>
+<path stroke="#000000" d="M181 97 150.5 127.5"/>
+<path stroke="#000000" d="M68.5 12.5 57.5 98.5"/>
+<path stroke="#CD0000" d="M87.5 26.5 87.5 29"/>
+<path stroke="#000000" d="M87.5 29 75.5 112.5"/>
+<path stroke="#000000" d="M51.5 49.5 48 48.5"/>
+<path stroke="#CDCDCD" d="M48 48.5 47 48.5"/>
+<path stroke="#0000CD" d="M47 48.5 37.5 45.5 23.5 31.5 17.5 18.5 0.5 1.5"/>
+<path stroke="#000000" d="M27.5 10.5 28 10"/>
+<path stroke="#0000CD" d="M28 10 32.5 6.5 35.5 6.5 39.5 8.5 40.5 11.5 35 13.5"/>
+<path stroke="#000000" d="M35 13.5 34.5 14"/>
+<path stroke="#0000CD" d="M34.5 14 32.5 21.5 37.5 28.5 32.5 28.5 28.5 26.5 25.5 23.5 23.5 17.5 27.5 9.5"/>
+<path stroke="#000000" d="M0.5 56.5 51.5 56.5"/>
+<path stroke="#000000" d="M48.5 55.5 47.5 49"/>
+<path stroke="#CDCDCD" d="M47.5 49 47.5 48.5"/>
+<path stroke="#000000" d="M96.5 39.5 115.5 0.5"/>
+<path stroke="#000000" d="M127.5 57.5 141.5 1.5"/>
+<path stroke="#000000" d="M161.5 65.5 173.5 0.5"/>
+<path stroke="#000000" d="M202.5 80.5 220.5 24.5 232.5 0.5"/>
+<path stroke="#000000" d="M70.5 9.5 72.5 0.5"/>
+<path stroke="#000000" d="M83.5 10.5 85.5 0.5"/>
+<path stroke="#000000" d="M49.5 95.5 55.5 98.5 75.5 102.5"/>
+<path stroke="#000000" d="M76.5 111.5 126.5 121.5 144.5 120.5 150.5 123.5 152.5 127.5"/>
+</g></svg>

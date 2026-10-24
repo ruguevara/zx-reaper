@@ -27,6 +27,7 @@ done
 # into the header of picture 5 (data at $E142); RestartGame zeroes them again
 $RUN $TMP/bagend.z80 --cls 0x38 --poke 0xB707,8 --poke 0xE142,5 --poke 0xE143,0x28 \
   --call 0x7F78 --reg A=0x05 --png $IMG/picture-05-day.png --crop 0,0,32,16 > /dev/null
+python3 scripts/vector.py $IMG
 
 # Screens in play
 $RUN re/orig.z80 --input tests/inputs/endgame.txt --shot 26120:$IMG/play-rivendell.png \

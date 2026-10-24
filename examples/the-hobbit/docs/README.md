@@ -45,6 +45,8 @@ done blind, without any earlier disassembly or description of the game.
 7. [Graphics](07-graphics.md): the loading screen, the font, all 22
    pictures, screens in play, a map of the 80 locations
 8. [Porting notes](08-porting.md)
+9. [The pictures as vectors](09-vector.md): the 22 pictures as SVG, fills
+   traced into polygons
 
 ## How to read the links
 
