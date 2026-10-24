@@ -39,9 +39,36 @@ bytes): three standard-speed blocks.
 
 ## Memory map
 
+Details and evidence: `re/frag/[ABCD]-report.md` (classification reports).
+
 | Range | What | Status |
 | --- | --- | --- |
-| $6000-$FEFF | the game, as unpacked | |
+| $5B00-$5DBF | room tile map, 22 rows x 32 tile numbers ($A20D: row/column -> address) | buffer |
+| $5DC0-$5DFF | object list (pointer at $BE56) | buffer |
+| $5E00-$60BF | tile flag map, $CD00+tile for each cell (3 pages above the tile map); overwrites the start-up code $6000-$6072 | buffer |
+| $6000-$6072 | start-up (run once) | code |
+| $60C0-$60FF | main stack (SP=$6100) | stack |
+| $6100-$612F | row address table, 24 words $5E00+32n, built at start-up | buffer |
+| $6130-$66DB | proportional font: index of 96 words, glyphs 16 rows high | font |
+| $66DC-$68CB | sprites 16 wide: door arch 16x24, 14 of 16x16 | gfx |
+| $68CC-$717E | 20 packed sprite sets, unpacked per room into the sprite sheet | gfx packed |
+| $717F-$7235 | parchment frame tiles and layout | gfx, layout |
+| $7236-$83A7 | room scripts: addresses (26 words) and bytecode for the interpreter $9D5F | script |
+| $83A8-$83FF | cutscene actor lists, debug room-warp routine (unused), music track per room | data, code |
+| $8400-$8500 | IM 2 vector table, 257 x $85 | table |
+| $8501-$855E | game variables | vars |
+| $855F-$8584 | interrupt stack | stack |
+| $8585-$8A8E | interrupt handler, 128K paging and music, main loop, beeper effects, title, ending, spawning | code |
+| $8A8F-$9047 | object types, frame lists, room objects (11 bytes), room items (8 bytes) | records |
+| $9048-$93D2 | text: 53 length-prefixed strings | text |
+| $93D3-$95FE | behaviour data for object kinds | records |
+| $95FF-$A595 | redraw, sprite drawing, parchments, script interpreter and opcodes, text, keys, menus | code |
+| $A596-$BE55 | game frame: player, items, room exits, sprite unpacking, entities | code |
+| $BE56-$BFFF | pointers, frame call list | vars, buffer |
+| $C000-$CCFF | sprite draw queue, object slots (11 x 22 bytes at $C100), redraw buffers | buffer |
+| $CD00-$D6FF | tile flags, tile attributes, tile bitmaps (256 x 8) | tables, gfx |
+| $D700-$FEFF | sprite sheet: a page per pixel row, 40 rows; columns $63-$FF filled per room | gfx, buffer |
+| $FF00-$FFFF | outline mask table built at start-up | buffer |
 
 ## Open questions
 
