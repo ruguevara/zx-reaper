@@ -32,10 +32,11 @@
 ; +$0190 SpriteCross: cross (pattee), the cross that can be taken, drawn in six
 ; colours by frames 0-5 of FramesCross
 ; .
-; +$01B0 SpritePlus: an inverted cross (thin, the crossbar low), frames 6-11 of
+; +$01B0 SpriteInvertedCross: an inverted cross (thin, the crossbar low), frames 6-11 of
 ; FramesCross in the same six colours: the look of a cross that cannot be taken
-; in the current state of the wheel of faith (WheelState; DrawCrossWheelRest
-; adds 6 to the frame, ActionCrossWheelTurned draws it). Observed: the
+; in the current state of the wheel of faith (WheelState: DrawCrossWheelRest
+; adds 6 to the frame while the wheel is turned, DrawCrossWheelTurned while it
+; is at rest). Observed: the
 ; wheel-turned cross of room 9, with the wheel at rest, is drawn as a magenta
 ; inverted cross.
 ; .
@@ -269,7 +270,7 @@ SpriteCross:
   DEFB $00,$00
   DEFB $00,$00
   DEFB $00,$00
-SpritePlus:
+SpriteInvertedCross:
   DEFB $00,$00
   DEFB $00,$00
   DEFB $00,$00
@@ -304,11 +305,14 @@ SpriteScroll:
   DEFB $00,$00
   DEFB $00,$00
 
-; Packed sprite set 0 (op $97 $00): 4 columns of 3 character rows
+; Packed sprite set 0 (op $97 $00): the skeleton archer, 4 columns of 3 character rows
 ;
-; Sprite sets are the animated sprites of the enemies and of Satan, stored
-; packed and unpacked into the sprite sheet (SpriteSheet) when a room is
-; entered: the room script op $97 N (OpUnpackSprites) calls UnpackSpriteSet,
+; Sprite sets are the sprites of most room creatures (not the spiders, drops,
+; stone heads, plants and fish, which are in the fixed part of the sheet), of
+; Death's scythe, the Pestilent Beast and its fire, Satan and his smoke. Each
+; set holds one thing, named in the title (seen by drawing the sheet columns
+; the set fills in a room that unpacks it). They are stored packed and
+; unpacked into the sprite sheet (SpriteSheet) when a room is entered: the room script op $97 N (OpUnpackSprites) calls UnpackSpriteSet,
 ; which reads record N of UnpackRecords (destination, this address, flags,
 ; frame width) and fills the sheet columns. Format of a set: byte 0 = total
 ; columns (frames x frame width), byte 1 = height in character rows (8 pixel
@@ -323,8 +327,10 @@ SpriteScroll:
 ; Unpacked by room script op $97 $00 into the sprite sheet at $D7F8 (page =
 ; first pixel row, low byte = first column) with record 0 of UnpackRecords:
 ; frame width 2 columns, mirrored copies (bit 6). 4 columns x 3 character rows
-; (24 pixel rows), 74 bytes packed. Used by rooms: 17, 21.
-PackedSet0:
+; (24 pixel rows), 74 bytes packed. Used by rooms: 17, 21. Contents (the sheet
+; columns drawn in room 17): two frames facing left (resting, aiming) and their
+; mirrored copies.
+PackedSetArcher:
   DEFB $04,$03
   DEFB $00,$DB,$0D,$14,$25,$24,$34,$2E,$FD,$25,$24,$14,$15,$0D,$01,$07
   DEFB $01,$F0,$DF,$F8,$98,$78,$F0,$10,$E6,$16,$FF,$AA,$14,$28,$98,$70
@@ -332,15 +338,15 @@ PackedSet0:
   DEFB $24,$29,$11,$01,$07,$01,$F0,$DF,$F8,$98,$78,$F0,$90,$FA,$C0,$FF
   DEFB $28,$14,$28,$98,$70,$26,$5A,$62
 
-; Packed sprite set 1 (op $97 $01): 4 columns of 3 character rows
+; Packed sprite set 1 (op $97 $01): the crusader, 4 columns of 3 character rows
 ;
 ; Unpacked by room script op $97 $01 into the sprite sheet at $D763 (page =
 ; first pixel row, low byte = first column) with record 1 of UnpackRecords:
 ; frame width 2 columns, pre-shifted copies (bit 7) and mirrored copies (bit
 ; 6). 4 columns x 3 character rows (24 pixel rows), 99 bytes packed. Used by
-; rooms: 0, 4, 5, 6, 24. Probably the crusaders (rooms 4-6 are the chase, room
-; 24 and 25 the ending).
-PackedSet1:
+; rooms: 0, 4, 5, 6, 24 (and 25, whose script calls RoomScript24). Contents
+; (the sheet columns drawn in room 0): two frames, then the mirrored copies.
+PackedSetCrusader:
   DEFB $04,$03
   DEFB $FF,$01,$03,$04,$0B,$17,$11,$15,$14,$FF,$12,$09,$84,$C2,$E4,$62
   DEFB $74,$32,$EF,$48,$30,$06,$03,$05,$0E,$0F,$FE,$E0,$F0,$38,$DC,$EE
@@ -350,14 +356,15 @@ PackedSet1:
   DEFB $EE,$2E,$EE,$7E,$6C,$D8,$34,$00,$7F,$73,$AF,$40,$73,$B2,$1C,$C0
   DEFB $E0
 
-; Packed sprite set 2 (op $97 $02): 12 columns of 4 character rows
+; Packed sprite set 2 (op $97 $02): Death, 12 columns of 4 character rows
 ;
 ; Unpacked by room script op $97 $02 into the sprite sheet at $D763 (page =
 ; first pixel row, low byte = first column) with record 2 of UnpackRecords:
 ; frame width 4 columns, pre-shifted copies (bit 7) and mirrored copies (bit
 ; 6). 12 columns x 4 character rows (32 pixel rows), 302 bytes packed. Used by
-; rooms: 18.
-PackedSet2:
+; rooms: 18. Contents (the sheet columns drawn in room 18): three frames (the
+; third is the throwing pose), then the mirrored copies.
+PackedSetDeath:
   DEFB $0C,$04
   DEFB $7F,$1F,$3F,$7F,$F0,$E0,$C1,$83,$FF,$82,$84,$44,$04,$06,$03,$01
   DEFB $04,$98,$05,$04,$08,$40,$00,$5F,$80,$9F,$3F,$FE,$BF,$1F,$EF,$67
@@ -379,14 +386,15 @@ PackedSet2:
   DEFB $21,$E0,$12,$0C,$00,$03,$80,$E0,$FF,$C0,$7E,$64,$C8,$87,$0E,$1C
   DEFB $30,$FF,$7E,$1C,$30,$08,$04,$18,$30,$C0,$80,$00
 
-; Packed sprite set 3 (op $97 $03): 4 columns of 3 character rows
+; Packed sprite set 3 (op $97 $03): the demon, 4 columns of 3 character rows
 ;
 ; Unpacked by room script op $97 $03 into the sprite sheet at $D7BB (page =
 ; first pixel row, low byte = first column) with record 3 of UnpackRecords:
 ; frame width 2 columns, pre-shifted copies (bit 7) and mirrored copies (bit
 ; 6). 4 columns x 3 character rows (24 pixel rows), 91 bytes packed. Used by
-; rooms: 21, 22.
-PackedSet3:
+; rooms: 21, 22. Contents (the sheet columns drawn in room 21): two frames,
+; then the mirrored copies.
+PackedSetDemon:
   DEFB $04,$03
   DEFB $1F,$09,$1F,$3F,$1C,$08,$FF,$29,$37,$3F,$23,$1F,$00,$09,$1F,$FD
   DEFB $1E,$1D,$0E,$04,$00,$08,$30,$1F,$C0,$88,$84,$DC,$CE,$5F,$CF,$97
@@ -395,14 +403,15 @@ PackedSet3:
   DEFB $04,$01,$05,$0B,$3E,$C0,$88,$84,$DC,$CE,$BF,$CF,$97,$13,$23,$CB
   DEFB $4B,$8B,$EE,$0B,$8B,$12,$24,$04,$00
 
-; Packed sprite set 4 (op $97 $04): 6 columns of 2 character rows
+; Packed sprite set 4 (op $97 $04): the bird, 6 columns of 2 character rows
 ;
 ; Unpacked by room script op $97 $04 into the sprite sheet at $EF63 (page =
 ; first pixel row, low byte = first column) with record 4 of UnpackRecords:
 ; frame width 3 columns, pre-shifted copies (bit 7) and mirrored copies (bit
 ; 6). 6 columns x 2 character rows (16 pixel rows), 68 bytes packed. Used by
-; rooms: 20, 23.
-PackedSet4:
+; rooms: 20, 23. Contents (the sheet columns drawn in room 20): two frames of
+; the gliding bird, 24 pixels wide, then the mirrored copies.
+PackedSetBird:
   DEFB $06,$02
   DEFB $0F,$10,$30,$7A,$DF,$FE,$BF,$E3,$C1,$4F,$07,$01,$00,$03,$AA,$FF
   DEFB $7B,$FC,$F8,$FC,$FF,$7F,$00,$01,$E6,$EF,$FF,$18,$00,$FC,$F8,$E0
@@ -410,13 +419,15 @@ PackedSet4:
   DEFB $7E,$70,$FA,$B8,$FF,$FC,$F0,$00,$3D,$E0,$F8,$FC,$00,$30,$E0,$FF
   DEFB $CC,$00
 
-; Packed sprite set 5 (op $97 $05): 10 columns of 3 character rows
+; Packed sprite set 5 (op $97 $05): the fire breath of the Pestilent Beast, 10 columns of 3 character rows
 ;
 ; Unpacked by room script op $97 $05 into the sprite sheet at $D768 (page =
 ; first pixel row, low byte = first column) with record 5 of UnpackRecords:
 ; frame width 2 columns, no extra copies. 10 columns x 3 character rows (24
-; pixel rows), 148 bytes packed. Used by rooms: 10.
-PackedSet5:
+; pixel rows), 148 bytes packed. Used by rooms: 10. Contents (the sheet columns
+; drawn in room 10): the jet in two frames, each an upper piece 2 columns wide
+; and a lower piece 3 columns wide.
+PackedSetBeastFire:
   DEFB $0A,$03
   DEFB $09,$07,$0F,$49,$1F,$3F,$7F,$29,$3F,$3E,$3F,$09,$80,$00,$A3,$80
   DEFB $C0,$E0,$20,$D5,$00,$80,$C0,$40,$00,$0B,$01,$02,$01,$77,$03,$07
@@ -429,13 +440,15 @@ PackedSet5:
   DEFB $A0,$22,$00,$0B,$80,$40,$80,$77,$C0,$E0,$C0,$E0,$60,$B0,$98,$00
   DEFB $80,$00
 
-; Packed sprite set 6 (op $97 $06): 4 columns of 5 character rows
+; Packed sprite set 6 (op $97 $06): the head of the Pestilent Beast, 4 columns of 5 character rows
 ;
 ; Unpacked by room script op $97 $06 into the sprite sheet at $D763 (page =
 ; first pixel row, low byte = first column) with record 6 of UnpackRecords:
 ; frame width 5 columns, no extra copies. 4 columns x 5 character rows (40
-; pixel rows), 117 bytes packed. Used by rooms: 10.
-PackedSet6:
+; pixel rows), 117 bytes packed. Used by rooms: 10. Contents (the sheet columns
+; drawn in room 10): one picture 32 x 40 pixels (the record says frame width 5,
+; the set has 4 columns).
+PackedSetBeastHead:
   DEFB $04,$05
   DEFB $00,$12,$01,$03,$3F,$07,$06,$0E,$0F,$0E,$0F,$1E,$07,$03,$01,$00
   DEFB $00,$1D,$10,$30,$60,$E0,$3F,$F1,$FF,$FC,$F0,$C0,$80,$FF,$F0,$F8
@@ -446,64 +459,70 @@ PackedSet6:
   DEFB $24,$80,$C0,$BF,$E0,$70,$30,$38,$78,$B8,$78,$9F,$F8,$F0,$E0,$C0
   DEFB $80,$00,$00
 
-; Packed sprite set 7 (op $97 $07): 2 columns of 4 character rows
+; Packed sprite set 7 (op $97 $07): the fire wheel, 2 columns of 4 character rows
 ;
 ; Unpacked by room script op $97 $07 into the sprite sheet at $D7E7 (page =
 ; first pixel row, low byte = first column) with record 7 of UnpackRecords:
 ; frame width 2 columns, no extra copies. 2 columns x 4 character rows (32
-; pixel rows), 44 bytes packed. Used by rooms: 22, 23.
-PackedSet7:
+; pixel rows), 44 bytes packed. Used by rooms: 22, 23. Contents (the sheet
+; columns drawn in room 22): its two frames one under the other in one strip of
+; 2 columns.
+PackedSetFireWheel:
   DEFB $02,$04
   DEFB $0F,$07,$02,$06,$0D,$F8,$09,$0E,$0B,$01,$00,$0F,$03,$06,$0D,$0B
   DEFB $78,$0D,$06,$03,$00,$0F,$80,$D0,$70,$90,$F8,$B0,$60,$40,$E0,$00
   DEFB $0F,$C0,$60,$B0,$D0,$78,$B0,$60,$C0,$00
 
-; Packed sprite set 8 (op $97 $08): 4 columns of 2 character rows
+; Packed sprite set 8 (op $97 $08): the darker fly (BehaviourFlyB), 4 columns of 2 character rows
 ;
 ; Unpacked by room script op $97 $08 into the sprite sheet at $D763 (page =
 ; first pixel row, low byte = first column) with record 8 of UnpackRecords:
 ; frame width 2 columns, mirrored copies (bit 6). 4 columns x 2 character rows
-; (16 pixel rows), 59 bytes packed. Used by rooms: 12.
-PackedSet8:
+; (16 pixel rows), 59 bytes packed. Used by rooms: 12. Contents (the sheet
+; columns drawn in room 12): two frames, then the mirrored copies.
+PackedSetFlyB:
   DEFB $04,$02
   DEFB $0F,$1C,$01,$3C,$7E,$BC,$52,$2D,$02,$3C,$00,$1F,$1C,$7E,$FC,$F8
   DEFB $C4,$FE,$16,$D4,$E8,$A8,$28,$20,$00,$7F,$60,$F0,$F9,$7B,$01,$3C
   DEFB $7E,$BE,$52,$2D,$02,$0A,$1D,$00,$FF,$3C,$7E,$FE,$FC,$F8,$F0,$C8
   DEFB $04,$FE,$16,$D4,$E8,$A8,$30,$40,$00
 
-; Packed sprite set 9 (op $97 $09): 4 columns of 2 character rows
+; Packed sprite set 9 (op $97 $09): the bright fly (BehaviourFlyA), 4 columns of 2 character rows
 ;
 ; Unpacked by room script op $97 $09 into the sprite sheet at $D76B (page =
 ; first pixel row, low byte = first column) with record 9 of UnpackRecords:
 ; frame width 2 columns, mirrored copies (bit 6). 4 columns x 2 character rows
-; (16 pixel rows), 59 bytes packed. Used by rooms: 12.
-PackedSet9:
+; (16 pixel rows), 59 bytes packed. Used by rooms: 12. Contents (the sheet
+; columns drawn in room 12): two frames, then the mirrored copies.
+PackedSetFlyA:
   DEFB $04,$02
   DEFB $EF,$02,$07,$06,$04,$01,$3C,$7E,$FE,$12,$5E,$1F,$06,$24,$19,$00
   DEFB $FF,$1C,$3E,$7E,$FC,$F8,$F0,$C8,$04,$FE,$56,$D4,$F8,$A8,$A4,$40
   DEFB $00,$07,$01,$3C,$7E,$FC,$12,$5E,$1F,$06,$3C,$00,$1F,$1C,$7E,$FC
   DEFB $F8,$C4,$F6,$16,$D4,$F8,$A8,$A0,$00
 
-; Packed sprite set 10 (op $97 $0A): 2 columns of 3 character rows
+; Packed sprite set 10 (op $97 $0A): the hanged man, 2 columns of 3 character rows
 ;
 ; Unpacked by room script op $97 $0A into the sprite sheet at $D763 (page =
 ; first pixel row, low byte = first column) with record 10 of UnpackRecords:
 ; frame width 2 columns, mirrored copies (bit 6). 2 columns x 3 character rows
-; (24 pixel rows), 44 bytes packed. Used by rooms: 9.
-PackedSet10:
+; (24 pixel rows), 44 bytes packed. Used by rooms: 9. Contents (the sheet
+; columns drawn in room 9): one frame and its mirrored copy.
+PackedSetHangedMan:
   DEFB $02,$03
   DEFB $FF,$07,$0C,$1A,$16,$15,$16,$12,$1B,$FE,$0C,$07,$00,$05,$08,$0D
   DEFB $0F,$07,$0C,$0F,$07,$FD,$F0,$38,$1C,$4E,$EE,$6E,$CE,$F8,$1A,$F4
   DEFB $00,$98,$B8,$7D,$88,$98,$D0,$60,$E0,$C0
 
-; Packed sprite set 11 (op $97 $0B): 4 columns of 3 character rows
+; Packed sprite set 11 (op $97 $0B): the knight, 4 columns of 3 character rows
 ;
 ; Unpacked by room script op $97 $0B into the sprite sheet at $D763 (page =
 ; first pixel row, low byte = first column) with record 11 of UnpackRecords:
 ; frame width 2 columns, pre-shifted copies (bit 7) and mirrored copies (bit
 ; 6). 4 columns x 3 character rows (24 pixel rows), 99 bytes packed. Used by
-; rooms: 15, 20.
-PackedSet11:
+; rooms: 15, 20. Contents (the sheet columns drawn in room 15): two frames,
+; then the mirrored copies.
+PackedSetKnight:
   DEFB $04,$03
   DEFB $7D,$01,$03,$07,$0F,$02,$0F,$FF,$0A,$8F,$C5,$C3,$C0,$E5,$62,$65
   DEFB $FF,$93,$68,$10,$03,$01,$00,$02,$01,$7F,$EE,$F7,$FB,$FD,$1D,$1C
@@ -513,14 +532,15 @@ PackedSet11:
   DEFB $FC,$BC,$FC,$FC,$78,$F4,$00,$FE,$E6,$BF,$80,$E6,$64,$38,$00,$1C
   DEFB $38
 
-; Packed sprite set 12 (op $97 $0C): 4 columns of 2 character rows
+; Packed sprite set 12 (op $97 $0C): the chasing ghost, 4 columns of 2 character rows
 ;
 ; Unpacked by room script op $97 $0C into the sprite sheet at $D763 (page =
 ; first pixel row, low byte = first column) with record 12 of UnpackRecords:
 ; frame width 2 columns, pre-shifted copies (bit 7) and mirrored copies (bit
 ; 6). 4 columns x 2 character rows (16 pixel rows), 70 bytes packed. Used by
-; rooms: 11.
-PackedSet12:
+; rooms: 11. Contents (the sheet columns drawn in room 11): two frames of the
+; grinning head, then the mirrored copies.
+PackedSetChaser:
   DEFB $04,$02
   DEFB $FB,$02,$17,$1F,$3F,$7F,$CF,$E6,$FF,$BF,$DF,$4A,$60,$35,$1F,$07
   DEFB $00,$FB,$A0,$B0,$F4,$FC,$FE,$3F,$7B,$FF,$F7,$E6,$CE,$1C,$38,$F0
@@ -528,26 +548,30 @@ PackedSet12:
   DEFB $35,$1F,$07,$FF,$40,$68,$F8,$FC,$FE,$3E,$7F,$F3,$EF,$E7,$C7,$0E
   DEFB $1C,$38,$F0,$C0
 
-; Packed sprite set 13 (op $97 $0D): 4 columns of 2 character rows
+; Packed sprite set 13 (op $97 $0D): the rat, 4 columns of 2 character rows
 ;
 ; Unpacked by room script op $97 $0D into the sprite sheet at $D763 (page =
 ; first pixel row, low byte = first column) with record 13 of UnpackRecords:
 ; frame width 2 columns, pre-shifted copies (bit 7) and mirrored copies (bit
 ; 6). 4 columns x 2 character rows (16 pixel rows), 47 bytes packed. Used by
-; rooms: 2. Rats (the cyan rats of room 2).
-PackedSet13:
+; rooms: 2. Contents (the sheet columns drawn in room 2): two frames, then the
+; mirrored copies.
+PackedSetRat:
   DEFB $04,$02
   DEFB $03,$05,$1B,$FF,$3F,$6F,$CF,$FF,$5B,$02,$04,$00,$03,$86,$C1,$FF
   DEFB $F1,$FB,$FF,$DE,$1C,$0F,$03,$06,$00,$FF,$05,$1B,$3F,$6F,$CF,$FF
   DEFB $5B,$01,$01,$02,$FF,$C1,$F1,$F9,$DF,$BE,$38,$18,$70
 
-; Packed sprite set 14 (op $97 $0E): 30 columns of 3 character rows
+; Packed sprite set 14 (op $97 $0E): Satan and his smoke, 30 columns of 3 character rows
 ;
 ; Unpacked by room script op $97 $0E into the sprite sheet at $D78F (page =
 ; first pixel row, low byte = first column) with record 14 of UnpackRecords:
 ; frame width 30 columns, no extra copies. 30 columns x 3 character rows (24
-; pixel rows), 589 bytes packed. Used by rooms: 24.
-PackedSet14:
+; pixel rows), 589 bytes packed. Used by rooms: 24 (and 25, whose script calls
+; RoomScript24). Contents (the sheet columns drawn in room 24): Satan's upper
+; and lower half in two frames, then the same four pieces of the cloud of
+; smoke.
+PackedSetSatan:
   DEFB $1E,$03
   DEFB $3F,$03,$07,$0F,$1F,$37,$2F,$FF,$39,$73,$43,$E2,$FE,$FF,$BF,$FF
   DEFB $FE,$57,$07,$2E,$7C,$38,$10,$00,$FF,$3B,$77,$8F,$CF,$EF,$E6,$F0
@@ -587,25 +611,29 @@ PackedSet14:
   DEFB $FE,$FF,$FD,$F9,$F1,$23,$FB,$83,$F3,$FB,$F9,$F8,$F0,$00,$70,$38
   DEFB $7E,$FF,$68,$7E,$FC,$FE,$78,$FC,$F8,$E0,$00
 
-; Packed sprite set 15 (op $97 $0F): 4 columns of 2 character rows
+; Packed sprite set 15 (op $97 $0F): the bat, 4 columns of 2 character rows
 ;
 ; Unpacked by room script op $97 $0F into the sprite sheet at $D763 (page =
 ; first pixel row, low byte = first column) with record 15 of UnpackRecords:
 ; frame width 2 columns, pre-shifted copies (bit 7). 4 columns x 2 character
-; rows (16 pixel rows), 50 bytes packed. Used by rooms: 8.
-PackedSet15:
+; rows (16 pixel rows), 50 bytes packed. Used by rooms: 8. Contents (the sheet
+; columns drawn in room 8): two frames (no mirrored copies: the bat looks the
+; same both ways).
+PackedSetBat:
   DEFB $04,$02
   DEFB $3F,$1C,$38,$70,$77,$FF,$B9,$F8,$A9,$8E,$87,$05,$00,$3F,$70,$38
   DEFB $1C,$DC,$FE,$3A,$F8,$2A,$E2,$C2,$40,$00,$1E,$30,$67,$EF,$F9,$F8
   DEFB $AE,$A7,$85,$40,$00,$1E,$18,$CC,$EE,$3E,$F8,$EA,$CA,$42,$04,$00
 
-; Packed sprite set 16 (op $97 $10): 4 columns of 4 character rows
+; Packed sprite set 16 (op $97 $10): Death's scythe, 4 columns of 4 character rows
 ;
 ; Unpacked by room script op $97 $10 into the sprite sheet at $D7EA (page =
 ; first pixel row, low byte = first column) with record 16 of UnpackRecords:
 ; frame width 2 columns, pre-shifted copies (bit 7). 4 columns x 4 character
-; rows (32 pixel rows), 67 bytes packed. Used by rooms: 18.
-PackedSet16:
+; rows (32 pixel rows), 67 bytes packed. Used by rooms: 18. Contents (the sheet
+; columns drawn in room 18): four frames of the spinning scythe, two under each
+; other in each of the two frame columns.
+PackedSetScythe:
   DEFB $04,$04
   DEFB $0A,$FF,$78,$1F,$7C,$7F,$3F,$1F,$00,$3C,$01,$03,$02,$00,$28,$FF
   DEFB $00,$0A,$FF,$00,$1E,$40,$C0,$80,$00,$7C,$F8,$FC,$FE,$3E,$1E,$28
@@ -613,14 +641,15 @@ PackedSet16:
   DEFB $18,$00,$03,$18,$0C,$B7,$0E,$1E,$FE,$FC,$F8,$00,$C4,$30,$F0,$30
   DEFB $00
 
-; Packed sprite set 17 (op $97 $11): 4 columns of 3 character rows
+; Packed sprite set 17 (op $97 $11): the skeleton, 4 columns of 3 character rows
 ;
 ; Unpacked by room script op $97 $11 into the sprite sheet at $D763 (page =
 ; first pixel row, low byte = first column) with record 17 of UnpackRecords:
 ; frame width 2 columns, pre-shifted copies (bit 7) and mirrored copies (bit
 ; 6). 4 columns x 3 character rows (24 pixel rows), 87 bytes packed. Used by
-; rooms: 13, 22.
-PackedSet17:
+; rooms: 13, 22. Contents (the sheet columns drawn in room 13): two frames of
+; the skeleton with a sword, then the mirrored copies.
+PackedSetSkeleton:
   DEFB $04,$03
   DEFB $1F,$03,$04,$0B,$17,$11,$7F,$16,$13,$0A,$84,$C2,$E5,$62,$F9,$75
   DEFB $32,$49,$30,$01,$02,$1F,$F0,$38,$DC,$EE,$2E,$7F,$EE,$CC,$98,$34
@@ -629,14 +658,15 @@ PackedSet17:
   DEFB $F0,$38,$DC,$EE,$BF,$2E,$EE,$CC,$98,$34,$68,$D4,$FF,$A2,$52,$A2
   DEFB $06,$26,$10,$08,$18
 
-; Packed sprite set 18 (op $97 $12): 4 columns of 3 character rows
+; Packed sprite set 18 (op $97 $12): the ceiling ghost, 4 columns of 3 character rows
 ;
 ; Unpacked by room script op $97 $12 into the sprite sheet at $D78F (page =
 ; first pixel row, low byte = first column) with record 18 of UnpackRecords:
 ; frame width 2 columns, pre-shifted copies (bit 7) and mirrored copies (bit
 ; 6). 4 columns x 3 character rows (24 pixel rows), 91 bytes packed. Used by
-; rooms: 22, 23.
-PackedSet18:
+; rooms: 22, 23. Contents (the sheet columns drawn in room 22): two frames of
+; the hooded figure hanging upside down, then the mirrored copies.
+PackedSetCeilingGhost:
   DEFB $04,$03
   DEFB $CF,$02,$01,$30,$49,$32,$75,$FF,$62,$E5,$C2,$84,$0A,$13,$16,$11
   DEFB $7C,$17,$0B,$04,$03,$00,$D7,$C0,$40,$4C,$04,$A4,$54,$FF,$A4,$D4
@@ -645,13 +675,15 @@ PackedSet18:
   DEFB $03,$00,$FF,$18,$08,$10,$26,$06,$A2,$52,$A2,$FE,$D4,$68,$34,$98
   DEFB $CC,$EE,$2E,$F8,$EE,$DC,$38,$F0,$00
 
-; Packed sprite set 19 (op $97 $13): 2 columns of 2 character rows
+; Packed sprite set 19 (op $97 $13): the worm, 2 columns of 2 character rows
 ;
 ; Unpacked by room script op $97 $13 into the sprite sheet at $D7F5 (page =
 ; first pixel row, low byte = first column) with record 19 of UnpackRecords:
 ; frame width 2 columns, pre-shifted copies (bit 7). 2 columns x 2 character
-; rows (16 pixel rows), 22 bytes packed. Used by rooms: 9, 14.
-PackedSet19:
+; rows (16 pixel rows), 22 bytes packed. Used by rooms: 9, 14. Contents (the
+; sheet columns drawn in room 9): its two frames one under the other in one
+; strip of 2 columns.
+PackedSetWorm:
   DEFB $02,$02
   DEFB $0F,$30,$39,$1F,$0F,$87,$00,$0F,$3F,$39,$0F,$F0,$F8,$9C,$0C,$87
   DEFB $00,$0C,$FC,$F8

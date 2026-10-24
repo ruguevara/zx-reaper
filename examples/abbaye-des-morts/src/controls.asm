@@ -239,15 +239,15 @@ GetKeyCode_Found:
 ; Hardware: 128K only: calls into the music bank.
 ;
 ; O:A 0 (the key code is lost, so the caller's tests for C fail)
-WaitSpaceRelease:
+ShowInfoScreen:
   RET                     ; 48K: return; 128K: CALL $85EE (patched by
                           ; Patch128KHooks)
   DEFB $EE,$85            ; operand of the patched CALL ($85EE)
-WaitSpaceRelease_Loop:
+ShowInfoScreen_Loop:
   HALT                    ; wait for a frame
   LD A,(KeyCode)          ; key code
   OR A
-  JR NZ,WaitSpaceRelease_Loop
+  JR NZ,ShowInfoScreen_Loop
   CALL BankShowTitle     ; 128K: music bank routine at $C09D
   XOR A
   RET
@@ -272,7 +272,7 @@ ToggleKempston:
 ; loading picture, which shows the same three prompts, stays); the interrupt
 ; runs MenuFrame, which keeps KeyCode up to date. It waits for no key to be
 ; held, then for a key: ENTER returns to the caller (the game starts), SPACE
-; calls WaitSpaceRelease (128K only: the info screen while SPACE is held; the
+; calls ShowInfoScreen (128K only: the info screen while SPACE is held; the
 ; loading picture says "hold Space for info" but on the 48K nothing happens), C
 ; opens the controls screen, anything else is ignored.
 ;
@@ -313,8 +313,8 @@ TitleWaitKey_Loop:
   LD A,(KeyCode)
   CP KEYCODE_ENTER
   RET Z
-  CP CHAR_SPACE
-  CALL Z,WaitSpaceRelease
+  CP KEYCODE_SPACE
+  CALL Z,ShowInfoScreen
   CP KEYCODE_C            ; C: controls
   JR NZ,TitleWaitKey_Loop
   CALL SaveMenuArea       ; save the middle of the screen and the attributes
@@ -464,7 +464,7 @@ AddKeyName:
   JR Z,AddKeyName_Short
   INC HL
   INC HL
-  CP CHAR_SPACE
+  CP KEYCODE_SPACE
   JR Z,AddKeyName_Short
   INC HL
   INC HL

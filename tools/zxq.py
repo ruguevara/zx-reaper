@@ -497,6 +497,12 @@ def image_diffs(root):
 EQU = re.compile(r'^@equ=([A-Za-z_][A-Za-z0-9_]*)=(.+?)\s*$')
 
 
+def breaks_shift_build(name):
+    """sjasmplus replaces a define at every `_`-separated part of a name, so
+    the shift test's -DSHIFT=... turns SHIFT_MASK or ROW_SHIFT into numbers."""
+    return 'SHIFT' in name.split('_')
+
+
 def cmd_const(args):
     import fcntl
     path = 'src/constants.asm'
@@ -514,6 +520,10 @@ def cmd_const(args):
             return 0
         name, value = args[0], args[1]
         comment = ' '.join(args[2:])
+        if breaks_shift_build(name):
+            print('%s: SHIFT as a part of the name breaks the shift test (sjasmplus '
+                  'substitutes -DSHIFT there); choose another name' % name)
+            return 1
         names = re.findall(r'[A-Za-z_]\w*', re.sub(r'\$[0-9A-Fa-f]+|0x[0-9A-Fa-f]+|%[01]+|\d+', '', value))
         unknown = [n for n in names if n not in have]
         if unknown or not re.match(r'^[\w$%+\-*/()<>&|~ ]+$', value):
@@ -703,7 +713,8 @@ RENAME_FILES = ('src/*.asm', 're/skool/*.skool', 'docs/*.md', 're/notes.md', 're
 def cmd_rename(lists, dry):
     """Apply label and constant renames from list files, lines `Old -> New`
     (anything after a `|` is a comment), across the sources (src/ or
-    re/skool/, whichever exists), docs/, re/*.md, README.md and scripts/.
+    re/skool/ before the export; after it re/skool/ is history and is left
+    as it is), docs/, re/*.md, README.md and scripts/.
     A label that starts with `Old_` (a loop head, an entry point) becomes
     `New_...` too. Refuses names longer than 24 characters, names already
     defined, and one name given two new names."""
@@ -718,7 +729,8 @@ def cmd_rename(lists, dry):
             if pairs.get(old, new) != new:
                 sys.exit('%s: two new names: %s and %s' % (old, pairs[old], new))
             pairs[old] = new
-    files = sorted(f for g in RENAME_FILES for f in glob.glob(g))
+    history = 're/skool/' if os.path.exists('src/game.asm') else '\0'
+    files = sorted(f for g in RENAME_FILES for f in glob.glob(g) if not f.startswith(history))
     text = {f: open(f).read() for f in files}
     names = set()
     for f, s in text.items():
@@ -731,6 +743,8 @@ def cmd_rename(lists, dry):
             errors.append('%s is not defined' % old)
         if len(new) > 24:
             errors.append('%s is longer than 24 characters' % new)
+        if breaks_shift_build(new):
+            errors.append('%s: SHIFT as a part of the name breaks the shift test' % new)
         if new in names and new not in pairs:
             errors.append('%s is already defined' % new)
     targets = list(pairs.values())

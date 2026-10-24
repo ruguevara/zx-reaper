@@ -38,7 +38,7 @@
 ;
 ; The sprites are in the sprite sheet at SpriteSheet (rows 0-23) and
 ; SpriteSheetLower (rows 24-39). Columns $63 and up hold what the room unpacked
-; (the sprite sets PackedSet0-PackedSet19; each block below names its set, as
+; (the 20 packed sprite sets, PackedSetArcher to PackedSetWorm; each block below names its set, as
 ; seen by drawing the sheet columns in a room that unpacks it); columns below
 ; $63 are the fixed part of the sheet (the monk, the spiders, drops, stone
 ; heads, plants, fish and the projectiles).
@@ -58,7 +58,7 @@ BehaviourJean:
 ; room 0) and by the crusader spawners of rooms 5, 6 and 25 (kind 1): the
 ; entity templates at CrusaderTemplateRoom5 hold the address of byte 5 of this
 ; block ($93E5). Crusaders are cyan (attribute $45), 24 pixels tall. Sprites:
-; PackedSet1 at $D763, two frames facing left, then their mirrored copies
+; PackedSetCrusader at $D763, two frames facing left, then their mirrored copies
 ; facing right (the same set gives the crusaders of the pyre, room 4).
 ;
 ; Layout: see BehaviourJean.
@@ -79,7 +79,7 @@ BehaviourCrusader:
 ;
 ; Used by the white skeletons with a sword that patrol left and right, two in
 ; room 13 and one in room 22 (attribute $47, 24 pixels tall). Sprites:
-; PackedSet17, unpacked at $D763 in both rooms, the same place as the crusader
+; PackedSetSkeleton, unpacked at $D763 in both rooms, the same place as the crusader
 ; set, so the sprite addresses are the crusader's.
 ;
 ; Layout: see BehaviourJean.
@@ -101,17 +101,17 @@ BehaviourSkeleton:
 ; Used by the ceiling ghosts of Tortured souls and Ashes to ashes, one in each:
 ; a white hooded figure hanging upside down from the ceiling (attribute $47,
 ; sprite 24 pixels tall, hit box 20) that patrols left and right (observed in
-; room 22: y $04, x from $08 to $38 and back). Sprites: PackedSet18 at $D78F.
+; room 22: y $04, x from $08 to $38 and back). Sprites: PackedSetCeilingGhost at $D78F.
 ;
 ; Layout: see BehaviourJean.
-BehaviourWhiteFlyer:
+BehaviourCeilingGhost:
   DEFB $00,$01,$0A,$06,$02 ; hit box top, left, bottom, right; slot +$15
                            ; (frame count)
   DEFB $47                ; attribute
   DEFW ShiftPairs         ; table of (first column, width) for x AND 3
   DEFB $0C                ; sprite height (2-pixel units)
-  DEFW BehaviourWhiteFlyer+$D ; sprites, first direction (left or up)
-  DEFW BehaviourWhiteFlyer+$11 ; sprites, second direction (right or down)
+  DEFW BehaviourCeilingGhost+$D ; sprites, first direction (left or up)
+  DEFW BehaviourCeilingGhost+$11 ; sprites, second direction (right or down)
   DEFW $D78F              ; first direction, frame 0
   DEFW $D79A              ; first direction, frame 1
   DEFW $D7A5              ; second direction, frame 0
@@ -120,7 +120,7 @@ BehaviourWhiteFlyer:
 ; Behaviour block: a bat (kinds 2 and 3, room 8)
 ;
 ; Used by the two bats of The Altar (red, attribute $42, 16 pixels tall, flying
-; left and right). Sprites: PackedSet15 at $D763, two frames with shifted
+; left and right). Sprites: PackedSetBat at $D763, two frames with shifted
 ; copies and no mirrored ones, so both directions use the same list.
 ;
 ; Layout: see BehaviourJean.
@@ -138,7 +138,7 @@ BehaviourBat:
 ; Behaviour block: a rat (kinds 2 and 3, room 2)
 ;
 ; Used by the two rats of Tower of the Bell (cyan, attribute $45, run along the
-; floor). Sprites: PackedSet13 at $D763.
+; floor). Sprites: PackedSetRat at $D763.
 ;
 ; Layout: see BehaviourJean.
 BehaviourRat:
@@ -195,7 +195,7 @@ ShiftPairsAligned:
 ; Behaviour block: a hanged man (kind 6, room 9)
 ;
 ; Used by the four hanged men of Hangman tree (yellow, attribute $46) that bob
-; up and down on their ropes. Sprites: PackedSet10 at $D763, one frame and its
+; up and down on their ropes. Sprites: PackedSetHangedMan at $D763, one frame and its
 ; mirrored copy at $D765 (drawn while going down).
 ;
 ; Layout: see BehaviourJean.
@@ -213,7 +213,7 @@ BehaviourHangedMan:
 ; Behaviour block: a worm (kind 2, rooms 9 and 14)
 ;
 ; Used by the cyan worms that crawl along a branch in room 9 and on the ground
-; in room 14 (attribute $45, 2 units tall). Sprites: PackedSet19 at $D7F5, a
+; in room 14 (attribute $45, 2 units tall). Sprites: PackedSetWorm at $D7F5, a
 ; strip of 16 pixel rows holding both frames, one under the other: frame 0 at
 ; pixel row 4 ($DBF5), frame 1 at row 12 ($E3F5).
 ;
@@ -232,7 +232,7 @@ BehaviourWorm:
 ; Behaviour block: a fly (kind 5, room 12)
 ;
 ; Used by three of the five green flies of Plagued ruins (bright, attribute
-; $44); they move up and down. Sprites: PackedSet9 at $D76B.
+; $44); they move up and down. Sprites: PackedSetFlyA at $D76B.
 ;
 ; Layout: see BehaviourJean.
 BehaviourFlyA:
@@ -251,7 +251,7 @@ BehaviourFlyA:
 ; Behaviour block: a fly, darker colour (kind 5, room 12)
 ;
 ; Used by the other two flies of Plagued ruins (attribute $04, not bright).
-; Sprites: PackedSet8 at $D763.
+; Sprites: PackedSetFlyB at $D763.
 ;
 ; Layout: see BehaviourJean.
 BehaviourFlyB:
@@ -271,7 +271,7 @@ BehaviourFlyB:
 ;
 ; Used by the chasing ghost of Cave of illusions, a grinning cyan head
 ; (attribute $45) that floats toward Jean through free space (UpdateChaser).
-; Sprites: PackedSet12 at $D763.
+; Sprites: PackedSetChaser at $D763.
 ;
 ; Layout: see BehaviourJean.
 BehaviourChaser:
@@ -290,7 +290,7 @@ BehaviourChaser:
 ; Behaviour block: a bird (kind 2, rooms 20 and 23)
 ;
 ; Used by the magenta gliding birds of Unexpected gate and Ashes to ashes
-; (attribute $43). Sprites: PackedSet4 at $EF63 (24 pixels wide). Its own
+; (attribute $43). Sprites: PackedSetBird at $EF63 (24 pixels wide). Its own
 ; shift table follows the frames (four (first column, width) pairs: 3+4+4+4 =
 ; 15 columns per frame).
 ;
@@ -365,18 +365,18 @@ SpriteBlockSplash:
 ; Behaviour block: a knight (kind 2, rooms 15 and 20)
 ;
 ; Used by the green knights with a closed helmet and a sword that patrol Gloomy
-; tunels (two) and Unexpected gate (one) (attribute $44). Sprites: PackedSet11
+; tunels (two) and Unexpected gate (one) (attribute $44). Sprites: PackedSetKnight
 ; at $D763.
 ;
 ; Layout: see BehaviourJean.
-BehaviourSoldier:
+BehaviourKnight:
   DEFB $00,$01,$0C,$06,$02 ; hit box top, left, bottom, right; slot +$15
                            ; (frame count)
   DEFB $44                ; attribute
   DEFW ShiftPairs         ; table of (first column, width) for x AND 3
   DEFB $0C                ; sprite height (2-pixel units)
-  DEFW BehaviourSoldier+$D ; sprites, first direction (left or up)
-  DEFW BehaviourSoldier+$11 ; sprites, second direction (right or down)
+  DEFW BehaviourKnight+$D ; sprites, first direction (left or up)
+  DEFW BehaviourKnight+$11 ; sprites, second direction (right or down)
   DEFW $D763              ; first direction, frame 0
   DEFW $D76E              ; first direction, frame 1
   DEFW $D779              ; second direction, frame 0
@@ -390,7 +390,7 @@ BehaviourSoldier:
 ; height, sprite width in bytes, then the sprite lists of the two directions
 ; (two frames each: frame 0 resting, frame 1 aiming with the bow drawn, shown
 ; for the last 30 frames before a shot, UpdateShooter_Tail). Sprites:
-; PackedSet0 at $D7F8, the two frames facing left and their mirrored copies.
+; PackedSetArcher at $D7F8, the two frames facing left and their mirrored copies.
 BehaviourArcher:
   DEFB $03,$01,$0B,$06,$02 ; hit box top, left, bottom, right (2-pixel units);
                            ; slot +$15 (frame count)
@@ -448,7 +448,7 @@ BehaviourFish:
 ; Behaviour block: a demon (kinds 2 and 3, rooms 21 and 22)
 ;
 ; Used by the red demons of Evil church (and one in Tortured souls); attribute
-; $42, 24 pixels tall. Sprites: PackedSet3 at $D7BB.
+; $42, 24 pixels tall. Sprites: PackedSetDemon at $D7BB.
 ;
 ; Layout: see BehaviourJean.
 BehaviourDemon:
@@ -468,7 +468,7 @@ BehaviourDemon:
 ;
 ; Used by the fire wheels, small red spinning flames that move up and down in
 ; Tortured souls and Ashes to ashes (attribute $42, three in each room). Both
-; directions share one frame list. Sprites: PackedSet7 at $D7E7, a strip of 32
+; directions share one frame list. Sprites: PackedSetFireWheel at $D7E7, a strip of 32
 ; pixel rows holding both frames, one under the other: frame 0 at pixel row 4
 ; ($DBE7), frame 1 at row 20 ($EBE7).
 ;
@@ -489,7 +489,7 @@ BehaviourFireWheel:
 ; Used by the head of the Pestilent Beast of room 10 (attribute $06,
 ; UpdateBeastHead): a 32 x 40 pixel sprite at the top of the room that lowers
 ; while the fire breath of kind 15 (BehaviourBeastFire) is drawn. Sprite:
-; PackedSet6 at $D763. The hit box bytes (38 pixels tall, 30 wide) are copied
+; PackedSetBeastHead at $D763. The hit box bytes (38 pixels tall, 30 wide) are copied
 ; to the slot but UpdateBeastHead drops them without a hit test: touching the
 ; head does not kill (from the code), only the fire does. After the 5 header
 ; bytes: attribute, sprite height, width in bytes, then the address of one
@@ -510,7 +510,7 @@ BehaviourBeastHead:
 ; attribute, width in bytes of the upper sprite (the lower one is a byte
 ; wider), height in 2-pixel units and the four sprite addresses of the jet:
 ; upper sprite frames 0 and 1, lower sprite frames 0 and 1
-; (UpdateBeastFire_Draw). Sprites: PackedSet5 at $D768, ten columns: upper
+; (UpdateBeastFire_Draw). Sprites: PackedSetBeastFire at $D768, ten columns: upper
 ; frame 0 (2), lower frame 0 (3), upper frame 1 (2), lower frame 1 (3).
 ;
 ; The rest of the entry holds sprite blocks (attribute, shift table ShiftPairs,
@@ -522,7 +522,7 @@ BehaviourBeastHead:
 ; 80 frames, then every 60), SpriteBlockPyreMonk the monk on the pyre (frame 2
 ; of MonkFramesLeft and of MonkFramesRight; he turns every 25 frames),
 ; SpriteBlockPyreCrusaderR and SpriteBlockPyreCrusaderL the crusaders right and
-; left of the pyre (frame 1 of PackedSet1 facing left, and its mirrored copy
+; left of the pyre (frame 1 of PackedSetCrusader facing left, and its mirrored copy
 ; facing right: each pair faces the pyre).
 BehaviourBeastFire:
   DEFB $00,$00,$17,$07,$02 ; hit box top, left, bottom, right (2-pixel units);
@@ -569,7 +569,7 @@ SpriteBlockPyreCrusaderL:
 ; left and right and throws scythes. After the 5 header bytes (hit box as in
 ; BehaviourJean): attribute, the pointer to Death's shift table (it follows the
 ; sprite lists), sprite height, the lists of the two directions (3 frames each,
-; 19 columns per frame). Sprites: PackedSet2 at $D763, three frames facing left
+; 19 columns per frame). Sprites: PackedSetDeath at $D763, three frames facing left
 ; and their mirrored copies. The frame count (+4) is 2, so StepAnimation only
 ; alternates frames 0 and 1; frame 2, the throwing pose, is drawn by
 ; ThrowDeathScythe, which selects it while Death's 50-frame timer is at 20 or
@@ -580,7 +580,7 @@ SpriteBlockPyreCrusaderL:
 ; sprite block of the thrown scythe follows (SpriteBlockScythe, used by the
 ; templates ScytheLeftTemplate and ScytheRightTemplate): attribute, the shift
 ; table ShiftPairs, height and the four frames of the spinning scythe
-; (PackedSet16 at $D7EA: a strip of 32 pixel rows with two frames, one under
+; (PackedSetScythe at $D7EA: a strip of 32 pixel rows with two frames, one under
 ; the other, in each of its two frame columns).
 BehaviourDeath:
   DEFB $02,$02,$0C,$0D,$02 ; hit box top, left, bottom, right (2-pixel units);
@@ -618,7 +618,7 @@ SpriteBlockScythe:
 ; frames 0 and 1 (QueueTwoPartSprite takes table[frame] and table[frame + 2]).
 ; Then the sprite block of the cloud of smoke that replaces Satan
 ; (SpriteBlockSmoke, used by the template SmokeTemplate): attribute and the
-; four addresses in the same order. Sprites: PackedSet14 at $D78F, 30 columns:
+; four addresses in the same order. Sprites: PackedSetSatan at $D78F, 30 columns:
 ; Satan's four pieces, then the smoke's.
 BehaviourSatan:
   DEFB $00,$00,$17,$0F,$02 ; hit box top, left, bottom, right (2-pixel units);

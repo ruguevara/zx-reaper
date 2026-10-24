@@ -124,7 +124,7 @@ Patch128KHooks:
   LD (StartGame_Music),A  ; the instruction at $860C (LD HL,$85F3) becomes CALL
                           ; $85F3
   LD (RunEnding_Music),A  ; $88D5 (LD HL,$85E8) becomes CALL $85E8
-  LD (WaitSpaceRelease),A ; $A31E (a RET followed by the operand bytes of CALL
+  LD (ShowInfoScreen),A ; $A31E (a RET followed by the operand bytes of CALL
                           ; $85EE) becomes CALL $85EE
   LD A,L
   OR A
@@ -152,7 +152,7 @@ FlagMapTail:
 
 ; Main stack (64 bytes, SP starts at $6100)
 ;
-; The stack of the main program: the start-up code and the main loop StartGame
+; The stack of the main program: the start-up code, StartGame and the main loop
 ; run with SP=$6100 and the stack grows down to $60C0. The interrupt handler
 ; uses its own stack at InterruptStack. The image holds $FF here.
 MainStack:
@@ -164,8 +164,11 @@ MainStack:
 ; the tile flag map at $5E00 (32 bytes per row, so the words are $5E00, $5E20,
 ; $5E40, ...). The entity update routines find the flag-map cell under a sprite
 ; by loading H=$61, L=2*row (row = y/4 of the 2-pixel y coordinate) and reading
-; the row address from here, then adding the column x/4: see UpdateChaser. Only
-; the first 22 words (the room area) are used; the last two are spare.
+; the row address from here, then adding the column x/4: see UpdateChaser; the
+; player's probes (ProbeCell) use it too. Words 22 and 23 ($60C0, $60E0) point
+; below the room, into the main stack: ProbeCell skips rows past 21 (y below
+; ROOM_HEIGHT_2PX), but the projectile handler UpdateArrow accepts y up to
+; PROJECTILE_Y_MAX-1 ($5F) and can read them (inferred from the code, not run).
 ;
 ; +0 word: address of row 0 ... +46 word: address of row 23
 FlagRowTable:

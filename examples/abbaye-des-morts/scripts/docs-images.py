@@ -198,7 +198,7 @@ def article_images():
         return [sum(([ink if (c[y] >> (7 - k)) & 1 else paper for k in range(8)] for c in cols), [])
                 for y in range(24)]
     sets = [[at(label, 240)[24 * k:24 * k + 24] for k in range(10)]
-            for label in ('HourglassTop', 'HourglassBottom')]
+            for label in ('HourglassFramesEven', 'HourglassFramesOdd')]
     zxgfx.write_png(f'{IMG}/graphics-hourglass.png',
                     zxgfx.compose([glass(sets[s][k]) for s in (0, 1) for k in range(9, -1, -1)], 10, 3,
                                   ['%d' % k for s in (0, 1) for k in range(9, -1, -1)]))

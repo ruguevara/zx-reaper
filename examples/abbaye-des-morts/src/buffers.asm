@@ -33,20 +33,20 @@ FrameListPtr:
 ; Built by the game frame and run by RunFrameList. A command is 10 bytes: the
 ; address of a routine (QueueSprite for sprites that are masked in the redraw
 ; buffer, QueueBlockSprite for the object sprite), then the 8 bytes it pops:
-; position (y, byte column), graphics address (column in the low byte,
-; pixel-row page in the high byte), width in bytes, height in 2-pixel units, a
-; byte that is popped as the flags and not used, and the attribute (the fields
-; are described at SpriteCmd). The list has room for 16 commands and the
-; closing word, the address of LeaveFrameList ($A2 bytes); no check for a full list was seen, and the
-; fill after it (SpareFill1) would take the overflow. The most seen in fuzzed runs
-; of all 25 rooms was 14 commands (rooms 10 and 15, F44).
+; position (y, byte column), graphics address (column in the low byte, pixel-row
+; page in the high byte), width in bytes, height in 2-pixel units, a byte that
+; is popped as the flags and not used, and the attribute (the fields are
+; described at SpriteCmd). The list has room for 16 commands and the closing
+; word, the address of LeaveFrameList ($A2 bytes); no check for a full list was
+; seen, and the fill after it (SpareFill1) would take the overflow. The most
+; seen in fuzzed runs of all 25 rooms was 14 commands (rooms 10 and 15, F44).
 ;
 ; While RunFrameList runs, SP points into the list, so the routines it enters
 ; (QueueSprite, QueueBlockSprite) and an interrupt use the bytes below SP as
 ; their stack: these are bytes of commands already run, so nothing is lost.
 ; The PUSH BC of InterruptHandler (F139) does not restore them here: BC is not
 ; the popped pair (observed at frame 79 of a fuzzed run in room 5: the word
-; $98AC below SP became $0203).
+; $98AC below SP became $0203; F151).
 FrameList:
   DEFS $A2
 
@@ -65,11 +65,11 @@ SpareFill1:
 ; QueueBlockSprite, run from the frame call list, fill a template and
 ; AddQueueJob appends a copy at the end of the queue (the tail address is the
 ; operand of its first instruction). BuildRedrawList then walks the queue
-; (RunDrawQueue): for each job whose first word is not zero it calls the
-; routine at that address with DE = job + 1 and clears the word, so the queue
-; is empty again afterwards and the first word is also the marker of a free
-; job. Fields: +0 word routine (DrawSpriteJob for a masked sprite,
-; DrawBlockJob for an object sprite), the other 14 bytes are the parameters of the routine (SpriteJob and
+; (RunDrawQueue): for each job whose first word is not zero it calls the routine
+; at that address with DE = job + 1 and clears the word, so the queue is empty
+; again afterwards and the first word is also the marker of a free job. Fields:
+; +0 word routine (DrawSpriteJob for a masked sprite, DrawBlockJob for an object
+; sprite), the other 14 bytes are the parameters of the routine (SpriteJob and
 ; BlockJob list them). A 17th job would run into the object slots at
 ; ObjectSlots.
 DrawQueue:
@@ -120,7 +120,7 @@ DrawQueue:
 ; byte 8 are copied to +$A to +$13 as they are.
 ;
 ; Room items (MakeItemSlot) use slots too, filled from the item record
-; (RoomItems) and the type record (ObjectTypeRecords); their layout is given at
+; (RoomItems) and the type record (ItemTypeRecords); their layout is given at
 ; RunObjectSlots.
 ObjectSlots:
   DEFS $F4,$FF

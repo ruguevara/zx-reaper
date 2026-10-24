@@ -11,10 +11,12 @@ OP_RET                   EQU 0xC9 ; opcode of RET, written over the NOP at the s
 SCREEN_COLS              EQU 0x20 ; character cells per screen row; also the row stride of the tile map, the flag map and the attribute file
 ROOM_HEIGHT_2PX          EQU 0x58 ; height of the room area in 2-pixel units (22 cell rows of 4)
 SUBROW_MASK              EQU 3 ; mask for the position of a sprite inside a cell row, in 2-pixel units (0-3)
+SPRITE_PHASE_MASK         EQU 3 ; mask of the shift phase, x mod 4 in 2-pixel units: which of the four copies of a 16-pixel frame (shifted 0, 2, 4, 6 pixels) is drawn (ShiftPairs)
 SUBROWS_PER_CELL         EQU 4 ; 2-pixel units in a cell row (8 pixel rows)
 CELL_SIZE                EQU 8 ; pixel rows (and bitmap bytes) of a character cell
 PAGE_REDRAW_ATTRS        EQU 0xC4 ; high byte of the redraw cell buffer holding each cell's attribute
 PAGE_REDRAW_PIXELS       EQU 0xC5 ; high byte of the first pixel-row page of the redraw cell buffer (page + n holds pixel row n of each cell)
+MIRROR_TABLE_PAGE        EQU 0xC5 ; high byte of the table of bit-reversed bytes (BuildMirrorTable, at room entry, over the first pixel page of the redraw buffer) used to mirror sprite frames
 FLAGS_PAGE_OFFSET        EQU 3 ; pages between the tile map ($5B00) and the tile flag map ($5E00)
 TILE_HEART               EQU 0x7B ; tile number of the heart in the status bar
 STATUS_CELLS             EQU 12 ; cells of a status bar row (hearts, crosses)
@@ -27,7 +29,7 @@ ATTRS_HIGH               EQU 0x58 ; high byte of the attribute area address ($58
 SCREEN_HIGH              EQU 0x40 ; high byte of the screen bitmap address ($4000)
 MAP_ROWS                 EQU 22 ; rows of the tile map and the tile flag map (the room area)
 FLAG_REDRAW              EQU 0x80 ; tile flag bit 7: the cell is marked for redraw
-FLAG_HARMFUL             EQU 4 ; tile flag bit 2 (class 4): the cell kills the monk (ProbePlayer sets PlayerHit to 4) and removes Death's scythes; tiles $05, $3B, $3C, $4E-$74 (tile flag $84) and the water strips of rooms 16 and 19 (OpSetupWater)
+TILE_HARMFUL             EQU 4 ; tile flag bit 2 (class 4): the cell kills the monk (ProbePlayer sets PlayerHit to 4) and removes Death's scythes; tiles $05, $3B, $3C, $4E-$74 (tile flag $84) and the water strips of rooms 16 and 19 (OpSetupWater)
 TILEMAP_HIGH             EQU 0x5B ; high byte of the tile map address ($5B00)
 FLAGMAP_HIGH             EQU 0x5E ; high byte of the tile flag map address ($5E00)
 LDI_CHAIN_LEN            EQU 32 ; LDI instructions in the block copier chain at $ADA1-$ADE0
@@ -41,6 +43,7 @@ PARCHMENT_COLS           EQU 24 ; cells per row of the parchment frame
 KEYCODE_CAPS_SHIFT       EQU 0x01 ; key code of CAPS SHIFT in the key code table (GetKeyCode)
 KEYCODE_SYMBOL_SHIFT     EQU 0x02 ; key code of SYMBOL SHIFT
 KEYCODE_ENTER            EQU 0x0D ; key code of ENTER
+KEYCODE_SPACE            EQU 0x20 ; key code of SPACE (ASCII) in the key code table (GetKeyCode)
 KEYCODE_1                EQU 0x31 ; key code of the 1 key (ASCII)
 KEYCODE_2                EQU 0x32 ; key code of the 2 key (ASCII)
 KEYCODE_C                EQU 0x43 ; key code of the C key (ASCII)
@@ -106,7 +109,6 @@ MONK_HEIGHT              EQU 12 ; height of the standing monk sprite in 2-pixel 
 CROUCH_HEIGHT            EQU 8 ; height of the crouching monk sprite in 2-pixel units (16 pixels)
 SFX_JUMP                 EQU 2 ; sound effect: the monk jumps
 SFX_DEATH                EQU 6 ; sound effect: the monk dies
-STATE_DEATH              EQU 0x84 ; room state 4 with STATE_RUNNING: restart at the active checkpoint after a death (SelectCheckpoint, then as 2); UpdateDying_End makes it $85 (Game Over) when no life is left
 STATE_ENTER_ROOM         EQU 1 ; room state: enter the room whose number is in $8509
 EXIT_RIGHT               EQU 0 ; exit direction: through the right edge (not used: LeaveRight stores it with XOR A)
 EXIT_LEFT                EQU 1 ; exit direction: through the left edge
@@ -137,6 +139,7 @@ COLUMN_MASK              EQU 0x1F ; mask of a cell column number (0-31)
 PAGING_BANK0             EQU 0x10 ; value for port $7FFD: RAM bank 0 at $C000, ROM 1 (48K BASIC), normal screen: the paging state of the game
 SPEAKER_BIT              EQU 0x10 ; bit 4 of port $FE: the speaker (EAR output); the beeper effects toggle it
 STATE_RUNNING            EQU 0x80 ; room state bit 7: the frame routines run the game logic (with the low 7 bits 0 the main loop plays)
+STATE_RESTART            EQU 4 ; room state: restart at the active checkpoint after a death (SelectCheckpoint, then as 2); UpdateDying_End stores it with STATE_RUNNING ($84), plus one ($85, Game Over) when no life is left
 MUSIC_TRACK_TITLE        EQU 3 ; music track 3: the title and the controls menu
 MUSIC_TRACK_ENDING1      EQU 5 ; music track 5: first part of the ending (room 25)
 MUSIC_TRACK_ENDING2      EQU 2 ; music track 2: second part of the ending (the pyre, room 4)

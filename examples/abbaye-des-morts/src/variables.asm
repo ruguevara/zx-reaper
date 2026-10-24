@@ -2,7 +2,7 @@
 ;
 ; Zero while a cutscene runs, nonzero when it is over. RunCutscene clears it,
 ; runs the cutscene frame loop and polls it each frame; an actor sets it to 1
-; when its path script ends (UpdateCrusaderSignal) or when its countdown
+; when its path script ends (UpdateCrusaderEndScene) or when its countdown
 ; reaches zero (UpdatePyreMonk).
 CutsceneDone:
   DEFB $00
@@ -106,7 +106,7 @@ ExitDirection:
 
 ; Room state: what the main loop does next
 ;
-; The main loop StartGame takes the low 7 bits: 1 = enter the room RoomNumber
+; The main loop (MainLoop) takes the low 7 bits: 1 = enter the room RoomNumber
 ; (EnterRoom); 2 = put the player at the respawn position ($8512/$8514), then
 ; enter the room (set by the passage items
 ; ActionArchToBeast/ActionArchToRiver); 3 = ending sequence RunEnding (set by
@@ -244,7 +244,7 @@ ChurchDoorShut:
 ; +0 BellRung ($851B): 0, or 1 once the bell of the Tower of the Bell (room 2)
 ; has been touched (ActionBellOrLever, sound 3). When it is set the script of
 ; room 8 (The Altar) erases the 2x2 block of floor at row 20, column 26
-; (EraseWallBlock), which opens the way down into room 13, Catacombs (observed:
+; (OpenAltarFloor), which opens the way down into room 13, Catacombs (observed:
 ; Jean falls through into room 13 only with the flag set, F142). +1
 ; LeverRoom9 ($851C): 0 or 1, the lever of room 9 (Hangman tree). While it is 0
 ; the script of room 19 (Underground river) draws a door at its left edge
@@ -312,11 +312,11 @@ SatanSmoked:
 ; off it (the routine clears the bit when there is no contact), so the arrival
 ; does not send him straight back.
 ;
-; +0 DoorwayRoom10 ($8523): flag of the doorway in room 10 +1 DoorwayRoom19
+; +0 ArchLatchRoom10 ($8523): flag of the doorway in room 10 +1 ArchLatchRoom19
 ; ($8524): flag of the doorway in room 19
-DoorwayRoom10:
+ArchLatchRoom10:
   DEFB $00
-DoorwayRoom19:
+ArchLatchRoom19:
   DEFB $00
 
 ; Collected flags of the hearts, parchments, the red scroll and the crosses

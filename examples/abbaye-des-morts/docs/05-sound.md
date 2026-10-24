@@ -11,27 +11,27 @@ of its routines in the 48K simulator, and is marked so.
 
 ## How an effect is requested
 
-A routine asks for an effect by storing its number in [SoundRequest](../src/variables.asm#L470)
-($854F). [PlaySoundStep](../src/mainloop.asm#L288) runs once per frame at the start of the
-interrupt's frame routine ([GameFrameRoutine](../src/interrupt.asm#L178), and [MenuFrame](../src/controls.asm#L548) in the
+A routine asks for an effect by storing its number in [SoundRequest](../src/variables.asm#L506)
+($854F). [PlaySoundStep](../src/mainloop.asm#L291) runs once per frame at the start of the
+interrupt's frame routine ([GameFrameRoutine](../src/interrupt.asm#L181), and [MenuFrame](../src/controls.asm#L543) in the
 menus). It takes a request at once, even while another effect is playing
 (F104), clears it, copies the effect's 8-byte record to the current-effect
-variables at [SoundPeriod](../src/mainloop.asm#L474) and plays the first step; on the next frames it
-plays one step of the effect in [SoundPlaying](../src/variables.asm#L452) until the effect ends.
+variables at [SoundPeriod](../src/mainloop.asm#L477) and plays the first step; on the next frames it
+plays one step of the effect in [SoundPlaying](../src/variables.asm#L483) until the effect ends.
 
 | Effect | Constant | Requested by | Observed |
 | --- | --- | --- | --- |
 | 1 | (none) | nothing: no store of 1 in the image (F106) | forced by a poke |
-| 2 | SFX_JUMP | a jump starts ([PlayerStanding](../src/player.asm#L757)) | yes |
-| 3 | SFX_TRIGGER | the bell or a lever touched ([ActionBellOrLever](../src/gameframe.asm#L496)) | yes |
-| 4 | SFX_PORTAL | the arch between rooms 10 and 19 ([EnterRoomAtArch](../src/gameframe.asm#L385)) | yes |
-| 5 | SFX_PICKUP | a heart, a cross, the chalice or the final parchment taken ([FreeSlotWithSound](../src/gameframe.asm#L433)), the wheel ([ActionWheel](../src/gameframe.asm#L304)), a gate lever ([ActionGateLever](../src/gameframe.asm#L524)), a parchment ([ActionParchment](../src/gameframe.asm#L785)), a cross of the ring added ([ShowCrossRing](../src/effects.asm#L240)), a key accepted in the controls menu ([RedefineOneKey](../src/controls.asm#L410)) | yes |
-| 6 | SFX_DEATH | Jean dies ([KillPlayer](../src/player.asm#L475)) | yes |
-| 7 | SFX_ENEMY_SHOT | Death throws a scythe ([ThrowDeathScythe](../src/entities.asm#L3234)), Satan fires ([UpdateSatan](../src/entities.asm#L3519)), an archer or a stone head shoots ([UpdateShooter_Tail](../src/entities.asm#L1927)), a plant spits ([UpdatePlant](../src/entities.asm#L1997)), a fish splashes ([UpdateFishWaiting](../src/entities.asm#L2431), [UpdateFishJumping](../src/entities.asm#L2508)), the Beast breathes fire ([UpdateBeastFire](../src/entities.asm#L2705)) | yes |
-| 8 | SFX_DOOR | the church door flickers ([ActionChurchDoor](../src/gameframe.asm#L173)) | yes |
-| 9 | SFX_CHECKPOINT | a checkpoint touched ([ActionCheckpoint](../src/gameframe.asm#L273)) | yes |
+| 2 | SFX_JUMP | a jump starts ([PlayerStanding](../src/player.asm#L771)) | yes |
+| 3 | SFX_TRIGGER | the bell or a lever touched ([ActionBellOrLever](../src/gameframe.asm#L516)) | yes |
+| 4 | SFX_PORTAL | the arch between rooms 10 and 19 ([EnterRoomAtArch](../src/gameframe.asm#L398)) | yes |
+| 5 | SFX_PICKUP | a heart, a cross, the chalice or the final parchment taken ([FreeSlotWithSound](../src/gameframe.asm#L447)), the wheel ([ActionWheel](../src/gameframe.asm#L311)), a gate lever ([ActionGateLever](../src/gameframe.asm#L545)), a parchment ([ActionParchment](../src/gameframe.asm#L816)), a cross of the ring added ([ShowCrossRing](../src/effects.asm#L245)), a key accepted in the controls menu ([RedefineOneKey](../src/controls.asm#L408)) | yes |
+| 6 | SFX_DEATH | Jean dies ([KillPlayer](../src/player.asm#L479)) | yes |
+| 7 | SFX_ENEMY_SHOT | Death throws a scythe ([ThrowDeathScythe](../src/entities.asm#L3344)), Satan fires ([UpdateSatan](../src/entities.asm#L3632)), an archer or a stone head shoots ([UpdateShooter_Tail](../src/entities.asm#L1987)), a plant spits ([UpdatePlant](../src/entities.asm#L2057)), a fish splashes ([UpdateFishWaiting](../src/entities.asm#L2510), [UpdateFishJumping](../src/entities.asm#L2595)), the Beast breathes fire ([UpdateBeastFire](../src/entities.asm#L2792)) | yes |
+| 8 | SFX_DOOR | the church door flickers ([ActionChurchDoor](../src/gameframe.asm#L180)) | yes |
+| 9 | SFX_CHECKPOINT | a checkpoint touched ([ActionCheckpoint](../src/gameframe.asm#L280)) | yes |
 
-"Observed" means the request was seen in [SoundRequest](../src/variables.asm#L470) in a simulator
+"Observed" means the request was seen in [SoundRequest](../src/variables.asm#L506) in a simulator
 run (F107: rooms entered directly, items touched with Jean held on them);
 the list of requesters comes from the stores of each number in the code.
 
@@ -70,8 +70,8 @@ game logic of that frame starts that much later in the frame (F103).
 
 ## The effect records
 
-[SoundEffects](../src/mainloop.asm#L510) holds 8 bytes for each of the effects 2-9 (effect n at
-$87F2 + 8 (n - 2)); the fields, as described at [SoundPeriod](../src/mainloop.asm#L474):
+[SoundEffects](../src/mainloop.asm#L520) holds 8 bytes for each of the effects 2-9 (effect n at
+$87F2 + 8 (n - 2)); the fields, as described at [SoundPeriod](../src/mainloop.asm#L477):
 
 | Offset | Field | Meaning |
 | --- | --- | --- |
@@ -99,8 +99,8 @@ and so are 5 and 9.
 
 ## Effect 1 and its bug
 
-Effect 1 is built into [PlaySoundStep](../src/mainloop.asm#L288) rather than the table: 10 frames of
-48 speaker samples, each the bit 4 of a "random" byte from [NoiseByte](../src/mainloop.asm#L422).
+Effect 1 is built into [PlaySoundStep](../src/mainloop.asm#L291) rather than the table: 10 frames of
+48 speaker samples, each the bit 4 of a "random" byte from [NoiseByte](../src/mainloop.asm#L425).
 That routine was meant to return the refresh register R XORed with a byte of
 the ROM, walking a pointer through $0000-$03FF. It stores the pointer with
 `LD (NoisePointer),A` where `LD (NoisePointer),HL` was meant:
@@ -120,7 +120,7 @@ NoiseByte:
   RET
 ```
 
-[NoisePointer](../src/mainloop.asm#L442) keeps the value $1000, HL is $0001 every time and the byte
+[NoisePointer](../src/mainloop.asm#L445) keeps the value $1000, HL is $0001 every time and the byte
 is R XOR $01. R advances with every instruction, so the samples form a
 regular pattern: observed with the effect forced by a poke, bit 4 of the 48
 samples of a frame was `110100100100100100101101101101101101001001001001`
@@ -128,14 +128,14 @@ samples of a frame was `110100100100100100101101101101101101001001001001`
 
 ## 128K: the hooks
 
-The loader's second stage ([DetectMachine](../src/stage2.asm#L167), [MeasureBanks](../src/stage2.asm#L197))
+The loader's second stage ([DetectMachine](../src/stage2.asm#L171), [MeasureBanks](../src/stage2.asm#L201))
 finds out whether it runs on a 48K or a 128K machine, and on a 128K which
 of the banks 1, 3, 4 and 6 runs code fastest (it counts `INC DE` in one
-frame in each). [Start128](../src/stage2.asm#L110) copies the screen depacker
-[DepackScreen](../src/stage2.asm#L285) and the two packed screens of tape block 3 (the
+frame in each). [Start128](../src/stage2.asm#L114) copies the screen depacker
+[DepackScreen](../src/stage2.asm#L290) and the two packed screens of tape block 3 (the
 title and the info screen) into that bank at $C000, unpacks the music after
 them, from $CF6D, and looks for an AY chip by writing its register 8 and
-reading it back ([WriteAY](../src/stage2.asm#L157)). It leaves the bank's port value (or 1
+reading it back ([WriteAY](../src/stage2.asm#L161)). It leaves the bank's port value (or 1
 on a 48K) and the AY flag on the stack for the game (F66, inferred: the 128K
 paths were read, not run).
 
@@ -145,36 +145,36 @@ the 48K code:
 
 | Place | 48K | 128K |
 | --- | --- | --- |
-| [StartGame_Music](../src/mainloop.asm#L74) | `LD HL,BankShowTitle`: only loads HL | `CALL BankShowTitle` |
-| [RunEnding_Music](../src/sequences.asm#L149) | `LD HL,BankEndingDoor` | `CALL BankEndingDoor` |
-| [WaitSpaceRelease](../src/controls.asm#L245) | `RET` followed by two address bytes | `CALL BankShowInfo` |
-| [PlaySoundStep](../src/mainloop.asm#L288) (only with an AY) | `LD HL,PlayEffectOnAY` | `JP PlayEffectOnAY` |
+| [StartGame_Music](../src/mainloop.asm#L79) | `LD HL,BankShowTitle`: only loads HL | `CALL BankShowTitle` |
+| [RunEnding_Music](../src/sequences.asm#L148) | `LD HL,BankEndingDoor` | `CALL BankEndingDoor` |
+| [ShowInfoScreen](../src/controls.asm#L242) | `RET` followed by two address bytes | `CALL BankShowInfo` |
+| [PlaySoundStep](../src/mainloop.asm#L291) (only with an AY) | `LD HL,PlayEffectOnAY` | `JP PlayEffectOnAY` |
 
 Each stub is an instruction whose operand already is the address of the
 128K routine, so one byte turns it into a call. The routines page the bank
-in with [PageInBank](../src/interrupt.asm#L139) (port $7FFD) and enter it through
-[CallInMusicBank](../src/interrupt.asm#L123), which pushes [PageInBank0](../src/interrupt.asm#L105) as the return address of
+in with [PageInBank](../src/interrupt.asm#L142) (port $7FFD) and enter it through
+[CallInMusicBank](../src/interrupt.asm#L126), which pushes [PageInBank0](../src/interrupt.asm#L108) as the return address of
 the bank routine, so bank 0 is paged back in when it returns.
-[PlayEffectOnAY](../src/interrupt.asm#L160) saves the paging state, calls $CF7D in the bank and
+[PlayEffectOnAY](../src/interrupt.asm#L163) saves the paging state, calls $CF7D in the bank and
 restores it.
 
 ## 128K: what the bank routines do
 
 The bank is entered at four addresses. Two of them were run in the 48K
-simulator, with the bank's bytes placed at $C000 as [Start128](../src/stage2.asm#L110)
+simulator, with the bank's bytes placed at $C000 as [Start128](../src/stage2.asm#L114)
 puts them (paging itself is not simulated):
 
-- $F9D7, reached through [BankShowTitle](../src/interrupt.asm#L215) (HL = $C09D) and
-  [BankShowInfo](../src/interrupt.asm#L212) (HL = $CA8A), clears the attribute file and jumps to the
-  copy of [DepackScreen](../src/stage2.asm#L285) at $C000. With HL = $C09D the screen
+- $F9D7, reached through [BankShowTitle](../src/interrupt.asm#L218) (HL = $C09D) and
+  [BankShowInfo](../src/interrupt.asm#L215) (HL = $CA8A), clears the attribute file and jumps to the
+  copy of [DepackScreen](../src/stage2.asm#L290) at $C000. With HL = $C09D the screen
   afterwards was `data/loading.scr` byte for byte, with HL = $CA8A
   `data/info.scr`. So on a 128K the title picture is unpacked again from the
   bank at the start of every game, which is why the 48K title script is not
   needed there (F111), and holding SPACE on the title shows the info screen
   from the bank, releasing it brings the title back.
-- $FC4B, reached through [BankEndingDoor](../src/interrupt.asm#L209) at the end of the ending,
-  builds a bit-reversal table at $5B00 with the game's [BuildMirrorTable](../src/templates.asm#L388)
-  (read from its bytes: a tile code with bit 7 set is drawn mirrored), sets [MusicTrack](../src/variables.asm#L489) to 2 and draws a
+- $FC4B, reached through [BankEndingDoor](../src/interrupt.asm#L212) at the end of the ending,
+  builds a bit-reversal table at $5B00 with the game's [BuildMirrorTable](../src/templates.asm#L286)
+  (read from its bytes: a tile code with bit 7 set is drawn mirrored), sets [MusicTrack](../src/variables.asm#L529) to 2 and draws a
   picture of 8 x 6 cells (columns 12-19, rows 9-14) between the two lines of
   the last text of the ending: a closed double door. It draws it again 70
   frames later (it waits with HALT), then four more pictures 20 frames
@@ -186,21 +186,21 @@ puts them (paging itself is not simulated):
 The other two were only read (the first instructions of each, from the bytes
 of `data/music128.bin`; not run, so all of this is inferred):
 
-- $CF7D, called every frame by [PlayEffectOnAY](../src/interrupt.asm#L160), is the player. It first
-  reads the keyboard rows of [KeyRows](../src/controls.asm#L191): when F and H are pressed together
+- $CF7D, called every frame by [PlayEffectOnAY](../src/interrupt.asm#L163), is the player. It first
+  reads the keyboard rows of [KeyRows](../src/controls.asm#L190): when F and H are pressed together
   it flips a flag that silences the music (a mute toggle, not mentioned
-  anywhere in the game). It then compares [MusicTrack](../src/variables.asm#L489) with the byte at
+  anywhere in the game). It then compares [MusicTrack](../src/variables.asm#L529) with the byte at
   $8550, which holds the track playing (the game's own code never touches
   $8550, BankMusicTrack in the sources); a different track number is
-  started from a table of 9 module addresses at $D892 and [MusicTrack](../src/variables.asm#L489) is
-  cleared. Then comes an effect player: it takes [SoundRequest](../src/variables.asm#L470) into
-  [SoundPlaying](../src/variables.asm#L452) as the beeper code does and plays effect n from a table of
+  started from a table of 9 module addresses at $D892 and [MusicTrack](../src/variables.asm#L529) is
+  cleared. Then comes an effect player: it takes [SoundRequest](../src/variables.asm#L506) into
+  [SoundPlaying](../src/variables.asm#L483) as the beeper code does and plays effect n from a table of
   9 at $F7A3, one byte per frame (low 4 bits the volume, bit 5 a tone word
   follows, bit 6 a noise byte follows, a noise value of 32 or more ends the
   effect) on AY channel B. Last it writes the AY registers 0-13 from a copy
   in memory through ports $FFFD and $BFFD.
-- $CF6D, the first routine of the bank, copies [SoundRequest](../src/variables.asm#L470) to
-  [SoundPlaying](../src/variables.asm#L452); nothing in the game calls it.
+- $CF6D, the first routine of the bank, copies [SoundRequest](../src/variables.asm#L506) to
+  [SoundPlaying](../src/variables.asm#L483); nothing in the game calls it.
 
 ## 128K: the music
 
@@ -208,20 +208,20 @@ The table at $D892 holds 9 module addresses, tracks 1-9. Eight of the
 modules start with the header of a Vortex Tracker II 1.0 module; one of
 them has a title, track 2, "Prayer Of Hope" by Darkhorace. Track 9 starts
 with "ProTracker 3.5 compilation of Evil Fight" by DaRkHoRaCe. The game
-chooses the track in [MusicTrack](../src/variables.asm#L489):
+chooses the track in [MusicTrack](../src/variables.asm#L529):
 
 | Track | When |
 | --- | --- |
-| 3 | the title and the controls menu ([StartGame](../src/mainloop.asm#L65)) |
+| 3 | the title and the controls menu ([StartGame](../src/mainloop.asm#L70)) |
 | per room | on entering a room, from [RoomMusicTable](../src/cutscenelists.asm#L63): rooms 0:1, 1:2, 2-3:4, 4:7, 5-6:5, 7-8:4, 9:7, 10-11:8, 12-13:4, 14-16:8, 17:4, 18:9, 19-20:8, 21-23:6, 24:9 |
-| 7 | Satan turned into smoke ([UpdateSatan](../src/entities.asm#L3519)), the Game Over screen |
-| 5, then 2 | the two parts of the ending ([RunEnding](../src/sequences.asm#L113)); the bank's ending routine sets 2 again |
+| 7 | Satan turned into smoke ([UpdateSatan](../src/entities.asm#L3632)), the Game Over screen |
+| 5, then 2 | the two parts of the ending ([RunEnding](../src/sequences.asm#L112)); the bank's ending routine sets 2 again |
 
 Room 1, "A prayer of Hope", plays track 2, the module titled "Prayer Of
 Hope"; Death (room 18) and Satan (room 24) get track 9, "Evil Fight". As
 the player starts a track only when the number changes, walking between two
 rooms with the same track should not restart the music (inferred from the
-compare above). On a 48K nothing reads [MusicTrack](../src/variables.asm#L489).
+compare above). On a 48K nothing reads [MusicTrack](../src/variables.asm#L529).
 
 What the modules sound like, how the AY effects compare with the beeper
 ones and whether the F + H toggle works as read were not checked: the

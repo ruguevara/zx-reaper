@@ -6,9 +6,9 @@
 ; afterwards (observed: in room 16 row 21, columns 6-21 hold class 4 under the
 ; blank tile $80: the lake of blood, set by OpSetupWater). Bit 7 is the redraw
 ; mark: set when the cell must be drawn this frame (every tile of the table has
-; it, so a placed tile is drawn). Bit 6 is set by the sprite queue (QueueSprite) on the
-; cells a sprite covers and CollectRedrawRun turns it into bit 7 on the next
-; pass, which erases the sprite. Bits 0-2 are the class that the player and
+; it, so a placed tile is drawn). Bit 6 is set by the sprite queue (QueueSprite)
+; on the cells a sprite covers and CollectRedrawRun turns it into bit 7 on the
+; next pass, which erases the sprite. Bits 0-2 are the class that the player and
 ; enemies test:
 ;
 ; class 0 ($80): background, nothing there (tiles $25, $75-$76, $7B-$7C,
@@ -24,7 +24,7 @@
 ; $27-$3A, $3D-$4D, $77-$7A, $7D, $B8-$BF); a falling scythe lands on it
 ; (observed on the ledges of room 18)
 ;
-; class 4 ($84, FLAG_HARMFUL): harmful (tiles $05, $3B-$3C, $4E-$74); the
+; class 4 ($84, TILE_HARMFUL): harmful (tiles $05, $3B-$3C, $4E-$74); the
 ; player's code sets the hit flag $A8A0 from bit 2 (ProbePlayer), and
 ; UpdateScytheFalling and UpdateScytheSliding remove a scythe that meets bit 2
 ; (observed: a falling scythe over cells poked to 4 is freed in the next frame,
@@ -57,7 +57,9 @@ TileFlags:
 ; attribute file. CopyRunCells stores it in the redraw buffer RedrawAttrs with
 ; the tile's bitmap, and DrawRedrawList writes it to the screen. Nearly all are
 ; an ink colour on black paper ($01-$07); bit 6 (bright) is set on a few
-; ($42-$47). Tile $00 and tile $80 are both blank (attribute $00).
+; ($42-$47). Tile $00 and tile $80 are both blank (attribute $00), but $00 is
+; class 3 (solid) and $80 class 0: the black cells of room 20 that Jean walks
+; on are tile $00 (F135).
 TileAttrs:
   DEFB $00,$06,$06,$44,$44,$47,$07,$07,$07,$07,$07,$07,$07,$07,$07,$07
   DEFB $02,$02,$02,$02,$07,$07,$02,$02,$02,$02,$02,$02,$02,$02,$02,$02

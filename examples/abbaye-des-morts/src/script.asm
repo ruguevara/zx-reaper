@@ -88,7 +88,7 @@
 ;
 ; Every code above was run on hand-made scripts from a game snapshot and the
 ; tile map, flag map, screen and variables read back: each does what its line
-; says (review R3).
+; says (F149).
 ;
 ; Hardware: the character and bitmap commands write the screen bitmap and the
 ; attribute commands the attribute file directly; the tile commands only write
@@ -365,7 +365,7 @@ OpStampRun:
 StampTiles:
   LD B,(HL)               ; B = k, the number of positions
   INC HL
-OpStampRun_0:
+StampTiles_Pos:
   PUSH BC                 ; next position
   LD B,C                  ; B = list length
   PUSH DE                 ; keep the list address
@@ -376,7 +376,7 @@ OpStampRun_0:
   EX (SP),HL              ; HL = list, stack = script pointer
   EX DE,HL                ; HL = position, DE = list
   PUSH DE
-OpStampRun_1:
+StampTiles_Tile:
   PUSH DE                 ; next tile of the list
   LD A,(DE)
   LD E,A
@@ -384,11 +384,11 @@ OpStampRun_1:
   POP DE
   INC DE
   INC H                   ; next column
-  DJNZ OpStampRun_1
+  DJNZ StampTiles_Tile
   POP DE
   POP HL
   POP BC
-  DJNZ OpStampRun_0
+  DJNZ StampTiles_Pos
   RET
 
 ; Script opcode $8C: place one tile
@@ -449,7 +449,7 @@ OpTileRow_0:
 ; run, but the address arithmetic of TileMapAddress carries a column above 31
 ; into the next row (except from rows 7 and 15, which go back to rows 0 and 8):
 ; room 4's stripes at $742C have a run that reaches column 37. Used twice, rooms
-; 4 and 5 ($742C, $74D4); cells are placed through PlaceTile.
+; 4 and 5 ($742C, $74D4); cells are placed through PlaceTile (F150).
 ;
 ;   HL Operand bytes
 ; O:HL Address after the counts
@@ -1069,7 +1069,7 @@ OpStampTileBlock_1:
 ; bit first) and puts the tile on the cells whose bit is 1. A skip that passes
 ; column 31 goes to column 0 of the next row, dropping the rest (the groups
 ; stay in step only when the start column is a multiple of 8, as in the one
-; use, column 0); a mask byte wraps cell by cell. C counts every byte
+; use, column 0); a mask byte wraps cell by cell (F150). C counts every byte
 ; of the stream, index and mask bytes alike; the routine stops when it runs
 ; out, so a last index byte is read but its bits are not used. Used once (room
 ; 9, the foliage at $7851).
@@ -1460,12 +1460,12 @@ SetFlagRect:
   PUSH BC
   PUSH HL
   LD B,C
-OpSetFlagRect_0:
+SetFlagRect_Cell:
   PUSH HL                 ; one cell of the row
   CALL SetTileFlag
   POP HL
   INC H                   ; next column
-  DJNZ OpSetFlagRect_0
+  DJNZ SetFlagRect_Cell
   POP HL
   POP BC
   INC L                   ; next row
@@ -1567,16 +1567,16 @@ DrawTileVLine:
 ; can drown in and shows the scenery above it mirrored in it. First it writes 0
 ; (NOP) over the RET at DrawWaterReflection so that routine runs from the main
 ; loop on every frame, and patches that routine's operands: the attribute and
-; the width, the address of the attribute cells, and the two bitmap addresses
-; of the copy (the source starts at the top pixel line of the cell row 3 rows
+; the width, the address of the attribute cells, and the two bitmap addresses of
+; the copy (the source starts at the top pixel line of the cell row 3 rows
 ; above, the destination at the bottom pixel line of the water cell row; the
-; copy takes every third line going down and writes going up, so the three
-; rows above come out squashed and upside down: a reflection); the JR into the
-; LDI chain is set to copy `width` bytes per pixel line and the BC count to
-; width x 8. Observed with operands 21, 6, $13, 16: the operands written are
-; $5AA6, $13, 16, $5046, $57A6, $0080 and the JR offset $20. Finally it stores the flag value 4 in the
-; width cells (the entry SetFlagRect of OpSetFlagRect), which kills the monk
-; when he enters them (observed in room 16).
+; copy takes every third line going down and writes going up, so the three rows
+; above come out squashed and upside down: a reflection); the JR into the LDI
+; chain is set to copy `width` bytes per pixel line and the BC count to width x
+; 8. Observed with operands 21, 6, $13, 16: the operands written are $5AA6, $13,
+; 16, $5046, $57A6, $0080 and the JR offset $20. Finally it stores the flag
+; value 4 in the width cells (the entry SetFlagRect of OpSetFlagRect), which
+; kills the monk when he enters them (observed in room 16).
 ;
 ; Used twice: room 16 (lake, $7D5C: row 21, column 6, attribute $13, width 16)
 ; and room 19 (river, $7F7A: row 21, column 14, attribute $0D, width 16).
@@ -1637,7 +1637,7 @@ OpSetupWater_0:
   LD H,A
   POP BC
   POP HL
-  LD E,FLAG_HARMFUL       ; flag value of the water cells
+  LD E,TILE_HARMFUL       ; flag value of the water cells
   JP SetFlagRect          ; set the flags of the width cells (B = 1 row)
 
 ; Script code $9E: start the bubbling blood tiles of the bottom row

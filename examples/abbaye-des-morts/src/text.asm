@@ -12,7 +12,8 @@
 ; String N is the name of room N: the room script (op $87, RoomNameString) puts
 ; it in the name panel at the bottom right of the screen. Rooms 0 and 4 have no
 ; name panel; their strings ":)" and ":$" are never shown (Unknown: they look
-; like placeholders). Room 0 is the title and intro screen, room 4 the setting
+; like placeholders). Room 0 is the intro screen (the title is the separate
+; script ScriptTitle), room 4 the setting
 ; of the second part of the ending. The game's spelling is kept: room 15 is
 ; "Gloomy tunels".
 RoomNames:

@@ -1,6 +1,5 @@
-; MegaLZ depacker (the short version by fyrex and Mayhem), as a macro: the
-; loader has two copies of it, in the BASIC string (Stage1) and in stage 2
-; (Depack). Format: scripts/megalz.py.
+; MegaLZ depacker, as a macro: the loader has two copies of it, in the BASIC
+; string (Stage1) and in stage 2 (Depack). Format: scripts/megalz.py.
 ;   HL = packed data, DE = destination. The output goes up from DE.
 ;   A' = bit buffer: bits are taken from its top, a 1 trails the last bit
 ;   (the first ADD A,A of $80 gives zero, so a byte is fetched).

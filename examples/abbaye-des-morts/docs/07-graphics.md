@@ -18,13 +18,13 @@ commands for most of them are in
 | ![The info screen](img/info.png) | The info screen (`data/info.scr`). On a 128K, holding SPACE on the title unpacks it from the music bank ([Sound](05-sound.md)) |
 
 The hourglass of the tape loader: the outline of 3 x 3 cells
-([HourglassOutline](../src/stage2.asm#L751)) with its middle column replaced by one of ten
+([HourglassOutline](../src/stage2.asm#L756)) with its middle column replaced by one of ten
 frames. The frame follows the number of pages still to load; two sets of
-frames ([HourglassTop](../src/stage2.asm#L764) and [HourglassBottom](../src/stage2.asm#L795), top and
+frames ([HourglassFramesEven](../src/stage2.asm#L775) and [HourglassFramesOdd](../src/stage2.asm#L806), top and
 bottom row of the strip below) differ in the falling grains and alternate with
 bit 0 of the byte counter, so the stream flickers while a frame is shown.
 The loader's edge routine draws one quarter of the current frame (8 bytes)
-per call instead of the ROM's delay loop ([EdgeRoutines](../src/stage2.asm#L563)).
+per call instead of the ROM's delay loop ([EdgeRoutines](../src/stage2.asm#L568)).
 
 ![The 20 frames of the hourglass: frames 9 (start of the load) to 0 of the two sets](img/graphics-hourglass.png)
 ![The hourglass in loading order (not at loading speed)](img/graphics-hourglass.gif)
@@ -34,7 +34,7 @@ per call instead of the ROM's delay loop ([EdgeRoutines](../src/stage2.asm#L563)
 
 | | |
 | --- | --- |
-| ![The title script](img/title-and-menu-script.png) | The title drawn by [ScriptTitle](../src/controls.asm#L741) after a Game Over or the ending (48K) |
+| ![The title script](img/title-and-menu-script.png) | The title drawn by [ScriptTitle](../src/controls.asm#L736) after a Game Over or the ending (48K) |
 | ![The controls screen](img/controls.png) | The controls screen ([Title and menus](03-title-and-menu.md)) |
 | ![Redefining the keys](img/redefine.png) | Redefining the keys: JUMP, CROUCH and LEFT done, RIGHT asked for |
 | ![The intro](img/intro.png) | The intro, room 0: Jean ahead of three crusaders under the story text |
@@ -80,8 +80,8 @@ name panel (F124, F67).
 
 ![The 256 tiles of TileGfx, 32 to a row, each in its attribute from TileAttrs](img/tiles.png)
 
-The 256 tiles at [TileGfx](../src/tiles.asm#L90) (&#36;CF00), three times enlarged, tile n at row n /
-32, column n mod 32, each drawn in its attribute from [TileAttrs](../src/tiles.asm#L61). Tile
+The 256 tiles at [TileGfx](../src/tiles.asm#L92) (&#36;CF00), three times enlarged, tile n at row n /
+32, column n mod 32, each drawn in its attribute from [TileAttrs](../src/tiles.asm#L63). Tile
 $00 is the black solid cell of room 20's invisible bridge (F135), $3B and
 $3C the bubbling blood (F116), $4C the cross of the ring (F125), $7B and
 $7C the heart and the cross of the status bar, $80 the blank cell, $B7 the
@@ -91,12 +91,12 @@ rope of the hanged men (F88).
 
 ![The 34 frames of the item frame lists](img/items.png)
 
-The 34 frames of the lists at [FramesHeart](../src/objects.asm#L120) and after it, each a 16 x 16
+The 34 frames of the lists at [FramesHeart](../src/objects.asm#L129) and after it, each a 16 x 16
 sprite (the arch 16 x 24) in its attribute: the heart (2 frames,
-[FramesHeart](../src/objects.asm#L120)); the cross in six bright colours, then the thin plus sign
+[FramesHeart](../src/objects.asm#L129)); the cross in six bright colours, then the thin plus sign
 in the same six, shown for the crosses that cannot be taken with the wheel
-of faith as it is ([FramesCross](../src/objects.asm#L125), F31); the checkpoint, not active and
-active; the arch in its nine colour steps ([FramesArch](../src/objects.asm#L155)); the parchment;
+of faith as it is ([FramesCross](../src/objects.asm#L134), F31); the checkpoint, not active and
+active; the arch in its nine colour steps ([FramesArch](../src/objects.asm#L164)); the parchment;
 the red scroll (the same sprite, red); the bell at rest and ringing; the
 lever up and pulled; the wheel of faith in its two positions; the chalice
 ([Items and the ending](05-items-ending.md)).
@@ -105,12 +105,12 @@ lever up and pulled; the wheel of faith in its two positions; the chalice
 
 ![Jean's frames](img/monk.png) ![Jean walking](img/monk-walk.gif)
 
-From the sprite sheet: walking and in the air facing left ([MonkFramesLeft](../src/player.asm#L912))
-and right ([MonkFramesRight](../src/player.asm#L914)), the seven pictures of the dying animation
-([MonkDyingFrames](../src/player.asm#L916), three flames drawn bright red), crouching facing left
-and right ([CrouchFramesLeft](../src/player.asm#L923), [CrouchFramesRight](../src/player.asm#L925)). Only the unshifted
+From the sprite sheet: walking and in the air facing left ([MonkFramesLeft](../src/player.asm#L933))
+and right ([MonkFramesRight](../src/player.asm#L935)), the seven pictures of the dying animation
+([MonkDyingFrames](../src/player.asm#L937), three flames drawn bright red), crouching facing left
+and right ([CrouchFramesLeft](../src/player.asm#L944), [CrouchFramesRight](../src/player.asm#L946)). Only the unshifted
 copy of each frame is shown. The walk: pictures 0 and 1, each held for 8 frames, as
-[UpdatePlayerActive](../src/player.asm#L629) toggles them ([Jean](05-player.md), F70).
+[UpdatePlayerActive](../src/player.asm#L642) toggles them ([Jean](05-player.md), F70).
 
 ## Creatures
 
@@ -123,27 +123,27 @@ in [`src/behaviours.asm`](../src/behaviours.asm):
 
 | Label | Block | Creature |
 | --- | --- | --- |
-| $93D3 r0 | [BehaviourJean](../src/behaviours.asm#L41) | Jean walking across the intro screen (kind 0, room 0) |
-| $93E0 r0 | [BehaviourCrusader](../src/behaviours.asm#L60) | a crusader (kinds 0 and 1, rooms 0, 5, 6 and 25) |
-| $93F5 r13 | [BehaviourSkeleton](../src/behaviours.asm#L79) | a white walker (kind 2, rooms 13 and 22) |
-| $940A r22 | [BehaviourWhiteFlyer](../src/behaviours.asm#L98) | a white walker near the ceiling (kind 2, rooms 22 and 23) |
-| $941F r8 | [BehaviourBat](../src/behaviours.asm#L117) | a bat (kinds 2 and 3, room 8) |
-| $9430 r2 | [BehaviourRat](../src/behaviours.asm#L134) | a rat (kinds 2 and 3, room 2) |
-| $9445 r3 | [BehaviourSpider](../src/behaviours.asm#L154) | a spider on its thread (kind 4, rooms 3, 14, 16 and 19) |
-| $9452 r3 | [BehaviourSpiderYellow](../src/behaviours.asm#L170) | a yellow spider (kind 5, room 3) |
-| $9465 r9 | [BehaviourHangedMan](../src/behaviours.asm#L190) | a hanged man (kind 6, room 9) |
-| $9476 r9 | [BehaviourWorm](../src/behaviours.asm#L207) | a worm (kind 2, rooms 9 and 14) |
-| $9487 r12 | [BehaviourFlyA](../src/behaviours.asm#L224) | a fly (kind 5, room 12) |
-| $949C r12 | [BehaviourFlyB](../src/behaviours.asm#L242) | a fly, darker colour (kind 5, room 12) |
-| $94B1 r11 | [BehaviourChaser](../src/behaviours.asm#L261) | the grinning ghost that chases Jean (kind 8, room 11) |
-| $94C6 r20 | [BehaviourBird](../src/behaviours.asm#L281) | a flying creature (kind 2, rooms 20 and 23) |
-| $9506 r15 | [BehaviourSoldier](../src/behaviours.asm#L349) | a soldier (kind 2, rooms 15 and 20) |
-| $9555 r21 | [BehaviourDemon](../src/behaviours.asm#L428) | a demon (kinds 2 and 3, rooms 21 and 22) |
-| $956A r22 | [BehaviourFireWheel](../src/behaviours.asm#L449) | a falling red flame (kind 4, rooms 22 and 23) |
+| $93D3 r0 | [BehaviourJean](../src/behaviours.asm#L45) | Jean walking across the intro screen (kind 0, room 0) |
+| $93E0 r0 | [BehaviourCrusader](../src/behaviours.asm#L65) | a crusader (kinds 0 and 1, rooms 0, 5, 6 and 25) |
+| $93F5 r13 | [BehaviourSkeleton](../src/behaviours.asm#L86) | a white walker (kind 2, rooms 13 and 22) |
+| $940A r22 | [BehaviourCeilingGhost](../src/behaviours.asm#L107) | a white walker near the ceiling (kind 2, rooms 22 and 23) |
+| $941F r8 | [BehaviourBat](../src/behaviours.asm#L127) | a bat (kinds 2 and 3, room 8) |
+| $9430 r2 | [BehaviourRat](../src/behaviours.asm#L144) | a rat (kinds 2 and 3, room 2) |
+| $9445 r3 | [BehaviourSpider](../src/behaviours.asm#L165) | a spider on its thread (kind 4, rooms 3, 14, 16 and 19) |
+| $9452 r3 | [BehaviourSpiderYellow](../src/behaviours.asm#L181) | a yellow spider (kind 5, room 3) |
+| $9465 r9 | [BehaviourHangedMan](../src/behaviours.asm#L202) | a hanged man (kind 6, room 9) |
+| $9476 r9 | [BehaviourWorm](../src/behaviours.asm#L221) | a worm (kind 2, rooms 9 and 14) |
+| $9487 r12 | [BehaviourFlyA](../src/behaviours.asm#L238) | a fly (kind 5, room 12) |
+| $949C r12 | [BehaviourFlyB](../src/behaviours.asm#L257) | a fly, darker colour (kind 5, room 12) |
+| $94B1 r11 | [BehaviourChaser](../src/behaviours.asm#L277) | the grinning ghost that chases Jean (kind 8, room 11) |
+| $94C6 r20 | [BehaviourBird](../src/behaviours.asm#L298) | a flying creature (kind 2, rooms 20 and 23) |
+| $9506 r15 | [BehaviourKnight](../src/behaviours.asm#L372) | a soldier (kind 2, rooms 15 and 20) |
+| $9555 r21 | [BehaviourDemon](../src/behaviours.asm#L454) | a demon (kinds 2 and 3, rooms 21 and 22) |
+| $956A r22 | [BehaviourFireWheel](../src/behaviours.asm#L476) | a falling red flame (kind 4, rooms 22 and 23) |
 
 ![Death](img/creature-95B9.png)
 
-[BehaviourDeath](../src/behaviours.asm#L538): Death (kind 16, room 18), drawn on its own because it is
+[BehaviourDeath](../src/behaviours.asm#L585): Death (kind 16, room 18), drawn on its own because it is
 28 pixel rows high.
 
 The other kinds have blocks of another layout and are shown in play, rooms
@@ -152,17 +152,17 @@ entered directly with enemy hits switched off (&#36;A87A := $18):
 | | |
 | --- | --- |
 | ![Crusaders](img/creatures-chase.png) | Room 5: the crusaders arrive from the left ([Creatures](05-creatures.md)) |
-| ![Hanged men](img/graphics-play-hanged-men.png) | Room 9, 60 frames after the warp: the hanged men ([BehaviourHangedMan](../src/behaviours.asm#L190)) on ropes they draw into the tile map (F88), a worm on the branch |
-| ![Beast](img/creatures-beast.png) | Room 10: the Pestilent Beast ([BehaviourBeastHead](../src/behaviours.asm#L467)) breathes fire ([BehaviourBeastFire](../src/behaviours.asm#L490)) |
+| ![Hanged men](img/graphics-play-hanged-men.png) | Room 9, 60 frames after the warp: the hanged men ([BehaviourHangedMan](../src/behaviours.asm#L202)) on ropes they draw into the tile map (F88), a worm on the branch |
+| ![Beast](img/creatures-beast.png) | Room 10: the Pestilent Beast ([BehaviourBeastHead](../src/behaviours.asm#L497)) breathes fire ([BehaviourBeastFire](../src/behaviours.asm#L527)) |
 | ![Beast flames](img/graphics-play-beast-flames.png) | Room 10, 300 frames after the warp: flames running along the ledge below the Beast (F84) |
-| ![Plants](img/creatures-plants.png) | Room 14: a plant ([BehaviourSeedPlant](../src/behaviours.asm#L401)) has just spat two seeds |
-| ![Archers](img/graphics-play-archers.png) | Room 17, 110 frames after the warp: three skeleton archers ([BehaviourArcher](../src/behaviours.asm#L369)) and their arrows (F81) |
+| ![Plants](img/creatures-plants.png) | Room 14: a plant ([BehaviourSeedPlant](../src/behaviours.asm#L427)) has just spat two seeds |
+| ![Archers](img/graphics-play-archers.png) | Room 17, 110 frames after the warp: three skeleton archers ([BehaviourArcher](../src/behaviours.asm#L394)) and their arrows (F81) |
 | ![Death in play](img/creatures-death.png) | Room 18: Death and two scythes |
-| ![Fish](img/graphics-play-fish.png) | Room 19, 80 frames after the warp: a fish ([BehaviourFish](../src/behaviours.asm#L415)) out of the river, a spider on its thread (F83) |
-| ![Satan](img/creatures-satan.png) | Room 24: Satan ([BehaviourSatan](../src/behaviours.asm#L572)) has fired a volley; the ring of crosses is complete |
+| ![Fish](img/graphics-play-fish.png) | Room 19, 80 frames after the warp: a fish ([BehaviourFish](../src/behaviours.asm#L441)) out of the river, a spider on its thread (F83) |
+| ![Satan](img/creatures-satan.png) | Room 24: Satan ([BehaviourSatan](../src/behaviours.asm#L623)) has fired a volley; the ring of crosses is complete |
 
-The water drops ([BehaviourDrop](../src/behaviours.asm#L315)) hang from the roofs of rooms 15 and 19
-and the stone heads ([BehaviourStoneHead](../src/behaviours.asm#L388)) sit in the walls of rooms 20
+The water drops ([BehaviourDrop](../src/behaviours.asm#L337)) hang from the roofs of rooms 15 and 19
+and the stone heads ([BehaviourStoneHead](../src/behaviours.asm#L414)) sit in the walls of rooms 20
 and 22; see the room pictures above.
 
 ## The sprite sheet
@@ -182,14 +182,14 @@ mirrored copies ([Screen drawing](05-drawing.md)).
 ![The font](img/graphics-font.png)
 
 The 96 characters $20-$7F of [FontIndex](../src/font.asm#L11), each drawn by the game's
-[DrawGlyph](../src/script.asm#L531) in the simulator, 12 to a line. "@" and $7F are empty.
+[DrawGlyph](../src/script.asm#L555) in the simulator, 12 to a line. "@" and $7F are empty.
 
 ## The parchment frame
 
 ![The 12 parchment frame tiles](img/graphics-parchment-tiles.png)
 
-The 12 frame tiles at [ParchmentFrameTiles](../src/graphics.asm#L651), yellow on black as
+The 12 frame tiles at [ParchmentFrameTiles](../src/graphics.asm#L702), yellow on black as
 [ShowParchment](../src/hud.asm#L103) draws them: 0 top-left corner, 1 and 2 top edge, 3
 top-right corner, 4 and 6 left edge, 5 and 7 right edge, 8 bottom-left
-corner, 9 and 10 bottom edge, 11 bottom-right corner. [ParchmentLayout](../src/graphics.asm#L679)
+corner, 9 and 10 bottom edge, 11 bottom-right corner. [ParchmentLayout](../src/graphics.asm#L730)
 places them around a 22 x 9 interior.

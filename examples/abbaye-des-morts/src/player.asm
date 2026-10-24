@@ -125,7 +125,7 @@ ProbePlayer:
   LD BC,$0107             ; 3x2 block from (X+1, Y+7)
   CALL ProbeBlock3x2
   LD A,E
-  AND FLAG_HARMFUL        ; harmful tile class
+  AND TILE_HARMFUL        ; harmful tile class
   LD (PlayerHit),A        ; hit flag
   RET
 ; Standing, walking, jumping or falling.
@@ -162,7 +162,7 @@ ProbePlayer_Stand:
   LD BC,$0202             ; ring from (X+2, Y+2)
   CALL ProbeRing
   LD A,E
-  AND FLAG_HARMFUL        ; harmful tile class
+  AND TILE_HARMFUL        ; harmful tile class
   LD (PlayerHit),A        ; hit flag
   RET
 
@@ -531,10 +531,10 @@ UpdateDying_End:
   LD A,(Lives)            ; lives left?
   OR A
   LD HL,RoomState         ; room state
-  LD (HL),STATE_DEATH     ; $84: restart at the checkpoint
-  JR NZ,KillPlayer_0      ; lives left
+  LD (HL),STATE_RUNNING+STATE_RESTART ; $84: restart at the checkpoint
+  JR NZ,UpdateDying_Bar      ; lives left
   INC (HL)                ; room state $85: Game Over
-KillPlayer_0:
+UpdateDying_Bar:
   LD DE,DrawLivesBar      ; hearts bar redraw gate: NOP re-arms it
   XOR A
   LD (DE),A
@@ -706,7 +706,7 @@ PlayerFalling:
   LD DE,(PlayerSpeedY)    ; DE = vertical speed
   LD A,(PlayerTileFeet)   ; feet flags
   AND TILE_BLOCKS|TILE_STANDABLE ; free below: keep falling
-  JR Z,UpdatePlayerActive_3
+  JR Z,PlayerFalling_Move
   CP TILE_BLOCKS          ; class 2 or 3: landed
   JP NC,PlayerLanded      ; landed
   LD A,H                  ; class 1 (platform): Y mod 4
@@ -714,7 +714,7 @@ PlayerFalling:
   JP Z,PlayerLanded       ; exactly at the top of a cell row: landed
   ADD A,D                 ; Y mod 4 + speed high byte
   EX AF,AF'               ; A' = that
-UpdatePlayerActive_3:
+PlayerFalling_Move:
   ADD HL,DE               ; Y + speed
   LD (PlayerY),HL
   LD A,(PlayerTileFeet)   ; feet flags (old)
@@ -745,11 +745,11 @@ PlayerJumping:
   LD DE,(PlayerSpeedY)    ; vertical speed
   LD A,(PlayerTileHead)   ; head flags
   AND TILE_BLOCKS
-  JR NZ,UpdatePlayerActive_4 ; head blocked: do not rise
+  JR NZ,PlayerJumping_Slow ; head blocked: do not rise
   LD HL,(PlayerY)         ; Y - speed
   SBC HL,DE
   LD (PlayerY),HL
-UpdatePlayerActive_4:
+PlayerJumping_Slow:
   LD HL,(PlayerSpeedY)    ; speed - $1E
   LD DE,-GRAVITY
   ADD HL,DE
@@ -771,7 +771,7 @@ PlayerLanded:
 PlayerStanding:
   LD A,(ControlsPressed)  ; jump pressed (bit 3 or 4)?
   AND CTRL_JUMP
-  JR Z,UpdatePlayerActive_5
+  JR Z,PlayerStanding_Crouch
   LD A,SFX_JUMP
   LD (SoundRequest),A
   LD HL,PlayerAnimTimer
@@ -781,7 +781,7 @@ PlayerStanding:
   LD A,PLAYER_JUMPING
   LD (PlayerState),A
   JR PlayerStanding_Floor
-UpdatePlayerActive_5:
+PlayerStanding_Crouch:
   LD A,(ControlsHeld)     ; crouch held?
   AND CTRL_CROUCH
   JR Z,PlayerStanding_Floor
@@ -826,9 +826,9 @@ DrawPlayerAttr:
 DrawPlayerSprite:
   LD A,(PlayerFacing)     ; facing
   OR A
-  JR Z,UpdatePlayerActive_6 ; facing right (0): keep DE, the right table
+  JR Z,DrawPlayerSprite_Frame ; facing right (0): keep DE, the right table
   EX DE,HL                ; facing left: DE = the left table
-UpdatePlayerActive_6:
+DrawPlayerSprite_Frame:
   LD HL,(PlayerFrame)     ; HL = frame number
   LD H,$00
   ADD HL,HL
@@ -838,7 +838,7 @@ UpdatePlayerActive_6:
   LD D,(HL)
   LD HL,(PlayerX)         ; X
   LD A,H
-  AND SUBROW_MASK         ; X mod 4: shift phase
+  AND SPRITE_PHASE_MASK    ; X mod 4: shift phase
   ADD A,A                 ; x 2: index in the pairs
   LD L,A
   XOR A

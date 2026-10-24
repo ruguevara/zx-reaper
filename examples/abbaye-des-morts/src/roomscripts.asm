@@ -148,7 +148,7 @@ RoomScript01:
 ;
 ; Room 2: column 2, row 0 of the 5x5 map (left is room 1, right 3, down 7; up
 ; gives room 3, not 22, by the byte wrap of CheckRoomExit, F77). Unpacks sprite
-; set PackedSet13. Subscripts: ScriptRoomPanel, ScriptSky, BlockStoneB,
+; set PackedSetRat. Subscripts: ScriptRoomPanel, ScriptSky, BlockStoneB,
 ; BlockStoneA. Items (RoomItems) at row,column: bell 1,5, heart 7,12.
 RoomScript02:
   DEFB $97,$0D            ; SPRITESET 13
@@ -235,7 +235,7 @@ RoomScript03:
 ;
 ; Room 4: column 4, row 0 of the 5x5 map (left is room 3, right 5, down 9; up
 ; gives room 5, not 24, by the byte wrap of CheckRoomExit, F77). Unpacks sprite
-; set PackedSet1. Subscripts: ScriptSky, BlockTreeBark, BlockGrassEarth. No
+; set PackedSetCrusader. Subscripts: ScriptSky, BlockTreeBark, BlockGrassEarth. No
 ; items.
 ;
 ; Hardware: writes the screen bitmap and the attribute file directly (ops $81
@@ -299,7 +299,7 @@ BlockTreeBark:
 ; of rooms 5 and 6 only goes one way.
 ;
 ; Room 5: column 0, row 1 of the 5x5 map (left is room 4, right 6, up 0, down
-; 10, counted modulo 25). Unpacks sprite set PackedSet1. Subscripts:
+; 10, counted modulo 25). Unpacks sprite set PackedSetCrusader. Subscripts:
 ; ScriptRoomPanel, BlockGrassEarth, BlockTreeBark. No items.
 RoomScript05:
   DEFB $97,$01            ; SPRITESET 1
@@ -354,7 +354,7 @@ RoomScript05:
 ; that the way into room 7 stays shut.
 ;
 ; Room 6: column 1, row 1 of the 5x5 map (left is room 5, right 7, up 1, down
-; 11, counted modulo 25). Unpacks sprite set PackedSet1. Subscripts:
+; 11, counted modulo 25). Unpacks sprite set PackedSetCrusader. Subscripts:
 ; ScriptRoomPanel, ScriptSky, BlockTreeBark, BlockGrassEarth. No items.
 RoomScript06:
   DEFB $97,$01            ; SPRITESET 1
@@ -498,12 +498,12 @@ BlockStoneHalfA:
 ; Room script 8: The Altar
 ;
 ; Two conditional parts: the door DoorRight at the right edge (the way to room
-; 9) while the lever of room 10 (LeverRoom10) is still 0, and EraseWallBlock,
+; 9) while the lever of room 10 (LeverRoom10) is still 0, and OpenAltarFloor,
 ; which erases a 2x2 block of the floor once the bell of room 2 (BellRung) has
 ; rung and so opens the way down to room 13, Catacombs (observed, F142).
 ;
 ; Room 8: column 3, row 1 of the 5x5 map (left is room 7, right 9, up 3, down
-; 13, counted modulo 25). Unpacks sprite set PackedSet15. Subscripts:
+; 13, counted modulo 25). Unpacks sprite set PackedSetBat. Subscripts:
 ; ScriptRoomPanel, BlockStoneHalfA. Items (RoomItems) at row,column: parchment
 ; 18,27, checkpoint 17,7.
 RoomScript08:
@@ -554,8 +554,8 @@ RoomScript08:
   DEFW LeverRoom10
   DEFB $91,$7E,$02,$01,$01,$13,$07 ; PICTURES tiles from $7E, 2x1, at 1
                                    ; positions
-  DEFB $9C                ; IFNZ run EraseWallBlock if BellRung is not 0
-  DEFW EraseWallBlock
+  DEFB $9C                ; IFNZ run OpenAltarFloor if BellRung is not 0
+  DEFW OpenAltarFloor
   DEFW BellRung
   DEFB $80                ; END
 
@@ -565,7 +565,7 @@ RoomScript08:
 ; with the blank tile $80, class 0, so that Jean can drop through into room 13,
 ; Catacombs (observed, F142). Run by room 8 (op $9C) when BellRung, the bell of
 ; the Tower of the Bell, is nonzero.
-EraseWallBlock:
+OpenAltarFloor:
   DEFB $86,$14,$1A,$02,$02,$80 ; FILLTILE row 20, col 26, 2x2, tile $80
   DEFB $80                ; END
 
@@ -587,7 +587,7 @@ DoorRight:
 ; the last op, F3).
 ;
 ; Room 9: column 4, row 1 of the 5x5 map (left is room 8, right 10, up 4, down
-; 14, counted modulo 25). Unpacks sprite sets PackedSet10, PackedSet19.
+; 14, counted modulo 25). Unpacks sprite sets PackedSetHangedMan, PackedSetWorm.
 ; Subscripts: ScriptRoomPanel, BlockGrassEarth. Items (RoomItems) at
 ; row,column: lever 18,27, cross 4,6.
 RoomScript09:
@@ -647,7 +647,7 @@ RoomScript09:
 ; 0-1); Jean passes it crouching (F133; flag maps read in a run).
 ;
 ; Room 10: column 0, row 2 of the 5x5 map (left is room 9, right 11, up 5, down
-; 15, counted modulo 25). Unpacks sprite sets PackedSet5, PackedSet6.
+; 15, counted modulo 25). Unpacks sprite sets PackedSetBeastFire, PackedSetBeastHead.
 ; Subscripts: ScriptRoomPanel, BlockCaveRock, BlockCaveGrass. Items (RoomItems)
 ; at row,column: lever 4,7, doorway arch 17,23, heart 18,10, cross 4,26.
 RoomScript10:
@@ -724,7 +724,7 @@ BlockCaveRock:
 ; columns 2-3. Flag maps read in a run.
 ;
 ; Room 11: column 1, row 2 of the 5x5 map (left is room 10, right 12, up 6,
-; down 16, counted modulo 25). Unpacks sprite set PackedSet12. Subscripts:
+; down 16, counted modulo 25). Unpacks sprite set PackedSetChaser. Subscripts:
 ; ScriptRoomPanel, BlockCaveRock, BlockCaveGrass. Items (RoomItems) at
 ; row,column: heart 4,2, checkpoint 17,14.
 RoomScript11:
@@ -788,7 +788,7 @@ BlockCaveGrass:
 ; Room script 12: Plagued ruins
 ;
 ; Room 12: column 2, row 2 of the 5x5 map (left is room 11, right 13, up 7,
-; down 17, counted modulo 25). Unpacks sprite sets PackedSet8, PackedSet9.
+; down 17, counted modulo 25). Unpacks sprite sets PackedSetFlyB, PackedSetFlyA.
 ; Subscripts: ScriptRoomPanel, BlockYellowBricks. Items (RoomItems) at
 ; row,column: heart 6,16, parchment 18,10, checkpoint 7,8.
 RoomScript12:
@@ -836,7 +836,7 @@ BlockYellowBricks:
 ; Room script 13: Catacombs
 ;
 ; Room 13: column 3, row 2 of the 5x5 map (left is room 12, right 14, up 8,
-; down 18, counted modulo 25). Unpacks sprite set PackedSet17. Subscripts:
+; down 18, counted modulo 25). Unpacks sprite set PackedSetSkeleton. Subscripts:
 ; ScriptRoomPanel, BlockYellowBricks. Items (RoomItems) at row,column: cross
 ; 18,18.
 RoomScript13:
@@ -872,7 +872,7 @@ RoomScript13:
 ; Room script 14: Hidden garden
 ;
 ; Room 14: column 4, row 2 of the 5x5 map (left is room 13, right 15, up 9,
-; down 19, counted modulo 25). Unpacks sprite set PackedSet19. Subscripts:
+; down 19, counted modulo 25). Unpacks sprite set PackedSetWorm. Subscripts:
 ; ScriptRoomPanel, BlockCaveRock, BlockCaveGrass. Items (RoomItems) at
 ; row,column: parchment 10,19, cross 4,9, checkpoint 17,8.
 RoomScript14:
@@ -915,7 +915,7 @@ RoomScript14:
 ; Room script 15: Gloomy tunels
 ;
 ; Room 15: column 0, row 3 of the 5x5 map (left is room 14, right 16, up 10,
-; down 20, counted modulo 25). Unpacks sprite set PackedSet11. Subscripts:
+; down 20, counted modulo 25). Unpacks sprite set PackedSetKnight. Subscripts:
 ; ScriptRoomPanel, BlockCaveRock. Items (RoomItems) at row,column: heart 14,3,
 ; cross 8,28, checkpoint 7,21.
 RoomScript15:
@@ -1016,7 +1016,7 @@ RoomScript16:
 ; Room script 17: The wheel of faith
 ;
 ; Room 17: column 2, row 3 of the 5x5 map (left is room 16, right 18, up 12,
-; down 22, counted modulo 25). Unpacks sprite set PackedSet0. Subscripts:
+; down 22, counted modulo 25). Unpacks sprite set PackedSetArcher. Subscripts:
 ; ScriptRoomPanel, BlockYellowBricks. Items (RoomItems) at row,column: wheel of
 ; faith 2,15, heart 18,3, cross 18,28, cross 10,3.
 RoomScript17:
@@ -1054,7 +1054,7 @@ RoomScript17:
 ; Room script 18: Banquet of Death
 ;
 ; Room 18: column 3, row 3 of the 5x5 map (left is room 17, right 19, up 13,
-; down 23, counted modulo 25). Unpacks sprite sets PackedSet2, PackedSet16.
+; down 23, counted modulo 25). Unpacks sprite sets PackedSetDeath, PackedSetScythe.
 ; Subscripts: ScriptRoomPanel. Items (RoomItems) at row,column: heart 11,15,
 ; cross 5,3.
 RoomScript18:
@@ -1170,7 +1170,7 @@ DoorLeftLow:
 ; (LeverRoom20) is 0; pulling it runs EraseDoorRight, which erases the door.
 ;
 ; Room 20: column 0, row 4 of the 5x5 map (left is room 19, right 21, up 15,
-; down 0, counted modulo 25). Unpacks sprite sets PackedSet11, PackedSet4.
+; down 0, counted modulo 25). Unpacks sprite sets PackedSetKnight, PackedSetBird.
 ; Subscripts: ScriptRoomPanel, BlockCaveRock. Items (RoomItems) at row,column:
 ; lever 6,24.
 RoomScript20:
@@ -1230,7 +1230,7 @@ EraseDoorRight:
 ; (AnimateBloodTiles).
 ;
 ; Room 21: column 1, row 4 of the 5x5 map (left is room 20, right 22, up 16,
-; down 1, counted modulo 25). Unpacks sprite sets PackedSet0, PackedSet3.
+; down 1, counted modulo 25). Unpacks sprite sets PackedSetArcher, PackedSetDemon.
 ; Subscripts: ScriptRoomPanel, BlockAbbeyStoneA, BlockAbbeyStoneB,
 ; BlockAbbeyBlood, BlockBloodPool, BlockStoneHalfB. Items (RoomItems) at
 ; row,column: parchment 6,3, checkpoint 5,19.
@@ -1328,8 +1328,8 @@ BlockStoneHalfB:
 ; (AnimateBloodTiles).
 ;
 ; Room 22: column 2, row 4 of the 5x5 map (left is room 21, right 23, up 17,
-; down 2, counted modulo 25). Unpacks sprite sets PackedSet17, PackedSet3,
-; PackedSet18, PackedSet7. Subscripts: ScriptRoomPanel, BlockAbbeyStoneA,
+; down 2, counted modulo 25). Unpacks sprite sets PackedSetSkeleton, PackedSetDemon,
+; PackedSetCeilingGhost, PackedSetFireWheel. Subscripts: ScriptRoomPanel, BlockAbbeyStoneA,
 ; BlockAbbeyBlood, BlockBloodPool, BlockStoneHalfB. Items (RoomItems) at
 ; row,column: cross 18,27.
 RoomScript22:
@@ -1382,8 +1382,8 @@ RoomScript22:
 ; (AnimateBloodTiles).
 ;
 ; Room 23: column 3, row 4 of the 5x5 map (left is room 22, right 24, up 18,
-; down 3, counted modulo 25). Unpacks sprite sets PackedSet4, PackedSet18,
-; PackedSet7. Subscripts: ScriptRoomPanel, BlockAbbeyStoneA, BlockAbbeyBlood,
+; down 3, counted modulo 25). Unpacks sprite sets PackedSetBird, PackedSetCeilingGhost,
+; PackedSetFireWheel. Subscripts: ScriptRoomPanel, BlockAbbeyStoneA, BlockAbbeyBlood,
 ; BlockBloodPool. Items (RoomItems) at row,column: heart 7,23, checkpoint
 ; 17,17.
 RoomScript23:
@@ -1430,11 +1430,14 @@ RoomScript23:
 ;
 ; Satan's room. The last op, $9F, switches on the ring of crosses
 ; (ShowCrossRing), which shows the twelve crosses one by one when all of them
-; have been collected. The sprite set 14 (Satan) is unpacked by the room
-; objects, the script itself unpacks sets 14 and 1.
+; have been collected; the crosses are solid and are the way up to the chalice
+; (F125). Sprite sets are unpacked only by script op $97 (OpUnpackSprites is
+; the only caller of UnpackSpriteSet): this script unpacks set 14 (used by no
+; other room: Satan) and set 1 (the crusaders, F65, for room 25, which runs
+; this script).
 ;
 ; Room 24: column 4, row 4 of the 5x5 map (left is room 23, right 0, up 19,
-; down 4, counted modulo 25). Unpacks sprite sets PackedSet14, PackedSet1.
+; down 4, counted modulo 25). Unpacks sprite sets PackedSetSatan, PackedSetCrusader.
 ; Subscripts: ScriptRoomPanel, BlockAbbeyStoneA, BlockAbbeyBlood. Items
 ; (RoomItems) at row,column: chalice 2,16, red scroll 14,28.
 RoomScript24:

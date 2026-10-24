@@ -199,10 +199,10 @@ GameFrameRoutine:
 ; BuildMirrorTable and sets MusicTrack to 2.
 ;
 ; BankShowInfo: HL = $CA8A, then as BankShowTitle; called through the stub at
-; WaitSpaceRelease when SPACE is held on the title: the info screen.
+; ShowInfoScreen when SPACE is held on the title: the info screen.
 ;
 ; BankShowTitle: HL = $C09D, DE = $F9D7; called through the stub at
-; StartGame_Music when a game starts and by WaitSpaceRelease when SPACE is
+; StartGame_Music when a game starts and by ShowInfoScreen when SPACE is
 ; released. The bank routine at $F9D7 clears the attributes and jumps to $C000,
 ; the copy of DepackScreen, with HL: it draws the title screen (the bank's
 ; bytes: LD B,3 / LD DE,$5800 / XOR A / fill / JP $C000; run on its own in the

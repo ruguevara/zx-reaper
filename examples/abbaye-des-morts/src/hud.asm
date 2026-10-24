@@ -1,7 +1,7 @@
 ; Redraw the crosses counter in the status bar
 ;
 ; One-shot redraw gate: the first byte is NOP while a redraw is wanted and RET
-; otherwise. The main loop (StartGame) calls this address on every pass; the
+; otherwise. The main loop (MainLoop_Play) calls this address on every pass; the
 ; routine puts RET over its own first byte at once, so it draws only once per
 ; request. A request is a NOP written at the start of a game (StartGame), when
 ; a cross is picked up (TakeCross, from both cross actions
@@ -81,7 +81,7 @@ FillHudAttrs_0:
 ;
 ; Single byte that is RET normally. Touching a parchment (ActionParchment)
 ; stores its two message numbers in $850E/$850F and writes NOP here; the main
-; loop (StartGame) calls this address on every pass, so the call then falls
+; loop (MainLoop_Play) calls this address on every pass, so the call then falls
 ; through into ShowParchment, which shows the parchment and writes RET back.
 ; EnterRoom also writes RET here when a room is entered.
 ParchmentGate:
@@ -276,7 +276,7 @@ DrawFrameCell_1:
 ; Run the pending event script (once)
 ;
 ; One-shot gate in the style of ParchmentGate: the first byte is NOP when a
-; script is pending and RET otherwise, and the main loop (StartGame) calls this
+; script is pending and RET otherwise, and the main loop (MainLoop_Play) calls this
 ; address on every pass. When pending, it writes RET over itself and runs the
 ; script at the address held in its own LD HL instruction (operand at $9CEE,
 ; SmcEventScript+1) with RunScript. The routines that start an event store the

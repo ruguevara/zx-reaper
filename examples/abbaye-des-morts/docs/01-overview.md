@@ -16,7 +16,7 @@ the ROM tape loader that animates an hourglass.
   being expelled by the Catholic Church out of the Lanquedoc. The Cathar Jean
   Raymond runs to escape the crusaders..." (the spelling is the game's, F129).
 - **Rooms.** 25 rooms (0-24) on a 5 x 5 grid: right and left are room +1 and
-  -1, down and up +5 and -5 ([RoomNumber](../src/variables.asm#L77), F41, F76). Room 0 holds the
+  -1, down and up +5 and -5 ([RoomNumber](../src/variables.asm#L80), F41, F76). Room 0 holds the
   intro text, room 4 is only used by the ending, and room 1 is only seen
   through a window of room 2 (F124). A 26th room, 25, exists only for the
   ending. Play starts in room 5, "Escape !!!", with crusaders running in from
@@ -51,13 +51,13 @@ the right part shows the room name in the game's proportional font.
 
 | Part | Use |
 | --- | --- |
-| Z80 at 3.5 MHz, IM 2 | [StartUp](../src/startup.asm#L39) sets I = $84 and IM 2; every vector of the 257-byte table [Im2Table](../src/im2table.asm#L11) is $8585, the handler [InterruptHandler](../src/interrupt.asm#L30). The game logic runs inside the interrupt, once per 50 Hz frame ([Game loop](04-game-loop.md), F103) |
-| Screen bitmap $4000-$57FF, attributes $5800-$5AFF | written directly: changed cells by [DrawRedrawList](../src/redraw.asm#L32), text and frames by the script interpreter [RunScript](../src/script.asm#L84), the status bar by [DrawLivesBar](../src/sprites.asm#L1321) and [DrawCrossesHud](../src/hud.asm#L17) |
+| Z80 at 3.5 MHz, IM 2 | [StartUp](../src/startup.asm#L39) sets I = $84 and IM 2; every vector of the 257-byte table [Im2Table](../src/im2table.asm#L11) is $8585, the handler [InterruptHandler](../src/interrupt.asm#L35). The game logic runs inside the interrupt, once per 50 Hz frame ([Game loop](04-game-loop.md), F103) |
+| Screen bitmap $4000-$57FF, attributes $5800-$5AFF | written directly: changed cells by [DrawRedrawList](../src/redraw.asm#L32), text and frames by the script interpreter [RunScript](../src/script.asm#L99), the status bar by [DrawLivesBar](../src/sprites.asm#L1337) and [DrawCrossesHud](../src/hud.asm#L17) |
 | RAM $5B00-$60FF | tile map, object list and tile flag map of the room, over the printer buffer and the system variables (the game never returns to BASIC) |
-| Port $FE out | border (black from the start-up on) and the speaker, bit 4 ([PlaySoundStep](../src/mainloop.asm#L288), F105) |
-| Port $FE in | keyboard: eight half-rows read with `INI` into [KeyRows](../src/controls.asm#L191) every frame ([ScanKeyboard](../src/helpers.asm#L221)) |
-| Port $1F in | Kempston joystick: probed 65536 times at start-up, then read every frame while it is switched on ([ReadKempston](../src/controls.asm#L61), F35) |
-| Port $7FFD out | 128K paging, written on every machine at start-up ([PageInBank0](../src/interrupt.asm#L105)); used for the music bank on a 128K only |
+| Port $FE out | border (black from the start-up on) and the speaker, bit 4 ([PlaySoundStep](../src/mainloop.asm#L291), F105) |
+| Port $FE in | keyboard: eight half-rows read with `INI` into [KeyRows](../src/controls.asm#L190) every frame ([ScanKeyboard](../src/helpers.asm#L221)) |
+| Port $1F in | Kempston joystick: probed 65536 times at start-up, then read every frame while it is switched on ([ReadKempston](../src/controls.asm#L59), F35) |
+| Port $7FFD out | 128K paging, written on every machine at start-up ([PageInBank0](../src/interrupt.asm#L108)); used for the music bank on a 128K only |
 | AY ports $FFFD / $BFFD | only through code in the 128K music bank (not disassembled) |
 | R register | the only random source: Death's throw side, the church door flicker, the unused noise effect (Q12) |
 | ROM | the loader copies and patches LD-BYTES and reads ROM bytes as click data; the game calls no ROM routine (Q14) |
@@ -75,35 +75,35 @@ can be moved as a block (`make shift-test`), the rest stays where it is
 | Range | Size | Contents | Source |
 | --- | --- | --- | --- |
 | $5B00-$5DBF | 704 | room tile map: 22 rows x 32 tile numbers | [TILE_MAP](../src/game.asm#L7) |
-| $5DC0-$5DFF | 64 | object list: requests to create objects (template, y, x) | [OBJECT_LIST](../src/game.asm#L8), [ObjectListPtr](../src/buffers.asm#L15) |
+| $5DC0-$5DFF | 64 | object list: requests to create objects (template, y, x) | [OBJECT_LIST](../src/game.asm#L8), [ObjectListPtr](../src/buffers.asm#L17) |
 | $5E00-$60BF | 704 | tile flag map: class and redraw marks of every cell (F68) | [FLAG_MAP](../src/game.asm#L11), [FlagMapTail](../src/startup.asm#L150) |
 | $6000-$6072 | 115 | start-up code, run once, then overwritten by the flag map | [StartUp](../src/startup.asm#L39) |
 | $60C0-$60FF | 64 | main stack (SP = $6100) | [MainStack](../src/startup.asm#L158) |
-| $6100-$612F | 48 | address of each flag map row (24 words, built at start-up) | [FlagRowTable](../src/startup.asm#L171) |
+| $6100-$612F | 48 | address of each flag map row (24 words, built at start-up) | [FlagRowTable](../src/startup.asm#L174) |
 | $6130-$66DB | 1452 | proportional font: index of 96 words, glyphs 16 rows high | [FontIndex](../src/font.asm#L11), [FontGlyphs](../src/font.asm#L50) |
-| $66DC-$68CB | 496 | item sprites: the arch (16 x 24) and 14 of 16 x 16 | [SpriteArch](../src/graphics.asm#L24) |
-| $68CC-$717E | 2227 | 20 packed sprite sets | [PackedSet0](../src/graphics.asm#L308) |
-| $717F-$7235 | 183 | parchment frame tiles and layout | [ParchmentFrameTiles](../src/graphics.asm#L651), [ParchmentLayout](../src/graphics.asm#L679) |
+| $66DC-$68CB | 496 | item sprites: the arch (16 x 24) and 14 of 16 x 16 | [SpriteArch](../src/graphics.asm#L44) |
+| $68CC-$717E | 2227 | 20 packed sprite sets | [PackedSetArcher](../src/graphics.asm#L333) |
+| $717F-$7235 | 183 | parchment frame tiles and layout | [ParchmentFrameTiles](../src/graphics.asm#L702), [ParchmentLayout](../src/graphics.asm#L730) |
 | $7236-$83A7 | 4466 | room script table (26 words) and the scripts | [RoomScriptTable](../src/roomscripts.asm#L8) |
 | $83A8-$83FF | 88 | ending actor lists, the debug room warp, music track of each room | [CutsceneList1](../src/cutscenelists.asm#L14), [DebugWarpRoom](../src/cutscenelists.asm#L39), [RoomMusicTable](../src/cutscenelists.asm#L63) |
 | $8400-$8500 | 257 | IM 2 vector table, all $85 | [Im2Table](../src/im2table.asm#L11) |
-| $8501-$855E | 94 | game variables | [CutsceneDone](../src/variables.asm#L7) to [RedrawListPtr](../src/variables.asm#L541) |
-| $855F-$8584 | 38 | interrupt stack | [InterruptStack](../src/variables.asm#L551) |
-| $8585-$8A8E | 1290 | interrupt handler, 128K hooks, new game, main loop, room entry, beeper effects, intro, ending, spawning | [InterruptHandler](../src/interrupt.asm#L30), [StartGame](../src/mainloop.asm#L65) |
-| $8A8F-$9047 | 1465 | item types and frame lists, room objects (77 x 11 bytes), room items (45 x 8 bytes) | [ObjectTypeTable](../src/objects.asm#L14), [RoomObjects](../src/objects.asm#L259), [RoomItems](../src/objects.asm#L580) |
-| $9048-$93D2 | 907 | 53 length-prefixed strings | [RoomNames](../src/text.asm#L18) |
-| $93D3-$95FE | 556 | behaviour blocks of the creatures, projectile sprite blocks | [BehaviourJean](../src/behaviours.asm#L41) |
-| $95FF-&#36;A595 | 3991 | redraw, sprite drawing, status bar, parchments, script interpreter, keys, menus, cheat | [DrawRedrawList](../src/redraw.asm#L32) to [ScriptGameOver](../src/controls.asm#L761) |
-| $A596-&#36;BC91 | 5884 | game frame, items, hit tests, Jean, room exits, tile effects, sprite unpacking, creatures | [GameFrame](../src/gameframe.asm#L20), [PlayerState](../src/player.asm#L30), [EntityHandlers](../src/entities.asm#L29) |
-| $BC92-&#36;BE55 | 452 | templates of spawned objects, frame list runner, checkpoints | [ArrowLeftTemplate](../src/templates.asm#L26), [Checkpoints](../src/templates.asm#L364) |
-| $BE56-&#36;BEFB | 166 | two list pointers and the frame call list | [ObjectListPtr](../src/buffers.asm#L15), [FrameList](../src/buffers.asm#L44) |
-| $BEFC-&#36;BFFF | 260 | unused (&#36;FF) | [SpareFill1](../src/buffers.asm#L52) |
-| $C000-&#36;C0FF | 256 | sprite draw queue: 16 jobs of 16 bytes | [DrawQueue](../src/buffers.asm#L69) |
-| $C100-&#36;C1F3 | 244 | 11 object slots of 22 bytes and their end mark | [ObjectSlots](../src/buffers.asm#L119) |
-| $C1F4-&#36;C1FF | 12 | unused (&#36;FF) | [SpareFill2](../src/buffers.asm#L126) |
-| $C200-&#36;CCFF | 2816 | redraw buffers: run list, lengths, attributes, 8 pixel-row pages | [RedrawRuns](../src/buffers.asm#L144) to [RedrawPixels](../src/buffers.asm#L176) |
-| $CD00-&#36;D6FF | 2560 | tile flags, tile attributes, tile bitmaps (256 tiles) | [TileFlags](../src/tiles.asm#L36), [TileAttrs](../src/tiles.asm#L61), [TileGfx](../src/tiles.asm#L90) |
-| $D700-&#36;FEFF | 10240 | sprite sheet: 40 pages, one per pixel row; columns $63-&#36;FF filled per room | [SpriteSheet](../src/spritesheet.asm#L25), [SpriteSheetLower](../src/spritesheet.asm#L278) |
+| $8501-$855E | 94 | game variables | [CutsceneDone](../src/variables.asm#L7) to [RedrawListPtr](../src/variables.asm#L584) |
+| $855F-$8584 | 38 | interrupt stack | [InterruptStack](../src/variables.asm#L595) |
+| $8585-$8A8E | 1290 | interrupt handler, 128K hooks, new game, main loop, room entry, beeper effects, intro, ending, spawning | [InterruptHandler](../src/interrupt.asm#L35), [StartGame](../src/mainloop.asm#L70) |
+| $8A8F-$9047 | 1465 | item types and frame lists, room objects (77 x 11 bytes), room items (45 x 8 bytes) | [ItemTypeTable](../src/objects.asm#L17), [RoomObjects](../src/objects.asm#L276), [RoomItems](../src/objects.asm#L616) |
+| $9048-$93D2 | 907 | 53 length-prefixed strings | [RoomNames](../src/text.asm#L19) |
+| $93D3-$95FE | 556 | behaviour blocks of the creatures, projectile sprite blocks | [BehaviourJean](../src/behaviours.asm#L45) |
+| $95FF-&#36;A595 | 3991 | redraw, sprite drawing, status bar, parchments, script interpreter, keys, menus, cheat | [DrawRedrawList](../src/redraw.asm#L32) to [ScriptGameOver](../src/controls.asm#L756) |
+| $A596-&#36;BC91 | 5884 | game frame, items, hit tests, Jean, room exits, tile effects, sprite unpacking, creatures | [GameFrame](../src/gameframe.asm#L22), [PlayerState](../src/player.asm#L33), [EntityHandlers](../src/entities.asm#L30) |
+| $BC92-&#36;BE55 | 452 | templates of spawned objects, frame list runner, checkpoints | [ArrowLeftTemplate](../src/templates.asm#L49), [Checkpoints](../src/templates.asm#L259) |
+| $BE56-&#36;BEFB | 166 | two list pointers and the frame call list | [ObjectListPtr](../src/buffers.asm#L17), [FrameList](../src/buffers.asm#L50) |
+| $BEFC-&#36;BFFF | 260 | unused (&#36;FF) | [SpareFill1](../src/buffers.asm#L58) |
+| $C000-&#36;C0FF | 256 | sprite draw queue: 16 jobs of 16 bytes | [DrawQueue](../src/buffers.asm#L75) |
+| $C100-&#36;C1F3 | 244 | 11 object slots of 22 bytes and their end mark | [ObjectSlots](../src/buffers.asm#L125) |
+| $C1F4-&#36;C1FF | 12 | unused (&#36;FF) | [SpareFill2](../src/buffers.asm#L132) |
+| $C200-&#36;CCFF | 2816 | redraw buffers: run list, lengths, attributes, 8 pixel-row pages | [RedrawRuns](../src/buffers.asm#L150) to [RedrawPixels](../src/buffers.asm#L182) |
+| $CD00-&#36;D6FF | 2560 | tile flags, tile attributes, tile bitmaps (256 tiles) | [TileFlags](../src/tiles.asm#L36), [TileAttrs](../src/tiles.asm#L63), [TileGfx](../src/tiles.asm#L92) |
+| $D700-&#36;FEFF | 10240 | sprite sheet: 40 pages, one per pixel row; columns $63-&#36;FF filled per room | [SpriteSheet](../src/spritesheet.asm#L25), [SpriteSheetLower](../src/spritesheet.asm#L281) |
 | $FF00-&#36;FFFF | 256 | outline mask table, built at start-up | [OutlineMasks](../src/game.asm#L13) |
 
 Unused bytes inside the variable block: $8508 and $8520 ($8550 is used only by the 128K music bank). The details
@@ -166,7 +166,7 @@ the stack just below itself (USR leaves its own address in BC) and moves the
 packed second stage (5513 bytes) with `LDDR` to the top of memory, ending at
 $FFFF: unpacked, stage 2 covers $6000-$8AFF, which overlaps the place the
 string was loaded to. It then pushes $6000 as the return address and runs the
-MegaLZ depacker ([MEGALZ_DEPACK](../src/megalz.asm#L10), a macro the loader
+MegaLZ depacker ([MEGALZ_DEPACK](../src/megalz.asm#L9), a macro the loader
 uses twice), which ends with `RET C` into stage 2.
 
 ### MegaLZ
@@ -194,7 +194,7 @@ and an optimal packer whose ties fall the way the original packer's did, so
 The two screens are packed in "RCS" order: within each third of the bitmap
 the cells are taken column by column, the eight pixel rows of a cell
 together, and the 768 attributes follow as they are. Neighbouring bytes are
-then more alike, which packs better. [DepackScreen](../src/stage2.asm#L285) is a copy of
+then more alike, which packs better. [DepackScreen](../src/stage2.asm#L290) is a copy of
 the depacker that converts every address it writes or copies from into the
 screen layout on the fly.
 
@@ -202,19 +202,19 @@ screen layout on the fly.
 
 [Stage2](../src/stage2.asm#L52) runs at $6000 with its stack below it:
 
-1. **Machine check** ([DetectMachine](../src/stage2.asm#L167)). It writes $10 to
+1. **Machine check** ([DetectMachine](../src/stage2.asm#L171)). It writes $10 to
    port $7FFD and $10 to $FFFF, then $11 and $11, then pages $10 back in and
    reads $FFFF. On a 48K the second write landed on the same byte, and the
-   machine type becomes 1. On a 128K [MeasureBanks](../src/stage2.asm#L197) counts how
+   machine type becomes 1. On a 128K [MeasureBanks](../src/stage2.asm#L201) counts how
    many times `INC DE / JR $-1` runs in one frame in banks 1, 3, 4 and 6,
    with a temporary IM 2 handler of `POP HL / RET` that returns from the
    `CALL` of the counting loop, and keeps the fastest bank. Banks 1 and 3 are
    contended on the original 128K and banks 4 and 6 on the +2A/+3, so the
    fastest of the four is an uncontended one on either (inferred). The machine
    type is then the port $7FFD value of that bank ($11-$16).
-2. **Picture** ([RevealPicture](../src/stage2.asm#L428)). The picture stored at $7000
+2. **Picture** ([RevealPicture](../src/stage2.asm#L433)). The picture stored at $7000
    (RCS order, attributes at $8800) is copied to the screen one cell at a
-   time, in the order of the 768 cell numbers at [RevealOrder](../src/stage2.asm#L492),
+   time, in the order of the 768 cell numbers at [RevealOrder](../src/stage2.asm#L497),
    from the middle of the screen outwards. Before each cell it sends bit 4 of
    a ROM byte (the cell number used as a ROM address) to the speaker, after
    it bit 3 of the R register (the MIC output), and waits 26 `DJNZ` loops;
@@ -225,7 +225,7 @@ screen layout on the fly.
 
    ![The picture half revealed, 4 frames after stage 2 starts (simulator, white screen beforehand)](img/overview-reveal.png)
 
-3. **Tape loader** ([InstallLoader](../src/stage2.asm#L674)). LD-BYTES is copied from
+3. **Tape loader** ([InstallLoader](../src/stage2.asm#L679)). LD-BYTES is copied from
    the ROM ($0556-$05E2) to $FE00 and patched: the border colour operand
    becomes 0, the `PUSH HL` of the SA/LD-RET return address becomes a `NOP`
    (the copy returns straight to its caller; with a non-standard ROM the same
@@ -233,17 +233,17 @@ screen layout on the fly.
    closing `JP NC,LD-8-BITS`
    is pointed at the copy, and, when the ROM's LD-EDGE-1 is the standard one
    (no $C3 at $05E9), the `CALL LD-EDGE-2` inside LD-8-BITS is pointed at new
-   edge routines copied to $FE8D ([LdEdge2](../src/stage2.asm#L565), [LdEdge1](../src/stage2.asm#L568)).
+   edge routines copied to $FE8D ([LdEdge2](../src/stage2.asm#L570), [LdEdge1](../src/stage2.asm#L573)).
    In place of the ROM's delay loop these draw one cell (8 bytes) of the
    middle column of the current hourglass frame before each edge sample,
    the cells in the order top, middle, bottom, middle; they keep the border
    black (`AND 7` became `AND 0`) and do not test BREAK. The pilot tone and
    the sync pulses are still timed by the ROM's own edge routines, which the
    copy calls at their ROM addresses.
-4. **Hourglass.** [DrawHourglass](../src/stage2.asm#L700) draws a 3 x 3 cell
+4. **Hourglass.** [DrawHourglass](../src/stage2.asm#L705) draws a 3 x 3 cell
    hourglass in bright yellow at the bottom right corner (cells 29-31 of rows
    21-23) and copies two sets of ten frames of its middle column to $FC00 and
-   $FD00. [BuildFrameTable](../src/stage2.asm#L646) fills the page at $FB00 so that the
+   $FD00. [BuildFrameTable](../src/stage2.asm#L651) fills the page at $FB00 so that the
    high byte of the count of bytes still to load selects a frame: the frame
    steps on once per tenth of the block. Bit 0 of the low byte selects the
    frame set; the two sets differ in the falling sand, so the middle of the
@@ -252,7 +252,7 @@ screen layout on the fly.
    ![The hourglass as DrawHourglass leaves it before the first byte (simulator)](img/overview-hourglass.png)
 
 5. **Block 3** is loaded at $625E, over the code that has finished its work
-   (from [RevealExit](../src/stage2.asm#L419) on); a tape error loads it again. It holds
+   (from [RevealExit](../src/stage2.asm#L424) on); a tape error loads it again. It holds
    four MegaLZ streams ([`scripts/block3.py`](../scripts/block3.py)):
 
    | Address | Packed | Unpacked | Contents |
@@ -263,12 +263,12 @@ screen layout on the fly.
    | $83F9 | 21193 | 40704 | the game, $6000-&#36;FEFF |
 
 6. **48K tail.** All attributes are set to 0, then
-   [DepackScreen](../src/stage2.asm#L285) unpacks the loading screen. The pixels arrive
+   [DepackScreen](../src/stage2.asm#L290) unpacks the loading screen. The pixels arrive
    under black attributes and the picture appears when the attributes, the
    last part of the stream, are written: in the simulator the first
    attribute is written 26 frames after the load and the screen is complete
    at frame 29 (observed).
-7. **The game.** [StartGame](../src/stage2.asm#L91) copies the depacker to the printer
+7. **The game.** [StartGame](../src/stage2.asm#L95) copies the depacker to the printer
    buffer at $5B00, moves the packed game to $AD37-&#36;FFFF with `LDDR` (one
    byte too many is moved, to $0000, where the ROM ignores it), and jumps to
    the copy with $6000 pushed as the return address. The game is unpacked
@@ -281,9 +281,9 @@ On a 48K the info screen is never unpacked: the game overwrites it.
 
 ### The 128K tail
 
-[Start128](../src/stage2.asm#L110) runs instead of step 6: it
+[Start128](../src/stage2.asm#L114) runs instead of step 6: it
 pages in the bank chosen by the machine check, copies
-[DepackScreen](../src/stage2.asm#L285) to $C000 and the two packed screens after it
+[DepackScreen](../src/stage2.asm#L290) to $C000 and the two packed screens after it
 (the loading screen at $C09D, the info screen at $CA8A), unpacks the music
 to $CF6D, silences the AY and probes it (register 8 written with $0F and 7
 and read back), pages bank 0 with ROM 1 back in ($10) and goes on with the
@@ -300,23 +300,23 @@ tile flag map and are overwritten when the first room is entered. It:
 
 1. pops the word, keeps the machine type in [MachineType](../src/variables.asm#L44) and, on a 128K,
    calls [Patch128KHooks](../src/startup.asm#L122) (below);
-2. pages bank 0 in ([PageInBank0](../src/interrupt.asm#L105), harmless on a 48K), sets the border
+2. pages bank 0 in ([PageInBank0](../src/interrupt.asm#L108), harmless on a 48K), sets the border
    black and the speaker off;
 3. sets I = $84 and IM 2, and puts the address of a `RET`
-   ([NoFrameRoutine](../src/mainloop.asm#L242)) in [InterruptRoutine](../src/variables.asm#L34), the word the interrupt
+   ([NoFrameRoutine](../src/mainloop.asm#L245)) in [InterruptRoutine](../src/variables.asm#L34), the word the interrupt
    handler calls through. Interrupts stay disabled until the title menu
-   ([TitleWaitKey](../src/controls.asm#L305) executes the first `EI`);
-4. builds [FlagRowTable](../src/startup.asm#L171), the address of each row of the flag map;
+   ([TitleWaitKey](../src/controls.asm#L303) executes the first `EI`);
+4. builds [FlagRowTable](../src/startup.asm#L174), the address of each row of the flag map;
 5. builds the outline masks at $FF00: byte n is NOT(n OR n<<1 OR n>>1), the
    pixels of n and their neighbours cleared, which gives sprites a one-pixel
    black outline without stored masks (F37, see [Screen drawing](05-drawing.md));
 6. reads port $1F 65536 times and ORs the readings. If bits 0-4 were never
-   set, a Kempston interface is assumed and the byte [KempstonSwitch](../src/controls.asm#L46) at the
+   set, a Kempston interface is assumed and the byte [KempstonSwitch](../src/controls.asm#L45) at the
    end of the key reader is a `NOP`; otherwise (floating bus, no interface)
    it becomes a `RET`. A joystick moved during the probe also switches it off
    (F35). The start-up lasts 43 frames in the simulator (observed), nearly
    all of it this loop: 65536 passes of 46 T-states;
-7. jumps to [StartGame_NoTitle](../src/mainloop.asm#L70), past the drawing of the title script: the
+7. jumps to [StartGame_NoTitle](../src/mainloop.asm#L75), past the drawing of the title script: the
    loading screen is the title the first time
    ([Title and menus](03-title-and-menu.md)).
 
@@ -331,21 +331,21 @@ its bytes in [`data/music128.bin`](../data/music128.bin), not run.
 | | 48K | 128K |
 | --- | --- | --- |
 | [MachineType](../src/variables.asm#L44) | 1 | port $7FFD value of the music bank, $11-$16 |
-| [StartGame_Music](../src/mainloop.asm#L74) (start of every game) | `LD HL,BankShowTitle` | `CALL` [BankShowTitle](../src/interrupt.asm#L215): bank routine $F9D7 with HL = $C09D |
-| [WaitSpaceRelease](../src/controls.asm#L245) (SPACE on the title) | `RET`: SPACE does nothing | `CALL` [BankShowInfo](../src/interrupt.asm#L212): bank routine $F9D7 with HL = $CA8A, then [BankShowTitle](../src/interrupt.asm#L215) when SPACE is released |
-| [RunEnding_Music](../src/sequences.asm#L149) (end of the ending) | `LD HL,BankEndingDoor` | `CALL` [BankEndingDoor](../src/interrupt.asm#L209): bank routine $FC4B |
-| [PlaySoundStep](../src/mainloop.asm#L288) (every frame) | beeper effects | with an AY: `JP` [PlayEffectOnAY](../src/interrupt.asm#L160), bank routine $CF7D |
-| title after Game Over or the ending | [ScriptTitle](../src/controls.asm#L741) is drawn | not drawn (F111) |
+| [StartGame_Music](../src/mainloop.asm#L79) (start of every game) | `LD HL,BankShowTitle` | `CALL` [BankShowTitle](../src/interrupt.asm#L218): bank routine $F9D7 with HL = $C09D |
+| [ShowInfoScreen](../src/controls.asm#L242) (SPACE on the title) | `RET`: SPACE does nothing | `CALL` [BankShowInfo](../src/interrupt.asm#L215): bank routine $F9D7 with HL = $CA8A, then [BankShowTitle](../src/interrupt.asm#L218) when SPACE is released |
+| [RunEnding_Music](../src/sequences.asm#L148) (end of the ending) | `LD HL,BankEndingDoor` | `CALL` [BankEndingDoor](../src/interrupt.asm#L212): bank routine $FC4B |
+| [PlaySoundStep](../src/mainloop.asm#L291) (every frame) | beeper effects | with an AY: `JP` [PlayEffectOnAY](../src/interrupt.asm#L163), bank routine $CF7D |
+| title after Game Over or the ending | [ScriptTitle](../src/controls.asm#L736) is drawn | not drawn (F111) |
 | loading and info screens | loading screen unpacked by the loader; info screen lost | both kept packed in the music bank |
 
 The bank routine at $F9D7 is, by its bytes, `LD B,3 / LD DE,$5800 / XOR A`,
 a loop that clears the 768 attributes, and `JP $C000`, the copy of
-[DepackScreen](../src/stage2.asm#L285); $C09D and $CA8A are where [Start128](../src/stage2.asm#L110)
+[DepackScreen](../src/stage2.asm#L290); $C09D and $CA8A are where [Start128](../src/stage2.asm#L114)
 put the packed loading and info screens. So on a 128K these two entries
 unpack a screen: the title at the start of every game (which is why the
 title script is not needed) and the info screen while SPACE is held
-(inferred from the bytes, not run; hence the names [BankShowTitle](../src/interrupt.asm#L215) and
-[BankShowInfo](../src/interrupt.asm#L212)). What $CF7D and $FC4B do in the
-bank was not worked out; $CF7D reads two bytes of [KeyRows](../src/controls.asm#L191) (&#36;A2D4 and
-$A2D9) and $FC4B calls [BuildMirrorTable](../src/templates.asm#L388) at $BE48 and writes
-[MusicTrack](../src/variables.asm#L489) at $8551, all at fixed addresses (by their bytes).
+(inferred from the bytes, not run; hence the names [BankShowTitle](../src/interrupt.asm#L218) and
+[BankShowInfo](../src/interrupt.asm#L215)). What $CF7D and $FC4B do in the
+bank was not worked out; $CF7D reads two bytes of [KeyRows](../src/controls.asm#L190) (&#36;A2D4 and
+$A2D9) and $FC4B calls [BuildMirrorTable](../src/templates.asm#L286) at $BE48 and writes
+[MusicTrack](../src/variables.asm#L529) at $8551, all at fixed addresses (by their bytes).

@@ -1,8 +1,8 @@
 ; Object type table: 12 pointers to the type records of the room items
 ;
 ; Indexed by the type number of a room item record (RoomItems, byte +3), 2
-; bytes per type. MakeItemSlot reads the word at ObjectTypeTable + 2 x type and
-; takes the 8-byte type record (ObjectTypeRecords) it points to. The types are:
+; bytes per type. MakeItemSlot reads the word at ItemTypeTable + 2 x type and
+; takes the 8-byte type record (ItemTypeRecords) it points to. The types are:
 ; 0 heart, 1 cross taken while the wheel of faith of room 17 is at rest, 2
 ; cross taken while the wheel is turned, 3 checkpoint (gravestone cross), 4
 ; bell, 5 parchment, 6 the red scroll of room 24, 7 the church door trigger (no
@@ -14,23 +14,23 @@
 ;
 ; The table is not read for the room objects (enemies) of RoomObjects, which
 ; use the handler table at EntityHandlers.
-ObjectTypeTable:
-  DEFW ObjectTypeRecords  ; type 0: heart
-  DEFW ObjectTypeRecords+$0008 ; type 1: cross (wheel at rest)
-  DEFW ObjectTypeRecords+$10 ; type 2: cross (wheel turned)
-  DEFW ObjectTypeRecords+$18 ; type 3: checkpoint
-  DEFW ObjectTypeRecords+$20 ; type 4: bell
-  DEFW ObjectTypeRecords+$28 ; type 5: parchment
-  DEFW ObjectTypeRecords+$30 ; type 6: red scroll
-  DEFW ObjectTypeRecords+$38 ; type 7: church door trigger
-  DEFW ObjectTypeRecords+$40 ; type 8: arch
-  DEFW ObjectTypeRecords+$48 ; type 9: lever
-  DEFW ObjectTypeRecords+$50 ; type 10: wheel of faith
-  DEFW ObjectTypeRecords+$58 ; type 11: chalice
+ItemTypeTable:
+  DEFW ItemTypeRecords  ; type 0: heart
+  DEFW ItemTypeRecords+$0008 ; type 1: cross (wheel at rest)
+  DEFW ItemTypeRecords+$10 ; type 2: cross (wheel turned)
+  DEFW ItemTypeRecords+$18 ; type 3: checkpoint
+  DEFW ItemTypeRecords+$20 ; type 4: bell
+  DEFW ItemTypeRecords+$28 ; type 5: parchment
+  DEFW ItemTypeRecords+$30 ; type 6: red scroll
+  DEFW ItemTypeRecords+$38 ; type 7: church door trigger
+  DEFW ItemTypeRecords+$40 ; type 8: arch
+  DEFW ItemTypeRecords+$48 ; type 9: lever
+  DEFW ItemTypeRecords+$50 ; type 10: wheel of faith
+  DEFW ItemTypeRecords+$58 ; type 11: chalice
 
 ; Object type records: 12 records of 8 bytes, one per type of room item
 ;
-; Found through ObjectTypeTable by the item spawner MakeItemSlot, which copies
+; Found through ItemTypeTable by the item spawner MakeItemSlot, which copies
 ; the fields into the object slot (RunObjectSlots has the slot layout). Fields:
 ;
 ; +0 byte: frames between two animation steps (slot +8 and +9)
@@ -54,7 +54,7 @@ ObjectTypeTable:
 ; +0 byte, 1, is the first countdown of the door rattle that ActionChurchDoor
 ; keeps in slot +8, so the first rattle (with sound 8) comes on the frame after
 ; the door shuts (observed).
-ObjectTypeRecords:
+ItemTypeRecords:
   DEFB $14,$02            ; type 0 heart: frame delay, number of frames
   DEFW RoomItemHandler    ; handler
   DEFW FramesHeart        ; frame list
@@ -113,7 +113,7 @@ ObjectTypeRecords:
 ; Each frame: +0 word: graphics address of a 16 x 16 pixel sprite (32 bytes;
 ; the arch is 16 x 24, 48 bytes) in the sprite block at SpriteArch, +2 byte:
 ; attribute, +3 byte: 0 (unused: it is popped as the flags of the sprite
-; command). The type records (ObjectTypeRecords) point into this table; the
+; command). The type records (ItemTypeRecords) point into this table; the
 ; item's current frame number (slot +$0A) is an index in its list, read by
 ; DrawItemFrame. The lists:
 ;
@@ -144,17 +144,17 @@ FramesCross:
   DEFB $45,$00
   DEFW SpriteCross
   DEFB $44,$00
-  DEFW SpritePlus
+  DEFW SpriteInvertedCross
   DEFB $06,$00
-  DEFW SpritePlus
+  DEFW SpriteInvertedCross
   DEFB $02,$00
-  DEFW SpritePlus
+  DEFW SpriteInvertedCross
   DEFB $03,$00
-  DEFW SpritePlus
+  DEFW SpriteInvertedCross
   DEFB $01,$00
-  DEFW SpritePlus
+  DEFW SpriteInvertedCross
   DEFB $05,$00
-  DEFW SpritePlus
+  DEFW SpriteInvertedCross
   DEFB $04,$00
 FramesCheckpoint:
   DEFW SpriteCheckpoint0
@@ -423,11 +423,11 @@ RoomObjects:
   DEFB $16,$02,$20,$08,$20,$04,$00,$08,$38 ; room 22: ceiling ghost (patroller,
                                            ; starts left), x $20 y $04, x
                                            ; limits $08-$38
-  DEFW BehaviourWhiteFlyer
+  DEFW BehaviourCeilingGhost
   DEFB $17,$02,$20,$08,$50,$04,$00,$08,$70 ; room 23: ceiling ghost (patroller,
                                            ; starts left), x $50 y $04, x
                                            ; limits $08-$70
-  DEFW BehaviourWhiteFlyer
+  DEFW BehaviourCeilingGhost
   DEFB $14,$02,$20,$04,$12,$2C,$00,$10,$68 ; room 20: bird (patroller, starts
                                            ; left), x $12 y $2C, x limits
                                            ; $10-$68
@@ -471,15 +471,15 @@ RoomObjects:
   DEFB $0F,$02,$10,$08,$28,$1C,$00,$26,$3B ; room 15: knight (patroller,
                                            ; starts left), x $28 y $1C, x
                                            ; limits $26-$3B
-  DEFW BehaviourSoldier
+  DEFW BehaviourKnight
   DEFB $0F,$02,$10,$08,$60,$44,$00,$40,$60 ; room 15: knight (patroller,
                                            ; starts left), x $60 y $44, x
                                            ; limits $40-$60
-  DEFW BehaviourSoldier
+  DEFW BehaviourKnight
   DEFB $14,$02,$10,$08,$44,$44,$00,$28,$48 ; room 20: knight (patroller,
                                            ; starts left), x $44 y $44, x
                                            ; limits $28-$48
-  DEFW BehaviourSoldier
+  DEFW BehaviourKnight
   DEFB $11,$0A,$00,$50,$08,$0C,$00,$00,$00 ; room 17: skeleton archer, x $08 y
                                            ; $0C, shoots every $50 frames
   DEFW BehaviourArcher
@@ -598,7 +598,7 @@ RoomObjects:
 ; whose meaning depends on the type (taken, pulled, active checkpoint...) and
 ; which survives leaving the room
 ;
-; +3 byte: type, the index in ObjectTypeTable (0-11)
+; +3 byte: type, the index in ItemTypeTable (0-11)
 ;
 ; +4 byte: row of the top-left cell of the 16 x 16 pixel sprite (0-21)
 ;
@@ -634,10 +634,10 @@ RoomItems:
   DEFW ChaliceTaken
   DEFB $0B,$02,$10,low ActionChalice,high ActionChalice
   DEFB $0A                ; room 10: arch, row 17 column 23, flag $8523
-  DEFW DoorwayRoom10
+  DEFW ArchLatchRoom10
   DEFB $08,$11,$17,low ActionArchToRiver,high ActionArchToRiver
   DEFB $13                ; room 19: arch, row 15 column 21, flag $8524
-  DEFW DoorwayRoom19
+  DEFW ArchLatchRoom19
   DEFB $08,$0F,$15,low ActionArchToBeast,high ActionArchToBeast
   DEFB $02                ; room 2: heart, row 7 column 12, flag $8525
   DEFW HeartRoom2

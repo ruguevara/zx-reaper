@@ -224,20 +224,20 @@ AnimateBloodTiles_2:
 
 ; Show the ring of twelve crosses in Satan's room, flashing in colour
 ;
-; Called once per pass by the main loop (MainLoop_Play). The byte at ShowCrossRing is
-; RET until the room script uses op $9F (OpTwelveCrosses, at the end of room
-; 24's script, which room 25 calls too); room entry (EnterRoom) puts the RET
-; back. Once the player holds 12 crosses (Crosses) it acts on every fifth pass
-; (CrossFlashTimer; observed in room 24: every 8 to 9 interrupt frames, the
-; main loop is slower than one pass per frame there): it advances the colour
-; cycle (the operand of the LD A,n at SmcCrossColour holds the position 0-5)
-; and copies the new attribute from CrossColours to the attribute of the ring
-; cross tile (CE4C). Unless the chalice has been taken (ChaliceTaken) it then
-; adds one cross to the ring (CrossRingCount, one cross per step until 12, with
-; sound effect 5) and stamps that many crosses, tile $4C, at the first cells of
-; the list at CrossRingPositions (row, column pairs, also read by the erase
-; script ScriptEraseCrosses), which marks them for redraw; with all 12 shown it
-; restamps them every time, so they keep flashing.
+; Called once per pass by the main loop (MainLoop_Play). The byte at
+; ShowCrossRing is RET until the room script uses op $9F (OpTwelveCrosses, at
+; the end of room 24's script, which room 25 calls too); room entry (EnterRoom)
+; puts the RET back. Once the player holds 12 crosses (Crosses) it acts on every
+; fifth pass (CrossFlashTimer; observed in room 24: every 8 to 9 interrupt
+; frames, the main loop is slower than one pass per frame there): it advances
+; the colour cycle (the operand of the LD A,n at SmcCrossColour holds the
+; position 0-5) and copies the new attribute from CrossColours to the attribute
+; of the ring cross tile ($CE4C). Unless the chalice has been taken
+; (ChaliceTaken) it then adds one cross to the ring (CrossRingCount, one cross
+; per step until 12, with sound effect 5) and stamps that many crosses, tile
+; $4C, at the first cells of the list at CrossRingPositions (row, column pairs,
+; also read by the erase script ScriptEraseCrosses), which marks them for
+; redraw; with all 12 shown it restamps them every time, so they keep flashing.
 ;
 ; Hardware: none directly (PlaceTile marks the cells, and the redraw step of
 ; the main loop, BuildRedrawList and DrawRedrawList, paints them); requests

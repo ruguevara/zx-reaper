@@ -10,7 +10,7 @@
 ; 24), low byte = first byte column; the columns go up from there (INC E: never
 ; a carry into the page); the sets one room uses have different destinations,
 ; sets of different rooms reuse them (several start at $D763) +2 word: address
-; of the packed set (PackedSet0..PackedSet19, label PackedSetN) +4 byte: flags.
+; of the packed set (PackedSetArcher..PackedSetWorm, label PackedSetN) +4 byte: flags.
 ; Bit 7: after each frame add three copies shifted right by 2, 4 and 6 pixels
 ; (the entities are positioned in 2-pixel steps, so a sprite is drawn from the
 ; copy for x AND 3). Bit 6: after all frames add the mirrored copy of every
@@ -22,51 +22,52 @@
 ; The sheet bytes written by UnpackSpriteSet for all 20 records agree with a
 ; model of the format described here (see finding F114).
 UnpackRecords:
-  DEFW $D7F8,PackedSet0   ; set 0: skeleton archers (rooms 17, 21)
+  DEFW $D7F8,PackedSetArcher   ; set 0: skeleton archers (rooms 17, 21)
   DEFB $40,$02
-  DEFW $D763,PackedSet1   ; set 1: crusaders (rooms 0, 4, 5, 6, 24 and 25,
+  DEFW $D763,PackedSetCrusader   ; set 1: crusaders (rooms 0, 4, 5, 6, 24 and 25,
                           ; whose script calls room 24's)
   DEFB $C0,$02
-  DEFW $D763,PackedSet2   ; set 2: Death (room 18)
+  DEFW $D763,PackedSetDeath   ; set 2: Death (room 18)
   DEFB $C0,$04
-  DEFW $D7BB,PackedSet3   ; set 3: demons (rooms 21, 22)
+  DEFW $D7BB,PackedSetDemon   ; set 3: demons (rooms 21, 22)
   DEFB $C0,$02
-  DEFW $EF63,PackedSet4   ; set 4: birds (rooms 20, 23)
+  DEFW $EF63,PackedSetBird   ; set 4: birds (rooms 20, 23)
   DEFB $C0,$03
-  DEFW $D768,PackedSet5   ; set 5: the fire jet of the Pestilent Beast (room
+  DEFW $D768,PackedSetBeastFire   ; set 5: the fire jet of the Pestilent Beast (room
                           ; 10; BehaviourBeastFire, drawn red from $D768,
-                          ; $D76A, $D76D, $D76F)
+                          ; $D76A, $D76D, $D76F; F153)
   DEFB $00,$02
-  DEFW $D763,PackedSet6   ; set 6: head of the Pestilent Beast (room 10); frame
+  DEFW $D763,PackedSetBeastHead   ; set 6: head of the Pestilent Beast (room 10); frame
                           ; width 5, but the set has only 4 columns
   DEFB $00,$05
-  DEFW $D7E7,PackedSet7   ; set 7: fire wheels (rooms 22, 23)
+  DEFW $D7E7,PackedSetFireWheel   ; set 7: fire wheels (rooms 22, 23)
   DEFB $00,$02
-  DEFW $D763,PackedSet8   ; set 8: flies, BehaviourFlyB (room 12)
+  DEFW $D763,PackedSetFlyB   ; set 8: flies, BehaviourFlyB (room 12)
   DEFB $40,$02
-  DEFW $D76B,PackedSet9   ; set 9: flies, BehaviourFlyA (room 12)
+  DEFW $D76B,PackedSetFlyA   ; set 9: flies, BehaviourFlyA (room 12)
   DEFB $40,$02
-  DEFW $D763,PackedSet10  ; set 10: hanged men (room 9)
+  DEFW $D763,PackedSetHangedMan  ; set 10: hanged men (room 9)
   DEFB $40,$02
-  DEFW $D763,PackedSet11  ; set 11: knights (rooms 15, 20)
+  DEFW $D763,PackedSetKnight  ; set 11: knights (rooms 15, 20)
   DEFB $C0,$02
-  DEFW $D763,PackedSet12  ; set 12: the chasing ghost (room 11)
+  DEFW $D763,PackedSetChaser  ; set 12: the chasing ghost (room 11)
   DEFB $C0,$02
-  DEFW $D763,PackedSet13  ; set 13: rats (room 2)
+  DEFW $D763,PackedSetRat  ; set 13: rats (room 2)
   DEFB $C0,$02
-  DEFW $D78F,PackedSet14  ; set 14: Satan's pieces (room 24)
+  DEFW $D78F,PackedSetSatan  ; set 14: Satan's pieces (room 24)
   DEFB $00,$1E
-  DEFW $D763,PackedSet15  ; set 15: red bats (room 8)
+  DEFW $D763,PackedSetBat  ; set 15: red bats (room 8)
   DEFB $80,$02
-  DEFW $D7EA,PackedSet16  ; set 16: Death's scythe (room 18), two frames of
+  DEFW $D7EA,PackedSetScythe  ; set 16: Death's scythe (room 18), two frames of
                           ; 32 rows, each drawn as an upper and a lower
-                          ; 16-row picture ($D7EA/$D7F5, $E7EA/$E7F5)
+                          ; 16-row picture ($D7EA/$D7F5, $E7EA/$E7F5;
+                          ; F153)
   DEFB $80,$02
-  DEFW $D763,PackedSet17  ; set 17: skeletons (rooms 13, 22)
+  DEFW $D763,PackedSetSkeleton  ; set 17: skeletons (rooms 13, 22)
   DEFB $C0,$02
-  DEFW $D78F,PackedSet18  ; set 18: ceiling ghosts (rooms 22, 23)
+  DEFW $D78F,PackedSetCeilingGhost  ; set 18: ceiling ghosts (rooms 22, 23)
   DEFB $C0,$02
-  DEFW $D7F5,PackedSet19  ; set 19: worms (rooms 9, 14)
+  DEFW $D7F5,PackedSetWorm  ; set 19: worms (rooms 9, 14)
   DEFB $80,$02
 
 ; Unpack a packed sprite set into the sprite sheet
@@ -396,7 +397,7 @@ ShiftPixelLine_Byte:
 ; DE Destination
 MirrorPixelLine:
   EXX
-  LD H,PAGE_REDRAW_PIXELS ; H' = page of the bit-reverse table
+  LD H,MIRROR_TABLE_PAGE  ; H' = page of the bit-reverse table
   EXX
   LD B,C
 MirrorPixelLine_Byte:

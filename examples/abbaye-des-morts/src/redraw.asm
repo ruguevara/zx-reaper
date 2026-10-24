@@ -2,16 +2,16 @@
 ; run of cells
 ;
 ; The last step of the drawing of a frame (the main loop MainLoop_Play, the
-; intro RunIntro and the cutscenes RunCutscene call it after BuildRedrawList). It walks the redraw
-; run list at RedrawRuns and copies each run of cells from the redraw cell
-; buffers to the screen. The list holds one record per character row that has
-; cells to draw: the row number, the number of runs and for each run the first
-; column and the index of its first cell in the buffers; $FF ends the list
-; (RedrawListPtr, BuildRedrawList and CollectRedrawRun build it). For a run of
-; n cells (n = 1-32, from RedrawLengths + index) it copies the n attribute
-; bytes from RedrawAttrs + index to the attribute file, then the 8 pixel rows
-; from the pages RedrawPixels to $CC00 (page + pixel row) to the bitmap of the
-; cells.
+; intro RunIntro and the cutscenes RunCutscene call it after BuildRedrawList).
+; It walks the redraw run list at RedrawRuns and copies each run of cells from
+; the redraw cell buffers to the screen. The list holds one record per character
+; row that has cells to draw: the row number, the number of runs and for each
+; run the first column and the index of its first cell in the buffers; $FF ends
+; the list (RedrawListPtr, BuildRedrawList and CollectRedrawRun build it). For a
+; run of n cells (n = 1-32, from RedrawLengths + index) it copies the n
+; attribute bytes from RedrawAttrs + index to the attribute file, then the 8
+; pixel rows from the pages RedrawPixels to $CC00 (page + pixel row) to the
+; bitmap of the cells.
 ;
 ; The copy is done with unrolled chains of LDI (and LDD) instructions that are
 ; entered at the right place by a JR whose offset byte is patched for every run
@@ -81,9 +81,9 @@ DrawRedrawList_Run:
   LD (SmcAttrJump+$0001),A
   LD H,PAGE_REDRAW_ATTRS  ; HL = attribute of the first cell, in the buffer
 ; Self-modified: the offset of this JR is written above (with those of
-; SmcBitmapForwardJump and SmcBitmapBackJump) as 2 x (32 - run length), so that it jumps into the chain of
-; LDI instructions that follows at the place where as many LDIs remain as the
-; run has cells but one.
+; SmcBitmapForwardJump and SmcBitmapBackJump) as 2 x (32 - run length), so that
+; it jumps into the chain of LDI instructions that follows at the place where as
+; many LDIs remain as the run has cells but one.
 SmcAttrJump:
   JR SmcAttrJump          ; enter the LDI chain; the offset byte (+1) is
                           ; patched
@@ -409,7 +409,7 @@ SmcRedrawIndex:
                           ; next)
   LD HL,(RedrawListPtr)   ; the list pointer
   LD A,E
-  AND SCREEN_COLS-$01     ; column of the run
+  AND COLUMN_MASK         ; column of the run
   LD (HL),A               ; run entry: first column
   INC L
   LD (HL),C               ; run entry: index of the first cell
@@ -615,9 +615,9 @@ RunDrawQueue_Job:
 ; POPs, and it ends with a RET into the next entry. The room items use it (the
 ; sprite command at ItemCmd, made by DrawItemFrame): a sprite 2 bytes wide,
 ; without mask, placed on the character grid, its graphics in the 16-pixel
-; sprites at $66DC-$68CB (observed in room 10: the arch at $66DC with height
-; 12, the other items with height 8, width always 2). It stores the parameters in the
-; job template BlockJob (the height in 2-pixel units divided by 4 gives the
+; sprites at $66DC-$68CB (observed in room 10: the arch at $66DC with height 12,
+; the other items with height 8, width always 2). It stores the parameters in
+; the job template BlockJob (the height in 2-pixel units divided by 4 gives the
 ; character rows), marks the 2 cells of each row as for QueueSprite (bit 6 set
 ; and bit 7 clear in the tile flag map, so that the cells are redrawn now and
 ; once more in the next frame to erase the sprite) and adds the template to the
@@ -672,10 +672,10 @@ QueueBlockSprite_0:
 ; QueueBlockSprite)
 ;
 ; QueueBlockSprite stores its parameters here and AddQueueJob copies 16 bytes
-; from here to the draw queue (DrawQueue); the template is only 8 bytes long,
-; so the next 8 bytes (the first code bytes of QueueSprite, which follows in
-; memory) are copied along and not used. The job is run by BuildRedrawList: the handler DrawBlockJob
-; draws the sprite into the redraw cell buffers. Fields:
+; from here to the draw queue (DrawQueue); the template is only 8 bytes long, so
+; the next 8 bytes (the first code bytes of QueueSprite, which follows in
+; memory) are copied along and not used. The job is run by BuildRedrawList: the
+; handler DrawBlockJob draws the sprite into the redraw cell buffers. Fields:
 ;
 ; +0 word: handler, DrawBlockJob
 ;

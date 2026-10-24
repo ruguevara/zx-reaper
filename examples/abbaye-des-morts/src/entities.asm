@@ -32,10 +32,10 @@ EntityHandlers:
   DEFW UpdateCrusaderSpawner ; kind 1: makes a crusader every 40 frames from
                              ; the template at the record's parameter word
                              ; (CrusaderTemplateRoom5, 6, 25)
-  DEFW UpdateWalkLeft     ; kind 2: horizontal patroller, starts left
-  DEFW UpdateWalkRight    ; kind 3: horizontal patroller, starts right
-  DEFW UpdateWalkDown     ; kind 4: vertical patroller, starts down
-  DEFW UpdateWalkUp       ; kind 5: vertical patroller, starts up
+  DEFW UpdatePatrolLeft     ; kind 2: horizontal patroller, starts left
+  DEFW UpdatePatrolRight    ; kind 3: horizontal patroller, starts right
+  DEFW UpdatePatrolDown     ; kind 4: vertical patroller, starts down
+  DEFW UpdatePatrolUp       ; kind 5: vertical patroller, starts up
   DEFW UpdateHangedDown   ; kind 6: hanged man, starts down
   DEFW UpdateHangedUp     ; kind 7: hanged man going up (no room object has
                           ; this kind)
@@ -75,7 +75,7 @@ EntityHandlers:
 ; ReadSpriteLeft) +$12 byte: animation counter, +$13 byte: its reload (8 frames
 ; per step) +$14 byte: frame number, +$15 byte: number of frames (2)
 ;
-; All three are drawn from the sprite set 1 (the crusaders, PackedSet1), cyan.
+; All three are drawn from the sprite set 1 (the crusaders, PackedSetCrusader), cyan.
 ; The hit box test (HitTest) makes a crusader kill Jean on touch.
 CrusaderTemplateRoom5:
   DEFW UpdateCrusader,$0060,PathScriptRoom5,$F700,$4400,$0600,$0100,$060C,BehaviourCrusader+$0005,$0808,$0200 ; room 5,
@@ -434,7 +434,7 @@ ReadSpriteCrusaderJump:
   INC HL
   EX DE,HL                ; DE = description, at its height byte
   EX AF,AF'               ; A = x
-  AND $03                 ; shift phase
+  AND SPRITE_PHASE_MASK                 ; shift phase
   ADD A,A
   LD L,A
   LD H,$00
@@ -455,14 +455,14 @@ ReadSpriteCrusaderJump:
 ; Command 5 of the path scripts (PathCommands) puts this address in the slot:
 ; it sets the cutscene-finished flag (CutsceneDone, which the ending's frame
 ; loop polls) and then runs UpdateCrusader. As the handler word stays
-; UpdateCrusaderSignal, the flag is set again in every later frame. The room 25
+; UpdateCrusaderEndScene, the flag is set again in every later frame. The room 25
 ; script ends with this command (the crusaders have reached the top of the
 ; stairs).
 ;
 ; Hardware: none.
 ;
 ; SP Slot address + 2 (the handler word has been popped)
-UpdateCrusaderSignal:
+UpdateCrusaderEndScene:
   LD A,$01
   LD (CutsceneDone),A     ; CutsceneDone: tell the cutscene it is over
 
@@ -485,7 +485,7 @@ UpdateCrusaderSignal:
 ; UpdateCrusaderFall), is removed (command 4: FreeEntitySlotAtEntry) or does
 ; what command 5 does, and the frame goes on as if there had been no command.
 ; Command 0 is this handler itself, a command that changes nothing; command 5
-; is UpdateCrusaderSignal.
+; is UpdateCrusaderEndScene.
 ;
 ; Slot fields used: +2 word x speed (8.8), +4 word path pointer, +6 word x
 ; (8.8, high byte in 2-pixel units), +8 word y; the state word +$A is skipped
@@ -569,16 +569,17 @@ UpdateCrusader_Command:
 ; 0 UpdateCrusader keep running (the handler itself: nothing changes) 1
 ; UpdateCrusaderStepUp step up 8 pixels (x speed $00A0, curve JumpCurveStepUp)
 ; 2 UpdateCrusaderHop hop over a pit (x speed $0150, curve JumpCurveHop: about
-; 8 units forward, back to the same y) 3 UpdateCrusaderFall fall 16 pixels (x speed unchanged, curve
-; JumpCurveFall) 4 FreeEntitySlotAtEntry remove the crusader (free the slot) 5
-; UpdateCrusaderSignal signal the end of the cutscene, then keep running
+; 8 units forward, back to the same y) 3 UpdateCrusaderFall fall 16 pixels (x
+; speed unchanged, curve JumpCurveFall) 4 FreeEntitySlotAtEntry remove the
+; crusader (free the slot) 5 UpdateCrusaderEndScene signal the end of the
+; cutscene, then keep running
 PathCommands:
   DEFW UpdateCrusader     ; 0: UpdateCrusader, keep running
   DEFW UpdateCrusaderStepUp ; 1: UpdateCrusaderStepUp
   DEFW UpdateCrusaderHop  ; 2: UpdateCrusaderHop
   DEFW UpdateCrusaderFall ; 3: UpdateCrusaderFall
   DEFW FreeEntitySlotAtEntry ; 4: FreeEntitySlotAtEntry
-  DEFW UpdateCrusaderSignal ; 5: UpdateCrusaderSignal
+  DEFW UpdateCrusaderEndScene ; 5: UpdateCrusaderEndScene
 
 ; Path scripts of the crusaders: pairs (target x, command)
 ;
@@ -706,19 +707,19 @@ UpdateHangedUp_0:
 
 ; Entity handler: patroller moving up (kind 5)
 ;
-; The counterpart of UpdateWalkDown for a creature that starts its vertical
+; The counterpart of UpdatePatrolDown for a creature that starts its vertical
 ; patrol moving up (the flies of room 12, the yellow spiders of room 3; also
 ; every kind 4 creature, green spiders and fire wheels, after its first turn).
 ; The y coordinate goes up by the speed each frame; when its high byte falls
 ; below the upper turning point (+4) the handler word of the slot is rewritten
-; with UpdateWalkDown. The sprite is placed at (x, y) through PlaceEntityLeft,
+; with UpdatePatrolDown. The sprite is placed at (x, y) through PlaceEntityLeft,
 ; which tests the hit box and draws the first frame table (facing up). Stack
-; scheme and slot fields as in UpdateWalkLeft and ReadSpriteLeft.
+; scheme and slot fields as in UpdatePatrolLeft and ReadSpriteLeft.
 ;
 ; Hardware: none.
 ;
 ; SP Slot address + 2
-UpdateWalkUp:
+UpdatePatrolUp:
   POP BC                  ; speed
   POP DE                  ; D lower turning point, E upper
   POP HL                  ; x (8.8); only its high byte is used
@@ -731,18 +732,18 @@ UpdateWalkUp:
   POP HL                  ; SP is back at slot+$A
   LD A,H                  ; y in 2-pixel units
   CP E                    ; above the upper turning point?
-  JR NC,UpdateWalkUp_0    ; no: go on
+  JR NC,UpdatePatrolUp_0    ; no: go on
   LD HL,$FFF8             ; -8: back to slot+2
   ADD HL,SP
   LD SP,HL
-  LD HL,UpdateWalkDown    ; from the next frame the creature goes down
+  LD HL,UpdatePatrolDown    ; from the next frame the creature goes down
   PUSH HL                 ; written over the handler word at slot+0
   POP HL                  ; pop the handler again
   POP BC                  ; pop speed, limits, x and y again
   POP DE
   POP HL
   POP HL
-UpdateWalkUp_0:
+UpdatePatrolUp_0:
   EX AF,AF'               ; A = x
   LD D,A                  ; D = x
   POP BC                  ; skip the unused word at +$A
@@ -759,7 +760,7 @@ UpdateWalkUp_0:
 ; ceiling ghosts of rooms 22 and 23. Which creature it is depends on the sprite
 ; description of its room record, not on the handler. A record of kind 2
 ; starts moving left (this handler), a record of kind 3 starts moving right
-; (UpdateWalkRight); the two handlers turn the slot into each other at the ends
+; (UpdatePatrolRight); the two handlers turn the slot into each other at the ends
 ; of the patrol. The first frame table faces left (observed: the rat of room 2
 ; moving left has its snout on the left, the one moving right on the right).
 ;
@@ -770,7 +771,7 @@ UpdateWalkUp_0:
 ;
 ; The x coordinate goes down by the speed each frame. When its high byte equals
 ; the left turning point the handler word of the slot is rewritten with
-; UpdateWalkRight, so from the next frame the same speed is added. The test is
+; UpdatePatrolRight, so from the next frame the same speed is added. The test is
 ; for equality, so a creature that starts outside its patrol (or a speed that
 ; skips a value) runs until x has wrapped round. The sprite is placed at (x,
 ; y); the hit box test and the drawing go on at ReadSpriteLeft (the first frame
@@ -784,7 +785,7 @@ UpdateWalkUp_0:
 ; Hardware: none.
 ;
 ; SP Slot address + 2
-UpdateWalkLeft:
+UpdatePatrolLeft:
   POP BC                  ; speed
   POP DE                  ; D right turning point, E left turning point
   POP HL                  ; x (8.8)
@@ -794,17 +795,17 @@ UpdateWalkLeft:
   POP HL                  ; SP is back at slot+8
   LD A,H                  ; x in 2-pixel units
   CP E                    ; at the left turning point?
-  JR NZ,UpdateWalkLeft_0  ; no: go on
+  JR NZ,UpdatePatrolLeft_0  ; no: go on
   LD HL,$FFFA             ; -6: back to slot+2
   ADD HL,SP
   LD SP,HL
-  LD HL,UpdateWalkRight   ; from the next frame the creature goes right
+  LD HL,UpdatePatrolRight   ; from the next frame the creature goes right
   PUSH HL                 ; written over the handler word at slot+0
   POP HL                  ; pop the handler again
   POP BC                  ; pop speed, limits and x again
   POP DE
   POP HL
-UpdateWalkLeft_0:
+UpdatePatrolLeft_0:
   LD D,H                  ; D = x
   POP HL                  ; y (8.8)
   POP BC                  ; skip the unused word at +$A
@@ -812,7 +813,7 @@ UpdateWalkLeft_0:
 
 ; Place an entity sprite (facing left or up) and test its hit box
 ;
-; Reached by falling through from UpdateWalkLeft and by jumps from UpdateWalkUp
+; Reached by falling through from UpdatePatrolLeft and by jumps from UpdatePatrolUp
 ; and the chaser (UpdateChaser_Draw, when Jean is on its left): movers whose
 ; sprite faces left or up. Puts the position into the draw command, keeps x in
 ; A' for the shift phase and goes on to the hit box test with the first frame
@@ -846,15 +847,15 @@ TestEntityHitLeft:
 ; the decreasing direction)
 ;
 ; Reached through HitTest from TestEntityHitLeft, that is from the movers that
-; go left or up (UpdateWalkLeft, UpdateWalkUp, UpdateHangedUp) and from the
+; go left or up (UpdatePatrolLeft, UpdatePatrolUp, UpdateHangedUp) and from the
 ; chasing ghost (UpdateChaser) when Jean is on its left. ReadSpriteRight does
-; the same for the increasing direction (right or down). SP is at slot+$10, after the hit box
-; words (+$C..+$F) that HitTest popped. The routine copies the attribute, the
-; width and the height of the sprite into the main draw command at SpriteCmd
-; (the position is already there), picks the column offset for the shift phase
-; of x, then hands over to the animation counter step StepAnimation with IX =
-; SelectFrameLeft, which selects the frame, completes the draw command and
-; queues it.
+; the same for the increasing direction (right or down). SP is at slot+$10,
+; after the hit box words (+$C..+$F) that HitTest popped. The routine copies
+; the attribute, the width and the height of the sprite into the main draw
+; command at SpriteCmd (the position is already there), picks the column offset
+; for the shift phase of x, then hands over to the animation counter step
+; StepAnimation with IX = SelectFrameLeft, which selects the frame, completes
+; the draw command and queues it.
 ;
 ; Slot layout of the walkers (kinds 2 to 8; SpawnRoomObject builds it from the
 ; room record at RoomObjects: byte 2 times 4 is +2, byte 3 is +$12 and +$13,
@@ -894,7 +895,7 @@ ReadSpriteLeft:
   INC HL
   EX DE,HL                ; DE = description at its height byte
   EX AF,AF'               ; A = x
-  AND $03                 ; shift phase 0-3
+  AND SPRITE_PHASE_MASK                 ; shift phase 0-3
   ADD A,A                 ; 2 bytes per phase
   LD L,A
   LD H,$00
@@ -999,13 +1000,13 @@ UpdateHangedDown_0:
 ; rooms 22 and 23. Which one it is depends on the sprite description of its
 ; room record. A record of kind 4 (the green spiders and the fire wheels)
 ; starts moving down (this handler), a record of kind 5 (the yellow spiders and
-; the flies) starts moving up (UpdateWalkUp); the two handlers turn the slot
+; the flies) starts moving up (UpdatePatrolUp); the two handlers turn the slot
 ; into each other at the ends of the patrol (stack scheme and slot fields as in
-; UpdateWalkLeft, ReadSpriteLeft).
+; UpdatePatrolLeft, ReadSpriteLeft).
 ;
 ; The y coordinate goes down by the speed each frame; when its high byte
 ; reaches the lower turning point (+5) the handler word of the slot is
-; rewritten with UpdateWalkUp. The sprite is placed at (x, y) through
+; rewritten with UpdatePatrolUp. The sprite is placed at (x, y) through
 ; PlaceEntityRight (x is a multiple of 4, so the shift phase is 0), which tests
 ; the hit box and draws the second frame table.
 ;
@@ -1016,7 +1017,7 @@ UpdateHangedDown_0:
 ; Hardware: none.
 ;
 ; SP Slot address + 2
-UpdateWalkDown:
+UpdatePatrolDown:
   POP BC                  ; speed
   POP DE                  ; D lower turning point, E upper
   POP HL                  ; x (8.8); only its high byte is used
@@ -1028,18 +1029,18 @@ UpdateWalkDown:
   POP HL                  ; SP is back at slot+$A
   LD A,H                  ; y in 2-pixel units
   CP D                    ; reached the lower turning point?
-  JR C,UpdateWalkDown_0   ; no: go on
+  JR C,UpdatePatrolDown_0   ; no: go on
   LD HL,$FFF8             ; -8: back to slot+2
   ADD HL,SP
   LD SP,HL
-  LD HL,UpdateWalkUp      ; from the next frame the creature goes up
+  LD HL,UpdatePatrolUp      ; from the next frame the creature goes up
   PUSH HL                 ; written over the handler word at slot+0
   POP HL                  ; pop the handler again
   POP BC                  ; pop speed, limits, x and y again
   POP DE
   POP HL
   POP HL
-UpdateWalkDown_0:
+UpdatePatrolDown_0:
   EX AF,AF'               ; A = x
   LD D,A                  ; D = x
   POP BC                  ; skip the unused word at +$A
@@ -1050,21 +1051,21 @@ UpdateWalkDown_0:
 ; Entity handler: patroller moving right (kind 3) and the tail shared by the
 ; movers that go right or down
 ;
-; The counterpart of UpdateWalkLeft for a creature that starts its patrol
+; The counterpart of UpdatePatrolLeft for a creature that starts its patrol
 ; moving right (room record kind 3: one rat of room 2, one bat of room 8 and
 ; one demon of room 21; every horizontal patroller listed there after its first
 ; turn). The x coordinate goes up by the
 ; speed each frame; when its high byte equals the right turning point the
-; handler word of the slot is rewritten with UpdateWalkLeft, so from the next
+; handler word of the slot is rewritten with UpdatePatrolLeft, so from the next
 ; frame the speed is subtracted. The position goes into the draw command, then
 ; ReadSpriteRight tests the hit box and draws the second frame table of the
 ; sprite description (creatures facing right). The slot fields are those of
-; UpdateWalkLeft and ReadSpriteLeft.
+; UpdatePatrolLeft and ReadSpriteLeft.
 ;
 ; Hardware: none.
 ;
 ; SP Slot address + 2
-UpdateWalkRight:
+UpdatePatrolRight:
   POP BC                  ; speed
   POP DE                  ; D right turning point, E left turning point
   POP HL                  ; x (8.8)
@@ -1073,17 +1074,17 @@ UpdateWalkRight:
   POP HL                  ; SP is back at slot+8
   LD A,H                  ; x in 2-pixel units
   CP D                    ; at the right turning point?
-  JR NZ,UpdateWalkRight_0 ; no: go on
+  JR NZ,UpdatePatrolRight_0 ; no: go on
   LD HL,$FFFA             ; -6: back to slot+2
   ADD HL,SP
   LD SP,HL
-  LD HL,UpdateWalkLeft    ; from the next frame the creature goes left
+  LD HL,UpdatePatrolLeft    ; from the next frame the creature goes left
   PUSH HL                 ; written over the handler word at slot+0
   POP HL                  ; pop the handler again
   POP BC                  ; pop speed, limits and x again
   POP DE
   POP HL
-UpdateWalkRight_0:
+UpdatePatrolRight_0:
   LD D,H                  ; D = x
   POP HL                  ; y (8.8)
   POP BC                  ; skip the unused word at +$A
@@ -1091,8 +1092,8 @@ UpdateWalkRight_0:
 
 ; Place an entity sprite (facing right or down) and test its hit box
 ;
-; Reached by falling through from UpdateWalkRight and by jumps from
-; UpdateWalkDown and the chaser (UpdateChaser_Draw, when Jean is level with it
+; Reached by falling through from UpdatePatrolRight and by jumps from
+; UpdatePatrolDown and the chaser (UpdateChaser_Draw, when Jean is level with it
 ; or on its right): movers whose sprite faces right or down. Puts the position
 ; into the draw command, keeps x in A' and goes on to the hit box test with the
 ; second frame table. E is not read here: HitTest takes the position from DE.
@@ -1129,7 +1130,7 @@ TestEntityHitRight:
 ; BehaviourJean; as it runs right it is drawn from the second table,
 ; MonkFramesRight, frames 0 and 1: Jean's walk) and three cyan crusaders
 ; (BehaviourCrusader) running after him. The slot is entered
-; with SP at slot+2 (see UpdateWalkLeft for the stack scheme). The x coordinate
+; with SP at slot+2 (see UpdatePatrolLeft for the stack scheme). The x coordinate
 ; goes up by the speed each frame; when its high byte equals the end coordinate
 ; (+5, $80, off the right of the screen) the slot is freed through
 ; FreeEntitySlot. x starts at a value below 0 ($CB-$F7: the runner enters from
@@ -1169,8 +1170,8 @@ UpdateIntroRunner:
 
 ; Read the sprite description and animate (facing right or down)
 ;
-; Entry point used through HitTest by UpdateWalkRight, UpdateHangedDown,
-; UpdateWalkDown, the chasing ghost (UpdateChaser, Jean level with it or on its
+; Entry point used through HitTest by UpdatePatrolRight, UpdateHangedDown,
+; UpdatePatrolDown, the chasing ghost (UpdateChaser, Jean level with it or on its
 ; right) and the walking crusaders (UpdateCrusader_Draw), and by
 ; UpdateIntroRunner, which falls into it without a hit test. Like
 ; ReadSpriteLeft, but picks the second frame table. Observed in rooms 2, 9 and
@@ -1191,7 +1192,7 @@ ReadSpriteRight:
   INC HL
   EX DE,HL                ; DE = description at its height byte
   EX AF,AF'               ; A = x
-  AND $03                 ; shift phase 0-3
+  AND SPRITE_PHASE_MASK                 ; shift phase 0-3
   ADD A,A                 ; 2 bytes per phase
   LD L,A
   LD H,$00
@@ -1407,10 +1408,10 @@ UpdateChaser_Wait_0:
 ; Entity handler: the chasing ghost (kind 8, room 11)
 ;
 ; The chasing ghost, a cyan grinning head that floats through the Cave of
-; illusions (room 11; the only room record of kind 8). After a start delay it moves toward Jean
-; along both axes, through free space only, then faces Jean and is drawn (the
-; tail UpdateChaser_Wait/UpdateChaser_Draw). Entered with SP at slot+2, see
-; UpdateWalkLeft for the stack scheme.
+; illusions (room 11; the only room record of kind 8). After a start delay it
+; moves toward Jean along both axes, through free space only, then faces Jean
+; and is drawn (the tail UpdateChaser_Wait/UpdateChaser_Draw). Entered with SP
+; at slot+2, see UpdatePatrolLeft for the stack scheme.
 ;
 ; The start delay is the byte at slot+5 (30 frames in the room record): each
 ; frame it is decremented and, until it reaches 0, the handler only draws the
@@ -1418,22 +1419,23 @@ UpdateChaser_Wait_0:
 ; drops to 0 on every following frame. The movement then works in four steps.
 ; First, the tile flag map is sampled around the sprite, which is 2 cells wide
 ; and 3 high at (x/4, y/4): the flags of the two cells of its own top row
-; (ProbeHead; not the row above it, unlike the other three sides), of the two cells right of rows 1 and 2 (ProbeRight), of the two
-; cells under the bottom row (ProbeBelow) and of the two cells left of rows 1
-; and 2 (ProbeLeft) are ORed in pairs (ProbeRight-ProbeHead) and a side counts
-; as free when its class (flag AND 7) is 0. Second, Jean's x and y (A8A2, A8A4;
-; bit 7 set counts as 0) are compared with the chaser's; each compare gives 0
-; (equal), 1 (Jean is smaller: left or above) or 2 (greater: right or below),
-; and the two codes are shifted into A' (whatever A' held before only reaches
-; the bits above the low nibble) and make a 4-bit move mask (x code in bits
-; 3-2, y code in bits 1-0). Third, the mask is ANDed with the free sides (bit 3
-; right, bit 2 left, bit 1 below, bit 0 above). Last, the speed is subtracted
-; from or added to y for bits 0 and 1 and to x for bits 2 and 3, so each axis
-; is blocked separately (the ghost slides along a wall: it does not move
-; toward a side whose probed cells are not class 0), and it does not move on an
-; axis on which it is level with Jean. Observed in room 11 with Jean at x =
-; $70, y = $40: after the delay the face moved diagonally from (x $40, y $24),
-; 0.25 unit per frame on each axis.
+; (ProbeHead; not the row above it, unlike the other three sides), of the two
+; cells right of rows 1 and 2 (ProbeRight), of the two cells under the bottom
+; row (ProbeBelow) and of the two cells left of rows 1 and 2 (ProbeLeft) are
+; ORed in pairs (ProbeRight-ProbeHead) and a side counts as free when its class
+; (flag AND 7) is 0. Second, Jean's x and y (A8A2, A8A4; bit 7 set counts as 0)
+; are compared with the chaser's; each compare gives 0 (equal), 1 (Jean is
+; smaller: left or above) or 2 (greater: right or below), and the two codes are
+; shifted into A' (whatever A' held before only reaches the bits above the low
+; nibble) and make a 4-bit move mask (x code in bits 3-2, y code in bits 1-0).
+; Third, the mask is ANDed with the free sides (bit 3 right, bit 2 left, bit 1
+; below, bit 0 above). Last, the speed is subtracted from or added to y for
+; bits 0 and 1 and to x for bits 2 and 3, so each axis is blocked separately
+; (the ghost slides along a wall: it does not move toward a side whose probed
+; cells are not class 0), and it does not move on an axis on which it is level
+; with Jean. Observed in room 11 with Jean at x = $70, y = $40: after the delay
+; the face moved diagonally from (x $40, y $24), 0.25 unit per frame on each
+; axis.
 ;
 ; Slot fields used: +2 word speed (8.8, $0040 = 0.25 unit of 2 pixels per
 ; frame), +5 byte start delay, +6 word x (8.8), +8 word y (8.8); the sprite
@@ -1609,7 +1611,7 @@ UpdateChaser_11:
 ; The cyan drops that form at the tip of the stalactites of Gloomy tunnels
 ; (room 15) and Underground river (room 19), swell and fall. A drop cycles
 ; through two handlers: this one while it hangs and UpdateDropFalling while it
-; falls. Entered with SP at slot+2, see UpdateWalkLeft for the stack scheme.
+; falls. Entered with SP at slot+2, see UpdatePatrolLeft for the stack scheme.
 ; Slot fields used: +4 byte y of the stalactite tip, +7 byte x, +$B byte start
 ; delay; the whole layout is at AnimateDrop.
 ;
@@ -1953,11 +1955,11 @@ UpdateShooter_Common:
 ;
 ; Continuation of UpdateShooter_Common after the hit test HitTest (reached by
 ; the JP at SmcHitContinue; SP is at slot+$10, the hit test has popped the two
-; hit box words). It pops the pointer to the sprite block (slot +$10: attribute,
-; height, width, frame tables) and puts the attribute, width and height in the
-; draw command at SpriteCmd (A' = 0: no shifted copy), then steps the shot
-; countdown (slot +$12 counter, +$13 reload: $50 for the archers, $46 for the
-; stone head):
+; hit box words). It pops the pointer to the sprite block (slot +$10:
+; attribute, height, width, frame tables) and puts the attribute, width and
+; height in the draw command at SpriteCmd (A' = 0: no shifted copy), then steps
+; the shot countdown (slot +$12 counter, +$13 reload: $50 for the archers, $46
+; for the stone head):
 ;
 ; - when the counter equals ARCHER_AIM_TIME (30) the frame number is increased:
 ; the aiming frame is shown for the last 30 frames; - when it reaches 0 the
@@ -2329,7 +2331,7 @@ SetProjectileSprite:
   LD A,(HL)               ; column in the sprite sheet
   INC HL
   EX AF,AF'               ; A = x, A' = column
-  AND $03                 ; shift phase
+  AND SPRITE_PHASE_MASK                 ; shift phase
   ADD A,A
   ADD A,A                 ; times 4 pages
   ADD A,(HL)              ; plus the page of the first copy
@@ -2519,12 +2521,12 @@ UpdateFishWaiting:
 
 ; Fish: jump out of the water
 ;
-; Reached from UpdateFishWaiting when its countdown, already decremented, equals
-; FISH_JUMP_TIME. Queues a splash at the water surface below the fish and
-; rewrites the slot words +0 to +8 for the jump (see UpdateFishWaiting). DE is
-; kept across the EXX and stored back at +4: the countdown goes on through the
-; jump. Observed in rooms 16 and 19: SP = slot + 6, E = $36, D = $54 at every
-; entry.
+; Reached from UpdateFishWaiting when its countdown, already decremented,
+; equals FISH_JUMP_TIME. Queues a splash at the water surface below the fish
+; and rewrites the slot words +0 to +8 for the jump (see UpdateFishWaiting). DE
+; is kept across the EXX and stored back at +4: the countdown goes on through
+; the jump. Observed in rooms 16 and 19: SP = slot + 6, E = $36, D = $54 at
+; every entry.
 ;
 ; Hardware: none.
 ;
@@ -3095,7 +3097,7 @@ SetMovingSprite:
   INC HL
   EX DE,HL                ; DE = block + 3
   EX AF,AF'               ; A = x
-  AND $03                 ; shift phase
+  AND SPRITE_PHASE_MASK                 ; shift phase
   ADD A,A                 ; two bytes per pair
   LD L,A
   LD H,$00
@@ -3182,9 +3184,9 @@ UpdateDeathRight:
 ; hand over to each other). The speed is subtracted from x; when the high byte
 ; of x equals the left turning point (slot +4) the handler word is rewritten
 ; with UpdateDeathRight. IY = SelectFrameLeft selects the first frame table of
-; the sprite block (left). This is the handler of room object kind 16 (EntityHandlers
-; entry 16), so it is the half that runs first, from x = $09 down to the
-; turning point $08.
+; the sprite block (left). This is the handler of room object kind 16
+; (EntityHandlers entry 16), so it is the half that runs first, from x = $09
+; down to the turning point $08.
 ;
 ; SP Slot address + 2 (the handler word was popped by the RET that entered the
 ;    routine)
@@ -3261,14 +3263,15 @@ UpdateDeath_Common_0:
 ;
 ; Continuation of UpdateDeath_Common after the hit test at HitTest (reached by
 ; the JP at SmcHitContinue; SP is at slot+16, the hit test has popped the two
-; hit box words). It pops the pointer in slot +$10, which points five bytes into the
-; behaviour block of kind 16 (BehaviourDeath): attribute byte, pointer to the
-; pair table of (column offset, width) per shift phase, height in 2-pixel
-; units, then the two frame tables. The attribute goes to the draw command at
-; $ACD1 (+9, $ACDA); the pair for shift phase x AND 3 gives the offset of the
-; shifted copy inside the frame (kept in A') and the width, and with the height
-; they go to $ACD7. Then the animation counter and frame number in slot
-; +$12..+$15 are stepped by StepAnimation, which continues at ThrowDeathScythe.
+; hit box words). It pops the pointer in slot +$10, which points five bytes
+; into the behaviour block of kind 16 (BehaviourDeath): attribute byte, pointer
+; to the pair table of (column offset, width) per shift phase, height in
+; 2-pixel units, then the two frame tables. The attribute goes to the draw
+; command at $ACD1 (+9, $ACDA); the pair for shift phase x AND 3 gives the
+; offset of the shifted copy inside the frame (kept in A') and the width, and
+; with the height they go to $ACD7. Then the animation counter and frame number
+; in slot +$12..+$15 are stepped by StepAnimation, which continues at
+; ThrowDeathScythe.
 ;
 ; Each frame is stored in the sprite sheet as four copies, each 2 pixels
 ; further right than the one before (4, 5, 5 and 5 columns for Death, 19 per
@@ -3291,7 +3294,7 @@ SetDeathSprite:
   INC HL
   EX DE,HL                ; HL = pair table, DE = block + 8
   EX AF,AF'               ; A = x
-  AND $03                 ; shift phase
+  AND SPRITE_PHASE_MASK                 ; shift phase
   ADD A,A                 ; two bytes per pair
   LD C,A
   LD B,$00
@@ -3377,24 +3380,24 @@ ThrowDeathScythe_2:
 ; ScytheRightTemplate, spawned by ThrowDeathScythe). In this state it falls
 ; straight down: its y moves by the vertical speed and the cells under it are
 ; looked at. When they are free it is drawn (UpdateMovingSprite_Draw) and keeps
-; falling. When a cell is harmful (tile class 4, FLAG_HARMFUL) the slot is
+; falling. When a cell is harmful (tile class 4, TILE_HARMFUL) the slot is
 ; freed by way of FreeEntitySlotAtEntry (the four state words are pushed back
-; first so that SP is at the slot again). This is how most scythes end: in
-; 5000 frames of room 18 (Jean out of play) 54 of the 96 scythes removed fell
-; onto the harmful bottom row (y $4D, x $28-$58), the other 42 slid off the
-; room edges (UpdateScytheSliding). When a cell is solid (class 1 to 3) the scythe lands:
-; y is rounded down to a multiple of 4 (a whole character row), the handler
-; word becomes UpdateScytheSliding and the scythe is drawn. UpdateScytheSliding
-; then slides it sideways and hands it back to this routine when the floor
-; ends, so a scythe that lands on a ledge moves along it (observed: it falls,
-; alternates between the two states while it creeps sideways, falls off the end
-; of the ledge and goes on) until it leaves the room at the side or reaches a
-; harmful tile. Entity handlers are not called: the slot walker RunObjectSlots
-; sets SP to a slot of ObjectSlots and RETs, so the handler is entered with SP
-; at slot+2 (the handler word has been popped) and finds its state on the
-; stack. It pops the words it needs, pushes back the ones that changed, and
-; ends by jumping to RunObjectSlot with HL at the next slot (here through
-; NextSlotAfterAnim).
+; first so that SP is at the slot again). This is how most scythes end: in 5000
+; frames of room 18 (Jean out of play) 54 of the 96 scythes removed fell onto
+; the harmful bottom row (y $4D, x $28-$58), the other 42 slid off the room
+; edges (UpdateScytheSliding). When a cell is solid (class 1 to 3) the scythe
+; lands: y is rounded down to a multiple of 4 (a whole character row), the
+; handler word becomes UpdateScytheSliding and the scythe is drawn.
+; UpdateScytheSliding then slides it sideways and hands it back to this routine
+; when the floor ends, so a scythe that lands on a ledge moves along it
+; (observed: it falls, alternates between the two states while it creeps
+; sideways, falls off the end of the ledge and goes on) until it leaves the
+; room at the side or reaches a harmful tile. Entity handlers are not called:
+; the slot walker RunObjectSlots sets SP to a slot of ObjectSlots and RETs, so
+; the handler is entered with SP at slot+2 (the handler word has been popped)
+; and finds its state on the stack. It pops the words it needs, pushes back the
+; ones that changed, and ends by jumping to RunObjectSlot with HL at the next
+; slot (here through NextSlotAfterAnim).
 ;
 ; Slot layout (from the template, see ScytheLeftTemplate): +2 word x speed
 ; (signed 8.8, used by UpdateScytheSliding only; $FF80 = left), +4 word y speed
@@ -3438,7 +3441,7 @@ UpdateScytheFalling:
   LD H,(HL)
   LD L,A
   LD A,C
-  AND $03                 ; x not a multiple of 4: three cells
+  AND SPRITE_PHASE_MASK                 ; x not a multiple of 4: three cells
   JR Z,UpdateScytheFalling_0
   LD A,(HL)
   INC L
@@ -3547,7 +3550,7 @@ UpdateScytheSliding:
   LD H,(HL)
   LD L,A
   LD A,C
-  AND $03
+  AND SPRITE_PHASE_MASK    ; x not a multiple of 4: three cells
   JR Z,UpdateScytheSliding_0
   LD A,(HL)
   INC L
@@ -3557,7 +3560,7 @@ UpdateScytheSliding_0:
   OR (HL)
   BIT 2,A                 ; harmful?
   JR NZ,Scythe_Destroy
-  AND $03                 ; solid cell under it: stay in this state
+  AND TILE_BLOCKS+TILE_STANDABLE ; solid cell under it: stay in this state
   JR NZ,UpdateScytheSliding_1
   LD HL,$FFF8             ; no floor: back to falling
   ADD HL,SP
@@ -3617,11 +3620,12 @@ UpdateScytheSliding_1:
 ; this is seen (SatanSmoked is zero, and set to $FF) music track 7 starts, the
 ; script at $82D4 is started (the main loop runs the script whose address is in
 ; $9CEE when $9CE7 holds a NOP; it erases the ring of crosses), the done flag
-; of the crosses display CrossRingDone is cleared (no code reads it), and Satan's own slot is overwritten with the smoke template
-; SmokeTemplate, whose handler UpdateSatanSmoke draws a cloud of smoke in the
-; place of Satan for 150 frames (observed: a white cloud, then nothing). Later,
-; when the room is entered again with SatanSmoked set, the slot is freed at
-; once and Satan is gone for good.
+; of the crosses display CrossRingDone is cleared (no code reads it), and
+; Satan's own slot is overwritten with the smoke template SmokeTemplate, whose
+; handler UpdateSatanSmoke draws a cloud of smoke in the place of Satan for 150
+; frames (observed: a white cloud, then nothing). Later, when the room is
+; entered again with SatanSmoked set, the slot is freed at once and Satan is
+; gone for good.
 ;
 ; SP Slot address + 2 (the handler word was popped by the RET that entered the
 ;    routine)

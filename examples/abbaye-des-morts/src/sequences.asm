@@ -78,7 +78,7 @@ LoadCutsceneList:
 
 ; Ending sequence
 ;
-; Run by the main loop (StartGame) when the room state is 3 (touching the red
+; Run by the main loop (MainLoop) when the room state is 3 (touching the red
 ; scroll of room 24 sets it, ActionFinalScroll). In order:
 ;
 ; 1 Jean's state becomes 0 (none) and room 25 is entered (EnterRoom). The
@@ -159,7 +159,7 @@ RunEnding_Music:
 ; as the intro does: wait for a completed frame list (WaitFrameList), run it
 ; (FrameListGate), build and copy the cells (BuildRedrawList, DrawRedrawList).
 ; It stops when an actor sets CutsceneDone (the end of its path script,
-; UpdateCrusaderSignal, or its countdown, UpdatePyreMonk; observed in the
+; UpdateCrusaderEndScene, or its countdown, UpdatePyreMonk; observed in the
 ; ending run: $B1D1 at frame 406, $B988 at frame 897) and then sets the room
 ; state to 0. The keys do nothing. Jean is not in play (state 0), except in the
 ; second scene, where UpdatePyreMonk sets his state to 2 and his hit flag, so
@@ -338,8 +338,8 @@ SpawnItem:
 ; Make the object slot of a room item
 ;
 ; Finds a free slot (FindFreeSlot) and fills it from the room item record
-; (RoomItems) and the type record of its type (ObjectTypeRecords, found through
-; the table ObjectTypeTable). Slot layout, as the handler RoomItemHandler and
+; (RoomItems) and the type record of its type (ItemTypeRecords, found through
+; the table ItemTypeTable). Slot layout, as the handler RoomItemHandler and
 ; RunObjectSlots use it:
 ;
 ; +0 word: handler (type record +2); +2 byte: row (record +4); +3 byte: column
@@ -363,7 +363,7 @@ MakeItemSlot:
   INC HL
   PUSH HL                 ; save the pointer to the record + 4
   ADD A,A                 ; two bytes per entry
-  LD HL,ObjectTypeTable   ; ObjectTypeTable
+  LD HL,ItemTypeTable   ; ItemTypeTable
   CALL AddAToHL           ; = AddAToHL, HL += A
   LD E,(HL)               ; DE = type record
   INC HL

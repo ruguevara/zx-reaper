@@ -32,8 +32,8 @@ TL_EDGE_CALL EQU TapeLoader+$75   ; CALL LD-EDGE-2 in LD-8-BITS
 TL_8BITS     EQU TapeLoader+$74   ; LD-8-BITS
 TL_8BITS_JP  EQU TapeLoader+$80   ; JP NC,LD-8-BITS
 FrameTable   EQU $FB00  ; page of the bytes left -> offset of the hourglass frame
-FramesTop    EQU $FC00
-FramesBottom EQU $FD00
+FramesEven    EQU $FC00  ; HourglassFramesEven copied here: frames for an even count
+FramesOdd EQU $FD00  ; HourglassFramesOdd: frames for an odd count
 IM2_TABLE    EQU $BE00  ; 128K timing: 257 bytes of $BF, handler at $BFBF
 TIMING_LOOP  EQU $C000  ; INC DE / JR $-1, put in each bank tested
 ; tape block 3
@@ -69,7 +69,11 @@ Stage2:
   CALL TapeLoader
   POP DE
   POP IX
-  JR NC,.retry          ; a tape error: load the block again
+  JR NC,.retry          ; a tape error: load the block again. Safe only for an
+                        ; error in the first 1764 bytes: block 3 overwrites
+                        ; BuildFrameTable ($6942) on, and a retry after that
+                        ; runs block-3 data (observed with a simulated error
+                        ; after 3000 bytes; after 1000 the retry works)
   DI
   LD A,(MachineType)
   PUSH AF               ; for the game: A = machine type (1 = 48K)
@@ -146,8 +150,8 @@ Start128:
 .ay:
   LD L,0
   CALL WriteAY
-  POP BC                ; B = machine type, C = 1 if there is an AY
-  LD C,A
+  POP BC                ; B = machine type (C = the flags pushed with it)
+  LD C,A                ; C = 1 if an AY answered, 0 if not
   PUSH BC
   LD A,$10              ; bank 0, 48K ROM
   CALL PageBank
@@ -268,7 +272,8 @@ WaitInterrupt:
   EI
   HALT
 
-; 1 on a 48K machine; on 128K the port value of the bank in use ($11-$16).
+; 1 on a 48K machine; on 128K the port value of the bank in use ($11, $13,
+; $14 or $16: the fastest of the banks measured).
 MachineType:
   DEFB 0
 
@@ -574,7 +579,7 @@ LdEdge1:
   LD E,A
   LD A,(DE)
   LD L,A
-  LD A,high FramesTop
+  LD A,high FramesEven
   ADC A,0
   LD H,A
   LD (EdgeSP+1),SP
@@ -695,15 +700,15 @@ InstallLoader:
   LD (TL_8BITS_JP),HL
   RET
 
-; Draw the hourglass at HOURGLASS: frames to FramesTop and FramesBottom,
+; Draw the hourglass at HOURGLASS: frames to FramesEven and FramesOdd,
 ; the attributes, the outline. The RET is made a NOP by InstallLoader.
 DrawHourglass:
   RET
-  LD HL,HourglassTop
-  LD DE,FramesTop
+  LD HL,HourglassFramesEven
+  LD DE,FramesEven
   LD BC,240
   LDIR
-  LD DE,FramesBottom
+  LD DE,FramesOdd
   LD BC,240
   LDIR
   LD HL,HOURGLASS_ATTR
@@ -760,8 +765,14 @@ HourglassOutline:
   DEFB $90,$58,$50,$58,$50,$50,$D8,$B8
 
 ; Ten frames of the middle column (3 cells, 24 bytes each), two sets
-; chosen by bit 0 of the bytes left.
-HourglassTop:
+; chosen by bit 0 of the bytes left: HourglassFramesEven for an even count,
+; HourglassFramesOdd for an odd one. The sets are not the top and bottom of
+; the hourglass: they differ only in the falling grains, so the stream
+; flickers as bytes come in. Frame 0 has all the sand below (the end of the
+; load), frame 9 all of it above; FrameTable picks the frame from the high
+; byte of the bytes left (observed by running LdEdge1 with DE = $7464 down
+; to $0010: the sand runs from the top into the bottom).
+HourglassFramesEven:
   DEFB $FF,$80,$00,$00,$00,$00,$00,$80
   DEFB $55,$2A,$2A,$14,$1C,$22,$2A,$5D
   DEFB $BE,$7F,$7F,$7F,$7F,$7F,$80,$FF
@@ -792,7 +803,7 @@ HourglassTop:
   DEFB $FF,$80,$7F,$7F,$7F,$7F,$7F,$BE
   DEFB $5D,$2A,$2A,$14,$1C,$22,$2A,$41
   DEFB $88,$00,$08,$00,$08,$00,$80,$FF
-HourglassBottom:
+HourglassFramesOdd:
   DEFB $FF,$80,$00,$00,$00,$00,$00,$80
   DEFB $55,$2A,$2A,$1C,$14,$2A,$2A,$5D
   DEFB $BE,$7F,$7F,$7F,$7F,$7F,$80,$FF

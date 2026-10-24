@@ -15,7 +15,7 @@
 ; ShiftPairs give a column offset and a width per shift phase). Frames 0-5 are
 ; the walking and jumping monk, frames 6-8 ($42-$62) the flames of his death in
 ; three sizes. The columns $63-$FF are filled at run time with the sprites of
-; the room, from the packed sets at PackedSet0 by UnpackSpriteSet, and are zero
+; the room, from the packed sets at PackedSetArcher by UnpackSpriteSet, and are zero
 ; in the image (the 157-byte DEFS lines); those sprites may start on any page
 ; and be taller than 24 rows (Death is 28 rows high at $D763, the scythe 16
 ; rows at $D7EA and $E7EA).

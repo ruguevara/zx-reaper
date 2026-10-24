@@ -80,7 +80,7 @@ EndFrameList:
 ; EndOfSlots restores SP and returns to this routine's caller.
 ;
 ; Slot layout for the room items (made by MakeItemSlot from the room item
-; records at RoomItems and the type records at ObjectTypeTable): +0 word:
+; records at RoomItems and the type records at ItemTypeTable): +0 word:
 ; handler (RoomItemHandler), +2 byte: row (y/8), +3 byte: column (x/8), +4
 ; word: the item's action routine, +6 word: address of the item's flag byte, +8
 ; byte: frame countdown, +9 byte: countdown reload, +A byte: current frame, +B
@@ -128,7 +128,7 @@ EndOfSlots:
 ; pops the item's action routine (slot +4), which gets the carry flag and SP at
 ; slot + 6.
 ;
-; Used by all item types of ObjectTypeTable except type 5 (ParchmentHandler).
+; Used by all item types of ItemTypeTable except type 5 (ParchmentHandler).
 RoomItemHandler:
   POP HL                  ; L = row, H = column
   LD (ItemCmdPos),HL      ; sprite command position (row, column)
@@ -348,7 +348,7 @@ ActionArchToBeast:
   JR NC,ArchRelease       ; not touching: release the latch
   BIT 7,(HL)              ; latched: Jean has just arrived here
   JR NZ,ArchIdle
-  LD HL,DoorwayRoom10     ; latch of the arch in room 10
+  LD HL,ArchLatchRoom10     ; latch of the arch in room 10
   SET 7,(HL)              ; it is where Jean arrives
   LD HL,$5C00             ; arrival position: X = $5C (column 23) ...
   LD (RespawnX),HL
@@ -374,7 +374,7 @@ ActionArchToRiver:
   JR NC,ArchRelease       ; not touching: release the latch
   BIT 7,(HL)              ; latched: Jean has just arrived here
   JR NZ,ArchIdle
-  LD HL,DoorwayRoom19     ; latch of the arch in room 19
+  LD HL,ArchLatchRoom19     ; latch of the arch in room 19
   SET 7,(HL)
   LD HL,$5400             ; arrival position: X = $54 (column 21) ...
   LD (RespawnX),HL
@@ -775,7 +775,7 @@ DrawItemFrame_Next:
 ; Handler of the parchment items
 ;
 ; The handler word (+0) of the slots made from room items of type 5, the
-; parchments (ObjectTypeRecords, room item records of RoomItems). Like
+; parchments (ItemTypeRecords, room item records of RoomItems). Like
 ; RoomItemHandler it pops the row and column (+2, +3) into the position of the
 ; object draw command ItemCmd, builds the 16x16-pixel box of the item in
 ; 2-pixel units and jumps to the overlap test OverlapTest, but with IX =
