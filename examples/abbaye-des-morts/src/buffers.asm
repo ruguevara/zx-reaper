@@ -36,7 +36,8 @@ FrameListPtr:
 ; byte that is popped as the flags and not used, and the attribute (the fields
 ; are described at SpriteCmd). The list has room for 16 commands and the
 ; closing word $BDEB ($A2 bytes); no check for a full list was seen, and the
-; fill after it (LBEFC) would take the overflow.
+; fill after it (LBEFC) would take the overflow. The most seen in fuzzed runs
+; of all 25 rooms was 14 commands (rooms 10 and 15, F44).
 ;
 ; The interrupt handler writes into this area while SP points here and puts the
 ; bytes back.

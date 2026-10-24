@@ -18,8 +18,9 @@
 ; 4), takes the respawn position and room from the checkpoint rules
 ; (SelectCheckpoint: with no checkpoint taken, room 5 at X $2400, Y $4400,
 ; observed) and enters the room. On a 128K machine the title script is not
-; drawn at all (by reading the code: the DEC A / CALL Z test is for a 48K
-; machine only).
+; drawn at all: the DEC A / CALL Z test is for a 48K machine only (observed
+; with the machine type poked to $10: the Game Over text stays up while the
+; title menu waits, F111).
 ;
 ; Main loop (MainLoop). The low 7 bits of the room state RoomState say what to
 ; do, bit 7 only tells the frame routine GameFrame to run the game logic:
@@ -250,7 +251,8 @@ NoFrameRoutine:
 ; constants); this routine takes the request, clears it, and plays one step of
 ; the effect in SoundPlaying every frame until the effect ends. A new request
 ; replaces the effect that is playing at once (observed, F104). An effect can
-; chain another one when it ends (field +7 of its record).
+; chain another one when it ends (field +7 of its record; every record of the
+; table has 0 there, so the chain is never used, F130).
 ;
 ; Effect 1 is built in: a noise burst of 10 frames (NOISE_FRAMES), each 48
 ; speaker samples (NOISE_SAMPLES) of bit 4 of NoiseByte, about 180 T-states
@@ -270,8 +272,9 @@ NoFrameRoutine:
 ; the record has one). Otherwise the next segment starts: MODE 0 sets PERIOD
 ; back to BASE, 1 lowers BASE by 2 first (higher pitch each time), 2 raises it
 ; by 2 (lower pitch), anything else keeps PERIOD and reverses STEP (the pitch
-; sweeps back); FRAMES is reloaded from RELOAD. The fields are described at
-; SoundPeriod.
+; sweeps back); FRAMES is reloaded from RELOAD. The table uses only MODE 0 and
+; 2 (effect 6), so the branches of 1 and 3+ never run (F130). The fields are
+; described at SoundPeriod.
 ;
 ; Hardware: writes the speaker through port $FE (bit 4; the border bits are 0,
 ; so the border goes black during a burst). The timing loops run with
@@ -493,7 +496,7 @@ SoundNext:
 ; is built into the routine and has no record.
 ;
 ; Who plays what (SFX_ constants; observed by watching SoundRequest in runs,
-; except the checkpoint and the portal, which are inferred from the callers): 2
+; F107; the checkpoint and the portal by touching their items): 2
 ; jump, 3 bell or lever touched, 4 passage between rooms 10 and 19, 5 item
 ; taken or lever pulled, 6 Jean dies, 7 Death throws a scythe or Satan fires, 8
 ; the church door, 9 a checkpoint.

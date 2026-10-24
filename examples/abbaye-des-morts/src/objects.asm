@@ -217,8 +217,8 @@ FramesChalice:
 ;
 ; +3 byte: frames between two animation steps or other timer (slot +$12 counts
 ; down, +$13 reloads); for the crusader spawner (kind 1) it is the delay before
-; the first crusader, then a new one comes every $28 frames (inferred from
-; UpdateCrusaderSpawner, not timed)
+; the first crusader, then a new one comes every $28 frames (observed in room
+; 5: the first at about frame 90, then one per 40, F118)
 ;
 ; +4 byte: x position in 2-pixel units (high byte of the slot's x word at
 ; +6/+7)
@@ -248,7 +248,7 @@ FramesChalice:
 ; on a thread, flies, fire wheels); 6 and 7 the hanged men of room 9 (bob on
 ; their ropes; no record starts as kind 7); 8 the grinning ghost of room 11
 ; that chases Jean; 9 the water drops of rooms 15 and 19; 10 skeleton archers;
-; 11 the stone stone heads in the wall of rooms 20 and 22 that shoot arrows; 12
+; 11 the stone heads in the wall of rooms 20 and 22 that shoot arrows; 12
 ; the spitting plants of room 14; 13 the fish of rooms 16 and 19 that jump out
 ; of the water; 14 the head of the Pestilent Beast; 15 the fire breath of the
 ; Beast (room 10; its timer is 110 frames); 16 Death of room 18; 17 Satan of

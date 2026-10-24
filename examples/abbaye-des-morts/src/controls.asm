@@ -73,7 +73,8 @@ ReadKempston:
 ; bit 0, and stops at the first key that is held (bit = 0). The caller
 ; (MenuFrame) stores the result for the key redefinition (RedefineOneKey). Note
 ; that GetKeyCode, which gives the key's code, scans each row from bit 0 up, so
-; with two keys held in one row the two routines can pick different keys.
+; with two keys held in one row the two routines can pick different keys
+; (observed: P and I held give the name P and the key I, F127).
 ;
 ; O:B Row index of the key (0-7), 0 when no key is held
 ; O:C Bit mask of the key within its half-row ($10, 8, 4, 2 or 1), 0 when no
@@ -397,8 +398,8 @@ PromptRight:
 ; effect 5 and stores the key's (row, mask) into the pair named by the record.
 ; The row and mask come from PressedKeyMask, which the frame routine MenuFrame
 ; filled with FindPressedKey's answer, while the name comes from the key code
-; of GetKeyCode; with two keys held at once these can differ. Finally the
-; keyboard line is redrawn with the new names (ScriptKeyboardLine).
+; of GetKeyCode; with two keys held at once these can differ (F127). Finally
+; the keyboard line is redrawn with the new names (ScriptKeyboardLine).
 ;
 ; Hardware: waits for frame interrupts with HALT; beeper effect through the
 ; request byte SoundRequest; text through RunScript.

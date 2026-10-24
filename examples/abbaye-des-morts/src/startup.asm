@@ -30,7 +30,8 @@
 ; $A28F, the last instruction of the key scan ReadKeyControls, so the joystick
 ; read that follows it at $A290 is never reached. When bits 0-4 stay clear (a
 ; Kempston interface with nothing pressed) a NOP is stored instead and the key
-; scan runs on into the joystick read.
+; scan runs on into the joystick read. A joystick moved during the probe
+; switches the interface off as well (observed, F35).
 ;
 ; Hardware: writes the border and the speaker through port $FE, sets IM 2 and
 ; the I register, writes port $7FFD through PageInBank0 (128K paging; harmless

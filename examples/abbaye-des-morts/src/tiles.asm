@@ -27,7 +27,8 @@
 ; class 4 ($84, FLAG_HARMFUL): harmful (tiles $05, $3B-$3C, $4E-$74); the
 ; player's code sets the hit flag $A8A0 from bit 2 (ProbePlayer), and
 ; UpdateScytheFalling and UpdateScytheSliding remove a scythe that meets bit 2
-; (from the code, not observed)
+; (observed: a falling scythe over cells poked to 4 is freed in the next frame,
+; F56)
 ;
 ; Class 2 (bit 1 alone: blocks walking and the head, cannot be stood on) is not
 ; used by any tile of the table; the border cells set by script op $8A

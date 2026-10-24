@@ -116,8 +116,12 @@ RoomScript00:
 
 ; Room script 1: A prayer of Hope
 ;
-; Room 1: column 1, row 0 of the 5x5 map (left is room 0, right 2, up 21, down
-; 6, counted modulo 25). Subscripts: ScriptRoomPanel, ScriptSky. No items.
+; Room 1: column 1, row 0 of the 5x5 map (left is room 0, right 2, down 6; up
+; gives room 2, not 21, by the byte wrap of CheckRoomExit, F77). Subscripts:
+; ScriptRoomPanel, ScriptSky. No items. Its flag map has no floor and no walls
+; except columns 30-31: in play the room is only seen through the window at rows
+; 4-7 of the left wall of room 2, where Jean stops in the one-cell pocket of
+; column 31 (F124).
 RoomScript01:
   DEFB $87,$01            ; ROOMNAME 1 "A prayer of Hope"
   DEFB $83                ; CALL ScriptRoomPanel
@@ -142,10 +146,10 @@ RoomScript01:
 
 ; Room script 2: Tower of the Bell
 ;
-; Room 2: column 2, row 0 of the 5x5 map (left is room 1, right 3, up 22, down
-; 7, counted modulo 25). Unpacks sprite set PackedSet13. Subscripts:
-; ScriptRoomPanel, ScriptSky, BlockStoneB, BlockStoneA. Items (RoomItems) at
-; row,column: bell 1,5, heart 7,12.
+; Room 2: column 2, row 0 of the 5x5 map (left is room 1, right 3, down 7; up
+; gives room 3, not 22, by the byte wrap of CheckRoomExit, F77). Unpacks sprite
+; set PackedSet13. Subscripts: ScriptRoomPanel, ScriptSky, BlockStoneB,
+; BlockStoneA. Items (RoomItems) at row,column: bell 1,5, heart 7,12.
 RoomScript02:
   DEFB $97,$0D            ; SPRITESET 13
   DEFB $87,$02            ; ROOMNAME 2 "Tower of the Bell"
@@ -192,9 +196,10 @@ BlockStoneB:
 
 ; Room script 3: Wine supplies
 ;
-; Room 3: column 3, row 0 of the 5x5 map (left is room 2, right 4, up 23, down
-; 8, counted modulo 25). Subscripts: ScriptRoomPanel, ScriptSky, BlockStoneA.
-; Items (RoomItems) at row,column: parchment 16,18, cross 18,28.
+; Room 3: column 3, row 0 of the 5x5 map (left is room 2, right 4, down 8; up
+; gives room 4, not 23, by the byte wrap of CheckRoomExit, F77). Subscripts:
+; ScriptRoomPanel, ScriptSky, BlockStoneA. Items (RoomItems) at row,column:
+; parchment 16,18, cross 18,28.
 RoomScript03:
   DEFB $87,$03            ; ROOMNAME 3 "Wine supplies"
   DEFB $83                ; CALL ScriptRoomPanel
@@ -222,13 +227,16 @@ RoomScript03:
 ; Has no room name, so the name panel is not drawn. Besides being the room of
 ; the grid it is the setting of the second part of the ending (RunEnding): the
 ; script clears the two bottom character rows with op $81 and, with op $90,
-; forces a full redraw. Quirk (F67): in play nothing redraws the status bar
-; that op $81 has erased, so the hearts and crosses stay blank, also in the
-; next rooms, until a life or a cross is gained or lost.
+; forces a full redraw. Quirk (F67): nothing redraws the status bar that op
+; $81 has erased, so the hearts and crosses stay blank, also in the next
+; rooms, until a life or a cross is gained or lost. Room 4 cannot be entered
+; in play (F124), so this shows only after the debug warp; after the ending
+; StartGame redraws the bar.
 ;
-; Room 4: column 4, row 0 of the 5x5 map (left is room 3, right 5, up 24, down
-; 9, counted modulo 25). Unpacks sprite set PackedSet1. Subscripts: ScriptSky,
-; BlockTreeBark, BlockGrassEarth. No items.
+; Room 4: column 4, row 0 of the 5x5 map (left is room 3, right 5, down 9; up
+; gives room 5, not 24, by the byte wrap of CheckRoomExit, F77). Unpacks sprite
+; set PackedSet1. Subscripts: ScriptSky, BlockTreeBark, BlockGrassEarth. No
+; items.
 ;
 ; Hardware: writes the screen bitmap and the attribute file directly (ops $81
 ; and $8F), not through the tile map.

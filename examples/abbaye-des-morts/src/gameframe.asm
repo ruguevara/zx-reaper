@@ -454,8 +454,10 @@ FreeSlot:
 ;
 ; The room item of room 24 (Satan !!!) at row 2, column 16 with flag $8521. It
 ; is drawn (frame 0) only while twelve crosses have been collected ($854D >=
-; 12); with fewer it is not drawn. A touch takes it whatever the cross count
-; (observed: with 0 crosses and Jean placed on its spot): the flag becomes $FF
+; 12); with fewer its slot is freed on its first frame without a touch. A
+; touch in that first frame takes it whatever the cross count (observed with 0
+; crosses and Jean placed on its spot at the room entry, F30; not possible in
+; play, Jean reaches it from the ring of crosses, F125): the flag becomes $FF
 ; and the item is freed with sound effect 5. The flag is tested by UpdateSatan
 ; (Satan disappears in a cloud of smoke), ActionFinalScroll (the final
 ; parchment appears) and ShowCrossRing (the ring of crosses stops).

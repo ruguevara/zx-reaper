@@ -186,6 +186,8 @@ RunCutscene_Loop:
 ; The exit of SpawnQueuedObjects when FindFreeSlot finds no free slot: drops
 ; the template address and position it had pushed, discards the rest of the
 ; queue (SpawnQueueCount = 0) and returns to the caller of SpawnQueuedObjects.
+; Happens in room 14, where the plants' volleys find all 11 slots busy and
+; some seeds are never spat (observed, F126).
 ;
 ; O:A 0
 SpawnQueued_NoSlot:

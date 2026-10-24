@@ -1005,8 +1005,11 @@ ItemCmdAttr:
 ; room number is reduced modulo 25 by subtracting 25 until it is below 25. The
 ; subtraction works on the byte, so a room number below zero (the left of room
 ; 0, the top row of rooms going up) is $FB-$FF and ends as 6 more than the
-; mathematical result (room 0 left gives room 5, room 2 up gives room 3);
-; whether the map has such exits was not checked.
+; mathematical result (room 0 left gives room 5, room 2 up gives room 3).
+; None of these exits can be reached in play: room 0 is only the intro, the
+; top edges of rooms 1-4 are out of reach and room 4 cannot be entered
+; (F124); only the debug warp (DebugMoveRoom) takes them (F77, observed by
+; poking the position).
 ;
 ; Hardware: none.
 CheckRoomExit:

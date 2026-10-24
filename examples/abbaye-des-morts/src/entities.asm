@@ -3396,12 +3396,13 @@ Scythe_Draw:
 ;
 ; Slot layout: see UpdateScytheFalling.
 ;
-; Bug candidate: the drawing path at $BB50 (a solid cell under the scythe: with
-; the scythe at its rounded height that only happens when it slides into a
-; ledge or wall) loads D and E from the x position, because H holds x here and
-; not y, so the scythe would be drawn at y = x. It was not reached in any run,
-; so the bug is not observed; the usual path (UpdateScytheFalling and this
-; routine alternating, see the findings) draws through Scythe_Draw.
+; Bug: the drawing path at $BB50 (a solid cell under the scythe: with the
+; scythe at its rounded height that only happens when it slides into a ledge
+; or wall) loads D and E from the x position, because H holds x here and not
+; y, so the scythe is drawn (and hit-tested) at y = x. Observed with the flags
+; of its row poked solid (F51); not reached in 5000 frames of room 18 without
+; pokes: the usual path (UpdateScytheFalling and this routine alternating, F50)
+; draws through Scythe_Draw.
 ;
 ; SP Slot address + 2 (the handler word was popped by the RET that entered the
 ;    routine)

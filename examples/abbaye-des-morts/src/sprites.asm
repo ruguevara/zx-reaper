@@ -143,7 +143,8 @@ QueueSprite_3:
 ; brings along the code bytes after it, which nobody uses. The queue tail is
 ; the operand of the first instruction (BuildRedrawList resets it to $C000
 ; every frame). There is no check for a full queue (16 jobs): the 17th would be
-; copied over the object slots at $C100.
+; copied over the object slots at $C100. The most seen in fuzzed runs of all
+; 25 rooms was 14 jobs (F44).
 ;
 ; HL Address of the 16-byte job (template)
 AddQueueJob:

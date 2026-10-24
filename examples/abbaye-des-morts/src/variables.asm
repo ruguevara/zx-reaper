@@ -253,10 +253,12 @@ LeverRoom20:
 ;
 ; 0, or $FF once the player has touched the chalice in room 24 (item type 11,
 ; ActionChalice; the chalice is drawn only once 12 crosses are collected, see
-; Crosses, but a touch takes it whatever the count). The enemy code of Satan
-; UpdateSatan tests it: while it is 0 Satan moves and attacks, once it is set
-; he turns into a cloud of smoke (once, see SatanSmoked). The crosses routine
-; ShowCrossRing stops adding crosses and the red scroll (item type 6,
+; Crosses; with fewer the item frees its slot on its first frame, so only a
+; touch on the room's first frame takes it, F30, which cannot happen in play:
+; the chalice is reached from the ring of crosses, F125). The enemy code of
+; Satan UpdateSatan tests it: while it is 0 Satan moves and attacks, once it is
+; set he turns into a cloud of smoke (once, see SatanSmoked). The crosses
+; routine ShowCrossRing stops adding crosses and the red scroll (item type 6,
 ; ActionFinalScroll) appears: touching it starts the ending. Never cleared
 ; except by a new game.
 ChaliceTaken:
@@ -426,7 +428,8 @@ CheckpointFlag8:
 ; the death routine KillPlayer; raised by one, up to 9 (MAX_LIVES), by a heart
 ; (ActionHeart). The status bar draws that many hearts (DrawLivesBar). When it
 ; is 0 at the end of the death animation the room state becomes 5, Game Over
-; (RoomState).
+; (RoomState). The dying monk still touches items, so a heart taken during the
+; death animation gives the life back, the last one too (observed, F121).
 Lives:
   DEFB $09
 
