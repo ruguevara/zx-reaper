@@ -26,7 +26,7 @@
 ; $89 y,x,w,h: TILEBLOCK, fill a rectangle with the current block repeated, its top-left tile at the rectangle's
 ; corner (#R$A0BE)
 ; $8A m: EDGES, make room edges solid by setting flag bit 1 on the border cells: bit 0 left column, 1 right column, 2
-; top row, 3 bottom row (#R$A065)
+; top row, 3 the row of 32 cells at $60E0 under the room (#R$A065)
 ; $8B c,t1..tc,n,(y,x)*n: STAMPS, draw a row of the c tiles at n positions (#R$9DF7)
 ; $8C y,x,t: TILE1, one tile at a position (#R$9E1B)
 ; $8D y,x,t,n,r1..rn: RUNS, from (y,x) draw tile t along the row (continuing on the next row after column 31): runs

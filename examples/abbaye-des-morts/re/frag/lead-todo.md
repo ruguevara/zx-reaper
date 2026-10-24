@@ -39,3 +39,13 @@
   the frame list has no overflow check.
 - Tool notes: zxq check prints only a block offset, not the entry at fault;
   label duplicates show only at assembly.
+- W5 splits: $9C58 "Show a full-screen text window" (entered by the ending
+  $887B), $9DD7 "Fill a rectangle of the tile map" (CALL from $9DC2, JP from
+  $A15C); $9DFE optional.
+- Writers of the LD HL,nn operand at $9CEE ($A615, $A75A, $BB57):
+  `@isub=LD (SmcEventScript+1),HL`.
+- Gates armed: $9C51 by $A836; $9C1B by $A782 and $85FC; $9BF3 by $A70B.
+- Drop constant OP_FIRST (unused); F21 overlaps F11.
+- Script operand lengths (W5, observed F13): $8D 5+c, $92 3+2k, $94 5+c,
+  $9D 5 bytes.
+- Open: why $9C58 sets $850C to 0 while the window is up; flag class 2.
