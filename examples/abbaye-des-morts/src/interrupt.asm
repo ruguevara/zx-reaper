@@ -179,32 +179,35 @@ GameFrameRoutine:
 ; 128K: music player entry points
 ;
 ; Three entry points that load the registers for CallInMusicBank and call a
-; routine of the music player in the music bank. The 128K code is not
-; disassembled and was not run (the simulator is a 48K machine), so what each
-; call does is a guess from the callers: Unknown. The names are the callers'
-; names.
+; routine in the music bank (data/music128.bin, at $CF6D in the bank; not
+; disassembled, and not run: the simulator is a 48K machine). The bank also
+; holds a copy of DepackScreen at $C000 and the two packed screens of tape
+; block 3 after it, the title at $C09D and the info screen at $CA8A (copied
+; there by the loader, Start128).
 ;
 ; MusicEntryEnding: DE = $FC4B, HL as the caller left it; called by RunEnding
 ; at the end of the ending (the stub at $88D5 that Patch128KHooks turns into
-; CALL $85E8). Probably silences the music.
+; CALL $85E8). The bank routine there calls BuildMirrorTable and sets
+; MusicTrack to 2 (read from its bytes; the rest is not known).
 ;
-; MusicEntryInfo: HL = $CA8A, then as MusicEntryGame; called through the stub
-; at WaitSpaceRelease when SPACE is held on the title (the info screen).
+; BankShowInfo: HL = $CA8A, then as BankShowTitle; called through the stub at
+; WaitSpaceRelease when SPACE is held on the title: the info screen.
 ;
-; MusicEntryGame: HL = $C09D, DE = $F9D7; called through the stub at
+; BankShowTitle: HL = $C09D, DE = $F9D7; called through the stub at
 ; StartGame_Music when a game starts and by WaitSpaceRelease when SPACE is
-; released. Probably starts the module at HL (the music is a Vortex Tracker II
-; module).
+; released. The bank routine at $F9D7 clears the attributes and jumps to $C000,
+; the copy of DepackScreen, with HL: it draws the title screen (read from the
+; bytes of the bank: LD B,3 / LD DE,$5800 / XOR A / fill / JP $C000).
 ;
 ; Hardware: 128K paging port, through CallInMusicBank.
 MusicEntryEnding:
   LD DE,$FC4B             ; music bank routine at $FC4B
   JP CallInMusicBank
-MusicEntryInfo:
-  LD HL,$CA8A             ; module address for the info screen (assumed)
-  JR MusicCallF9D7        ; skip the next LD HL
-MusicEntryGame:
-  LD HL,$C09D             ; module address of the game music (assumed)
-MusicCallF9D7:
-  LD DE,$F9D7             ; music bank routine at $F9D7
+BankShowInfo:
+  LD HL,$CA8A             ; the packed info screen in the bank
+  JR BankDrawScreen        ; skip the next LD HL
+BankShowTitle:
+  LD HL,$C09D             ; the packed title screen in the bank
+BankDrawScreen:
+  LD DE,$F9D7             ; bank routine: clear the attributes, unpack the screen
   JP CallInMusicBank

@@ -18,7 +18,8 @@
 ; HitTest: the documentation of some handlers calls the second pair a size,
 ; which is the same only while the first pair is 0.
 ;
-; +4 byte: Unknown, copied to slot +$15 (the values are 1 and 2)
+; +4 byte: number of animation frames, copied to slot +$15, the frame count
+; of StepAnimation (the values are 1 and 2)
 ;
 ; +5 byte: attribute of the sprite
 ;
@@ -39,7 +40,7 @@
 ; set the room unpacked.
 BehaviourJean:
   DEFB $00,$00,$00,$00,$02 ; hit box top, left, bottom, right; slot +$15
-                           ; (Unknown)
+                           ; (frame count)
   DEFB $46                ; attribute
   DEFW ShiftPairs         ; table of (first column, width) for x AND 3
   DEFB $0C                ; sprite height (2-pixel units)
@@ -58,7 +59,7 @@ BehaviourJean:
 ; Layout: see BehaviourJean.
 BehaviourCrusader:
   DEFB $00,$01,$0C,$06,$02 ; hit box top, left, bottom, right; slot +$15
-                           ; (Unknown)
+                           ; (frame count)
   DEFB $45                ; attribute
   DEFW ShiftPairs         ; table of (first column, width) for x AND 3
   DEFB $0C                ; sprite height (2-pixel units)
@@ -77,7 +78,7 @@ BehaviourCrusader:
 ; Layout: see BehaviourJean.
 BehaviourSkeleton:
   DEFB $02,$01,$0C,$06,$02 ; hit box top, left, bottom, right; slot +$15
-                           ; (Unknown)
+                           ; (frame count)
   DEFB $47                ; attribute
   DEFW ShiftPairs         ; table of (first column, width) for x AND 3
   DEFB $0C                ; sprite height (2-pixel units)
@@ -96,7 +97,7 @@ BehaviourSkeleton:
 ; Layout: see BehaviourJean.
 BehaviourWhiteFlyer:
   DEFB $00,$01,$0A,$06,$02 ; hit box top, left, bottom, right; slot +$15
-                           ; (Unknown)
+                           ; (frame count)
   DEFB $47                ; attribute
   DEFW ShiftPairs         ; table of (first column, width) for x AND 3
   DEFB $0C                ; sprite height (2-pixel units)
@@ -115,7 +116,7 @@ BehaviourWhiteFlyer:
 ; Layout: see BehaviourJean.
 BehaviourBat:
   DEFB $01,$01,$06,$06,$02 ; hit box top, left, bottom, right; slot +$15
-                           ; (Unknown)
+                           ; (frame count)
   DEFB $42                ; attribute
   DEFW ShiftPairs         ; table of (first column, width) for x AND 3
   DEFB $08                ; sprite height (2-pixel units)
@@ -132,7 +133,7 @@ BehaviourBat:
 ; Layout: see BehaviourJean.
 BehaviourRat:
   DEFB $03,$01,$06,$06,$02 ; hit box top, left, bottom, right; slot +$15
-                           ; (Unknown)
+                           ; (frame count)
   DEFB $45                ; attribute
   DEFW ShiftPairs         ; table of (first column, width) for x AND 3
   DEFB $08                ; sprite height (2-pixel units)
@@ -152,7 +153,7 @@ BehaviourRat:
 ; Layout: see BehaviourJean.
 BehaviourSpider:
   DEFB $00,$01,$05,$06,$02 ; hit box top, left, bottom, right; slot +$15
-                           ; (Unknown)
+                           ; (frame count)
   DEFB $44                ; attribute
   DEFW ShiftPairsAligned  ; table of (first column, width) for x AND 3
   DEFB $05                ; sprite height (2-pixel units)
@@ -168,7 +169,7 @@ BehaviourSpider:
 ; Layout: see BehaviourJean.
 BehaviourSpiderYellow:
   DEFB $00,$01,$05,$06,$02 ; hit box top, left, bottom, right; slot +$15
-                           ; (Unknown)
+                           ; (frame count)
   DEFB $06                ; attribute
   DEFW ShiftPairsAligned  ; table of (first column, width) for x AND 3
   DEFB $05                ; sprite height (2-pixel units)
@@ -188,7 +189,7 @@ ShiftPairsAligned:
 ; Layout: see BehaviourJean.
 BehaviourHangedMan:
   DEFB $00,$01,$07,$06,$01 ; hit box top, left, bottom, right; slot +$15
-                           ; (Unknown)
+                           ; (frame count)
   DEFB $46                ; attribute
   DEFW ShiftPairsAligned  ; table of (first column, width) for x AND 3
   DEFB $0C                ; sprite height (2-pixel units)
@@ -205,7 +206,7 @@ BehaviourHangedMan:
 ; Layout: see BehaviourJean.
 BehaviourWorm:
   DEFB $00,$01,$01,$06,$02 ; hit box top, left, bottom, right; slot +$15
-                           ; (Unknown)
+                           ; (frame count)
   DEFB $45                ; attribute
   DEFW ShiftPairs         ; table of (first column, width) for x AND 3
   DEFB $02                ; sprite height (2-pixel units)
@@ -222,7 +223,7 @@ BehaviourWorm:
 ; Layout: see BehaviourJean.
 BehaviourFlyA:
   DEFB $01,$01,$06,$06,$02 ; hit box top, left, bottom, right; slot +$15
-                           ; (Unknown)
+                           ; (frame count)
   DEFB $44                ; attribute
   DEFW ShiftPairsAligned  ; table of (first column, width) for x AND 3
   DEFB $08                ; sprite height (2-pixel units)
@@ -240,7 +241,7 @@ BehaviourFlyA:
 ; Layout: see BehaviourJean.
 BehaviourFlyB:
   DEFB $01,$01,$06,$06,$02 ; hit box top, left, bottom, right; slot +$15
-                           ; (Unknown)
+                           ; (frame count)
   DEFB $04                ; attribute
   DEFW ShiftPairsAligned  ; table of (first column, width) for x AND 3
   DEFB $08                ; sprite height (2-pixel units)
@@ -259,7 +260,7 @@ BehaviourFlyB:
 ; Layout: see BehaviourJean.
 BehaviourChaser:
   DEFB $01,$01,$06,$06,$02 ; hit box top, left, bottom, right; slot +$15
-                           ; (Unknown)
+                           ; (frame count)
   DEFB $45                ; attribute
   DEFW ShiftPairs         ; table of (first column, width) for x AND 3
   DEFB $08                ; sprite height (2-pixel units)
@@ -279,7 +280,7 @@ BehaviourChaser:
 ; Layout: see BehaviourJean.
 BehaviourBird:
   DEFB $03,$00,$04,$0B,$02 ; hit box top, left, bottom, right; slot +$15
-                           ; (Unknown)
+                           ; (frame count)
   DEFB $43                ; attribute
   DEFW ShiftPairsBird     ; table of (first column, width) for x AND 3
   DEFB $08                ; sprite height (2-pixel units)
@@ -313,7 +314,7 @@ ShiftPairsBird:
 ; (3 sprites).
 BehaviourDrop:
   DEFB $00,$03,$03,$05,$02 ; hit box top, left, bottom, right (2-pixel units);
-                           ; slot +$15 (Unknown)
+                           ; slot +$15 (frame count)
   DEFB $45,$04            ; attribute, height of the falling drop
   DEFW $EF53              ; hanging drop, frame 0
   DEFW $EF55              ; hanging drop, frame 1
@@ -347,7 +348,7 @@ SpriteBlockSplash:
 ; Layout: see BehaviourJean.
 BehaviourSoldier:
   DEFB $00,$01,$0C,$06,$02 ; hit box top, left, bottom, right; slot +$15
-                           ; (Unknown)
+                           ; (frame count)
   DEFB $44                ; attribute
   DEFW ShiftPairs         ; table of (first column, width) for x AND 3
   DEFB $0C                ; sprite height (2-pixel units)
@@ -367,7 +368,7 @@ BehaviourSoldier:
 ; (two frames each).
 BehaviourArcher:
   DEFB $03,$01,$0B,$06,$02 ; hit box top, left, bottom, right (2-pixel units);
-                           ; slot +$15 (Unknown)
+                           ; slot +$15 (frame count)
   DEFB $47,$0C,$02        ; attribute, sprite height (2-pixel units), width
                           ; (bytes)
   DEFW BehaviourArcher+$C ; sprites, first direction (left)
@@ -386,7 +387,7 @@ BehaviourArcher:
 ; pointer to the list of its two sprites.
 BehaviourStoneHead:
   DEFB $00,$00,$07,$07,$02 ; hit box top, left, bottom, right (2-pixel units);
-                           ; slot +$15 (Unknown)
+                           ; slot +$15 (frame count)
   DEFB $07,$08,$02        ; attribute, sprite height, width (bytes)
   DEFW BehaviourStoneHead+$A ; sprites
   DEFW $EF3E              ; sprite $EF3E
@@ -399,7 +400,7 @@ BehaviourStoneHead:
 ; then the addresses of its two sprites.
 BehaviourSeedPlant:
   DEFB $03,$01,$07,$06,$02 ; hit box top, left, bottom, right (2-pixel units);
-                           ; slot +$15 (Unknown)
+                           ; slot +$15 (frame count)
   DEFB $43,$08,$02        ; attribute, sprite height, width (bytes)
   DEFW $EF4B              ; sprite, frame 0
   DEFW $EF4D              ; sprite, frame 1
@@ -413,7 +414,7 @@ BehaviourSeedPlant:
 ; then the addresses of its two sprites.
 BehaviourFish:
   DEFB $00,$00,$07,$07,$02 ; hit box top, left, bottom, right (2-pixel units);
-                           ; slot +$15 (Unknown)
+                           ; slot +$15 (frame count)
   DEFB $03,$08,$02        ; attribute, sprite height, width (bytes)
   DEFW $EF4F              ; sprite, frame 0
   DEFW $EF51              ; sprite, frame 1
@@ -426,7 +427,7 @@ BehaviourFish:
 ; Layout: see BehaviourJean.
 BehaviourDemon:
   DEFB $02,$01,$0C,$06,$02 ; hit box top, left, bottom, right; slot +$15
-                           ; (Unknown)
+                           ; (frame count)
   DEFB $42                ; attribute
   DEFW ShiftPairs         ; table of (first column, width) for x AND 3
   DEFB $0C                ; sprite height (2-pixel units)
@@ -447,7 +448,7 @@ BehaviourDemon:
 ; Layout: see BehaviourJean.
 BehaviourFireWheel:
   DEFB $00,$02,$03,$05,$02 ; hit box top, left, bottom, right; slot +$15
-                           ; (Unknown)
+                           ; (frame count)
   DEFB $42                ; attribute
   DEFW ShiftPairsAligned  ; table of (first column, width) for x AND 3
   DEFB $04                ; sprite height (2-pixel units)
@@ -465,7 +466,7 @@ BehaviourFireWheel:
 ; sprite height, width in bytes, then the address of one sprite.
 BehaviourBeastHead:
   DEFB $00,$00,$13,$0F,$01 ; hit box top, left, bottom, right (2-pixel units);
-                           ; slot +$15 (Unknown)
+                           ; slot +$15 (frame count)
   DEFB $06,$14,$04        ; attribute, sprite height, width (bytes)
   DEFW $D763              ; sprite
 
@@ -488,7 +489,7 @@ BehaviourBeastHead:
 ; SpriteBlockPyreCrusaderL the crusaders at the pyre (right and left).
 BehaviourBeastFire:
   DEFB $00,$00,$17,$07,$02 ; hit box top, left, bottom, right (2-pixel units);
-                           ; slot +$15 (Unknown)
+                           ; slot +$15 (frame count)
   DEFB $42,$02,$0C        ; attribute, width (bytes), height (2-pixel units)
   DEFW $D768              ; jet, upper sprite, frame 0
   DEFW $D76D              ; jet, upper sprite, frame 1
@@ -536,7 +537,7 @@ SpriteBlockPyreCrusaderL:
 ; sprite addresses.
 BehaviourDeath:
   DEFB $02,$02,$0C,$0D,$02 ; hit box top, left, bottom, right (2-pixel units);
-                           ; slot +$15 (Unknown)
+                           ; slot +$15 (frame count)
   DEFB $47                ; attribute
   DEFW ShiftTableDeath    ; shift table (ShiftTableDeath)
   DEFB $0E                ; sprite height
@@ -570,7 +571,7 @@ SpriteBlockScythe:
 ; attribute and four sprite addresses.
 BehaviourSatan:
   DEFB $00,$00,$17,$0F,$02 ; hit box top, left, bottom, right (2-pixel units);
-                           ; slot +$15 (Unknown)
+                           ; slot +$15 (frame count)
   DEFB $42,$04,$0C        ; attribute, width (bytes), height (2-pixel units)
   DEFW $D78F              ; body sprite
   DEFW $D796              ; body sprite

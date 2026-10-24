@@ -31,7 +31,7 @@ clears $8512-$854D and then sets the lives to 9 (F123).
 | $8504 | [InterruptRoutine](../src/variables.asm#L34) | word: the routine the interrupt handler calls ([Game loop](04-game-loop.md)) |
 | $8506 | [MachineType](../src/variables.asm#L44) | 1 on a 48K; on a 128K the port $7FFD value of the music bank |
 | $8507 | [PagingState](../src/variables.asm#L53) | last value written to port $7FFD |
-| $8508 | [L8508](../src/variables.asm#L61) | unused |
+| $8508 | [UnusedByte](../src/variables.asm#L61) | unused |
 | $8509 | [RoomNumber](../src/variables.asm#L77) | current room, 0-25 |
 | $850A | [RoomTableEnd](../src/variables.asm#L87) | constant $1A, read together with the room as a word: the end mark of the room tables |
 | $850B | [ExitDirection](../src/variables.asm#L98) | side of the last room exit: 0 right, 1 left, 2 down, 3 up; the next room is swept in from it (F41) |
@@ -40,32 +40,32 @@ clears $8512-$854D and then sets the lives to 9 (F123).
 | $850E | [ParchmentLine1](../src/variables.asm#L137), [ParchmentLine2](../src/variables.asm#L139) | string numbers of the two lines of the parchment being read |
 | $8510 | [BloodAnimTimer](../src/variables.asm#L150) | countdown of the bubbling blood (rooms 21-23) |
 | $8511 | [CrossFlashTimer](../src/variables.asm#L159) | countdown of the colour step of the ring of crosses |
-| $8512 | [RespawnX](../src/variables.asm#L175), [RespawnY](../src/variables.asm#L179) | two words: where Jean appears when a room is entered in state 2 or 4 |
-| $8516 | [PlayerBoxXMax](../src/variables.asm#L196) | 4 bytes: Jean's hit box, right, left, bottom and top edge, rebuilt every frame |
-| $851A | [ChurchDoorShut](../src/variables.asm#L214) | $FF once Jean has entered the Abandoned church (room 7) |
-| $851B | [BellRung](../src/variables.asm#L240) | the bell of room 2: 0 or 1 |
-| $851C | [LeverRoom9](../src/variables.asm#L242), [LeverRoom10](../src/variables.asm#L244) | the levers of rooms 9 and 10: 0 or 1 |
-| $851E | [WheelState](../src/variables.asm#L246) | the wheel of faith of room 17: 0 at rest, 6 turned, bit 7 = still touched (F31) |
-| $851F | [LeverRoom20](../src/variables.asm#L248) | the lever of room 20 |
+| $8512 | [RespawnX](../src/variables.asm#L177), [RespawnY](../src/variables.asm#L181) | two words: where Jean appears when a room is entered in state 2 or 4 |
+| $8516 | [PlayerBoxXMax](../src/variables.asm#L198) | 4 bytes: Jean's hit box, right, left, bottom and top edge, rebuilt every frame |
+| $851A | [ChurchDoorShut](../src/variables.asm#L216) | $FF once Jean has entered the Abandoned church (room 7) |
+| $851B | [BellRung](../src/variables.asm#L242) | the bell of room 2: 0 or 1 |
+| $851C | [LeverRoom9](../src/variables.asm#L244), [LeverRoom10](../src/variables.asm#L246) | the levers of rooms 9 and 10: 0 or 1 |
+| $851E | [WheelState](../src/variables.asm#L248) | the wheel of faith of room 17: 0 at rest, 6 turned, bit 7 = still touched (F31) |
+| $851F | [LeverRoom20](../src/variables.asm#L250) | the lever of room 20 |
 | $8520 | | unused |
-| $8521 | [ChaliceTaken](../src/variables.asm#L264) | $FF once the chalice is taken |
-| $8522 | [SatanSmoked](../src/variables.asm#L275) | $FF once Satan has turned to smoke |
-| $8523 | [DoorwayRoom10](../src/variables.asm#L290), [DoorwayRoom19](../src/variables.asm#L292) | the two arches; bit 7 = Jean has just arrived through it (F32) |
-| $8525-$8540 | [HeartRoom2](../src/variables.asm#L319) to [WheelCrossRoom22](../src/variables.asm#L373) | one flag per pick-up item, $FF = taken: 9 hearts, 6 parchments, the red scroll ([RedScrollTaken](../src/variables.asm#L349)), 12 crosses |
-| $8541 | [CrossRingCount](../src/variables.asm#L389) | crosses of the ring drawn so far in room 24, 0-12 |
-| $8542 | [CrossRingDone](../src/variables.asm#L391) | set to 12 with the twelfth cross, cleared by Satan's smoke; nothing reads it |
-| $8543-$854B | [CheckpointFlag0](../src/variables.asm#L406) to [CheckpointFlag8](../src/variables.asm#L422) | the active checkpoint: all 0, or one nonzero (F33) |
-| $854C | [Lives](../src/variables.asm#L433) | 9 at the start, at most 9 from hearts (F122) |
-| $854D | [Crosses](../src/variables.asm#L442) | crosses collected, 0-12 |
-| $854E | [SoundPlaying](../src/variables.asm#L450) | beeper effect playing (0 none) |
-| $854F | [SoundRequest](../src/variables.asm#L468) | effect requested by the game; replaces the one playing (F104, F107) |
-| $8550 | [L8550](../src/variables.asm#L474) | unused |
-| $8551 | [MusicTrack](../src/variables.asm#L486) | track for the 128K music player; not read on a 48K |
-| $8552 | [SpawnQueueCount](../src/variables.asm#L499) | requests waiting in the object list |
-| $8553 | [CrossColours](../src/variables.asm#L508) | 6 attributes the ring of crosses cycles through |
-| $8559 | [ProbeRight](../src/variables.asm#L522) | 4 bytes: tile flags around the chasing face of room 11 |
-| $855D | [RedrawListPtr](../src/variables.asm#L538) | word: write pointer of the redraw run list |
-| $855F-$8584 | [InterruptStack](../src/variables.asm#L548) | the interrupt handler's stack |
+| $8521 | [ChaliceTaken](../src/variables.asm#L266) | $FF once the chalice is taken |
+| $8522 | [SatanSmoked](../src/variables.asm#L277) | $FF once Satan has turned to smoke |
+| $8523 | [DoorwayRoom10](../src/variables.asm#L292), [DoorwayRoom19](../src/variables.asm#L294) | the two arches; bit 7 = Jean has just arrived through it (F32) |
+| $8525-$8540 | [HeartRoom2](../src/variables.asm#L321) to [WheelCrossRoom22](../src/variables.asm#L375) | one flag per pick-up item, $FF = taken: 9 hearts, 6 parchments, the red scroll ([RedScrollTaken](../src/variables.asm#L351)), 12 crosses |
+| $8541 | [CrossRingCount](../src/variables.asm#L391) | crosses of the ring drawn so far in room 24, 0-12 |
+| $8542 | [CrossRingDone](../src/variables.asm#L393) | set to 12 with the twelfth cross, cleared by Satan's smoke; nothing reads it |
+| $8543-$854B | [CheckpointFlag0](../src/variables.asm#L408) to [CheckpointFlag8](../src/variables.asm#L424) | the active checkpoint: all 0, or one nonzero (F33) |
+| $854C | [Lives](../src/variables.asm#L435) | 9 at the start, at most 9 from hearts (F122) |
+| $854D | [Crosses](../src/variables.asm#L444) | crosses collected, 0-12 |
+| $854E | [SoundPlaying](../src/variables.asm#L452) | beeper effect playing (0 none) |
+| $854F | [SoundRequest](../src/variables.asm#L470) | effect requested by the game; replaces the one playing (F104, F107) |
+| $8550 | [UnusedByte2](../src/variables.asm#L476) | unused |
+| $8551 | [MusicTrack](../src/variables.asm#L488) | track for the 128K music player; not read on a 48K |
+| $8552 | [SpawnQueueCount](../src/variables.asm#L501) | requests waiting in the object list |
+| $8553 | [CrossColours](../src/variables.asm#L510) | 6 attributes the ring of crosses cycles through |
+| $8559 | [ProbeRight](../src/variables.asm#L524) | 4 bytes: tile flags around the chasing face of room 11 |
+| $855D | [RedrawListPtr](../src/variables.asm#L540) | word: write pointer of the redraw run list |
+| $855F-$8584 | [InterruptStack](../src/variables.asm#L550) | the interrupt handler's stack |
 
 Jean's variables are in the player module (&#36;A894-&#36;A8A4), next to his code:
 
@@ -249,7 +249,7 @@ cannot be taken (F31). What each action does is in
 ## Behaviour blocks
 
 A room object record points to a behaviour block in $93D3-$95FE
-([BehaviourJean](../src/behaviours.asm#L40) and on). [SpawnRoomObject](../src/sequences.asm#L451) copies its first four bytes
+([BehaviourJean](../src/behaviours.asm#L41) and on). [SpawnRoomObject](../src/sequences.asm#L451) copies its first four bytes
 to slot +&#36;C-+&#36;F and keeps the address of byte 5 in slot +$10, through which
 the handler reads the rest. The walking and flying kinds (0, 2-6, 8) share
 one layout:
@@ -270,7 +270,7 @@ stone heads, the plants, the fish, the Beast, Death (with its own shift table
 for a sprite 19 columns wide per frame) and Satan (two sprite halves). The
 same area holds the sprite blocks of the projectiles and the ending's actors
 (attribute, shift table, height, sprites), which the templates point to, for
-example [SpriteBlockFireball](../src/behaviours.asm#L321) and [SpriteBlockScythe](../src/behaviours.asm#L554).
+example [SpriteBlockFireball](../src/behaviours.asm#L322) and [SpriteBlockScythe](../src/behaviours.asm#L555).
 
 ## Object slots
 
@@ -308,7 +308,7 @@ Objects made during play (arrows, seeds, fireballs, scythes, flames, splashes,
 the smoke, the ending's actors) are copied from templates in $BC92-&#36;BDD9
 ([ArrowLeftTemplate](../src/templates.asm#L26) and on). A creature that shoots writes a 4-byte
 request (template address, y, x) to the object list at $5DC0 through
-[ObjectListPtr](../src/buffers.asm#L15) and counts it in [SpawnQueueCount](../src/variables.asm#L499); at the end of the
+[ObjectListPtr](../src/buffers.asm#L15) and counts it in [SpawnQueueCount](../src/variables.asm#L501); at the end of the
 frame [SpawnQueuedObjects](../src/sequences.asm#L221) turns every request into a slot (F55):
 
 | Template bytes | Slot |
@@ -329,7 +329,7 @@ copied over Satan's own slot (F53). The ending's two actor lists
 ## Checkpoints
 
 [Checkpoints](../src/templates.asm#L364) holds ten records of 3 bytes: room, row, column. Records 1-9
-belong to the nine flags [CheckpointFlag0](../src/variables.asm#L406)-[CheckpointFlag8](../src/variables.asm#L422); the tenth is
+belong to the nine flags [CheckpointFlag0](../src/variables.asm#L408)-[CheckpointFlag8](../src/variables.asm#L424); the tenth is
 the start of a game. [SelectCheckpoint](../src/templates.asm#L315) takes the record of the first
 nonzero flag, or the tenth when all are 0, and sets the respawn position to
 column x 4, row x 4 (F33).

@@ -12,10 +12,10 @@ bytes): three standard-speed blocks.
 | Block | What | Source |
 | --- | --- | --- |
 | 01 | header: program "l'Abbaye", 5689 bytes, LINE 10, program 40 bytes | `tape/tape.txt` |
-| 02 | BASIC line 10 (`PRINT USR (VARS+3)`) and the variables: one string, l$, of 5646 bytes holding Stage1 | `src/loader.bas`, `src/stage1.asm` |
+| 02 | BASIC line 10 (`PRINT USR (VARS+3)`) and the variables: one string, l&#36;, of 5646 bytes holding Stage1 | `src/loader.bas`, `src/stage1.asm` |
 | 03 | headerless, flag $FF, 29796 bytes loaded at $625E by the loader's copy of LD-BYTES | `scripts/block3.py` |
 
-- Stage1 (in l$, run at $5CF6): moves the packed stage 2 to the top of
+- Stage1 (in l&#36;, run at $5CF6): moves the packed stage 2 to the top of
   memory and unpacks it (MegaLZ) to $6000-$8AFF, then returns to $6000.
 - Stage 2 (`src/stage2.asm`): machine check (48K / 128K by paging, then the
   fastest bank by timing), the picture at $7000 revealed cell by cell,
@@ -27,7 +27,7 @@ bytes): three standard-speed blocks.
   RCS order), the info screen ($6C4B, 1251 bytes, RCS order), the 128K music
   ($712E, 4811 bytes, 11631 unpacked, a Vortex Tracker II player and module
   that goes to a 128K bank; not disassembled) and the game ($83F9, 21193
-  bytes, 40704 unpacked to $6000-$FEFF).
+  bytes, 40704 unpacked to $6000-&#36;FEFF).
 - The packer: `scripts/megalz.py` is an optimal MegaLZ packer whose ties
   fall the way the original packer's did, so all five streams come out byte
   for byte (checked by `make`). The game stream takes about 2.5 minutes to
@@ -43,7 +43,7 @@ Details and evidence: `re/frag/[ABCD]-report.md` (classification reports).
 
 | Range | What | Status |
 | --- | --- | --- |
-| $5B00-$5DBF | room tile map, 22 rows x 32 tile numbers ($A20D: row/column -> address) | buffer |
+| $5B00-$5DBF | room tile map, 22 rows x 32 tile numbers (&#36;A20D: row/column -> address) | buffer |
 | $5DC0-$5DFF | object list (pointer at $BE56) | buffer |
 | $5E00-$60BF | tile flag map, $CD00+tile for each cell (3 pages above the tile map); overwrites the start-up code $6000-$6072 | buffer |
 | $6000-$6072 | start-up (run once) | code |
@@ -62,13 +62,13 @@ Details and evidence: `re/frag/[ABCD]-report.md` (classification reports).
 | $8A8F-$9047 | object types, frame lists, room objects (11 bytes), room items (8 bytes) | records |
 | $9048-$93D2 | text: 53 length-prefixed strings | text |
 | $93D3-$95FE | behaviour data for object kinds | records |
-| $95FF-$A595 | redraw, sprite drawing, parchments, script interpreter and opcodes, text, keys, menus | code |
-| $A596-$BE55 | game frame: player, items, room exits, sprite unpacking, entities | code |
-| $BE56-$BFFF | pointers, frame call list | vars, buffer |
-| $C000-$CCFF | sprite draw queue, object slots (11 x 22 bytes at $C100), redraw buffers | buffer |
-| $CD00-$D6FF | tile flags, tile attributes, tile bitmaps (256 x 8) | tables, gfx |
-| $D700-$FEFF | sprite sheet: a page per pixel row, 40 rows; columns $63-$FF filled per room | gfx, buffer |
-| $FF00-$FFFF | outline mask table built at start-up | buffer |
+| $95FF-&#36;A595 | redraw, sprite drawing, parchments, script interpreter and opcodes, text, keys, menus | code |
+| $A596-&#36;BE55 | game frame: player, items, room exits, sprite unpacking, entities | code |
+| $BE56-&#36;BFFF | pointers, frame call list | vars, buffer |
+| $C000-&#36;CCFF | sprite draw queue, object slots (11 x 22 bytes at $C100), redraw buffers | buffer |
+| $CD00-&#36;D6FF | tile flags, tile attributes, tile bitmaps (256 x 8) | tables, gfx |
+| $D700-&#36;FEFF | sprite sheet: a page per pixel row, 40 rows; columns $63-&#36;FF filled per room | gfx, buffer |
+| $FF00-&#36;FFFF | outline mask table built at start-up | buffer |
 
 ## Game structure
 
@@ -77,7 +77,7 @@ Details and evidence: `re/frag/[ABCD]-report.md` (classification reports).
   outline mask table, probes the Kempston port, IM 2 with I=$84: the vector
   table $8400-$8500 points to $8585, the interrupt handler, which saves all
   registers and calls the routine in InterruptRoutine ($8504): the menu frame
-  ($A43D) or the game frame ($85E2: a sound step, then GameFrame $A596). The
+  (&#36;A43D) or the game frame ($85E2: a sound step, then GameFrame $A596). The
   game logic runs once per interrupt; the foreground (MainLoop $8664) only
   draws (F103).
 - Rooms: a 5x5 grid, 25 rooms, number in RoomNumber $8509 (right +1, left
@@ -93,7 +93,7 @@ Details and evidence: `re/frag/[ABCD]-report.md` (classification reports).
   the creatures and items into 11 object slots of 22 bytes at $C100, each
   run by its handler word through RET (F34, F80).
 - Keys: ControlKeys $A2BF (redefinable), ControlsRead/Held/Pressed
-  $A2CF-$A2D1; the Kempston read at $A290 is cut off by a RET at $A28F when
+  $A2CF-&#36;A2D1; the Kempston read at $A290 is cut off by a RET at $A28F when
   no interface answers on port $1F (F35).
 
 ## Coverage
@@ -107,15 +107,17 @@ Kempston branches, the warp keys, rare branches.
 
 ## Relocation
 
-The shift test moves $85BC-$BFFF (SHIFT_START/SHIFT_END in re/layout.mk) and
+The shift test moves $85BC-&#36;BFFF (SHIFT_START/SHIFT_END in re/layout.mk) and
 passes at +$100 and +$101, on the input scripts and on every room entered
 directly, the ending and game over (scripts/shift-rooms.sh). Fixed: the
 start-up code (entered at $6000, under the flag map), FlagRowTable at $6100
 and Im2Table at $8400 (read by page), the interrupt handler at $8585 (an IM
 2 vector is two equal bytes), the font, the sprites and the room scripts
 below; the buffers, the tile tables and the sprite sheet above (a page per
-pixel row). The moved part can grow into the $FF fill at $BEFC-$BFFF, $104
+pixel row). The moved part can grow into the $FF fill at $BEFC-&#36;BFFF, $104
 bytes. Records that hold an address in two bytes (item actions, crusader
 templates in RoomObjects, cutscene actors) use `low`/`high` of the label.
-F120 (one frame of the monk drawn from code bytes) makes room 22 with fuzz
+On a 48K only: the 128K music bank (data/music128.bin, data) calls
+BuildMirrorTable (&#36;BE48) and reads KeyRows (&#36;A2D4, $A2D9) at fixed addresses,
+inside the moved part. F120 (one frame of the monk drawn from code bytes) makes room 22 with fuzz
 seed 22 differ in the moved build; scripts/shift-rooms.sh uses seed 122 there.

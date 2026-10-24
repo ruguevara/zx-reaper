@@ -57,21 +57,21 @@ F58).
 | 1 | cross | 3, 10, 13, 14, 16, 17, 18, 19 | [ActionCrossWheelRest](../src/gameframe.asm#L569) | in $8535-$8540 | taken if the wheel is at rest |
 | 2 | cross | 9, 15, 17, 22 | [ActionCrossWheelTurned](../src/gameframe.asm#L553) | in $8535-$8540 | taken if the wheel is turned |
 | 3 | checkpoint (a gravestone cross) | 8, 11, 12, 14, 15, 19, 21, 23 | [ActionCheckpoint](../src/gameframe.asm#L273) | $8544-$854B | becomes the active checkpoint, sound 9 |
-| 4 | bell | 2 | [ActionBellOrLever](../src/gameframe.asm#L496) | [BellRung](../src/variables.asm#L240) $851B | 0 to 1 once, sound 3 |
+| 4 | bell | 2 | [ActionBellOrLever](../src/gameframe.asm#L496) | [BellRung](../src/variables.asm#L242) $851B | 0 to 1 once, sound 3 |
 | 5 | parchment | 3, 8, 12, 14, 16, 21 | [ActionParchment](../src/gameframe.asm#L785) | $852E-$8533 | shows two lines of text, gone |
-| 6 | red scroll | 24 | [ActionFinalScroll](../src/gameframe.asm#L236) | [RedScrollTaken](../src/variables.asm#L349) $8534 | starts the ending |
-| 7 | church door trigger (no sprite) | 7 | [ActionChurchDoor](../src/gameframe.asm#L173) | [CheckpointFlag0](../src/variables.asm#L406) $8543 | shuts the door behind Jean |
+| 6 | red scroll | 24 | [ActionFinalScroll](../src/gameframe.asm#L236) | [RedScrollTaken](../src/variables.asm#L351) $8534 | starts the ending |
+| 7 | church door trigger (no sprite) | 7 | [ActionChurchDoor](../src/gameframe.asm#L173) | [CheckpointFlag0](../src/variables.asm#L408) $8543 | shuts the door behind Jean |
 | 8 | arch | 10, 19 | [ActionArchToRiver](../src/gameframe.asm#L365), [ActionArchToBeast](../src/gameframe.asm#L339) | $8523, $8524 | moves Jean to the other arch, sound 4 |
 | 9 | lever | 9, 10, 20 | [ActionBellOrLever](../src/gameframe.asm#L496), [ActionGateLever](../src/gameframe.asm#L524) | $851C, $851D, $851F | 0 to 1 once, sound 3 (room 20: 5) |
-| 10 | wheel of faith | 17 | [ActionWheel](../src/gameframe.asm#L304) | [WheelState](../src/variables.asm#L246) $851E | 0 and 6 in turn, sound 5 |
-| 11 | chalice | 24 | [ActionChalice](../src/gameframe.asm#L469) | [ChaliceTaken](../src/variables.asm#L264) $8521 | Satan turns to smoke |
+| 10 | wheel of faith | 17 | [ActionWheel](../src/gameframe.asm#L304) | [WheelState](../src/variables.asm#L248) $851E | 0 and 6 in turn, sound 5 |
+| 11 | chalice | 24 | [ActionChalice](../src/gameframe.asm#L469) | [ChaliceTaken](../src/variables.asm#L266) $8521 | Satan turns to smoke |
 
 [StartGame](../src/mainloop.asm#L65) clears all the flags ($8512-$854D) at the start of a game.
 
 ## Hearts
 
 [ActionHeart](../src/gameframe.asm#L415) sets the flag to $FF, arms the redraw of the hearts bar
-([DrawLivesBar](../src/sprites.asm#L1321)) and adds one to [Lives](../src/variables.asm#L433) with `CP 9` / `ADC A,0`, so at 9
+([DrawLivesBar](../src/sprites.asm#L1321)) and adds one to [Lives](../src/variables.asm#L435) with `CP 9` / `ADC A,0`, so at 9
 lives the heart is used up and adds nothing (F122). Without a touch the heart
 beats: two frames, 20 frames each.
 
@@ -79,7 +79,7 @@ beats: two frames, 20 frames each.
 
 The twelve crosses are the goal of the game: the first parchment, in room 3,
 says "Twelve crosses / against the devil". A taken cross ([TakeCross](../src/gameframe.asm#L581)) sets
-its flag to $FF, adds one to [Crosses](../src/variables.asm#L442) and arms [DrawCrossesHud](../src/hud.asm#L17), which
+its flag to $FF, adds one to [Crosses](../src/variables.asm#L444) and arms [DrawCrossesHud](../src/hud.asm#L17), which
 redraws the twelve cross cells of row 23 with as many in bright white as are
 held, the rest blue.
 
@@ -99,7 +99,7 @@ brothers / changed their faith", which fits the four crosses of type 2
 ## Checkpoints
 
 A checkpoint whose flag is 0 ([ActionCheckpoint](../src/gameframe.asm#L273)) clears all nine
-checkpoint flags [CheckpointFlag0](../src/variables.asm#L406)-[CheckpointFlag8](../src/variables.asm#L422), sets its own to 2
+checkpoint flags [CheckpointFlag0](../src/variables.asm#L408)-[CheckpointFlag8](../src/variables.asm#L424), sets its own to 2
 and requests sound effect 9; the picture drawn is bit 1 of the flag, so the
 active one is lit. After a death [SelectCheckpoint](../src/templates.asm#L315) restarts Jean at the
 first flag that is not 0, or in room 5 when there is none (F33; the table of
@@ -111,14 +111,14 @@ reaches another checkpoint before room 7 was not checked.
 ## The church door (room 7)
 
 The Abandoned church has an item with no sprite at row 15, column 2, just
-inside its left door. While the door is open ([ChurchDoorShut](../src/variables.asm#L214) is 0) a
-touch sets checkpoint flag 0 to 1 and [ChurchDoorShut](../src/variables.asm#L214) to $FF, and starts
+inside its left door. While the door is open ([ChurchDoorShut](../src/variables.asm#L216) is 0) a
+touch sets checkpoint flag 0 to 1 and [ChurchDoorShut](../src/variables.asm#L216) to $FF, and starts
 [DoorLeftShut](../src/roomscripts.asm#L474) through the one-shot runner [RunEventScript](../src/hud.asm#L279), which draws
 the door at once. From then on the item makes the door rattle: a countdown of
 32 to 63 frames (R AND $1F plus $20, the R register as a random number) ends
 in sound effect 8 and three frames of the other door picture
 [DoorLeftRattle](../src/roomscripts.asm#L485), then the normal one again (F28). The scripts of rooms 6
-and 7 draw a door on their common edge whenever [ChurchDoorShut](../src/variables.asm#L214) is set, so
+and 7 draw a door on their common edge whenever [ChurchDoorShut](../src/variables.asm#L216) is set, so
 Jean cannot go back to the forest ([Rooms](05-rooms.md)).
 
 ## Bell and levers
@@ -144,7 +144,7 @@ gate in front of Jean disappears at once.
 The arch of room 10 (row 17, column 23) and the one of room 19 (row 15,
 column 21) lead to each other ([ActionArchToRiver](../src/gameframe.asm#L365), [ActionArchToBeast](../src/gameframe.asm#L339)).
 A touch sets bit 7 of the other arch's flag, puts the other arch's position
-into [RespawnX](../src/variables.asm#L175) and [RespawnY](../src/variables.asm#L179) (room 10: X $5C, Y $44; room 19: X $54,
+into [RespawnX](../src/variables.asm#L177) and [RespawnY](../src/variables.asm#L181) (room 10: X $5C, Y $44; room 19: X $54,
 Y $3C), sets the room number, Jean's state to 4 and the room state to 2
 (respawn), and requests sound effect 4 ([EnterRoomAtArch](../src/gameframe.asm#L385)). Bit 7 of the
 arrival arch's flag is a latch: that arch ignores Jean until he has walked
@@ -208,7 +208,7 @@ on the cross at row 6, F125; [Rooms](05-rooms.md)).
 
 ![Room 24 with twelve crosses: the ring and the chalice above it](img/rooms-ring.png)
 
-Taking the chalice sets [ChaliceTaken](../src/variables.asm#L264). In the same game frame (the items are
+Taking the chalice sets [ChaliceTaken](../src/variables.asm#L266). In the same game frame (the items are
 spawned before the creatures, so their slots come first; observed: both flags
 change in frame 25 of a run with Jean placed on the chalice) Satan turns into
 a cloud of smoke for 150 frames, his fireballs vanish, the ring is erased and
@@ -260,7 +260,7 @@ close the windows.
 ![The pyre after 280 frames: the player's own dying animation](img/items-ending-burn.png)
 
 Using the death of the player for the burning has side effects that do not
-show. [KillPlayer](../src/player.asm#L475) takes a life (observed: [Lives](../src/variables.asm#L433) 9 to 8 at the moment
+show. [KillPlayer](../src/player.asm#L475) takes a life (observed: [Lives](../src/variables.asm#L435) 9 to 8 at the moment
 he catches fire), and at the end of the animation [UpdateDying_End](../src/player.asm#L525) writes
 room state $84 (or $85 with no life left) on every frame; the cutscene loop
 does not look at the room state and sets it to 0 when it ends, and

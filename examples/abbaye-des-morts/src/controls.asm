@@ -235,7 +235,7 @@ GetKeyCode_Found:
 ; the first byte is a RET, so SPACE does nothing. On the 128K the start-up code
 ; Patch128KHooks turns the RET into CALL $85EE (the two bytes after it are that
 ; address), which calls into the music bank at $CA8A; the routine then waits
-; for the key to be released and calls MusicEntryGame (music bank routine at
+; for the key to be released and calls BankShowTitle (music bank routine at
 ; $C09D). What the two music calls do is Unknown (the 128K code was not run:
 ; the simulator is 48K).
 ;
@@ -251,7 +251,7 @@ WaitSpaceRelease_Loop:
   LD A,(KeyCode)          ; key code
   OR A
   JR NZ,WaitSpaceRelease_Loop
-  CALL MusicEntryGame     ; 128K: music bank routine at $C09D
+  CALL BankShowTitle     ; 128K: music bank routine at $C09D
   XOR A
   RET
 

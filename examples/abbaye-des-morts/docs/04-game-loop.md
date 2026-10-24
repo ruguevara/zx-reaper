@@ -38,7 +38,7 @@ SmcInterruptReturn:
 ```
 
 The return address and the interrupted SP are stored in the operands of the
-last two instructions, the registers go on [InterruptStack](../src/variables.asm#L548) ($855F-$8584),
+last two instructions, the registers go on [InterruptStack](../src/variables.asm#L550) ($855F-$8584),
 and the handler leaves with `LD SP,nn` and `JP nn` instead of `RET`. The
 reason is the foreground: while it runs a frame list, SP walks up through the
 list at $BE5A as a data pointer ([below](#the-frame-call-list)), and just
@@ -80,7 +80,7 @@ the ending and the Game Over screen; the room state decides how much of
 | 6 | [RunObjectSlots](../src/gameframe.asm#L92) | every busy slot: items test Jean's box and act, creatures move, test their hit box and queue their sprites ([Creatures](05-creatures.md), [Items](05-items-ending.md)) |
 | 7 | [UpdatePlayer](../src/player.asm#L554) | Jean's state machine: death on a hit, walking, jumping, falling, crouching; queues his sprite |
 | 8 | [EndFrameList](../src/gameframe.asm#L59) | closes the list and opens the gate for the foreground, unless the foreground is running the previous list |
-| 9 | [SpawnQueuedObjects](../src/sequences.asm#L221) | turns the requests of shooting creatures into slots, when [SpawnQueueCount](../src/variables.asm#L499) is not 0 |
+| 9 | [SpawnQueuedObjects](../src/sequences.asm#L221) | turns the requests of shooting creatures into slots, when [SpawnQueueCount](../src/variables.asm#L501) is not 0 |
 | 10 | [CheckRoomExit](../src/player.asm#L1015) | Jean beyond an edge: next room, room state 1 |
 
 The order has consequences that the later sections rely on:
@@ -173,7 +173,7 @@ returns ([Title and menus](03-title-and-menu.md)). Each pass reads the low
 | --- | --- | --- |
 | $80 | the main loop, once a room is drawn | one pass of play: see below |
 | 1 | [CheckRoomExit](../src/player.asm#L1015) when Jean crosses an edge (also the debug warp) | [EnterRoom](../src/mainloop.asm#L188), [RedrawRoom](../src/sprites.asm#L1147), state $80 |
-| 2 | the arches between rooms 10 and 19 ([ActionArchToRiver](../src/gameframe.asm#L365), [ActionArchToBeast](../src/gameframe.asm#L339)) | Jean to the respawn position ([RespawnX](../src/variables.asm#L175)), then as 1 |
+| 2 | the arches between rooms 10 and 19 ([ActionArchToRiver](../src/gameframe.asm#L365), [ActionArchToBeast](../src/gameframe.asm#L339)) | Jean to the respawn position ([RespawnX](../src/variables.asm#L177)), then as 1 |
 | 3 | the red scroll of room 24 ([ActionFinalScroll](../src/gameframe.asm#L236)) | [RunEnding](../src/sequences.asm#L113), then a new game at [StartGame](../src/mainloop.asm#L65) |
 | $84 | the end of the dying animation with lives left ([UpdateDying_End](../src/player.asm#L525)) | [SelectCheckpoint](../src/templates.asm#L315): room and position of the active checkpoint, then as 2 |
 | $85, 5 | the end of the dying animation with no life left; R and Y in [GameFrame](../src/gameframe.asm#L20) | Game Over screen, then [StartGame](../src/mainloop.asm#L65) |

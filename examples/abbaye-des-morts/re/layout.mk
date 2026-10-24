@@ -14,6 +14,7 @@ TAP2SNA_OPTS := -c finish-tape=1 --start 24576
 # $8400 (both read by page), the handler at $8585 (an IM 2 vector is two equal
 # bytes), the font and the room scripts. Fixed above: buffers, tile tables and
 # the sprite sheet, a page per pixel row. build.asm saves the whole region.
+# 48K only: the 128K music bank (data) calls $BE48 and reads $A2D4/$A2D9.
 SHIFT_START := 0x85BC
 SHIFT_END := 0xC000
 SHIFT_LOAD := 0x6000

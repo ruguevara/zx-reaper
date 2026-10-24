@@ -423,7 +423,8 @@ RevealExit:
   RET
 
 ; Reveal the picture at $7000 cell by cell in the order of RevealOrder,
-; each cell with a click and a flash of the border.
+; each cell with two clicks (the speaker bit from a ROM byte, the MIC bit
+; from R).
 RevealPicture:
   LD A,(BORDCR)
   RRA
@@ -477,7 +478,7 @@ RevealPicture:
   EDUP
   LD A,(HL)
   LD (DE),A
-  LD A,R                ; border flash
+  LD A,R                ; bit 3 (MIC) from R: a second click; the border stays C
   AND 8
   OR C
   OUT ($FE),A

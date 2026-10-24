@@ -76,7 +76,7 @@ can be moved as a block (`make shift-test`), the rest stays where it is
 | --- | --- | --- | --- |
 | $5B00-$5DBF | 704 | room tile map: 22 rows x 32 tile numbers | [TILE_MAP](../src/game.asm#L7) |
 | $5DC0-$5DFF | 64 | object list: requests to create objects (template, y, x) | [OBJECT_LIST](../src/game.asm#L8), [ObjectListPtr](../src/buffers.asm#L15) |
-| $5E00-$60BF | 704 | tile flag map: class and redraw marks of every cell (F68) | [FLAG_MAP](../src/game.asm#L11), [L6073](../src/startup.asm#L150) |
+| $5E00-$60BF | 704 | tile flag map: class and redraw marks of every cell (F68) | [FLAG_MAP](../src/game.asm#L11), [FlagMapTail](../src/startup.asm#L150) |
 | $6000-$6072 | 115 | start-up code, run once, then overwritten by the flag map | [StartUp](../src/startup.asm#L39) |
 | $60C0-$60FF | 64 | main stack (SP = $6100) | [MainStack](../src/startup.asm#L158) |
 | $6100-$612F | 48 | address of each flag map row (24 words, built at start-up) | [FlagRowTable](../src/startup.asm#L171) |
@@ -87,20 +87,20 @@ can be moved as a block (`make shift-test`), the rest stays where it is
 | $7236-$83A7 | 4466 | room script table (26 words) and the scripts | [RoomScriptTable](../src/roomscripts.asm#L8) |
 | $83A8-$83FF | 88 | ending actor lists, the debug room warp, music track of each room | [CutsceneList1](../src/cutscenelists.asm#L14), [DebugWarpRoom](../src/cutscenelists.asm#L39), [RoomMusicTable](../src/cutscenelists.asm#L63) |
 | $8400-$8500 | 257 | IM 2 vector table, all $85 | [Im2Table](../src/im2table.asm#L11) |
-| $8501-$855E | 94 | game variables | [CutsceneDone](../src/variables.asm#L7) to [RedrawListPtr](../src/variables.asm#L538) |
-| $855F-$8584 | 38 | interrupt stack | [InterruptStack](../src/variables.asm#L548) |
+| $8501-$855E | 94 | game variables | [CutsceneDone](../src/variables.asm#L7) to [RedrawListPtr](../src/variables.asm#L540) |
+| $855F-$8584 | 38 | interrupt stack | [InterruptStack](../src/variables.asm#L550) |
 | $8585-$8A8E | 1290 | interrupt handler, 128K hooks, new game, main loop, room entry, beeper effects, intro, ending, spawning | [InterruptHandler](../src/interrupt.asm#L30), [StartGame](../src/mainloop.asm#L65) |
 | $8A8F-$9047 | 1465 | item types and frame lists, room objects (77 x 11 bytes), room items (45 x 8 bytes) | [ObjectTypeTable](../src/objects.asm#L14), [RoomObjects](../src/objects.asm#L259), [RoomItems](../src/objects.asm#L580) |
 | $9048-$93D2 | 907 | 53 length-prefixed strings | [RoomNames](../src/text.asm#L18) |
-| $93D3-$95FE | 556 | behaviour blocks of the creatures, projectile sprite blocks | [BehaviourJean](../src/behaviours.asm#L40) |
+| $93D3-$95FE | 556 | behaviour blocks of the creatures, projectile sprite blocks | [BehaviourJean](../src/behaviours.asm#L41) |
 | $95FF-&#36;A595 | 3991 | redraw, sprite drawing, status bar, parchments, script interpreter, keys, menus, cheat | [DrawRedrawList](../src/redraw.asm#L32) to [ScriptGameOver](../src/controls.asm#L761) |
 | $A596-&#36;BC91 | 5884 | game frame, items, hit tests, Jean, room exits, tile effects, sprite unpacking, creatures | [GameFrame](../src/gameframe.asm#L20), [PlayerState](../src/player.asm#L30), [EntityHandlers](../src/entities.asm#L29) |
 | $BC92-&#36;BE55 | 452 | templates of spawned objects, frame list runner, checkpoints | [ArrowLeftTemplate](../src/templates.asm#L26), [Checkpoints](../src/templates.asm#L364) |
 | $BE56-&#36;BEFB | 166 | two list pointers and the frame call list | [ObjectListPtr](../src/buffers.asm#L15), [FrameList](../src/buffers.asm#L44) |
-| $BEFC-&#36;BFFF | 260 | unused (&#36;FF) | [LBEFC](../src/buffers.asm#L52) |
+| $BEFC-&#36;BFFF | 260 | unused (&#36;FF) | [SpareFill1](../src/buffers.asm#L52) |
 | $C000-&#36;C0FF | 256 | sprite draw queue: 16 jobs of 16 bytes | [DrawQueue](../src/buffers.asm#L69) |
 | $C100-&#36;C1F3 | 244 | 11 object slots of 22 bytes and their end mark | [ObjectSlots](../src/buffers.asm#L119) |
-| $C1F4-&#36;C1FF | 12 | unused (&#36;FF) | [LC1F4](../src/buffers.asm#L126) |
+| $C1F4-&#36;C1FF | 12 | unused (&#36;FF) | [SpareFill2](../src/buffers.asm#L126) |
 | $C200-&#36;CCFF | 2816 | redraw buffers: run list, lengths, attributes, 8 pixel-row pages | [RedrawRuns](../src/buffers.asm#L144) to [RedrawPixels](../src/buffers.asm#L176) |
 | $CD00-&#36;D6FF | 2560 | tile flags, tile attributes, tile bitmaps (256 tiles) | [TileFlags](../src/tiles.asm#L36), [TileAttrs](../src/tiles.asm#L61), [TileGfx](../src/tiles.asm#L90) |
 | $D700-&#36;FEFF | 10240 | sprite sheet: 40 pages, one per pixel row; columns $63-&#36;FF filled per room | [SpriteSheet](../src/spritesheet.asm#L25), [SpriteSheetLower](../src/spritesheet.asm#L278) |
@@ -212,9 +212,9 @@ screen layout on the fly.
    contended on the original 128K and banks 4 and 6 on the +2A/+3, so the
    fastest of the four is an uncontended one on either (inferred). The machine
    type is then the port $7FFD value of that bank ($11-$16).
-2. **Picture** ([RevealPicture](../src/stage2.asm#L427)). The picture stored at $7000
+2. **Picture** ([RevealPicture](../src/stage2.asm#L428)). The picture stored at $7000
    (RCS order, attributes at $8800) is copied to the screen one cell at a
-   time, in the order of the 768 cell numbers at [RevealOrder](../src/stage2.asm#L491),
+   time, in the order of the 768 cell numbers at [RevealOrder](../src/stage2.asm#L492),
    from the middle of the screen outwards. Before each cell it sends bit 4 of
    a ROM byte (the cell number used as a ROM address) to the speaker, after
    it bit 3 of the R register (the MIC output), and waits 26 `DJNZ` loops;
@@ -225,7 +225,7 @@ screen layout on the fly.
 
    ![The picture half revealed, 4 frames after stage 2 starts (simulator, white screen beforehand)](img/overview-reveal.png)
 
-3. **Tape loader** ([InstallLoader](../src/stage2.asm#L673)). LD-BYTES is copied from
+3. **Tape loader** ([InstallLoader](../src/stage2.asm#L674)). LD-BYTES is copied from
    the ROM ($0556-$05E2) to $FE00 and patched: the border colour operand
    becomes 0, the `PUSH HL` of the SA/LD-RET return address becomes a `NOP`
    (the copy returns straight to its caller; with a non-standard ROM the same
@@ -233,17 +233,17 @@ screen layout on the fly.
    closing `JP NC,LD-8-BITS`
    is pointed at the copy, and, when the ROM's LD-EDGE-1 is the standard one
    (no $C3 at $05E9), the `CALL LD-EDGE-2` inside LD-8-BITS is pointed at new
-   edge routines copied to $FE8D ([LdEdge2](../src/stage2.asm#L564), [LdEdge1](../src/stage2.asm#L567)).
+   edge routines copied to $FE8D ([LdEdge2](../src/stage2.asm#L565), [LdEdge1](../src/stage2.asm#L568)).
    In place of the ROM's delay loop these draw one cell (8 bytes) of the
    middle column of the current hourglass frame before each edge sample,
    the cells in the order top, middle, bottom, middle; they keep the border
    black (`AND 7` became `AND 0`) and do not test BREAK. The pilot tone and
    the sync pulses are still timed by the ROM's own edge routines, which the
    copy calls at their ROM addresses.
-4. **Hourglass.** [DrawHourglass](../src/stage2.asm#L699) draws a 3 x 3 cell
+4. **Hourglass.** [DrawHourglass](../src/stage2.asm#L700) draws a 3 x 3 cell
    hourglass in bright yellow at the bottom right corner (cells 29-31 of rows
    21-23) and copies two sets of ten frames of its middle column to $FC00 and
-   $FD00. [BuildFrameTable](../src/stage2.asm#L645) fills the page at $FB00 so that the
+   $FD00. [BuildFrameTable](../src/stage2.asm#L646) fills the page at $FB00 so that the
    high byte of the count of bytes still to load selects a frame: the frame
    steps on once per tenth of the block. Bit 0 of the low byte selects the
    frame set; the two sets differ in the falling sand, so the middle of the
@@ -331,9 +331,9 @@ its bytes in [`data/music128.bin`](../data/music128.bin), not run.
 | | 48K | 128K |
 | --- | --- | --- |
 | [MachineType](../src/variables.asm#L44) | 1 | port $7FFD value of the music bank, $11-$16 |
-| [StartGame_Music](../src/mainloop.asm#L74) (start of every game) | `LD HL,MusicEntryGame` | `CALL` [MusicEntryGame](../src/interrupt.asm#L206): bank routine $F9D7 with HL = $C09D |
-| [WaitSpaceRelease](../src/controls.asm#L245) (SPACE on the title) | `RET`: SPACE does nothing | `CALL` [MusicEntryInfo](../src/interrupt.asm#L203): bank routine $F9D7 with HL = $CA8A, then [MusicEntryGame](../src/interrupt.asm#L206) when SPACE is released |
-| [RunEnding_Music](../src/sequences.asm#L149) (end of the ending) | `LD HL,MusicEntryEnding` | `CALL` [MusicEntryEnding](../src/interrupt.asm#L200): bank routine $FC4B |
+| [StartGame_Music](../src/mainloop.asm#L74) (start of every game) | `LD HL,BankShowTitle` | `CALL` [BankShowTitle](../src/interrupt.asm#L209): bank routine $F9D7 with HL = $C09D |
+| [WaitSpaceRelease](../src/controls.asm#L245) (SPACE on the title) | `RET`: SPACE does nothing | `CALL` [BankShowInfo](../src/interrupt.asm#L206): bank routine $F9D7 with HL = $CA8A, then [BankShowTitle](../src/interrupt.asm#L209) when SPACE is released |
+| [RunEnding_Music](../src/sequences.asm#L149) (end of the ending) | `LD HL,MusicEntryEnding` | `CALL` [MusicEntryEnding](../src/interrupt.asm#L203): bank routine $FC4B |
 | [PlaySoundStep](../src/mainloop.asm#L287) (every frame) | beeper effects | with an AY: `JP` [PlayEffectOnAY](../src/interrupt.asm#L157), bank routine $CF7D |
 | title after Game Over or the ending | [ScriptTitle](../src/controls.asm#L741) is drawn | not drawn (F111) |
 | loading and info screens | loading screen unpacked by the loader; info screen lost | both kept packed in the music bank |
@@ -341,11 +341,11 @@ its bytes in [`data/music128.bin`](../data/music128.bin), not run.
 The bank routine at $F9D7 is, by its bytes, `LD B,3 / LD DE,$5800 / XOR A`,
 a loop that clears the 768 attributes, and `JP $C000`, the copy of
 [DepackScreen](../src/stage2.asm#L285); $C09D and $CA8A are where [Start128](../src/stage2.asm#L110)
-put the packed loading and info screens. So on a 128K the two "music" entries
+put the packed loading and info screens. So on a 128K these two entries
 unpack a screen: the title at the start of every game (which is why the
 title script is not needed) and the info screen while SPACE is held
-(inferred from the bytes; the source names [MusicEntryGame](../src/interrupt.asm#L206) and
-[MusicEntryInfo](../src/interrupt.asm#L203) come from their callers). What $CF7D and $FC4B do in the
+(inferred from the bytes, not run; hence the names [BankShowTitle](../src/interrupt.asm#L209) and
+[BankShowInfo](../src/interrupt.asm#L206)). What $CF7D and $FC4B do in the
 bank was not worked out; $CF7D reads two bytes of [KeyRows](../src/controls.asm#L191) (&#36;A2D4 and
 $A2D9) and $FC4B calls [BuildMirrorTable](../src/templates.asm#L388) at $BE48 and writes
-[MusicTrack](../src/variables.asm#L486) at $8551, all at fixed addresses (by their bytes).
+[MusicTrack](../src/variables.asm#L488) at $8551, all at fixed addresses (by their bytes).

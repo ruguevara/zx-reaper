@@ -20,8 +20,8 @@ at once; falls never do.
 | [PlayerTileHead](../src/player.asm#L43), [PlayerTileRight](../src/player.asm#L45), [PlayerTileFeet](../src/player.asm#L47), [PlayerTileLeft](../src/player.asm#L49) | the probe results of this frame: the OR of the flag bytes at the probe points |
 | [PlayerHit](../src/player.asm#L51) | 0, 4 (a harmful cell), $FF (a creature), 2 (the pyre of the ending); not 0 kills |
 | [PlayerX](../src/player.asm#L53), [PlayerY](../src/player.asm#L55) | position, 8.8; the high byte counts units of 2 pixels |
-| [PlayerBoxXMax](../src/variables.asm#L196) .. [PlayerBoxYMin](../src/variables.asm#L202) | the hit box of this frame, which creatures and items compare with theirs |
-| [Lives](../src/variables.asm#L433), [RespawnX](../src/variables.asm#L175), [RespawnY](../src/variables.asm#L179) | lives left; where the next respawn puts him |
+| [PlayerBoxXMax](../src/variables.asm#L198) .. [PlayerBoxYMin](../src/variables.asm#L204) | the hit box of this frame, which creatures and items compare with theirs |
+| [Lives](../src/variables.asm#L435), [RespawnX](../src/variables.asm#L177), [RespawnY](../src/variables.asm#L181) | lives left; where the next respawn puts him |
 
 The high byte of X runs 0-$7F across the 256-pixel room and the high byte of
 Y 0-$57 down its 176 pixel rows. (X, Y) is the top left corner of the sprite,
@@ -188,7 +188,7 @@ creature's box overlaps Jean's ([Creatures](05-creatures.md)). In the ending
 the pyre monk stores 2 ([Ending](05-items-ending.md)).
 
 [UpdatePlayerActive](../src/player.asm#L629) tests the flag first; if it is not 0, [KillPlayer](../src/player.asm#L475)
-takes a life from [Lives](../src/variables.asm#L433) at once, requests sound effect 6, clears the flag
+takes a life from [Lives](../src/variables.asm#L435) at once, requests sound effect 6, clears the flag
 and sets state 1. [UpdateDying](../src/player.asm#L490) then runs every frame:
 
 - Y goes up by $0080, one pixel per frame;
@@ -196,7 +196,7 @@ and sets state 1. [UpdateDying](../src/player.asm#L490) then runs every frame:
   [MonkDyingFrames](../src/player.asm#L916) are three flames (large, medium, small) in the order
   0 1 0 1 2 1 2, drawn in bright red instead of bright yellow;
 - picture 7 is not drawn, and at picture 8 [UpdateDying_End](../src/player.asm#L525) sets the room
-  state to $84, restart after a death, or $85, Game Over, when [Lives](../src/variables.asm#L433) is 0,
+  state to $84, restart after a death, or $85, Game Over, when [Lives](../src/variables.asm#L435) is 0,
   and asks for the hearts to be redrawn.
 
 The animation lasts 32 frames (F73). Jean cannot leave the room while dying
@@ -209,11 +209,11 @@ life back, even the last one, and then no Game Over follows (F121).
 Room state 4 makes the main loop call [SelectCheckpoint](../src/templates.asm#L315)
 ([MainLoop_AfterDeath](../src/mainloop.asm#L105)). It clears the room state and the hit flag, turns a
 dying monk into a standing one, and scans the nine checkpoint flags
-[CheckpointFlag0](../src/variables.asm#L406)-[CheckpointFlag8](../src/variables.asm#L422) for the first one that is not 0. Its
+[CheckpointFlag0](../src/variables.asm#L408)-[CheckpointFlag8](../src/variables.asm#L424) for the first one that is not 0. Its
 index selects a 3-byte record of [Checkpoints](../src/templates.asm#L364) (room, row, column); with all
 nine at 0 the tenth record, the start in room 5, is used (F33). The room goes
 to [RoomNumber](../src/variables.asm#L77) and row x 4 and column x 4 to the high bytes of
-[RespawnY](../src/variables.asm#L179) and [RespawnX](../src/variables.asm#L175); the main loop copies them to Jean and enters
+[RespawnY](../src/variables.asm#L181) and [RespawnX](../src/variables.asm#L177); the main loop copies them to Jean and enters
 the room, which rebuilds it with all its creatures at their start.
 
 | Flag | Set by | Room | Respawn (row, column) |
@@ -232,7 +232,7 @@ the room, which rebuilds it with all its creatures at their start.
 Touching a checkpoint clears all nine flags and sets its own to 2, so at most
 one is active ([Items](05-items-ending.md)). A death always returns Jean to
 that checkpoint, whatever room he died in. The arches of rooms 10 and 19 also
-write [RespawnX](../src/variables.asm#L175) and [RespawnY](../src/variables.asm#L179), but only for their own move (room state
+write [RespawnX](../src/variables.asm#L177) and [RespawnY](../src/variables.asm#L181), but only for their own move (room state
 2); a death after an arch goes through [SelectCheckpoint](../src/templates.asm#L315) and overwrites
 them (observed: Jean placed on the arch of room 19 arrived in room 10 at
 X $5C, Y $44; room state $84 poked there restarted him in room 5 at X $24,

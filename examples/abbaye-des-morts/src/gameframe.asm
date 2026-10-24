@@ -836,10 +836,10 @@ HitTest:
 ; player box PlayerBoxXMax (min x, max x, min y, max y of Jean) and jumps to IX
 ; with carry set when they overlap, clear when not.
 ;
-; D Top of the box (y)
-; E Left of the box (x)
-; B Bottom of the box (y)
-; C Right of the box (x)
+; D Left of the box (min x)
+; E Top of the box (min y)
+; B Right of the box (max x)
+; C Bottom of the box (max y)
 ; IX Where to go on (carry set: overlap)
 OverlapTest:
   LD HL,(PlayerBoxXMax)   ; H = player min x, L = player max x

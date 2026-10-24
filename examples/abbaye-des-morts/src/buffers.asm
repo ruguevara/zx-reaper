@@ -36,7 +36,7 @@ FrameListPtr:
 ; byte that is popped as the flags and not used, and the attribute (the fields
 ; are described at SpriteCmd). The list has room for 16 commands and the
 ; closing word $BDEB ($A2 bytes); no check for a full list was seen, and the
-; fill after it (LBEFC) would take the overflow. The most seen in fuzzed runs
+; fill after it (SpareFill1) would take the overflow. The most seen in fuzzed runs
 ; of all 25 rooms was 14 commands (rooms 10 and 15, F44).
 ;
 ; The interrupt handler writes into this area while SP points here and puts the
@@ -49,7 +49,7 @@ FrameList:
 ; Never read and never written in the runs made (rooms 9, 12, 14, 15 and 17
 ; with random keys for 1500 frames, nothing was written into $BEFC-$BFFF). It
 ; follows the frame call list.
-LBEFC:
+SpareFill1:
   DEFS $0104,$FF
 
   ORG $C000
@@ -123,7 +123,7 @@ ObjectSlots:
 ;
 ; Follows the object slots and their end mark at $C1F2. Never written in the
 ; runs made.
-LC1F4:
+SpareFill2:
   DEFS $0C,$FF
 
 ; Redraw run list: the cells to copy to the screen this frame, grouped by row

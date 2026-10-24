@@ -87,8 +87,8 @@ IntroText:
 
 ; Satan's words: strings 43-45
 ;
-; The first screen of the ending sequence (RunEnding): white text on black,
-; printed centred by the script ScriptEnding1: "your doom will come / not by my
+; The first screen of the ending sequence (RunEnding, room 25): black text on
+; bright red in the text window, printed centred by the script ScriptEnding1: "your doom will come / not by my
 ; hand / but by human hands".
 SatanText:
   DEFM $13,"your doom will come" ; string 43
@@ -98,7 +98,7 @@ SatanText:
 ; The "Heresy" message: strings 46-48
 ;
 ; The second screen of the ending sequence, printed centred by the script
-; ScriptEnding2 before the second part of the ending (room 25): "Heresy!!! The
+; ScriptEnding2 at the second part of the ending (room 4, the pyre): "Heresy!!! The
 ; Cathar is hidden on the throne of Satan, burn him".
 HeresyText:
   DEFM $14,"Heresy!!! The Cathar" ; string 46

@@ -194,12 +194,12 @@ entered:
 
 | Room | Subscript | Drawn while | Effect |
 | --- | --- | --- | --- |
-| 6 | [DoorRight](../src/roomscripts.asm#L575), column 31, rows 14-17 | [ChurchDoorShut](../src/variables.asm#L214) is not 0 | the way back into the church is shut |
-| 7 | [DoorLeftShut](../src/roomscripts.asm#L474), column 0, rows 14-17 | [ChurchDoorShut](../src/variables.asm#L214) is not 0 | the church door, shut behind Jean (F28) |
-| 8 | [DoorRight](../src/roomscripts.asm#L575) | the lever of room 10 ([LeverRoom10](../src/variables.asm#L244)) is 0 | the way right to room 9 |
-| 8 | [EraseWallBlock](../src/roomscripts.asm#L565), 2 x 2 at row 20, column 26 | the bell of room 2 ([BellRung](../src/variables.asm#L240)) is not 0 | erases a wall block |
-| 19 | [DoorLeftLow](../src/roomscripts.asm#L1150), column 0, rows 16-19 | the lever of room 9 ([LeverRoom9](../src/variables.asm#L242)) is 0 | the way left to room 18 |
-| 20 | [DoorRight](../src/roomscripts.asm#L575) | the lever of room 20 ([LeverRoom20](../src/variables.asm#L248)) is 0 | the gate right to room 21 |
+| 6 | [DoorRight](../src/roomscripts.asm#L575), column 31, rows 14-17 | [ChurchDoorShut](../src/variables.asm#L216) is not 0 | the way back into the church is shut |
+| 7 | [DoorLeftShut](../src/roomscripts.asm#L474), column 0, rows 14-17 | [ChurchDoorShut](../src/variables.asm#L216) is not 0 | the church door, shut behind Jean (F28) |
+| 8 | [DoorRight](../src/roomscripts.asm#L575) | the lever of room 10 ([LeverRoom10](../src/variables.asm#L246)) is 0 | the way right to room 9 |
+| 8 | [EraseWallBlock](../src/roomscripts.asm#L565), 2 x 2 at row 20, column 26 | the bell of room 2 ([BellRung](../src/variables.asm#L242)) is not 0 | erases a wall block |
+| 19 | [DoorLeftLow](../src/roomscripts.asm#L1150), column 0, rows 16-19 | the lever of room 9 ([LeverRoom9](../src/variables.asm#L244)) is 0 | the way left to room 18 |
+| 20 | [DoorRight](../src/roomscripts.asm#L575) | the lever of room 20 ([LeverRoom20](../src/variables.asm#L250)) is 0 | the gate right to room 21 |
 
 The door tiles are class 3, so a door is a wall. Two items do not wait for the
 next visit: the church trigger and the lever of room 20 store a script
@@ -252,15 +252,15 @@ two tiles are class 4: the blood at the foot of these rooms kills. See
 ### The ring of twelve crosses (room 24)
 
 Op $9F, the last command of room 24's script, switches on [ShowCrossRing](../src/effects.asm#L240).
-It does nothing until Jean holds twelve crosses ([Crosses](../src/variables.asm#L442)). Then every
+It does nothing until Jean holds twelve crosses ([Crosses](../src/variables.asm#L444)). Then every
 fifth pass ([CrossFlashTimer](../src/variables.asm#L159)) it:
 
 1. advances a colour index 0-5 kept in the operand of the instruction at
-   [SmcCrossColour](../src/effects.asm#L251) and copies that attribute of [CrossColours](../src/variables.asm#L508) (yellow,
+   [SmcCrossColour](../src/effects.asm#L251) and copies that attribute of [CrossColours](../src/variables.asm#L510) (yellow,
    red, magenta, blue, cyan, green, all bright) into [TileAttrs](../src/tiles.asm#L61) for tile
    $4C, so all the crosses of the ring change colour together;
-2. unless the chalice has been taken ([ChaliceTaken](../src/variables.asm#L264)), adds one cross to the
-   ring ([CrossRingCount](../src/variables.asm#L389), up to 12, with sound effect 5) and stamps that
+2. unless the chalice has been taken ([ChaliceTaken](../src/variables.asm#L266)), adds one cross to the
+   ring ([CrossRingCount](../src/variables.asm#L391), up to 12, with sound effect 5) and stamps that
    many tiles $4C at the positions of [CrossRingPositions](../src/roomscripts.asm#L1477) through
    [PlaceTile](../src/script.asm#L489), which also marks them for redraw.
 

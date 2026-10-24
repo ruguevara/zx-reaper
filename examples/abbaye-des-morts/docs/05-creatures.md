@@ -93,7 +93,7 @@ all free at entry, are enough; neither spawner checks for a full table
 
 During play a creature that shoots builds a 4-byte record (template address,
 y, x) at [SPAWN_TEMPLATE](../src/game.asm#L9) and [SPAWN_POSITION](../src/game.asm#L10), appends it to the object
-list at [OBJECT_LIST](../src/game.asm#L8) ($5DC0) and increments [SpawnQueueCount](../src/variables.asm#L499). At the end
+list at [OBJECT_LIST](../src/game.asm#L8) ($5DC0) and increments [SpawnQueueCount](../src/variables.asm#L501). At the end
 of the game frame [SpawnQueuedObjects](../src/sequences.asm#L221) copies each template of
 `src/templates.asm` into a free slot: bytes 0-5, then x and y plus the
 template's two signed offsets, then bytes 8-17 (F55). The templates of the
@@ -144,7 +144,7 @@ down (F93, F101).
 [HitTest](../src/gameframe.asm#L821) pops two words from the slot, the offset and the far corner of
 the hit box (y in the low byte, x in the high byte), adds both to the
 position, and falls into [OverlapTest](../src/gameframe.asm#L844), which compares the box with Jean's
-([PlayerBoxXMax](../src/variables.asm#L196)). Both corners are measured from the position, so the
+([PlayerBoxXMax](../src/variables.asm#L198)). Both corners are measured from the position, so the
 second word is a size only when the offset is 0 (F100). The test is
 
 - creature right edge >= Jean's left edge and creature left edge < Jean's
@@ -176,18 +176,18 @@ first frame table, right or down from the second (F93).
 
 | Creature | Block | Rooms | Moves | Speed, pixels per frame |
 | --- | --- | --- | --- | --- |
-| rat | [BehaviourRat](../src/behaviours.asm#L133) | 2 | x | 1 |
-| bat | [BehaviourBat](../src/behaviours.asm#L116) | 8 | x | 1, 0.5 |
-| worm | [BehaviourWorm](../src/behaviours.asm#L206) | 9, 14 | x | 0.5 |
-| skeleton | [BehaviourSkeleton](../src/behaviours.asm#L78) | 13, 22 | x | 1 |
-| white ghost | [BehaviourWhiteFlyer](../src/behaviours.asm#L97) | 22, 23 | x | 1 |
-| magenta bird | [BehaviourBird](../src/behaviours.asm#L280) | 20, 23 | x | 1, 1.5 |
-| green soldier | [BehaviourSoldier](../src/behaviours.asm#L348) | 15, 20 | x | 0.5 |
-| red demon | [BehaviourDemon](../src/behaviours.asm#L427) | 21, 22 | x | 1 |
-| green spider | [BehaviourSpider](../src/behaviours.asm#L153) | 3, 14, 16, 19 | y | 0.75-1.3 |
-| yellow spider | [BehaviourSpiderYellow](../src/behaviours.asm#L169) | 3 | y | 0.5, 1.25 |
-| fly (two kinds) | [BehaviourFlyA](../src/behaviours.asm#L223), [BehaviourFlyB](../src/behaviours.asm#L241) | 12 | y | 0.75-2 |
-| fire wheel | [BehaviourFireWheel](../src/behaviours.asm#L448) | 22, 23 | y | 2, 3 |
+| rat | [BehaviourRat](../src/behaviours.asm#L134) | 2 | x | 1 |
+| bat | [BehaviourBat](../src/behaviours.asm#L117) | 8 | x | 1, 0.5 |
+| worm | [BehaviourWorm](../src/behaviours.asm#L207) | 9, 14 | x | 0.5 |
+| skeleton | [BehaviourSkeleton](../src/behaviours.asm#L79) | 13, 22 | x | 1 |
+| white ghost | [BehaviourWhiteFlyer](../src/behaviours.asm#L98) | 22, 23 | x | 1 |
+| magenta bird | [BehaviourBird](../src/behaviours.asm#L281) | 20, 23 | x | 1, 1.5 |
+| green soldier | [BehaviourSoldier](../src/behaviours.asm#L349) | 15, 20 | x | 0.5 |
+| red demon | [BehaviourDemon](../src/behaviours.asm#L428) | 21, 22 | x | 1 |
+| green spider | [BehaviourSpider](../src/behaviours.asm#L154) | 3, 14, 16, 19 | y | 0.75-1.3 |
+| yellow spider | [BehaviourSpiderYellow](../src/behaviours.asm#L170) | 3 | y | 0.5, 1.25 |
+| fly (two kinds) | [BehaviourFlyA](../src/behaviours.asm#L224), [BehaviourFlyB](../src/behaviours.asm#L242) | 12 | y | 0.75-2 |
+| fire wheel | [BehaviourFireWheel](../src/behaviours.asm#L449) | 22, 23 | y | 2, 3 |
 
 The horizontal handlers test the turning point for equality (CP / JR NZ),
 the vertical ones with >= and <. A horizontal creature placed outside its
@@ -313,16 +313,16 @@ requests sound effect 7 and queues three fireballs from one unit left of and
 9 units below his position: [FireballUpTemplate](../src/templates.asm#L79) (up and left),
 [FireballLeftTemplate](../src/templates.asm#L91) (left) and [FireballDownTemplate](../src/templates.asm#L98) (down and left)
 (F52). [UpdateFireball](../src/entities.asm#L2132) is [UpdateArrow](../src/entities.asm#L2157) with one more test: it frees the
-slot once [SatanSmoked](../src/variables.asm#L275) is set.
+slot once [SatanSmoked](../src/variables.asm#L277) is set.
 
 ![Room 24: Satan has fired a volley; the ring of crosses is complete](img/creatures-satan.png)
 
-When the chalice has been taken ([ChaliceTaken](../src/variables.asm#L264) is not 0), the next run of
-[UpdateSatan](../src/entities.asm#L3519), in the same game frame, sets [SatanSmoked](../src/variables.asm#L275), sets music track 7, starts
-[ScriptEraseCrosses](../src/roomscripts.asm#L1475) through [RunEventScript](../src/hud.asm#L279), clears [CrossRingDone](../src/variables.asm#L391)
+When the chalice has been taken ([ChaliceTaken](../src/variables.asm#L266) is not 0), the next run of
+[UpdateSatan](../src/entities.asm#L3519), in the same game frame, sets [SatanSmoked](../src/variables.asm#L277), sets music track 7, starts
+[ScriptEraseCrosses](../src/roomscripts.asm#L1475) through [RunEventScript](../src/hud.asm#L279), clears [CrossRingDone](../src/variables.asm#L393)
 and copies [SmokeTemplate](../src/templates.asm#L172) over its own slot: a white cloud
 ([UpdateSatanSmoke](../src/entities.asm#L3726)) that lasts 150 frames and has no hit box (F53). On a
-later visit [UpdateSatan](../src/entities.asm#L3519) finds [SatanSmoked](../src/variables.asm#L275) set and frees its slot at
+later visit [UpdateSatan](../src/entities.asm#L3519) finds [SatanSmoked](../src/variables.asm#L277) set and frees its slot at
 once.
 
 ## Crusaders (kind 1, rooms 5, 6 and 25)

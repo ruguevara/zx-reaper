@@ -8,7 +8,7 @@
 ; jumps there), because the loader's picture is already the title. It installs
 ; MenuFrame, the frame routine of the menus, in InterruptRoutine, starts the
 ; title music (track 3; on a 128K Patch128KHooks turns the LD HL at
-; StartGame_Music into CALL MusicEntryGame), clears the 60 bytes $8512-$854D
+; StartGame_Music into CALL BankShowTitle), clears the 60 bytes $8512-$854D
 ; (respawn position, flags of the items and checkpoints, lives, crosses), sets
 ; 9 lives, enables the redraw of the lives bar and the crosses counter
 ; (DrawLivesBar, DrawCrossesHud: a NOP written over their RET), and waits in
@@ -72,7 +72,7 @@ StartGame_NoTitle:
                           ; title
   LD (InterruptRoutine),HL ; InterruptRoutine
 StartGame_Music:
-  LD HL,MusicEntryGame    ; 128K: becomes CALL $85F3 (start the music), written
+  LD HL,BankShowTitle    ; 128K: becomes CALL $85F3 (start the music), written
                           ; by Patch128KHooks; on a 48K it only loads HL
   LD A,MUSIC_TRACK_TITLE
   LD (MusicTrack),A       ; MusicTrack

@@ -164,11 +164,11 @@ WaterChainTail_3:
   LD A,L                  ; reached the next row after three steps
   ADD A,$20
   LD L,A
-  JR C,LADC1_4
+  JR C,WaterChainTail_4
   LD A,H
   SUB $08
   LD H,A
-LADC1_4:
+WaterChainTail_4:
   JP DrawWaterReflection_Line ; next line
 
 ; Animate the bubbling blood tiles of the bottom row

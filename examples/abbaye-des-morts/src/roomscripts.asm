@@ -1457,9 +1457,9 @@ RoomScript24:
 ; Room script 25: the ending room, runs the script of room 24
 ;
 ; Room 25 is only entered by the ending sequence RunEnding (first part): it
-; runs the script of room 24 (RoomScript24) and nothing else; the crusaders of
-; the actor list CutsceneList1 and the text ScriptEnding1 are added by the
-; sequence.
+; runs the script of room 24 (RoomScript24) and nothing else; Jean (the actor
+; list CutsceneList1) and the text ScriptEnding1 are added by the sequence, the
+; crusaders come from the room's spawner (RoomObjects).
 RoomScript25:
   DEFB $83                ; CALL RoomScript24
   DEFW RoomScript24

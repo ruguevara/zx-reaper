@@ -33,8 +33,8 @@ From [StartGame_NoTitle](../src/mainloop.asm#L70) on, both cases are the same:
    [KeyRows](../src/controls.asm#L191) ([ScanKeyboard](../src/helpers.asm#L221)), stores the first key held as (half-row,
    mask) in [PressedKeyMask](../src/variables.asm#L21) ([FindPressedKey](../src/controls.asm#L83)) and its code in
    [KeyCode](../src/controls.asm#L180) ([GetKeyCode](../src/controls.asm#L212)).
-2. [MusicTrack](../src/variables.asm#L486) is set to 3 (read by the 128K player only).
-3. The 60 bytes $8512-$854D are cleared and [Lives](../src/variables.asm#L433) is set to 9, the
+2. [MusicTrack](../src/variables.asm#L488) is set to 3 (read by the 128K player only).
+3. The 60 bytes $8512-$854D are cleared and [Lives](../src/variables.asm#L435) is set to 9, the
    status bar redraws are armed and Jean's animation timer is set to 8 (see
    [A new game](#a-new-game)).
 4. [TitleWaitKey](../src/controls.asm#L305) enables interrupts (the first `EI` after the loader, on
@@ -248,7 +248,7 @@ crosses and the attribute of its tile $4C. None of these shows in play.
 ## Game Over
 
 Room state 5 makes the main loop run [ScriptGameOver](../src/controls.asm#L761) (string 37,
-"G a m e  O v e r", centred, white on black), set [MusicTrack](../src/variables.asm#L486) to 7, wait
+"G a m e  O v e r", centred, white on black), set [MusicTrack](../src/variables.asm#L488) to 7, wait
 for a key and its release ([WaitKeyPress](../src/helpers.asm#L9), [WaitKeyRelease](../src/helpers.asm#L27)) and jump to
 [StartGame](../src/mainloop.asm#L65): the title script, then the title menu as above. There is no
 high score. The state is set when the last life is lost (F73) or by R and Y

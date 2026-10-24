@@ -6,7 +6,8 @@
   megalz.py rcs IN OUT               a screen to RCS order
 --rcs: the file is a screen, the stream holds it in RCS order (rcs_address).
 
-Format (as read by the depacker at $5CF6 and $6152, see src/loader*.asm):
+Format (as read by the depacker at $5CF6 and $6152, see src/stage1.asm and
+src/stage2.asm):
 bits are read MSB first from bytes taken from the stream when the bit
 buffer runs out; the first byte of the output is stored as is.
   1 + byte                 literal

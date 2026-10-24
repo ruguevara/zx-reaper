@@ -107,9 +107,9 @@ StartUp_0:
 ; Called by StartUp when the machine is not a 48K. It turns three
 ; one-instruction stubs of the 48K code into CALLs (store $CD, the opcode of
 ; CALL, over the first byte): StartGame_Music (start of the game: the call
-; enters the music bank through MusicEntryGame), $88D5 in RunEnding (end of the
+; enters the music bank through BankShowTitle), $88D5 in RunEnding (end of the
 ; ending sequence, through MusicEntryEnding) and $A31E in the key-release wait
-; (through MusicEntryInfo). Each stub is a 3-byte instruction whose operand
+; (through BankShowInfo). Each stub is a 3-byte instruction whose operand
 ; already is the address of the 128K entry routine, and each of those pages in
 ; the music bank and calls the player there with CallInMusicBank.
 ;
@@ -147,7 +147,7 @@ Patch128KHooks:
 ; Cell byte: bits 0-2 the class of the tile (see TileFlags), bit 7 the "redraw
 ; this cell" mark, bit 6 the "a sprite was drawn here, erase it next frame"
 ; mark (see QueueSprite).
-L6073:
+FlagMapTail:
   DEFS $4D,$FF
 
 ; Main stack (64 bytes, SP starts at $6100)

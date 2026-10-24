@@ -272,10 +272,10 @@ DrawFrameCell_1:
 ; address on every pass. When pending, it writes RET over itself and runs the
 ; script at the address held in its own LD HL instruction (operand at $9CEE,
 ; SmcEventScript+1) with RunScript. The routines that start an event store the
-; script address there and write 0 over the first byte: ActionChurchDoor
-; (lever, scripts $76A0 and $76A8), ActionGateLever (script $8048) and
-; UpdateSatan (the twelve crosses, script $82D4). EnterRoom writes RET here
-; when a room is entered.
+; script address there and write 0 over the first byte: ActionChurchDoor (the
+; church door shutting behind Jean, scripts DoorLeftShut and DoorLeftRattle),
+; ActionGateLever (EraseDoorRight) and UpdateSatan (the twelve crosses,
+; ScriptEraseCrosses). EnterRoom writes RET here when a room is entered.
 RunEventScript:
   NOP
   LD HL,RunEventScript    ; disarm

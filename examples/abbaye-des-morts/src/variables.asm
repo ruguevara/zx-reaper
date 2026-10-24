@@ -55,10 +55,10 @@ PagingState:
 
 ; Unused byte
 ;
-; No code reads or writes $8508 or $8503/$8505/$8520/$8550 (see PressedKeyMask,
-; InterruptRoutine, BellRung, SoundRequest): they are padding of the variable
-; block.
-L8508:
+; No code reads or writes $8508, nor $8520 and $8550 further on (see BellRung
+; and SoundRequest): they are padding of the variable block. ($8503 is
+; PressedKeyRow, $8505 the high byte of InterruptRoutine.)
+UnusedByte:
   DEFB $00
 
 ; Current room number (0-24)
@@ -167,8 +167,10 @@ CrossFlashTimer:
 ; bytes are 0. SelectCheckpoint sets the high bytes from the active checkpoint
 ; record (Checkpoints: column*4, row*4); the passage items ActionArchToBeast
 ; and ActionArchToRiver set both words to the exit of the doorway they lead to,
-; so that after a death in the other room the player reappears there. The block
-; $8512-$854D is zeroed by StartGame at the start of a game.
+; where state 2 puts the player in the other room. A death goes through state 4
+; and SelectCheckpoint, which overwrites them with the checkpoint (observed: a
+; death after an arch restarted in room 5, the last checkpoint record). The
+; block $8512-$854D is zeroed by StartGame at the start of a game.
 ;
 ; +0 word RespawnX (low byte, then RespawnXHi) +2 word RespawnY (low byte, then
 ; RespawnYHi)
@@ -471,7 +473,7 @@ SoundRequest:
 ; Unused byte
 ;
 ; No code reads or writes $8550.
-L8550:
+UnusedByte2:
   DEFB $00
 
 ; Music track number

@@ -90,7 +90,8 @@ Tools: sjasmplus, Python 3 with SkoolKit 10.1 (`pip install -r ../../requirement
 - Graphics: tiles in `src/tiles.asm`, item sprites and the packed sprite sets
   in `src/graphics.asm` (format in `re/notes.md`), the screens in `data/`.
 - Relocation: `$85BC-$BFFF` moves (by up to $104 bytes); the rest stays where
-  it is (see `re/layout.mk`).
+  it is (see `re/layout.mk`). On a 48K only: the 128K music bank, kept as
+  data, calls BuildMirrorTable and reads KeyRows at their fixed addresses.
 
 ## Not explained
 

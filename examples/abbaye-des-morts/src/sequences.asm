@@ -281,8 +281,8 @@ SpawnQueuedObjects_Next:
 
 ; Spawn the room's items
 ;
-; Walks the room item table RoomItems (8-byte records sorted by room, ended by
-; room $1A) and calls SpawnItem for every record of the current room
+; Walks the room item table RoomItems (8-byte records in the order of their
+; flag addresses, not of their rooms, ended by room $1A) and calls SpawnItem for every record of the current room
 ; RoomNumber. The room and the end mark are loaded together: C = the room, B =
 ; $1A (RoomTableEnd). Called by EnterRoom after the room script, with every
 ; slot free.
