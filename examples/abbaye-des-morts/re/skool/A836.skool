@@ -1,0 +1,14 @@
+; Routine at A836
+c$A836 POP HL        ;
+ $A837 JR NC,$A84C   ;
+ $A839 LD ($850E),HL ;
+ $A83C POP HL        ;
+ $A83D LD (HL),$FF   ;
+ $A83F LD HL,$9C51   ;
+ $A842 LD (HL),$00   ;
+ $A844 LD A,$05      ;
+ $A846 LD ($854F),A  ;
+ $A849 JP $A724      ;
+*$A84C POP HL        ;
+ $A84D XOR A         ;
+ $A84E JP $A7DB      ;

@@ -1,4 +1,0 @@
-; Data block at B5C4
-b$B5C4 DEFB $DF,$AC,$3A,$1F,$AA,$B7,$C2,$1F
- $B5CC DEFB $B4,$21,$D1,$AC,$ED,$5B,$58,$BE
- $B5D4 DEFB $FD,$E9,$C1,$C1,$E1,$54,$E1,$5C

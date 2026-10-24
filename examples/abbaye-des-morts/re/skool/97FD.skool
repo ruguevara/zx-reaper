@@ -1,3 +1,26 @@
-; Data block at 97FD
-b$97FD DEFB $E1,$D1,$C1,$F1,$32,$35,$98,$ED
- $9805 DEFB $53,$30,$98,$CB,$38,$CB
+; Routine at 97FD
+c$97FD POP HL        ;
+ $97FE POP DE        ;
+ $97FF POP BC        ;
+ $9800 POP AF        ;
+ $9801 LD ($9835),A  ;
+ $9804 LD ($9830),DE ;
+ $9808 SRL B         ;
+ $980A SRL B         ;
+ $980C LD A,B        ;
+ $980D LD ($9832),A  ;
+ $9810 LD ($9833),HL ;
+ $9813 CALL $A21E    ;
+ $9816 LD A,L        ;
+*$9817 SET 6,(HL)    ;
+ $9819 RES 7,(HL)    ;
+ $981B INC L         ;
+ $981C SET 6,(HL)    ;
+ $981E RES 7,(HL)    ;
+ $9820 ADD A,$20     ;
+ $9822 LD L,A        ;
+ $9823 JR NC,$9826   ;
+ $9825 INC H         ;
+*$9826 DJNZ $9817    ;
+ $9828 LD HL,$982E   ;
+ $982B JP $98B1      ;

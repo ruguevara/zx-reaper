@@ -1,6 +1,6 @@
 ; Routine at A1CE
 ;
-; Used by the routine at #R$85FC.
+; Used by the routines at #R$85FC, #R$887B and #R$9C52.
 c$A1CE EI            ;
  $A1CF HALT          ;
  $A1D0 XOR A         ;

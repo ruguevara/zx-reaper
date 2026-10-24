@@ -1,0 +1,28 @@
+; Routine at B344
+c$B344 POP BC        ;
+ $B345 POP DE        ;
+ $B346 POP HL        ;
+ $B347 LD A,H        ;
+ $B348 EX AF,AF'     ;
+ $B349 POP HL        ;
+ $B34A ADD HL,BC     ;
+ $B34B PUSH HL       ;
+ $B34C POP HL        ;
+ $B34D LD A,H        ;
+ $B34E CP D          ;
+ $B34F JR C,$B35F    ;
+ $B351 LD HL,$FFF8   ;
+ $B354 ADD HL,SP     ;
+ $B355 LD SP,HL      ;
+ $B356 LD HL,$B283   ;
+ $B359 PUSH HL       ;
+ $B35A POP HL        ;
+ $B35B POP BC        ;
+ $B35C POP DE        ;
+ $B35D POP HL        ;
+ $B35E POP HL        ;
+*$B35F EX AF,AF'     ;
+ $B360 LD D,A        ;
+ $B361 POP BC        ;
+ $B362 LD E,H        ;
+ $B363 JR $B380      ;

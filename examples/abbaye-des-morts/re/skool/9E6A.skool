@@ -1,7 +1,7 @@
 ; Routine at 9E6A
 ;
-; Used by the routines at #R$9DD2, #R$9DF7, #R$9E1B, #R$9E3D, #R$A0BE and
-; #R$AE4B.
+; Used by the routines at #R$9DD2, #R$9DF7, #R$9E1B, #R$9E29, #R$9E3D, #R$9FD6,
+; #R$9FFF, #R$A0BE and #R$AE4B.
 c$9E6A PUSH HL       ;
  $9E6B CALL $A20D    ;
  $9E6E LD D,$CD      ;

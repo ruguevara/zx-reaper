@@ -1,5 +1,0 @@
-; Data block at A6C4
-b$A6C4 DEFB $23,$85,$CB,$FE,$21,$00,$5C,$22
- $A6CC DEFB $12,$85,$21,$00,$44,$22,$14,$85
- $A6D4 DEFB $3E,$0A,$18,$1A,$E1,$30,$2B,$CB
- $A6DC DEFB $7E

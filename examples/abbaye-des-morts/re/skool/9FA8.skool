@@ -1,6 +1,6 @@
 ; Routine at 9FA8
 ;
-; Used by the routine at #R$9D8D.
+; Used by the routines at #R$9C52 and #R$9D8D.
 c$9FA8 PUSH AF       ;
  $9FA9 CALL $A1F2    ;
  $9FAC POP DE        ;

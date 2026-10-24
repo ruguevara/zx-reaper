@@ -1,0 +1,15 @@
+; Routine at 9CA5
+;
+; Used by the routine at #R$9C96.
+c$9CA5 LD C,$18      ;
+ $9CA7 PUSH DE       ;
+ $9CA8 EX DE,HL      ;
+ $9CA9 CALL $A1F2    ;
+ $9CAC EX DE,HL      ;
+*$9CAD CALL $9CB7    ;
+ $9CB0 LD A,C        ;
+ $9CB1 OR A          ;
+ $9CB2 JR NZ,$9CAD   ;
+ $9CB4 POP DE        ;
+ $9CB5 INC E         ;
+ $9CB6 RET           ;

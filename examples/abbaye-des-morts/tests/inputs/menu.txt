@@ -1,0 +1,20 @@
+# title, C: controls; 1 Kempston off/on; 2 redefine keys (JUMP LEFT RIGHT CROUCH...); ENTER; hold SPACE: info; again
+150 C
+160 -
+200 1
+205 -
+250 2
+255 -
+300 1
+305 -
+350 ENTER
+355 -
+400 SPACE
+700 -
+800 C
+805 -
+850 2
+855 -
+900 ENTER
+905 -
+1000 END

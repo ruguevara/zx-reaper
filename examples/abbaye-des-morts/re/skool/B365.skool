@@ -1,0 +1,34 @@
+; Routine at B365
+c$B365 POP BC        ;
+ $B366 POP DE        ;
+ $B367 POP HL        ;
+ $B368 ADD HL,BC     ;
+ $B369 PUSH HL       ;
+ $B36A POP HL        ;
+ $B36B LD A,H        ;
+ $B36C CP D          ;
+ $B36D JR NZ,$B37C   ;
+ $B36F LD HL,$FFFA   ;
+ $B372 ADD HL,SP     ;
+ $B373 LD SP,HL      ;
+ $B374 LD HL,$B2A6   ;
+ $B377 PUSH HL       ;
+ $B378 POP HL        ;
+ $B379 POP BC        ;
+ $B37A POP DE        ;
+ $B37B POP HL        ;
+*$B37C LD D,H        ;
+ $B37D POP HL        ;
+ $B37E POP BC        ;
+ $B37F LD E,H        ;
+; This entry point is used by the routines at #R$B344 and #R$B436.
+*$B380 LD L,H        ;
+ $B381 LD H,D        ;
+ $B382 LD A,H        ;
+ $B383 EX AF,AF'     ;
+ $B384 SRA H         ;
+ $B386 SRA H         ;
+ $B388 LD ($ACD3),HL ;
+; This entry point is used by the routine at #R$B2F9.
+*$B38B LD HL,$B3AD   ;
+ $B38E JP $A851      ;

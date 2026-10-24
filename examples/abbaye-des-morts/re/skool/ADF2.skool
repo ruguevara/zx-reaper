@@ -1,2 +1,0 @@
-; Data block at ADF2
-b$ADF2 DEFB $04,$7C,$D6,$08

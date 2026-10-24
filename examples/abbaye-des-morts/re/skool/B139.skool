@@ -1,0 +1,27 @@
+; Routine at B139
+c$B139 POP BC        ;
+ $B13A POP DE        ;
+ $B13B POP HL        ;
+ $B13C ADD HL,BC     ;
+ $B13D PUSH HL       ;
+ $B13E LD A,H        ;
+ $B13F POP HL        ;
+ $B140 POP DE        ;
+ $B141 POP BC        ;
+ $B142 LD L,C        ;
+ $B143 LD H,$00      ;
+ $B145 INC C         ;
+ $B146 DJNZ $B15D    ;
+ $B148 LD BC,$0600   ;
+ $B14B EXX           ;
+ $B14C LD ($B15B),SP ;
+ $B150 LD HL,$FFF6   ;
+ $B153 ADD HL,SP     ;
+ $B154 LD SP,HL      ;
+ $B155 LD HL,$B1D4   ;
+ $B158 PUSH HL       ;
+ $B159 EXX           ;
+ $B15A LD SP,$B15A   ;
+*$B15D PUSH BC       ;
+ $B15E LD BC,$B0F4   ;
+ $B161 JR $B18E      ;

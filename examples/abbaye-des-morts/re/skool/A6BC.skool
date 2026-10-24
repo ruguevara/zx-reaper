@@ -1,0 +1,13 @@
+; Routine at A6BC
+c$A6BC POP HL        ;
+ $A6BD JR NC,$A706   ;
+ $A6BF BIT 7,(HL)    ;
+ $A6C1 JR NZ,$A708   ;
+ $A6C3 LD HL,$8523   ;
+ $A6C6 SET 7,(HL)    ;
+ $A6C8 LD HL,$5C00   ;
+ $A6CB LD ($8512),HL ;
+ $A6CE LD HL,$4400   ;
+ $A6D1 LD ($8514),HL ;
+ $A6D4 LD A,$0A      ;
+ $A6D6 JR $A6F2      ;

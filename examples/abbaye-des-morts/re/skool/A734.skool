@@ -1,0 +1,12 @@
+; Routine at A734
+c$A734 POP HL        ;
+ $A735 LD A,(HL)     ;
+ $A736 JR NC,$A73C   ;
+ $A738 SBC A,A       ;
+ $A739 LD (HL),A     ;
+ $A73A JR $A71F      ;
+*$A73C LD A,($854D)  ;
+ $A73F CP $0C        ;
+ $A741 JP C,$A724    ;
+ $A744 XOR A         ;
+ $A745 JP $A7DB      ;

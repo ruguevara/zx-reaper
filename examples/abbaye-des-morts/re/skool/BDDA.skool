@@ -1,4 +1,4 @@
 ; Routine at BDDA
 ;
-; Used by the routines at #R$85FC and #R$8832.
+; Used by the routines at #R$85FC, #R$8832 and #R$88DE.
 c$BDDA RET           ;

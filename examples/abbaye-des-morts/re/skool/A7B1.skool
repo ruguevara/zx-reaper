@@ -1,0 +1,22 @@
+; Routine at A7B1
+;
+; Used by the routine at #R$A777.
+c$A7B1 POP HL        ;
+ $A7B2 POP BC        ;
+ $A7B3 POP DE        ;
+ $A7B4 LD A,E        ;
+ $A7B5 DEC C         ;
+ $A7B6 JR NZ,$A7C0   ;
+ $A7B8 LD C,B        ;
+ $A7B9 INC A         ;
+ $A7BA LD E,A        ;
+ $A7BB CP D          ;
+ $A7BC JR C,$A7C0    ;
+ $A7BE SUB D         ;
+ $A7BF LD E,A        ;
+*$A7C0 LD L,A        ;
+ $A7C1 LD A,($851E)  ;
+ $A7C4 AND $07       ;
+ $A7C6 XOR $06       ;
+ $A7C8 ADD A,L       ;
+ $A7C9 JR $A7D9      ;

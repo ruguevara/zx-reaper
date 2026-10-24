@@ -1,3 +1,12 @@
-; Data block at 9DC2
-b$9DC2 DEFB $4E,$23,$46,$23,$C5,$79,$CD,$1A
- $9DCA DEFB $A1,$CD,$D7,$9D,$C1,$10,$F5,$C9
+; Routine at 9DC2
+c$9DC2 LD C,(HL)     ;
+ $9DC3 INC HL        ;
+ $9DC4 LD B,(HL)     ;
+ $9DC5 INC HL        ;
+*$9DC6 PUSH BC       ;
+ $9DC7 LD A,C        ;
+ $9DC8 CALL $A11A    ;
+ $9DCB CALL $9DD7    ;
+ $9DCE POP BC        ;
+ $9DCF DJNZ $9DC6    ;
+ $9DD1 RET           ;

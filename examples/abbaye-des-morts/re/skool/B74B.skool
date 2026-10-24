@@ -1,0 +1,5 @@
+; Data block at B74B
+b$B74B DEFB $D1,$E1,$01,$14,$00,$09,$E5,$E1
+ $B753 DEFB $EB,$C1,$09,$EB,$C1,$09,$E5,$D5
+ $B75B DEFB $7C,$FE,$60,$D2,$16,$B7,$CB,$7A
+ $B763 DEFB $C2,$16,$B7,$CB,$2C,$CB,$84

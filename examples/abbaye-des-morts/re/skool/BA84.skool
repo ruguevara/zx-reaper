@@ -1,4 +1,0 @@
-; Data block at BA84
-b$BA84 DEFB $D9,$3E,$07,$32,$4F,$85,$21,$46
- $BA8C DEFB $BD,$11,$58,$BD,$ED,$5F,$E6,$01
- $BA94 DEFB $20,$01,$EB,$22,$FC

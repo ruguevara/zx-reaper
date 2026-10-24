@@ -44,3 +44,21 @@ bytes): three standard-speed blocks.
 | $6000-$FEFF | the game, as unpacked | |
 
 ## Open questions
+
+## Game structure (first look)
+
+- Entry $6000: pops the machine type (1 = 48K) into $8506, 128K setup at
+  $605F, IM 2 with I=$84: the vector table $8400-$8500 points to $8585, the
+  interrupt handler, which saves all registers and calls the routine whose
+  address is in $8504 (changed per game state).
+- Rooms: a 5x5 grid, 25 rooms, number in $8509 (left/right ±1, up/down ±5,
+  wrapped modulo 25). Room 0 is the intro text. $850C is the room state
+  checked by the main loop at $8664: $80 playing, 1 enter the room, 2 back to
+  the checkpoint, 3 game over, 4 (unknown), 5 the ending; bit 7 keeps the
+  frame routines running.
+- Keys: $A2BF holds 8 (row, mask) pairs of the redefinable keys (default
+  QAOP...), $A2CF the control bits read each frame; the Kempston read at
+  $A290 is cut off by a RET at $A28F when no interface answers on port $1F.
+- Coverage: tests/inputs (title, menu, play, info screen, random keys) and
+  scripts/coverage.sh (each room entered directly by poking $8509 and
+  $850C, both endings, the Kempston read) -> re/maps/.

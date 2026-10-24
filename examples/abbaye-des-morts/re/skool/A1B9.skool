@@ -1,0 +1,4 @@
+; Routine at A1B9
+c$A1B9 XOR A         ;
+ $A1BA LD ($AE20),A  ;
+ $A1BD RET           ;

@@ -1,0 +1,26 @@
+; Routine at B2D4
+c$B2D4 POP HL        ;
+ $B2D5 LD A,(HL)     ;
+ $B2D6 INC HL        ;
+ $B2D7 LD ($ACDA),A  ;
+ $B2DA LD C,(HL)     ;
+ $B2DB INC HL        ;
+ $B2DC LD B,(HL)     ;
+ $B2DD INC HL        ;
+ $B2DE EX DE,HL      ;
+ $B2DF EX AF,AF'     ;
+ $B2E0 AND $03       ;
+ $B2E2 ADD A,A       ;
+ $B2E3 LD L,A        ;
+ $B2E4 LD H,$00      ;
+ $B2E6 ADD HL,BC     ;
+ $B2E7 LD A,(HL)     ;
+ $B2E8 EX AF,AF'     ;
+ $B2E9 INC HL        ;
+ $B2EA LD C,(HL)     ;
+ $B2EB EX DE,HL      ;
+ $B2EC LD B,(HL)     ;
+ $B2ED INC HL        ;
+ $B2EE LD ($ACD7),BC ;
+ $B2F2 LD IX,$B3D4   ;
+ $B2F6 JP $A883      ;

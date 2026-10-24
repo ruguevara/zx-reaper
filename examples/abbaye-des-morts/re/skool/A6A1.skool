@@ -1,0 +1,17 @@
+; Routine at A6A1
+c$A6A1 POP HL        ;
+ $A6A2 JR NC,$A6B3   ;
+ $A6A4 BIT 7,(HL)    ;
+ $A6A6 JR NZ,$A6B5   ;
+ $A6A8 LD A,(HL)     ;
+ $A6A9 XOR $86       ;
+ $A6AB LD (HL),A     ;
+ $A6AC LD A,$05      ;
+ $A6AE LD ($854F),A  ;
+ $A6B1 JR $A6B5      ;
+*$A6B3 RES 7,(HL)    ;
+; This entry point is used by the routine at #R$A688.
+*$A6B5 LD A,(HL)     ;
+ $A6B6 AND $02       ;
+ $A6B8 RRCA          ;
+ $A6B9 JP $A7DB      ;

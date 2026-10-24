@@ -1,3 +1,0 @@
-; Data block at AE05
-b$AE05 DEFB $04,$7C,$D6,$08,$67,$24,$C3,$9D
- $AE0D DEFB $AD,$24,$BC,$C2,$9D,$AD,$7D,$C6

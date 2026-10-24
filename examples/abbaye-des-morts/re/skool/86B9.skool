@@ -1,6 +1,6 @@
 ; Routine at 86B9
 ;
-; Used by the routines at #R$85FC and #R$8832.
+; Used by the routines at #R$85FC, #R$8832 and #R$887B.
 c$86B9 LD HL,$C500   ;
  $86BC CALL $BE48    ;
  $86BF LD A,$C9      ;

@@ -1,0 +1,35 @@
+; Routine at B2A6
+c$B2A6 POP BC        ;
+ $B2A7 POP DE        ;
+ $B2A8 POP HL        ;
+ $B2A9 OR A          ;
+ $B2AA SBC HL,BC     ;
+ $B2AC PUSH HL       ;
+ $B2AD POP HL        ;
+ $B2AE LD A,H        ;
+ $B2AF CP E          ;
+ $B2B0 JR NZ,$B2BF   ;
+ $B2B2 LD HL,$FFFA   ;
+ $B2B5 ADD HL,SP     ;
+ $B2B6 LD SP,HL      ;
+ $B2B7 LD HL,$B365   ;
+ $B2BA PUSH HL       ;
+ $B2BB POP HL        ;
+ $B2BC POP BC        ;
+ $B2BD POP DE        ;
+ $B2BE POP HL        ;
+*$B2BF LD D,H        ;
+ $B2C0 POP HL        ;
+ $B2C1 POP BC        ;
+ $B2C2 LD E,H        ;
+; This entry point is used by the routines at #R$B283 and #R$B436.
+*$B2C3 LD L,H        ;
+ $B2C4 LD H,D        ;
+ $B2C5 LD A,H        ;
+ $B2C6 EX AF,AF'     ;
+ $B2C7 SRA H         ;
+ $B2C9 SRA H         ;
+ $B2CB LD ($ACD3),HL ;
+; This entry point is used by the routine at #R$B236.
+*$B2CE LD HL,$B2D4   ;
+ $B2D1 JP $A851      ;

@@ -1,4 +1,0 @@
-; Data block at 980F
-b$980F DEFB $98,$22,$33,$98,$CD,$1E,$A2,$7D
- $9817 DEFB $CB,$F6,$CB,$BE,$2C,$CB,$F6,$CB
- $981F DEFB $BE,$C6

@@ -1,0 +1,57 @@
+; Routine at A7CB
+;
+; Used by the routines at #R$A6D8 and #R$A70B.
+c$A7CB POP BC        ;
+ $A7CC POP DE        ;
+ $A7CD LD A,E        ;
+ $A7CE DEC C         ;
+ $A7CF JR NZ,$A7D9   ;
+ $A7D1 LD C,B        ;
+ $A7D2 INC A         ;
+ $A7D3 LD E,A        ;
+ $A7D4 CP D          ;
+ $A7D5 JR C,$A7D9    ;
+ $A7D7 SUB D         ;
+ $A7D8 LD E,A        ;
+; This entry point is used by the routines at #R$A782 and #R$A7B1.
+*$A7D9 PUSH DE       ;
+ $A7DA PUSH BC       ;
+; This entry point is used by the routines at #R$A668, #R$A6A1, #R$A734,
+; #R$A748, #R$A75A and #R$A836.
+*$A7DB POP HL        ;
+ $A7DC POP HL        ;
+ $A7DD POP DE        ;
+ $A7DE LD H,$00      ;
+ $A7E0 LD L,A        ;
+ $A7E1 ADD HL,HL     ;
+ $A7E2 ADD HL,HL     ;
+ $A7E3 ADD HL,DE     ;
+ $A7E4 LD E,(HL)     ;
+ $A7E5 INC HL        ;
+ $A7E6 LD D,(HL)     ;
+ $A7E7 INC HL        ;
+ $A7E8 LD A,(HL)     ;
+ $A7E9 INC HL        ;
+ $A7EA POP BC        ;
+ $A7EB LD ($ACE9),DE ;
+ $A7EF LD ($ACEB),BC ;
+ $A7F3 LD ($ACEE),A  ;
+ $A7F6 LD HL,$ACE5   ;
+ $A7F9 LD A,($AA1F)  ;
+ $A7FC OR A          ;
+ $A7FD JR NZ,$A81B   ;
+ $A7FF LD DE,($BE58) ;
+ $A803 LDI           ;
+ $A805 LDI           ;
+ $A807 LDI           ;
+ $A809 LDI           ;
+ $A80B LDI           ;
+ $A80D LDI           ;
+ $A80F LDI           ;
+ $A811 LDI           ;
+ $A813 LDI           ;
+ $A815 LDI           ;
+ $A817 LD ($BE58),DE ;
+*$A81B LD HL,$0006   ;
+ $A81E ADD HL,SP     ;
+ $A81F JP $A5F0      ;

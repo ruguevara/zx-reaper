@@ -1,0 +1,18 @@
+; Routine at A668
+c$A668 EX AF,AF'     ;
+ $A669 LD A,($8521)  ;
+ $A66C OR A          ;
+ $A66D JR NZ,$A676   ;
+; This entry point is used by the routine at #R$A615.
+*$A66F LD HL,$0010   ;
+ $A672 ADD HL,SP     ;
+ $A673 JP $A5F0      ;
+*$A676 POP HL        ;
+ $A677 EX AF,AF'     ;
+ $A678 JR NC,$A684   ;
+ $A67A LD (HL),$FF   ;
+ $A67C LD A,$03      ;
+ $A67E LD ($850C),A  ;
+ $A681 JP $A71F      ;
+*$A684 XOR A         ;
+ $A685 JP $A7DB      ;

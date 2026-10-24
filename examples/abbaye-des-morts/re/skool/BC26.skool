@@ -1,0 +1,15 @@
+; Routine at BC26
+c$BC26 POP HL        ;
+ $BC27 LD A,(HL)     ;
+ $BC28 INC HL        ;
+ $BC29 LD C,(HL)     ;
+ $BC2A INC HL        ;
+ $BC2B LD B,(HL)     ;
+ $BC2C INC HL        ;
+ $BC2D LD ($ACDA),A  ;
+ $BC30 LD ($ACE4),A  ;
+ $BC33 LD ($ACD7),BC ;
+ $BC37 DEC C         ;
+ $BC38 LD ($ACE1),BC ;
+ $BC3C LD IX,$BC43   ;
+ $BC40 JP $A883      ;

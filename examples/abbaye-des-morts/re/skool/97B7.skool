@@ -1,6 +1,6 @@
 ; Routine at 97B7
 ;
-; Used by the routines at #R$85FC and #R$8832.
+; Used by the routines at #R$85FC, #R$8832 and #R$88DE.
 c$97B7 LD HL,$C200   ;
  $97BA LD ($855D),HL ;
  $97BD LD (HL),$FF   ;

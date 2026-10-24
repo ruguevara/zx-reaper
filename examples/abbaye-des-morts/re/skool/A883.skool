@@ -1,6 +1,7 @@
 ; Routine at A883
 ;
-; Used by the routine at #R$B391.
+; Used by the routines at #R$B2D4, #R$B391, #R$B870, #R$B9CF, #R$BA54 and
+; #R$BC26.
 c$A883 POP BC        ;
  $A884 POP DE        ;
  $A885 DEC C         ;

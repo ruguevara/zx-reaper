@@ -1,0 +1,9 @@
+; Routine at A13D
+;
+; Used by the routine at #R$A123.
+c$A13D CALL $A20D    ;
+ $A140 LD A,$03      ;
+ $A142 ADD A,H       ;
+ $A143 LD H,A        ;
+ $A144 LD (HL),E     ;
+ $A145 RET           ;

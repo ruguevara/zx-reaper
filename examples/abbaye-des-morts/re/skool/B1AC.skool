@@ -1,0 +1,26 @@
+; Routine at B1AC
+c$B1AC POP HL        ;
+ $B1AD LD A,(HL)     ;
+ $B1AE INC HL        ;
+ $B1AF LD ($ACDA),A  ;
+ $B1B2 LD C,(HL)     ;
+ $B1B3 INC HL        ;
+ $B1B4 LD B,(HL)     ;
+ $B1B5 INC HL        ;
+ $B1B6 EX DE,HL      ;
+ $B1B7 EX AF,AF'     ;
+ $B1B8 AND $03       ;
+ $B1BA ADD A,A       ;
+ $B1BB LD L,A        ;
+ $B1BC LD H,$00      ;
+ $B1BE ADD HL,BC     ;
+ $B1BF LD A,(HL)     ;
+ $B1C0 EX AF,AF'     ;
+ $B1C1 INC HL        ;
+ $B1C2 LD C,(HL)     ;
+ $B1C3 EX DE,HL      ;
+ $B1C4 LD B,(HL)     ;
+ $B1C5 INC HL        ;
+ $B1C6 LD ($ACD7),BC ;
+ $B1CA LD E,$00      ;
+ $B1CC JP $B3D2      ;

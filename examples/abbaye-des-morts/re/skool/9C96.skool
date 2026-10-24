@@ -1,0 +1,13 @@
+; Routine at 9C96
+;
+; Used by the routine at #R$9C52.
+c$9C96 LD HL,$71DF   ;
+ $9C99 LD E,(HL)     ;
+ $9C9A INC HL        ;
+ $9C9B LD D,(HL)     ;
+ $9C9C INC HL        ;
+*$9C9D CALL $9CA5    ;
+ $9CA0 LD A,(HL)     ;
+ $9CA1 OR A          ;
+ $9CA2 JR NZ,$9C9D   ;
+ $9CA4 RET           ;

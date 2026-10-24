@@ -1,8 +1,10 @@
-; Data block at A14E
-b$A14E DEFB $4E,$23,$46,$23,$C5,$CD,$5C,$A1
- $A156 DEFB $C1,$10,$F9,$C9,$4E,$23,$5E,$23
- $A15E DEFB $56,$23,$46,$23,$79,$0E,$01,$C3
- $A166 DEFB $D7,$9D,$AF,$32,$88,$AD,$5E,$23
- $A16E DEFB $56,$23,$7E,$32,$8D,$AD,$23,$7E
- $A176 DEFB $32,$8F,$AD,$4F,$06,$01,$23,$E5
- $A17E DEFB $D5,$C5,$6F,$26,$00
+; Routine at A14E
+c$A14E LD C,(HL)     ;
+ $A14F INC HL        ;
+ $A150 LD B,(HL)     ;
+ $A151 INC HL        ;
+*$A152 PUSH BC       ;
+ $A153 CALL $A15C    ;
+ $A156 POP BC        ;
+ $A157 DJNZ $A152    ;
+ $A159 RET           ;

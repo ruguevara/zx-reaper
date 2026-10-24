@@ -76,7 +76,8 @@ c$9836 POP HL        ;
  $98AB INC H         ;
 *$98AC DJNZ $989C    ;
  $98AE LD HL,$98D9   ;
- $98B1 LD DE,$C000   ;
+; This entry point is used by the routine at #R$97FD.
+*$98B1 LD DE,$C000   ;
  $98B4 LDI           ;
  $98B6 LDI           ;
  $98B8 LDI           ;

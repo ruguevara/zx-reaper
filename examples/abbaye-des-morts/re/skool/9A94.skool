@@ -1,12 +1,67 @@
-; Data block at 9A94
-b$9A94 DEFB $1A,$4F,$0A,$A6,$B1,$77,$2C,$1C
- $9A9C DEFB $1A,$4F,$0A,$A6,$B1,$77,$2C,$1C
- $9AA4 DEFB $1A,$4F,$0A,$A6,$B1,$77,$2C,$1C
- $9AAC DEFB $1A,$4F,$0A,$A6,$B1,$77,$24,$14
- $9AB4 DEFB $1A,$4F,$0A,$A6,$B1,$77,$2D,$1D
- $9ABC DEFB $1A,$4F,$0A,$A6,$B1,$77,$2D,$1D
- $9AC4 DEFB $1A,$4F,$0A,$A6,$B1,$77,$2D,$1D
- $9ACC DEFB $1A,$4F,$0A,$A6,$B1,$77,$14,$C9
- $9AD4 DEFB $CD,$94,$9A,$24,$CD,$94,$9A,$24
- $9ADC DEFB $CD,$94,$9A,$24,$CD,$94,$9A,$F1
- $9AE4 DEFB $26,$C4
+; Routine at 9A94
+;
+; Used by the routine at #R$9AD4.
+c$9A94 LD A,(DE)     ;
+ $9A95 LD C,A        ;
+ $9A96 LD A,(BC)     ;
+ $9A97 AND (HL)      ;
+ $9A98 OR C          ;
+ $9A99 LD (HL),A     ;
+ $9A9A INC L         ;
+ $9A9B INC E         ;
+ $9A9C LD A,(DE)     ;
+ $9A9D LD C,A        ;
+ $9A9E LD A,(BC)     ;
+ $9A9F AND (HL)      ;
+ $9AA0 OR C          ;
+ $9AA1 LD (HL),A     ;
+ $9AA2 INC L         ;
+ $9AA3 INC E         ;
+ $9AA4 LD A,(DE)     ;
+ $9AA5 LD C,A        ;
+ $9AA6 LD A,(BC)     ;
+ $9AA7 AND (HL)      ;
+ $9AA8 OR C          ;
+ $9AA9 LD (HL),A     ;
+ $9AAA INC L         ;
+ $9AAB INC E         ;
+ $9AAC LD A,(DE)     ;
+ $9AAD LD C,A        ;
+ $9AAE LD A,(BC)     ;
+ $9AAF AND (HL)      ;
+ $9AB0 OR C          ;
+ $9AB1 LD (HL),A     ;
+ $9AB2 INC H         ;
+ $9AB3 INC D         ;
+ $9AB4 LD A,(DE)     ;
+ $9AB5 LD C,A        ;
+ $9AB6 LD A,(BC)     ;
+ $9AB7 AND (HL)      ;
+ $9AB8 OR C          ;
+ $9AB9 LD (HL),A     ;
+ $9ABA DEC L         ;
+ $9ABB DEC E         ;
+ $9ABC LD A,(DE)     ;
+ $9ABD LD C,A        ;
+ $9ABE LD A,(BC)     ;
+ $9ABF AND (HL)      ;
+ $9AC0 OR C          ;
+ $9AC1 LD (HL),A     ;
+ $9AC2 DEC L         ;
+ $9AC3 DEC E         ;
+ $9AC4 LD A,(DE)     ;
+ $9AC5 LD C,A        ;
+ $9AC6 LD A,(BC)     ;
+ $9AC7 AND (HL)      ;
+ $9AC8 OR C          ;
+ $9AC9 LD (HL),A     ;
+ $9ACA DEC L         ;
+ $9ACB DEC E         ;
+ $9ACC LD A,(DE)     ;
+ $9ACD LD C,A        ;
+ $9ACE LD A,(BC)     ;
+ $9ACF AND (HL)      ;
+ $9AD0 OR C          ;
+ $9AD1 LD (HL),A     ;
+ $9AD2 INC D         ;
+ $9AD3 RET           ;

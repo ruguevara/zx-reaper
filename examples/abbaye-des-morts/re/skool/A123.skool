@@ -1,6 +1,22 @@
-; Data block at A123
-b$A123 DEFB $CD,$1A,$A1,$7E,$23,$E5,$6F,$EB
- $A12B DEFB $C5,$E5,$41,$E5,$CD,$3D,$A1,$E1
- $A133 DEFB $24,$10,$F8,$E1,$C1,$2C,$10,$F0
- $A13B DEFB $E1,$C9,$CD,$0D,$A2,$3E,$03,$84
- $A143 DEFB $67,$73,$C9
+; Routine at A123
+c$A123 CALL $A11A    ;
+ $A126 LD A,(HL)     ;
+ $A127 INC HL        ;
+ $A128 PUSH HL       ;
+ $A129 LD L,A        ;
+ $A12A EX DE,HL      ;
+; This entry point is used by the routine at #R$A168.
+*$A12B PUSH BC       ;
+ $A12C PUSH HL       ;
+ $A12D LD B,C        ;
+*$A12E PUSH HL       ;
+ $A12F CALL $A13D    ;
+ $A132 POP HL        ;
+ $A133 INC H         ;
+ $A134 DJNZ $A12E    ;
+ $A136 POP HL        ;
+ $A137 POP BC        ;
+ $A138 INC L         ;
+ $A139 DJNZ $A12B    ;
+ $A13B POP HL        ;
+ $A13C RET           ;

@@ -1,0 +1,15 @@
+; Routine at A688
+c$A688 POP HL        ;
+ $A689 JR NC,$A6B5   ;
+ $A68B LD A,(HL)     ;
+ $A68C OR A          ;
+ $A68D JR NZ,$A6B5   ;
+ $A68F LD DE,$8543   ;
+ $A692 LD B,$09      ;
+*$A694 LD (DE),A     ;
+ $A695 INC DE        ;
+ $A696 DJNZ $A694    ;
+ $A698 LD (HL),$02   ;
+ $A69A LD A,$09      ;
+ $A69C LD ($854F),A  ;
+ $A69F JR $A6B5      ;

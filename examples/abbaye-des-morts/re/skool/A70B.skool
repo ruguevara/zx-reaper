@@ -1,0 +1,23 @@
+; Routine at A70B
+c$A70B POP HL        ;
+ $A70C JP NC,$A7CB   ;
+ $A70F LD (HL),$FF   ;
+ $A711 LD HL,$9BF3   ;
+ $A714 LD (HL),$00   ;
+ $A716 LD HL,$854C   ;
+ $A719 LD A,(HL)     ;
+ $A71A CP $09        ;
+ $A71C ADC A,$00     ;
+ $A71E LD (HL),A     ;
+; This entry point is used by the routines at #R$A668, #R$A734 and #R$A782.
+*$A71F LD A,$05      ;
+ $A721 LD ($854F),A  ;
+; This entry point is used by the routines at #R$A734 and #R$A836.
+*$A724 LD HL,$FFFA   ;
+ $A727 ADD HL,SP     ;
+ $A728 LD SP,HL      ;
+ $A729 LD HL,$0000   ;
+ $A72C PUSH HL       ;
+ $A72D LD HL,$0016   ;
+ $A730 ADD HL,SP     ;
+ $A731 JP $A5F0      ;

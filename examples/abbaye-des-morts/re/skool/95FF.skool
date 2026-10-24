@@ -1,8 +1,8 @@
 ; Routine at 95FF
 ;
-; Used by the routines at #R$85FC and #R$8832.
+; Used by the routines at #R$85FC, #R$8832 and #R$88DE.
 c$95FF LD HL,$C200   ;
-; This entry point is used by the routine at #R$96F5.
+; This entry point is used by the routine at #R$96F3.
 *$9602 LD A,(HL)     ;
  $9603 INC A         ;
  $9604 RET Z         ;
@@ -19,7 +19,7 @@ c$95FF LD HL,$C200   ;
  $9612 EXX           ;
  $9613 INC L         ;
  $9614 LD B,(HL)     ;
-; This entry point is used by the routine at #R$96F5.
+; This entry point is used by the routine at #R$96F3.
 *$9615 PUSH BC       ;
  $9616 INC L         ;
  $9617 LD A,(HL)     ;

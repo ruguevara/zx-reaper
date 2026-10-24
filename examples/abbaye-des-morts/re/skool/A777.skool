@@ -1,2 +1,6 @@
-; Message at A777
-t$A777 DEFM "08:"
+; Routine at A777
+c$A777 JR NC,$A7B1   ;
+ $A779 LD A,($851E)  ;
+ $A77C AND $07       ;
+ $A77E JR Z,$A7B1    ;
+ $A780 JR $A78B      ;

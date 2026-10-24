@@ -1,6 +1,17 @@
-; Data block at B436
-b$B436 DEFB $C5,$C1,$D1,$E1,$5C,$F1,$3A,$A2
- $B43E DEFB $A8,$CB,$7F,$28,$01,$AF,$BA,$DA
- $B446 DEFB $C3,$B2,$C3,$80,$B3,$D1,$C1,$10
- $B44E DEFB $E7,$04,$C5,$F1,$D1,$E1,$CB,$2C
- $B456 DEFB $CB,$84
+; Routine at B436
+;
+; Used by the routine at #R$B44B.
+c$B436 PUSH BC       ;
+ $B437 POP BC        ;
+; This entry point is used by the routine at #R$B44B.
+*$B438 POP DE        ;
+ $B439 POP HL        ;
+ $B43A LD E,H        ;
+ $B43B POP AF        ;
+ $B43C LD A,($A8A2)  ;
+ $B43F BIT 7,A       ;
+ $B441 JR Z,$B444    ;
+ $B443 XOR A         ;
+*$B444 CP D          ;
+ $B445 JP C,$B2C3    ;
+ $B448 JP $B380      ;

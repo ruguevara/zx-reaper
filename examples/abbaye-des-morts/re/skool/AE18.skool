@@ -1,2 +1,0 @@
-; Data block at AE18
-b$AE18 DEFB $04,$7C,$D6,$08,$67,$C3,$9D,$AD

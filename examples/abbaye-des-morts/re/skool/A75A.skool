@@ -1,0 +1,15 @@
+; Routine at A75A
+c$A75A POP HL        ;
+ $A75B LD A,(HL)     ;
+ $A75C JR NC,$A757   ;
+ $A75E OR A          ;
+ $A75F JR NZ,$A757   ;
+ $A761 LD (HL),$01   ;
+ $A763 LD A,$05      ;
+ $A765 LD ($854F),A  ;
+ $A768 LD A,(HL)     ;
+ $A769 LD HL,$8048   ;
+ $A76C LD ($9CEE),HL ;
+ $A76F LD HL,$9CE7   ;
+ $A772 LD (HL),$00   ;
+ $A774 JP $A7DB      ;

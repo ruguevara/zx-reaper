@@ -1,0 +1,26 @@
+; Routine at B9CF
+c$B9CF POP HL        ;
+ $B9D0 LD A,(HL)     ;
+ $B9D1 INC HL        ;
+ $B9D2 LD ($ACDA),A  ;
+ $B9D5 LD C,(HL)     ;
+ $B9D6 INC HL        ;
+ $B9D7 LD B,(HL)     ;
+ $B9D8 INC HL        ;
+ $B9D9 EX DE,HL      ;
+ $B9DA EX AF,AF'     ;
+ $B9DB AND $03       ;
+ $B9DD ADD A,A       ;
+ $B9DE LD L,A        ;
+ $B9DF LD H,$00      ;
+ $B9E1 ADD HL,BC     ;
+ $B9E2 LD A,(HL)     ;
+ $B9E3 EX AF,AF'     ;
+ $B9E4 INC HL        ;
+ $B9E5 LD C,(HL)     ;
+ $B9E6 EX DE,HL      ;
+ $B9E7 LD B,(HL)     ;
+ $B9E8 INC HL        ;
+ $B9E9 LD ($ACD7),BC ;
+ $B9ED LD IX,$B9F4   ;
+ $B9F1 JP $A883      ;

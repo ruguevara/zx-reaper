@@ -1,3 +1,7 @@
-; Data block at A290
-b$A290 DEFB $01,$1F,$00,$ED,$78,$E6,$17,$B3
- $A298 DEFB $32,$CF,$A2,$C9
+; Routine at A290
+c$A290 LD BC,$001F   ;
+ $A293 IN A,(C)      ;
+ $A295 AND $17       ;
+ $A297 OR E          ;
+ $A298 LD ($A2CF),A  ;
+ $A29B RET           ;

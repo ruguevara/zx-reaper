@@ -1,5 +1,0 @@
-; Data block at B7C1
-b$B7C1 DEFB $D5,$AC,$C3,$E4,$B3,$C1,$D1,$1D
- $B7C9 DEFB $7B,$FE,$36,$28,$08,$D5,$21,$12
- $B7D1 DEFB $00,$39,$C3,$F0,$A5,$E1,$7C,$E1
- $B7D9 DEFB $6F,$7C

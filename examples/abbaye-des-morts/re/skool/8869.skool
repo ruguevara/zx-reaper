@@ -1,6 +1,6 @@
 ; Routine at 8869
 ;
-; Used by the routine at #R$8832.
+; Used by the routines at #R$8832 and #R$88DE.
 c$8869 LD A,($BDDA)  ;
  $886C OR A          ;
  $886D JR NZ,$8869   ;

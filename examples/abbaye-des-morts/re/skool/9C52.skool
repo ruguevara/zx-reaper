@@ -1,20 +1,32 @@
-; Data block at 9C52
-b$9C52 DEFB $21,$2A,$83,$01,$06,$30,$3A,$0C
- $9C5A DEFB $85,$F5,$C5,$E5,$AF,$32,$0C,$85
- $9C62 DEFB $21,$51,$9C,$36,$C9,$E1,$CD,$5F
- $9C6A DEFB $9D,$C1,$D9,$CD,$96,$9C,$CD,$CE
- $9C72 DEFB $A1,$CD,$C3,$A1,$CD,$CE,$A1,$AF
- $9C7A DEFB $32,$F3,$9B,$32,$1B,$9C,$32,$0B
- $9C82 DEFB $85,$CD,$5A,$9B,$21,$16,$0C,$01
- $9C8A DEFB $14,$02,$3E,$07,$CD,$A8,$9F,$F1
- $9C92 DEFB $32,$0C,$85,$C9,$21,$DF,$71,$5E
- $9C9A DEFB $23,$56,$23,$CD,$A5,$9C,$7E,$B7
- $9CA2 DEFB $20,$F9,$C9,$0E,$18,$D5,$EB,$CD
- $9CAA DEFB $F2,$A1,$EB,$CD,$B7,$9C,$79,$B7
- $9CB2 DEFB $20,$F9,$D1,$1C,$C9,$7E,$23,$3D
- $9CBA DEFB $28,$1D,$3D,$E5,$D5,$87,$87,$87
- $9CC2 DEFB $21,$7F,$71,$CD,$D9,$A1,$D9,$79
- $9CCA DEFB $D9,$12,$EB,$CD,$03,$A2,$EB,$CD
- $9CD2 DEFB $CA,$9B,$D1,$E1,$1C,$0D,$C9,$7E
- $9CDA DEFB $23,$F5,$D9,$78,$D9,$12,$F1,$1C
- $9CE2 DEFB $0D,$3D,$20,$F5,$C9
+; Routine at 9C52
+c$9C52 LD HL,$832A   ;
+ $9C55 LD BC,$3006   ;
+; This entry point is used by the routine at #R$887B.
+*$9C58 LD A,($850C)  ;
+ $9C5B PUSH AF       ;
+ $9C5C PUSH BC       ;
+ $9C5D PUSH HL       ;
+ $9C5E XOR A         ;
+ $9C5F LD ($850C),A  ;
+ $9C62 LD HL,$9C51   ;
+ $9C65 LD (HL),$C9   ;
+ $9C67 POP HL        ;
+ $9C68 CALL $9D5F    ;
+ $9C6B POP BC        ;
+ $9C6C EXX           ;
+ $9C6D CALL $9C96    ;
+ $9C70 CALL $A1CE    ;
+ $9C73 CALL $A1C3    ;
+ $9C76 CALL $A1CE    ;
+ $9C79 XOR A         ;
+ $9C7A LD ($9BF3),A  ;
+ $9C7D LD ($9C1B),A  ;
+ $9C80 LD ($850B),A  ;
+ $9C83 CALL $9B5A    ;
+ $9C86 LD HL,$0C16   ;
+ $9C89 LD BC,$0214   ;
+ $9C8C LD A,$07      ;
+ $9C8E CALL $9FA8    ;
+ $9C91 POP AF        ;
+ $9C92 LD ($850C),A  ;
+ $9C95 RET           ;

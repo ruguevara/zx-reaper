@@ -1,6 +1,6 @@
 ; Routine at 8A6E
 ;
-; Used by the routines at #R$897E and #R$89ED.
+; Used by the routines at #R$8905, #R$897E and #R$89ED.
 c$8A6E POP IY        ;
 ; This entry point is used by the routine at #R$B099.
 *$8A70 EXX           ;

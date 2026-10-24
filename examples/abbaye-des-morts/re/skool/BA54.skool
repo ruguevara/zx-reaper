@@ -1,0 +1,26 @@
+; Routine at BA54
+c$BA54 POP HL        ;
+ $BA55 LD A,(HL)     ;
+ $BA56 INC HL        ;
+ $BA57 LD ($ACDA),A  ;
+ $BA5A LD E,(HL)     ;
+ $BA5B INC HL        ;
+ $BA5C LD D,(HL)     ;
+ $BA5D INC HL        ;
+ $BA5E EX DE,HL      ;
+ $BA5F EX AF,AF'     ;
+ $BA60 AND $03       ;
+ $BA62 ADD A,A       ;
+ $BA63 LD C,A        ;
+ $BA64 LD B,$00      ;
+ $BA66 ADD HL,BC     ;
+ $BA67 LD A,(HL)     ;
+ $BA68 EX AF,AF'     ;
+ $BA69 INC HL        ;
+ $BA6A LD C,(HL)     ;
+ $BA6B EX DE,HL      ;
+ $BA6C LD B,(HL)     ;
+ $BA6D INC HL        ;
+ $BA6E LD ($ACD7),BC ;
+ $BA72 LD IX,$BA79   ;
+ $BA76 JP $A883      ;

@@ -1,0 +1,22 @@
+; Routine at BC43
+c$BC43 LD D,$00      ;
+ $BC45 ADD HL,DE     ;
+ $BC46 ADD HL,DE     ;
+ $BC47 LD E,(HL)     ;
+ $BC48 INC HL        ;
+ $BC49 LD D,(HL)     ;
+ $BC4A INC HL        ;
+ $BC4B LD ($ACD5),DE ;
+ $BC4F INC HL        ;
+ $BC50 INC HL        ;
+ $BC51 LD A,(HL)     ;
+ $BC52 INC HL        ;
+ $BC53 LD H,(HL)     ;
+ $BC54 LD L,A        ;
+ $BC55 LD ($ACDF),HL ;
+ $BC58 LD A,($AA1F)  ;
+ $BC5B OR A          ;
+ $BC5C JP NZ,$B41F   ;
+ $BC5F LD HL,$ACD1   ;
+ $BC62 LD DE,($BE58) ;
+ $BC66 JP $B3F3      ;

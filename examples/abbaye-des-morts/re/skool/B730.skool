@@ -1,0 +1,19 @@
+; Routine at B730
+c$B730 POP HL        ;
+ $B731 LD ($ACD7),HL ;
+ $B734 POP HL        ;
+ $B735 LD A,(HL)     ;
+ $B736 INC HL        ;
+ $B737 LD ($ACDA),A  ;
+ $B73A LD A,(HL)     ;
+ $B73B INC HL        ;
+ $B73C EX AF,AF'     ;
+ $B73D AND $03       ;
+ $B73F ADD A,A       ;
+ $B740 ADD A,A       ;
+ $B741 ADD A,(HL)    ;
+ $B742 LD H,A        ;
+ $B743 EX AF,AF'     ;
+ $B744 LD L,A        ;
+ $B745 LD ($ACD5),HL ;
+ $B748 JP $B3E4      ;

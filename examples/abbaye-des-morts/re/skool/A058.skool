@@ -1,0 +1,10 @@
+; Routine at A058
+c$A058 CALL $A11A    ;
+ $A05B LD A,(BC)     ;
+ $A05C OR A          ;
+ $A05D RET Z         ;
+ $A05E PUSH HL       ;
+ $A05F EX DE,HL      ;
+ $A060 CALL $9D5F    ;
+ $A063 POP HL        ;
+ $A064 RET           ;

@@ -1,0 +1,10 @@
+; Routine at A04B
+c$A04B CALL $A11A    ;
+ $A04E LD A,(BC)     ;
+ $A04F OR A          ;
+ $A050 RET NZ        ;
+ $A051 PUSH HL       ;
+ $A052 EX DE,HL      ;
+ $A053 CALL $9D5F    ;
+ $A056 POP HL        ;
+ $A057 RET           ;

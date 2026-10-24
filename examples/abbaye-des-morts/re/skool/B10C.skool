@@ -1,0 +1,28 @@
+; Routine at B10C
+c$B10C POP BC        ;
+ $B10D POP DE        ;
+ $B10E POP HL        ;
+ $B10F LD BC,$0150   ;
+ $B112 ADD HL,BC     ;
+ $B113 PUSH HL       ;
+ $B114 LD A,H        ;
+ $B115 POP HL        ;
+ $B116 POP DE        ;
+ $B117 POP BC        ;
+ $B118 LD L,C        ;
+ $B119 LD H,$00      ;
+ $B11B INC C         ;
+ $B11C DJNZ $B133    ;
+ $B11E LD BC,$0600   ;
+ $B121 EXX           ;
+ $B122 LD ($B131),SP ;
+ $B126 LD HL,$FFF6   ;
+ $B129 ADD HL,SP     ;
+ $B12A LD SP,HL      ;
+ $B12B LD HL,$B1D4   ;
+ $B12E PUSH HL       ;
+ $B12F EXX           ;
+ $B130 LD SP,$B130   ;
+*$B133 PUSH BC       ;
+ $B134 LD BC,$B100   ;
+ $B137 JR $B18E      ;

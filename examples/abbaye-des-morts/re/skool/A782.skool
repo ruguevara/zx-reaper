@@ -1,0 +1,31 @@
+; Routine at A782
+c$A782 JR NC,$A799   ;
+ $A784 LD A,($851E)  ;
+ $A787 AND $07       ;
+ $A789 JR NZ,$A799   ;
+; This entry point is used by the routine at #R$A777.
+*$A78B POP HL        ;
+ $A78C LD (HL),$FF   ;
+ $A78E LD HL,$9C1B   ;
+ $A791 LD (HL),$00   ;
+ $A793 LD HL,$854D   ;
+ $A796 INC (HL)      ;
+ $A797 JR $A71F      ;
+*$A799 POP HL        ;
+ $A79A POP BC        ;
+ $A79B POP DE        ;
+ $A79C LD A,E        ;
+ $A79D DEC C         ;
+ $A79E JR NZ,$A7A8   ;
+ $A7A0 LD C,B        ;
+ $A7A1 INC A         ;
+ $A7A2 LD E,A        ;
+ $A7A3 CP D          ;
+ $A7A4 JR C,$A7A8    ;
+ $A7A6 SUB D         ;
+ $A7A7 LD E,A        ;
+*$A7A8 LD L,A        ;
+ $A7A9 LD A,($851E)  ;
+ $A7AC AND $07       ;
+ $A7AE ADD A,L       ;
+ $A7AF JR $A7D9      ;

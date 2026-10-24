@@ -1,0 +1,12 @@
+; Routine at A748
+c$A748 POP HL        ;
+ $A749 LD A,(HL)     ;
+ $A74A JR NC,$A757   ;
+ $A74C OR A          ;
+ $A74D JR NZ,$A757   ;
+ $A74F LD (HL),$01   ;
+ $A751 LD A,$03      ;
+ $A753 LD ($854F),A  ;
+ $A756 LD A,(HL)     ;
+; This entry point is used by the routine at #R$A75A.
+*$A757 JP $A7DB      ;

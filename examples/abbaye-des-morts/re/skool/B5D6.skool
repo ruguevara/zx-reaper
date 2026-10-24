@@ -1,0 +1,14 @@
+; Routine at B5D6
+c$B5D6 POP BC        ;
+ $B5D7 POP BC        ;
+ $B5D8 POP HL        ;
+ $B5D9 LD D,H        ;
+ $B5DA POP HL        ;
+ $B5DB LD E,H        ;
+ $B5DC LD H,D        ;
+ $B5DD LD L,E        ;
+ $B5DE LD ($5DFE),HL ;
+ $B5E1 EXX           ;
+ $B5E2 LD IY,$B3D4   ;
+ $B5E6 LD HL,$BCB2   ;
+ $B5E9 JR $B611      ;

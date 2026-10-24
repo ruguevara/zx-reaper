@@ -1,0 +1,17 @@
+; Routine at 88DE
+;
+; Used by the routine at #R$887B.
+c$88DE XOR A         ;
+ $88DF LD ($8501),A  ;
+ $88E2 LD A,$80      ;
+ $88E4 LD ($850C),A  ;
+*$88E7 CALL $8869    ;
+ $88EA CALL $BDDA    ;
+ $88ED CALL $97B7    ;
+ $88F0 CALL $95FF    ;
+ $88F3 LD A,($8501)  ;
+ $88F6 OR A          ;
+ $88F7 JR Z,$88E7    ;
+ $88F9 XOR A         ;
+ $88FA LD ($850C),A  ;
+ $88FD RET           ;

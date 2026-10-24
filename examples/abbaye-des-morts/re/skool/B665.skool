@@ -1,0 +1,24 @@
+; Routine at B665
+c$B665 POP BC        ;
+ $B666 POP BC        ;
+ $B667 POP HL        ;
+ $B668 LD D,H        ;
+ $B669 POP HL        ;
+ $B66A LD E,H        ;
+ $B66B LD H,D        ;
+ $B66C LD L,E        ;
+ $B66D LD ($5DFE),HL ;
+ $B670 SRA H         ;
+ $B672 SRA H         ;
+ $B674 LD ($ACD3),HL ;
+ $B677 POP AF        ;
+ $B678 EX AF,AF'     ;
+ $B679 POP HL        ;
+ $B67A ADD HL,DE     ;
+ $B67B EX DE,HL      ;
+ $B67C POP BC        ;
+ $B67D ADD HL,BC     ;
+ $B67E LD B,H        ;
+ $B67F LD C,L        ;
+ $B680 LD IX,$B687   ;
+ $B684 JP $A85F      ;

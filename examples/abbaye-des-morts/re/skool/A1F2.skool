@@ -1,6 +1,6 @@
 ; Routine at A1F2
 ;
-; Used by the routines at #R$9BA7 and #R$9FA8.
+; Used by the routines at #R$9BA7, #R$9CA5, #R$9FA8 and #R$A168.
 c$A1F2 LD A,L        ;
  $A1F3 RRCA          ;
  $A1F4 RRCA          ;

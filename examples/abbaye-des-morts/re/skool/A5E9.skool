@@ -3,7 +3,9 @@
 ; Used by the routine at #R$A596.
 c$A5E9 LD ($A5FD),SP ;
  $A5ED LD HL,$C100   ;
-; This entry point is used by the routines at #R$B407 and #R$B426.
+; This entry point is used by the routines at #R$A615, #R$A668, #R$A70B,
+; #R$A7CB, #R$B08E, #R$B3F3, #R$B426, #R$B512, #R$B7C6, #R$B8C5, #R$B97D and
+; #R$BB57.
 *$A5F0 LD SP,HL      ;
  $A5F1 LD A,(HL)     ;
  $A5F2 INC L         ;

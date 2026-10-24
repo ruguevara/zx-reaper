@@ -1,6 +1,7 @@
 ; Routine at A851
 ;
-; Used by the routine at #R$B1D4.
+; Used by the routines at #R$B163, #R$B1CF, #R$B2A6, #R$B365, #R$B534, #R$B5EB,
+; #R$B6E6, #R$B818, #R$B8C5, #R$B9B0, #R$BA15 and #R$BB57.
 c$A851 LD ($A881),HL ;
  $A854 POP HL        ;
  $A855 ADD HL,DE     ;
@@ -10,7 +11,8 @@ c$A851 LD ($A881),HL ;
  $A859 LD B,H        ;
  $A85A LD C,L        ;
  $A85B LD IX,$A87A   ;
- $A85F LD HL,($8516) ;
+; This entry point is used by the routines at #R$A600, #R$A822 and #R$B665.
+*$A85F LD HL,($8516) ;
  $A862 LD A,B        ;
  $A863 CP H          ;
  $A864 JR C,$A877    ;

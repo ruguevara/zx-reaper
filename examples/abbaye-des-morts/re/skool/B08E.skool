@@ -1,0 +1,8 @@
+; Routine at B08E
+;
+; Used by the routines at #R$B6E6, #R$B77F, #R$BAB1 and #R$BB57.
+c$B08E LD HL,$0000   ;
+ $B091 PUSH HL       ;
+ $B092 LD HL,$0016   ;
+ $B095 ADD HL,SP     ;
+ $B096 JP $A5F0      ;

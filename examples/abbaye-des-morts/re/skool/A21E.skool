@@ -1,6 +1,6 @@
 ; Routine at A21E
 ;
-; Used by the routine at #R$9836.
+; Used by the routines at #R$97FD and #R$9836.
 c$A21E LD A,L        ;
  $A21F RRCA          ;
  $A220 RRCA          ;

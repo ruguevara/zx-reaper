@@ -11,6 +11,7 @@ c$AD88 NOP           ;
  $AD94 LD HL,$0000   ;
  $AD97 LD DE,$0000   ;
  $AD9A LD BC,$0000   ;
- $AD9D PUSH HL       ;
+; This entry point is used by the routine at #R$ADC1.
+*$AD9D PUSH HL       ;
  $AD9E PUSH DE       ;
 *$AD9F JR $AD9F      ;

@@ -1,0 +1,20 @@
+; Routine at 9B3E
+c$9B3E CALL $9AEE    ;
+ $9B41 INC H         ;
+ $9B42 CALL $9AEE    ;
+ $9B45 INC H         ;
+ $9B46 CALL $9AEE    ;
+ $9B49 INC H         ;
+ $9B4A CALL $9AEE    ;
+ $9B4D POP AF        ;
+ $9B4E LD H,$C4      ;
+ $9B50 LD (HL),A     ;
+ $9B51 INC L         ;
+ $9B52 LD (HL),A     ;
+ $9B53 INC L         ;
+ $9B54 LD (HL),A     ;
+ $9B55 INC L         ;
+ $9B56 LD (HL),A     ;
+ $9B57 INC L         ;
+ $9B58 LD (HL),A     ;
+ $9B59 RET           ;

@@ -1,6 +1,6 @@
 ; Routine at A203
 ;
-; Used by the routine at #R$9BA7.
+; Used by the routines at #R$9BA7, #R$9CB7 and #R$A168.
 c$A203 LD A,H        ;
  $A204 AND $03       ;
  $A206 ADD A,A       ;

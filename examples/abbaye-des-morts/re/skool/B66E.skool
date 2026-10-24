@@ -1,7 +1,0 @@
-; Data block at B66E
-b$B66E DEFB $FE,$5D,$CB,$2C,$CB,$2C,$22,$D3
- $B676 DEFB $AC,$F1,$08,$E1,$19,$EB,$C1,$09
- $B67E DEFB $44,$4D,$DD,$21,$87,$B6,$C3,$5F
- $B686 DEFB $A8,$30,$04,$9F,$32,$A0,$A8,$E1
- $B68E DEFB $7E,$23,$32,$DA,$AC,$08,$C1,$47
- $B696 DEFB $D1,$79,$FE

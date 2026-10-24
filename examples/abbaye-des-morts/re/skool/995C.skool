@@ -1,3 +1,0 @@
-; Data block at 995C
-b$995C DEFB $ED,$73,$2E,$99,$31,$60,$99,$26
- $9964 DEFB $C4

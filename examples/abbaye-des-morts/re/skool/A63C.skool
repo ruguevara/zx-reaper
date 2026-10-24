@@ -1,4 +1,0 @@
-; Data block at A63C
-b$A63C DEFB $E1,$C1,$0D,$20,$18,$06,$04,$21
- $A644 DEFB $A8,$76,$22,$EE,$9C,$21,$E7,$9C
- $A64C DEFB $71,$ED,$5F,$E6,$1F,$C6

@@ -1,0 +1,28 @@
+; Routine at BA79
+c$BA79 EXX           ;
+ $BA7A LD A,C        ;
+ $BA7B EXX           ;
+ $BA7C CP $14        ;
+ $BA7E JR NC,$BA81   ;
+ $BA80 LD E,D        ;
+*$BA81 JR NZ,$BAAF   ;
+ $BA83 LD E,D        ;
+ $BA84 EXX           ;
+ $BA85 LD A,$07      ;
+ $BA87 LD ($854F),A  ;
+ $BA8A LD HL,$BD46   ;
+ $BA8D LD DE,$BD58   ;
+ $BA90 LD A,R        ;
+ $BA92 AND $01       ;
+ $BA94 JR NZ,$BA97   ;
+ $BA96 EX DE,HL      ;
+*$BA97 LD ($5DFC),HL ;
+ $BA9A LD HL,$8552   ;
+ $BA9D INC (HL)      ;
+ $BA9E LD HL,$5DFC   ;
+ $BAA1 LD DE,($BE56) ;
+ $BAA5 LD BC,$0004   ;
+ $BAA8 LDIR          ;
+ $BAAA LD ($BE56),DE ;
+ $BAAE EXX           ;
+*$BAAF JP (IY)       ;

@@ -1,0 +1,7 @@
+; Routine at B870
+c$B870 POP HL        ;
+ $B871 LD A,(HL)     ;
+ $B872 INC HL        ;
+ $B873 LD ($ACDA),A  ;
+ $B876 LD IX,$B87D   ;
+ $B87A JP $A883      ;

@@ -1,9 +1,12 @@
-; Data block at A600
-b$A600 DEFB $E1,$22,$E7,$AC,$29,$29,$EB,$21
- $A608 DEFB $08,$08,$19,$44,$4D,$DD,$21,$14
- $A610 DEFB $A6,$C3,$5F,$A8,$C9,$30,$1F,$3A
- $A618 DEFB $1A,$85,$3C,$28,$1F,$E1,$36,$01
- $A620 DEFB $9F,$32,$1A,$85,$21,$A0,$76,$22
- $A628 DEFB $EE,$9C,$21,$E7,$9C,$36,$00,$21
- $A630 DEFB $0E,$00,$39,$C3,$F0,$A5,$3A,$1A
- $A638 DEFB $85
+; Routine at A600
+c$A600 POP HL        ;
+ $A601 LD ($ACE7),HL ;
+ $A604 ADD HL,HL     ;
+ $A605 ADD HL,HL     ;
+ $A606 EX DE,HL      ;
+ $A607 LD HL,$0808   ;
+ $A60A ADD HL,DE     ;
+ $A60B LD B,H        ;
+ $A60C LD C,L        ;
+ $A60D LD IX,$A614   ;
+ $A611 JP $A85F      ;

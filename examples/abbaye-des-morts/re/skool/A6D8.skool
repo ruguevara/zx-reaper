@@ -1,0 +1,25 @@
+; Routine at A6D8
+c$A6D8 POP HL        ;
+ $A6D9 JR NC,$A706   ;
+ $A6DB BIT 7,(HL)    ;
+ $A6DD JR NZ,$A708   ;
+ $A6DF LD HL,$8524   ;
+ $A6E2 SET 7,(HL)    ;
+ $A6E4 LD HL,$5400   ;
+ $A6E7 LD ($8512),HL ;
+ $A6EA LD HL,$3C00   ;
+ $A6ED LD ($8514),HL ;
+ $A6F0 LD A,$13      ;
+; This entry point is used by the routine at #R$A6BC.
+*$A6F2 LD ($8509),A  ;
+ $A6F5 LD A,$02      ;
+ $A6F7 LD ($850C),A  ;
+ $A6FA ADD A,A       ;
+ $A6FB LD ($A894),A  ;
+ $A6FE LD A,$04      ;
+ $A700 LD ($854F),A  ;
+ $A703 JP $A7CB      ;
+; This entry point is used by the routine at #R$A6BC.
+*$A706 RES 7,(HL)    ;
+; This entry point is used by the routine at #R$A6BC.
+*$A708 JP $A7CB      ;

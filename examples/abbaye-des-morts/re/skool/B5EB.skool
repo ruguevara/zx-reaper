@@ -1,0 +1,30 @@
+; Routine at B5EB
+c$B5EB POP BC        ;
+ $B5EC POP BC        ;
+ $B5ED POP HL        ;
+ $B5EE LD D,H        ;
+ $B5EF POP HL        ;
+ $B5F0 LD E,H        ;
+ $B5F1 LD H,D        ;
+ $B5F2 LD L,E        ;
+ $B5F3 LD ($5DFE),HL ;
+ $B5F6 LD A,($A8A2)  ;
+ $B5F9 BIT 7,A       ;
+ $B5FB JR Z,$B5FE    ;
+ $B5FD XOR A         ;
+*$B5FE CP H          ;
+ $B5FF EXX           ;
+ $B600 LD IY,$B3D4   ;
+ $B604 LD HL,$BC92   ;
+ $B607 LD DE,$BCA2   ;
+ $B60A JR C,$B611    ;
+ $B60C EX DE,HL      ;
+ $B60D LD IY,$B3D2   ;
+; This entry point is used by the routine at #R$B5D6.
+*$B611 EXX           ;
+ $B612 SRA H         ;
+ $B614 SRA H         ;
+ $B616 LD ($ACD3),HL ;
+ $B619 POP HL        ;
+ $B61A LD HL,$B620   ;
+ $B61D JP $A851      ;

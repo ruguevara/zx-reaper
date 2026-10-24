@@ -25,7 +25,7 @@ c$9BA7 PUSH HL       ;
  $9BC6 LD A,H        ;
  $9BC7 ADD A,$CF     ;
  $9BC9 LD H,A        ;
-; This entry point is used by the routine at #R$9C3B.
+; This entry point is used by the routines at #R$9C3B and #R$9CB7.
 *$9BCA LD B,$08      ;
 *$9BCC LD A,(HL)     ;
  $9BCD LD (DE),A     ;

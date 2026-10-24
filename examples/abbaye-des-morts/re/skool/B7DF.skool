@@ -1,3 +1,0 @@
-; Data block at B7DF
-b$B7DF DEFB $FE,$5D,$D9,$21,$4F,$85,$36,$07
- $B7E7 DEFB $21,$12,$BD,$22,$FC

@@ -2,7 +2,8 @@
 c$9DD2 CALL $A11A    ;
  $9DD5 LD A,(HL)     ;
  $9DD6 INC HL        ;
- $9DD7 PUSH HL       ;
+; This entry point is used by the routines at #R$9DC2 and #R$A15C.
+*$9DD7 PUSH HL       ;
  $9DD8 EX DE,HL      ;
  $9DD9 LD E,A        ;
 *$9DDA PUSH HL       ;

@@ -1,0 +1,4 @@
+; Routine at A1BE
+c$A1BE XOR A         ;
+ $A1BF LD ($AE4B),A  ;
+ $A1C2 RET           ;

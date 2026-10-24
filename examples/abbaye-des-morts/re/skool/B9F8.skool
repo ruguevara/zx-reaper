@@ -1,0 +1,21 @@
+; Routine at B9F8
+c$B9F8 LD IY,$B3D2   ;
+ $B9FC POP BC        ;
+ $B9FD POP DE        ;
+ $B9FE POP HL        ;
+ $B9FF ADD HL,BC     ;
+ $BA00 PUSH HL       ;
+ $BA01 POP HL        ;
+ $BA02 LD A,H        ;
+ $BA03 CP D          ;
+ $BA04 JR NZ,$BA32   ;
+ $BA06 LD HL,$FFFA   ;
+ $BA09 ADD HL,SP     ;
+ $BA0A LD SP,HL      ;
+ $BA0B LD HL,$BA15   ;
+ $BA0E PUSH HL       ;
+ $BA0F POP HL        ;
+ $BA10 POP BC        ;
+ $BA11 POP DE        ;
+ $BA12 POP HL        ;
+ $BA13 JR $BA32      ;

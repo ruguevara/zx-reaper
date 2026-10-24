@@ -1,4 +1,30 @@
-; Data block at B3F3
-b$B3F3 DEFB $ED,$A0,$ED,$A0,$ED,$A0,$ED,$A0
- $B3FB DEFB $ED,$A0,$ED,$A0,$ED,$A0,$ED,$A0
- $B403 DEFB $ED,$A0,$ED,$A0
+; Routine at B3F3
+;
+; Used by the routine at #R$BC43.
+c$B3F3 LDI           ;
+ $B3F5 LDI           ;
+ $B3F7 LDI           ;
+ $B3F9 LDI           ;
+ $B3FB LDI           ;
+ $B3FD LDI           ;
+ $B3FF LDI           ;
+ $B401 LDI           ;
+ $B403 LDI           ;
+ $B405 LDI           ;
+; This entry point is used by the routine at #R$B3D2.
+*$B407 LDI           ;
+ $B409 LDI           ;
+ $B40B LDI           ;
+ $B40D LDI           ;
+ $B40F LDI           ;
+ $B411 LDI           ;
+ $B413 LDI           ;
+ $B415 LDI           ;
+ $B417 LDI           ;
+ $B419 LDI           ;
+ $B41B LD ($BE58),DE ;
+; This entry point is used by the routines at #R$B099, #R$B0B1, #R$B3D2,
+; #R$B56D and #R$BC43.
+*$B41F LD HL,$0004   ;
+ $B422 ADD HL,SP     ;
+ $B423 JP $A5F0      ;

@@ -1,0 +1,38 @@
+; Routine at 887B
+;
+; Used by the routine at #R$85FC.
+c$887B XOR A         ;
+ $887C LD ($A894),A  ;
+ $887F LD A,$19      ;
+ $8881 LD ($8509),A  ;
+ $8884 CALL $86B9    ;
+ $8887 LD HL,$8345   ;
+ $888A LD BC,$5042   ;
+ $888D CALL $9C58    ;
+ $8890 LD A,$05      ;
+ $8892 LD ($8551),A  ;
+ $8895 LD HL,$83A8   ;
+ $8898 LD BC,$0005   ;
+ $889B CALL $8870    ;
+ $889E CALL $88DE    ;
+ $88A1 LD A,$04      ;
+ $88A3 LD ($8509),A  ;
+ $88A6 CALL $86B9    ;
+ $88A9 LD HL,$8363   ;
+ $88AC LD BC,$2805   ;
+ $88AF CALL $9C58    ;
+ $88B2 LD HL,$3E00   ;
+ $88B5 LD ($A8A1),HL ;
+ $88B8 LD HL,$3A00   ;
+ $88BB LD ($A8A3),HL ;
+ $88BE LD HL,$83AD   ;
+ $88C1 LD BC,$0021   ;
+ $88C4 CALL $8870    ;
+ $88C7 CALL $88DE    ;
+ $88CA LD A,$02      ;
+ $88CC LD ($8551),A  ;
+ $88CF LD HL,$8381   ;
+ $88D2 CALL $9D5F    ;
+ $88D5 LD HL,$85E8   ;
+ $88D8 CALL $A1C3    ;
+ $88DB JP $A1CE      ;

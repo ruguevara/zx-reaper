@@ -1,0 +1,3 @@
+; Data block at BB07
+b$BB07 DEFB $C1,$D1,$E1,$09,$E5,$D9,$D1,$D9
+ $BB0F DEFB $D1,$7A,$D9,$C6,$07,$1F,$E6

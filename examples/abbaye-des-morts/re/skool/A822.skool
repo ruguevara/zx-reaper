@@ -1,0 +1,12 @@
+; Routine at A822
+c$A822 POP HL        ;
+ $A823 LD ($ACE7),HL ;
+ $A826 ADD HL,HL     ;
+ $A827 ADD HL,HL     ;
+ $A828 EX DE,HL      ;
+ $A829 LD HL,$0808   ;
+ $A82C ADD HL,DE     ;
+ $A82D LD B,H        ;
+ $A82E LD C,L        ;
+ $A82F LD IX,$A836   ;
+ $A833 JP $A85F      ;

@@ -1,11 +1,14 @@
 ; Routine at B3D2
+;
+; Used by the routine at #R$B1AC.
 c$B3D2 INC HL        ;
  $B3D3 INC HL        ;
  $B3D4 LD A,(HL)     ;
  $B3D5 INC HL        ;
  $B3D6 LD H,(HL)     ;
  $B3D7 LD L,A        ;
- $B3D8 LD D,$00      ;
+; This entry point is used by the routines at #R$B687, #R$B880 and #R$B9F4.
+*$B3D8 LD D,$00      ;
  $B3DA ADD HL,DE     ;
  $B3DB ADD HL,DE     ;
  $B3DC EX AF,AF'     ;
@@ -14,7 +17,8 @@ c$B3D2 INC HL        ;
  $B3DF LD H,(HL)     ;
  $B3E0 LD L,A        ;
  $B3E1 LD ($ACD5),HL ;
- $B3E4 LD A,($AA1F)  ;
+; This entry point is used by the routines at #R$B730 and #R$B77F.
+*$B3E4 LD A,($AA1F)  ;
  $B3E7 OR A          ;
  $B3E8 JR NZ,$B41F   ;
  $B3EA LD HL,$ACD1   ;

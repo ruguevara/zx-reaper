@@ -1,0 +1,22 @@
+; Routine at B512
+c$B512 POP BC        ;
+ $B513 POP DE        ;
+ $B514 POP HL        ;
+ $B515 LD D,H        ;
+ $B516 POP HL        ;
+ $B517 POP AF        ;
+ $B518 DEC A         ;
+ $B519 JR Z,$B523    ;
+ $B51B PUSH AF       ;
+ $B51C LD HL,$000C   ;
+ $B51F ADD HL,SP     ;
+ $B520 JP $A5F0      ;
+*$B523 LD H,D        ;
+ $B524 LD L,E        ;
+ $B525 SRA H         ;
+ $B527 SRA H         ;
+ $B529 LD ($ACD3),HL ;
+ $B52C POP HL        ;
+ $B52D POP HL        ;
+ $B52E LD IY,$B407   ;
+ $B532 JR $B56D      ;

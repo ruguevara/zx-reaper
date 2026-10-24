@@ -1,6 +1,6 @@
 ; Routine at 9B5A
 ;
-; Used by the routines at #R$85FC and #R$8832.
+; Used by the routines at #R$85FC, #R$8832 and #R$9C52.
 c$9B5A LD A,($850B)  ;
  $9B5D ADD A,A       ;
  $9B5E ADD A,A       ;
