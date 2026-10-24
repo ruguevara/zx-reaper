@@ -180,5 +180,8 @@ projects built with it.
 - `zxinit.py` automates standard headed blocks. Custom loaders, headerless and
   encrypted blocks are handled by the `zx-init` skill with the agent.
 - `zxbasic.py` knows 48K keywords only (128K `SPECTRUM`/`PLAY` come out as `\A3`/`\A4`).
-- Game tapes are copyrighted: keep game projects in private repositories, and
-  the tapes and everything made from them out of git.
+- Game tapes are copyrighted: the tapes and everything made from them as
+  data (snapshots, RAM images, extracted assets, records, web builds) stay
+  out of git. The explanations of games already reversed in public
+  (annotated sources, articles, ports) are published without them, as the
+  examples here are.

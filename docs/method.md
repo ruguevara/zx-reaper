@@ -248,9 +248,9 @@ In detail: [The Hobbit: a blind run](the-hobbit-run.md).
 | [Cheril the Goddess](https://spectrumcomputing.co.uk/alt/27991/ZX-Spectrum/Cheril_the_Goddess), [Trabajo Basura](https://spectrumcomputing.co.uk/alt/27128/ZX-Spectrum/Trabajo_Basura) | the same Mojon Twins engine, sources available: tests whether names carry over between games | freeware |
 | [BLAM!](https://scattergoodstudios.itch.io/blam) (1992) | a classic in assembler, re-released for free by its author | free, with the author's permission |
 | [The Speccies 2](https://spectrumcomputing.co.uk/entry/30028) | a modern game in assembler | freeware; distribute only from the author's site, Spectrum Computing, WoS |
-| Manic Miner, Jet Set Willy, Hungry Horace | SkoolKit reference disassemblies exist to compare the classification with | rights unclear: for private testing only, do not publish the tape or the result |
+| Manic Miner, Jet Set Willy, Hungry Horace | SkoolKit reference disassemblies exist to compare the classification with | already reversed in public: publish the explanation, never the tape or anything made from it as data |
 
-"Freeware" on Spectrum Computing usually means "free, but under copyright": keep the reverse-engineered sources and the ports in a private repository, and do not put the tape there.
+"Freeware" on Spectrum Computing usually means "free, but under copyright": the tape and anything made from it as data stay out of the repository, as for any game.
 
 ## Limits
 
@@ -258,7 +258,7 @@ In detail: [The Hobbit: a blind run](the-hobbit-run.md).
 - Only standard headed blocks are split automatically. Protected loaders are manual work for the agent following `zx-init`; the hardest part is generating a tape with encryption, which needs `scripts/encrypt.py`.
 - The shift test does not move code that is copied to a fixed address at start-up: such code is kept in place with `DISP`, or excluded and noted in `re/notes.md`.
 - The stage 3 replay sees only the ROM's IM1 interrupts; a game with its own IM2 handler needs its checkpoint at a HALT. Stages 3 and 4 have been done on two games, and the stage 4 bridge is still written per game.
-- Copyright: do not put `original/`, built tapes or anything made from them (RAM images, extracted assets, records, web builds) into the project repository unless the game is free.
+- Copyright: never put `original/`, built tapes or anything made from them as data (RAM images, extracted assets, records, web builds) into the repository unless the game is free. The explanations of games already reversed in public (annotated sources, articles, ports) are published without them, as the examples are.
 
 ## Links
 
