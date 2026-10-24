@@ -4,7 +4,8 @@
 
 Russian version: [README.ru.md](README.ru.md).
 
-An agent harness for analysing and porting ZX Spectrum 48K games.
+An agent harness for analysing and porting ZX Spectrum 48K games, for
+recreational and educational purposes only.
 
 ## Retro Engineer Anything
 

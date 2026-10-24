@@ -5,6 +5,7 @@
 English version: [README.md](README.md).
 
 Агентская обвязка (harness) для анализа и портирования игр ZX Spectrum 48.
+Проект сделан только в развлекательных и образовательных целях.
 
 ## Retro Engineer Anything
 
