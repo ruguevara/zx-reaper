@@ -1,0 +1,2 @@
+; Pointer to the next free word of the frame call list at $BE5A
+g$BE58 DEFW $0000

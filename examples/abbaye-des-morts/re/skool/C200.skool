@@ -1,0 +1,3 @@
+; Redraw run list built by $97B7: runs of dirty cells, $FF after each screen
+; row
+g$C200 DEFS $0100,$FF

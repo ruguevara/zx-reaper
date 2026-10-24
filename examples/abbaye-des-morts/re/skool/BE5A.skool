@@ -1,0 +1,2 @@
+; Frame call list: routine addresses run by RET with SP=$BE5A, ended by $BDEB
+g$BE5A DEFS $A2

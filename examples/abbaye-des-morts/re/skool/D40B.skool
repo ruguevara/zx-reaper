@@ -1,2 +1,0 @@
-; Data block at D40B
-b$D40B DEFB $1C

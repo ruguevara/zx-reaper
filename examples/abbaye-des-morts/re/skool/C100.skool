@@ -1,0 +1,3 @@
+; Object slots: 11 records of 22 bytes, word 0 the handler (0 free), end mark
+; $A5FC at $C1F2
+g$C100 DEFS $F4,$FF

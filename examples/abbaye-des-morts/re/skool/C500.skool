@@ -1,0 +1,3 @@
+; Redraw cells: 8 pixel rows of each queued cell, one page per row; also the
+; bit-mirror table and a screen copy
+g$C500 DEFS $0800,$FF

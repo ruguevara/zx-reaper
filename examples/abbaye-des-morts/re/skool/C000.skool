@@ -1,0 +1,2 @@
+; Sprite draw queue: 16 records of 16 bytes, word 0 the routine
+g$C000 DEFS $0100,$FF

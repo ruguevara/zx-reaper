@@ -1,2 +1,0 @@
-; Data block at D508
-b$D508 DEFB $1C,$CA,$D2
