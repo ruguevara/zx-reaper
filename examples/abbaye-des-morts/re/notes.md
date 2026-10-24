@@ -70,22 +70,52 @@ Details and evidence: `re/frag/[ABCD]-report.md` (classification reports).
 | $D700-$FEFF | sprite sheet: a page per pixel row, 40 rows; columns $63-$FF filled per room | gfx, buffer |
 | $FF00-$FFFF | outline mask table built at start-up | buffer |
 
-## Open questions
+## Game structure
 
-## Game structure (first look)
+- Entry $6000 (StartUp): pops the machine type (1 = 48K) into MachineType,
+  patches the 128K hooks ($605F) on 128K, builds the flag row table and the
+  outline mask table, probes the Kempston port, IM 2 with I=$84: the vector
+  table $8400-$8500 points to $8585, the interrupt handler, which saves all
+  registers and calls the routine in InterruptRoutine ($8504): the menu frame
+  ($A43D) or the game frame ($85E2: a sound step, then GameFrame $A596). The
+  game logic runs once per interrupt; the foreground (MainLoop $8664) only
+  draws (F103).
+- Rooms: a 5x5 grid, 25 rooms, number in RoomNumber $8509 (right +1, left
+  -1, down +5, up -5, wrapped modulo 25; rooms 0-4 are not reachable from
+  below, F124). Room 0 is the intro, room 25 the first ending scene. Room
+  state $850C, checked by the main loop: $80 playing, 1 enter the room, 2
+  back to the arrival position, 3 the ending ($887B), 4 restart at a
+  checkpoint after a death, 5 game over (script $A57E); bit 7 keeps the
+  frame routines running (F25).
+- A room is built by its bytecode script (RoomScriptTable $7236, the
+  interpreter RunScript $9D5F, 32 opcodes): tiles into the tile map $5B00,
+  tile flags into the flag map $5E00; then RoomObjects and RoomItems spawn
+  the creatures and items into 11 object slots of 22 bytes at $C100, each
+  run by its handler word through RET (F34, F80).
+- Keys: ControlKeys $A2BF (redefinable), ControlsRead/Held/Pressed
+  $A2CF-$A2D1; the Kempston read at $A290 is cut off by a RET at $A28F when
+  no interface answers on port $1F (F35).
 
-- Entry $6000: pops the machine type (1 = 48K) into $8506, 128K setup at
-  $605F, IM 2 with I=$84: the vector table $8400-$8500 points to $8585, the
-  interrupt handler, which saves all registers and calls the routine whose
-  address is in $8504 (changed per game state).
-- Rooms: a 5x5 grid, 25 rooms, number in $8509 (left/right ±1, up/down ±5,
-  wrapped modulo 25). Room 0 is the intro text. $850C is the room state
-  checked by the main loop at $8664: $80 playing, 1 enter the room, 2 back to
-  the checkpoint, 3 the ending ($887B), 4 restart the room after a death,
-  5 game over (script $A57E); bit 7 keeps the frame routines running.
-- Keys: $A2BF holds 8 (row, mask) pairs of the redefinable keys (default
-  QAOP...), $A2CF the control bits read each frame; the Kempston read at
-  $A290 is cut off by a RET at $A28F when no interface answers on port $1F.
-- Coverage: tests/inputs (title, menu, play, info screen, random keys) and
-  scripts/coverage.sh (each room entered directly by poking $8509 and
-  $850C, both endings, the Kempston read) -> re/maps/.
+## Coverage
+
+tests/inputs (title and menu, the RAGE cheat, the info screen, play, 8000
+frames of random keys) and scripts/coverage.sh (each room entered by poking
+$8509 and $850C, the ending, game over, the Kempston read) -> re/maps/: 89%
+of the instructions executed. The rest: dead code (F130) and paths the
+inputs did not take (F131): the 128K paths (the simulator is 48K), some
+Kempston branches, the warp keys, rare branches.
+
+## Relocation
+
+The shift test moves $85BC-$BFFF (SHIFT_START/SHIFT_END in re/layout.mk) and
+passes at +$100 and +$101, on the input scripts and on every room entered
+directly, the ending and game over (scripts/shift-rooms.sh). Fixed: the
+start-up code (entered at $6000, under the flag map), FlagRowTable at $6100
+and Im2Table at $8400 (read by page), the interrupt handler at $8585 (an IM
+2 vector is two equal bytes), the font, the sprites and the room scripts
+below; the buffers, the tile tables and the sprite sheet above (a page per
+pixel row). The moved part can grow into the $FF fill at $BEFC-$BFFF, $104
+bytes. Records that hold an address in two bytes (item actions, crusader
+templates in RoomObjects, cutscene actors) use `low`/`high` of the label.
+F120 (one frame of the monk drawn from code bytes) makes room 22 with fuzz
+seed 22 differ in the moved build; scripts/shift-rooms.sh uses seed 122 there.
