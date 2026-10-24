@@ -102,7 +102,7 @@ verify: build/game$(EXT)
 	else $(T)/zxtape.py diff $(ORIG) $<; exit 1; fi
 
 build/game.z80: build/game$(EXT)
-	tap2sna.py $< $@ > build/tap2sna.log
+	tap2sna.py $(TAP2SNA_OPTS) $< $@ > build/tap2sna.log
 
 expected:
 	@for i in $(INPUTS); do n=$$(basename $$i .txt); \
