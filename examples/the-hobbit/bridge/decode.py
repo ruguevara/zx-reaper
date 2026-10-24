@@ -130,7 +130,9 @@ def which(ptr, offsets=(0,)):
 def location(mem, i):
     a = word(mem, L.LocationTable + 2 * i)
     exits, e = [], a + 10
-    while mem[e] != 0xFF:
+    end = min([b for b in record_starts() if b > a and record_starts()[b][0] == 'location'] or [0x10000])
+    while mem[e] != 0xFF and e < end:       # location 0 has no end mark: its one exit, then location 1
+
         exits.append(Exit(mem[e], mem[e + 1], mem[e + 2]))
         e += 3
     return Location(id=i, flags=mem[a], capacity=mem[a + 1],

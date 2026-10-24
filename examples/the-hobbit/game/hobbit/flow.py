@@ -6,6 +6,7 @@ target 'RestartGame', and the game starts again from the title key."""
 import copy
 
 from . import assets, engine, parser, terminal, text, words
+from . import handlers, system, verbs  # noqa: F401  (they register the table handlers)
 from .constants import (CHAR_AT, CHAR_BACKSPACE, CHAR_COMMA, CHAR_CR, CHAR_FULLSTOP, CHAR_PROMPT,
                         CHAR_QUOTE, CHAR_SPACE, CURSOR_GLYPH, INPUT_COLUMNS, INPUT_LINE_SIZE,
                         KEY_DELETE, OPENING_LINES, ORDER_SLOTS, PARSED_WORDS_SIZE, RULE_ROW_Y,

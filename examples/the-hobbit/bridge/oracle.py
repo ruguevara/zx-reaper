@@ -227,11 +227,12 @@ def check_routines(record, names, limit=None):
             async def wrapper(*args):
                 call = start()
                 try:
-                    await orig(*args)
+                    v = await orig(*args)
                 except Goto as g:
                     finish(call, g.target.__name__)
                     raise
-                finish(call, None)
+                finish(call, v)
+                return v
         else:
             @functools.wraps(orig)
             def wrapper(*args):
