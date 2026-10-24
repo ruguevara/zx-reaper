@@ -1,9 +1,20 @@
-; Routine at A9B4
+; Probe two cells side by side
 ;
-; Used by the routines at #R$A8A5 and #R$A950.
-c$A9B4 LD E,$00      ;
- $A9B6 CALL $A9FE    ;
- $A9B9 INC B         ;
- $A9BA INC B         ;
- $A9BB INC B         ;
- $A9BC JP $A9FE      ;
+; ORs the tile flags of the cells at (x+B, y+C) and (x+B+3, y+C) into E (E starts at 0). Used for the head and the
+; feet of the standing monk (#R$A8A5). B is left increased by 3.
+; .
+; Hardware: none; reads the tile flag map.
+;
+; HL Position: H = x, L = y (2-pixel units)
+; B Offset of the first point in x
+; C Offset of the first point in y
+; D Column mask (always $1F)
+; O:E OR of the tile flags at the points
+; O:B B + 3
+@label=ProbePair
+c$A9B4 LD E,$00   ;
+ $A9B6 CALL $A9FE ;
+ $A9B9 INC B      ;
+ $A9BA INC B      ;
+ $A9BB INC B      ;
+ $A9BC JP $A9FE   ;

@@ -1,4 +1,9 @@
-; Unused debug: leave the room-warp mode (player state 4)
-c$AD82 LD A,$04      ;
+; Unused debug: leave the room warp mode
+;
+; Jumped to by the debug room warp #R$83CE when key T (control bit 5) is pressed: sets the player state back to 4,
+; standing (it was $FF, the warp mode). Never reached in normal play.
+@label=DebugLeaveWarp
+@isub=LD A,PLAYER_STANDING
+c$AD82 LD A,$04      ; player state standing
  $AD84 LD ($A894),A  ;
  $AD87 RET           ;

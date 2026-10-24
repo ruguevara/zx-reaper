@@ -1,3 +1,12 @@
-; Routine at B9F4
-c$B9F4 POP BC        ;
- $B9F5 JP $B3D8      ;
+; Moving sprite: queue the sprite after the animation step
+;
+; Continuation of #R$B9CF after #R$A883. The POP BC takes back the animation counter that #R$A883 has just pushed, so
+; that SP is at slot+$12 as the end of #R$B3D8 expects (it adds 4 to reach the next slot). HL points to the frame table
+; and E is the frame number: #R$B3D8 takes table[E], adds the column offset in A' and queues the draw command.
+;
+; A' Column offset of the shifted copy
+; E Frame number
+; HL Frame table
+@label=QueueMovingSprite
+c$B9F4 POP BC        ; SP at slot+$12
+ $B9F5 JP $B3D8      ; graphics = table[E] + offset; queue it, next slot

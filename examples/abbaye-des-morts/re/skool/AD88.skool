@@ -1,17 +1,43 @@
-; Routine at AD88
+; Draw the water row: its attribute and the reflection of the scenery above it
 ;
-; Used by the routine at #R$85FC.
-c$AD88 NOP           ;
- $AD89 LD HL,$0000   ;
- $AD8C LD A,$00      ;
- $AD8E LD B,$00      ;
-*$AD90 LD (HL),A     ;
+; Called once per frame by the main loop #R$85FC. The byte at #R$AD88 is RET until a room script uses op $9D, which
+; #R$A168 turns into NOP (room entry #R$86B9 puts the RET back), and then writes the operands of the instructions
+; below: this routine is the water of room 16 (a lake of blood) and room 19 (the underground river). Every frame it
+; (1) writes the attribute to the `width` cells of the water row and (2) redraws the bitmap of that row as a reflection:
+; 8 pixel lines, each a copy of `width` bytes, the first one the bottom line of the row (a line is picked every third
+; pixel line starting at the top of the cell row 3 rows above the water, so the 24 lines of the three cell rows above
+; the water come out squashed to a third of their height and upside down). The copy is made by the chain of 32 LDI
+; instructions at #R$ADA1: the JR at #R$AD9F jumps into the chain so that only `width` of them run (#R$ADC1 steps the
+; two pointers to the next line, see there). The patched operands are labelled; #R$A168 writes them:
+; .
+; #R$AD89 attribute address of the first water cell (SmcWaterAttrAddr+1), #R$AD8C attribute (SmcWaterAttr+1),
+; #R$AD8E width in cells (SmcWaterWidth+1), #R$AD94 bitmap address of the first source line (SmcWaterSrc+1),
+; #R$AD97 bitmap address of the first destination line (SmcWaterDst+1), #R$AD9A bytes to copy, width x 8
+; (SmcWaterCount+1) and #R$AD9F the JR offset, 2 x (32 - width) (SmcWaterJump+1).
+; .
+; Hardware: writes the attribute file and the screen bitmap (the water row, 8 pixel lines).
+@label=DrawWaterReflection
+c$AD88 NOP           ; RET unless op $9D of the room script switched the water on
+@label=SmcWaterAttrAddr
+ $AD89 LD HL,$0000   ; attribute address of the first cell (patched by #R$A168)
+@label=SmcWaterAttr
+ $AD8C LD A,$00      ; water attribute (patched)
+@label=SmcWaterWidth
+ $AD8E LD B,$00      ; width in cells (patched)
+@label=DrawWaterReflection_Attr
+*$AD90 LD (HL),A     ; paint the attribute of the water cells
  $AD91 INC L         ;
  $AD92 DJNZ $AD90    ;
- $AD94 LD HL,$0000   ;
- $AD97 LD DE,$0000   ;
- $AD9A LD BC,$0000   ;
-; This entry point is used by the routine at #R$ADC1.
+@label=SmcWaterSrc
+ $AD94 LD HL,$0000   ; source: first pixel line, 3 cell rows above the water (patched)
+@label=SmcWaterDst
+ $AD97 LD DE,$0000   ; destination: bottom pixel line of the water row (patched)
+@label=SmcWaterCount
+ $AD9A LD BC,$0000   ; width x 8 (patched): reaches 0 after the 8th line
+; Loop head, one pixel line per pass (also jumped to from #R$ADC1): remember the start of the source and destination
+; lines, then copy the line by jumping into the LDI chain.
+@label=DrawWaterReflection_Line
 *$AD9D PUSH HL       ;
  $AD9E PUSH DE       ;
-*$AD9F JR $AD9F      ;
+@label=SmcWaterJump
+*$AD9F JR $AD9F      ; offset patched to 2 x (32 - width): skips the LDIs that are not needed

@@ -1,15 +1,28 @@
-; Routine at AAAB
+; Player state machine: dispatch on the state
 ;
-; Used by the routine at #R$A596.
-c$AAAB LD A,($A894)  ;
- $AAAE INC A         ;
- $AAAF JP Z,$83CE    ;
- $AAB2 DEC A         ;
- $AAB3 RET Z         ;
- $AAB4 DEC A         ;
- $AAB5 JR Z,$AA56    ;
- $AAB7 LD C,A        ;
- $AAB8 LD A,($A2D1)  ;
- $AABB LD B,A        ;
- $AABC BIT 5,B       ;
- $AABE JR $AAC6      ;
+; Called once per game frame (#R$A596) after the object slots. Player state #R$A894: $FF runs the debug room warp
+; #R$83CE (JP, it returns to the frame code), 0 does nothing, 1 (dying) goes on with the dying animation #R$AA56. For
+; states 2 to 5 (jumping, crouching, standing, falling) it leaves C = state - 1 and B = the control bits newly pressed
+; this frame (#R$A2D1) and goes on at #R$AAC6. The JR at #R$AABE is changed by the RAGE cheat (#R$A422) into JR Z:
+; then the T key (bit 5 of B) falls through to #R$AAC0, which enters the debug room warp; without the cheat it always
+; goes to #R$AAC6.
+; .
+; Hardware: none.
+;
+; O:C Player state minus 1 (1 jumping, 2 crouching, 3 standing, 4 falling)
+; O:B Control bits newly pressed (#R$A2D1)
+@label=UpdatePlayer
+c$AAAB LD A,($A894) ; state
+ $AAAE INC A        ; $FF becomes 0
+ $AAAF JP Z,$83CE   ; state $FF: debug room warp
+ $AAB2 DEC A        ; restore the state
+ $AAB3 RET Z        ; 0: nothing
+ $AAB4 DEC A        ;
+ $AAB5 JR Z,$AA56   ; 1: dying animation
+ $AAB7 LD C,A       ; C = state - 1
+ $AAB8 LD A,($A2D1) ; keys pressed this frame
+ $AABB LD B,A       ;
+ $AABC BIT 5,B      ; T (the debug warp key)
+; Self-modified opcode: JR ($18) normally, JR Z ($28) when the cheat is on (flipped by #R$A422).
+@label=SmcWarpCheat
+ $AABE JR $AAC6     ; skip the warp entry (with the cheat: unless T was pressed)

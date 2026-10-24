@@ -1,9 +1,17 @@
-; Routine at AFFC
+; Shift a run of bytes along one pixel line right by one pixel
 ;
-; Used by the routine at #R$AF7B.
+; Rotates the C bytes from (HL) right through the carry, left byte first, with a clear carry at the start: the whole run
+; moves one bit to the right, a 0 enters on the left and the bit leaving the last byte is lost. L is restored.
+;
+; C Bytes in the run
+; HL Start of the run
+; O:A L
+; O:B 0
+@label=ShiftPixelLine
 c$AFFC LD A,L        ;
  $AFFD LD B,C        ;
  $AFFE OR A          ;
+@label=ShiftPixelLine_Byte
 *$AFFF RR (HL)       ;
  $B001 INC L         ;
  $B002 DJNZ $AFFF    ;

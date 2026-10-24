@@ -1,41 +1,59 @@
-; Graphics unpack commands (20 records of 6 bytes)
-b$AE9D DEFW $D7F8,$68CC
+; Sprite set unpack records: 20 records of 6 bytes, one per packed sprite set
+;
+; Record n tells the unpacker #R$AF15 how to turn the packed set n (room script op $97 n, #R$A146) into the sprite
+; sheet at #R$D700. The sheet is a page per pixel row (the high byte of an address is the pixel row, the low byte the
+; byte column) and a sprite is a run of columns read down the pages. The 20 records and what they hold:
+; .
+; +0 word: destination in the sheet: page = first pixel row ($D7 row 0, $EF row 24), low byte = first byte column; the
+; columns go up from there (INC E: never a carry into the page); the sets one room uses have different destinations,
+; sets of different rooms reuse them (several start at $D763)
+; +2 word: address of the packed set (#R$68CC..#R$7169, label PackedSetN)
+; +4 byte: flags. Bit 7: after each frame add three copies shifted right by 2, 4 and 6 pixels (the entities are
+; positioned in 2-pixel steps, so a sprite is drawn from the copy for x AND 3). Bit 6: after all frames add the mirrored
+; copy of every frame (columns reversed and each byte bit-reversed through the table #R$C500 that #R$BE48 builds on room
+; entry), used for the other walking direction. Other bits unused
+; +5 byte: frame width in columns (the packed set holds frames x width columns)
+; .
+; The sheet bytes written by #R$AF15 for all 20 records agree with a model of the format described here (see finding
+; FINDINGID).
+@label=UnpackRecords
+b$AE9D DEFW $D7F8,$68CC ; set 0: skeleton archers (rooms 17, 21)
  $AEA1 DEFB $40,$02
- $AEA3 DEFW $D763,$6916
+ $AEA3 DEFW $D763,$6916 ; set 1: crusaders (rooms 0, 4, 5, 6, 24, 25)
  $AEA7 DEFB $C0,$02
- $AEA9 DEFW $D763,$6979
+ $AEA9 DEFW $D763,$6979 ; set 2: Death (room 18)
  $AEAD DEFB $C0,$04
- $AEAF DEFW $D7BB,$6AA7
+ $AEAF DEFW $D7BB,$6AA7 ; set 3: red winged devils (rooms 21, 22)
  $AEB3 DEFB $C0,$02
- $AEB5 DEFW $EF63,$6B02
+ $AEB5 DEFW $EF63,$6B02 ; set 4: magenta winged flyers (rooms 20, 23)
  $AEB9 DEFB $C0,$03
- $AEBB DEFW $D768,$6B46
+ $AEBB DEFW $D768,$6B46 ; set 5: unidentified, room 10 (dragon room)
  $AEBF DEFB $00,$02
- $AEC1 DEFW $D763,$6BDA
+ $AEC1 DEFW $D763,$6BDA ; set 6: dragon head (room 10)
  $AEC5 DEFB $00,$05
- $AEC7 DEFW $D7E7,$6C4F
+ $AEC7 DEFW $D7E7,$6C4F ; set 7: red whirling fireballs (rooms 22, 23)
  $AECB DEFB $00,$02
- $AECD DEFW $D763,$6C7B
+ $AECD DEFW $D763,$6C7B ; set 8: green flies (room 12)
  $AED1 DEFB $40,$02
- $AED3 DEFW $D76B,$6CB6
+ $AED3 DEFW $D76B,$6CB6 ; set 9: green flies, second kind (room 12)
  $AED7 DEFB $40,$02
- $AED9 DEFW $D763,$6CF1
+ $AED9 DEFW $D763,$6CF1 ; set 10: hanged men (room 9)
  $AEDD DEFB $40,$02
- $AEDF DEFW $D763,$6D1D
+ $AEDF DEFW $D763,$6D1D ; set 11: green zombies (rooms 15, 20)
  $AEE3 DEFB $C0,$02
- $AEE5 DEFW $D763,$6D80
+ $AEE5 DEFW $D763,$6D80 ; set 12: grinning cyan ghost (room 11)
  $AEE9 DEFB $C0,$02
- $AEEB DEFW $D763,$6DC6
+ $AEEB DEFW $D763,$6DC6 ; set 13: rats (room 2)
  $AEEF DEFB $C0,$02
- $AEF1 DEFW $D78F,$6DF5
+ $AEF1 DEFW $D78F,$6DF5 ; set 14: Satan's pieces (room 24)
  $AEF5 DEFB $00,$1E
- $AEF7 DEFW $D763,$7042
+ $AEF7 DEFW $D763,$7042 ; set 15: red bats (room 8)
  $AEFB DEFB $80,$02
- $AEFD DEFW $D7EA,$7074
+ $AEFD DEFW $D7EA,$7074 ; set 16: scythe pieces, probably (room 18)
  $AF01 DEFB $80,$02
- $AF03 DEFW $D763,$70B7
+ $AF03 DEFW $D763,$70B7 ; set 17: skeletons (rooms 13, 22)
  $AF07 DEFB $C0,$02
- $AF09 DEFW $D78F,$710E
+ $AF09 DEFW $D78F,$710E ; set 18: white ghosts (rooms 22, 23)
  $AF0D DEFB $C0,$02
- $AF0F DEFW $D7F5,$7169
+ $AF0F DEFW $D7F5,$7169 ; set 19: cyan worms (rooms 9, 14)
  $AF13 DEFB $80,$02

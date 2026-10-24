@@ -1,61 +1,79 @@
-; Routine at A9D2
+; Probe the ring of 8 points around the body
 ;
-; Used by the routine at #R$A8A5.
-c$A9D2 LD E,$00      ;
- $A9D4 CALL $A9FE    ;
- $A9D7 INC B         ;
- $A9D8 INC B         ;
- $A9D9 INC B         ;
- $A9DA CALL $A9FE    ;
- $A9DD INC C         ;
- $A9DE INC C         ;
- $A9DF INC C         ;
- $A9E0 CALL $A9FE    ;
- $A9E3 INC C         ;
- $A9E4 INC C         ;
- $A9E5 INC C         ;
- $A9E6 CALL $A9FE    ;
- $A9E9 INC C         ;
- $A9EA INC C         ;
- $A9EB INC C         ;
- $A9EC CALL $A9FE    ;
- $A9EF DEC B         ;
- $A9F0 DEC B         ;
- $A9F1 DEC B         ;
- $A9F2 CALL $A9FE    ;
- $A9F5 DEC C         ;
- $A9F6 DEC C         ;
- $A9F7 DEC C         ;
- $A9F8 CALL $A9FE    ;
- $A9FB DEC C         ;
- $A9FC DEC C         ;
- $A9FD DEC C         ;
-; This entry point is used by the routines at #R$A96F, #R$A97A, #R$A98B,
-; #R$A990, #R$A9B4 and #R$A9BF.
-*$A9FE PUSH HL       ;
- $A9FF LD A,H        ;
- $AA00 ADD A,B       ;
- $AA01 CP $80        ;
- $AA03 JR NC,$AA1D   ;
- $AA05 RRA           ;
- $AA06 RRA           ;
- $AA07 AND D         ;
- $AA08 LD H,A        ;
- $AA09 LD A,L        ;
- $AA0A ADD A,C       ;
- $AA0B CP $58        ;
- $AA0D JR NC,$AA1D   ;
- $AA0F RRA           ;
- $AA10 AND $3E       ;
- $AA12 LD L,A        ;
- $AA13 LD A,H        ;
- $AA14 LD H,$61      ;
- $AA16 ADD A,(HL)    ;
- $AA17 INC L         ;
- $AA18 LD H,(HL)     ;
- $AA19 LD L,A        ;
- $AA1A LD A,(HL)     ;
- $AA1B OR E          ;
- $AA1C LD E,A        ;
-*$AA1D POP HL        ;
- $AA1E RET           ;
+; ORs the tile flags of eight cells into E (E starts at 0): the corners and edge points of a 4 x 9 unit area, (x+B,
+; y+C), (x+B+3, y+C), then down the right side (y+C+3, +6, +9), and back up the left side (x+B, y+C+9, +6, +3). The
+; standing monk (#R$A8A5) tests it for harmful tiles. B and C are left unchanged.
+; .
+; Hardware: none; reads the tile flag map.
+;
+; HL Position: H = x, L = y (2-pixel units)
+; B Offset of the first point in x
+; C Offset of the first point in y
+; D Column mask (always $1F)
+; O:E OR of the tile flags at the points
+; O:B B unchanged
+@label=ProbeRing
+c$A9D2 LD E,$00    ;
+ $A9D4 CALL $A9FE  ;
+ $A9D7 INC B       ;
+ $A9D8 INC B       ;
+ $A9D9 INC B       ;
+ $A9DA CALL $A9FE  ;
+ $A9DD INC C       ;
+ $A9DE INC C       ;
+ $A9DF INC C       ;
+ $A9E0 CALL $A9FE  ;
+ $A9E3 INC C       ;
+ $A9E4 INC C       ;
+ $A9E5 INC C       ;
+ $A9E6 CALL $A9FE  ;
+ $A9E9 INC C       ;
+ $A9EA INC C       ;
+ $A9EB INC C       ;
+ $A9EC CALL $A9FE  ;
+ $A9EF DEC B       ;
+ $A9F0 DEC B       ;
+ $A9F1 DEC B       ;
+ $A9F2 CALL $A9FE  ;
+ $A9F5 DEC C       ;
+ $A9F6 DEC C       ;
+ $A9F7 DEC C       ;
+ $A9F8 CALL $A9FE  ;
+ $A9FB DEC C       ;
+ $A9FC DEC C       ;
+ $A9FD DEC C       ;
+; Entry point used by the probe routines above: the flags of one cell. The point (H+B, L+C) is outside the room (x of
+; $80 or more, y of $58 or more; negative coordinates count as large) and then adds nothing. Otherwise the flag map
+; address is found through the row address table (#R$6100): column = (x+B)/4, row = (y+C)/4. HL is preserved.
+@label=ProbeCell
+*$A9FE PUSH HL     ; save the position
+ $A9FF LD A,H      ;
+ $AA00 ADD A,B     ;
+@isub=CP ROOM_WIDTH_2PX
+ $AA01 CP $80      ;
+ $AA03 JR NC,$AA1D ; outside the room
+ $AA05 RRA         ; /4: column
+ $AA06 RRA         ;
+ $AA07 AND D       ; AND D (column mask)
+ $AA08 LD H,A      ; H = column
+ $AA09 LD A,L      ;
+ $AA0A ADD A,C     ;
+@isub=CP ROOM_HEIGHT_2PX
+ $AA0B CP $58      ;
+ $AA0D JR NC,$AA1D ; outside the room
+ $AA0F RRA         ; /2
+ $AA10 AND $3E     ; (y/4) * 2: offset in the row address table
+ $AA12 LD L,A      ;
+ $AA13 LD A,H      ;
+@isub=LD H,FLAG_ROW_TABLE_HIGH
+ $AA14 LD H,$61    ;
+ $AA16 ADD A,(HL)  ; row address low + column
+ $AA17 INC L       ;
+ $AA18 LD H,(HL)   ; row address high
+ $AA19 LD L,A      ;
+ $AA1A LD A,(HL)   ; tile flags of the cell
+ $AA1B OR E        ; accumulate
+ $AA1C LD E,A      ;
+@label=ProbeCell_Skip
+*$AA1D POP HL      ;
+ $AA1E RET         ;

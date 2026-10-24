@@ -1,2 +1,5 @@
 ; Unused RET
-c$85BD RET           ;
+;
+; Nothing refers to this RET (not executed with any input in re/maps).
+@label=UnusedRet
+c$85BD RET

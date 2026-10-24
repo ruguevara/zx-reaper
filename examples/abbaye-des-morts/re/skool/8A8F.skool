@@ -1,14 +1,22 @@
-; Object type table: 12 pointers to 8-byte type records (index = type, read by
-; $897E)
-w$8A8F DEFW $8AA7
- $8A91 DEFW $8AAF
- $8A93 DEFW $8AB7
- $8A95 DEFW $8ABF
- $8A97 DEFW $8AC7
- $8A99 DEFW $8ACF
- $8A9B DEFW $8AD7
- $8A9D DEFW $8ADF
- $8A9F DEFW $8AE7
- $8AA1 DEFW $8AEF
- $8AA3 DEFW $8AF7
- $8AA5 DEFW $8AFF
+; Object type table: 12 pointers to the type records of the room items
+;
+; Indexed by the type number of a room item record (#R$8EDF, byte +3), 2 bytes per type. #R$897E reads the word at
+; ObjectTypeTable + 2 x type and takes the 8-byte type record (#R$8AA7) it points to. The types are: 0 heart, 1 cross
+; taken while the wheel of room 17 is off, 2 cross taken while the wheel is on, 3 checkpoint (gravestone cross), 4
+; bell, 5 parchment, 6 the red scroll of room 24, 7 the church door trigger (no sprite), 8 arch between two rooms, 9
+; lever, 10 the wheel lever of room 17, 11 the chalice.
+; .
+; The table is not read for the room objects (enemies) of #R$8B8F, which use the handler table at #R$B028.
+@label=ObjectTypeTable
+w$8A8F DEFW $8AA7    ; type 0: heart
+ $8A91 DEFW $8AAF    ; type 1: cross (wheel off)
+ $8A93 DEFW $8AB7    ; type 2: cross (wheel on)
+ $8A95 DEFW $8ABF    ; type 3: checkpoint
+ $8A97 DEFW $8AC7    ; type 4: bell
+ $8A99 DEFW $8ACF    ; type 5: parchment
+ $8A9B DEFW $8AD7    ; type 6: red scroll
+ $8A9D DEFW $8ADF    ; type 7: church door trigger
+ $8A9F DEFW $8AE7    ; type 8: arch
+ $8AA1 DEFW $8AEF    ; type 9: lever
+ $8AA3 DEFW $8AF7    ; type 10: wheel lever
+ $8AA5 DEFW $8AFF    ; type 11: chalice

@@ -1,28 +1,46 @@
-; Routine at B344
-c$B344 POP BC        ;
- $B345 POP DE        ;
- $B346 POP HL        ;
- $B347 LD A,H        ;
- $B348 EX AF,AF'     ;
- $B349 POP HL        ;
- $B34A ADD HL,BC     ;
+; Entity handler: patroller moving down (kind 4)
+;
+; The handler of the enemies that move along a vertical line: green and yellow spiders (rooms 3, 14, 16, 19), the
+; green flies of room 12 and the red fireballs of rooms 22 and 23. Which one it is depends on the sprite description
+; of its room record. A record of kind 4 starts moving down (this handler), a record of kind 5 starts moving up
+; (#R$B283); the two handlers turn the slot into each other at the ends of the patrol (stack scheme and slot fields
+; as in #R$B2A6, #R$B2D4).
+; .
+; The y coordinate goes down by the speed each frame; when its high byte reaches the lower turning point (+5) the
+; handler word of the slot is rewritten with #R$B283. The sprite is placed at (x, y) through #R$B380 (x is a multiple
+; of 4, so the shift phase is 0), which tests the hit box and draws the second frame table.
+; .
+; Slot fields used: +2 word speed (8.8, 2-pixel units per frame), +4 byte upper turning point of y, +5 byte lower
+; turning point, +6 word x (high byte only), +8 word y (8.8).
+; .
+; Hardware: none.
+;
+; SP Slot address + 2
+@label=UpdateWalkDown
+c$B344 POP BC        ; speed
+ $B345 POP DE        ; D lower turning point, E upper
+ $B346 POP HL        ; x (8.8); only its high byte is used
+ $B347 LD A,H        ; A = x in 2-pixel units
+ $B348 EX AF,AF'     ; kept in A'
+ $B349 POP HL        ; y (8.8)
+ $B34A ADD HL,BC     ; y goes down
  $B34B PUSH HL       ;
- $B34C POP HL        ;
- $B34D LD A,H        ;
- $B34E CP D          ;
- $B34F JR C,$B35F    ;
- $B351 LD HL,$FFF8   ;
+ $B34C POP HL        ; SP is back at slot+10
+ $B34D LD A,H        ; y in 2-pixel units
+ $B34E CP D          ; reached the lower turning point?
+ $B34F JR C,$B35F    ; no: go on
+ $B351 LD HL,$FFF8   ; -8: back to slot+2
  $B354 ADD HL,SP     ;
  $B355 LD SP,HL      ;
- $B356 LD HL,$B283   ;
- $B359 PUSH HL       ;
- $B35A POP HL        ;
- $B35B POP BC        ;
+ $B356 LD HL,$B283   ; from the next frame the creature goes up
+ $B359 PUSH HL       ; written over the handler word at slot+0
+ $B35A POP HL        ; pop the handler again
+ $B35B POP BC        ; pop speed, limits, x and y again
  $B35C POP DE        ;
  $B35D POP HL        ;
  $B35E POP HL        ;
-*$B35F EX AF,AF'     ;
- $B360 LD D,A        ;
- $B361 POP BC        ;
- $B362 LD E,H        ;
- $B363 JR $B380      ;
+*$B35F EX AF,AF'     ; A = x
+ $B360 LD D,A        ; D = x
+ $B361 POP BC        ; skip the unused word at +10
+ $B362 LD E,H        ; E = y
+ $B363 JR $B380      ; place the sprite, test the hit box, draw (facing down)

@@ -1,19 +1,32 @@
-; Routine at B730
-c$B730 POP HL        ;
- $B731 LD ($ACD7),HL ;
- $B734 POP HL        ;
- $B735 LD A,(HL)     ;
+; Projectile: attribute, size and shifted graphics of the sprite, then queue it
+;
+; Continuation of #R$B71B after the hit test #R$A851 (reached by a JP through $A881; SP is at slot+$E, the hit test has
+; popped the two hit box words). It pops the sprite size word (slot +$E: width, height) into the draw command at #R$ACD1
+; (+6, $ACD7) and the pointer to the sprite description (slot +$10) which holds three bytes: attribute, column in the
+; sprite sheet and the page of the first shifted copy. The attribute goes to the draw command (+9, $ACDA). The graphics
+; address (+4, $ACD5) is the column plus the page, increased by 4 pages for every step of the shift phase x AND 3 (A' =
+; x): the sprite sheet #R$D700 holds a page per pixel row, and the four copies of such a small sprite (2-pixel units: 4
+; pixel rows high) follow each other, each copy shifted 2 pixels further right than the one before. #R$B3E4 then queues
+; the draw command and goes on to the next slot.
+;
+; A' x in 2-pixel units; AND 3 is the shift phase
+; SP Slot address + $E
+@label=SetProjectileSprite
+c$B730 POP HL        ; width, height
+ $B731 LD ($ACD7),HL ; of the draw command
+ $B734 POP HL        ; sprite description: attribute, column, page
+ $B735 LD A,(HL)     ; attribute
  $B736 INC HL        ;
- $B737 LD ($ACDA),A  ;
- $B73A LD A,(HL)     ;
+ $B737 LD ($ACDA),A  ; of the draw command
+ $B73A LD A,(HL)     ; column in the sprite sheet
  $B73B INC HL        ;
- $B73C EX AF,AF'     ;
- $B73D AND $03       ;
+ $B73C EX AF,AF'     ; A = x, A' = column
+ $B73D AND $03       ; shift phase
  $B73F ADD A,A       ;
- $B740 ADD A,A       ;
- $B741 ADD A,(HL)    ;
+ $B740 ADD A,A       ; times 4 pages
+ $B741 ADD A,(HL)    ; plus the page of the first copy
  $B742 LD H,A        ;
  $B743 EX AF,AF'     ;
- $B744 LD L,A        ;
- $B745 LD ($ACD5),HL ;
- $B748 JP $B3E4      ;
+ $B744 LD L,A        ; HL = page and column
+ $B745 LD ($ACD5),HL ; graphics of the draw command
+ $B748 JP $B3E4      ; queue it (unless #R$AA1F stops drawing), next slot

@@ -1,34 +1,50 @@
-; Routine at AFC9
+; Make a horizontally mirrored copy of a frame
 ;
-; Used by the routine at #R$AF15.
+; For every pixel line (page) of the frame at HL it reads the N columns backwards (from the last column to the first),
+; reverses the bits of each byte through #R$B006 and writes them forwards at DE, which makes the picture face the other
+; way. HL and DE are then moved on by N columns and B counted down like #R$AF58 does (once per column except the last
+; of the frame, which is left to the caller's DJNZ; B = 1 on return when the set ran out).
+;
+; A Frame width N
+; B Columns of the set left
+; C Character rows
+; HL Start of the frame: column in L, page of pixel row 0 in H
+; DE Destination: column in E, same page numbers as the source
+; O:A N
+; O:B Columns left, less N - 1
+; O:HL Start of the next source frame
+; O:DE Destination after the mirrored frame
+@label=MirrorFrame
 c$AFC9 PUSH AF       ;
  $AFCA PUSH HL       ;
  $AFCB PUSH DE       ;
  $AFCC PUSH BC       ;
  $AFCD PUSH AF       ;
  $AFCE LD B,C        ;
- $AFCF LD C,A        ;
+ $AFCF LD C,A        ; C = N
  $AFD0 SLA B         ;
  $AFD2 SLA B         ;
- $AFD4 SLA B         ;
+ $AFD4 SLA B         ; B = pixel lines = 8 x rows
  $AFD6 DEC A         ;
  $AFD7 ADD A,L       ;
- $AFD8 LD L,A        ;
+ $AFD8 LD L,A        ; HL = last column of the frame
+@label=MirrorFrame_Line
 *$AFD9 PUSH HL       ;
  $AFDA PUSH DE       ;
  $AFDB PUSH BC       ;
- $AFDC CALL $B006    ;
+ $AFDC CALL $B006    ; mirror one pixel line
  $AFDF POP BC        ;
  $AFE0 POP DE        ;
  $AFE1 POP HL        ;
- $AFE2 INC H         ;
+ $AFE2 INC H         ; next pixel line
  $AFE3 INC D         ;
  $AFE4 DJNZ $AFD9    ;
  $AFE6 POP AF        ;
  $AFE7 POP BC        ;
  $AFE8 POP DE        ;
  $AFE9 POP HL        ;
-*$AFEA INC L         ;
+@label=MirrorFrame_Advance
+*$AFEA INC L         ; move on by N columns, as #R$AF58 does for its columns
  $AFEB INC E         ;
  $AFEC DEC A         ;
  $AFED JR Z,$AFF2    ;

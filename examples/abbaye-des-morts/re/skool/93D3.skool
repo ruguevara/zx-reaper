@@ -1,8 +1,36 @@
-; Behaviour data for object kind 0 (rooms 0): 5-byte header, then kind-specific
-; bytes and sprite/frame pointers
-b$93D3 DEFB $00,$00,$00,$00,$02
- $93D8 DEFB $46
- $93D9 DEFW $AC9F
- $93DB DEFB $0C
- $93DC DEFW $ACA7
- $93DE DEFW $ACAD
+; Behaviour block: Jean walking across the intro screen (kind 0, room 0)
+;
+; Used by the first walker of room 0 (#R$8B8F): the monk of the intro, drawn with the same frames and shift table as the player (#R$AC9F, #R$ACA7).
+; .
+; Behaviour blocks (#R$93D3 to #R$95FE) say how a room object kind (#R$8B8F) looks and where it can be hit. A room
+; object record points to one (record +9). #R$89ED copies bytes 0-3 into the slot (+$0C to +$0F), byte 4 into slot
+; +$15 and keeps the address of byte 5 in slot +$10/+$11: the handler of the kind reads the rest through that pointer.
+; The blocks of the walking and flying kinds (0, 2-6 and 8) have this layout (read from #R$B2D4, #R$B3D2 and #R$A851):
+; .
+; +0 byte: top edge of the hit box, +1 left edge, +2 bottom edge, +3 right edge: all relative to the object's position,
+; in 2-pixel units (the handler adds them to x and y and #R$A851 compares the box with Jean's)
+; .
+; +4 byte: Unknown, copied to slot +$15 (the values are 1 and 2)
+; .
+; +5 byte: attribute of the sprite
+; .
+; +6 word: table of (first column, width in bytes) pairs, one for each x AND 3 (the sprite sheet holds four copies of
+; every sprite shifted by 2 pixels; #R$AC9F is the table of the monk and the crusader, 11 columns per frame, #R$9463
+; is the table of the sprites that sit on a byte boundary)
+; .
+; +8 byte: sprite height in 2-pixel units
+; .
+; +9 word: the sprites for the first direction (moving left or up): a list of sprite sheet addresses indexed by the
+; animation frame
+; .
+; +$0B word: the same for the second direction (moving right or down)
+; .
+; The sprites are in the sprite sheet at #R$D700 (rows 0-23) and #R$EF00 (rows 24-39); which creature they show
+; depends on the sprite set the room unpacked.
+@label=BehaviourJean
+b$93D3 DEFB $00,$00,$00,$00,$02  ; hit box top, left, bottom, right; slot +$15 (Unknown)
+ $93D8 DEFB $46      ; attribute
+ $93D9 DEFW $AC9F    ; table of (first column, width) for x AND 3
+ $93DB DEFB $0C      ; sprite height (2-pixel units)
+ $93DC DEFW $ACA7    ; Jean standing, facing left (3 frames, #R$ACA7)
+ $93DE DEFW $ACAD    ; Jean standing, facing right (3 frames, #R$ACAD)

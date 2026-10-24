@@ -1,12 +1,16 @@
-; Behaviour data for object kind 0,1 (rooms 0,5,6,25): 5-byte header, then
-; kind-specific bytes and sprite/frame pointers
-b$93E0 DEFB $00,$01,$0C,$06,$02
- $93E5 DEFB $45
- $93E6 DEFW $AC9F
- $93E8 DEFB $0C
- $93E9 DEFW $93ED
- $93EB DEFW $93F1
- $93ED DEFW $D763
- $93EF DEFW $D76E
- $93F1 DEFW $D779
- $93F3 DEFW $D784
+; Behaviour block: a crusader (kinds 0 and 1, rooms 0, 5, 6 and 25)
+;
+; Used by the three crusaders that follow Jean across the intro screen (kind 0, room 0) and by the crusader spawners of rooms 5, 6 and 25 (kind 1): the entity templates at #R$B04C hold the address of byte 5 of this block ($93E5). Crusaders are cyan (attribute $45), 24 pixels tall.
+; .
+; Layout: see #R$93D3.
+@label=BehaviourCrusader
+b$93E0 DEFB $00,$01,$0C,$06,$02  ; hit box top, left, bottom, right; slot +$15 (Unknown)
+ $93E5 DEFB $45      ; attribute
+ $93E6 DEFW $AC9F    ; table of (first column, width) for x AND 3
+ $93E8 DEFB $0C      ; sprite height (2-pixel units)
+ $93E9 DEFW $93ED    ; sprites, first direction (left or up)
+ $93EB DEFW $93F1    ; sprites, second direction (right or down)
+ $93ED DEFW $D763    ; first direction, frame 0
+ $93EF DEFW $D76E    ; first direction, frame 1
+ $93F1 DEFW $D779    ; second direction, frame 0
+ $93F3 DEFW $D784    ; second direction, frame 1

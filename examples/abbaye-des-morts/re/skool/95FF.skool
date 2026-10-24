@@ -1,13 +1,37 @@
-; Routine at 95FF
+; Copy the redraw list to the screen: attributes and eight pixel rows of every run of cells
 ;
-; Used by the routines at #R$85FC, #R$8832 and #R$88DE.
+; The last step of the drawing of a frame (main loop #R$85FC, title #R$8832 and cutscenes #R$88DE call it after
+; #R$97B7). It walks the redraw run list at #R$C200 and copies each run of cells from the redraw cell buffers to the
+; screen. The list holds one record per character row that has cells to draw: the row number, the number of runs and
+; for each run the first column and the index of its first cell in the buffers; $FF ends the list (#R$855D, #R$97B7
+; and #R$9719 build it). For a run of n cells (n = 1-32, from #R$C300 + index) it copies the n attribute bytes from
+; #R$C400 + index to the attribute file, then the 8 pixel rows from the pages #R$C500 to #R$CC00 (page + pixel row)
+; to the bitmap of the cells.
+; .
+; The copy is done with unrolled chains of LDI (and LDD) instructions that are entered at the right place by a JR
+; whose offset byte is patched for every run to 2 x (32 - n): #R$9634 (attributes, chain #R$9636-#R$9673),
+; #R$9683 (bitmap going back, chain #R$9685-#R$96C2) and #R$96C7 (bitmap going forward, chain #R$96C9-#R$9706). Each chain
+; has 31 two-byte LDIs; the last byte of a run is copied by a plain LD A,(HL) / LD (DE),A after the chain. To save
+; a seek at the end of every pixel row, the rows alternate in direction: row 0 is copied from the last cell of the
+; run back to the first (LDD), row 1 from the first to the last (LDI), and so on for four pairs of rows (B).
+; .
+; Hardware: writes the attribute file (#R$5800) and the screen bitmap (#R$4000, the 8 pixel rows of a cell are 256
+; bytes apart) directly; no port is used. SP is not touched.
+; .
+; All registers are changed.
+@label=DrawRedrawList
 c$95FF LD HL,$C200   ;
-; This entry point is used by the routine at #R$96F3.
-*$9602 LD A,(HL)     ;
+; Next row record of the redraw list
+;
+; Reads the row number ($FF ends the list: the routine returns), looks up the attribute file address of the row's first
+; cell in #R$9CF3 and goes through the runs of the row. Also entered from #R$96F3, with HL at the next row record
+; (row number, run count, runs...), after the last run of a row.
+@label=DrawRedrawList_Row
+*$9602 LD A,(HL)     ; row number, $FF = end of the list
  $9603 INC A         ;
  $9604 RET Z         ;
  $9605 DEC A         ;
- $9606 ADD A,A       ;
+ $9606 ADD A,A       ; x2: index into the row address table
  $9607 EXX           ;
  $9608 LD L,A        ;
  $9609 LD H,$00      ;
@@ -15,30 +39,45 @@ c$95FF LD HL,$C200   ;
  $960E ADD HL,DE     ;
  $960F LD E,(HL)     ;
  $9610 INC HL        ;
- $9611 LD D,(HL)     ;
+ $9611 LD D,(HL)     ; DE' = attribute file address of column 0 of the row
  $9612 EXX           ;
  $9613 INC L         ;
- $9614 LD B,(HL)     ;
-; This entry point is used by the routine at #R$96F3.
-*$9615 PUSH BC       ;
+ $9614 LD B,(HL)     ; B = number of runs of the row
+; One run of cells
+;
+; Entered for each run of the row (the loop is closed by #R$96F3) with HL at the run entry in the list (first column,
+; then the index of the first cell in the buffers, which also gives the address of the run's length cell in #R$C300)
+; and B the runs left in the row.
+@label=DrawRedrawList_Run
+*$9615 PUSH BC       ; save the runs left and the loop counter
  $9616 INC L         ;
- $9617 LD A,(HL)     ;
+ $9617 LD A,(HL)     ; A = first column of the run
  $9618 INC L         ;
- $9619 PUSH HL       ;
- $961A LD L,(HL)     ;
- $961B LD H,$C3      ;
+ $9619 PUSH HL       ; save the list pointer
+ $961A LD L,(HL)     ; L = index of the first cell in the buffers
+@isub=LD H,PAGE_REDRAW_LENGTHS
+ $961B LD H,$C3      ; HL = length cell of the run
  $961D EXX           ;
  $961E LD L,A        ;
  $961F LD H,$00      ;
- $9621 ADD HL,DE     ;
+ $9621 ADD HL,DE     ; + column: attribute file address of the first cell
  $9622 PUSH HL       ;
  $9623 EXX           ;
- $9624 POP DE        ;
- $9625 LD A,$20      ;
+ $9624 POP DE        ; DE = attribute file address
+@isub=LD A,SCREEN_COLS
+ $9625 LD A,$20      ; offset of the three chain entry jumps = 2 x (32 - length)
  $9627 SUB (HL)      ;
  $9628 ADD A,A       ;
+@isub=LD (SmcBitmapForwardJump+1),A
  $9629 LD ($96C8),A  ;
+@isub=LD (SmcBitmapBackJump+1),A
  $962C LD ($9684),A  ;
+@isub=LD (SmcAttrJump+1),A
  $962F LD ($9635),A  ;
- $9632 LD H,$C4      ;
-*$9634 JR $9634      ;
+@isub=LD H,PAGE_REDRAW_ATTRS
+ $9632 LD H,$C4      ; HL = attribute of the first cell, in the buffer
+; Self-modified: the offset of this JR is written above (#R$9629 and the two stores after it) as 2 x (32 - run length),
+; so that it jumps into the chain of LDI instructions that follows at the place where as many LDIs remain as the run
+; has cells but one.
+@label=SmcAttrJump
+*$9634 JR $9634      ; enter the LDI chain; the offset byte (+1) is patched

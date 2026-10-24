@@ -1,52 +1,77 @@
-; Routine at B8C5
-c$B8C5 POP BC        ;
- $B8C6 POP DE        ;
+; Entity handler: fire breath of the Pestilent Beast (room 10)
+;
+; The red jet of fire the dragon of "Pestilent Beast" breathes from its mouth down to the ledge below it, and the flames
+; that run along that ledge afterwards: handler of room object kind 15 (#R$B028, behaviour block #R$9585). The jet
+; kills the monk on contact (observed: the hit flag #R$A8A0 is set on the frame it appears over the monk). Its cycle
+; is 110 frames: for the first 72 nothing is drawn and nothing is tested; for the last 38 the jet is drawn and tested
+; every frame (#R$B924); at the end of the cycle it disappears and two flames are made (templates #R$BD22 and #R$BD34
+; at the position of the jet, 20 units lower, on the ledge, running left and right: #R$B9B0), and the next cycle
+; starts. The head of the dragon (#R$B880) lowers during the same last frames.
+; .
+; Slot (the layout of the room enemies made by #R$89ED): +2 word offset in y of the second sprite of the jet ($000C: 12
+; units below the first), +4 byte cycle countdown (110 down to 1) and +5 its reload ($6E), +6 word x and +8 word y
+; (8.8, high bytes in 2-pixel units; the position is the mouth: x = $40, y = $18), +$A byte countdown to the appearance
+; of the jet and +$B its reload ($48 = 72), +$C word hit box offset, +$E word hit box size (7 wide, $17 high), +$10
+; pointer to the sprite block (#R$958A: attribute, height, width, then the frames of both sprites), +$12 byte
+; animation counter and +$13 its reload (2), +$14 byte frame and +$15 number of frames (2).
+; .
+; This routine counts the cycle down (when it reaches 0 the countdown is reloaded and the flames are made), takes the
+; position, and either leaves the slot (cycle countdown 0, or the appearance countdown still above 0, which is stored
+; back one lower) or makes the positions of the two draw commands (#R$ACD1: y, x/4; #R$ACDB: the same x, y plus +2)
+; and tests the hit box against the monk with #R$A851, which continues at #R$B924.
+;
+; SP Slot address + 2 (the handler word was popped by the RET that entered the routine)
+@label=UpdateBeastFire
+c$B8C5 POP BC        ; B = 0, C = $0C: offset in y of the second sprite
+ $B8C6 POP DE        ; E cycle countdown, D reload
  $B8C7 DEC E         ;
  $B8C8 JR NZ,$B8CB   ;
- $B8CA LD E,D        ;
-*$B8CB PUSH DE       ;
+ $B8CA LD E,D        ; end of the cycle: reload (the zero flag stays set)
+*$B8CB PUSH DE       ; store the countdown
  $B8CC POP DE        ;
- $B8CD POP HL        ;
- $B8CE LD D,H        ;
- $B8CF POP HL        ;
- $B8D0 LD E,H        ;
+ $B8CD POP HL        ; x word
+ $B8CE LD D,H        ; D = x
+ $B8CF POP HL        ; y word
+ $B8D0 LD E,H        ; E = y
  $B8D1 LD H,D        ;
- $B8D2 LD L,E        ;
- $B8D3 JR NZ,$B90C   ;
- $B8D5 LD ($5DFE),HL ;
+ $B8D2 LD L,E        ; HL = x (H) and y (L)
+ $B8D3 JR NZ,$B90C   ; not the end of the cycle
+ $B8D5 LD ($5DFE),HL ; SPAWN_POSITION of the flames
  $B8D8 EXX           ;
- $B8D9 LD HL,$8552   ;
+ $B8D9 LD HL,$8552   ; two records waiting
  $B8DC INC (HL)      ;
  $B8DD INC (HL)      ;
- $B8DE LD HL,$BD22   ;
- $B8E1 LD ($5DFC),HL ;
- $B8E4 LD HL,$5DFC   ;
- $B8E7 LD DE,($BE56) ;
+ $B8DE LD HL,$BD22   ; FlameLeftTemplate
+ $B8E1 LD ($5DFC),HL ; SPAWN_TEMPLATE
+ $B8E4 LD HL,$5DFC   ; SPAWN_TEMPLATE, SPAWN_POSITION
+ $B8E7 LD DE,($BE56) ; end of the object list
+@isub=LD BC,OBJECT_ENTRY_SIZE
  $B8EB LD BC,$0004   ;
- $B8EE LDIR          ;
- $B8F0 LD HL,$BD34   ;
+ $B8EE LDIR          ; append the record
+ $B8F0 LD HL,$BD34   ; FlameRightTemplate
  $B8F3 LD ($5DFC),HL ;
- $B8F6 LD HL,$5DFC   ;
+ $B8F6 LD HL,$5DFC   ; same position
+@isub=LD C,OBJECT_ENTRY_SIZE
  $B8F9 LD C,$04      ;
- $B8FB LDIR          ;
+ $B8FB LDIR          ; append the second record
  $B8FD LD ($BE56),DE ;
  $B901 EXX           ;
- $B902 POP BC        ;
- $B903 LD C,B        ;
-*$B904 PUSH BC       ;
- $B905 LD HL,$000C   ;
+ $B902 POP BC        ; C appearance countdown, B reload
+ $B903 LD C,B        ; the jet is hidden again for the next 72 frames
+*$B904 PUSH BC       ; store the countdown; nothing is drawn
+ $B905 LD HL,$000C   ; SP is at slot+$A: +$C is the next slot
  $B908 ADD HL,SP     ;
- $B909 JP $A5F0      ;
-*$B90C SRA H         ;
+ $B909 JP $A5F0      ; next slot
+*$B90C SRA H         ; x / 4 = byte column
  $B90E SRA H         ;
- $B910 LD ($ACD3),HL ;
- $B913 ADD HL,BC     ;
- $B914 LD ($ACDD),HL ;
- $B917 POP BC        ;
+ $B910 LD ($ACD3),HL ; position of the first draw command: y, byte column
+ $B913 ADD HL,BC     ; the second sprite is 12 units lower
+ $B914 LD ($ACDD),HL ; position of the second draw command
+ $B917 POP BC        ; C appearance countdown, B reload
  $B918 DEC C         ;
- $B919 JR NZ,$B904   ;
- $B91B INC C         ;
- $B91C PUSH BC       ;
+ $B919 JR NZ,$B904   ; still hidden
+ $B91B INC C         ; stays at 1: drawn every frame until the end of the cycle
+ $B91C PUSH BC       ; store it
  $B91D POP BC        ;
- $B91E LD HL,$B924   ;
- $B921 JP $A851      ;
+ $B91E LD HL,$B924   ; continue after the hit test
+ $B921 JP $A851      ; hit test: sets the hit flag when the monk touches the box

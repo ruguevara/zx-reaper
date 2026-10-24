@@ -1,2 +1,5 @@
-; Text: "G a m e  O v e r" (string 37)
-t$926B DEFM $10,"G a m e  O v e r"
+; Game Over text: string 37
+;
+; Printed by the Game Over screen script (#R$A57E), with spaces between the letters (and two between the words).
+@label=GameOverText
+t$926B DEFM $10,"G a m e  O v e r"  ; string 37

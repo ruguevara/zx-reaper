@@ -1,14 +1,24 @@
 ; Random byte for the noise effect
 ;
-; Used by the routine at #R$871A.
-c$87D7 PUSH HL       ;
- $87D8 LD HL,($87E8) ;
- $87DB INC HL        ;
- $87DC LD A,H        ;
- $87DD AND $03       ;
- $87DF LD H,A        ;
- $87E0 LD ($87E8),A  ;
- $87E3 LD A,R        ;
- $87E5 XOR (HL)      ;
- $87E6 POP HL        ;
- $87E7 RET           ;
+; Meant to return the Refresh register XORed with a byte of the ROM, read through a pointer that walks the first 1,024
+; bytes of the ROM ($87E8). The pointer is stored with LD ($87E8),A instead of LD ($87E8),HL: A is the high byte masked
+; to 0-3, written over the LOW byte, so the pointer stays $1000, HL becomes $0001 after the INC and the AND, and the byte
+; read is always the ROM byte at $0001 ($01 in the standard 48K ROM). The result is R XOR $01. R counts instructions, so
+; the 'noise' of effect 1 is a regular pattern (observed: the bit 4 of the 48 samples of a frame repeat '001' with a
+; phase change). An original bug; no request ever starts effect 1 anyway.
+; .
+; Hardware: reads the Refresh register (LD A,R) and ROM memory.
+;
+; O:A R XOR (ROM byte at $0001)
+@label=NoiseByte
+c$87D7 PUSH HL
+ $87D8 LD HL,($87E8)        ; noise pointer, $1000 and never changed
+ $87DB INC HL               ; $1001
+ $87DC LD A,H               ; H = $10
+ $87DD AND $03              ; window of 1,024 bytes, intended to keep the pointer in $0000-$03FF
+ $87DF LD H,A               ; H = 0: HL = $0001
+ $87E0 LD ($87E8),A         ; BUG: stores A (0-3) over the low byte of the pointer instead of HL
+ $87E3 LD A,R               ; refresh register
+ $87E5 XOR (HL)             ; XOR the ROM byte at $0001
+ $87E6 POP HL
+ $87E7 RET

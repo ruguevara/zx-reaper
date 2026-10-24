@@ -1,12 +1,16 @@
-; Behaviour data for object kind 2,3 (rooms 21,22): 5-byte header, then
-; kind-specific bytes and sprite/frame pointers
-b$9555 DEFB $02,$01,$0C,$06,$02
- $955A DEFB $42
- $955B DEFW $AC9F
- $955D DEFB $0C
- $955E DEFW $9562
- $9560 DEFW $9566
- $9562 DEFW $D7BB
- $9564 DEFW $D7C6
- $9566 DEFW $D7D1
- $9568 DEFW $D7DC
+; Behaviour block: a demon (kinds 2 and 3, rooms 21 and 22)
+;
+; Used by the red demons of Evil church (and one in Tortured souls); attribute $42, 24 pixels tall.
+; .
+; Layout: see #R$93D3.
+@label=BehaviourDemon
+b$9555 DEFB $02,$01,$0C,$06,$02  ; hit box top, left, bottom, right; slot +$15 (Unknown)
+ $955A DEFB $42      ; attribute
+ $955B DEFW $AC9F    ; table of (first column, width) for x AND 3
+ $955D DEFB $0C      ; sprite height (2-pixel units)
+ $955E DEFW $9562    ; sprites, first direction (left or up)
+ $9560 DEFW $9566    ; sprites, second direction (right or down)
+ $9562 DEFW $D7BB    ; first direction, frame 0
+ $9564 DEFW $D7C6    ; first direction, frame 1
+ $9566 DEFW $D7D1    ; second direction, frame 0
+ $9568 DEFW $D7DC    ; second direction, frame 1

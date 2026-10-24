@@ -1,34 +1,50 @@
-; Routine at B365
-c$B365 POP BC        ;
- $B366 POP DE        ;
- $B367 POP HL        ;
- $B368 ADD HL,BC     ;
+; Entity handler: patroller moving right (kind 3) and the tail shared by the movers that go right or down
+;
+; The counterpart of #R$B2A6 for a creature that starts its patrol moving right (rats, bats, skeletons, crusaders and
+; the other horizontal patrollers listed there; room record kind 3). The x coordinate goes up by the speed each frame;
+; when its high byte equals the right turning point the handler word of the slot is rewritten with #R$B2A6, so from
+; the next frame the speed is subtracted. The position goes into the draw command, then #R$B3AD tests the hit box
+; and draws the second frame table of the sprite description (creatures facing right). The slot fields are those of
+; #R$B2A6 and #R$B2D4.
+; .
+; Hardware: none.
+;
+; SP Slot address + 2
+@label=UpdateWalkRight
+c$B365 POP BC        ; speed
+ $B366 POP DE        ; D right turning point, E left turning point
+ $B367 POP HL        ; x (8.8)
+ $B368 ADD HL,BC     ; x goes right
  $B369 PUSH HL       ;
- $B36A POP HL        ;
- $B36B LD A,H        ;
- $B36C CP D          ;
- $B36D JR NZ,$B37C   ;
- $B36F LD HL,$FFFA   ;
+ $B36A POP HL        ; SP is back at slot+8
+ $B36B LD A,H        ; x in 2-pixel units
+ $B36C CP D          ; at the right turning point?
+ $B36D JR NZ,$B37C   ; no: go on
+ $B36F LD HL,$FFFA   ; -6: back to slot+2
  $B372 ADD HL,SP     ;
  $B373 LD SP,HL      ;
- $B374 LD HL,$B2A6   ;
- $B377 PUSH HL       ;
- $B378 POP HL        ;
- $B379 POP BC        ;
+ $B374 LD HL,$B2A6   ; from the next frame the creature goes left
+ $B377 PUSH HL       ; written over the handler word at slot+0
+ $B378 POP HL        ; pop the handler again
+ $B379 POP BC        ; pop speed, limits and x again
  $B37A POP DE        ;
  $B37B POP HL        ;
-*$B37C LD D,H        ;
- $B37D POP HL        ;
- $B37E POP BC        ;
- $B37F LD E,H        ;
-; This entry point is used by the routines at #R$B344 and #R$B436.
-*$B380 LD L,H        ;
- $B381 LD H,D        ;
- $B382 LD A,H        ;
- $B383 EX AF,AF'     ;
- $B384 SRA H         ;
+*$B37C LD D,H        ; D = x
+ $B37D POP HL        ; y (8.8)
+ $B37E POP BC        ; skip the unused word at +10
+ $B37F LD E,H        ; E = y
+; Entry point used by #R$B344 and #R$B436 (movers whose sprite faces right or down): D = x, E = y, H = y. Puts the
+; position into the draw command and goes on to the hit box test with the second frame table.
+@label=PlaceEntityRight
+*$B380 LD L,H        ; L = y
+ $B381 LD H,D        ; H = x
+ $B382 LD A,H        ; A = x in 2-pixel units
+ $B383 EX AF,AF'     ; kept in A': its low two bits are the shift phase
+ $B384 SRA H         ; x / 4: byte column
  $B386 SRA H         ;
- $B388 LD ($ACD3),HL ;
-; This entry point is used by the routine at #R$B2F9.
+ $B388 LD ($ACD3),HL ; draw command position: (y, x/4)
+; Entry point used by #R$B2F9: the position is already in the draw command. D = x, E = y, SP at slot+$C (the next words
+; are the hit box). Tests the hit box against Jean and continues at #R$B3AD.
+@label=TestEntityHitRight
 *$B38B LD HL,$B3AD   ;
- $B38E JP $A851      ;
+ $B38E JP $A851      ; #R$A851 tests the hit box, then jumps to the address in HL

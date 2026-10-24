@@ -1,9 +1,21 @@
-; Routine at A96F
+; Probe two cells side by side (copy of #R$A9B4)
 ;
-; Used by the routine at #R$A8A5.
-c$A96F LD E,$00      ;
- $A971 CALL $A9FE    ;
- $A974 INC B         ;
- $A975 INC B         ;
- $A976 INC B         ;
- $A977 JP $A9FE      ;
+; The same code as #R$A9B4, used by the crouching branch of #R$A8A5 for the head: the flags of the cells at (x+B, y+C)
+; and (x+B+3, y+C) are ORed into E (E starts at 0). Three units are less than the 4 units of a cell, so the two points
+; are in the same or in neighbouring cell columns. B is left increased by 3.
+; .
+; Hardware: none; reads the tile flag map.
+;
+; HL Position: H = x, L = y (2-pixel units)
+; B Offset of the first point in x
+; C Offset of the first point in y
+; D Column mask (always $1F)
+; O:E OR of the tile flags at the points
+; O:B B + 3
+@label=ProbePair2
+c$A96F LD E,$00   ;
+ $A971 CALL $A9FE ;
+ $A974 INC B      ;
+ $A975 INC B      ;
+ $A976 INC B      ;
+ $A977 JP $A9FE   ;

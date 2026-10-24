@@ -1,78 +1,136 @@
 ; Game start and main loop
-c$85FC LD A,($8506)  ;
- $85FF LD HL,$A526   ;
- $8602 DEC A         ;
- $8603 CALL Z,$9D5F  ;
- $8606 LD HL,$A43D   ;
- $8609 LD ($8504),HL ;
- $860C LD HL,$85F3   ;
- $860F LD A,$03      ;
- $8611 LD ($8551),A  ;
- $8614 LD HL,$8512   ;
- $8617 LD BC,$3C00   ;
-*$861A LD (HL),C     ;
- $861B INC HL        ;
- $861C DJNZ $861A    ;
- $861E LD HL,$854D   ;
- $8621 LD (HL),C     ;
- $8622 DEC HL        ;
- $8623 LD (HL),$09   ;
- $8625 LD HL,$9C1B   ;
- $8628 LD (HL),C     ;
- $8629 LD HL,$9BF3   ;
- $862C LD (HL),C     ;
- $862D LD HL,$A895   ;
- $8630 LD (HL),$08   ;
- $8632 CALL $A339    ;
- $8635 LD HL,$85E2   ;
- $8638 LD ($8504),HL ;
- $863B XOR A         ;
- $863C LD ($850B),A  ;
- $863F LD ($850C),A  ;
- $8642 CALL $8832    ;
- $8645 LD A,$04      ;
- $8647 LD ($A894),A  ;
-*$864A CALL $BDF3    ;
-*$864D LD HL,($8512) ;
- $8650 LD ($A8A1),HL ;
- $8653 LD HL,($8514) ;
- $8656 LD ($A8A3),HL ;
-*$8659 CALL $86B9    ;
- $865C CALL $9B5A    ;
- $865F LD A,$80      ;
- $8661 LD ($850C),A  ;
-*$8664 LD A,($850C)  ;
- $8667 AND $7F       ;
- $8669 DEC A         ;
- $866A JR Z,$8659    ;
- $866C DEC A         ;
- $866D JR Z,$864D    ;
- $866F DEC A         ;
- $8670 JR Z,$869F    ;
- $8672 DEC A         ;
- $8673 JR Z,$864A    ;
- $8675 DEC A         ;
- $8676 JR Z,$86A5    ;
-*$8678 CALL $9CE7    ;
- $867B CALL $9C51    ;
- $867E CALL $9BF3    ;
- $8681 CALL $9C1B    ;
- $8684 LD A,($BDDA)  ;
- $8687 OR A          ;
- $8688 JR NZ,$8678   ;
- $868A CALL $BDDA    ;
- $868D CALL $97B7    ;
- $8690 CALL $95FF    ;
- $8693 CALL $AD88    ;
- $8696 CALL $AE20    ;
- $8699 CALL $AE4B    ;
- $869C JP $8664      ;
-*$869F CALL $887B    ;
- $86A2 JP $85FC      ;
-*$86A5 LD HL,$A57E   ;
- $86A8 CALL $9D5F    ;
- $86AB LD A,$07      ;
- $86AD LD ($8551),A  ;
- $86B0 CALL $A1C3    ;
- $86B3 CALL $A1CE    ;
- $86B6 JP $85FC      ;
+;
+; Starts a game and then runs it: the code never returns, the Game Over screen and the ending jump back to $85FC.
+; .
+; Start. On a 48K machine ($8506 = 1) it draws the title screen script #R$A526; the first start enters at #R$8606
+; instead (#R$6000 jumps there), because the loader's picture is already the title. It installs #R$A43D, the frame
+; routine of the menus, in #R$8504, starts the title music (track 3; on a 128K #R$605F turns the LD HL at #R$860C into
+; CALL #R$85F3), clears the 60 bytes $8512-$854D (respawn position, flags of the items and checkpoints, lives, crosses),
+; sets 9 lives, enables the redraw of the lives bar and the crosses counter (#R$9BF3, #R$9C1B: a NOP written over their
+; RET), and waits in the title menu for ENTER (#R$A339). It then installs the game frame routine #R$85E2, clears the
+; exit direction and the room state, runs the intro, room 0, until a key is pressed (#R$8832), makes Jean stand
+; (state 4), takes the respawn position and room from the checkpoint rules (#R$BDF3: with no checkpoint taken, room 5
+; at X $2400, Y $4400, observed) and enters the room. On a 128K machine the title script is not drawn at all (by
+; reading the code: the DEC A / CALL Z test is for a 48K machine only).
+; .
+; Main loop (#R$8664). The low 7 bits of the room state #R$850C say what to do, bit 7 only tells the frame routine
+; #R$A596 to run the game logic:
+; .
+; 1 enter the room #R$8509: #R$86B9, then #R$9B5A draws it with a sweep, then the state becomes $80 (playing).
+; .
+; 2 respawn: copy the respawn position (#R$8512, #R$8514) to Jean's X and Y (#R$A8A1, #R$A8A3), then as 1.
+; .
+; 3 the ending: #R$887B, then start again at #R$85FC.
+; .
+; 4 after a death: #R$BDF3 chooses the checkpoint (room, position, state 0), then as 2.
+; .
+; 5 Game Over: script #R$A57E, music track 7, wait for a key, start again at #R$85FC.
+; .
+; anything else (0 with bit 7 set): one frame of play, see below.
+; .
+; One frame of play. The game logic does not run here but in the interrupt, once per frame at 50 Hz (#R$85E2 and
+; #R$A596; observed: 800 interrupts and 800 game frames in frames 700-1500 of tests/inputs/play.txt). The loop below is
+; the foreground, which only draws. It calls the four one-shot gates (#R$9CE7 event script, #R$9C51 parchment, #R$9BF3
+; lives bar, #R$9C1B crosses counter: each is a RET until something arms it) over and over until the interrupt has
+; completed a frame list (#R$BDDA is NOP, written by #R$A5DB), then runs the list of queued sprite commands (#R$BDDB),
+; builds and draws the changed cells and sprites (#R$97B7, #R$95FF), steps the three tile animations (#R$AD88 liquid
+; strip, #R$AE20 blood tiles, #R$AE4B ring of crosses; each a RET until a room script enables it) and tests the room
+; state again. A quiet frame is drawn by about T 55,000 of the frame; a busy one takes the whole frame or more. When the
+; drawing outlasts the next interrupt, that frame's game logic still runs but its sprites are not queued, so the screen
+; is updated on fewer frames than the logic (observed, same run: 586 draws for 800 frames).
+; .
+; Hardware: none directly. The pacing comes from the gate #R$BDDA that the 50 Hz interrupt opens; the screen is written by
+; the routines called from here.
+@label=StartGame
+c$85FC LD A,($8506)         ; machine type: 1 on a 48K Spectrum
+ $85FF LD HL,$A526          ; title screen script
+ $8602 DEC A                ; Z on a 48K machine
+ $8603 CALL Z,$9D5F         ; RunScript: draw the title (48K only)
+@label=StartGame_NoTitle
+ $8606 LD HL,$A43D          ; first start enters here; menu frame routine for the title
+ $8609 LD ($8504),HL        ; InterruptRoutine
+@label=StartGame_Music
+ $860C LD HL,$85F3          ; 128K: becomes CALL $85F3 (start the music), written by #R$605F; on a 48K it only loads HL
+@isub=LD A,MUSIC_TRACK_TITLE
+ $860F LD A,$03
+ $8611 LD ($8551),A         ; MusicTrack
+ $8614 LD HL,$8512          ; first byte to clear: RespawnX
+ $8617 LD BC,$3C00          ; B = 60 bytes ($8512-$854D), C = 0
+@label=StartGame_Clear
+*$861A LD (HL),C
+ $861B INC HL
+ $861C DJNZ $861A
+ $861E LD HL,$854D          ; Crosses: 0 (already cleared by the loop)
+ $8621 LD (HL),C
+ $8622 DEC HL
+@isub=LD (HL),MAX_LIVES
+ $8623 LD (HL),$09          ; Lives
+ $8625 LD HL,$9C1B          ; DrawCrossesHud: NOP instead of RET, so it draws once
+ $8628 LD (HL),C
+ $8629 LD HL,$9BF3          ; DrawLivesBar: NOP instead of RET
+ $862C LD (HL),C
+ $862D LD HL,$A895          ; Jean's animation timer #R$A895
+ $8630 LD (HL),$08
+ $8632 CALL $A339           ; title menu: ENTER starts, C opens the controls menu
+ $8635 LD HL,$85E2          ; game frame routine
+ $8638 LD ($8504),HL
+ $863B XOR A                ; exit direction 0 (right)
+ $863C LD ($850B),A
+ $863F LD ($850C),A         ; room state 0
+ $8642 CALL $8832           ; intro: room 0 until a key is pressed
+@isub=LD A,PLAYER_STANDING
+ $8645 LD A,$04
+ $8647 LD ($A894),A         ; PlayerState
+@label=MainLoop_AfterDeath
+*$864A CALL $BDF3           ; chooses room and respawn position, sets room state 0
+@label=MainLoop_Respawn
+*$864D LD HL,($8512)        ; respawn position X (8.8) ...
+ $8650 LD ($A8A1),HL        ; ... to Jean's X
+ $8653 LD HL,($8514)        ; respawn position Y ...
+ $8656 LD ($A8A3),HL        ; ... to Jean's Y
+@label=MainLoop_EnterRoom
+*$8659 CALL $86B9           ; build the room
+ $865C CALL $9B5A           ; draw it, sweeping in from the side Jean left by
+@isub=LD A,STATE_RUNNING
+ $865F LD A,$80
+ $8661 LD ($850C),A         ; RoomState: playing
+@label=MainLoop
+*$8664 LD A,($850C)         ; RoomState
+ $8667 AND $7F              ; bit 7 is only the "run the game logic" flag
+ $8669 DEC A                ; state 1: enter the room
+ $866A JR Z,$8659
+ $866C DEC A                ; state 2: respawn
+ $866D JR Z,$864D
+ $866F DEC A                ; state 3: the ending
+ $8670 JR Z,$869F
+ $8672 DEC A                ; state 4: restart after a death
+ $8673 JR Z,$864A
+ $8675 DEC A                ; state 5: Game Over
+ $8676 JR Z,$86A5
+@label=MainLoop_Play
+*$8678 CALL $9CE7           ; event script (once, when armed)
+ $867B CALL $9C51           ; parchment (when one was picked up)
+ $867E CALL $9BF3           ; lives bar
+ $8681 CALL $9C1B           ; crosses counter
+ $8684 LD A,($BDDA)         ; frame list gate: $C9 (RET) until the interrupt completes a list, then NOP
+ $8687 OR A
+ $8688 JR NZ,$8678          ; not ready: the gates again
+ $868A CALL $BDDA           ; = #R$BDDB, run the frame list of sprite commands
+ $868D CALL $97B7           ; build the redraw runs, draw the sprite jobs into the cells
+ $8690 CALL $95FF           ; copy the cells to the screen
+ $8693 CALL $AD88           ; liquid strip of rooms 16 and 19
+ $8696 CALL $AE20           ; blood tiles of rooms 21-23
+ $8699 CALL $AE4B           ; ring of crosses of room 24
+ $869C JP $8664             ; next frame
+@label=MainLoop_Ending
+*$869F CALL $887B           ; the ending, then restart the game
+ $86A2 JP $85FC
+@label=MainLoop_GameOver
+*$86A5 LD HL,$A57E          ; Game Over screen script
+ $86A8 CALL $9D5F
+@isub=LD A,MUSIC_TRACK_7
+ $86AB LD A,$07             ; MusicTrack 7
+ $86AD LD ($8551),A
+ $86B0 CALL $A1C3           ; wait for a key press
+ $86B3 CALL $A1CE           ; wait for the key to be released
+ $86B6 JP $85FC

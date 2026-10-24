@@ -1,44 +1,73 @@
-; Routine at B7C6
-c$B7C6 POP BC        ;
- $B7C7 POP DE        ;
+; Entity handler: fish waiting under the water (rooms 16 and 19)
+;
+; The jumping fish of "Lake of despair" (room 16, three of them) and "Underground river" (room 19, two): handler of room
+; object kind 13 (#R$B028, behaviour block #R$9549). A fish has two states, each with its own handler: this one, in
+; which it is hidden under the water, and #R$B818, in which it jumps out of the water in an arc and falls back. The
+; slot is the one of the room enemies (#R$89ED): +2 word not used while waiting (the jump speed once it jumps), +4
+; byte countdown and +5 byte its reload ($54), +6 word x and +8 word y (8.8, high bytes in 2-pixel units), +$A and +$B
+; bytes not used, +$C word hit box offset, +$E word hit box size (7, 7), +$10 pointer to the sprite block (#R$954E:
+; attribute, height, width, two frames), +$12 byte animation counter and +$13 its reload, +$14 byte frame and +$15
+; number of frames (2).
+; .
+; While waiting nothing is drawn and the hit test is not made. The countdown goes down by one per frame; when it equals
+; FISH_JUMP_TIME (30 frames after the reload) the fish jumps: a splash (template #R$BD12) is made at x with y = WATER_Y
+; (position at SPAWN_POSITION, record appended to the object list #R$BE56, spawn count #R$8552 raised, sound effect
+; SFX_ENEMY_SHOT), and the slot is rewritten in place: the handler word becomes #R$B818, +2 the jump speed
+; FISH_JUMP_SPEED (upwards), +4 the countdown (kept: it now counts the 54 frames of the jump), +8 the start y
+; FISH_JUMP_Y, +6 x is kept. The rest of the slot is not touched. The fish of a room start with different countdowns
+; (observed in room 19: $54 and $7C), so that they do not jump together.
+;
+; SP Slot address + 2 (the handler word was popped by the RET that entered the routine)
+@label=UpdateFishWaiting
+c$B7C6 POP BC        ; +2, not used
+ $B7C7 POP DE        ; E countdown, D reload
  $B7C8 DEC E         ;
  $B7C9 LD A,E        ;
- $B7CA CP $36        ;
+@isub=CP FISH_JUMP_TIME
+ $B7CA CP $36        ; time to jump?
  $B7CC JR Z,$B7D6    ;
- $B7CE PUSH DE       ;
- $B7CF LD HL,$0012   ;
+ $B7CE PUSH DE       ; store the countdown
+ $B7CF LD HL,$0012   ; SP is at slot+4: +$12 is the next slot
  $B7D2 ADD HL,SP     ;
- $B7D3 JP $A5F0      ;
-*$B7D6 POP HL        ;
- $B7D7 LD A,H        ;
- $B7D8 POP HL        ;
+ $B7D3 JP $A5F0      ; next slot
+; The fish jumps. SP is at slot+6.
+@label=UpdateFishWaiting_Jump
+*$B7D6 POP HL        ; x word
+ $B7D7 LD A,H        ; A = x
+ $B7D8 POP HL        ; y word
  $B7D9 LD L,A        ;
  $B7DA LD A,H        ;
- $B7DB LD H,L        ;
- $B7DC LD L,$50      ;
- $B7DE LD ($5DFE),HL ;
+ $B7DB LD H,L        ; H = x
+@isub=LD L,WATER_Y
+ $B7DC LD L,$50      ; y of the water surface
+ $B7DE LD ($5DFE),HL ; SPAWN_POSITION of the splash
  $B7E1 EXX           ;
- $B7E2 LD HL,$854F   ;
+ $B7E2 LD HL,$854F   ; sound effect request
+@isub=LD (HL),SFX_ENEMY_SHOT
  $B7E5 LD (HL),$07   ;
- $B7E7 LD HL,$BD12   ;
- $B7EA LD ($5DFC),HL ;
- $B7ED LD HL,$8552   ;
+ $B7E7 LD HL,$BD12   ; SplashTemplate
+ $B7EA LD ($5DFC),HL ; SPAWN_TEMPLATE
+ $B7ED LD HL,$8552   ; one more record waiting
  $B7F0 INC (HL)      ;
- $B7F1 LD HL,$5DFC   ;
- $B7F4 LD DE,($BE56) ;
+ $B7F1 LD HL,$5DFC   ; SPAWN_TEMPLATE, SPAWN_POSITION
+ $B7F4 LD DE,($BE56) ; end of the object list
+@isub=LD BC,OBJECT_ENTRY_SIZE
  $B7F8 LD BC,$0004   ;
- $B7FB LDIR          ;
+ $B7FB LDIR          ; append the record
  $B7FD LD ($BE56),DE ;
- $B801 EXX           ;
- $B802 LD HL,$4C7C   ;
- $B805 PUSH HL       ;
+ $B801 EXX           ; DE = countdown (E) and reload (D) again
+@isub=LD HL,FISH_JUMP_Y
+ $B802 LD HL,$4C7C   ; start y of the jump
+ $B805 PUSH HL       ; slot +8
  $B806 DEC SP        ;
- $B807 DEC SP        ;
- $B808 PUSH DE       ;
- $B809 LD BC,$FDAE   ;
- $B80C PUSH BC       ;
- $B80D LD HL,$B818   ;
- $B810 PUSH HL       ;
+ $B807 DEC SP        ; skip +6, x stays
+ $B808 PUSH DE       ; slot +4: countdown and reload
+@isub=LD BC,FISH_JUMP_SPEED
+ $B809 LD BC,$FDAE   ; speed upwards
+ $B80C PUSH BC       ; slot +2
+ $B80D LD HL,$B818   ; the jumping state
+ $B810 PUSH HL       ; handler word at slot +0
+@isub=LD HL,SLOT_SIZE
  $B811 LD HL,$0016   ;
- $B814 ADD HL,SP     ;
+ $B814 ADD HL,SP     ; next slot
  $B815 JP $A5F0      ;

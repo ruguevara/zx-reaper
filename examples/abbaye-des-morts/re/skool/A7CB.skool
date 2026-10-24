@@ -1,46 +1,64 @@
-; Routine at A7CB
+; Item: step the frame animation, then queue the item's sprite
 ;
-; Used by the routines at #R$A6D8 and #R$A70B.
-c$A7CB POP BC        ;
- $A7CC POP DE        ;
- $A7CD LD A,E        ;
+; The common tail of the item actions whose sprite is animated and depends on nothing else (#R$A6D8, #R$A70B). The
+; lever crosses (#R$A782, #R$A7B1) do the same with a frame offset of their own and enter at #R$A7D9. Entered with SP
+; at slot + 8: the caller has popped the flag pointer. Pops the animation words of the slot (+8: C = countdown, B =
+; reload value; +$A: E = frame, D = number of frames); the countdown goes down by one and at zero it reloads from B,
+; the frame goes up by one and wraps to 0 at D. #R$A7D9 then stores the words back and #R$A7DB queues the sprite of
+; frame A.
+; .
+; Hardware: none; the sprite is only queued (#R$ACE5), the screen is written later.
+;
+; SP Slot address + 8 (the flag pointer is already popped)
+@label=AnimateItem
+c$A7CB POP BC        ; C = countdown, B = reload
+ $A7CC POP DE        ; E = frame, D = number of frames
+ $A7CD LD A,E        ; A = frame
  $A7CE DEC C         ;
- $A7CF JR NZ,$A7D9   ;
- $A7D1 LD C,B        ;
+ $A7CF JR NZ,$A7D9   ; countdown not over
+ $A7D1 LD C,B        ; reload; next frame, wrapping at D
  $A7D2 INC A         ;
  $A7D3 LD E,A        ;
  $A7D4 CP D          ;
  $A7D5 JR C,$A7D9    ;
  $A7D7 SUB D         ;
  $A7D8 LD E,A        ;
-; This entry point is used by the routines at #R$A782 and #R$A7B1.
-*$A7D9 PUSH DE       ;
+; Entry point of #R$A7CB, #R$A782 and #R$A7B1: A = frame to draw, DE and BC = the animation words to put back into the
+; slot
+@label=AnimateItem_Store
+*$A7D9 PUSH DE       ; store the animation words back
  $A7DA PUSH BC       ;
-; This entry point is used by the routines at #R$A668, #R$A6A1, #R$A734,
-; #R$A748, #R$A75A and #R$A836.
-*$A7DB POP HL        ;
+; Entry point of the item actions that draw a frame they have already chosen (#R$A668, #R$A6A1, #R$A734, #R$A748,
+; #R$A75A, #R$A836) and of #R$A7D9. A = frame number, SP at slot + 8. Skips the animation words (+8..+$B), pops the
+; frame list pointer (+$C) and the size of the sprite (+$E: C = width in bytes, B = height in 2-pixel units), takes
+; frame A of the list (4 bytes: sprite address, attribute, 0; #R$8B07) and puts address, size and attribute into the
+; object draw command #R$ACE5 (its position was set by the slot handler, #R$A600 or #R$A822). Unless the frame list is
+; being run (#R$AA1F is a RET) the 10 bytes of the command are appended to the list at (#R$BE58). Last it goes on with
+; the next slot (the slot ends at SP + 6).
+@label=DrawItemFrame
+*$A7DB POP HL        ; skip the animation words
  $A7DC POP HL        ;
- $A7DD POP DE        ;
- $A7DE LD H,$00      ;
+ $A7DD POP DE        ; DE = frame list
+ $A7DE LD H,$00      ; HL = 4 x A
  $A7E0 LD L,A        ;
  $A7E1 ADD HL,HL     ;
  $A7E2 ADD HL,HL     ;
- $A7E3 ADD HL,DE     ;
- $A7E4 LD E,(HL)     ;
+ $A7E3 ADD HL,DE     ; frame entry
+ $A7E4 LD E,(HL)     ; DE = sprite address (D = pixel row page, E = column)
  $A7E5 INC HL        ;
  $A7E6 LD D,(HL)     ;
  $A7E7 INC HL        ;
- $A7E8 LD A,(HL)     ;
+ $A7E8 LD A,(HL)     ; attribute
  $A7E9 INC HL        ;
- $A7EA POP BC        ;
+ $A7EA POP BC        ; C = width, B = height
  $A7EB LD ($ACE9),DE ;
  $A7EF LD ($ACEB),BC ;
  $A7F3 LD ($ACEE),A  ;
- $A7F6 LD HL,$ACE5   ;
- $A7F9 LD A,($AA1F)  ;
+ $A7F6 LD HL,$ACE5   ; the draw command
+ $A7F9 LD A,($AA1F)  ; $C9 (RET) while the frame list is being run
  $A7FC OR A          ;
  $A7FD JR NZ,$A81B   ;
- $A7FF LD DE,($BE58) ;
+ $A7FF LD DE,($BE58) ; append the 10 bytes to the frame list
  $A803 LDI           ;
  $A805 LDI           ;
  $A807 LDI           ;
@@ -52,6 +70,8 @@ c$A7CB POP BC        ;
  $A813 LDI           ;
  $A815 LDI           ;
  $A817 LD ($BE58),DE ;
-*$A81B LD HL,$0006   ;
+@label=DrawItemFrame_Next
+@isub=LD HL,SLOT_SIZE-$10
+*$A81B LD HL,$0006   ; SP is at slot + $10
  $A81E ADD HL,SP     ;
- $A81F JP $A5F0      ;
+ $A81F JP $A5F0      ; next slot

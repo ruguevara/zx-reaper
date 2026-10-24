@@ -1,14 +1,31 @@
-; Routine at B5D6
-c$B5D6 POP BC        ;
- $B5D7 POP BC        ;
- $B5D8 POP HL        ;
- $B5D9 LD D,H        ;
- $B5DA POP HL        ;
- $B5DB LD E,H        ;
- $B5DC LD H,D        ;
- $B5DD LD L,E        ;
- $B5DE LD ($5DFE),HL ;
- $B5E1 EXX           ;
- $B5E2 LD IY,$B3D4   ;
- $B5E6 LD HL,$BCB2   ;
- $B5E9 JR $B611      ;
+; Entity handler: stone head in the wall that shoots arrows (kind 11, rooms 20 and 22)
+;
+; The stone head set into the right-hand wall of Unexpected gate (room 20, at x = $6C, y = $0C) and Tortured souls
+; (room 22, at x = $70, y = $34). It does not move: the handler takes its position, makes it the position of the
+; shot to be created (SPAWN_POSITION, the (y, x) half of the object list record, #R$5DFC) and prepares the arguments
+; of the shared tail #R$B611 of the archer #R$B5EB: the template of the shot in the alternate HL (#R$BCB2, the arrow
+; flying left, #R$B6ED) and IY = #R$B3D4, the first frame table. The tail puts the position into the draw command and
+; tests the hit box; the continuation #R$B620 counts the shot cycle down (70 frames: the head fires when the countdown
+; reaches 0) and queues the arrow, animates and draws the head. Observed in room 20: a slot with handler #R$B6ED, x
+; speed $FE00, appears at x = $6A next to the head every 70 frames and flies left.
+; .
+; Slot fields used: +6 word x (high byte), +8 word y (high byte); the speed and the turning points are not used. The
+; sprite description is of another kind than the walkers' (see #R$B620).
+; .
+; Hardware: none.
+;
+; SP Slot address + 2
+@label=UpdateStoneHead
+c$B5D6 POP BC        ; skip the speed
+ $B5D7 POP BC        ; skip the words at +4
+ $B5D8 POP HL        ; x (8.8)
+ $B5D9 LD D,H        ; D = x
+ $B5DA POP HL        ; y (8.8)
+ $B5DB LD E,H        ; E = y
+ $B5DC LD H,D        ; H = x
+ $B5DD LD L,E        ; L = y
+ $B5DE LD ($5DFE),HL ; position of the shot
+ $B5E1 EXX           ; alternate registers: template of the shot ...
+ $B5E2 LD IY,$B3D4   ; first frame table (the head faces left)
+ $B5E6 LD HL,$BCB2   ; ... the arrow flying left
+ $B5E9 JR $B611      ; tail of the archer #R$B5EB

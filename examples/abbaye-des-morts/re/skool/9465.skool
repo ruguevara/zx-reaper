@@ -1,10 +1,14 @@
-; Behaviour data for object kind 6 (rooms 9): 5-byte header, then kind-specific
-; bytes and sprite/frame pointers
-b$9465 DEFB $00,$01,$07,$06,$01
- $946A DEFB $46
- $946B DEFW $9463
- $946D DEFB $0C
- $946E DEFW $9472
- $9470 DEFW $9474
- $9472 DEFW $D763
- $9474 DEFW $D765
+; Behaviour block: a hanged man (kind 6, room 9)
+;
+; Used by the four hanged men of Hangman tree (yellow, attribute $46) that bob up and down on their ropes.
+; .
+; Layout: see #R$93D3.
+@label=BehaviourHangedMan
+b$9465 DEFB $00,$01,$07,$06,$01  ; hit box top, left, bottom, right; slot +$15 (Unknown)
+ $946A DEFB $46      ; attribute
+ $946B DEFW $9463    ; table of (first column, width) for x AND 3
+ $946D DEFB $0C      ; sprite height (2-pixel units)
+ $946E DEFW $9472    ; sprites, first direction (left or up)
+ $9470 DEFW $9474    ; sprites, second direction (right or down)
+ $9472 DEFW $D763    ; first direction, frame 0
+ $9474 DEFW $D765    ; second direction, frame 0

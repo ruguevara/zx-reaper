@@ -1,5 +1,15 @@
-; Routine at A87A
-c$A87A JR NC,$A880   ;
- $A87C SBC A,A       ;
- $A87D LD ($A8A0),A  ;
-*$A880 JP $A880      ;
+; Hit test continuation: flag a hit on the player
+;
+; Reached by the JP (IX) at the end of the overlap test #R$A85F, entered through #R$A851. With the carry flag set (the
+; entity's box overlaps the player's) it stores $FF in the player's hit flag #R$A8A0, which makes the player routine
+; (#R$AAC6) kill the monk in this frame. Then it jumps to the continuation address that #R$A851 stored in the operand of
+; the JP at #R$A880.
+;
+; F Carry set when the entity overlaps the player
+@label=HitTestDone
+c$A87A JR NC,$A880  ; no overlap
+ $A87C SBC A,A      ; A = $FF
+ $A87D LD ($A8A0),A ;
+; Self-modified: the operand is the address #R$A851 was called with.
+@label=SmcHitContinue
+*$A880 JP $A880     ; continue (operand written by #R$A851)

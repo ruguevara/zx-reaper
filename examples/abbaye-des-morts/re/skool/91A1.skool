@@ -1,13 +1,19 @@
-; Text: parchment messages (strings 25-36, two lines each)
-t$91A1 DEFM $0E,"Twelve crosses"
- $91B0 DEFM $11,"against the devil"
- $91C2 DEFM $0F,"Twelve brothers"
- $91D2 DEFM $11,"hid and died here"
- $91E4 DEFM $0D,"Four brothers"
- $91F2 DEFM $13,"changed their faith"
- $9206 DEFM $11,"An invisible path"
- $9218 DEFM $12,"over a wood bridge"
- $922B DEFM $0D,"Jump to death"
- $9239 DEFM $14,"and prove your faith"
- $924E DEFM $0D,"Glide through"
- $925C DEFM $0E,"the beast cage"
+; Parchment texts: strings 25-36, two lines for each of the six parchments
+;
+; A parchment (room item type 5, #R$8EDF) names its two lines by string number; the text is shown by #R$9C52 in the
+; parchment frame when Jean touches the item (the item action #R$A836 copies the numbers to #R$850E). The pairs: 25-26 room 3 (Wine supplies), 27-28 room 8 (The Altar), 29-30
+; room 12 (Plagued ruins), 31-32 room 14 (Hidden garden), 33-34 room 16 (Lake of despair), 35-36 room 21 (Evil church).
+; The first parchment says to collect twelve crosses; the others are hints about the abbey.
+@label=ParchmentTexts
+t$91A1 DEFM $0E,"Twelve crosses"  ; string 25
+ $91B0 DEFM $11,"against the devil"  ; string 26
+ $91C2 DEFM $0F,"Twelve brothers"  ; string 27
+ $91D2 DEFM $11,"hid and died here"  ; string 28
+ $91E4 DEFM $0D,"Four brothers"  ; string 29
+ $91F2 DEFM $13,"changed their faith"  ; string 30
+ $9206 DEFM $11,"An invisible path"  ; string 31
+ $9218 DEFM $12,"over a wood bridge"  ; string 32
+ $922B DEFM $0D,"Jump to death"  ; string 33
+ $9239 DEFM $14,"and prove your faith"  ; string 34
+ $924E DEFM $0D,"Glide through"  ; string 35
+ $925C DEFM $0E,"the beast cage"  ; string 36

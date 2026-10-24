@@ -1,10 +1,14 @@
-; Behaviour data for object kind 4 (rooms 22,23): 5-byte header, then
-; kind-specific bytes and sprite/frame pointers
-b$956A DEFB $00,$02,$03,$05,$02
- $956F DEFB $42
- $9570 DEFW $9463
- $9572 DEFB $04
- $9573 DEFW $9577
- $9575 DEFW $9577
- $9577 DEFW $DBE7
- $9579 DEFW $EBE7
+; Behaviour block: a falling red flame (kind 4, rooms 22 and 23)
+;
+; Used by the small red spinning flames that move up and down in Tortured souls and Ashes to ashes (attribute $42). The same sprite address is used for both directions: the sprite sheet has one for each row of the sheet ($DBE7 and $EBE7: frames 0 and 1).
+; .
+; Layout: see #R$93D3.
+@label=BehaviourFireWheel
+b$956A DEFB $00,$02,$03,$05,$02  ; hit box top, left, bottom, right; slot +$15 (Unknown)
+ $956F DEFB $42      ; attribute
+ $9570 DEFW $9463    ; table of (first column, width) for x AND 3
+ $9572 DEFB $04      ; sprite height (2-pixel units)
+ $9573 DEFW $9577    ; sprites, first direction (left or up)
+ $9575 DEFW $9577    ; sprites, second direction (right or down)
+ $9577 DEFW $DBE7    ; both directions, frame 0
+ $9579 DEFW $EBE7    ; both directions, frame 1

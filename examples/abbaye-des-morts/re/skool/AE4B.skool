@@ -1,50 +1,70 @@
-; Routine at AE4B
+; Show the ring of twelve crosses in Satan's room, flashing in colour
 ;
-; Used by the routine at #R$85FC.
-c$AE4B NOP           ;
- $AE4C LD B,$0C      ;
- $AE4E LD A,($854D)  ;
+; Called once per frame by the main loop #R$85FC. The byte at #R$AE4B is RET until the room script uses op $9F
+; (#R$A1BE, at the end of room 24's script, which room 25 calls too); room entry (#R$86B9) puts the RET back. Once the
+; player holds 12 crosses (#R$854D) it runs every fifth frame (#R$8511): it advances the colour cycle (the operand of
+; the LD A,n at #R$AE5A holds the position 0-5) and copies the new attribute from #R$8553 to the attribute of the
+; ring cross tile (#R$CE4C). Unless the chalice has been taken (#R$8521) it then adds one cross to the ring
+; (#R$8541, one cross per call until 12, with sound effect 5) and stamps that many crosses, tile $4C, at the first
+; cells of the list at #R$82D7 (row, column pairs, also read by the erase script #R$82D4), which marks them for redraw;
+; with all 12 shown it restamps them every time, so they keep flashing.
+; .
+; Hardware: none directly (the crosses are drawn by the redraw routine #R$9B5A); requests sound effect 5 through
+; #R$854F.
+@label=ShowCrossRing
+c$AE4B NOP           ; RET unless op $9F of the room script switched the ring on
+@isub=LD B,CROSSES_NEEDED
+ $AE4C LD B,$0C      ; B = 12, also the size of the ring
+ $AE4E LD A,($854D)  ; crosses collected
  $AE51 CP B          ;
- $AE52 RET C         ;
- $AE53 LD HL,$8511   ;
+ $AE52 RET C         ; fewer than 12: nothing to show
+ $AE53 LD HL,$8511   ; colour step timer
  $AE56 DEC (HL)      ;
  $AE57 RET NZ        ;
+@isub=LD (HL),CROSS_FLASH_PERIOD
  $AE58 LD (HL),$05   ;
- $AE5A LD A,$00      ;
+@label=SmcCrossColour
+ $AE5A LD A,$00      ; the colour position; this operand is stored by #R$AE62
  $AE5C INC A         ;
+@isub=CP CROSS_COLOURS
  $AE5D CP $06        ;
  $AE5F JR NZ,$AE62   ;
- $AE61 XOR A         ;
-*$AE62 LD ($AE5B),A  ;
- $AE65 LD HL,$8553   ;
- $AE68 CALL $A1D9    ;
+ $AE61 XOR A         ; wrap to 0 after the 6th colour
+@isub=LD (SmcCrossColour+1),A
+*$AE62 LD ($AE5B),A  ; keep the position for the next step
+ $AE65 LD HL,$8553   ; CrossColours
+ $AE68 CALL $A1D9    ; HL = colour table + position
  $AE6B LD A,(HL)     ;
- $AE6C LD ($CE4C),A  ;
+@isub=LD (TileAttrs+TILE_RING_CROSS),A
+ $AE6C LD ($CE4C),A  ; attribute of the ring cross tile
  $AE6F LD A,($8521)  ;
  $AE72 OR A          ;
- $AE73 RET NZ        ;
- $AE74 LD HL,$8541   ;
+ $AE73 RET NZ        ; chalice taken: the ring is no longer restamped
+ $AE74 LD HL,$8541   ; crosses of the ring shown so far
  $AE77 LD A,(HL)     ;
  $AE78 CP B          ;
- $AE79 JR Z,$AE89    ;
- $AE7B INC (HL)      ;
+ $AE79 JR Z,$AE89    ; all 12 shown: just restamp them (B = 12)
+ $AE7B INC (HL)      ; one more cross
  $AE7C LD A,(HL)     ;
  $AE7D CP B          ;
  $AE7E JR NZ,$AE83   ;
- $AE80 LD ($8542),A  ;
-*$AE83 LD B,A        ;
+ $AE80 LD ($8542),A  ; the twelfth: CrossRingDone = 12
+*$AE83 LD B,A        ; B = number of crosses to stamp
+@isub=LD A,SFX_PICKUP
  $AE84 LD A,$05      ;
- $AE86 LD ($854F),A  ;
-*$AE89 LD HL,$82D7   ;
-*$AE8C LD E,(HL)     ;
+ $AE86 LD ($854F),A  ; sound effect 5
+@label=ShowCrossRing_Stamp
+*$AE89 LD HL,$82D7   ; list of positions
+*$AE8C LD E,(HL)     ; E = row
  $AE8D INC HL        ;
- $AE8E LD D,(HL)     ;
+ $AE8E LD D,(HL)     ; D = column
  $AE8F INC HL        ;
  $AE90 PUSH BC       ;
  $AE91 PUSH HL       ;
- $AE92 EX DE,HL      ;
+ $AE92 EX DE,HL      ; H = column, L = row
+@isub=LD E,TILE_RING_CROSS
  $AE93 LD E,$4C      ;
- $AE95 CALL $9E6A    ;
+ $AE95 CALL $9E6A    ; PlaceTile
  $AE98 POP HL        ;
  $AE99 POP BC        ;
  $AE9A DJNZ $AE8C    ;

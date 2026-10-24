@@ -1,4 +1,8 @@
 ; Jump to HL
 ;
-; Used by the routine at #R$8585.
-c$85BC JP (HL)       ;
+; A CALL to this address is an indirect call through HL. Used by the interrupt handler #R$8585 (HL = the frame routine
+; from #R$8504) and by the draw queue runner #R$97B7 (HL = the handler of a queued job).
+;
+; HL Address to jump to
+@label=JumpToHL
+c$85BC JP (HL)

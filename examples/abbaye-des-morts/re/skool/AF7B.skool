@@ -1,58 +1,75 @@
-; Routine at AF7B
+; Add the three pre-shifted copies of a frame
 ;
-; Used by the routine at #R$AF15.
+; Does nothing unless flag bit 7 of the set is set (A). The frame (N columns, rows of pixel pages) is at HL; the copies
+; are written after it at DE, one pixel line (page) at a time: copy 1 is the frame shifted right by 2 pixels and is N + 1
+; columns wide (a zero byte is appended to take the bits shifted out), copy 2 is copy 1 shifted by 2 more pixels and copy 3
+; copy 2 shifted by 2 more, both N + 1 columns wide as well (the bits that leave the last column are lost). The 2-pixel
+; shift is two calls of #R$AFFC. A frame so takes N + 3 x (N + 1) columns, which the entity code relies on when it picks the copy for
+; x AND 3 (#R$ACA7 pair tables). On return DE is the destination after the copies and HL the source plus 3 x N + 3.
+;
+; A Flags of the set: bit 7 makes the copies
+; A' Frame width N
+; C Character rows of the frame
+; HL Start of the frame, the column in L, the page of pixel row 0 in H
+; DE Destination of the copies: the column after the frame, same page
+; O:A Flags
+; O:A' N
+; O:HL Source column + 3 x N + 3
+; O:DE Destination column + 3 x N + 3 (low byte only)
+@label=ShiftFrameCopies
 c$AF7B BIT 7,A       ;
  $AF7D RET Z         ;
- $AF7E EX AF,AF'     ;
+ $AF7E EX AF,AF'     ; A = N
  $AF7F PUSH BC       ;
  $AF80 PUSH AF       ;
- $AF81 LD A,C        ;
- $AF82 POP BC        ;
+ $AF81 LD A,C        ; A = character rows
+ $AF82 POP BC        ; B = N
  $AF83 PUSH BC       ;
- $AF84 LD C,B        ;
+ $AF84 LD C,B        ; C = N, the columns per pixel line
  $AF85 LD B,A        ;
  $AF86 SLA B         ;
  $AF88 SLA B         ;
- $AF8A SLA B         ;
+ $AF8A SLA B         ; B = pixel lines (pages) = 8 x rows
  $AF8C PUSH HL       ;
  $AF8D PUSH DE       ;
+@label=ShiftFrameCopies_Line
 *$AF8E PUSH BC       ;
  $AF8F PUSH HL       ;
  $AF90 PUSH DE       ;
- $AF91 CALL $AFF4    ;
+ $AF91 CALL $AFF4    ; copy 1 = the line, N bytes (HL ends N bytes on, at the new copy)
  $AF94 XOR A         ;
- $AF95 LD (DE),A     ;
+ $AF95 LD (DE),A     ; a zero byte after it
  $AF96 INC E         ;
- $AF97 INC C         ;
- $AF98 CALL $AFFC    ;
- $AF9B CALL $AFFC    ;
- $AF9E CALL $AFF4    ;
- $AFA1 CALL $AFFC    ;
+ $AF97 INC C         ; N + 1 bytes from now on
+ $AF98 CALL $AFFC    ; shift copy 1 right by 1 pixel ...
+ $AF9B CALL $AFFC    ; ... and by 1 more: 2 pixels
+ $AF9E CALL $AFF4    ; copy 2 = copy 1 (N + 1 bytes)
+ $AFA1 CALL $AFFC    ; shifted by 2 pixels more
  $AFA4 CALL $AFFC    ;
- $AFA7 CALL $AFF4    ;
- $AFAA CALL $AFFC    ;
+ $AFA7 CALL $AFF4    ; copy 3 = copy 2
+ $AFAA CALL $AFFC    ; shifted by 2 pixels more
  $AFAD CALL $AFFC    ;
  $AFB0 POP DE        ;
  $AFB1 POP HL        ;
  $AFB2 POP BC        ;
- $AFB3 INC H         ;
- $AFB4 INC D         ;
+ $AFB3 INC H         ; next pixel line, source ...
+ $AFB4 INC D         ; ... and destination
  $AFB5 DJNZ $AF8E    ;
  $AFB7 POP DE        ;
  $AFB8 POP HL        ;
- $AFB9 LD A,C        ;
+ $AFB9 LD A,C        ; N
  $AFBA ADD A,A       ;
  $AFBB ADD A,C       ;
  $AFBC INC A         ;
  $AFBD INC A         ;
- $AFBE INC A         ;
+ $AFBE INC A         ; 3 x N + 3
  $AFBF PUSH AF       ;
  $AFC0 ADD A,E       ;
  $AFC1 LD E,A        ;
  $AFC2 POP AF        ;
  $AFC3 ADD A,L       ;
  $AFC4 LD L,A        ;
- $AFC5 POP AF        ;
+ $AFC5 POP AF        ; A = N
  $AFC6 POP BC        ;
- $AFC7 EX AF,AF'     ;
+ $AFC7 EX AF,AF'     ; A = flags again, A' = N
  $AFC8 RET           ;

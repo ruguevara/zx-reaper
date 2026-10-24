@@ -1,8 +1,18 @@
-; 128K: call DE in the music bank
+; 128K: call the routine DE in the music bank
 ;
-; Used by the routine at #R$85E8.
-c$85C2 LD BC,$85BE   ;
- $85C5 PUSH BC       ;
- $85C6 PUSH DE       ;
-; This entry point is used by the routine at #R$85D5.
-*$85C7 LD A,($8506)  ;
+; Pushes the address of #R$85BE (page bank 0 back in) and then DE, and falls into #R$85C7, which pages the music bank in
+; and RETs: the RET jumps to DE, and the RET at the end of that routine returns to #R$85BE, which restores bank 0 and
+; returns to the caller of this routine. HL and the other registers reach the music routine unchanged, except BC.
+; .
+; Hardware: writes the paging port $7FFD (through #R$85CA).
+;
+; DE Address of the routine in the music bank ($C000-$FFFF)
+; HL Argument passed on to that routine (module address, see #R$85E8)
+; O:BC Changed
+@label=CallInMusicBank
+@isub=LD BC,PageInBank0
+c$85C2 LD BC,$85BE          ; return address of the music routine
+ $85C5 PUSH BC
+ $85C6 PUSH DE              ; the RET at $85D4 jumps here
+@label=PageInMusicBank
+*$85C7 LD A,($8506)         ; port value that selects the music bank (#R$8506)

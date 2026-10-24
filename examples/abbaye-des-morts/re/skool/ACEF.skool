@@ -1,69 +1,112 @@
-; Routine at ACEF
+; Room exits: change the room when Jean walks off an edge
 ;
-; Used by the routine at #R$A596.
-c$ACEF LD A,($A894)  ;
+; The last routine of the game frame (#R$A596). Does nothing in the states 0 and 1 (none, dying). Otherwise it looks
+; at the position of the monk (X and Y, high bytes in 2-pixel units, kept modulo 256, so a position left of or above
+; the room is $FC-$FF resp. $FA-$FF). Horizontal exits are tested first and only on the side Jean faces (#R$A897):
+; facing right he leaves through the right edge when $7C <= X < $FC, facing left through the left edge when $80 <= X
+; <= $FC. The sprite is 8 units wide, so Jean has half of his width outside the room when the room changes. Vertical
+; exits: up when $80 <= Y <= $F9 (5 units of the sprite are still in the room), down when $52 <= Y < $80 (only 6 of
+; the 12 units are left).
+; .
+; On an exit the room number #R$8509 changes by +1 (right), -1 (left), +5 (down) or -5 (up), the position wraps by the
+; size of the room (X by $80, Y by $58, so that the monk appears at the opposite edge half outside the room), the exit
+; direction #R$850B is set (0 right, 1 left, 2 down, 3 up: the new room is drawn from that side by #R$9B5A) and the
+; room state #R$850C becomes 1, which makes the main loop (#R$85FC) enter the room. Last the room number is reduced
+; modulo 25 by subtracting 25 until it is below 25. The subtraction works on the byte, so a room number below zero
+; (the left of room 0, the top row of rooms going up) is $FB-$FF and ends as 6 more than the mathematical result (room
+; 0 left gives room 5, room 2 up gives room 3); whether the map has such exits was not checked.
+; .
+; Hardware: none.
+@label=CheckRoomExit
+c$ACEF LD A,($A894)  ; state
+@isub=CP PLAYER_JUMPING
  $ACF2 CP $02        ;
- $ACF4 RET C         ;
- $ACF5 LD HL,($A8A1) ;
- $ACF8 LD A,($A897)  ;
+ $ACF4 RET C         ; none or dying: no exits
+ $ACF5 LD HL,($A8A1) ; H = X
+ $ACF8 LD A,($A897)  ; facing
  $ACFB OR A          ;
- $ACFC LD A,H        ;
- $ACFD JR NZ,$AD14   ;
- $ACFF CP $FC        ;
- $AD01 JR NC,$AD2A   ;
- $AD03 CP $7C        ;
+ $ACFC LD A,H        ; A = X
+ $ACFD JR NZ,$AD14   ; facing left
+ $ACFF CP $FC        ; $FC-$FF: just entered from the left
+ $AD01 JR NC,$AD2A   ; no horizontal exit
+ $AD03 CP $7C        ; not yet at the right edge
  $AD05 JR C,$AD2A    ;
- $AD07 SUB $80       ;
+@isub=SUB ROOM_WIDTH_2PX
+ $AD07 SUB $80       ; X wraps to $FC-$FF
  $AD09 LD H,A        ;
  $AD0A LD ($A8A1),HL ;
- $AD0D LD HL,$8509   ;
+; Leave through the right edge (also entered by the debug room warp, #R$AD71): next room.
+@label=LeaveRight
+ $AD0D LD HL,$8509   ; room + 1
  $AD10 INC (HL)      ;
- $AD11 XOR A         ;
- $AD12 JR $AD5C      ;
-*$AD14 CP $80        ;
- $AD16 JR C,$AD2A    ;
- $AD18 CP $FD        ;
- $AD1A JR NC,$AD2A   ;
- $AD1C ADD A,$80     ;
+ $AD11 XOR A         ; exit direction 0: right
+ $AD12 JR $AD5C      ; store the direction
+@label=CheckExitLeft
+*$AD14 CP $80        ; A = X, facing left
+ $AD16 JR C,$AD2A    ; no exit
+ $AD18 CP $FD        ; $FD-$FF: no exit yet
+ $AD1A JR NC,$AD2A   ; no exit
+@isub=ADD A,ROOM_WIDTH_2PX
+ $AD1C ADD A,$80     ; X wraps to $7C or less
  $AD1E LD H,A        ;
  $AD1F LD ($A8A1),HL ;
- $AD22 LD HL,$8509   ;
+; Leave through the left edge (also entered by the debug room warp): previous room.
+@label=LeaveLeft
+ $AD22 LD HL,$8509   ; room - 1
  $AD25 DEC (HL)      ;
+@isub=LD A,EXIT_LEFT
  $AD26 LD A,$01      ;
  $AD28 JR $AD5C      ;
-*$AD2A LD HL,($A8A3) ;
+; Vertical exits.
+@label=CheckExitY
+*$AD2A LD HL,($A8A3) ; H = Y
  $AD2D LD A,H        ;
- $AD2E CP $80        ;
+ $AD2E CP $80        ; Y below $80: test the bottom
  $AD30 JR C,$AD47    ;
- $AD32 CP $FA        ;
+ $AD32 CP $FA        ; $FA-$FF: no exit yet
  $AD34 JR NC,$AD47   ;
- $AD36 ADD A,$58     ;
+@isub=ADD A,ROOM_HEIGHT_2PX
+ $AD36 ADD A,$58     ; Y wraps to the bottom
  $AD38 LD H,A        ;
  $AD39 LD ($A8A3),HL ;
- $AD3C LD HL,$8509   ;
+; Leave through the top edge (also entered by the debug room warp): room - 5.
+@label=LeaveUp
+ $AD3C LD HL,$8509   ; room
  $AD3F LD A,(HL)     ;
  $AD40 SUB $05       ;
  $AD42 LD (HL),A     ;
+@isub=LD A,EXIT_UP
  $AD43 LD A,$03      ;
  $AD45 JR $AD5C      ;
-*$AD47 CP $80        ;
- $AD49 RET NC        ;
- $AD4A CP $52        ;
- $AD4C RET C         ;
- $AD4D SUB $58       ;
+@label=CheckExitDown
+*$AD47 CP $80        ; A = Y
+ $AD49 RET NC        ; $80-$FF: no exit
+ $AD4A CP $52        ; $52: the bottom
+ $AD4C RET C         ; above: no exit
+@isub=SUB ROOM_HEIGHT_2PX
+ $AD4D SUB $58       ; Y wraps to the top
  $AD4F LD H,A        ;
  $AD50 LD ($A8A3),HL ;
- $AD53 LD HL,$8509   ;
+; Leave through the bottom edge (also entered by the debug room warp): room + 5.
+@label=LeaveDown
+ $AD53 LD HL,$8509   ; room
  $AD56 LD A,(HL)     ;
  $AD57 ADD A,$05     ;
  $AD59 LD (HL),A     ;
+@isub=LD A,EXIT_DOWN
  $AD5A LD A,$02      ;
-*$AD5C LD ($850B),A  ;
- $AD5F LD A,$01      ;
+@label=SetExitDirection
+*$AD5C LD ($850B),A  ; exit direction
+@isub=LD A,STATE_ENTER_ROOM
+ $AD5F LD A,$01      ; enter the new room
  $AD61 LD ($850C),A  ;
-*$AD64 LD A,($8509)  ;
+; Reduce the room number modulo 25.
+@label=WrapRoomNumber
+*$AD64 LD A,($8509)  ; room
+@isub=CP GRID_ROOMS
  $AD67 CP $19        ;
  $AD69 RET C         ;
+@isub=SUB GRID_ROOMS
  $AD6A SUB $19       ;
  $AD6C LD ($8509),A  ;
  $AD6F JR $AD64      ;

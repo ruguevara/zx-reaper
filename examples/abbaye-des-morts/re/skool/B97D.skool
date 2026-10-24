@@ -1,36 +1,57 @@
-; Routine at B97D
-c$B97D POP BC        ;
+; Entity handler: the monk burning on the pyre (ending, second scene)
+;
+; The monk tied to the stake in the second scene of the ending (room 4; template #R$BD92, record in the list at #R$83AD;
+; the three flames of the pyre and the four crusaders around it are #R$B9B0). Slot (template slot, see #R$B6E6): +2 word
+; the first countdown ($0118 = 280 frames), +4 word the second countdown ($00AF = 175 frames), +6 word x and +8 word y
+; (8.8, high bytes in 2-pixel units: $3E and $3A, the place where the game also puts the monk's own position), +$A word
+; hit box offset and +$C word hit box size (both 0), +$E pointer to the sprite block (#R$95A5, yellow monk, 2 frames),
+; +$10 animation counter and reload, +$12 frame and number of frames (2).
+; .
+; The scene has three phases:
+; .
+; - first countdown above 1: it is stored back one lower and the monk is drawn, standing still (speed and turning
+; point are zeroed in the registers and the code goes on at #R$B9B2, which draws it with the shared flame/actor code);
+; - the first countdown reaches 0 (the monk burns away): the player variables #R$A8A0 (hit flag) and #R$A894 (state) are
+; set to 2; nothing is drawn by this handler any more. Observed: the game's own monk (the player, at the same position)
+; then runs its dying animation, the state #R$A894 becoming 1 and y going from $3A to $2C within about 100 frames;
+; - the first countdown is 0: the second countdown is decreased every frame and nothing is drawn; when it is 0 the
+; cutscene flag #R$8501 is set to 1, which ends the scene (the slot has already run once more when the loop notices:
+; observed, the second countdown wraps to $FFFE).
+;
+; SP Slot address + 2 (the handler word was popped by the RET that entered the routine)
+@label=UpdatePyreMonk
+c$B97D POP BC        ; first countdown
  $B97E LD A,B        ;
  $B97F OR C          ;
- $B980 JR NZ,$B994   ;
- $B982 POP DE        ;
+ $B980 JR NZ,$B994   ; still counting
+ $B982 POP DE        ; second countdown
  $B983 LD A,D        ;
  $B984 OR E          ;
  $B985 JR NZ,$B98B   ;
- $B987 INC A         ;
- $B988 LD ($8501),A  ;
-*$B98B DEC DE        ;
- $B98C PUSH DE       ;
- $B98D LD HL,$0012   ;
+ $B987 INC A         ; A = 1
+ $B988 LD ($8501),A  ; CutsceneDone: end the scene
+*$B98B DEC DE        ; count down
+ $B98C PUSH DE       ; store it
+ $B98D LD HL,$0012   ; SP is at slot+4: +$12 is the next slot
  $B990 ADD HL,SP     ;
- $B991 JP $A5F0      ;
+ $B991 JP $A5F0      ; next slot, nothing drawn
 *$B994 DEC BC        ;
  $B995 LD A,B        ;
  $B996 OR C          ;
- $B997 JR Z,$B9A3    ;
- $B999 PUSH BC       ;
+ $B997 JR Z,$B9A3    ; just reached 0: the monk burns away
+ $B999 PUSH BC       ; store the countdown
  $B99A POP BC        ;
- $B99B POP DE        ;
+ $B99B POP DE        ; second countdown (not changed)
  $B99C XOR A         ;
  $B99D LD B,A        ;
- $B99E LD C,A        ;
+ $B99E LD C,A        ; speed 0
  $B99F LD D,A        ;
- $B9A0 LD E,A        ;
- $B9A1 JR $B9B2      ;
-*$B9A3 PUSH BC       ;
+ $B9A0 LD E,A        ; limit 0: never reached
+ $B9A1 JR $B9B2      ; draw it like a flame, at the same place
+*$B9A3 PUSH BC       ; store the countdown (0)
  $B9A4 LD A,$02      ;
- $B9A6 LD ($A8A0),A  ;
- $B9A9 LD ($A894),A  ;
+ $B9A6 LD ($A8A0),A  ; hit flag
+ $B9A9 LD ($A894),A  ; player state
  $B9AC POP BC        ;
- $B9AD POP DE        ;
- $B9AE JR $B98B      ;
+ $B9AD POP DE        ; second countdown
+ $B9AE JR $B98B      ; count it down, nothing drawn

@@ -1,53 +1,69 @@
-; Routine at B77F
-c$B77F POP HL        ;
- $B780 POP DE        ;
- $B781 POP BC        ;
- $B782 ADD HL,BC     ;
- $B783 EX DE,HL      ;
- $B784 POP BC        ;
- $B785 ADD HL,BC     ;
- $B786 PUSH HL       ;
- $B787 PUSH DE       ;
- $B788 POP HL        ;
- $B789 LD D,H        ;
- $B78A POP HL        ;
- $B78B LD E,H        ;
+; Entity handler: water splash (rooms 16 and 19)
+;
+; The splash that appears on the water where a fish jumps out and where it falls back in (the object is made from
+; #R$BD12 by #R$B7C6 and #R$B818). It plays its three frames (blue-white drops, sprite description #R$94FF) two frames
+; each, so it lasts six game frames, and is then removed. It has no hit box. Slot (a template slot, see #R$B6E6): +2
+; word x speed and +4 word y speed (both 0 here, but added to the position), +6 word x, +8 word y (8.8, high bytes in
+; 2-pixel units), +$A byte animation counter and +$B its reload (2), +$C byte frame and +$D number of frames (3), +$E
+; word width and height of the sprite (2, 4), +$10 pointer to the sprite description (attribute, then one graphics
+; address per frame). The position is the start position set by the fish: x of the fish, y = WATER_Y.
+; .
+; Entered with SP at slot+2. The frame counter reaching the number of frames removes the splash: SP is put back to
+; slot+2 and #R$B08E zeroes the handler word and goes on to the next slot; otherwise it makes the draw command
+; (position y, x/4; size; attribute; graphics = table[frame], no shift phase is used) and goes to #R$B3E4, which
+; queues it.
+;
+; SP Slot address + 2 (the handler word was popped by the RET that entered the routine)
+@label=UpdateSplash
+c$B77F POP HL        ; x speed
+ $B780 POP DE        ; y speed
+ $B781 POP BC        ; x
+ $B782 ADD HL,BC     ; x moves
+ $B783 EX DE,HL      ; DE = new x, HL = y speed
+ $B784 POP BC        ; y
+ $B785 ADD HL,BC     ; y moves
+ $B786 PUSH HL       ; store y
+ $B787 PUSH DE       ; store x
+ $B788 POP HL        ; and take them back: HL = x word
+ $B789 LD D,H        ; D = x
+ $B78A POP HL        ; y word
+ $B78B LD E,H        ; E = y
  $B78C LD L,H        ;
- $B78D LD H,D        ;
+ $B78D LD H,D        ; HL = x (H) and y (L)
  $B78E LD A,H        ;
- $B78F EX AF,AF'     ;
- $B790 SRA H         ;
+ $B78F EX AF,AF'     ; A' = x (not used further)
+ $B790 SRA H         ; x / 4 = byte column
  $B792 SRA H         ;
- $B794 LD ($ACD3),HL ;
- $B797 POP BC        ;
- $B798 POP DE        ;
+ $B794 LD ($ACD3),HL ; position of the draw command: y, byte column
+ $B797 POP BC        ; C animation counter, B reload
+ $B798 POP DE        ; E frame, D number of frames
  $B799 DEC C         ;
  $B79A JR NZ,$B7AA   ;
- $B79C LD C,B        ;
- $B79D INC E         ;
+ $B79C LD C,B        ; reload
+ $B79D INC E         ; next frame
  $B79E LD A,E        ;
  $B79F CP D          ;
  $B7A0 JR NZ,$B7AA   ;
- $B7A2 LD HL,$FFF4   ;
+ $B7A2 LD HL,$FFF4   ; last frame shown: remove the splash; -12: SP back to slot+2
  $B7A5 ADD HL,SP     ;
  $B7A6 LD SP,HL      ;
- $B7A7 JP $B08E      ;
-*$B7AA PUSH DE       ;
- $B7AB PUSH BC       ;
- $B7AC POP BC        ;
+ $B7A7 JP $B08E      ; free the slot
+*$B7AA PUSH DE       ; store frame
+ $B7AB PUSH BC       ; store counter
+ $B7AC POP BC        ; and take them back to move SP on
  $B7AD POP DE        ;
- $B7AE POP HL        ;
- $B7AF LD ($ACD7),HL ;
- $B7B2 POP HL        ;
- $B7B3 LD A,(HL)     ;
+ $B7AE POP HL        ; width, height
+ $B7AF LD ($ACD7),HL ; of the draw command
+ $B7B2 POP HL        ; sprite description
+ $B7B3 LD A,(HL)     ; attribute
  $B7B4 INC HL        ;
- $B7B5 LD ($ACDA),A  ;
+ $B7B5 LD ($ACDA),A  ; of the draw command
  $B7B8 LD D,$00      ;
  $B7BA ADD HL,DE     ;
- $B7BB ADD HL,DE     ;
+ $B7BB ADD HL,DE     ; HL = table + 2 * frame
  $B7BC LD A,(HL)     ;
  $B7BD INC HL        ;
  $B7BE LD H,(HL)     ;
- $B7BF LD L,A        ;
- $B7C0 LD ($ACD5),HL ;
- $B7C3 JP $B3E4      ;
+ $B7BF LD L,A        ; graphics address of the frame
+ $B7C0 LD ($ACD5),HL ; of the draw command
+ $B7C3 JP $B3E4      ; queue it, next slot

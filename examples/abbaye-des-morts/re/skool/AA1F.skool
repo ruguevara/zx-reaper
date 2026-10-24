@@ -1,8 +1,18 @@
-; Routine at AA1F
+; Queue a draw command on the frame call list
 ;
-; Used by the routine at #R$AAC6.
-c$AA1F NOP           ;
- $AA20 LD DE,($BE58) ;
+; Appends the 10 bytes of the draw command at HL to the frame call list at (#R$BE58) and advances the pointer by 10:
+; the player (#R$AC49, #R$AA96) uses it for the monk's sprite command #R$ACD1. The first byte is self-modifying and
+; doubles as a flag: it is a NOP in the game frame and $C9 (RET) while the call list is being run by #R$BDDB, which
+; writes it at the start of the drawing phase and clears it at the end (#R$BDEB), so that nothing is queued while the
+; list is being run. The game frame (#R$A596) and the other queueing routines read it as that flag (they skip their
+; own copy when it is not zero).
+; .
+; Hardware: none.
+;
+; HL Address of the 10-byte draw command (see #R$ACD1)
+@label=QueueDrawCmd
+c$AA1F NOP           ; NOP, or RET while the call list runs (written by #R$BDDB, #R$BDEB)
+ $AA20 LD DE,($BE58) ; write pointer of the frame call list
  $AA24 LDI           ;
  $AA26 LDI           ;
  $AA28 LDI           ;
@@ -13,5 +23,5 @@ c$AA1F NOP           ;
  $AA32 LDI           ;
  $AA34 LDI           ;
  $AA36 LDI           ;
- $AA38 LD ($BE58),DE ;
+ $AA38 LD ($BE58),DE ; new write pointer
  $AA3C RET           ;

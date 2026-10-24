@@ -1,40 +1,53 @@
-; Routine at B534
-c$B534 POP BC        ;
- $B535 POP DE        ;
- $B536 POP HL        ;
- $B537 LD A,H        ;
- $B538 EX AF,AF'     ;
- $B539 POP HL        ;
- $B53A ADD HL,BC     ;
+; Entity handler: water drop falling (kind 9, rooms 15 and 19)
+;
+; The falling half of the water drop cycle (the hanging half is #R$B512; #R$B56D starts the fall after 70 frames). The
+; y coordinate goes down by the speed (1 unit of 2 pixels per frame); when its high byte reaches the end of the fall
+; (slot +5) the handler word of the slot is rewritten with #R$B512 and the drop hangs again. Two sprites are drawn: the
+; drop at the stalactite tip (main draw command at y = slot+4, as in #R$B512) and the falling drop (second draw
+; command at #R$ACDB, position (y, x/4) with the current y), so IY = #R$B3F3 queues two commands. The falling drop is
+; tested against Jean's hit box through #R$A851 (DE = x, y), which continues at #R$B56D. Observed in room 15: y goes
+; from $2C to $3C in 16 frames, one unit per frame; the cycle of 70 frames is counted by #R$B56D.
+; .
+; Hardware: none.
+;
+; SP Slot address + 2
+@label=UpdateDropFalling
+c$B534 POP BC        ; speed
+ $B535 POP DE        ; D = y where the fall ends, E = y of the tip
+ $B536 POP HL        ; x (8.8)
+ $B537 LD A,H        ; A = x
+ $B538 EX AF,AF'     ; kept in A'
+ $B539 POP HL        ; y (8.8)
+ $B53A ADD HL,BC     ; the drop falls
  $B53B PUSH HL       ;
- $B53C POP HL        ;
- $B53D LD A,H        ;
- $B53E CP D          ;
- $B53F JR C,$B54F    ;
- $B541 LD HL,$FFF8   ;
+ $B53C POP HL        ; SP is back at slot+10
+ $B53D LD A,H        ; y in 2-pixel units
+ $B53E CP D          ; the end of the fall?
+ $B53F JR C,$B54F    ; not yet
+ $B541 LD HL,$FFF8   ; -8: back to slot+2
  $B544 ADD HL,SP     ;
  $B545 LD SP,HL      ;
- $B546 LD HL,$B512   ;
- $B549 PUSH HL       ;
- $B54A POP HL        ;
- $B54B POP BC        ;
+ $B546 LD HL,$B512   ; from the next frame the drop hangs again
+ $B549 PUSH HL       ; written over the handler word at slot+0
+ $B54A POP HL        ; pop the handler again
+ $B54B POP BC        ; pop speed, limits, x and y again
  $B54C POP DE        ;
  $B54D POP HL        ;
  $B54E POP HL        ;
-*$B54F EX AF,AF'     ;
- $B550 LD D,A        ;
- $B551 POP BC        ;
- $B552 LD C,E        ;
- $B553 LD E,H        ;
- $B554 LD L,H        ;
- $B555 LD H,D        ;
+*$B54F EX AF,AF'     ; A = x
+ $B550 LD D,A        ; D = x
+ $B551 POP BC        ; skip the word at +10
+ $B552 LD C,E        ; C = y of the tip
+ $B553 LD E,H        ; E = y
+ $B554 LD L,H        ; L = y
+ $B555 LD H,D        ; H = x
  $B556 LD A,H        ;
- $B557 EX AF,AF'     ;
- $B558 SRA H         ;
+ $B557 EX AF,AF'     ; A' = x
+ $B558 SRA H         ; x / 4: byte column
  $B55A SRA H         ;
- $B55C LD ($ACDD),HL ;
- $B55F LD L,C        ;
- $B560 LD ($ACD3),HL ;
- $B563 LD IY,$B3F3   ;
- $B567 LD HL,$B56D   ;
- $B56A JP $A851      ;
+ $B55C LD ($ACDD),HL ; second draw command: position (y, x/4) of the falling drop
+ $B55F LD L,C        ; L = y of the tip
+ $B560 LD ($ACD3),HL ; main draw command: position (y of the tip, x/4)
+ $B563 LD IY,$B3F3   ; queue both commands
+ $B567 LD HL,$B56D   ; after the hit box test: #R$B56D
+ $B56A JP $A851      ; #R$A851 tests the hit box of the falling drop, then jumps to HL

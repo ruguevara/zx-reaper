@@ -1,65 +1,97 @@
-; Routine at B56D
+; Water drop: sprite description, animation countdown, start of the fall, then queue the sprites
 ;
-; Used by the routine at #R$B512.
-c$B56D POP HL        ;
- $B56E LD A,(HL)     ;
+; The continuation of #R$B512 (jumped to, IY = #R$B407) and of #R$B534 (through #R$A851, IY = #R$B3F3) for the water
+; drops (kind 9). SP is at slot+$10, so the next words of the slot are the sprite description pointer and the
+; animation words. It fills the draw commands from the sprite description, counts the cycle of the drop down and
+; queues the commands through IY.
+; .
+; Slot layout of the drops (made by #R$89ED from the room record; byte 3 of the record is the cycle length): +0 word
+; handler (#R$B512 or #R$B534), +2 word speed of the fall (8.8, $0100 = 1 unit of 2 pixels per frame), +4 byte y of the
+; stalactite tip (copy of the record's y), +5 byte y where the fall ends, +6 word x (8.8; high byte a multiple of 4),
+; +8 word y (8.8), +$A byte not used, +$B byte start delay (#R$B512), +$C..+$F hit box (y offset, x offset, y size, x
+; size), +$10 word sprite description, +$12 byte cycle countdown (70 frames, DROP_PERIOD), +$13 byte its reload, +$14
+; byte frame number (0, or 1 for the last 30 frames of the cycle), +$15 byte number of frames.
+; .
+; Sprite description of the drops (#R$94E8, after the 5-byte hit box and frame count header of the block #R$94E3): +0
+; byte attribute (used for both sprites), +1 byte height of the falling drop (2-pixel units; the width of both
+; sprites is 2 cells and the height of the hanging drop is 2), +2 word graphics of the hanging drop for frame 0, +4 word for
+; frame 1, +6 word graphics of the falling drop.
+; .
+; The cycle countdown goes down by one per frame (also during the fall, #R$B56D is run by both handlers). At $1E (30
+; frames before the end) the hanging drop switches to frame 1 (it swells). At 0 the fall begins: SP is saved in the operand of the
+; LD SP at #R$B59F and moved back to slot+2, the handler word becomes #R$B534, y is reset to the tip, SP is restored,
+; the frame number goes back to 0 and the countdown is reloaded with 70. Observed in room 15: the countdown goes from
+; $46 to 1 in 70 frames and the fall begins at the next one.
+; .
+; Hardware: none.
+;
+; IY Address that queues the draw commands: #R$B407 (one) or #R$B3F3 (two)
+; SP Slot address + $10
+@label=AnimateDrop
+c$B56D POP HL        ; address of the sprite description
+ $B56E LD A,(HL)     ; attribute
  $B56F INC HL        ;
- $B570 LD ($ACDA),A  ;
- $B573 LD ($ACE4),A  ;
- $B576 LD B,(HL)     ;
+ $B570 LD ($ACDA),A  ; main draw command
+ $B573 LD ($ACE4),A  ; second draw command
+ $B576 LD B,(HL)     ; height of the falling drop
  $B577 INC HL        ;
- $B578 LD C,$02      ;
- $B57A LD ($ACE1),BC ;
- $B57E LD B,C        ;
- $B57F LD ($ACD7),BC ;
- $B583 POP BC        ;
- $B584 POP DE        ;
- $B585 DEC C         ;
- $B586 JR NZ,$B5A7   ;
- $B588 LD B,$46      ;
- $B58A EXX           ;
- $B58B LD ($B5A0),SP ;
- $B58F LD HL,$FFEC   ;
+ $B578 LD C,$02      ; width: 2 cells
+ $B57A LD ($ACE1),BC ; second draw command: width, height
+ $B57E LD B,C        ; main draw command height 2 ...
+ $B57F LD ($ACD7),BC ; ... width 2
+ $B583 POP BC        ; C = cycle countdown, B = reload
+ $B584 POP DE        ; E = frame number, D = number of frames
+ $B585 DEC C         ; cycle over?
+ $B586 JR NZ,$B5A7   ; no
+@isub=LD B,DROP_PERIOD
+ $B588 LD B,$46      ; reload value
+ $B58A EXX           ; alternate registers as scratch
+@isub=LD (SmcDropSP+1),SP
+ $B58B LD ($B5A0),SP ; save SP in the operand of the LD SP at #R$B59F
+ $B58F LD HL,$FFEC   ; -$14: back to slot+2
  $B592 ADD HL,SP     ;
  $B593 LD SP,HL      ;
- $B594 LD HL,$B534   ;
- $B597 PUSH HL       ;
- $B598 POP HL        ;
- $B599 POP BC        ;
- $B59A POP DE        ;
- $B59B POP HL        ;
- $B59C POP HL        ;
- $B59D LD H,E        ;
- $B59E PUSH HL       ;
- $B59F LD SP,$B59F   ;
- $B5A2 EXX           ;
- $B5A3 LD E,C        ;
- $B5A4 LD C,B        ;
+ $B594 LD HL,$B534   ; the drop falls from the next frame on
+ $B597 PUSH HL       ; written over the handler word at slot+0
+ $B598 POP HL        ; pop the handler again
+ $B599 POP BC        ; speed
+ $B59A POP DE        ; E = y of the tip, D = end of the fall
+ $B59B POP HL        ; x
+ $B59C POP HL        ; y
+ $B59D LD H,E        ; y := y of the tip
+ $B59E PUSH HL       ; store y
+@label=SmcDropSP
+@keep
+ $B59F LD SP,$B59F   ; the operand is written by #R$B58B: SP back at slot+$16
+ $B5A2 EXX           ; main registers again: B = reload
+ $B5A3 LD E,C        ; E = 0: frame 0
+ $B5A4 LD C,B        ; C = reload: the countdown starts again
  $B5A5 JR $B5AD      ;
-*$B5A7 LD A,C        ;
+*$B5A7 LD A,C        ; countdown value
+@isub=CP DROP_SWELL
  $B5A8 CP $1E        ;
  $B5AA JR NZ,$B5AD   ;
- $B5AC INC E         ;
-*$B5AD PUSH DE       ;
+ $B5AC INC E         ; frame 1 for the last 30 frames
+*$B5AD PUSH DE       ; store the frame number and the countdown
  $B5AE PUSH BC       ;
- $B5AF LD D,$00      ;
- $B5B1 EX DE,HL      ;
+ $B5AF LD D,$00      ; DE = frame number
+ $B5B1 EX DE,HL      ; HL = frame number, DE = address of the graphics words
  $B5B2 ADD HL,HL     ;
- $B5B3 ADD HL,DE     ;
- $B5B4 LD C,(HL)     ;
+ $B5B3 ADD HL,DE     ; HL = DE + 2 * frame
+ $B5B4 LD C,(HL)     ; graphics of the hanging drop
  $B5B5 INC HL        ;
  $B5B6 LD B,(HL)     ;
- $B5B7 LD ($ACD5),BC ;
+ $B5B7 LD ($ACD5),BC ; main draw command: graphics
  $B5BB LD HL,$0004   ;
- $B5BE ADD HL,DE     ;
+ $B5BE ADD HL,DE     ; the third word: graphics of the falling drop
  $B5BF LD A,(HL)     ;
  $B5C0 INC HL        ;
  $B5C1 LD H,(HL)     ;
  $B5C2 LD L,A        ;
- $B5C3 LD ($ACDF),HL ;
- $B5C6 LD A,($AA1F)  ;
+ $B5C3 LD ($ACDF),HL ; second draw command: graphics
+ $B5C6 LD A,($AA1F)  ; frame list being run: do not queue
  $B5C9 OR A          ;
- $B5CA JP NZ,$B41F   ;
- $B5CD LD HL,$ACD1   ;
- $B5D0 LD DE,($BE58) ;
- $B5D4 JP (IY)       ;
+ $B5CA JP NZ,$B41F   ; go on with the next slot
+ $B5CD LD HL,$ACD1   ; first draw command
+ $B5D0 LD DE,($BE58) ; write pointer of the frame call list
+ $B5D4 JP (IY)       ; #R$B407 or #R$B3F3 copies the commands

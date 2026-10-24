@@ -1,9 +1,19 @@
-; Frame lists: 4-byte frames (sprite address, attribute, unused 0), read by
-; $A7CB
+; Frame lists of the room items: 34 frames of 4 bytes
+;
+; Each frame: +0 word: graphics address of a 16 x 16 pixel sprite (32 bytes, in the sprite block at #R$66DC), +2 byte:
+; attribute, +3 byte: 0 (unused: it is popped as the flags of the sprite command). The type records (#R$8AA7) point
+; into this table; the item's current frame number (slot +$0A) is an index in its list. The lists:
+; .
+; FramesHeart (2 frames), FramesCross (12: 6 bright crosses in the colours of #R$8553, then 6 thin ones, the plus sign
+; sprite), FramesCheckpoint (2: not active, active), FramesArch (9, all the arch with changing ink), FramesScroll
+; (1: the parchment), FramesRedScroll (1: the same sprite in red, attribute $42), FramesBell (2: at rest, ringing),
+; FramesLever (2: up, pulled), FramesWheel (2) and FramesChalice (1).
+@label=FramesHeart
 b$8B07 DEFW $682C
  $8B09 DEFB $02,$00
  $8B0B DEFW $684C
  $8B0D DEFB $02,$00
+@label=FramesCross
  $8B0F DEFW $686C
  $8B11 DEFB $46,$00
  $8B13 DEFW $686C
@@ -28,10 +38,12 @@ b$8B07 DEFW $682C
  $8B39 DEFB $05,$00
  $8B3B DEFW $688C
  $8B3D DEFB $04,$00
+@label=FramesCheckpoint
  $8B3F DEFW $670C
  $8B41 DEFB $07,$00
  $8B43 DEFW $672C
  $8B45 DEFB $07,$00
+@label=FramesArch
  $8B47 DEFW $66DC
  $8B49 DEFB $01,$00
  $8B4B DEFW $66DC
@@ -50,21 +62,27 @@ b$8B07 DEFW $682C
  $8B65 DEFB $01,$00
  $8B67 DEFW $66DC
  $8B69 DEFB $01,$00
+@label=FramesScroll
  $8B6B DEFW $68AC
  $8B6D DEFB $46,$00
+@label=FramesRedScroll
  $8B6F DEFW $68AC
  $8B71 DEFB $42,$00
+@label=FramesBell
  $8B73 DEFW $674C
  $8B75 DEFB $46,$00
  $8B77 DEFW $676C
  $8B79 DEFB $06,$00
+@label=FramesLever
  $8B7B DEFW $678C
  $8B7D DEFB $46,$00
  $8B7F DEFW $67AC
  $8B81 DEFB $06,$00
+@label=FramesWheel
  $8B83 DEFW $67CC
  $8B85 DEFB $47,$00
  $8B87 DEFW $67EC
  $8B89 DEFB $07,$00
+@label=FramesChalice
  $8B8B DEFW $680C
  $8B8D DEFB $46,$00

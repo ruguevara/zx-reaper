@@ -1,24 +1,47 @@
-; Routine at B9B0
-c$B9B0 POP BC        ;
- $B9B1 POP DE        ;
-; This entry point is used by the routine at #R$B97D.
-*$B9B2 POP HL        ;
- $B9B3 ADD HL,BC     ;
- $B9B4 PUSH HL       ;
+; Entity handler: sprite moving sideways at a constant speed (flames of the Pestilent Beast, actors of the ending)
+;
+; Drives the objects that only slide along x and are drawn from a block with the shift pairs (#R$AC9F): the two flames
+; that run along the ledge of room 10 after the Beast has breathed (templates #R$BD22, moving left, and #R$BD34, moving
+; right; spawned by #R$B8C5; they kill the monk on contact, observed: the hit flag is set when the monk stands on the
+; ledge), and the actors of the ending (the monk of the first scene, #R$BD80, the three flames of the pyre, #R$BDA4,
+; and the four crusaders, #R$BDB6 and #R$BDC8: speed 0 and limit 0, so they only animate). Slot (template slot, see
+; #R$B6E6): +2 word x speed (signed 8.8; $FFC0 = -0.25 moving left, $0040 moving right), +4 byte x limit (high byte of x
+; at which the object is removed: $18 for the left flame, $70 for the right flame, 0 for the actors) and +5 byte not
+; used, +6 word x and +8 word y (8.8, high bytes in 2-pixel units), +$A word hit box offset (y, x), +$C word hit box size
+; (y, x), +$E pointer to the sprite block (#R$9595, #R$959D, #R$95AD ...: attribute, pointer to the shift pairs,
+; height, then one graphics address per frame), +$10 byte animation counter and +$11 its reload, +$12 byte frame and
+; +$13 number of frames.
+; .
+; Each frame the speed is added to x; when the high byte of x equals the limit the slot is freed through #R$B426 (SP
+; back to slot+2, handler word cleared). Otherwise the position becomes the draw command's (y, x/4), A' = x for the shift
+; phase, the hit box is tested against the monk (#R$A851) and the code goes on at #R$B9CF.
+;
+; SP Slot address + 2 (the handler word was popped by the RET that entered the routine)
+@label=UpdateMovingSprite
+c$B9B0 POP BC        ; x speed
+ $B9B1 POP DE        ; E x limit
+; Also entered from the pyre monk (#R$B97D) with BC = 0 and DE = 0, SP at slot+4.
+@label=UpdateMovingSprite_Move
+*$B9B2 POP HL        ; x word
+ $B9B3 ADD HL,BC     ; x moves
+ $B9B4 PUSH HL       ; store x
  $B9B5 POP HL        ;
- $B9B6 LD A,H        ;
- $B9B7 CP E          ;
- $B9B8 JP Z,$B426    ;
- $B9BB LD D,H        ;
- $B9BC POP HL        ;
- $B9BD LD E,H        ;
-; This entry point is used by the routine at #R$BAB1.
-*$B9BE LD L,E        ;
- $B9BF LD H,D        ;
+ $B9B6 LD A,H        ; x in 2-pixel units
+ $B9B7 CP E          ; at the limit?
+ $B9B8 JP Z,$B426    ; yes: free the slot
+ $B9BB LD D,H        ; D = x
+ $B9BC POP HL        ; y word
+ $B9BD LD E,H        ; E = y
+; Draw part, also entered from the sliding scythe (#R$BAB1 and #R$BB07 through #R$BB02) with D = x and E = y in
+; 2-pixel units and SP at slot+$A: makes the draw command position and tests the hit box (#R$A851, which goes on at
+; #R$B9CF).
+@label=UpdateMovingSprite_Draw
+*$B9BE LD L,E        ; L = y
+ $B9BF LD H,D        ; H = x
  $B9C0 LD A,H        ;
- $B9C1 EX AF,AF'     ;
- $B9C2 SRA H         ;
+ $B9C1 EX AF,AF'     ; A' = x: its low 2 bits select the shifted copy
+ $B9C2 SRA H         ; x / 4 = byte column
  $B9C4 SRA H         ;
- $B9C6 LD ($ACD3),HL ;
- $B9C9 LD HL,$B9CF   ;
- $B9CC JP $A851      ;
+ $B9C6 LD ($ACD3),HL ; position of the draw command: y, byte column
+ $B9C9 LD HL,$B9CF   ; continue after the hit test
+ $B9CC JP $A851      ; hit test: sets the hit flag when the monk touches the box

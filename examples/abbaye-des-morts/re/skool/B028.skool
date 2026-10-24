@@ -1,6 +1,40 @@
-; Entity handlers by type
-w$B028 DEFW $B391,$B099,$B2A6,$B365
- $B030 DEFW $B344,$B283,$B2F9,$B236
- $B038 DEFW $B44B,$B512,$B5EB,$B5D6
- $B040 DEFW $B665,$B7C6,$B880,$B8C5
- $B048 DEFW $BA15,$BB57
+; Entity handler table: 18 words, indexed by the kind of a room object
+;
+; Word k is the handler of room objects of kind k (byte 1 of the 11-byte records at #R$8B8F). The enemy spawner #R$89ED
+; copies it to the first word of a free object slot (#R$C100): from then on #R$A5E9 enters it once per frame with SP
+; at the slot. The kinds with a record in #R$8B8F, with the creatures they drive (rooms in brackets; the sprite sets are
+; those of #R$AE9D):
+; .
+; 0 the runners of the intro screen: Jean and three crusaders (0); 1 the spawner of the crusaders that chase Jean (5,
+; 6 and the ending room 25); 2 and 3 patrollers along a platform, 2 starting to the left and 3 to the right: rats (2),
+; red bats (8), cyan worms (9, 14), skeletons (13, 22), green zombies (15, 20), white ghosts (22, 23), magenta winged
+; flyers (20, 23), red devils (21, 22); 4 and 5 patrollers along a thread or in the air, 4 starting down and 5 up:
+; green spiders (3, 14, 16, 19), red whirling fireballs (22, 23), green flies (12); 6 hanged men on their ropes (9);
+; 8 the cyan ghost face that chases Jean (11); 9 water drops falling from the ceiling (15, 19); 10 skeleton archers
+; (17, 21); 11 stone heads in the wall that shoot arrows (20, 22); 12 plants that spit spores (14); 13 fish jumping out
+; of the water (16, 19); 14 the head of the Pestilent Beast (10); 15 its fire breath (10); 16 Death (18); 17 Satan
+; (24). Kind 7 has no room object: the hanged man's handler for going up is entered from #R$B2F9 when it reaches the
+; bottom (and the other way round).
+; .
+; Handlers that change their own slot's first word to another (the patrollers between going left and right, the
+; crusaders between walking and jumping, Death between its two halves) leave this table unused for the rest of
+; their life.
+@label=EntityHandlers
+w$B028 DEFW $B391 ; kind 0: UpdateIntroRunner
+ $B02A DEFW $B099 ; kind 1: UpdateCrusaderSpawner, makes a crusader every 40 frames from a template at #R$B04C
+ $B02C DEFW $B2A6 ; kind 2: UpdateWalkLeft
+ $B02E DEFW $B365 ; kind 3: UpdateWalkRight
+ $B030 DEFW $B344 ; kind 4: UpdateWalkDown
+ $B032 DEFW $B283 ; kind 5: UpdateWalkUp
+ $B034 DEFW $B2F9 ; kind 6: UpdateHangedDown
+ $B036 DEFW $B236 ; kind 7: UpdateHangedUp (no room object has this kind)
+ $B038 DEFW $B44B ; kind 8: UpdateChaser
+ $B03A DEFW $B512 ; kind 9: UpdateDropHanging
+ $B03C DEFW $B5EB ; kind 10: UpdateArcher
+ $B03E DEFW $B5D6 ; kind 11: UpdateStoneHead
+ $B040 DEFW $B665 ; kind 12: UpdatePlant
+ $B042 DEFW $B7C6 ; kind 13: UpdateFishWaiting
+ $B044 DEFW $B880 ; kind 14: UpdateBeastHead
+ $B046 DEFW $B8C5 ; kind 15: UpdateBeastFire
+ $B048 DEFW $BA15 ; kind 16: UpdateDeathLeft
+ $B04A DEFW $BB57 ; kind 17: UpdateSatan

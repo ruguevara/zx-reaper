@@ -80,3 +80,14 @@
   doorway arch, 9 lever, 10 wheel, 11 chalice; the wheel swaps which
   crosses are real.
 - Quirk F67: room 4's script clears the HUD rows and nothing redraws them.
+- W8: $B43C, $B4B7, $B5F6 read ($A8A2): `@isub=LD A,(PlayerX+1)`.
+- $A70B and $A7B1 say "SP slot+4" for the flag pointer: it is slot+6.
+- $8B07 header: read by $A7DB (DrawItemFrame), not $A7CB.
+- $CD00: class 1 = one-way platform (F74). $83CE/$AAC0: reachable with the
+  cheat (T key, F78). $AD71/$83CE comments: point to LeaveRight/Left/Up/Down.
+- W8 splits (labelled already): $A7DB, $A85F, $A903, $AA56, $AA99, $AB25,
+  $AB31, $AB79, $ABA8, $ABFC, $AC1C, $AC4C, $AC80, $AD14, $AD2A, $AD5C.
+- Bugs (W8): room number underflow (left from room 0 -> 5, up from 2 -> 3,
+  F77); exit test depends on facing; $A96F duplicates $A9B4; $A9FE column
+  mask always $1F; one side blocked skips the other direction; dying frame 7
+  not drawn (monk invisible 4 frames).

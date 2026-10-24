@@ -1,31 +1,47 @@
-; Routine at A851
+; Hit test of an entity against the player, then continue where the caller says
 ;
-; Used by the routines at #R$B163, #R$B1CF, #R$B2A6, #R$B365, #R$B534, #R$B5EB,
-; #R$B6E6, #R$B818, #R$B8C5, #R$B9B0, #R$BA15 and #R$BB57.
-c$A851 LD ($A881),HL ;
- $A854 POP HL        ;
- $A855 ADD HL,DE     ;
- $A856 EX DE,HL      ;
- $A857 POP BC        ;
- $A858 ADD HL,BC     ;
- $A859 LD B,H        ;
+; Used by the enemy handlers (Death, Satan, the crusaders and the other entities), which JP here with their slot on
+; the stack: SP points at the slot's two hit box words (+$C offset, +$E size; both words have y in the low byte and x
+; in the high byte, in 2-pixel units, see #R$C100). The minimum corner of the entity's box is its position plus the
+; offset, the maximum corner its position plus the size (the size is measured from the position, not from the offset
+; corner). The two corners go to DE and BC and the code falls into the overlap test #R$A85F with IX = #R$A87A. HL is
+; stored as the operand of the JP at #R$A880, so that #R$A87A goes on at the caller's address with SP just after the
+; two words.
+; .
+; Hardware: none.
+;
+; DE Position of the entity: D = x, E = y (2-pixel units)
+; HL Address to continue at after the test
+; SP Slot address + $C (the hit box offset word)
+@label=HitTest
+@isub=LD (SmcHitContinue+1),HL
+c$A851 LD ($A881),HL ; continuation address
+ $A854 POP HL        ; hit box offset (y, x)
+ $A855 ADD HL,DE     ; minimum corner = position + offset
+ $A856 EX DE,HL      ; DE = minimum corner
+ $A857 POP BC        ; hit box size (y, x)
+ $A858 ADD HL,BC     ; maximum corner = position + size
+ $A859 LD B,H        ; BC = maximum corner
  $A85A LD C,L        ;
- $A85B LD IX,$A87A   ;
-; This entry point is used by the routines at #R$A600, #R$A822 and #R$B665.
-*$A85F LD HL,($8516) ;
- $A862 LD A,B        ;
+ $A85B LD IX,$A87A   ; continue at #R$A87A after the test
+; Entry point of #R$A600, #R$A822 and #R$B665 (which load IX themselves): the overlap test. Compares the box (D,
+; E)..(B, C) with the player box #R$8516 (min x, max x, min y, max y of Jean) and jumps to IX with carry set when they
+; overlap, clear when not.
+@label=OverlapTest
+*$A85F LD HL,($8516) ; H = player min x, L = player max x
+ $A862 LD A,B        ; entity max x below the player min x: no
  $A863 CP H          ;
- $A864 JR C,$A877    ;
- $A866 LD A,D        ;
+ $A864 JR C,$A877    ; no
+ $A866 LD A,D        ; entity min x not below the player max x: no
  $A867 CP L          ;
- $A868 JR NC,$A877   ;
- $A86A LD HL,($8518) ;
- $A86D LD A,C        ;
+ $A868 JR NC,$A877   ; no
+ $A86A LD HL,($8518) ; H = player min y, L = player max y
+ $A86D LD A,C        ; entity max y below the player min y: no
  $A86E CP H          ;
- $A86F JR C,$A877    ;
- $A871 LD A,E        ;
+ $A86F JR C,$A877    ; no
+ $A871 LD A,E        ; entity min y not below the player max y: no
  $A872 CP L          ;
- $A873 JR NC,$A877   ;
- $A875 JP (IX)       ;
-*$A877 OR A          ;
+ $A873 JR NC,$A877   ; no
+ $A875 JP (IX)       ; overlap: carry is set by the last CP
+*$A877 OR A          ; no overlap: carry clear
  $A878 JP (IX)       ;

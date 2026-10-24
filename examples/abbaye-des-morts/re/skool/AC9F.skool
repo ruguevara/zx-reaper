@@ -1,18 +1,40 @@
-; Player sprite frame tables
+; Sprite shift pairs and the frame tables of the monk
+;
+; The 16-pixel-wide sprites of the monk (and of most enemies) are stored in the sprite sheet (#R$D700) as four copies
+; of each frame, each shifted two pixels further right than the one before, so that a sprite can be placed on any
+; 2-pixel column without shifting at run time. X mod 4 (X in 2-pixel units) selects the copy; the pair table gives, per
+; copy, the column offset inside the frame and the width in bytes (2 for the unshifted copy, 3 for the others: 2 + 3 + 3 +
+; 3 = 11 columns per frame). The monk frame tables hold the sprite sheet address of each frame (D = pixel row page, E
+; = first column); #R$AC1C picks the table by the facing (#R$A897) and the entry by the animation frame (#R$A896).
+; .
+; +$00 ShiftPairs: 4 x (byte offset of the copy, width) for X mod 0, 1, 2, 3, shared with the enemies
+; +$08 MonkFramesLeft: 3 words, facing left (#R$A897 = 1): walking 0, walking 1, in the air
+; +$0E MonkFramesRight: 3 words, facing right: walking 0, walking 1, in the air
+; +$14 MonkDyingFrames: 7 words, the dying animation (3 pictures, repeated, #R$AA3D)
+; +$22 ShiftPairsCrouch: 4 x (offset, width) for the crouching monk (3 bytes wide in every phase)
+; +$2A CrouchFramesLeft: 2 words, crouching facing left (sprite sheet rows 24-39)
+; +$2E CrouchFramesRight: 2 words, crouching facing right
+@label=ShiftPairs
 b$AC9F DEFB $00,$02                                   ; {Standing: (byte
  $ACA1 DEFB $02,$03                                   ; offset, width) for X
  $ACA3 DEFB $05,$03                                   ; mod 4
  $ACA5 DEFB $08,$03                                   ; }
+@label=MonkFramesLeft
  $ACA7 DEFW $D700,$D70B,$D716                         ; Standing frames, facing
                                                       ; left
+@label=MonkFramesRight
  $ACAD DEFW $D721,$D72C,$D737                         ; Standing frames, facing
                                                       ; right
+@label=MonkDyingFrames
  $ACB3 DEFW $D742,$D74D,$D742,$D74D,$D758,$D74D,$D758 ; Dying frames
+@label=ShiftPairsCrouch
  $ACC1 DEFB $00,$03                                   ; {Crouching: (byte
  $ACC3 DEFB $03,$03                                   ; offset, width) for X
  $ACC5 DEFB $06,$03                                   ; mod 4
  $ACC7 DEFB $09,$03                                   ; }
+@label=CrouchFramesLeft
  $ACC9 DEFW $EF00,$EF0C                               ; Crouching frames,
                                                       ; facing left
+@label=CrouchFramesRight
  $ACCD DEFW $EF18,$EF24                               ; Crouching frames,
                                                       ; facing right

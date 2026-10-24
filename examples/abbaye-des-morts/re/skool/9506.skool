@@ -1,12 +1,16 @@
-; Behaviour data for object kind 2 (rooms 15,20): 5-byte header, then
-; kind-specific bytes and sprite/frame pointers
-b$9506 DEFB $00,$01,$0C,$06,$02
- $950B DEFB $44
- $950C DEFW $AC9F
- $950E DEFB $0C
- $950F DEFW $9513
- $9511 DEFW $9517
- $9513 DEFW $D763
- $9515 DEFW $D76E
- $9517 DEFW $D779
- $9519 DEFW $D784
+; Behaviour block: a soldier (kind 2, rooms 15 and 20)
+;
+; Used by the green soldiers with a sword of Gloomy tunels and Unexpected gate (attribute $44).
+; .
+; Layout: see #R$93D3.
+@label=BehaviourSoldier
+b$9506 DEFB $00,$01,$0C,$06,$02  ; hit box top, left, bottom, right; slot +$15 (Unknown)
+ $950B DEFB $44      ; attribute
+ $950C DEFW $AC9F    ; table of (first column, width) for x AND 3
+ $950E DEFB $0C      ; sprite height (2-pixel units)
+ $950F DEFW $9513    ; sprites, first direction (left or up)
+ $9511 DEFW $9517    ; sprites, second direction (right or down)
+ $9513 DEFW $D763    ; first direction, frame 0
+ $9515 DEFW $D76E    ; first direction, frame 1
+ $9517 DEFW $D779    ; second direction, frame 0
+ $9519 DEFW $D784    ; second direction, frame 1

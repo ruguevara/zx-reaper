@@ -1,14 +1,21 @@
-; Routine at B016
+; Step the source pointer past the shifted copies of a frame
 ;
-; Used by the routine at #R$AF15.
+; Does nothing unless flag bit 7 (A) is set; then adds 3 x N + 3 to L, the three copies that #R$AF7B added after the
+; frame (N + 1 columns each, N is in A'). Used by the mirror pass of #R$AF15, which reads the plain frames only.
+;
+; A Flags of the set: bit 7 = the frames have shifted copies
+; A' Frame width N
+; HL Source column
+; O:HL Source column + 3 x N + 3 (low byte only), or unchanged
+@label=SkipShiftedCopies
 c$B016 BIT 7,A       ;
  $B018 RET Z         ;
- $B019 EX AF,AF'     ;
+ $B019 EX AF,AF'     ; A = N
  $B01A PUSH AF       ;
  $B01B PUSH BC       ;
  $B01C LD C,A        ;
  $B01D ADD A,A       ;
- $B01E ADD A,C       ;
+ $B01E ADD A,C       ; 3 x N
  $B01F INC A         ;
  $B020 INC A         ;
  $B021 INC A         ;
@@ -16,5 +23,5 @@ c$B016 BIT 7,A       ;
  $B023 LD L,A        ;
  $B024 POP BC        ;
  $B025 POP AF        ;
- $B026 EX AF,AF'     ;
+ $B026 EX AF,AF'     ; back as on entry
  $B027 RET           ;

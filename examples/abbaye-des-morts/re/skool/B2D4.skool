@@ -1,26 +1,54 @@
-; Routine at B2D4
-c$B2D4 POP HL        ;
- $B2D5 LD A,(HL)     ;
+; Entity continuation: read the sprite description and animate (frame table for the decreasing direction)
+;
+; Reached through #R$A851 from #R$B2CE, that is from the movers that go left or up (#R$B2A6, #R$B283, #R$B236) and
+; from #R$B44B when Jean is on its left. #R$B3AD does the same for the increasing direction (right or down). SP is at
+; slot+$10, after the hit box words (+$C..+$F) that #R$A851 popped. The routine copies the attribute, the width and
+; the height of the sprite into the main draw command at #R$ACD1 (the position is already there), picks the column
+; offset for the shift phase of x, then hands over to the animation counter step #R$A883 with IX = #R$B3D4, which
+; selects the frame, completes the draw command and queues it.
+; .
+; Slot layout of the walkers (kinds 2 to 8; #R$89ED builds it from the room record at #R$8B8F: byte 2 times 4 is +2,
+; byte 3 is +$12 and +$13, byte 4 is x, byte 5 is y, byte 6 is +$A and +$B, bytes 7 and 8 are +4 and +5, the pointer
+; at +9 is the sprite description block): +0 word handler, +2 word speed (8.8 in 2-pixel units per frame), +4 byte and
+; +5 byte turning points (the lower and the higher coordinate; #R$B44B uses +5 as a start delay), +6 word x (8.8), +8
+; word y (8.8), +$A word not used by the walkers, +$C byte hit box y offset, +$D byte x offset, +$E byte y size, +$F
+; byte x size (2-pixel units, relative to the position), +$10 word address of the sprite description (the block from
+; its byte 5 on), +$12 byte animation countdown, +$13 byte countdown reload, +$14 byte frame number, +$15 byte number
+; of frames.
+; .
+; Sprite description (at the end of the behaviour block of the room record, for example #R$93E0): +0 byte attribute,
+; +1 word address of the shift table (#R$AC9F: byte offset and width for each x mod 4), +3 byte height (2-pixel
+; units), +4 word frame table used for creatures that face left or move up, +6 word frame table for right or down. A
+; frame table holds one word per frame: the address in the sprite sheet #R$D700 of the first column of the frame (the
+; high byte is the page, that is the pixel row; the byte offset of the shift phase is added to the low byte).
+; .
+; Hardware: none.
+;
+; SP Slot address + $10
+; A' x in 2-pixel units (the low two bits are the shift phase)
+@label=ReadSpriteLeft
+c$B2D4 POP HL        ; address of the sprite description
+ $B2D5 LD A,(HL)     ; attribute
  $B2D6 INC HL        ;
- $B2D7 LD ($ACDA),A  ;
- $B2DA LD C,(HL)     ;
+ $B2D7 LD ($ACDA),A  ; into the main draw command
+ $B2DA LD C,(HL)     ; BC = shift table
  $B2DB INC HL        ;
  $B2DC LD B,(HL)     ;
  $B2DD INC HL        ;
- $B2DE EX DE,HL      ;
- $B2DF EX AF,AF'     ;
- $B2E0 AND $03       ;
- $B2E2 ADD A,A       ;
+ $B2DE EX DE,HL      ; DE = description at its height byte
+ $B2DF EX AF,AF'     ; A = x
+ $B2E0 AND $03       ; shift phase 0-3
+ $B2E2 ADD A,A       ; 2 bytes per phase
  $B2E3 LD L,A        ;
  $B2E4 LD H,$00      ;
- $B2E6 ADD HL,BC     ;
- $B2E7 LD A,(HL)     ;
- $B2E8 EX AF,AF'     ;
+ $B2E6 ADD HL,BC     ; entry of the shift table
+ $B2E7 LD A,(HL)     ; byte offset of this phase
+ $B2E8 EX AF,AF'     ; kept in A' for #R$B3D8
  $B2E9 INC HL        ;
- $B2EA LD C,(HL)     ;
- $B2EB EX DE,HL      ;
- $B2EC LD B,(HL)     ;
+ $B2EA LD C,(HL)     ; width
+ $B2EB EX DE,HL      ; HL = height byte
+ $B2EC LD B,(HL)     ; height; HL = the frame table pointer
  $B2ED INC HL        ;
- $B2EE LD ($ACD7),BC ;
- $B2F2 LD IX,$B3D4   ;
+ $B2EE LD ($ACD7),BC ; draw command: width, height
+ $B2F2 LD IX,$B3D4   ; #R$A883 steps the animation, then jumps to IX
  $B2F6 JP $A883      ;

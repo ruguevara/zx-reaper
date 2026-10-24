@@ -1,5 +1,11 @@
-; Block copier: first 16 LDIs of the chain entered from $AD9F
-c$ADA1 LDI           ;
+; Water reflection: first 16 of the 32 LDIs that copy one pixel line
+;
+; The chain of #R$ADA1-#R$ADE0 copies up to 32 bytes from (HL) to (DE) and counts BC down. The JR at #R$AD9F of
+; #R$AD88 enters it 2 x (32 - width) bytes after its start so that exactly `width` (at most 32, LDI_CHAIN_LEN) bytes
+; are copied, then execution runs on into #R$ADC1, which ends with the second half of the chain. Falls through to
+; #R$ADC1 after the 16th LDI.
+@label=WaterCopyChain
+c$ADA1 LDI           ; the chain: 32 LDIs from here to #R$ADE0
  $ADA3 LDI           ;
  $ADA5 LDI           ;
  $ADA7 LDI           ;

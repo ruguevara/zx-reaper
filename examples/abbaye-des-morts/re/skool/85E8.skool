@@ -1,8 +1,27 @@
 ; 128K: music player entry points
-c$85E8 LD DE,$FC4B   ;
- $85EB JP $85C2      ;
- $85EE LD HL,$CA8A   ;
- $85F1 JR $85F6      ;
- $85F3 LD HL,$C09D   ;
-*$85F6 LD DE,$F9D7   ;
- $85F9 JP $85C2      ;
+;
+; Three entry points that load the registers for #R$85C2 and call a routine of the music player in the music bank. The
+; 128K code is not disassembled and was not run (the simulator is a 48K machine), so what each call does is a guess
+; from the callers: Unknown. The names are the callers' names.
+; .
+; #R$85E8: DE = $FC4B, HL as the caller left it; called by #R$887B at the end of the ending (the stub at $88D5 that
+; #R$605F turns into CALL $85E8). Probably silences the music.
+; .
+; #R$85EE: HL = $CA8A, then as #R$85F3; called through the stub at #R$A31E when SPACE is held on the title (the info
+; screen).
+; .
+; #R$85F3: HL = $C09D, DE = $F9D7; called through the stub at #R$860C when a game starts and by #R$A31E when SPACE is
+; released. Probably starts the module at HL (the music is a Vortex Tracker II module).
+; .
+; Hardware: 128K paging port, through #R$85C2.
+@label=MusicEntryEnding
+c$85E8 LD DE,$FC4B          ; music bank routine at $FC4B
+ $85EB JP $85C2
+@label=MusicEntryInfo
+ $85EE LD HL,$CA8A          ; module address for the info screen (assumed)
+ $85F1 JR $85F6             ; skip the next LD HL
+@label=MusicEntryGame
+ $85F3 LD HL,$C09D          ; module address of the game music (assumed)
+@label=MusicCallF9D7
+*$85F6 LD DE,$F9D7          ; music bank routine at $F9D7
+ $85F9 JP $85C2

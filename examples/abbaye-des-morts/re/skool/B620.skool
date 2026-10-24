@@ -1,42 +1,68 @@
-; Routine at B620
-c$B620 POP HL        ;
- $B621 LD A,(HL)     ;
+; Archer and stone head: draw attributes, shot countdown, throw an arrow, queue the sprite
+;
+; Continuation of #R$B611 after the hit test #R$A851 (reached by a JP through $A881; SP is at slot+$10, the hit
+; test has popped the two hit box words). It pops the pointer to the sprite block (slot +$10: attribute, height, width,
+; frame tables) and puts the attribute, width and height in the draw command at #R$ACD1 (A' = 0: no shifted copy), then
+; steps the shot countdown (slot +$12 counter, +$13 reload: $50 for the archers, $46 for the stone head):
+; .
+; - when the counter equals ARCHER_AIM_TIME (30) the frame number is increased: the aiming frame is shown for the last
+; 30 frames;
+; - when it reaches 0 the arrow is thrown: sound effect SFX_ENEMY_SHOT is requested, a 4-byte record (the template in
+; HL' and the position stored at SPAWN_POSITION by #R$B5EB or #R$B5D6) is appended to the object list at #R$BE56 and
+; the spawn count #R$8552 is increased, so that #R$8905 turns it into an arrow slot (#R$B6ED) in the same frame; the
+; counter is reloaded and the frame number is increased again, which wraps to 0 (frame 0 is the resting frame).
+; .
+; The frame number goes back to the slot and the code jumps to IY (#R$B3D4 or #R$B3D2: the frame table for the way the
+; shooter faces, see #R$B5EB), which queues the sprite draw command and goes on to the next slot.
+; .
+; Observed (room 17, the archers throw together every 80 frames; room 20 the stone head every 70): arrows appear in
+; the slots as #R$B6ED with the templates #R$BC92, #R$BCA2 and #R$BCB2.
+;
+; HL' Address of the arrow template (#R$BC92, #R$BCA2 or #R$BCB2)
+; IY Address #R$B3D4 or #R$B3D2 that queues the sprite
+; SP Slot address + $10
+@label=UpdateShooter_Tail
+c$B620 POP HL        ; sprite block
+ $B621 LD A,(HL)     ; attribute
  $B622 INC HL        ;
- $B623 LD ($ACDA),A  ;
+ $B623 LD ($ACDA),A  ; attribute of the draw command
  $B626 XOR A         ;
- $B627 EX AF,AF'     ;
- $B628 LD B,(HL)     ;
+ $B627 EX AF,AF'     ; A' = 0: column offset of the sprite copy
+ $B628 LD B,(HL)     ; height
  $B629 INC HL        ;
- $B62A LD C,(HL)     ;
- $B62B INC HL        ;
- $B62C LD ($ACD7),BC ;
- $B630 POP BC        ;
- $B631 POP DE        ;
+ $B62A LD C,(HL)     ; width
+ $B62B INC HL        ; HL = the frame tables
+ $B62C LD ($ACD7),BC ; width, height of the draw command
+ $B630 POP BC        ; C countdown, B reload
+ $B631 POP DE        ; E frame, D number of frames
  $B632 LD A,C        ;
- $B633 CP $1E        ;
+@isub=CP ARCHER_AIM_TIME
+ $B633 CP $1E        ; 30 frames before the shot: aiming frame
  $B635 JR NZ,$B638   ;
  $B637 INC E         ;
-*$B638 DEC C         ;
+*$B638 DEC C         ; count down
  $B639 JR NZ,$B661   ;
- $B63B EXX           ;
+ $B63B EXX           ; throw an arrow: HL' = template
+@isub=LD A,SFX_ENEMY_SHOT
  $B63C LD A,$07      ;
- $B63E LD ($854F),A  ;
- $B641 LD ($5DFC),HL ;
- $B644 LD HL,$8552   ;
+ $B63E LD ($854F),A  ; sound effect request
+ $B641 LD ($5DFC),HL ; SPAWN_TEMPLATE: the first word of the 4-byte record
+ $B644 LD HL,$8552   ; one more record waiting
  $B647 INC (HL)      ;
- $B648 LD HL,$5DFC   ;
- $B64B LD DE,($BE56) ;
+ $B648 LD HL,$5DFC   ; SPAWN_TEMPLATE, SPAWN_POSITION
+ $B64B LD DE,($BE56) ; end of the object list
+@isub=LD BC,OBJECT_ENTRY_SIZE
  $B64F LD BC,$0004   ;
- $B652 LDIR          ;
+ $B652 LDIR          ; append the record
  $B654 LD ($BE56),DE ;
  $B658 EXX           ;
- $B659 LD C,B        ;
- $B65A INC E         ;
+ $B659 LD C,B        ; reload the countdown
+ $B65A INC E         ; next frame: wraps to 0
  $B65B LD A,E        ;
  $B65C CP D          ;
  $B65D JR NZ,$B661   ;
  $B65F SUB D         ;
  $B660 LD E,A        ;
-*$B661 PUSH DE       ;
- $B662 PUSH BC       ;
- $B663 JP (IY)       ;
+*$B661 PUSH DE       ; store frame
+ $B662 PUSH BC       ; store countdown
+ $B663 JP (IY)       ; queue the sprite, next slot

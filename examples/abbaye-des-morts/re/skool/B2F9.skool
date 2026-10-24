@@ -1,40 +1,58 @@
-; Routine at B2F9
-c$B2F9 POP BC        ;
- $B2FA POP DE        ;
- $B2FB POP HL        ;
- $B2FC LD A,H        ;
- $B2FD EX AF,AF'     ;
- $B2FE POP HL        ;
- $B2FF ADD HL,BC     ;
+; Entity handler: hanged man going down on his rope (room 9)
+;
+; The hanged men of room 9 (Hangman tree, four yellow bodies on dotted red ropes) are entities of kind 6: this is
+; the handler of the half of the patrol in which the body goes down; the other half is #R$B236 (kind 7), which has
+; the same body written the other way round. The y coordinate goes down by the speed each frame; when its high byte
+; reaches the lower turning point the handler word of the slot is rewritten with #R$B236 (see there for the stack
+; scheme). The sprite is placed at (x, y), then the rope is redrawn in the tile map: the cell in the second column of
+; the sprite on the row of its top edge gets TILE_ROPE and the cell below TILE_BLANK, so the rope grows behind the
+; falling body. The hit box test and the drawing go on in #R$B3AD (the second frame table of the sprite description,
+; the one for the increasing direction).
+; .
+; Slot fields used: +2 word speed (8.8, 2-pixel units per frame), +4 byte upper turning point of y, +5 byte lower
+; turning point, +6 word x (high byte only), +8 word y (8.8). The other fields are described at #R$B2D4, which also says
+; how #R$89ED fills them from the room record.
+; .
+; Hardware: none. Writes the tile map at $5B00, which the draw queue shows.
+;
+; SP Slot address + 2
+@label=UpdateHangedDown
+c$B2F9 POP BC        ; speed
+ $B2FA POP DE        ; D lower turning point, E upper
+ $B2FB POP HL        ; x (8.8); only its high byte is used
+ $B2FC LD A,H        ; A = x in 2-pixel units
+ $B2FD EX AF,AF'     ; kept in A'
+ $B2FE POP HL        ; y (8.8)
+ $B2FF ADD HL,BC     ; y goes down
  $B300 PUSH HL       ;
- $B301 POP HL        ;
- $B302 LD A,H        ;
- $B303 CP D          ;
- $B304 JR C,$B314    ;
- $B306 LD HL,$FFF8   ;
+ $B301 POP HL        ; store y
+ $B302 LD A,H        ; y in 2-pixel units
+ $B303 CP D          ; reached the lower turning point?
+ $B304 JR C,$B314    ; no: go on
+ $B306 LD HL,$FFF8   ; -8: back to slot+2
  $B309 ADD HL,SP     ;
  $B30A LD SP,HL      ;
- $B30B LD HL,$B236   ;
- $B30E PUSH HL       ;
- $B30F POP HL        ;
- $B310 POP BC        ;
+ $B30B LD HL,$B236   ; from the next frame the body goes up
+ $B30E PUSH HL       ; written over the handler word at slot+0
+ $B30F POP HL        ; pop the handler again
+ $B310 POP BC        ; pop speed, limits, x and y again
  $B311 POP DE        ;
  $B312 POP HL        ;
  $B313 POP HL        ;
-*$B314 EX AF,AF'     ;
- $B315 LD D,A        ;
- $B316 POP BC        ;
- $B317 LD E,H        ;
- $B318 LD L,H        ;
- $B319 LD H,D        ;
+*$B314 EX AF,AF'     ; A = x
+ $B315 LD D,A        ; D = x
+ $B316 POP BC        ; skip the unused word at +10
+ $B317 LD E,H        ; E = y
+ $B318 LD L,H        ; L = y
+ $B319 LD H,D        ; H = x
  $B31A LD A,H        ;
- $B31B EX AF,AF'     ;
- $B31C SRA H         ;
+ $B31B EX AF,AF'     ; A' = x: its low two bits are the shift phase
+ $B31C SRA H         ; x / 4: byte column
  $B31E SRA H         ;
- $B320 LD ($ACD3),HL ;
- $B323 SRA L         ;
+ $B320 LD ($ACD3),HL ; draw command position: (y, x/4)
+ $B323 SRA L         ; y / 4: row of cells
  $B325 SRA L         ;
- $B327 LD A,L        ;
+ $B327 LD A,L        ; low byte of the map offset: (row mod 8) * 32 + column
  $B328 RRCA          ;
  $B329 RRCA          ;
  $B32A RRCA          ;
@@ -43,14 +61,18 @@ c$B2F9 POP BC        ;
  $B32E ADD A,H       ;
  $B32F LD H,A        ;
  $B330 LD A,L        ;
- $B331 AND $03       ;
+ $B331 AND $03       ; high byte: row / 8
  $B333 LD L,H        ;
  $B334 LD H,A        ;
- $B335 INC L         ;
+ $B335 INC L         ; second column of the sprite
+@isub=LD BC,TILE_MAP
  $B336 LD BC,$5B00   ;
  $B339 ADD HL,BC     ;
- $B33A LD (HL),$B7   ;
+@isub=LD (HL),TILE_ROPE
+ $B33A LD (HL),$B7   ; rope on the row of the top edge
+@isub=LD BC,SCREEN_COLS
  $B33C LD BC,$0020   ;
- $B33F ADD HL,BC     ;
- $B340 LD (HL),$80   ;
- $B342 JR $B38B      ;
+ $B33F ADD HL,BC     ; the cell below
+@isub=LD (HL),TILE_BLANK
+ $B340 LD (HL),$80   ; no rope below the end
+ $B342 JR $B38B      ; hit box test and draw, second frame table

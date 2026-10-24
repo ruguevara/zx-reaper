@@ -84,3 +84,76 @@ PLAYER_STANDING          EQU 4 ; player state: standing or walking
 OP_CALL                  EQU 0xCD ; opcode of CALL, stored over the first byte of a 3-byte instruction to turn it into a call
 OP_JP                    EQU 0xC3 ; opcode of JP
 GRID_ROOMS               EQU 25 ; rooms of the 5x5 map: a room number wraps modulo this (room 25 is the ending room outside the grid)
+PLAYER_JUMPING           EQU 2 ; player state: jumping (rising)
+PLAYER_CROUCHING         EQU 3 ; player state: crouching
+PLAYER_FALLING           EQU 5 ; player state: falling
+PLAYER_WARP              EQU 0xFF ; player state: debug room warp (cheat only)
+CTRL_RIGHT               EQU 1 ; control bit 0: right
+CTRL_LEFT                EQU 2 ; control bit 1: left
+CTRL_CROUCH              EQU 4 ; control bit 2: crouch
+CTRL_JUMP                EQU 0x18 ; control bits 3 and 4: jump (the keyboard sets both, Kempston fire only bit 4)
+TILE_BLOCKS              EQU 2 ; tile flag bit 1: the cell blocks the monk walking sideways or jumping up into it (classes 2 and 3)
+TILE_STANDABLE           EQU 1 ; tile flag bit 0: the monk can stand on the cell (classes 1 and 3); class 1 only from above
+WALK_SPEED               EQU 0x80 ; horizontal speed of the monk, 8.8 per frame: half a unit of 2 pixels, one pixel
+CROUCH_SPEED             EQU 0x20 ; horizontal speed of the crouching monk, 8.8 per frame: a quarter of a pixel
+JUMP_SPEED               EQU 0x01FE ; vertical speed at the start of a jump, 8.8 units of 2 pixels per frame, upwards
+GRAVITY                  EQU 0x1E ; change of the monk's vertical speed per frame, 8.8: the jump slows and the fall speeds up by this
+FALL_SPEED_CAP_HI        EQU 2 ; high byte of the fall speed from which it stops growing (the speed ends at $021C)
+DYING_RISE               EQU 0x80 ; how far the dying monk rises per frame, 8.8 (one pixel)
+WALK_ANIM_PERIOD         EQU 8 ; frames the walking monk keeps one animation frame
+DYING_ANIM_PERIOD        EQU 4 ; frames each frame of the dying animation lasts
+DYING_LAST_FRAME         EQU 7 ; frame number of the dying animation after which the monk is gone (the frame itself is not drawn)
+MONK_HEIGHT              EQU 12 ; height of the standing monk sprite in 2-pixel units (24 pixels)
+CROUCH_HEIGHT            EQU 8 ; height of the crouching monk sprite in 2-pixel units (16 pixels)
+SFX_JUMP                 EQU 2 ; sound effect: the monk jumps
+SFX_DEATH                EQU 6 ; sound effect: the monk dies
+STATE_DEATH              EQU 0x84 ; room state: restart the room after a death ($85, Game Over, when no life is left)
+STATE_ENTER_ROOM         EQU 1 ; room state: enter the room whose number is in $8509
+EXIT_RIGHT               EQU 0 ; exit direction: through the right edge
+EXIT_LEFT                EQU 1 ; exit direction: through the left edge
+EXIT_DOWN                EQU 2 ; exit direction: through the bottom edge
+EXIT_UP                  EQU 3 ; exit direction: through the top edge
+ROOM_WIDTH_2PX           EQU 0x80 ; width of the room in 2-pixel units (32 cells of 4)
+TILE_ROPE                EQU 0xB7 ; tile number of the dotted vertical rope of the hanged men (one pixel column at the left edge of the cell, red ink)
+TILE_BLANK               EQU 0x80 ; tile number of the empty tile (all zero bitmap)
+FLAG_ROW_TABLE_HIGH      EQU 0x61 ; high byte of the flag map row address table at $6100 (the low byte is 2 * row)
+DROP_PERIOD              EQU 0x46 ; frames from one fall of a water drop to the next (also the countdown reload of its slot)
+DROP_SWELL               EQU 0x1E ; countdown value at which a hanging water drop switches to its second frame, 30 frames before it falls
+ARCHER_AIM_TIME          EQU 0x1E ; shooter countdown value at which an archer or the stone head switches to its aiming frame (30 frames before the shot)
+PLANT_SPIT_TIME          EQU 0x32 ; countdown value at which a plant of room 14 opens and spits its two seeds
+BEAST_HEAD_DIP           EQU 0x28 ; the head of the Pestilent Beast is lowered by 2 units while its counter is at or below this
+PROJECTILE_Y_MAX         EQU 0x60 ; a projectile whose y (2-pixel units) reaches this is below the room and is removed (the room is 22 rows of 4 units, ROOM_HEIGHT_2PX)
+SEED_GRAVITY             EQU 0x14 ; added to the vertical speed of a plant's seed every frame (8.8)
+FISH_GRAVITY             EQU 0x16 ; added to the vertical speed of a jumping fish every frame (8.8)
+FISH_JUMP_SPEED          EQU 0xFDAE ; vertical speed a fish starts its jump with (8.8, -2.32 units per frame, upwards)
+FISH_JUMP_Y              EQU 0x4C7C ; y of a fish at the start of its jump (8.8, high byte in 2-pixel units)
+FISH_JUMP_TIME           EQU 0x36 ; countdown value at which a fish waiting under the water jumps
+WATER_Y                  EQU 0x50 ; y (2-pixel units) of the water surface of rooms 16 and 19, where splashes appear
+TILE_BLOOD_A             EQU 0x3B ; tile number of the bubbling blood, first phase (swapped with TILE_BLOOD_B by AnimateBloodTiles)
+TILE_BLOOD_B             EQU 0x3C ; tile number of the bubbling blood, second phase
+TILE_RING_CROSS          EQU 0x4C ; tile number of the red crosses of the ring of twelve crosses in Satan's room
+CROSS_FLASH_PERIOD       EQU 5 ; frames between two colour steps of the ring of crosses (CrossFlashTimer reload)
+CROSS_COLOURS            EQU 6 ; attributes in the colour cycle of the ring of crosses (CrossColours)
+LIQUID_ANIM_PERIOD       EQU 2 ; frames between two swaps of the blood tiles (LiquidAnimTimer reload)
+COLUMN_MASK              EQU 0x1F ; mask of a cell column number (0-31)
+PAGING_BANK0             EQU 0x10 ; value for port $7FFD: RAM bank 0 at $C000, ROM 1 (48K BASIC), normal screen: the paging state of the game
+SPEAKER_BIT              EQU 0x10 ; bit 4 of port $FE: the speaker (EAR output); the beeper effects toggle it
+STATE_RUNNING            EQU 0x80 ; room state bit 7: the frame routines run the game logic (with the low 7 bits 0 the main loop plays)
+MUSIC_TRACK_TITLE        EQU 3 ; music track 3: the title and the controls menu
+MUSIC_TRACK_ENDING1      EQU 5 ; music track 5: first part of the ending (room 25)
+MUSIC_TRACK_ENDING2      EQU 2 ; music track 2: second part of the ending (the pyre, room 4)
+ROOM_ENDING              EQU 25 ; room number of the first scene of the ending (outside the 5x5 grid)
+ROOM_PYRE                EQU 4 ; room number of the second scene of the ending: the burning of Jean at the stake
+OBJECT_SLOTS             EQU 11 ; object slots at $C100
+ROOM_ITEM_SIZE           EQU 8 ; bytes of a room item record (table at $8EDF)
+ROOM_OBJECT_SIZE         EQU 11 ; bytes of a room object record (table at $8B8F)
+SFX_SIZE                 EQU 8 ; bytes of a sound effect record
+NOISE_SAMPLES            EQU 0x30 ; speaker samples per frame of the noise effect
+NOISE_FRAMES             EQU 10 ; frames the noise effect lasts
+BURST_COUNTS             EQU 0xFF ; loop counts in the tone burst of one frame of a sound effect
+CYAN                     EQU 5 ; colour: cyan
+PAGE_REDRAW_LENGTHS      EQU 0xC3 ; high byte of the redraw cell buffer holding the run length of each run's first cell
+JOB_SIZE                 EQU 0x10 ; bytes of a draw queue job at $C000 (16 jobs)
+FLAG_SPRITE              EQU 0x40 ; tile flag bit 6: a sprite covers the cell this frame (becomes the redraw bit 7 for the next frame, to erase it)
+THIRD_MASK               EQU 0x18 ; mask of the screen third bits in the high byte of a screen address
+PIXEL_ROW_PAIRS          EQU 4 ; pairs of pixel rows (a cell has 8) copied by the redraw loop

@@ -1,7 +1,16 @@
-; 128K: sound effect through the AY player (replaces $871A)
-c$85D5 LD A,($8507)  ;
- $85D8 PUSH AF       ;
- $85D9 CALL $85C7    ;
- $85DC CALL $CF7D    ;
- $85DF POP AF        ;
- $85E0 JR $85CA      ;
+; 128K: sound effect through the AY player (replaces #R$871A)
+;
+; On a 128K machine where the loader found an AY chip, #R$605F turns the first instruction of #R$871A (LD HL,$85D5)
+; into JP $85D5, so the frame routine #R$85E2 comes here instead of playing a beeper effect. The routine saves the
+; current paging, pages in the music bank (#R$85C7), calls $CF7D in that bank, restores the paging and returns to the
+; caller of #R$871A. $CF7D is not disassembled (the music bank is not part of this image): it presumably reads the
+; effect request #R$854F, but whether it clears it and what the effect numbers mean on the AY is Unknown.
+; .
+; Hardware: writes the paging port $7FFD (through #R$85CA, #R$85C7); the AY itself is driven by the music bank code.
+@label=PlayEffectOnAY
+c$85D5 LD A,($8507)         ; current paging (#R$8507)
+ $85D8 PUSH AF
+ $85D9 CALL $85C7
+ $85DC CALL $CF7D           ; AY sound effect routine in the music bank
+ $85DF POP AF
+ $85E0 JR $85CA             ; restore the paging and return

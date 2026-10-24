@@ -1,4 +1,13 @@
-; Unused: enter the debug room-warp mode (player state $FF)
-c$AAC0 LD A,$FF      ;
- $AAC2 LD ($A894),A  ;
- $AAC5 RET           ;
+; Enter the debug room-warp mode (player state $FF)
+;
+; Reached only with the RAGE cheat on (#R$A422 has changed the JR at #R$AABE into JR Z) and the T key pressed: the
+; player state becomes $FF, in which #R$AAAB runs the room warp #R$83CE instead of the player (observed with
+; tests/inputs/cheat.txt: after T the direction keys step through the rooms 5, 6, 7, 12). Leaves the mode through
+; #R$AD82.
+; .
+; Hardware: none.
+@label=EnterRoomWarp
+@isub=LD A,PLAYER_WARP
+c$AAC0 LD A,$FF     ; debug room warp
+ $AAC2 LD ($A894),A ;
+ $AAC5 RET          ;

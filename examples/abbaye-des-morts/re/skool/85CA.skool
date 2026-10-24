@@ -1,9 +1,15 @@
+@equ=PAGING_PORT=$7FFD
 ; 128K: page in bank A
 ;
-; Used by the routines at #R$85BE and #R$85D5.
-c$85CA PUSH BC       ;
- $85CB LD BC,$7FFD   ;
- $85CE LD ($8507),A  ;
- $85D1 OUT (C),A     ;
- $85D3 POP BC        ;
- $85D4 RET           ;
+; Writes A to the 128K paging port and remembers it in #R$8507. BC is saved and restored.
+;
+; Hardware: writes port $7FFD (nothing happens on a 48K Spectrum).
+;
+; A Value for port $7FFD (bits 0-2 RAM bank at $C000, bit 4 ROM)
+@label=PageInBank
+c$85CA PUSH BC
+ $85CB LD BC,$7FFD
+ $85CE LD ($8507),A         ; last value written, for #R$85D5
+ $85D1 OUT (C),A
+ $85D3 POP BC
+ $85D4 RET

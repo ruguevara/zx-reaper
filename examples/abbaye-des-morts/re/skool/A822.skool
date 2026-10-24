@@ -1,12 +1,22 @@
-; Routine at A822
-c$A822 POP HL        ;
- $A823 LD ($ACE7),HL ;
+; Handler of the parchment items
+;
+; The handler word (+0) of the slots made from room items of type 5, the parchments (#R$8AA7, room item records of
+; #R$8EDF). Like #R$A600 it pops the row and column (+2, +3) into the position of the object draw command #R$ACE5,
+; builds the 16x16-pixel box of the item in 2-pixel units and jumps to the overlap test #R$A85F, but with IX = #R$A836
+; instead of the RET at #R$A614: the word at +4 of a parchment slot does not hold an action routine but the two
+; message numbers, so the action is fixed.
+;
+; SP Slot address + 2 (the handler word was popped by the RET that entered the routine)
+@label=ParchmentHandler
+c$A822 POP HL        ; L = row, H = column
+ $A823 LD ($ACE7),HL ; position of the draw command
  $A826 ADD HL,HL     ;
  $A827 ADD HL,HL     ;
  $A828 EX DE,HL      ;
- $A829 LD HL,$0808   ;
+@isub=LD HL,ITEM_BOX*256+ITEM_BOX
+ $A829 LD HL,$0808   ; box size 8 x 8 (2-pixel units)
  $A82C ADD HL,DE     ;
  $A82D LD B,H        ;
  $A82E LD C,L        ;
- $A82F LD IX,$A836   ;
- $A833 JP $A85F      ;
+ $A82F LD IX,$A836   ; continue at the parchment action
+ $A833 JP $A85F      ; overlap test

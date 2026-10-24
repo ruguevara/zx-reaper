@@ -1,37 +1,63 @@
-; IM 2 interrupt handler: calls the routine at ($8504) on its own stack
-c$8585 EX (SP),HL    ;
- $8586 LD ($85BA),HL ;
- $8589 POP HL        ;
- $858A LD ($85B7),SP ;
- $858E PUSH BC       ;
- $858F DI            ;
- $8590 LD SP,$8585   ;
- $8593 PUSH IX       ;
- $8595 PUSH HL       ;
- $8596 PUSH AF       ;
- $8597 PUSH BC       ;
- $8598 PUSH DE       ;
- $8599 EXX           ;
- $859A EX AF,AF'     ;
- $859B PUSH IY       ;
- $859D PUSH HL       ;
- $859E PUSH AF       ;
- $859F PUSH BC       ;
- $85A0 PUSH DE       ;
- $85A1 LD HL,($8504) ;
- $85A4 CALL $85BC    ;
- $85A7 POP DE        ;
- $85A8 POP BC        ;
- $85A9 POP AF        ;
- $85AA POP HL        ;
- $85AB POP IY        ;
- $85AD EX AF,AF'     ;
- $85AE EXX           ;
- $85AF POP DE        ;
- $85B0 POP BC        ;
- $85B1 POP AF        ;
- $85B2 POP HL        ;
- $85B3 POP IX        ;
- $85B5 EI            ;
- $85B6 LD SP,$85B6   ;
-*$85B9 JP $85B9      ;
+; IM 2 interrupt handler: runs the frame routine on its own stack
+;
+; Entered by the 50 Hz frame interrupt (IM 2, I = $84: every byte of the vector table at #R$8400 is $85, so every vector
+; is $8585). It swaps HL with the return address on the stack, stores the return address in the operand of the JP at
+; #R$85B9 and the interrupted SP in the operand of the LD SP at #R$85B6, switches SP to the interrupt stack (#R$855F, which
+; ends at $8585), pushes IX, HL, AF, BC, DE, IY and the alternate set, and calls the routine whose address is in
+; #R$8504 through #R$85BC (JP (HL)). Afterwards it pops everything, enables interrupts and returns with LD SP and JP
+; through the two patched operands. The interrupted code needs no stack room: the main loop runs the frame list with
+; SP as a data pointer (#R$BDDB) and is interrupted in the middle of it.
+; .
+; The routine called is #R$85E2 while the game (or the intro room 0) runs, #R$A43D during the title and the controls
+; menu, and the RET at #R$8719 before the game starts (#R$6000). One run of #R$85E2 takes about 5,500 to 7,300
+; T-states, plus a burst of up to 9,000 for a beeper sound effect, of the 69,888 of a frame (observed with the
+; simulator, frames 200-260 of tests/inputs/play.txt: interrupt accepted at T 19-28 of the frame, #R$A5DB reached at
+; T 5,700-7,300).
+; .
+; Hardware: the IM 2 frame interrupt. Interrupts stay disabled until the EI at #R$85B5, so the frame routine is never
+; interrupted. By reading the code (not seen): an interrupt accepted between that EI and the JP at #R$85B9 would store
+; $85B9 as the return address and then hang on JP $85B9; it needs a run of the handler that ends exactly as the next
+; frame starts.
+; .
+; O:All All registers are restored; the interrupted code goes on unaware
+@label=InterruptHandler
+c$8585 EX (SP),HL           ; HL = interrupted PC; the old HL is now on the stack
+@isub=LD (SmcInterruptReturn+1),HL
+ $8586 LD ($85BA),HL        ; return address: operand of the JP at $85B9
+ $8589 POP HL               ; HL as it was
+@isub=LD (SmcInterruptSP+1),SP
+ $858A LD ($85B7),SP        ; interrupted SP: operand of the LD SP at $85B6
+ $858E PUSH BC              ; no effect: writes BC below the interrupted SP, never read back (BC is pushed again at $8597)
+ $858F DI                   ; (the CPU disabled interrupts when it accepted this one)
+ $8590 LD SP,$8585          ; interrupt stack, #R$855F-$8584
+ $8593 PUSH IX
+ $8595 PUSH HL
+ $8596 PUSH AF
+ $8597 PUSH BC
+ $8598 PUSH DE
+ $8599 EXX                  ; switch to the alternate set, saved next
+ $859A EX AF,AF'
+ $859B PUSH IY
+ $859D PUSH HL
+ $859E PUSH AF
+ $859F PUSH BC
+ $85A0 PUSH DE
+ $85A1 LD HL,($8504)        ; frame routine address
+ $85A4 CALL $85BC           ; JP (HL): call the frame routine
+ $85A7 POP DE
+ $85A8 POP BC
+ $85A9 POP AF
+ $85AA POP HL
+ $85AB POP IY
+ $85AD EX AF,AF'
+ $85AE EXX
+ $85AF POP DE
+ $85B0 POP BC
+ $85B1 POP AF
+ $85B2 POP HL
+ $85B3 POP IX
+ $85B5 EI                   ; the only EI of the frame; takes effect after the LD SP
+@label=SmcInterruptSP
+ $85B6 LD SP,$85B6          ; SMC: the operand is the interrupted SP, stored by the LD at $858A
+@label=SmcInterruptReturn
+*$85B9 JP $85B9             ; SMC: the operand is the interrupted PC, stored by the LD at $8586

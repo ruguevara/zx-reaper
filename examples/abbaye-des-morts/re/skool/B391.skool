@@ -1,48 +1,66 @@
-; Routine at B391
-c$B391 POP BC        ;
- $B392 POP DE        ;
- $B393 POP HL        ;
- $B394 ADD HL,BC     ;
- $B395 PUSH HL       ;
- $B396 POP HL        ;
- $B397 LD A,H        ;
- $B398 CP D          ;
- $B399 JP Z,$B426    ;
- $B39C LD D,H        ;
- $B39D POP HL        ;
- $B39E LD E,H        ;
- $B39F LD L,E        ;
- $B3A0 LD H,D        ;
- $B3A1 LD A,H        ;
- $B3A2 EX AF,AF'     ;
- $B3A3 SRA H         ;
+; Entity handler: runner of the intro screen (kind 0), and the sprite continuation for the increasing direction
+;
+; Room 0 (the intro text, "The Cathar Jean Raymond runs to escape the crusaders...") has four entities of this kind:
+; the monk (sprite description #R$93D3, the standing frames of Jean from #R$ACA7) and three cyan crusaders (#R$93E0)
+; running after him. The slot is entered with SP at slot+2 (see #R$B2A6 for the stack scheme). The x coordinate goes
+; up by the speed each frame; when its high byte equals the end coordinate (+5, $80, off the right of the screen) the
+; slot is freed through #R$B426. x starts at a value below 0 ($CB-$F7: the runner enters from the left), and the
+; compare is for equality. There is no hit box: the three words +$A..+$F are skipped. The sprite goes on at #R$B3AD.
+; .
+; Slot fields used: +2 word speed (8.8, 2-pixel units per frame), +5 byte end x, +6 word x (8.8), +8 word y (8.8);
+; the sprite fields are described at #R$B2D4.
+; .
+; Hardware: none.
+;
+; SP Slot address + 2
+@label=UpdateIntroRunner
+c$B391 POP BC        ; speed
+ $B392 POP DE        ; D end x, E not used
+ $B393 POP HL        ; x (8.8)
+ $B394 ADD HL,BC     ; x goes right
+ $B395 PUSH HL       ; store x
+ $B396 POP HL        ; SP is back at slot+8
+ $B397 LD A,H        ; x in 2-pixel units
+ $B398 CP D          ; at the end?
+ $B399 JP Z,$B426    ; yes: free the slot
+ $B39C LD D,H        ; D = x
+ $B39D POP HL        ; y (8.8)
+ $B39E LD E,H        ; E = y
+ $B39F LD L,E        ; L = y
+ $B3A0 LD H,D        ; H = x
+ $B3A1 LD A,H        ; A = x in 2-pixel units
+ $B3A2 EX AF,AF'     ; kept in A': its low two bits are the shift phase
+ $B3A3 SRA H         ; x / 4: byte column
  $B3A5 SRA H         ;
- $B3A7 LD ($ACD3),HL ;
- $B3AA POP BC        ;
+ $B3A7 LD ($ACD3),HL ; draw command position: (y, x/4)
+ $B3AA POP BC        ; skip +10, +12 and +14: no hit box
  $B3AB POP BC        ;
  $B3AC POP BC        ;
- $B3AD POP HL        ;
- $B3AE LD A,(HL)     ;
+; Entry point used through #R$A851 by #R$B365, #R$B2F9, #R$B344 and #R$B436 (creatures facing right or down) and by this
+; routine. Like #R$B2D4, but picks the second frame table. SP is at slot+$10.
+@label=ReadSpriteRight
+ $B3AD POP HL        ; address of the sprite description
+ $B3AE LD A,(HL)     ; attribute
  $B3AF INC HL        ;
- $B3B0 LD ($ACDA),A  ;
- $B3B3 LD C,(HL)     ;
+ $B3B0 LD ($ACDA),A  ; into the main draw command
+ $B3B3 LD C,(HL)     ; BC = shift table
  $B3B4 INC HL        ;
  $B3B5 LD B,(HL)     ;
  $B3B6 INC HL        ;
- $B3B7 EX DE,HL      ;
- $B3B8 EX AF,AF'     ;
- $B3B9 AND $03       ;
- $B3BB ADD A,A       ;
+ $B3B7 EX DE,HL      ; DE = description at its height byte
+ $B3B8 EX AF,AF'     ; A = x
+ $B3B9 AND $03       ; shift phase 0-3
+ $B3BB ADD A,A       ; 2 bytes per phase
  $B3BC LD L,A        ;
  $B3BD LD H,$00      ;
- $B3BF ADD HL,BC     ;
- $B3C0 LD A,(HL)     ;
- $B3C1 EX AF,AF'     ;
+ $B3BF ADD HL,BC     ; entry of the shift table
+ $B3C0 LD A,(HL)     ; byte offset of this phase
+ $B3C1 EX AF,AF'     ; kept in A' for #R$B3D8
  $B3C2 INC HL        ;
- $B3C3 LD C,(HL)     ;
- $B3C4 EX DE,HL      ;
- $B3C5 LD B,(HL)     ;
+ $B3C3 LD C,(HL)     ; width
+ $B3C4 EX DE,HL      ; HL = height byte
+ $B3C5 LD B,(HL)     ; height; HL = the frame table pointer
  $B3C6 INC HL        ;
- $B3C7 LD ($ACD7),BC ;
- $B3CB LD IX,$B3D2   ;
- $B3CF JP $A883      ;
+ $B3C7 LD ($ACD7),BC ; draw command: width, height
+ $B3CB LD IX,$B3D2   ; the second frame table: #R$B3D2 skips the first
+ $B3CF JP $A883      ; #R$A883 steps the animation, then jumps to IX

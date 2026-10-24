@@ -1,2 +1,6 @@
 ; Noise pointer into the ROM
+;
+; Word. Read and 'advanced' by #R$87D7, which was meant to walk the ROM addresses $0000-$03FF to make noise; the store is
+; wrong (see there), so the word stays $1000 in every run.
+@label=NoisePointer
 g$87E8 DEFW $1000

@@ -1,6 +1,10 @@
-; Behaviour data for object kind 13 (rooms 16,19): 5-byte header, then
-; kind-specific bytes and sprite/frame pointers
-b$9549 DEFB $00,$00,$07,$07,$02
- $954E DEFB $03,$08,$02
- $9551 DEFW $EF4F
- $9553 DEFW $EF51
+; Behaviour block: a creature that jumps out of the water (kind 13, rooms 16 and 19)
+;
+; Used by the five magenta imps that leap up from the blood of Lake of despair and the creatures of Underground river
+; (attribute $03). After the 5 header bytes: attribute, sprite height, width in bytes, then the addresses of its two
+; sprites.
+@label=BehaviourJumper
+b$9549 DEFB $00,$00,$07,$07,$02  ; hit box top, left, bottom, right (2-pixel units); slot +$15 (Unknown)
+ $954E DEFB $03,$08,$02  ; attribute, sprite height, width (bytes)
+ $9551 DEFW $EF4F    ; sprite, frame 0
+ $9553 DEFW $EF51    ; sprite, frame 1

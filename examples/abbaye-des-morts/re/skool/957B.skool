@@ -1,5 +1,10 @@
-; Behaviour data for object kind 14 (rooms 10): 5-byte header, then
-; kind-specific bytes and sprite/frame pointers
-b$957B DEFB $00,$00,$13,$0F,$01
- $9580 DEFB $06,$14,$04
- $9583 DEFW $D763
+; Behaviour block: the Pestilent Beast (kind 14, room 10)
+;
+; Used by the beast of room 10 (attribute $06): a 32 x 40 pixel sprite at the top of the room, the head of the beast.
+; Observed: its counter (slot +$12) counts down from $6E and about when it ends two flames appear on the platform
+; below, one running left and one right (entities with handler #R$B9B0). Hit box 38 x 30 pixels. After the 5 header
+; bytes (hit box as in #R$93D3): attribute, sprite height, width in bytes, then the address of one sprite.
+@label=BehaviourBeastHead
+b$957B DEFB $00,$00,$13,$0F,$01  ; hit box top, left, bottom, right (2-pixel units); slot +$15 (Unknown)
+ $9580 DEFB $06,$14,$04  ; attribute, sprite height, width (bytes)
+ $9583 DEFW $D763    ; sprite

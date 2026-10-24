@@ -1,21 +1,26 @@
-; Behaviour data for object kind 9 (rooms 15,19): 5-byte header, then
-; kind-specific bytes and sprite/frame pointers
-b$94E3 DEFB $00,$03,$03,$05,$02
- $94E8 DEFB $45,$04
- $94EA DEFW $EF53
- $94EC DEFW $EF55
- $94EE DEFW $F357
- $94F0 DEFB $44
- $94F1 DEFW $EF30
- $94F3 DEFB $43
- $94F4 DEFW $EF30
- $94F6 DEFB $44
- $94F7 DEFW $EF32
- $94F9 DEFB $47
- $94FA DEFW $EF34
- $94FC DEFB $47
- $94FD DEFW $EF36
- $94FF DEFB $45
- $9500 DEFW $F759
- $9502 DEFW $F75B
- $9504 DEFW $F75D
+; Behaviour block: a water drop (kind 9, rooms 15 and 19)
+;
+; Used by the drops that fall from the roof of Gloomy tunels and Underground river (cyan, attribute $45). This kind does
+; not have the layout of #R$93D3: after the 5 header bytes (same meaning as there) come the attribute and the sprite
+; height (read by #R$B56D), then sprite addresses and 3-byte entries (attribute, sprite address) that #R$B56D indexes by the
+; animation step. What each entry is (falling drop, splash on the ground) was not worked out: Unknown.
+@label=BehaviourDrop
+b$94E3 DEFB $00,$03,$03,$05,$02  ; hit box top, left, bottom, right (2-pixel units); slot +$15 (Unknown)
+ $94E8 DEFB $45,$04  ; attribute, sprite height
+ $94EA DEFW $EF53    ; sprite $EF53
+ $94EC DEFW $EF55    ; sprite $EF55
+ $94EE DEFW $F357    ; sprite $F357
+ $94F0 DEFB $44      ; 3-byte entries: attribute,
+ $94F1 DEFW $EF30    ; sprite $EF30
+ $94F3 DEFB $43      ; attribute
+ $94F4 DEFW $EF30    ; sprite $EF30
+ $94F6 DEFB $44      ; attribute
+ $94F7 DEFW $EF32    ; sprite $EF32
+ $94F9 DEFB $47      ; attribute
+ $94FA DEFW $EF34    ; sprite $EF34
+ $94FC DEFB $47      ; attribute
+ $94FD DEFW $EF36    ; sprite $EF36
+ $94FF DEFB $45      ; attribute
+ $9500 DEFW $F759    ; sprite $F759
+ $9502 DEFW $F75B    ; sprite $F75B
+ $9504 DEFW $F75D    ; sprite $F75D

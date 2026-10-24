@@ -1,8 +1,12 @@
-; Behaviour data for object kind 4 (rooms 3,14,16,19): 5-byte header, then
-; kind-specific bytes and sprite/frame pointers
-b$9445 DEFB $00,$01,$05,$06,$02
- $944A DEFB $44
- $944B DEFW $9463
- $944D DEFB $05
- $944E DEFW $945F
- $9450 DEFW $945F
+; Behaviour block: a spider on its thread (kind 4, rooms 3, 14, 16 and 19)
+;
+; Used by the green spiders that move up and down (attribute $44). The two frames are at $F338 and $F33A (rows 24-39 of the sprite sheet, 2 bytes wide); the shift table is #R$9463.
+; .
+; Layout: see #R$93D3.
+@label=BehaviourSpider
+b$9445 DEFB $00,$01,$05,$06,$02  ; hit box top, left, bottom, right; slot +$15 (Unknown)
+ $944A DEFB $44      ; attribute
+ $944B DEFW $9463    ; table of (first column, width) for x AND 3
+ $944D DEFB $05      ; sprite height (2-pixel units)
+ $944E DEFW $945F    ; sprites, first direction (left or up)
+ $9450 DEFW $945F    ; sprites, second direction (right or down)

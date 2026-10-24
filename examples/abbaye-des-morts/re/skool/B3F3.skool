@@ -1,7 +1,19 @@
-; Routine at B3F3
+; Queue one or two draw commands of an entity and go on with the next slot
 ;
-; Used by the routine at #R$BC43.
-c$B3F3 LDI           ;
+; Copies draw commands (10 bytes each: routine word, y, x/4, graphics word, width, height, unused, attribute; see
+; #R$ACD1) from HL to the end of the frame call list at DE and stores the new end in #R$BE58. #R$B3F3 copies two
+; commands in a row (20 bytes: the commands at #R$ACD1 and #R$ACDB, used by the entities that draw two sprites: the
+; falling drop of #R$B534, Satan, the smoke), #R$B407 copies one. Both fall through to #R$B41F, which ends every
+; entity handler that has pushed back its animation counters: it sets HL to the slot after the current one and jumps
+; to #R$A5F0. Entered through IY (#R$B534, #R$B512, #R$B56D) or by a jump.
+; .
+; Hardware: none.
+;
+; HL Address of the first draw command (#R$ACD1)
+; DE Write pointer of the frame call list (the value of #R$BE58)
+; SP Slot address + $12
+@label=QueueTwoCommands
+c$B3F3 LDI           ; the main command ...
  $B3F5 LDI           ;
  $B3F7 LDI           ;
  $B3F9 LDI           ;
@@ -9,10 +21,11 @@ c$B3F3 LDI           ;
  $B3FD LDI           ;
  $B3FF LDI           ;
  $B401 LDI           ;
- $B403 LDI           ;
- $B405 LDI           ;
-; This entry point is used by the routine at #R$B3D2.
-*$B407 LDI           ;
+ $B403 LDI           ; ... 10 bytes
+ $B405 LDI           ; and then the second command (10 bytes)
+; Entry point used by #R$B3D2 and #R$B512 (through IY): copy one command, 10 bytes.
+@label=QueueOneCommand
+*$B407 LDI           ; 10 bytes
  $B409 LDI           ;
  $B40B LDI           ;
  $B40D LDI           ;
@@ -22,9 +35,11 @@ c$B3F3 LDI           ;
  $B415 LDI           ;
  $B417 LDI           ;
  $B419 LDI           ;
- $B41B LD ($BE58),DE ;
-; This entry point is used by the routines at #R$B099, #R$B0B1, #R$B3D2,
-; #R$B56D and #R$BC43.
-*$B41F LD HL,$0004   ;
+ $B41B LD ($BE58),DE ; new end of the frame call list
+; Entry point used by every entity handler that has pushed back its animation counters (and by those that draw nothing):
+; go on with the next slot. SP is at slot+$12.
+@label=NextSlotAfterAnim
+@isub=LD HL,SLOT_SIZE-$12
+*$B41F LD HL,$0004   ; slot+$12 + 4 = the next slot
  $B422 ADD HL,SP     ;
- $B423 JP $A5F0      ;
+ $B423 JP $A5F0      ; #R$A5F0 enters the handler of the slot at HL

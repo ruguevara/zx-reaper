@@ -1,6 +1,9 @@
-; Behaviour data for object kind 12 (rooms 14): 5-byte header, then
-; kind-specific bytes and sprite/frame pointers
-b$953D DEFB $03,$01,$07,$06,$02
- $9542 DEFB $43,$08,$02
- $9545 DEFW $EF4B
- $9547 DEFW $EF4D
+; Behaviour block: a spore plant (kind 12, room 14)
+;
+; Used by the three magenta plants of Hidden garden that throw spores (attribute $43). After the 5 header bytes:
+; attribute, sprite height, width in bytes, then the addresses of its two sprites.
+@label=BehaviourSporePlant
+b$953D DEFB $03,$01,$07,$06,$02  ; hit box top, left, bottom, right (2-pixel units); slot +$15 (Unknown)
+ $9542 DEFB $43,$08,$02  ; attribute, sprite height, width (bytes)
+ $9545 DEFW $EF4B    ; sprite, frame 0
+ $9547 DEFW $EF4D    ; sprite, frame 1

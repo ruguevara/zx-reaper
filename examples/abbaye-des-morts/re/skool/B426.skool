@@ -1,11 +1,19 @@
-; Routine at B426
+; Free the slot of an entity
 ;
-; Used by the routines at #R$B391 and #R$B9B0.
-c$B426 LD HL,$FFFA   ;
+; The same code as #R$A724, kept for the entity handlers: SP goes back to slot+2, the handler word at slot+0 is
+; zeroed (the slot is free; #R$A5F0 skips such a slot from now on) and the walker goes on with the slot after this
+; one. Used by the intro runner #R$B391 when it has run off the screen and by the flame #R$B9B0.
+; .
+; Hardware: none.
+;
+; SP Slot address + 8
+@label=FreeEntitySlot
+c$B426 LD HL,$FFFA   ; -6: back to slot+2
  $B429 ADD HL,SP     ;
  $B42A LD SP,HL      ;
- $B42B LD HL,$0000   ;
- $B42E PUSH HL       ;
- $B42F LD HL,$0016   ;
+ $B42B LD HL,$0000   ; handler = 0
+ $B42E PUSH HL       ; written over the handler word at slot+0
+@isub=LD HL,SLOT_SIZE
+ $B42F LD HL,$0016   ; the next slot
  $B432 ADD HL,SP     ;
- $B433 JP $A5F0      ;
+ $B433 JP $A5F0      ; #R$A5F0 enters the handler of the slot at HL
