@@ -1,4 +1,22 @@
-; Routine at 9660
+; Attribute copy chain (last 10 LDI), then the bitmap copy of the run begins
+;
+; The end of the chain of #R$9636, then the plain copy of the last attribute byte, then the set-up of the bitmap copy:
+; the high byte of the attribute address is turned into the high byte of the screen address of the same cell row (the
+; three thirds of the screen are $0800 apart), DE now addresses pixel row 0 of the last cell of the run, and HL the
+; matching byte of the first pixel-row page of the redraw buffers (#R$C500 + index of the last cell). B = 4 pairs of
+; pixel rows. C = $FF only keeps the LDD and LDI counting in BC from borrowing into B. It then falls into the JR at
+; #R$9683, which enters the LDD chain of #R$9685; the loop of #R$96F3 comes back to the same JR for the next pair of
+; pixel rows.
+; .
+; Hardware: writes the last attribute byte of the run and prepares screen addresses; the bitmap is written by the
+; chains that follow.
+;
+; HL Redraw attribute buffer address of the last cell
+; DE Attribute file address of the last cell
+; O:HL Page $C5 address of the last cell
+; O:DE Screen bitmap address of pixel row 0 of the last cell
+; O:BC $04FF
+@label=CopyAttrChain_Tail
 c$9660 LDI           ;
  $9662 LDI           ;
  $9664 LDI           ;
@@ -9,16 +27,22 @@ c$9660 LDI           ;
  $966E LDI           ;
  $9670 LDI           ;
  $9672 LDI           ;
- $9674 LD A,(HL)     ;
+ $9674 LD A,(HL)     ; the last cell has no LDI
  $9675 LD (DE),A     ;
  $9676 LD A,D        ;
  $9677 ADD A,A       ;
  $9678 ADD A,A       ;
  $9679 ADD A,A       ;
+@isub=AND THIRD_MASK
  $967A AND $18       ;
+@isub=ADD A,SCREEN_HIGH
  $967C ADD A,$40     ;
- $967E LD D,A        ;
- $967F INC H         ;
- $9680 LD BC,$04FF   ;
-; This entry point is used by the routine at #R$96F3.
-*$9683 JR $9683      ;
+ $967E LD D,A        ; D = high byte of the screen address
+ $967F INC H         ; next page of the redraw buffer: pixel row 0
+@isub=LD BC,PIXEL_ROW_PAIRS*256+$FF
+ $9680 LD BC,$04FF   ; B = pairs of pixel rows, C = $FF so that LDD/LDI never borrow from B
+; Self-modified: the offset byte of this JR is written by #R$9615 (2 x (32 - run length)). It enters the chain of LDD
+; instructions at #R$9685 to copy one pixel row of the run from its last cell to its first; #R$96F3 jumps back here to
+; do the next pair of pixel rows.
+@label=SmcBitmapBackJump
+*$9683 JR $9683      ; enter the LDD chain; the offset byte (+1) is patched

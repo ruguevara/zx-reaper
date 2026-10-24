@@ -1,4 +1,16 @@
-; Routine at 96F3
+; Bitmap copy chain going forward (last 10 LDI), then the loops over pixel rows, runs and rows
+;
+; The end of the chain of #R$96C9 and the plain copy of the last cell's byte, then the loop control of #R$95FF: after
+; each pair of pixel rows (one backward, one forward copy) B counts down and the code returns to the LDD entry at
+; #R$9683 until the 8 pixel rows are done; then the saved list pointer and run counter are restored and the next run
+; of the row is started at #R$9615; after the last run it goes on at #R$9602 with the next row record of the list.
+; .
+; Hardware: writes the screen bitmap.
+;
+; HL Redraw buffer address of the last cell
+; DE Screen bitmap address of the last cell
+; B Pairs of pixel rows left (the run counter is in the stack)
+@label=CopyBitmapForward_Tail
 c$96F3 LDI           ;
  $96F5 LDI           ;
  $96F7 LDI           ;
@@ -13,11 +25,11 @@ c$96F3 LDI           ;
  $9708 LD (DE),A     ;
  $9709 INC H         ;
  $970A INC D         ;
- $970B DEC B         ;
- $970C JP NZ,$9683   ;
- $970F POP HL        ;
- $9710 POP BC        ;
+ $970B DEC B         ; one more pair of pixel rows done
+ $970C JP NZ,$9683   ; next pair: back to the LDD chain
+ $970F POP HL        ; list pointer saved at #R$9619: the index byte of the run just drawn
+ $9710 POP BC        ; runs left, saved at #R$9615
  $9711 DEC B         ;
- $9712 JP NZ,$9615   ;
- $9715 INC L         ;
+ $9712 JP NZ,$9615   ; next run of the row
+ $9715 INC L         ; HL = the row number byte of the next row record
  $9716 JP $9602      ;

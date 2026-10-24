@@ -12,7 +12,7 @@
 ; except effect 6; the lengths are 2, 30, 10, 8, 56 (40 + 8 + 8), 1, 2 and 8 frames. Effect 5 (observed with the
 ; simulator, one burst per frame): PERIOD 40, 34, 28, 22, 16, 10, 4, 254, a rising chirp that ends in one low blip.
 @label=SoundEffects
-b$87F2 DEFB $00,$02,$02,$01,$00,$00,$00,$00 ; 2 SFX_JUMP: 2 frames, PERIOD 0 then 2 (a click and a higher click)
+b$87F2 DEFB $00,$02,$02,$01,$00,$00,$00,$00 ; 2 SFX_JUMP: 2 frames, PERIOD 0 (one click) then 2 (about 21 kHz)
  $87FA DEFB $A0,$50,$1E,$01,$00,$00,$00,$00 ; 3 SFX_TRIGGER: 30 frames, PERIOD $A0 + $50 per frame (wraps: a warble)
  $8802 DEFB $E6,$E6,$0A,$01,$02,$00,$00,$00 ; 4 SFX_PORTAL: 10 frames, PERIOD $E6 - $1A per frame
  $880A DEFB $28,$FA,$08,$01,$00,$00,$00,$00 ; 5 SFX_PICKUP: 8 frames, PERIOD 40 - 6 per frame (rising)

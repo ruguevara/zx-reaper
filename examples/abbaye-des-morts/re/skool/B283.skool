@@ -19,7 +19,7 @@ c$B283 POP BC        ; speed
  $B289 OR A          ;
  $B28A SBC HL,BC     ; y goes up
  $B28C PUSH HL       ; store y
- $B28D POP HL        ; SP is back at slot+10
+ $B28D POP HL        ; SP is back at slot+$A
  $B28E LD A,H        ; y in 2-pixel units
  $B28F CP E          ; above the upper turning point?
  $B290 JR NC,$B2A0   ; no: go on
@@ -35,6 +35,6 @@ c$B283 POP BC        ; speed
  $B29F POP HL        ;
 *$B2A0 EX AF,AF'     ; A = x
  $B2A1 LD D,A        ; D = x
- $B2A2 POP BC        ; skip the unused word at +10
+ $B2A2 POP BC        ; skip the unused word at +$A
  $B2A3 LD E,H        ; E = y
  $B2A4 JR $B2C3      ; place the sprite, test the hit box, draw (facing up)

@@ -157,3 +157,5 @@ JOB_SIZE                 EQU 0x10 ; bytes of a draw queue job at $C000 (16 jobs)
 FLAG_SPRITE              EQU 0x40 ; tile flag bit 6: a sprite covers the cell this frame (becomes the redraw bit 7 for the next frame, to erase it)
 THIRD_MASK               EQU 0x18 ; mask of the screen third bits in the high byte of a screen address
 PIXEL_ROW_PAIRS          EQU 4 ; pairs of pixel rows (a cell has 8) copied by the redraw loop
+CTRL_MOVES               EQU 0x1F ; control bits 0-4: right, left, crouch and jump; any of them ends the intro
+CRUSADER_PERIOD          EQU 40 ; frames between two crusaders made by the spawner of rooms 5, 6 and 25

@@ -33,7 +33,7 @@ c$B391 POP BC        ; speed
  $B3A3 SRA H         ; x / 4: byte column
  $B3A5 SRA H         ;
  $B3A7 LD ($ACD3),HL ; draw command position: (y, x/4)
- $B3AA POP BC        ; skip +10, +12 and +14: no hit box
+ $B3AA POP BC        ; skip the words at +$A, +$C and +$E: no hit box
  $B3AB POP BC        ;
  $B3AC POP BC        ;
 ; Entry point used through #R$A851 by #R$B365, #R$B2F9, #R$B344 and #R$B436 (creatures facing right or down) and by this

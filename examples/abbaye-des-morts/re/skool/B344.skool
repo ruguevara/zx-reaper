@@ -25,7 +25,7 @@ c$B344 POP BC        ; speed
  $B349 POP HL        ; y (8.8)
  $B34A ADD HL,BC     ; y goes down
  $B34B PUSH HL       ;
- $B34C POP HL        ; SP is back at slot+10
+ $B34C POP HL        ; SP is back at slot+$A
  $B34D LD A,H        ; y in 2-pixel units
  $B34E CP D          ; reached the lower turning point?
  $B34F JR C,$B35F    ; no: go on
@@ -41,6 +41,6 @@ c$B344 POP BC        ; speed
  $B35E POP HL        ;
 *$B35F EX AF,AF'     ; A = x
  $B360 LD D,A        ; D = x
- $B361 POP BC        ; skip the unused word at +10
+ $B361 POP BC        ; skip the unused word at +$A
  $B362 LD E,H        ; E = y
  $B363 JR $B380      ; place the sprite, test the hit box, draw (facing down)

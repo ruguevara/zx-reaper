@@ -9,8 +9,8 @@
 ; to the bitmap of the cells.
 ; .
 ; The copy is done with unrolled chains of LDI (and LDD) instructions that are entered at the right place by a JR
-; whose offset byte is patched for every run to 2 x (32 - n): #R$9634 (attributes, chain #R$9636-#R$9673),
-; #R$9683 (bitmap going back, chain #R$9685-#R$96C2) and #R$96C7 (bitmap going forward, chain #R$96C9-#R$9706). Each chain
+; whose offset byte is patched for every run to 2 x (32 - n): #R$9634 (attributes, chain from #R$9636),
+; #R$9683 (bitmap going back, chain from #R$9685) and #R$96C7 (bitmap going forward, chain from #R$96C9). Each chain
 ; has 31 two-byte LDIs; the last byte of a run is copied by a plain LD A,(HL) / LD (DE),A after the chain. To save
 ; a seek at the end of every pixel row, the rows alternate in direction: row 0 is copied from the last cell of the
 ; run back to the first (LDD), row 1 from the first to the last (LDI), and so on for four pairs of rows (B).

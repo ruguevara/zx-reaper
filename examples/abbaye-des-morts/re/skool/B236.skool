@@ -29,7 +29,7 @@ c$B236 POP BC        ; speed
  $B23C OR A          ;
  $B23D SBC HL,BC     ; y goes up
  $B23F PUSH HL       ; store y
- $B240 POP HL        ; SP is back at slot+10
+ $B240 POP HL        ; SP is back at slot+$A
  $B241 LD A,H        ; y in 2-pixel units
  $B242 CP E          ; above the upper turning point?
  $B243 JR NC,$B253   ; no: go on
@@ -45,7 +45,7 @@ c$B236 POP BC        ; speed
  $B252 POP HL        ;
 *$B253 EX AF,AF'     ; A = x
  $B254 LD D,A        ; D = x
- $B255 POP BC        ; skip the unused word at +10
+ $B255 POP BC        ; skip the unused word at +$A
  $B256 LD E,H        ; E = y
  $B257 LD L,H        ; L = y
  $B258 LD H,D        ; H = x

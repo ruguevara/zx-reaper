@@ -1,17 +1,26 @@
-; Run a cutscene until $8501 is set
+; Run a cutscene until an actor says it is over
 ;
-; Used by the routine at #R$887B.
-c$88DE XOR A         ;
- $88DF LD ($8501),A  ;
- $88E2 LD A,$80      ;
- $88E4 LD ($850C),A  ;
-*$88E7 CALL $8869    ;
- $88EA CALL $BDDA    ;
- $88ED CALL $97B7    ;
- $88F0 CALL $95FF    ;
- $88F3 LD A,($8501)  ;
- $88F6 OR A          ;
- $88F7 JR Z,$88E7    ;
- $88F9 XOR A         ;
- $88FA LD ($850C),A  ;
- $88FD RET           ;
+; Clears the flag #R$8501, sets the room state to $80 (the frame routine runs the game logic, so the actors queued by
+; #R$8870 are spawned by #R$8905 and move) and runs the foreground half of the game frame, as the intro does: wait for a
+; completed frame list (#R$8869), run it (#R$BDDA), build and copy the cells (#R$97B7, #R$95FF). It stops when an
+; actor sets #R$8501 (the end of its path script, #R$B1CF, or its countdown, #R$B97D) and then sets the room state to 0.
+; Jean is not in play (state 0) and the keys do nothing.
+; .
+; Hardware: none directly.
+@label=RunCutscene
+c$88DE XOR A                ; CutsceneDone = 0
+ $88DF LD ($8501),A
+@isub=LD A,STATE_RUNNING
+ $88E2 LD A,$80
+ $88E4 LD ($850C),A         ; RoomState
+@label=RunCutscene_Loop
+*$88E7 CALL $8869           ; wait for a completed frame list
+ $88EA CALL $BDDA           ; = #R$BDDB, run the frame list
+ $88ED CALL $97B7
+ $88F0 CALL $95FF
+ $88F3 LD A,($8501)         ; CutsceneDone
+ $88F6 OR A
+ $88F7 JR Z,$88E7
+ $88F9 XOR A                ; room state 0
+ $88FA LD ($850C),A
+ $88FD RET

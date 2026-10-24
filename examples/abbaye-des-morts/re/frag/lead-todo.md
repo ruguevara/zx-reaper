@@ -105,3 +105,16 @@
 - Bugs (W11): pyre monk countdown wraps to $FFFF (harmless); plant reload
   read from +$B not +$13 (same value); seeds test one flag cell, arrows two.
 - Tool: `zxq.py check FILE...` now builds HEAD + the given files.
+- W10 splits: $B2C3 "Place an entity sprite (facing left or up) and test
+  the hit box", $B380 (right or down), $B3AD "Read the sprite description
+  and animate (right or down)", $B3D8, $B3E4, $B407, $B41F.
+- Kinds ($B028): 0 $B391 intro runner, 1 $B099 crusaders (rooms 5, 6, 25),
+  2/3 horizontal patrol, 4/5 vertical patrol, 6/7 hanged men (room 9), 8
+  $B44B chaser (room 11), 9 $B512 drops, 10 archer, 11 $B5D6 stone head, 12
+  plants (14), 13 fish (16, 19). Creature = sprite block, not handler: rats
+  (2), bats (8), worms (9, 14), skeletons (13, 22), crusaders (15, 20),
+  demons (21, 22), flyers (20, 23), ceiling ghosts (22, 23); spiders (3, 14,
+  16, 19), flies (12), fireballs (22, 23).
+- $B426 duplicates $A724 (FreeSlot).
+- Bugs (W10): patrol limit tests are equalities (latent); chaser flag
+  probes wrap rows at columns 0, 30, 31; rope INC L wraps at column 31.

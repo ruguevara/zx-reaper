@@ -41,7 +41,7 @@ c$B2F9 POP BC        ; speed
  $B313 POP HL        ;
 *$B314 EX AF,AF'     ; A = x
  $B315 LD D,A        ; D = x
- $B316 POP BC        ; skip the unused word at +10
+ $B316 POP BC        ; skip the unused word at +$A
  $B317 LD E,H        ; E = y
  $B318 LD L,H        ; L = y
  $B319 LD H,D        ; H = x

@@ -18,7 +18,7 @@ c$B436 PUSH BC       ; store the countdown
 *$B438 POP DE        ; D = x
  $B439 POP HL        ; H = y
  $B43A LD E,H        ; E = y
- $B43B POP AF        ; skip the word at +10
+ $B43B POP AF        ; skip the word at +$A
  $B43C LD A,($A8A2)  ; Jean's x
  $B43F BIT 7,A       ; x of $80 or more is negative: counts as 0
  $B441 JR Z,$B444    ;

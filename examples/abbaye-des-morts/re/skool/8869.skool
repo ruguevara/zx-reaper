@@ -1,7 +1,14 @@
-; Wait for the frame flag at $BDDA
+; Wait until the interrupt has completed a frame list
 ;
-; Used by the routines at #R$8832 and #R$88DE.
-c$8869 LD A,($BDDA)  ;
- $886C OR A          ;
- $886D JR NZ,$8869   ;
- $886F RET           ;
+; Spins until the byte at #R$BDDA is 0 (a NOP). The game frame in the interrupt stores 0 there when it has queued the
+; sprite commands of a frame (#R$A5DB); the CALL #R$BDDA that follows runs the list. Used by the intro (#R$8832) and
+; the cutscene loop (#R$88DE); the main loop has its own copy of the wait with the one-shot gates inside it (#R$8678).
+; .
+; Hardware: waits for the frame interrupt without HALT.
+;
+; O:A 0
+@label=WaitFrameList
+c$8869 LD A,($BDDA)
+ $886C OR A
+ $886D JR NZ,$8869
+ $886F RET

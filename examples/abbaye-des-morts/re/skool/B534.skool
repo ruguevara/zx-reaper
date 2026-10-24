@@ -20,7 +20,7 @@ c$B534 POP BC        ; speed
  $B539 POP HL        ; y (8.8)
  $B53A ADD HL,BC     ; the drop falls
  $B53B PUSH HL       ;
- $B53C POP HL        ; SP is back at slot+10
+ $B53C POP HL        ; SP is back at slot+$A
  $B53D LD A,H        ; y in 2-pixel units
  $B53E CP D          ; the end of the fall?
  $B53F JR C,$B54F    ; not yet
@@ -36,7 +36,7 @@ c$B534 POP BC        ; speed
  $B54E POP HL        ;
 *$B54F EX AF,AF'     ; A = x
  $B550 LD D,A        ; D = x
- $B551 POP BC        ; skip the word at +10
+ $B551 POP BC        ; skip the word at +$A
  $B552 LD C,E        ; C = y of the tip
  $B553 LD E,H        ; E = y
  $B554 LD L,H        ; L = y

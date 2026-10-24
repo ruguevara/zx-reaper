@@ -44,7 +44,7 @@ c$B2A6 POP BC        ; speed
  $B2BE POP HL        ;
 *$B2BF LD D,H        ; D = x
  $B2C0 POP HL        ; y (8.8)
- $B2C1 POP BC        ; skip the unused word at +10
+ $B2C1 POP BC        ; skip the unused word at +$A
  $B2C2 LD E,H        ; E = y
 ; Entry point used by #R$B283 and #R$B436 (movers whose sprite faces left or up): D = x, E = y, H = y. Puts the
 ; position into the draw command and goes on to the hit box test with the first frame table.

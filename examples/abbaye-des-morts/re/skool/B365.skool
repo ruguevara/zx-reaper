@@ -15,7 +15,7 @@ c$B365 POP BC        ; speed
  $B366 POP DE        ; D right turning point, E left turning point
  $B367 POP HL        ; x (8.8)
  $B368 ADD HL,BC     ; x goes right
- $B369 PUSH HL       ;
+ $B369 PUSH HL       ; store x
  $B36A POP HL        ; SP is back at slot+8
  $B36B LD A,H        ; x in 2-pixel units
  $B36C CP D          ; at the right turning point?
@@ -31,7 +31,7 @@ c$B365 POP BC        ; speed
  $B37B POP HL        ;
 *$B37C LD D,H        ; D = x
  $B37D POP HL        ; y (8.8)
- $B37E POP BC        ; skip the unused word at +10
+ $B37E POP BC        ; skip the unused word at +$A
  $B37F LD E,H        ; E = y
 ; Entry point used by #R$B344 and #R$B436 (movers whose sprite faces right or down): D = x, E = y, H = y. Puts the
 ; position into the draw command and goes on to the hit box test with the second frame table.

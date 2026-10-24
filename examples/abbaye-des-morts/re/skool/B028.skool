@@ -17,8 +17,7 @@
 ; bottom (and the other way round).
 ; .
 ; Handlers that change their own slot's first word to another (the patrollers between going left and right, the
-; crusaders between walking and jumping, Death between its two halves) leave this table unused for the rest of
-; their life.
+; crusaders between walking and jumping) are not looked up in this table again.
 @label=EntityHandlers
 w$B028 DEFW $B391 ; kind 0: UpdateIntroRunner
  $B02A DEFW $B099 ; kind 1: UpdateCrusaderSpawner, makes a crusader every 40 frames from a template at #R$B04C

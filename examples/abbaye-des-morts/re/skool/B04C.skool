@@ -1,4 +1,27 @@
-; Entity templates: initial stack frames for the handler at $B1D4
-b$B04C DEFW $B1D4,$0060,$B218,$F700,$4400,$0600,$0100,$060C,$93E5,$0808,$0200
- $B062 DEFW $B1D4,$0060,$B220,$F700,$4400,$0600,$0100,$060C,$93E5,$0808,$0200
- $B078 DEFW $B1D4,$0060,$B22C,$F700,$4400,$0600,$0100,$060C,$93E5,$0808,$0200
+; Crusader templates: the initial object slot of a crusader, one per chase room
+;
+; The spawner #R$B099 copies one of these 22 bytes into a free slot of #R$C100 every 40 frames (the room object record
+; of room 5, 6 or 25 holds the address in its parameter bytes 5 and 6 at #R$8BC2, #R$8BCD and #R$8BD8). The templates
+; differ only in the path script of word +4. A slot is a stack frame (see #R$C100): its words are 11 words popped by the
+; handler #R$B1D4 and the code it jumps to:
+; .
+; +0 word: handler, #R$B1D4 (the path follower; the path commands replace it for a while by #R$B163, #R$B10C, #R$B139)
+; +2 word: x speed, 8.8 fixed point in 2-pixel units per frame ($0060: 0.375 units, three quarters of a pixel)
+; +4 word: address of the next entry of the path script (#R$B218): pairs (target x, command)
+; +6 word: x, 8.8 ($F700: -9 units, off the left edge); the high byte is in 2-pixel units
+; +8 word: y, 8.8 ($4400: 68 units, standing on the floor of the three rooms)
+; +A word: state of a jump along a speed curve: low byte = index in the curve (0-5), high byte = frames left (6)
+; +C word: hit box offset (low byte y, high byte x, in 2-pixel units): x + 1, y + 0
+; +E word: hit box size: x + 6, y + $0C (the box spans x + 1..x + 6 and y + 0..y + $0C)
+; +$10 word: pointer to the sprite block of the crusader (#R$93E0 + 5: attribute, pair table, frame tables)
+; +$12 byte: animation counter, +$13 byte: its reload (8 frames per step)
+; +$14 byte: frame number, +$15 byte: number of frames (2)
+; .
+; All three are drawn from the sprite set 1 (the crusaders, #R$6916), cyan. The hit box test (#R$A851) makes a crusader
+; kill Jean on touch.
+@label=CrusaderTemplateRoom5
+b$B04C DEFW $B1D4,$0060,$B218,$F700,$4400,$0600,$0100,$060C,$93E5,$0808,$0200 ; room 5, script $B218
+@label=CrusaderTemplateRoom6
+ $B062 DEFW $B1D4,$0060,$B220,$F700,$4400,$0600,$0100,$060C,$93E5,$0808,$0200 ; room 6, script $B220
+@label=CrusaderTemplateRoom25
+ $B078 DEFW $B1D4,$0060,$B22C,$F700,$4400,$0600,$0100,$060C,$93E5,$0808,$0200 ; room 25 (the ending), script $B22C

@@ -1,26 +1,42 @@
-; Title: room 0 until a key is pressed
+; Intro: room 0 until a key is pressed
 ;
-; Used by the routine at #R$85FC.
-c$8832 XOR A         ;
- $8833 LD ($A894),A  ;
- $8836 LD ($8509),A  ;
- $8839 LD ($A2D2),A  ;
- $883C CALL $86B9    ;
- $883F CALL $9B5A    ;
- $8842 LD A,$80      ;
- $8844 LD ($850C),A  ;
-*$8847 CALL $8869    ;
- $884A CALL $BDDA    ;
- $884D CALL $97B7    ;
- $8850 CALL $95FF    ;
- $8853 CALL $A304    ;
- $8856 LD A,($A2D2)  ;
- $8859 OR A          ;
- $885A RET NZ        ;
- $885B LD A,($850C)  ;
- $885E CP $05        ;
- $8860 RET Z         ;
- $8861 LD A,($A2CF)  ;
- $8864 AND $1F       ;
- $8866 JR Z,$8847    ;
- $8868 RET           ;
+; Called by the start of the game (#R$85FC) after ENTER in the title menu. Room 0 is the intro: the text "13th Century.
+; The Cathars were being expelled ... The Cathar Jean Raymond runs to escape the crusaders..." with Jean and three
+; crusaders walking across the screen (the four objects of kind 0 in the room object table, run by the game frame in
+; the interrupt, #R$85E2). Jean's own state is set to 0 (none), so the player is not in play, and the key code
+; #R$A2D2 is cleared. The routine enters room 0 (#R$86B9), draws it (#R$9B5A), sets the room state to $80, and runs the
+; foreground half of the game frame in a loop: wait for a completed frame list (#R$8869), run it (#R$BDDA), build and
+; copy the changed cells (#R$97B7, #R$95FF) and read the key code (#R$A304; the menu frame routine that does it in the
+; menus is no longer installed). It returns when a key is down (#R$A2D2 is not 0), when the room state is 5 (R and Y
+; were pressed together: the frame routine sets it, and the caller ignores it, as #R$BDF3 clears the state), or when any of the
+; control bits 0-4 of #R$A2CF is set (right, left, crouch, jump, or the Kempston joystick).
+; .
+; Hardware: none directly; the screen is written by the routines called.
+@label=RunIntro
+c$8832 XOR A                ; PlayerState 0: no player in the intro
+ $8833 LD ($A894),A
+ $8836 LD ($8509),A         ; room 0
+ $8839 LD ($A2D2),A         ; KeyCode: no key yet
+ $883C CALL $86B9           ; build room 0
+ $883F CALL $9B5A           ; draw it
+@isub=LD A,STATE_RUNNING
+ $8842 LD A,$80
+ $8844 LD ($850C),A
+@label=RunIntro_Loop
+*$8847 CALL $8869           ; wait for a completed frame list
+ $884A CALL $BDDA           ; = #R$BDDB, run the frame list
+ $884D CALL $97B7           ; redraw runs and sprite jobs
+ $8850 CALL $95FF           ; cells to the screen
+ $8853 CALL $A304           ; KeyCode of the key held
+ $8856 LD A,($A2D2)
+ $8859 OR A
+ $885A RET NZ               ; a key: the intro ends
+ $885B LD A,($850C)
+@isub=CP STATE_GAME_OVER
+ $885E CP $05
+ $8860 RET Z                ; R and Y: Game Over requested
+ $8861 LD A,($A2CF)         ; ControlsRead
+@isub=AND CTRL_MOVES
+ $8864 AND $1F
+ $8866 JR Z,$8847           ; no control pressed: go on
+ $8868 RET

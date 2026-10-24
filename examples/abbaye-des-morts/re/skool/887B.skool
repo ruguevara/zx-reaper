@@ -1,38 +1,67 @@
 ; Ending sequence
 ;
-; Used by the routine at #R$85FC.
-c$887B XOR A         ;
- $887C LD ($A894),A  ;
- $887F LD A,$19      ;
- $8881 LD ($8509),A  ;
- $8884 CALL $86B9    ;
- $8887 LD HL,$8345   ;
- $888A LD BC,$5042   ;
- $888D CALL $9C58    ;
- $8890 LD A,$05      ;
- $8892 LD ($8551),A  ;
- $8895 LD HL,$83A8   ;
- $8898 LD BC,$0005   ;
- $889B CALL $8870    ;
- $889E CALL $88DE    ;
- $88A1 LD A,$04      ;
- $88A3 LD ($8509),A  ;
- $88A6 CALL $86B9    ;
- $88A9 LD HL,$8363   ;
- $88AC LD BC,$2805   ;
- $88AF CALL $9C58    ;
- $88B2 LD HL,$3E00   ;
- $88B5 LD ($A8A1),HL ;
- $88B8 LD HL,$3A00   ;
- $88BB LD ($A8A3),HL ;
- $88BE LD HL,$83AD   ;
- $88C1 LD BC,$0021   ;
- $88C4 CALL $8870    ;
- $88C7 CALL $88DE    ;
- $88CA LD A,$02      ;
- $88CC LD ($8551),A  ;
- $88CF LD HL,$8381   ;
- $88D2 CALL $9D5F    ;
- $88D5 LD HL,$85E8   ;
- $88D8 CALL $A1C3    ;
- $88DB JP $A1CE      ;
+; Run by the main loop (#R$85FC) when the room state is 3 (touching the red scroll of room 24 sets it, #R$A668). In order:
+; .
+; 1 Jean's state becomes 0 (none) and room 25 is entered (#R$86B9). The full-screen text window #R$9C58 shows the script
+; #R$8345, "your doom will come / not by my hand / but by human hands", in black on bright red.
+; .
+; 2 Music track 5 (128K), actor list #R$83A8 (one actor, template #R$BD80) is loaded and the cutscene runs (#R$88DE): room
+; 25, the pentagram room, with Jean on the right and the crusaders walking in (observed: it ends 365 frames after the
+; window is closed by a key).
+; .
+; 3 Room 4 is entered with the text window #R$8363 ("Heresy!!! The Cathar is hidden on the throne of Satan, burn him", black
+; on cyan). Jean's X and Y are set to $3E00 and $3A00 (the middle of the room), actor list #R$83AD (8 actors) is
+; loaded and the second cutscene runs (observed: 457 frames): a forest at night, Jean on a red pyre, the crusaders round it.
+; .
+; 4 Music track 2, the script #R$8381 ("Your body has burned in the flames, but your soul has found a place in
+; Heaven."), the stub at #R$88D5 (on a 128K it calls the music routine #R$85E8), then wait for a key and its release.
+; .
+; It returns to the main loop, which starts a new game at #R$85FC. The text windows save and restore the room state
+; (#R$9C58), and the cutscene loop sets it to 0 when it ends.
+; .
+; Hardware: none directly; the screen is written by the routines called, the keyboard is read through #R$A1C3.
+@label=RunEnding
+c$887B XOR A                ; PlayerState 0
+ $887C LD ($A894),A
+@isub=LD A,ROOM_ENDING
+ $887F LD A,$19             ; room 25
+ $8881 LD ($8509),A
+ $8884 CALL $86B9           ; build it
+ $8887 LD HL,$8345          ; ScriptEnding1
+@isub=LD BC,(BRIGHT+RED*PAPER)*256+BRIGHT+RED
+ $888A LD BC,$5042          ; B: window interior bright red paper, black ink; C: frame tiles
+ $888D CALL $9C58           ; = #R$9C58, show the text window, wait for a key
+@isub=LD A,MUSIC_TRACK_ENDING1
+ $8890 LD A,$05             ; music track 5
+ $8892 LD ($8551),A
+ $8895 LD HL,$83A8          ; CutsceneList1
+@isub=LD BC,1+OBJECT_ENTRY_SIZE*1
+ $8898 LD BC,$0005          ; 1 record
+ $889B CALL $8870           ; to the object list
+ $889E CALL $88DE           ; run the cutscene until an actor sets #R$8501
+@isub=LD A,ROOM_PYRE
+ $88A1 LD A,$04             ; room 4
+ $88A3 LD ($8509),A
+ $88A6 CALL $86B9           ; build it
+ $88A9 LD HL,$8363          ; ScriptEnding2
+@isub=LD BC,CYAN*PAPER*256+CYAN
+ $88AC LD BC,$2805          ; B: interior cyan paper, black ink; C: frame tiles
+ $88AF CALL $9C58
+ $88B2 LD HL,$3E00          ; Jean X = $3E (8.8)
+ $88B5 LD ($A8A1),HL
+ $88B8 LD HL,$3A00          ; Jean Y = $3A (8.8)
+ $88BB LD ($A8A3),HL
+ $88BE LD HL,$83AD          ; CutsceneList2
+@isub=LD BC,1+OBJECT_ENTRY_SIZE*8
+ $88C1 LD BC,$0021          ; 8 records
+ $88C4 CALL $8870
+ $88C7 CALL $88DE           ; run the second cutscene
+@isub=LD A,MUSIC_TRACK_ENDING2
+ $88CA LD A,$02             ; music track 2
+ $88CC LD ($8551),A
+ $88CF LD HL,$8381          ; ScriptEnding3
+ $88D2 CALL $9D5F           ; = #R$9D5F, run the final text script
+@label=RunEnding_Music
+ $88D5 LD HL,$85E8          ; 128K: becomes CALL $85E8 (#R$605F, MusicEntryEnding); on a 48K it only loads HL
+ $88D8 CALL $A1C3           ; wait for a key
+ $88DB JP $A1CE             ; ... and for its release; returns to the main loop

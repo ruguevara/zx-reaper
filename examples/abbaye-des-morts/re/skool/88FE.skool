@@ -1,8 +1,12 @@
-; Cutscene: no free actor slot
+; Spawn failure: no free object slot
 ;
-; Used by the routine at #R$8905.
-c$88FE POP AF        ;
- $88FF POP AF        ;
- $8900 XOR A         ;
- $8901 LD ($8552),A  ;
- $8904 RET           ;
+; The exit of #R$8905 when #R$8A6E finds no free slot: drops the template address and position it had pushed, discards
+; the rest of the queue (#R$8552 = 0) and returns to the caller of #R$8905.
+;
+; O:A 0
+@label=SpawnQueued_NoSlot
+c$88FE POP AF               ; drop the pushed position (BC)...
+ $88FF POP AF               ; ... and template (DE)
+ $8900 XOR A                ; SpawnQueueCount = 0: forget the other records
+ $8901 LD ($8552),A
+ $8904 RET
