@@ -1,2 +1,3 @@
-; Message at A50F
+; Script: "JUMP"
 t$A50F DEFM "JUMP"
+ $A513 DEFB $80

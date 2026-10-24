@@ -1,0 +1,2 @@
+; Controls newly pressed this frame ($A596)
+g$A2D1 DEFB $00

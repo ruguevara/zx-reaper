@@ -1,2 +1,0 @@
-; Data block at A53D
-b$A53D DEFB $8E,$10,$5C

@@ -1,0 +1,2 @@
+; Control bits read this frame ($A271, or $A290 for Kempston)
+g$A2CF DEFB $00

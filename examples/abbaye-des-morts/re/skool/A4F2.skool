@@ -1,0 +1,4 @@
+; Key names shown on the controls screen (8 characters, rewritten by
+; $A336/$A3F6), end of the script at $A4DD
+g$A4F2 DEFM "QAOP    "
+ $A4FA DEFB $80

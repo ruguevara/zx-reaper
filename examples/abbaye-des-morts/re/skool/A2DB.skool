@@ -1,0 +1,3 @@
+; Key codes in keyboard-scan order (CAPS SHIFT..B), 40 codes then 0 for no key;
+; read by $A304
+t$A2DB DEFM $01,"ZXCVASDFGQWERT1234509876POIUY",$0D,"LKJH ",$02,"MNB",$00

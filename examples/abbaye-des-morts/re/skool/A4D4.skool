@@ -1,2 +1,3 @@
-; Message at A4D4
+; Script: "disabled"
 t$A4D4 DEFM "disabled"
+ $A4DC DEFB $80

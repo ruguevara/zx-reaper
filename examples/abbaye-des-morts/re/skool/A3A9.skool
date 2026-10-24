@@ -1,3 +1,5 @@
-; Data block at A3A9
-b$A3A9 DEFB $0F,$A5,$C5,$A2,$14,$A5,$C3,$A2
- $A3B1 DEFB $1B,$A5,$C1,$A2,$20,$A5,$BF,$A2
+; Redefine-key prompts: 4 x (prompt script address, key pair address)
+w$A3A9 DEFW $A50F,$A2C5
+ $A3AD DEFW $A514,$A2C3
+ $A3B1 DEFW $A51B,$A2C1
+ $A3B5 DEFW $A520,$A2BF

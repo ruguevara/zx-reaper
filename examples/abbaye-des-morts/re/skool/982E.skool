@@ -1,2 +1,7 @@
-; Data block at 982E
-b$982E DEFB $F7,$98,$00,$00,$00,$00,$00,$00
+; Draw-queue job built by $97FD: handler address, then parameters written at
+; run time (16 bytes copied by $98B1)
+g$982E DEFW $98F7
+ $9830 DEFW $0000
+ $9832 DEFB $00
+ $9833 DEFW $0000
+ $9835 DEFB $00

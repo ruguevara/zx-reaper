@@ -1,3 +1,0 @@
-; Data block at A0A7
-b$A0A7 DEFB $10,$FC,$E1,$C1,$3E,$20,$CD,$D9
- $A0AF DEFB $A1,$10,$F0,$E1,$C9

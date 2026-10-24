@@ -1,2 +1,4 @@
-; Data block at 930E
-b$930E DEFB $13
+; Text: Satan's words (strings 43-45)
+t$930E DEFM $13,"your doom will come"
+ $9322 DEFM $0E,"not by my hand"
+ $9331 DEFM $12,"but by human hands"

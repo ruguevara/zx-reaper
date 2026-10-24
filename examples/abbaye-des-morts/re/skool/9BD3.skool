@@ -1,4 +1,5 @@
-; Data block at 9BD3
+; Screen-scroll setups: 4 x 8 bytes (rows, columns, start address, 4 step bytes
+; poked into $9B91/$9B95/$9B9D/$9BA1), indexed by $850B
 b$9BD3 DEFB $20,$16,$00,$00,$00,$01,$01,$00
  $9BDB DEFB $20,$16,$00,$1F,$00,$01,$FF,$00
  $9BE3 DEFB $16,$20,$00,$00,$01,$00,$00,$01

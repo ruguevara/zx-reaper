@@ -1,2 +1,5 @@
-; Message at A41A
-t$A41A DEFM "enspcsss"
+; Short names of ENTER, SPACE, CAPS SHIFT, SYMBOL SHIFT, read by $A3F6
+t$A41A DEFM "en"
+ $A41C DEFM "sp"
+ $A41E DEFM "cs"
+ $A420 DEFM "ss"

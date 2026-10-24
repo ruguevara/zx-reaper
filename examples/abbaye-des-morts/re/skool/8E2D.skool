@@ -1,2 +1,0 @@
-; Data block at 8E2D
-b$8E2D DEFB $95,$10,$0D,$00,$04

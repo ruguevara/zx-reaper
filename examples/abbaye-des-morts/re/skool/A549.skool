@@ -1,2 +1,0 @@
-; Data block at A549
-b$A549 DEFB $8E,$A0,$00

@@ -1,0 +1,10 @@
+; Redefinable keys: 8 (keyboard row index, bit mask) pairs into the row buffer
+; at $A2D3
+g$A2BF DEFB $05,$01
+ $A2C1 DEFB $05,$02
+ $A2C3 DEFB $01,$01
+ $A2C5 DEFB $02,$01
+ $A2C7 DEFB $02,$01
+ $A2C9 DEFB $02,$10
+ $A2CB DEFB $02,$08
+ $A2CD DEFB $05,$10

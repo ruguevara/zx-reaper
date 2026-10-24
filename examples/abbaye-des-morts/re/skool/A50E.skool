@@ -1,2 +1,0 @@
-; Data block at A50E
-b$A50E DEFB $80

@@ -1,2 +1,4 @@
-; Data block at 9344
-b$9344 DEFB $14
+; Text: "Heresy!!!" message (strings 46-48)
+t$9344 DEFM $14,"Heresy!!! The Cathar"
+ $9359 DEFM $17,"is hidden on the throne"
+ $9371 DEFM $12,"of Satan, burn him"

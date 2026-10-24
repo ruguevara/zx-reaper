@@ -1,2 +1,0 @@
-; Data block at A2F9
-b$A2F9 DEFB $0D

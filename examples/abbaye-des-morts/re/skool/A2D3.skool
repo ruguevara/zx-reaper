@@ -1,0 +1,2 @@
+; Keyboard row buffer: 8 half-rows read by $A240
+g$A2D3 DEFB $00,$00,$00,$00,$00,$00,$00,$00

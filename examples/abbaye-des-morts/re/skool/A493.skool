@@ -1,3 +1,7 @@
-; Data block at A493
-b$A493 DEFB $8F,$00,$00,$20,$18,$00,$81,$40
- $A49B DEFB $00,$20,$40,$00,$8E
+; Script: controls screen background and "Enter to menu"
+t$A493 DEFB $8F,$00,$00,$20,$18,$00
+ $A499 DEFB $81,$40,$00,$20,$40,$00
+ $A49F DEFB $8E,$70,$4B
+ $A4A2 DEFM "Enter to menu"
+ $A4AF DEFB $8F,$08,$00,$20,$08,$07
+ $A4B5 DEFB $80

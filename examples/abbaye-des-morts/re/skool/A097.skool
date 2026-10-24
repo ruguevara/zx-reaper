@@ -1,3 +1,22 @@
-; Data block at A097
-b$A097 DEFB $CD,$1A,$A1,$7E,$23,$E5,$EB,$5F
- $A09F DEFB $CD,$2F,$A2,$C5,$E5
+; Unused script handler: fill a C x B area of the $5E00 attribute buffer with a
+; byte (arguments as code $8F)
+c$A097 CALL $A11A    ;
+ $A09A LD A,(HL)     ;
+ $A09B INC HL        ;
+ $A09C PUSH HL       ;
+ $A09D EX DE,HL      ;
+ $A09E LD E,A        ;
+ $A09F CALL $A22F    ;
+*$A0A2 PUSH BC       ;
+ $A0A3 PUSH HL       ;
+ $A0A4 LD B,C        ;
+*$A0A5 LD (HL),E     ;
+ $A0A6 INC L         ;
+ $A0A7 DJNZ $A0A5    ;
+ $A0A9 POP HL        ;
+ $A0AA POP BC        ;
+ $A0AB LD A,$20      ;
+ $A0AD CALL $A1D9    ;
+ $A0B0 DJNZ $A0A2    ;
+ $A0B2 POP HL        ;
+ $A0B3 RET           ;

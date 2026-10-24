@@ -1,2 +1,3 @@
-; Message at A514
+; Script: "CROUCH"
 t$A514 DEFM "CROUCH"
+ $A51A DEFB $80

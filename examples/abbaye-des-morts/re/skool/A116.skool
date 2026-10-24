@@ -1,2 +1,4 @@
-; Unused
-s$A116 DEFS $04
+; Block descriptor set by script code $88: width, height, data address
+g$A116 DEFB $00
+ $A117 DEFB $00
+ $A118 DEFW $0000

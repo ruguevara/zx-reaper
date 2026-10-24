@@ -1,4 +1,11 @@
-; Routine at A31E
-;
-; Used by the routine at #R$A336.
+; Wait for SPACE to be released (128K only: the RET here becomes CALL $85EE,
+; patched by $605F)
 c$A31E RET           ;
+ $A31F DEFB $EE,$85  ;
+*$A321 HALT          ;
+ $A322 LD A,($A2D2)  ;
+ $A325 OR A          ;
+ $A326 JR NZ,$A321   ;
+ $A328 CALL $85F3    ;
+ $A32B XOR A         ;
+ $A32C RET           ;

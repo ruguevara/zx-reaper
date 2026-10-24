@@ -1,7 +1,23 @@
-; Data block at 9636
-b$9636 DEFB $ED,$A0,$ED,$A0,$ED,$A0,$ED,$A0
- $963E DEFB $ED,$A0,$ED,$A0,$ED,$A0,$ED,$A0
- $9646 DEFB $ED,$A0,$ED,$A0,$ED,$A0,$ED,$A0
- $964E DEFB $ED,$A0,$ED,$A0,$ED,$A0,$ED,$A0
- $9656 DEFB $ED,$A0,$ED,$A0,$ED,$A0,$ED,$A0
- $965E DEFB $ED,$A0
+; Unrolled LDI chain, 21 of 31: entered by the JR at $9634 (offset set from the
+; width)
+c$9636 LDI           ;
+ $9638 LDI           ;
+ $963A LDI           ;
+ $963C LDI           ;
+ $963E LDI           ;
+ $9640 LDI           ;
+ $9642 LDI           ;
+ $9644 LDI           ;
+ $9646 LDI           ;
+ $9648 LDI           ;
+ $964A LDI           ;
+ $964C LDI           ;
+ $964E LDI           ;
+ $9650 LDI           ;
+ $9652 LDI           ;
+ $9654 LDI           ;
+ $9656 LDI           ;
+ $9658 LDI           ;
+ $965A LDI           ;
+ $965C LDI           ;
+ $965E LDI           ;

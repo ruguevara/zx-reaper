@@ -1,3 +1,6 @@
-; Data block at 99E8
-b$99E8 DEFB $02,$9A,$36,$9A,$7C,$9A,$D4,$9A
- $99F0 DEFB $3E,$9B
+; Jump table of the sprite drawers used by $99C9 (index A-1)
+w$99E8 DEFW $9A02
+ $99EA DEFW $9A36
+ $99EC DEFW $9A7C
+ $99EE DEFW $9AD4
+ $99F0 DEFW $9B3E

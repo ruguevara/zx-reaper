@@ -1,2 +1,2 @@
-; Data block at 926B
-b$926B DEFB $10
+; Text: "G a m e  O v e r" (string 37)
+t$926B DEFM $10,"G a m e  O v e r"

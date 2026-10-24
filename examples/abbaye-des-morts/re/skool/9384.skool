@@ -1,2 +1,5 @@
-; Data block at 9384
-b$9384 DEFB $14
+; Text: ending (strings 49-52)
+t$9384 DEFM $14,"Your body has burned"
+ $9399 DEFM $0E,"in the flames,"
+ $93A8 DEFM $17,"but your soul has found"
+ $93C0 DEFM $12,"a place in Heaven."

@@ -1,2 +1,0 @@
-; Data block at 907C
-b$907C DEFB $02,$3A,$24,$0A

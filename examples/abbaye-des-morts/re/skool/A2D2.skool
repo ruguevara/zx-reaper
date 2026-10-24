@@ -1,0 +1,2 @@
+; Code of the key pressed (0 = none), from $A304
+g$A2D2 DEFB $00

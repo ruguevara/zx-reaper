@@ -1,0 +1,5 @@
+; Script: "Press key "
+t$A4FB DEFB $81,$70,$00,$20,$10,$00
+ $A501 DEFB $8E,$70,$42
+ $A504 DEFM "Press key "
+ $A50E DEFB $80

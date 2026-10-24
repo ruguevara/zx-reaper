@@ -1,0 +1,21 @@
+; Behaviour data for object kind 9 (rooms 15,19): 5-byte header, then
+; kind-specific bytes and sprite/frame pointers
+b$94E3 DEFB $00,$03,$03,$05,$02
+ $94E8 DEFB $45,$04
+ $94EA DEFW $EF53
+ $94EC DEFW $EF55
+ $94EE DEFW $F357
+ $94F0 DEFB $44
+ $94F1 DEFW $EF30
+ $94F3 DEFB $43
+ $94F4 DEFW $EF30
+ $94F6 DEFB $44
+ $94F7 DEFW $EF32
+ $94F9 DEFB $47
+ $94FA DEFW $EF34
+ $94FC DEFB $47
+ $94FD DEFW $EF36
+ $94FF DEFB $45
+ $9500 DEFW $F759
+ $9502 DEFW $F75B
+ $9504 DEFW $F75D

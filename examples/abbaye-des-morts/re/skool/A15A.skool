@@ -1,2 +1,3 @@
-; Data block at A15A
-b$A15A DEFB $4E,$23
+; Script code $9A: one count byte, then as $A15C (never used by the scripts)
+c$A15A LD C,(HL)     ;
+ $A15B INC HL        ;

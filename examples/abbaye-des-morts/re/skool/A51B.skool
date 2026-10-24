@@ -1,2 +1,3 @@
-; Message at A51B
+; Script: "LEFT"
 t$A51B DEFM "LEFT"
+ $A51F DEFB $80

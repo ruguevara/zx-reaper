@@ -1,6 +1,6 @@
-; Data block at A2B7
-b$A2B7 DEFB $02,$04,$01,$10,$01,$01,$02,$08
- $A2BF DEFB $05,$01,$05,$02,$01,$01,$02,$01
- $A2C7 DEFB $02,$01,$02,$10,$02,$08,$05,$10
- $A2CF DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $A2D7 DEFB $00,$00,$00,$00,$01
+; Cheat check: 4 (row, mask) pairs whose XOR with the first four redefined keys
+; must be 0 ($A422)
+b$A2B7 DEFB $02,$04
+ $A2B9 DEFB $01,$10
+ $A2BB DEFB $01,$01
+ $A2BD DEFB $02,$08

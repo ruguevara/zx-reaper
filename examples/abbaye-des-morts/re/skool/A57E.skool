@@ -1,0 +1,7 @@
+; Script: game over screen
+t$A57E DEFB $8F,$00,$00,$20,$18,$00
+ $A584 DEFB $81,$00,$00,$20,$C0,$00
+ $A58A DEFB $82,$02,$58
+ $A58D DEFB $85,$25
+ $A58F DEFB $8F,$00,$00,$20,$18,$07
+ $A595 DEFB $80

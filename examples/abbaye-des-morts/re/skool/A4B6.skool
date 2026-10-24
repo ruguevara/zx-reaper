@@ -1,0 +1,5 @@
+; Script: "1. Kempston "
+t$A4B6 DEFB $81,$40,$00,$20,$10,$00
+ $A4BC DEFB $8E,$40,$00
+ $A4BF DEFM "1. Kempston "
+ $A4CB DEFB $80

@@ -1,2 +1,3 @@
-; Message at A520
+; Script: "RIGHT"
 t$A520 DEFM "RIGHT"
+ $A525 DEFB $80

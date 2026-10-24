@@ -1,0 +1,2 @@
+; Control bits of the previous frame ($A596)
+g$A2D0 DEFB $00

@@ -1,0 +1,4 @@
+; Script: "2. Keyboard " followed by the key names at $A4F2
+t$A4DD DEFB $81,$50,$00,$20,$10,$00
+ $A4E3 DEFB $8E,$50,$00
+ $A4E6 DEFM "2. Keyboard "

@@ -25,12 +25,13 @@ the agent and the reader see.
 ## Applying it
 
 Write a control-file fragment covering whole existing entries, ending with
-`i $END`, and run `tools/zxq.py reclassify frag.ctl`, then `make`. Example:
+`i $END` (several runs, each ending with its own `i` line, are applied one
+by one; the entries between them stay), and run `tools/zxq.py reclassify frag.ctl`, then `make`. Example:
 
 ```
 c $812E Game over
 t $8144 Title text
-T $8144,12,11:B1
+T $8144,12,11:n1
 w $8073 Direction handlers
 W $8073,8
 g $8159 Player X
@@ -43,8 +44,8 @@ i $81A1
 ```
 
 Text after an address in a control file becomes a comment, so keep notes
-out of fragments. Above: `T $8144,12,11:B1` is 11 characters then one byte
-(bit-7 terminated text); `W` makes words, which skool2asm turns into labels;
+out of fragments. Above: `T $8144,12,11:n1` is 11 characters then one byte
+(bit-7 terminated text; a byte inside a `T` line is `n`, not `B`); `W` makes words, which skool2asm turns into labels;
 `S ...:$55` is `DEFS 64,$55`; `B $9000,32,2` writes 2 bytes per line.
 
 Types: `c` code, `b` data, `t` text, `w` words, `g` variables, `s` fill, `u` unused,

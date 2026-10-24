@@ -1,2 +1,0 @@
-; Data block at A4D3
-b$A4D3 DEFB $80

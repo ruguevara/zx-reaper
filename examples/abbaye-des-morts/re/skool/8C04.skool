@@ -1,2 +1,0 @@
-; Message at 8C04
-t$8C04 DEFM " l0"

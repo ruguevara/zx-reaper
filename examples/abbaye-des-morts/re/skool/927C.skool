@@ -1,2 +1,6 @@
-; Data block at 927C
-b$927C DEFB $1E
+; Text: intro (strings 38-42)
+t$927C DEFM $1E,"13th Century. The Cathars were"
+ $929B DEFM $1E,"being expelled by the Catholic"
+ $92BA DEFM $1B,"Church out of the Lanquedoc"
+ $92D6 DEFM $17,"The Cathar Jean Raymond"
+ $92EE DEFM $1F,"runs to escape the crusaders..."

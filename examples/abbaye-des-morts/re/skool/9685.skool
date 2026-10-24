@@ -1,7 +1,23 @@
-; Data block at 9685
-b$9685 DEFB $ED,$A8,$ED,$A8,$ED,$A8,$ED,$A8
- $968D DEFB $ED,$A8,$ED,$A8,$ED,$A8,$ED,$A8
- $9695 DEFB $ED,$A8,$ED,$A8,$ED,$A8,$ED,$A8
- $969D DEFB $ED,$A8,$ED,$A8,$ED,$A8,$ED,$A8
- $96A5 DEFB $ED,$A8,$ED,$A8,$ED,$A8,$ED,$A8
- $96AD DEFB $ED,$A8
+; Unrolled LDD chain, 21 of 31: entered by the JR at $9683 (offset set from the
+; width)
+c$9685 LDD           ;
+ $9687 LDD           ;
+ $9689 LDD           ;
+ $968B LDD           ;
+ $968D LDD           ;
+ $968F LDD           ;
+ $9691 LDD           ;
+ $9693 LDD           ;
+ $9695 LDD           ;
+ $9697 LDD           ;
+ $9699 LDD           ;
+ $969B LDD           ;
+ $969D LDD           ;
+ $969F LDD           ;
+ $96A1 LDD           ;
+ $96A3 LDD           ;
+ $96A5 LDD           ;
+ $96A7 LDD           ;
+ $96A9 LDD           ;
+ $96AB LDD           ;
+ $96AD LDD           ;

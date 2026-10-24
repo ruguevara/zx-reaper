@@ -1,2 +1,3 @@
-; Unused
-s$9F26 DEFS $02
+; Text cursor: y (pixel row), x (pixel column); set by script code $8E
+g$9F26 DEFB $00
+ $9F27 DEFB $00

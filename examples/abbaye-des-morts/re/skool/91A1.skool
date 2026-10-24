@@ -1,2 +1,13 @@
-; Data block at 91A1
-b$91A1 DEFB $0E
+; Text: parchment messages (strings 25-36, two lines each)
+t$91A1 DEFM $0E,"Twelve crosses"
+ $91B0 DEFM $11,"against the devil"
+ $91C2 DEFM $0F,"Twelve brothers"
+ $91D2 DEFM $11,"hid and died here"
+ $91E4 DEFM $0D,"Four brothers"
+ $91F2 DEFM $13,"changed their faith"
+ $9206 DEFM $11,"An invisible path"
+ $9218 DEFM $12,"over a wood bridge"
+ $922B DEFM $0D,"Jump to death"
+ $9239 DEFM $14,"and prove your faith"
+ $924E DEFM $0D,"Glide through"
+ $925C DEFM $0E,"the beast cage"

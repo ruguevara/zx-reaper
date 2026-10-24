@@ -1,0 +1,13 @@
+; Script: title screen
+t$A526 DEFB $8F,$00,$00,$20,$18,$00
+ $A52C DEFB $81,$00,$00,$20,$C0,$00
+ $A532 DEFB $8E,$00,$60
+ $A535 DEFM "l'Abbaye"
+ $A53D DEFB $8E,$10,$5C
+ $A540 DEFM "des morts"
+ $A549 DEFB $8E,$A0,$00
+ $A54C DEFM "press C for controls"
+ $A560 DEFB $8E,$B0,$00
+ $A563 DEFM "press enter to start"
+ $A577 DEFB $8F,$00,$00,$20,$18,$07
+ $A57D DEFB $80

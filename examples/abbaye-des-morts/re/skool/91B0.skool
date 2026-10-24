@@ -1,2 +1,0 @@
-; Data block at 91B0
-b$91B0 DEFB $11

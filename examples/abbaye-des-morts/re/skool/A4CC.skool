@@ -1,2 +1,3 @@
-; Message at A4CC
+; Script: "enabled"
 t$A4CC DEFM "enabled"
+ $A4D3 DEFB $80
