@@ -1,15 +1,25 @@
-; Routine at BC26
-c$BC26 POP HL        ;
- $BC27 LD A,(HL)     ;
+; Satan: attribute and sizes of the two halves, then the animation step
+;
+; Continuation of #R$BB57 after the hit test #R$A851 (SP is at slot+16). It pops the pointer in slot +$10, which
+; points into the behaviour block of kind 17 (#R$95E6 + 5): attribute, width and height of the upper half, then the
+; frame tables. The attribute goes to both draw commands at $ACD1 and $ACDB, the width and height to the first, and
+; the width less one to the second (the lower half is a byte narrower). Then #R$A883 steps the animation (slot
+; +$12..+$15) and continues at #R$BC43 with HL = the frame tables.
+;
+; SP Slot address + 16 (the hit box words have been popped)
+@label=SetSatanSprite
+c$BC26 POP HL        ; pointer to the behaviour block + 5
+ $BC27 LD A,(HL)     ; attribute
  $BC28 INC HL        ;
- $BC29 LD C,(HL)     ;
+ $BC29 LD C,(HL)     ; width of the upper half
  $BC2A INC HL        ;
- $BC2B LD B,(HL)     ;
+ $BC2B LD B,(HL)     ; height of both halves
  $BC2C INC HL        ;
- $BC2D LD ($ACDA),A  ;
- $BC30 LD ($ACE4),A  ;
- $BC33 LD ($ACD7),BC ;
- $BC37 DEC C         ;
- $BC38 LD ($ACE1),BC ;
- $BC3C LD IX,$BC43   ;
- $BC40 JP $A883      ;
+ $BC2D LD ($ACDA),A  ; attribute of the upper half
+ $BC30 LD ($ACE4),A  ; attribute of the lower half
+ $BC33 LD ($ACD7),BC ; width, height of the upper half
+ $BC37 DEC C         ; lower half one byte narrower
+ $BC38 LD ($ACE1),BC ; width, height of the lower half
+@label=StepTwoPartAnim
+ $BC3C LD IX,$BC43   ; also entered from #R$BC69 with HL = the frame tables
+ $BC40 JP $A883      ; animation step, then #R$BC43

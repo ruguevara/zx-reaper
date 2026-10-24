@@ -1,18 +1,26 @@
-; Room 13 script: Catacombs
-b$7AD0 DEFB $97,$11
- $7AD2 DEFB $87,$0D
- $7AD4 DEFB $83,$F0,$82
- $7AD7 DEFB $83,$C8,$7A
- $7ADA DEFB $89,$00,$00,$20,$16
- $7ADF DEFB $98,$80,$07,$00,$1A,$02,$06,$06,$00,$1E,$04,$11,$00,$14,$03,$06
+; Room script 13: Catacombs
+;
+; Room 13: column 3, row 2 of the 5x5 map (left is room 12, right 14, up 8, down 18, counted modulo 25). Unpacks
+; sprite set #R$70B7. Subscripts: #R$82F0, #R$7AC8. Items (#R$8EDF) at row,column: cross 18,18.
+@label=RoomScript13
+b$7AD0 DEFB $97,$11         ; SPRITESET 17
+ $7AD2 DEFB $87,$0D         ; ROOMNAME 13 "Catacombs"
+ $7AD4 DEFB $83 ; CALL ScriptRoomPanel
+@isub=DEFW ScriptRoomPanel
+ $7AD5 DEFW $82F0
+ $7AD7 DEFB $83 ; CALL BlockYellowBricks
+@isub=DEFW BlockYellowBricks
+ $7AD8 DEFW $7AC8
+ $7ADA DEFB $89,$00,$00,$20,$16 ; TILEBLOCK row 0, col 0, 32x22
+ $7ADF DEFB $98,$80,$07,$00,$1A,$02,$06,$06,$00,$1E,$04,$11,$00,$14,$03,$06 ; RECTS tile $80, 7 rectangles
  $7AEF DEFB $06,$04,$0E,$06,$06,$18,$08,$08,$1E,$02,$04,$0F,$06,$0E,$05
- $7AFE DEFB $93,$01,$04,$04,$80,$4A,$49,$80
- $7B06 DEFB $93,$01,$0C,$03,$80,$4B,$80
- $7B0D DEFB $93,$03,$0A,$03,$80,$49,$80
- $7B14 DEFB $92,$26,$08,$02,$1A,$05,$1B,$08,$1A,$0B,$1B,$0C,$06,$0E,$07,$10
+ $7AFE DEFB $93,$01,$04,$04,$80,$4A,$49,$80 ; ROW row 1, col 4, 4 tiles
+ $7B06 DEFB $93,$01,$0C,$03,$80,$4B,$80 ; ROW row 1, col 12, 3 tiles
+ $7B0D DEFB $93,$03,$0A,$03,$80,$49,$80 ; ROW row 3, col 10, 3 tiles
+ $7B14 DEFB $92,$26,$08,$02,$1A,$05,$1B,$08,$1A,$0B,$1B,$0C,$06,$0E,$07,$10 ; STAMP1 tile $26 at 8 positions
  $7B24 DEFB $06,$12,$07
- $7B27 DEFB $92,$2B,$0B,$00,$14,$00,$15,$01,$08,$02,$1E,$03,$0D,$0E,$03,$10
+ $7B27 DEFB $92,$2B,$0B,$00,$14,$00,$15,$01,$08,$02,$1E,$03,$0D,$0E,$03,$10 ; STAMP1 tile $2B at 11 positions
  $7B37 DEFB $02,$12,$14,$14,$09,$15,$0E,$15,$1B
- $7B40 DEFB $91,$AA,$02,$03,$04,$10,$16,$10
+ $7B40 DEFB $91,$AA,$02,$03,$04,$10,$16,$10 ; PICTURES tiles from $AA, 2x3, at 4 positions
  $7B48 DEFB $18,$10,$1A,$10,$1C
- $7B4D DEFB $80
+ $7B4D DEFB $80             ; END

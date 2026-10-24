@@ -1,29 +1,42 @@
-; Room 11 script: Cave of illusions
-b$795D DEFB $97,$0C
- $795F DEFB $87,$0B
- $7961 DEFB $83,$F0,$82
- $7964 DEFB $83,$55,$79
- $7967 DEFB $89,$00,$00,$20,$16
- $796C DEFB $98,$80,$05,$01,$02,$1E,$03,$01,$02,$1C,$11,$01,$02,$10,$13,$08
+; Room script 11: Cave of illusions
+;
+; Two op $96 areas are turned into free space (flag $80): false walls, as the room name says (Cave of illusions).
+; .
+; Room 11: column 1, row 2 of the 5x5 map (left is room 10, right 12, up 6, down 16, counted modulo 25). Unpacks
+; sprite set #R$6D80. Subscripts: #R$82F0, #R$7955, #R$7A2B. Items (#R$8EDF) at row,column: heart 4,2, checkpoint
+; 17,14.
+@label=RoomScript11
+b$795D DEFB $97,$0C         ; SPRITESET 12
+ $795F DEFB $87,$0B         ; ROOMNAME 11 "Cave of illusions"
+ $7961 DEFB $83 ; CALL ScriptRoomPanel
+@isub=DEFW ScriptRoomPanel
+ $7962 DEFW $82F0
+ $7964 DEFB $83 ; CALL BlockCaveRock
+@isub=DEFW BlockCaveRock
+ $7965 DEFW $7955
+ $7967 DEFB $89,$00,$00,$20,$16 ; TILEBLOCK row 0, col 0, 32x22
+ $796C DEFB $98,$80,$05,$01,$02,$1E,$03,$01,$02,$1C,$11,$01,$02,$10,$13,$08 ; RECTS tile $80, 5 rectangles
  $797C DEFB $00,$02,$04,$01,$18,$04,$15
- $7983 DEFB $8B,$02,$20,$21,$0A,$06,$02,$06,$08,$06,$0C,$06,$0E,$06,$1A,$06
+ $7983 DEFB $8B,$02,$20,$21,$0A,$06,$02,$06,$08,$06,$0C,$06,$0E,$06,$1A,$06 ; STAMPS 2 tiles $20 $21 at 10 positions
  $7993 DEFB $1C,$08,$14,$08,$16,$0A,$0A,$0F,$0C
- $799C DEFB $8B,$02,$22,$23,$02,$0C,$10,$0C
+ $799C DEFB $8B,$02,$22,$23,$02,$0C,$10,$0C ; STAMPS 2 tiles $22 $23 at 2 positions
  $79A4 DEFB $18
- $79A5 DEFB $83,$2B,$7A
- $79A8 DEFB $99,$05,$0C,$00,$04,$02,$10,$12,$06,$02,$10,$1C,$02,$02,$12,$08
+ $79A5 DEFB $83 ; CALL BlockCaveGrass
+@isub=DEFW BlockCaveGrass
+ $79A6 DEFW $7A2B
+ $79A8 DEFB $99,$05,$0C,$00,$04,$02,$10,$12,$06,$02,$10,$1C,$02,$02,$12,$08 ; TILEBLOCKS 5 rectangles
  $79B8 DEFB $04,$02,$14,$0C,$06,$02
- $79BE DEFB $92,$24,$07,$02,$00,$0A,$1F,$11,$00,$12,$1F,$13,$1E,$14,$0A,$15
+ $79BE DEFB $92,$24,$07,$02,$00,$0A,$1F,$11,$00,$12,$1F,$13,$1E,$14,$0A,$15 ; STAMP1 tile $24 at 7 positions
  $79CE DEFB $15
- $79CF DEFB $92,$25,$0A,$01,$02,$01,$06,$01,$0A,$01,$0B,$01,$12,$01,$18,$01
+ $79CF DEFB $92,$25,$0A,$01,$02,$01,$06,$01,$0A,$01,$0B,$01,$12,$01,$18,$01 ; STAMP1 tile $25 at 10 positions
  $79DF DEFB $1A,$07,$0E,$07,$1D,$09,$16
- $79E6 DEFB $92,$26,$02,$12,$1B,$15,$18
- $79ED DEFB $92,$81,$06,$0B,$01,$0F,$15,$0F
+ $79E6 DEFB $92,$26,$02,$12,$1B,$15,$18 ; STAMP1 tile $26 at 2 positions
+ $79ED DEFB $92,$81,$06,$0B,$01,$0F,$15,$0F ; STAMP1 tile $81 at 6 positions
  $79F5 DEFB $1D,$11,$09,$13,$0D,$13,$10
- $79FC DEFB $9B,$A6,$06,$01,$04,$03,$01,$05,$02,$01,$0E,$02,$01,$14,$03,$01
+ $79FC DEFB $9B,$A6,$06,$01,$04,$03,$01,$05,$02,$01,$0E,$02,$01,$14,$03,$01 ; RUNS_V tile $A6, 6 vertical runs
  $7A0C DEFB $15,$05,$01,$1C,$02
- $7A11 DEFB $86,$14,$02,$06,$01,$05
- $7A17 DEFB $96,$05,$00,$02,$01,$80
- $7A1D DEFB $96,$14,$02,$02,$02,$80
- $7A23 DEFB $91,$7E,$02,$01,$01,$13,$0E
- $7A2A DEFB $80
+ $7A11 DEFB $86,$14,$02,$06,$01,$05 ; FILLTILE row 20, col 2, 6x1, tile $05
+ $7A17 DEFB $96,$05,$00,$02,$01,$80 ; FLAGS row 5, col 0, 2x1, flags $80
+ $7A1D DEFB $96,$14,$02,$02,$02,$80 ; FLAGS row 20, col 2, 2x2, flags $80
+ $7A23 DEFB $91,$7E,$02,$01,$01,$13,$0E ; PICTURES tiles from $7E, 2x1, at 1 positions
+ $7A2A DEFB $80             ; END

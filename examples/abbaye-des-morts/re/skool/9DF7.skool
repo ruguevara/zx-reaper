@@ -1,30 +1,37 @@
-; Routine at 9DF7
-c$9DF7 LD C,(HL)     ;
+; Script opcode $8B: draw a row of tiles at several positions
+;
+; Operands: n, t1..tn, k, then k positions (y x). The row of n tiles is drawn left to right at each position, one cell at a time through #R$9E6A. The shared part at #R$9DFE also serves #R$9DF0 ($92).
+;
+; HL Operand bytes
+; O:HL Address after the last position
+@label=OpStampRun
+c$9DF7 LD C,(HL)     ; C = n
  $9DF8 INC HL        ;
  $9DF9 LD B,$00      ;
- $9DFB LD D,H        ;
+ $9DFB LD D,H        ; DE = address of the tile list
  $9DFC LD E,L        ;
- $9DFD ADD HL,BC     ;
-; This entry point is used by the routine at #R$9DF0.
-*$9DFE LD B,(HL)     ;
+ $9DFD ADD HL,BC     ; skip the list
+; Entry point from #R$9DF0: DE tile list, C its length, HL the count byte k.
+@label=StampTiles
+*$9DFE LD B,(HL)     ; B = k, the number of positions
  $9DFF INC HL        ;
-*$9E00 PUSH BC       ;
- $9E01 LD B,C        ;
- $9E02 PUSH DE       ;
- $9E03 LD E,(HL)     ;
+*$9E00 PUSH BC       ; next position
+ $9E01 LD B,C        ; B = list length
+ $9E02 PUSH DE       ; keep the list address
+ $9E03 LD E,(HL)     ; DE = position (y, x)
  $9E04 INC HL        ;
  $9E05 LD D,(HL)     ;
  $9E06 INC HL        ;
- $9E07 EX (SP),HL    ;
- $9E08 EX DE,HL      ;
+ $9E07 EX (SP),HL    ; HL = list, stack = script pointer
+ $9E08 EX DE,HL      ; HL = position, DE = list
  $9E09 PUSH DE       ;
-*$9E0A PUSH DE       ;
+*$9E0A PUSH DE       ; next tile of the list
  $9E0B LD A,(DE)     ;
  $9E0C LD E,A        ;
- $9E0D CALL $9E6A    ;
+ $9E0D CALL $9E6A    ; put the tile in the map
  $9E10 POP DE        ;
  $9E11 INC DE        ;
- $9E12 INC H         ;
+ $9E12 INC H         ; next column
  $9E13 DJNZ $9E0A    ;
  $9E15 POP DE        ;
  $9E16 POP HL        ;

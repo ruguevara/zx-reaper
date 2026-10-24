@@ -1,9 +1,17 @@
-; Routine at 9DB7
+; Script opcode $84: print the string whose number is stored in a variable
+;
+; Operand: word, the address of a byte holding the string number. The scripts use $850D (the room name, set by $87) and $850E/$850F (the two lines of a parchment). Printed by #R$9F30.
+; .
+; Hardware: draws on the screen bitmap (through #R$9E79).
+;
+; HL Operand bytes
+; O:HL Address after the operand
+@label=OpPrintStringVar
 c$9DB7 LD E,(HL)     ;
  $9DB8 INC HL        ;
  $9DB9 LD D,(HL)     ;
  $9DBA INC HL        ;
- $9DBB LD A,(DE)     ;
+ $9DBB LD A,(DE)     ; string number from the variable
  $9DBC PUSH HL       ;
  $9DBD CALL $9F30    ;
  $9DC0 POP HL        ;

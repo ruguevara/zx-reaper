@@ -1,2 +1,11 @@
-; Room state ($80 playing, 1 enter, 2 checkpoint, 3 game over, 4, 5 ending)
+; Room state: what the main loop does next
+;
+; The main loop #R$85FC takes the low 7 bits: 1 = enter the room #R$8509 (#R$86B9); 2 = put the player at the respawn
+; position ($8512/$8514), then enter the room (set by the passage items #R$A6BC/#R$A6D8); 3 = ending sequence #R$887B
+; (set by the red scroll in Satan's room, #R$A668); 4 = restore the last checkpoint (#R$BDF3), then as 2 (set by the
+; death routine #R$AA3D when lives are left); 5 = Game Over screen (death without lives, or both abort keys: #R$A596);
+; 0 or anything above 5: run the frame routines. Bit 7 keeps the frame routines (player, entities, drawing) running:
+; the loop sets the state to $80 after a room has been entered. #R$9C52 and the cutscene loop clear and restore it so
+; that the frame update stops while a parchment is shown. The room-entry code #R$86B9 clears it.
+@label=RoomState
 g$850C DEFB $00

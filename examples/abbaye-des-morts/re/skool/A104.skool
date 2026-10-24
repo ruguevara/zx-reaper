@@ -1,12 +1,21 @@
-; Routine at A104
+; Script code $88: define the tile block used by $89 and $99
+;
+; Operands: width, height, then width x height tile numbers, row by row. Stores the width, height and the address of
+; the tile numbers (which stay in the script) in #R$A116 and moves the script pointer past them. Used 31 times, each
+; followed by $89 or $99 fills.
+;
+; HL Script pointer, at the operands
+; O:HL Script pointer after the operands
+@label=OpDefineBlock
 c$A104 LD C,(HL)     ;
  $A105 INC HL        ;
  $A106 LD B,(HL)     ;
  $A107 INC HL        ;
- $A108 LD ($A116),BC ;
- $A10C LD ($A118),HL ;
+ $A108 LD ($A116),BC ; block width and height
+ $A10C LD ($A118),HL ; address of the tile numbers
  $A10F LD E,C        ;
  $A110 LD D,$00      ;
-*$A112 ADD HL,DE     ;
+@label=OpDefineBlock_Skip
+*$A112 ADD HL,DE     ; skip width x height bytes
  $A113 DJNZ $A112    ;
  $A115 RET           ;

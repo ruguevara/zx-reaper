@@ -1,10 +1,19 @@
-; Routine at A04B
+; Script code $95: run a subscript when a flag byte is zero
+;
+; Operands: subscript address (word), flag address (word). If the byte at the flag address is 0 the script at the
+; subscript address is run to its $80 end by a recursive call of #R$9D5F; in either case the script goes on after the
+; operands. Observed with a hand-made script and the flag byte set to 0 and to 1. The flags are bytes of the item flag
+; area at $851A-$8521 (see the item table at $8EDF); used 3 times (rooms 8, 19 and 20).
+;
+; HL Script pointer, at the operands
+; O:HL Script pointer after the operands
+@label=OpRunIfZero
 c$A04B CALL $A11A    ;
- $A04E LD A,(BC)     ;
+ $A04E LD A,(BC)     ; flag byte
  $A04F OR A          ;
  $A050 RET NZ        ;
  $A051 PUSH HL       ;
  $A052 EX DE,HL      ;
- $A053 CALL $9D5F    ;
+ $A053 CALL $9D5F    ; run the subscript
  $A056 POP HL        ;
  $A057 RET           ;

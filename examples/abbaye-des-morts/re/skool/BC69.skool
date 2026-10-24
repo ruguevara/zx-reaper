@@ -1,23 +1,34 @@
-; Entity handler: two-part sprite with a lifetime (template at $BD6A)
-c$BC69 POP BC        ;
- $BC6A DJNZ $BC70    ;
- $BC6C PUSH BC       ;
- $BC6D JP $B08E      ;
-*$BC70 PUSH BC       ;
+; Entity handler: the cloud of smoke that replaces Satan (150 frames)
+;
+; The slot is made from the template #R$BD6A by #R$BB57 when the flag at #R$8521 shows Satan finished, so the layout
+; is the template's: +2 word lifetime (B counts down from 150, C unused), +4 word position of the upper half (y, byte
+; column), +6 word position of the lower half, +8 word width and height of both halves (4 and 12), +$A, +$C and +$E
+; three unused words, +$10 pointer to the behaviour block ($95F6: attribute $47, white, then the frame tables), +$12
+; animation counter and reload, +$14 frame number and number of frames. It has no hit box: the smoke does not hurt.
+; Each frame the lifetime is decremented; at zero the slot is freed by #R$B08E. Otherwise both halves are drawn
+; (#R$BC3C, #R$BC43) and the cloud animates through its two frames.
+;
+; SP Slot address + 2 (the handler word was popped by the RET that entered the routine)
+@label=UpdateSatanSmoke
+c$BC69 POP BC        ; lifetime in B
+ $BC6A DJNZ $BC70    ; count down
+ $BC6C PUSH BC       ; expired: store it back ...
+ $BC6D JP $B08E      ; ... and free the slot
+*$BC70 PUSH BC       ; store the lifetime back
  $BC71 POP BC        ;
- $BC72 POP HL        ;
- $BC73 LD ($ACD3),HL ;
- $BC76 POP HL        ;
- $BC77 LD ($ACDD),HL ;
- $BC7A POP BC        ;
+ $BC72 POP HL        ; position of the upper half
+ $BC73 LD ($ACD3),HL ; draw command 1
+ $BC76 POP HL        ; position of the lower half
+ $BC77 LD ($ACDD),HL ; draw command 2
+ $BC7A POP BC        ; width, height of both halves
  $BC7B LD ($ACD7),BC ;
  $BC7F LD ($ACE1),BC ;
- $BC83 POP AF        ;
+ $BC83 POP AF        ; three words not used
  $BC84 POP AF        ;
  $BC85 POP AF        ;
- $BC86 POP HL        ;
- $BC87 LD A,(HL)     ;
+ $BC86 POP HL        ; pointer to the behaviour block
+ $BC87 LD A,(HL)     ; attribute
  $BC88 INC HL        ;
- $BC89 LD ($ACDA),A  ;
- $BC8C LD ($ACE4),A  ;
- $BC8F JP $BC3C      ;
+ $BC89 LD ($ACDA),A  ; attribute of the upper half
+ $BC8C LD ($ACE4),A  ; attribute of the lower half
+ $BC8F JP $BC3C      ; animation step, then #R$BC43

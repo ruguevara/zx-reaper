@@ -1,2 +1,6 @@
 ; Redraw cells: attribute of each queued cell
-g$C400 DEFS $0100,$FF
+;
+; One byte per queued cell: the attribute from #R$CE00, indexed by the cell index of the run list (#R$C200); #R$976B
+; fills it, the sprite drawers change it, #R$95FF writes it to the attribute file (high byte PAGE_REDRAW_ATTRS).
+@label=RedrawAttrs
+g$C400 DEFS $0100,$FF ;

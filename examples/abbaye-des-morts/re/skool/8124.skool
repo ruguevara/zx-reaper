@@ -1,3 +1,6 @@
-; Script: block pattern 2x2 (op $88)
-b$8124 DEFB $88,$02,$02,$45,$46,$80,$80
- $812B DEFB $80
+; Block pattern: stone with a clear lower half (tiles $45,$46,$80,$80)
+;
+; Defines the current block as stone tiles over two blank tiles. Called by rooms 21, 22.
+@label=BlockStoneHalfB
+b$8124 DEFB $88,$02,$02,$45,$46,$80,$80 ; BLOCK 2x2: $45 $46 $80 $80
+ $812B DEFB $80             ; END

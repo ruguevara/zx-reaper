@@ -1,3 +1,6 @@
-; Script: block pattern 2x2 (op $88)
-b$8104 DEFB $88,$02,$02,$3E,$3F,$41,$40
- $810B DEFB $80
+; Block pattern: abbey stone (tiles $3E,$3F,$41,$40)
+;
+; Defines the current block as 2x2 tiles of grey stone, the walls of the last rooms. Called by rooms 21, 22, 23, 24.
+@label=BlockAbbeyStoneA
+b$8104 DEFB $88,$02,$02,$3E,$3F,$41,$40 ; BLOCK 2x2: $3E $3F $41 $40
+ $810B DEFB $80             ; END

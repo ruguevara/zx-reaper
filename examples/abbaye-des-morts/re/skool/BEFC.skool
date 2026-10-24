@@ -1,2 +1,5 @@
-; Unused, $FF fill
-u$BEFC DEFS $0104,$FF
+; Unused: $FF fill
+;
+; Never read and never written in the runs made (rooms 9, 12, 14, 15 and 17 with random keys for 1500 frames, nothing
+; was written into $BEFC-$BFFF). It follows the frame call list.
+u$BEFC DEFS $0104,$FF ;

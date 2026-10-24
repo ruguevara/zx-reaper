@@ -1,2 +1,14 @@
-; Bytes for $A6D8
-g$8523 DEFB $00,$00
+; Doorway locks: arrived through the passage between rooms 10 and 19
+;
+; Flags of the two arched doorways (items of type 8) that join room 10 (Pestilent Beast) and room 19 (Underground
+; river). Touching the doorway of room 10 (#R$A6D8) sends the player to room 19 and sets bit 7 of the other doorway's
+; flag, and the doorway of room 19 (#R$A6BC) does the reverse; a doorway whose bit 7 is set ignores the player until
+; he has walked off it (the routine clears the bit when there is no contact), so the arrival does not send him
+; straight back.
+; .
+; +0 DoorwayRoom10 ($8523): flag of the doorway in room 10
+; +1 DoorwayRoom19 ($8524): flag of the doorway in room 19
+@label=DoorwayRoom10
+g$8523 DEFB $00
+@label=DoorwayRoom19
+ $8524 DEFB $00

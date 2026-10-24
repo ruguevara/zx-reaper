@@ -1,20 +1,28 @@
-; Routine at 9DD2
-c$9DD2 CALL $A11A    ;
+; Script opcode $86: fill a rectangle of the tile map with one tile
+;
+; Operands: y x w h t (5 bytes): rows y to y+h-1 and columns x to x+w-1 get the tile t, one cell at a time through #R$9E6A. Also entered at #R$9DD7 by #R$9DC2 and #R$A15C with the rectangle already in registers.
+;
+; HL Operand bytes
+; O:HL Address after the operands
+@label=OpFillTiles
+c$9DD2 CALL $A11A    ; E = y, D = x, C = w, B = h
  $9DD5 LD A,(HL)     ;
  $9DD6 INC HL        ;
-; This entry point is used by the routines at #R$9DC2 and #R$A15C.
-*$9DD7 PUSH HL       ;
- $9DD8 EX DE,HL      ;
- $9DD9 LD E,A        ;
-*$9DDA PUSH HL       ;
+; Entry point: fill a rectangle of tiles. A tile number, DE position (E row, D column),
+; C width, B height. O: HL unchanged, BC and DE destroyed.
+@label=FillTilesRect
+*$9DD7 PUSH HL       ; keep the script pointer
+ $9DD8 EX DE,HL      ; HL = position: L row, H column
+ $9DD9 LD E,A        ; E = tile
+*$9DDA PUSH HL       ; one row
  $9DDB PUSH BC       ;
- $9DDC LD B,C        ;
-*$9DDD CALL $9E6A    ;
- $9DE0 INC H         ;
+ $9DDC LD B,C        ; B = width
+*$9DDD CALL $9E6A    ; put the tile in the map
+ $9DE0 INC H         ; next column
  $9DE1 DJNZ $9DDD    ;
  $9DE3 POP BC        ;
  $9DE4 POP HL        ;
- $9DE5 INC L         ;
+ $9DE5 INC L         ; next row
  $9DE6 DJNZ $9DDA    ;
  $9DE8 POP HL        ;
  $9DE9 RET           ;

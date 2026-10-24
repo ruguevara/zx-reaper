@@ -1,58 +1,92 @@
 @org
-; Routine at 6000
+; Start-up: set up the machine, tables and interrupts, then start the game
+;
+; Run once, entered from the unpacker with SP=$5FFE: the word on the stack was left by the loader's machine check
+; (H = machine type: 1 on a 48K Spectrum, on a 128K the value for port $7FFD that pages in the fastest bank, which holds
+; the music; L = 1 when an AY chip answers, 0 when not). The routine sits in the room buffers at $6000-$6072 and is
+; overwritten as soon as the first room is entered, so it cannot be called again.
+; .
+; It saves the machine type in #R$8506, hooks the 128K music (#R$605F) when H is not 1, pages in bank 0 and sets the
+; border to black, selects interrupt mode 2 with the vector table at #R$8400 (every vector points to the interrupt
+; handler #R$8585) and installs the do-nothing routine #R$8719 as the routine the handler calls (#R$8504). It then
+; builds the row address table #R$6100 (24 words, $5E00+32*n, one per row of the tile flag map), the outline mask
+; table at $FF00 and probes for a Kempston joystick. It ends by jumping into the game start at $8606, skipping the
+; 48K-only screen script that #R$85FC runs on a 48K machine (the loader has already shown it).
+; .
+; Outline mask table: byte n of the page $FF00 is NOT(n OR n<<1 OR n>>1): a pixel row with every pixel next to a set
+; pixel cleared. The sprite drawers use it to give sprites a one-pixel black outline instead of storing masks.
+; .
+; Kempston probe: port $1F is read 65536 times and the readings are ORed together. A machine without the interface
+; returns the floating bus, which sets some of bits 0-4, so those bits are never all zero; the routine then stores RET
+; ($C9) over the first instruction of the joystick read at $A28F, which cuts it off. With a real interface (bits 0-4
+; all zero while no direction or fire is pressed) a NOP is stored and the joystick is read each frame.
+; .
+; Hardware: writes the border and the speaker through port $FE, sets IM 2 and the I register, writes port $7FFD
+; through #R$85BE (128K paging; harmless on a 48K machine), reads the Kempston port $1F.
+@label=StartUp
 c$6000 DI            ;
- $6001 POP HL        ;
- $6002 LD SP,$6100   ;
+ $6001 POP HL               ; machine type pushed by the loader
+@isub=LD SP,MainStack+$40
+ $6002 LD SP,$6100          ; main stack is $60C0-$60FF
  $6005 LD A,H        ;
- $6006 LD ($8506),A  ;
+ $6006 LD ($8506),A         ; 1 on a 48K Spectrum
  $6009 DEC A         ;
- $600A CALL NZ,$605F ;
- $600D CALL $85BE    ;
- $6010 XOR A         ;
+ $600A CALL NZ,$605F        ; 128K: hook the music (not on a 48K)
+ $600D CALL $85BE           ; page in bank 0 (RAM 0, ROM 1)
+ $6010 XOR A                ; black border, speaker off
+@isub=OUT (ULA_PORT),A
  $6011 OUT ($FE),A   ;
- $6013 LD A,$84      ;
+@isub=LD A,Im2Table/256
+ $6013 LD A,$84             ; vector table page ($84): every entry points to the interrupt handler
  $6015 LD I,A        ;
  $6017 IM 2          ;
- $6019 LD HL,$8719   ;
+ $6019 LD HL,$8719          ; the interrupt calls a RET until the game sets its own routine
  $601C LD ($8504),HL ;
- $601F LD HL,$6100   ;
- $6022 LD DE,$5E00   ;
- $6025 LD B,$18      ;
-*$6027 LD (HL),E     ;
+ $601F LD HL,$6100          ; row address table
+ $6022 LD DE,$5E00          ; flag map row 0
+@isub=LD B,ROW_TABLE_ENTRIES
+ $6025 LD B,$18             ; one word per row
+@label=StartUp_RowTable
+*$6027 LD (HL),E            ; word = address of the flag map row
  $6028 INC L         ;
  $6029 LD (HL),D     ;
  $602A INC L         ;
  $602B PUSH HL       ;
- $602C LD HL,$0020   ;
+@isub=LD HL,SCREEN_COLS
+ $602C LD HL,$0020          ; next row is 32 bytes further
  $602F ADD HL,DE     ;
  $6030 EX DE,HL      ;
  $6031 POP HL        ;
  $6032 DJNZ $6027    ;
- $6034 LD HL,$FF00   ;
-*$6037 LD B,L        ;
- $6038 LD A,L        ;
+ $6034 LD HL,$FF00          ; outline mask table, one page
+@label=StartUp_Outline
+*$6037 LD B,L               ; B = n >> 1
+ $6038 LD A,L               ; A = n << 1
  $6039 SRL B         ;
  $603B SLA A         ;
  $603D OR L          ;
- $603E OR B          ;
- $603F CPL           ;
+ $603E OR B                 ; A = n OR n<<1 OR n>>1
+ $603F CPL                  ; NOT: the outline mask
  $6040 LD (HL),A     ;
  $6041 INC L         ;
  $6042 JR NZ,$6037   ;
- $6044 LD BC,$001F   ;
+@isub=LD BC,PORT_KEMPSTON
+ $6044 LD BC,$001F          ; read port $1F 65536 times
  $6047 LD H,B        ;
  $6048 LD L,B        ;
  $6049 LD E,B        ;
-*$604A IN A,(C)      ;
+@label=StartUp_Kempston
+*$604A IN A,(C)             ; accumulate every bit seen on the port
  $604C OR E          ;
  $604D LD E,A        ;
  $604E DEC HL        ;
  $604F LD A,H        ;
  $6050 OR L          ;
  $6051 JR NZ,$604A   ;
- $6053 LD A,E        ;
+ $6053 LD A,E               ; bits 0-4 of the port ever set (floating bus): no interface
  $6054 AND C         ;
  $6055 JR Z,$6059    ;
- $6057 LD A,$C9      ;
-*$6059 LD ($A28F),A  ;
- $605C JP $8606      ;
+@isub=LD A,OP_RET
+ $6057 LD A,$C9             ; RET
+*$6059 LD ($A28F),A         ; NOP (0) when the joystick answers, RET when not
+ $605C JP $8606             ; start the game, skipping the 48K screen script

@@ -1,3 +1,7 @@
-; Script: block pattern 2x2 (op $88)
-b$7443 DEFB $88,$02,$02,$03,$04,$01,$02
- $744A DEFB $80
+; Block pattern: grass over earth (tiles $03,$04,$01,$02)
+;
+; Defines the current block as 2x2 tiles of grass on top of yellow earth, the ground of the forest rooms. Called by
+; rooms 4, 5, 6, 9.
+@label=BlockGrassEarth
+b$7443 DEFB $88,$02,$02,$03,$04,$01,$02 ; BLOCK 2x2: $03 $04 $01 $02
+ $744A DEFB $80             ; END

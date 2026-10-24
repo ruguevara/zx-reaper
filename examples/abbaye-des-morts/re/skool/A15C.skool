@@ -1,6 +1,12 @@
-; Routine at A15C
+; Draw a vertical line of one tile
 ;
-; Used by the routine at #R$A14E.
+; Reads row, column and length from the script and hands over to the rectangle fill #R$9DD7 with a width of 1: the
+; tile goes in each of the length cells below the start, through #R$9E6A.
+;
+; C Tile number
+; HL Script pointer, at (row, column, length)
+; O:HL Script pointer after the three bytes
+@label=DrawTileVLine
 c$A15C LD E,(HL)     ;
  $A15D INC HL        ;
  $A15E LD D,(HL)     ;
@@ -9,4 +15,4 @@ c$A15C LD E,(HL)     ;
  $A161 INC HL        ;
  $A162 LD A,C        ;
  $A163 LD C,$01      ;
- $A165 JP $9DD7      ;
+ $A165 JP $9DD7      ; rectangle fill with width 1 (C), tile in A, height B

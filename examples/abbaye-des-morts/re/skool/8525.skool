@@ -1,3 +1,70 @@
-; Object flags read by $896B
-g$8525 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
- $8533 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+; Collected flags of the hearts, parchments, the red scroll and the crosses ($8525-$8540)
+;
+; One byte for each pick-up item of the room item table #R$8EDF (the pointer in the item's record is the address of
+; its flag). 0 means the item is still there, $FF (ITEM_GONE) that it has been taken: the item spawner #R$8957 (via
+; #R$896B) does not create an item whose flag is $FF, so a taken item stays gone. The flags are zeroed by #R$85FC at
+; the start of a game; the flag of an item taken in a room survives leaving and re-entering the room. Each flag is
+; named after its item and the room it is in; the comment gives the item's row and column in the room.
+;
+; +$00-$08: hearts (item type 0, #R$A70B): one more life, up to 9 (the status bar shows them, #R$854C).
+; +$09-$0E: parchments (type 5, #R$A836): taking one shows the parchment text (#R$850E).
+; +$0F: the red scroll of Satan's room (type 6, #R$A668), only present after the chalice.
+; +$10-$1B: the twelve crosses (types 1 and 2, #R$A782/#R$A777, counted in #R$854D). The eight crosses of type 1
+; (CrossRoomN) can be taken while the wheel of faith #R$851E is at rest, the four of type 2 (WheelCrossRoomN) only
+; after it has been turned.
+@label=HeartRoom2
+g$8525 DEFB $00 ; room 2, row 7, column 12, item type 0
+@label=HeartRoom10
+ $8526 DEFB $00 ; room 10, row 18, column 10, item type 0
+@label=HeartRoom11
+ $8527 DEFB $00 ; room 11, row 4, column 2, item type 0
+@label=HeartRoom12
+ $8528 DEFB $00 ; room 12, row 6, column 16, item type 0
+@label=HeartRoom15
+ $8529 DEFB $00 ; room 15, row 14, column 3, item type 0
+@label=HeartRoom17
+ $852A DEFB $00 ; room 17, row 18, column 3, item type 0
+@label=HeartRoom18
+ $852B DEFB $00 ; room 18, row 11, column 15, item type 0
+@label=HeartRoom19
+ $852C DEFB $00 ; room 19, row 8, column 25, item type 0
+@label=HeartRoom23
+ $852D DEFB $00 ; room 23, row 7, column 23, item type 0
+@label=ParchmentRoom3
+ $852E DEFB $00 ; room 3, row 16, column 18, item type 5
+@label=ParchmentRoom8
+ $852F DEFB $00 ; room 8, row 18, column 27, item type 5
+@label=ParchmentRoom12
+ $8530 DEFB $00 ; room 12, row 18, column 10, item type 5
+@label=ParchmentRoom14
+ $8531 DEFB $00 ; room 14, row 10, column 19, item type 5
+@label=ParchmentRoom16
+ $8532 DEFB $00 ; room 16, row 5, column 22, item type 5
+@label=ParchmentRoom21
+ $8533 DEFB $00 ; room 21, row 6, column 3, item type 5
+@label=RedScrollTaken
+ $8534 DEFB $00 ; room 24, row 14, column 28, item type 6
+@label=CrossRoom3
+ $8535 DEFB $00 ; room 3, row 18, column 28, item type 1
+@label=WheelCrossRoom9
+ $8536 DEFB $00 ; room 9, row 4, column 6, item type 2
+@label=CrossRoom10
+ $8537 DEFB $00 ; room 10, row 4, column 26, item type 1
+@label=CrossRoom13
+ $8538 DEFB $00 ; room 13, row 18, column 18, item type 1
+@label=CrossRoom14
+ $8539 DEFB $00 ; room 14, row 4, column 9, item type 1
+@label=WheelCrossRoom15
+ $853A DEFB $00 ; room 15, row 8, column 28, item type 2
+@label=CrossRoom16
+ $853B DEFB $00 ; room 16, row 6, column 2, item type 1
+@label=CrossRoom17
+ $853C DEFB $00 ; room 17, row 18, column 28, item type 1
+@label=WheelCrossRoom17
+ $853D DEFB $00 ; room 17, row 10, column 3, item type 2
+@label=CrossRoom18
+ $853E DEFB $00 ; room 18, row 5, column 3, item type 1
+@label=CrossRoom19
+ $853F DEFB $00 ; room 19, row 2, column 3, item type 1
+@label=WheelCrossRoom22
+ $8540 DEFB $00 ; room 22, row 18, column 27, item type 2

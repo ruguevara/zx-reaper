@@ -1,2 +1,5 @@
-; Unused
+; Unused byte
+;
+; No code reads or writes $8508 or $8503/$8505/$8520/$8550 (see #R$8502, #R$8504, #R$851B, #R$854F): they are padding
+; of the variable block.
 g$8508 DEFB $00

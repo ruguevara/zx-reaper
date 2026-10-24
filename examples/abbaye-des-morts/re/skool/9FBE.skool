@@ -1,19 +1,35 @@
-; Routine at 9FBE
+@equ=FLAG_MAP=$5E00
+; Script code $90: mark or unmark every tile for redraw
+;
+; Operand: one byte v. Rewrites every cell of the tile flag map at $5E00-$60BF: the old bit 7 (the redraw mark) is
+; cleared and v rotated right by one bit is ORed in, so bit 0 of v becomes the new mark in bit 7 and bits 1-7 of v
+; land in bits 0-6 of the flags. The scripts use 0 (clear all marks: room 0, the intro text) and 1 (mark every cell,
+; so the next redraw pass repaints the whole room from the tile map: room 4 and the scripts at $82D0-$83A7).
+; .
+; Observed: the cell at $6000 (row 16, column 0) is left alone, because the loop ends when L reaches 0 on its first
+; page and so skips offset 0 of that page.
+;
+; HL Script pointer, at the operands
+; O:HL Script pointer after the operands
+@label=OpMarkRedraw
 c$9FBE LD A,(HL)     ;
  $9FBF INC HL        ;
- $9FC0 RRCA          ;
+ $9FC0 RRCA          ; v rotated right: bit 0 -> bit 7
  $9FC1 LD E,A        ;
- $9FC2 LD D,$7F      ;
+@isub=LD D,$FF-FLAG_REDRAW
+ $9FC2 LD D,$7F      ; D = mask that clears the mark
  $9FC4 PUSH HL       ;
- $9FC5 LD HL,$60BF   ;
+@isub=LD HL,FLAG_MAP+MAP_ROWS*SCREEN_COLS-1
+ $9FC5 LD HL,$60BF   ; last cell of the map; the loop works down through three pages
  $9FC8 LD B,$03      ;
+@label=OpMarkRedraw_Loop
 *$9FCA LD A,(HL)     ;
  $9FCB AND D         ;
  $9FCC OR E          ;
  $9FCD LD (HL),A     ;
  $9FCE DEC L         ;
  $9FCF JR NZ,$9FCA   ;
- $9FD1 DEC H         ;
+ $9FD1 DEC H         ; next page down
  $9FD2 DJNZ $9FCA    ;
  $9FD4 POP HL        ;
  $9FD5 RET           ;

@@ -1,23 +1,48 @@
-; Routine at A450
+@equ=ATTRS=$5800
+@equ=SCREEN_THIRD2=$4800
+@equ=TILE_MAP=$5B00
+; Restore the middle of the screen and the attributes
 ;
-; Used by the routine at #R$A336.
+; Called by #R$A336 when the controls screen is left. Fills the attribute file with 0 (black), then loads A with the
+; opcode of EX DE,HL and runs the copier #R$A45E, which patches that opcode over both NOPs so that the two block
+; copies run the other way: from $C500 back to $4800 and from $5B00 back to $5800. The attribute fill is overwritten
+; by the second copy.
+; .
+; Hardware: writes the screen bitmap and attributes.
+@label=RestoreMenuArea
 c$A450 LD HL,$5800   ;
+@isub=LD DE,ATTRS+1
  $A453 LD DE,$5801   ;
- $A456 LD (HL),L     ;
+ $A456 LD (HL),L     ; L = 0: black
+@isub=LD BC,ATTRS_SIZE-1
  $A457 LD BC,$02FF   ;
  $A45A LDIR          ;
- $A45C LD A,$EB      ;
-; This entry point is used by the routine at #R$A44D.
-*$A45E LD ($A479),A  ;
- $A461 LD ($A46D),A  ;
- $A464 LD HL,$4800   ;
+@isub=LD A,OP_EX_DE_HL
+ $A45C LD A,$EB      ; makes both copies run buffer -> screen
+; Entry point used by #R$A44D. The two copies below are patched by A: 0 (NOP) copies screen to buffers (save), $EB (EX
+; DE,HL) copies buffers to screen (restore).
+@label=CopyMenuArea
+@isub=LD (SmcCopyAttrs),A
+*$A45E LD ($A479),A  ; patch the NOP at the end (attributes)
+@isub=LD (SmcCopyBitmap),A
+ $A461 LD ($A46D),A  ; patch the NOP below (bitmap)
+@isub=LD HL,SCREEN_THIRD2
+ $A464 LD HL,$4800   ; middle third of the bitmap
  $A467 LD DE,$C500   ;
+@isub=LD BC,THIRD_SIZE
  $A46A LD BC,$0800   ;
- $A46D NOP           ;
+; Self-modified: NOP or EX DE,HL, written by #R$A45E.
+@label=SmcCopyBitmap
+ $A46D NOP           ; NOP: screen to buffer; EX DE,HL: buffer to screen
  $A46E LDIR          ;
+@isub=LD HL,ATTRS
  $A470 LD HL,$5800   ;
- $A473 LD DE,$5B00   ;
+@isub=LD DE,TILE_MAP
+ $A473 LD DE,$5B00   ; attribute save area (the tile map buffer, unused before the game)
+@isub=LD BC,ATTRS_SIZE
  $A476 LD BC,$0300   ;
+; Self-modified: NOP or EX DE,HL, written by #R$A45E.
+@label=SmcCopyAttrs
  $A479 NOP           ;
  $A47A LDIR          ;
  $A47C RET           ;

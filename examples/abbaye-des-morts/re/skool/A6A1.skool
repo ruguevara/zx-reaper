@@ -1,17 +1,29 @@
-; Routine at A6A1
-c$A6A1 POP HL        ;
- $A6A2 JR NC,$A6B3   ;
- $A6A4 BIT 7,(HL)    ;
+; Item action: lever that switches on each touch (room 17)
+;
+; The room item of room 17 (The wheel of faith) at row 2, column 15 with flag $851E. While Jean touches it and bit 7
+; of the flag (a latch) is clear, the flag is XORed with $86: bit 7 is set (latch) and bits 1-2 toggle between 0 (off)
+; and 6 (on); sound effect 5 plays. When Jean is not touching it the latch is cleared. The frame drawn is bit 1 of the
+; flag. The crosses of #R$A777 and #R$A782 depend on the state bits (flag AND 7).
+;
+; F Carry set when Jean's box overlaps the item's box
+; SP Slot address + 4 on entry: the next stack word is the flag pointer (the action pops it); see #R$A5E9 for the slot layout
+@label=ActionLever
+c$A6A1 POP HL        ; flag pointer
+ $A6A2 JR NC,$A6B3   ; not touching: release the latch
+ $A6A4 BIT 7,(HL)    ; latch set: Jean has not left the lever yet
  $A6A6 JR NZ,$A6B5   ;
  $A6A8 LD A,(HL)     ;
- $A6A9 XOR $86       ;
+ $A6A9 XOR $86       ; toggle the state bits and set the latch
  $A6AB LD (HL),A     ;
+@isub=LD A,SFX_PICKUP
  $A6AC LD A,$05      ;
  $A6AE LD ($854F),A  ;
  $A6B1 JR $A6B5      ;
-*$A6B3 RES 7,(HL)    ;
-; This entry point is used by the routine at #R$A688.
-*$A6B5 LD A,(HL)     ;
+@label=ActionLever_Release
+*$A6B3 RES 7,(HL)    ; clear the latch
+; Entry point used by #R$A688: draw frame (flag AND 2) / 2 of the item; HL = flag pointer.
+@label=DrawFlagFrame
+*$A6B5 LD A,(HL)     ; bit 1: 0 or 1
  $A6B6 AND $02       ;
  $A6B8 RRCA          ;
- $A6B9 JP $A7DB      ;
+ $A6B9 JP $A7DB      ; draw the frame, next slot

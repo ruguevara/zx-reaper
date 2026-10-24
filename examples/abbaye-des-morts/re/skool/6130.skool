@@ -1,5 +1,12 @@
-; Font index: 96 words for $20-$7F, bits 0-11 offset from the word's high byte
-; to the glyph, bits 12-15 width-2
+; Font index: one word per character $20-$7F, giving the glyph offset and width
+;
+; Word n belongs to the character with code $20+n (the word of character c is at $6130+2*(c-$20)). Read by the
+; character printer #R$9E79 and by #R$9F52, which measures a string in the proportional font.
+; .
+; Word layout (stored low byte first): bits 0-11: offset from the address of the word's high byte (its own address +
+; 1) to the glyph in #R$61F0; bits 12-15: glyph width in pixels minus 2 (GLYPH_WIDTH_BIAS), so the glyphs are 2-17
+; pixels wide. The width is also the advance to the next character.
+@label=FontIndex
 b$6130 DEFW $30BF,$10BF,$30C3,$70C5
  $6138 DEFW $40D1,$80DD,$A0F3,$0109
  $6140 DEFW $310B,$3115,$511F,$6125

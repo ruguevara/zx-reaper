@@ -1,2 +1,15 @@
-; Twelve crosses: count drawn, done flag ($AE4B)
-g$8541 DEFB $00,$00
+; The ring of twelve crosses: how many are shown, and a completion flag
+;
+; State of the crosses routine #R$AE4B, which runs in rooms 24 and 25 (script op $9F) once all 12 crosses are
+; collected (#R$854D). Every 5 frames it increments the count (while the chalice is not taken, #R$8521) and re-stamps
+; that many crosses (tile $4C) at the positions listed from #R$82D7, so that the ring of twelve crosses appears one
+; cross at a time with sound 5. The values survive leaving the room, so on a later visit the whole ring is drawn at
+; once. Zeroed at the start of a game.
+; .
+; +0 CrossRingCount: crosses of the ring drawn so far, 0-12
+; +1 CrossRingDone: set to 12 when the twelfth cross appears and cleared by #R$BB57 when Satan is turned into smoke;
+; no code reads it
+@label=CrossRingCount
+g$8541 DEFB $00
+@label=CrossRingDone
+ $8542 DEFB $00

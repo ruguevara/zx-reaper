@@ -1,2 +1,6 @@
-; Main stack (SP starts at $6100)
+; Main stack (64 bytes, SP starts at $6100)
+;
+; The stack of the main program: the start-up code and the main loop #R$85FC run with SP=$6100 and the stack grows
+; down to $60C0. The interrupt handler uses its own stack at #R$855F. The image holds $FF here.
+@label=MainStack
 b$60C0 DEFS $40,$FF

@@ -1,6 +1,22 @@
-; Routine at 9A16
+; Draw two pixel rows of a 2-byte-wide sprite
 ;
-; Used by the routine at #R$9A36.
+; Called four times per character row by #R$9A36. The first pixel row is stored from the left byte to the right, the
+; second from the right byte to the left, so that HL and DE are back at the first column at the end and no pointer
+; has to be reloaded. Each byte is combined with the background as in #R$99F2: (OutlineMasks[g] AND old byte) OR g.
+; HL ends one pixel row down and DE two rows down.
+; .
+; The pointers are in the alternate register set (see #R$9972): HL = destination in the redraw cell buffer (H = pixel-row
+; page, L = cell index), DE = graphics in the sprite sheet (D = pixel row, E = column), B = $FF so that BC addresses the
+; outline mask table OutlineMasks ($FF00) by the graphics byte in C.
+; .
+; Hardware: none (the redraw cell buffer is in RAM).
+;
+; BC B = $FF; C is scratch
+; DE Graphics: D = pixel row, E = column of the first byte
+; HL Destination in the redraw cell buffer: H = pixel-row page, L = cell index of the first byte
+; O:DE D advanced by 2 pixel rows
+; O:HL H advanced by 1 pixel row
+@label=DrawStripW2
 c$9A16 LD A,(DE)     ;
  $9A17 LD C,A        ;
  $9A18 LD A,(BC)     ;

@@ -1,66 +1,99 @@
-; Routine at BAB1
-c$BAB1 POP BC        ;
- $BAB2 POP BC        ;
+; Entity handler: Death's scythe falling
+;
+; The scythe Death throws (templates #R$BD46 and #R$BD58, spawned by #R$BA79). In this state it falls straight down:
+; its y moves by the vertical speed and the cells under it are looked at. When they are free it is drawn (#R$B9BE) and
+; keeps falling. When a cell is harmful (tile class 4, FLAG_HARMFUL; from the code, no scythe was seen to take this
+; exit) the slot is freed by way of #R$B08E (the four state words are pushed back first so that SP is at the slot
+; again). When a cell is solid (class 1 to 3) the scythe lands: y is rounded down to a multiple of 4 (a whole
+; character row), the handler word becomes #R$BB07 and the scythe is drawn. #R$BB07 then slides it sideways and hands
+; it back to this routine when the floor ends, so a scythe that lands on a ledge moves along it (observed: it falls,
+; alternates between the two states while it creeps sideways, falls off the end of the ledge and goes on) until it
+; leaves the room at the side or reaches a harmful tile. Entity handlers are not called: the slot walker #R$A5E9 sets
+; SP to a slot of #R$C100 and RETs, so the handler is entered with SP at slot+2 (the handler word has been popped) and
+; finds its state on the stack. It pops the words it needs, pushes back the ones that changed, and ends by jumping to
+; #R$A5F0 with HL at the next slot (here through #R$B41F).
+; .
+; Slot layout (from the template, see #R$BD46): +2 word x speed (signed 8.8, used by #R$BB07 only; $FF80 = left), +4
+; word y speed ($00C0), +6 word x, +8 word y (8.8, high bytes in 2-pixel units), +$A word hit box offset (y, x), +$C
+; word hit box size (y, x), +$E word pointer to the sprite block ($95DA: attribute, pair table $AC9F, height, four
+; frames), +$10 animation counter and reload, +$12 frame number and number of frames (4), +$14 unused.
+; .
+; The cell test reads the tile flag map: the row address table at $6100 gives the address of the row of the scythe's
+; lower edge ((y + 7) / 4), the column is x / 4, and the flags of two cells (three when x AND 3 is not 0, the sprite
+; straddling three cells) are ORed.
+;
+; SP Slot address + 2 (the handler word was popped by the RET that entered the routine)
+@label=UpdateScytheFalling
+c$BAB1 POP BC        ; x speed (not used while falling)
+ $BAB2 POP BC        ; y speed
  $BAB3 EXX           ;
- $BAB4 POP DE        ;
+ $BAB4 POP DE        ; DE' = x word (D' = x)
  $BAB5 EXX           ;
- $BAB6 POP HL        ;
- $BAB7 ADD HL,BC     ;
- $BAB8 PUSH HL       ;
+ $BAB6 POP HL        ; y word
+ $BAB7 ADD HL,BC     ; y moves down
+ $BAB8 PUSH HL       ; store y
  $BAB9 EXX           ;
- $BABA POP AF        ;
- $BABB ADD A,$07     ;
+ $BABA POP AF        ; A = y high byte
+ $BABB ADD A,$07     ; cell row of the lower edge = (y + 7) / 4, as a word index
  $BABD RRA           ;
  $BABE AND $3E       ;
  $BAC0 LD L,A        ;
- $BAC1 LD H,$61      ;
- $BAC3 LD A,D        ;
+ $BAC1 LD H,$61      ; row address table at $6100
+ $BAC3 LD A,D        ; x in 2-pixel units (D')
  $BAC4 LD C,A        ;
  $BAC5 RRA           ;
  $BAC6 RRA           ;
- $BAC7 AND $1F       ;
- $BAC9 ADD A,(HL)    ;
+ $BAC7 AND $1F       ; byte column
+ $BAC9 ADD A,(HL)    ; address of the cell in the tile flag map
  $BACA INC L         ;
  $BACB LD H,(HL)     ;
  $BACC LD L,A        ;
  $BACD LD A,C        ;
- $BACE AND $03       ;
+ $BACE AND $03       ; x not a multiple of 4: three cells
  $BAD0 JR Z,$BAD4    ;
  $BAD2 LD A,(HL)     ;
  $BAD3 INC L         ;
-*$BAD4 OR (HL)       ;
+*$BAD4 OR (HL)       ; OR of the flags of the cells
  $BAD5 INC L         ;
  $BAD6 OR (HL)       ;
- $BAD7 AND $07       ;
- $BAD9 JR Z,$BB00    ;
- $BADB BIT 2,A       ;
- $BADD JR Z,$BAE6    ;
- $BADF PUSH HL       ;
+@isub=AND TILE_CLASS_MASK
+ $BAD7 AND $07       ; tile class
+ $BAD9 JR Z,$BB00    ; free: keep falling
+ $BADB BIT 2,A       ; harmful?
+ $BADD JR Z,$BAE6    ; no: solid, the scythe lands
+; Free the scythe. Also entered from #R$BB07 when the scythe leaves the room or meets a harmful cell. The four pushes
+; put SP back at slot+2 (the state words are overwritten with HL, which does not matter), and #R$B08E then zeroes the
+; handler word and goes on to the next slot.
+@label=Scythe_Destroy
+ $BADF PUSH HL       ; put the four state words back: SP = slot+2
  $BAE0 PUSH HL       ;
  $BAE1 PUSH HL       ;
  $BAE2 PUSH HL       ;
- $BAE3 JP $B08E      ;
-*$BAE6 LD HL,$FFF8   ;
+ $BAE3 JP $B08E      ; free the slot
+*$BAE6 LD HL,$FFF8   ; -8: SP back to slot+2
  $BAE9 ADD HL,SP     ;
  $BAEA LD SP,HL      ;
- $BAEB LD HL,$BB07   ;
- $BAEE PUSH HL       ;
+ $BAEB LD HL,$BB07   ; new handler: sliding
+ $BAEE PUSH HL       ; written over the handler word at slot+0
  $BAEF POP HL        ;
  $BAF0 EXX           ;
- $BAF1 POP BC        ;
+ $BAF1 POP BC        ; pop x speed, y speed, x and y again
  $BAF2 POP BC        ;
  $BAF3 POP DE        ;
  $BAF4 POP HL        ;
  $BAF5 LD A,H        ;
- $BAF6 AND $FC       ;
+ $BAF6 AND $FC       ; y rounded down to a multiple of 4 ...
  $BAF8 LD H,A        ;
- $BAF9 LD L,$00      ;
- $BAFB PUSH HL       ;
+ $BAF9 LD L,$00      ; ... with a zero fraction
+ $BAFB PUSH HL       ; store y
  $BAFC POP HL        ;
- $BAFD LD A,D        ;
+ $BAFD LD A,D        ; A = x
  $BAFE JR $BB02      ;
-*$BB00 LD A,D        ;
+*$BB00 LD A,D        ; A = x
  $BB01 EXX           ;
-*$BB02 LD D,A        ;
- $BB03 LD E,H        ;
- $BB04 JP $B9BE      ;
+; Draw the scythe: D = x and E = y in 2-pixel units go to the common drawing code #R$B9BE, which makes the draw
+; command, tests the hit box against the player and queues the sprite. Also entered from #R$BB07.
+@label=Scythe_Draw
+*$BB02 LD D,A        ; D = x
+ $BB03 LD E,H        ; E = y
+ $BB04 JP $B9BE      ; draw it (#R$B9BE)

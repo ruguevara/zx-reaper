@@ -1,4 +1,5 @@
-; Routine at 9C51
+; Parchment gate: RET until a parchment is picked up, then falls into ShowParchment
 ;
-; Used by the routine at #R$85FC.
+; Single byte that is RET normally. Touching a parchment (#R$A836) stores its two message numbers in $850E/$850F and writes NOP here; the main loop (#R$85FC) calls this address on every pass, so the call then falls through into #R$9C52, which shows the parchment and writes RET back. #R$86B9 also writes RET here when a room is entered.
+@label=ParchmentGate
 c$9C51 RET           ;

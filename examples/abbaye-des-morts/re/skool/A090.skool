@@ -1,6 +1,11 @@
-; Routine at A090
+; Set bit 1 of a run of tile flags
 ;
-; Used by the routine at #R$A065.
+; Sets bit 1 of C flag bytes starting at HL, DE bytes apart.
+;
+; HL Address of the first flag in the flag map
+; DE Step between cells: 1 along a row, 32 down a column
+; C Number of cells
+@label=SetFlagRun
 c$A090 LD B,C        ;
 *$A091 SET 1,(HL)    ;
  $A093 ADD HL,DE     ;

@@ -1,5 +1,9 @@
-; Packed sprite set 14 (op $97): 30 columns of 3 chars; flag bytes, set bit =
-; literal byte, clear = 0
+; Packed sprite set 14 (op $97 $0E): 30 columns of 3 character rows
+;
+; Unpacked by room script op $97 $0E into the sprite sheet at $D78F (page = first pixel row, low byte = first column)
+; with record 14 of #R$AE9D: frame width 30 columns, no extra copies. 30 columns x 3 character rows (24 pixel rows),
+; 589 bytes packed. Used by rooms: 24.
+@label=PackedSet14
 b$6DF5 DEFB $1E,$03
  $6DF7 DEFB $3F,$03,$07,$0F,$1F,$37,$2F,$FF,$39,$73,$43,$E2,$FE,$FF,$BF,$FF
  $6E07 DEFB $FE,$57,$07,$2E,$7C,$38,$10,$00,$FF,$3B,$77,$8F,$CF,$EF,$E6,$F0

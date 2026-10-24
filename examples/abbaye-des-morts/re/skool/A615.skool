@@ -1,41 +1,64 @@
-; Routine at A615
+; Item action: the church door that shuts behind Jean (room 7)
+;
+; The room item of room 7 (Abandoned church) at row 15, column 2 with flag $8543; it has no sprite. While the door is
+; open ($851A = 0), Jean touching the item (observed with Jean placed on that spot; in play Jean enters the room from
+; the left) sets its flag to 1 (checkpoint 1: #R$BDF3 uses the first nonzero checkpoint flag among the nine at $8543),
+; $851A to $FF, and arms the one-shot script runner #R$9CE7 with the subscript at $76A0, which draws the door (tiles
+; at column 0, rows 14-17); the room script of room 7 draws it again whenever the room is entered with $851A nonzero.
+; Once the door is shut the item makes it flicker: a countdown in slot +8 of 32-63 frames (random, from the R
+; register) ends with sound effect 8 and the alternative door tiles of the subscript at $76A8 for 3 frames (slot +9
+; counts them), then the normal $76A0 again.
+; .
+; Hardware: reads the R register as a random number; sound request byte #R$854F.
+;
+; F Carry set when Jean's box overlaps the item's box
+; SP Slot address + 4 on entry: the next stack word is the flag pointer (the action pops it); see #R$A5E9 for the slot layout
+@label=ActionChurchDoor
 c$A615 JR NC,$A636   ;
- $A617 LD A,($851A)  ;
+ $A617 LD A,($851A)  ; $851A: door shut ($FF) or not (0)
  $A61A INC A         ;
- $A61B JR Z,$A63C    ;
- $A61D POP HL        ;
- $A61E LD (HL),$01   ;
- $A620 SBC A,A       ;
- $A621 LD ($851A),A  ;
- $A624 LD HL,$76A0   ;
- $A627 LD ($9CEE),HL ;
- $A62A LD HL,$9CE7   ;
- $A62D LD (HL),$00   ;
+ $A61B JR Z,$A63C    ; shut: flicker
+ $A61D POP HL        ; flag pointer
+ $A61E LD (HL),$01   ; checkpoint 1 reached
+ $A620 SBC A,A       ; carry is set: A = $FF
+ $A621 LD ($851A),A  ; door shut
+ $A624 LD HL,$76A0   ; subscript: the shut door
+ $A627 LD ($9CEE),HL ; operand of the LD HL at #R$9CED (script address)
+ $A62A LD HL,$9CE7   ; the one-shot runner #R$9CE7 ...
+ $A62D LD (HL),$00   ; ... is re-armed: NOP
+; Go on with the next slot; SP is at slot + 8 here (the flag pointer is popped, the counters are pushed back).
+@label=NextSlotSP8
+@isub=LD HL,SLOT_SIZE-8
 *$A62F LD HL,$000E   ;
  $A632 ADD HL,SP     ;
  $A633 JP $A5F0      ;
-*$A636 LD A,($851A)  ;
+@label=ActionChurchDoor_NoTouch
+*$A636 LD A,($851A)  ; not touching: only if the door is shut
  $A639 INC A         ;
- $A63A JR NZ,$A66F   ;
-*$A63C POP HL        ;
- $A63D POP BC        ;
+ $A63A JR NZ,$A66F   ; open and not touching: skip the slot
+@label=ActionChurchDoor_Flicker
+*$A63C POP HL        ; flag pointer
+ $A63D POP BC        ; C = countdown, B = frames left of the flash
  $A63E DEC C         ;
- $A63F JR NZ,$A659   ;
- $A641 LD B,$04      ;
- $A643 LD HL,$76A8   ;
+ $A63F JR NZ,$A659   ; countdown not over
+ $A641 LD B,$04      ; flash starts: 3 frames to go
+ $A643 LD HL,$76A8   ; subscript: the other door tiles
  $A646 LD ($9CEE),HL ;
- $A649 LD HL,$9CE7   ;
+ $A649 LD HL,$9CE7   ; re-arm the runner
  $A64C LD (HL),C     ;
- $A64D LD A,R        ;
+ $A64D LD A,R        ; random countdown 32-63 frames
  $A64F AND $1F       ;
  $A651 ADD A,$20     ;
  $A653 LD C,A        ;
+@isub=LD A,SFX_DOOR
  $A654 LD A,$08      ;
  $A656 LD ($854F),A  ;
-*$A659 DJNZ $A665    ;
- $A65B LD HL,$76A0   ;
+@label=ActionChurchDoor_Count
+*$A659 DJNZ $A665    ; one frame of the flash less
+ $A65B LD HL,$76A0   ; flash over: the normal door tiles
  $A65E LD ($9CEE),HL ;
  $A661 LD HL,$9CE7   ;
  $A664 LD (HL),B     ;
-*$A665 PUSH BC       ;
+@label=ActionChurchDoor_Store
+*$A665 PUSH BC       ; write the counters back
  $A666 JR $A62F      ;

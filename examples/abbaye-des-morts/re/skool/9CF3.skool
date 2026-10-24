@@ -1,4 +1,7 @@
-; Attribute-buffer row addresses: 22 words, $5800 + 32*row, read by $95FF
+; Attribute file row addresses: 22 words, $5800 + 32*row
+;
+; One word per row of the room area (rows 0-21): the address of the first attribute cell of the row. Read by the redraw routine #R$95FF.
+@label=AttrRowAddrs
 w$9CF3 DEFW $5800
  $9CF5 DEFW $5820
  $9CF7 DEFW $5840

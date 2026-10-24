@@ -1,3 +1,6 @@
-; Script: block pattern 2x2 (op $88)
-b$7A2B DEFB $88,$02,$02,$03,$04,$22,$23
- $7A32 DEFB $80
+; Block pattern: grass on cave rock (tiles $03,$04,$22,$23)
+;
+; Defines the current block as grass tiles over cyan rock. Called by rooms 10, 11, 14, 16.
+@label=BlockCaveGrass
+b$7A2B DEFB $88,$02,$02,$03,$04,$22,$23 ; BLOCK 2x2: $03 $04 $22 $23
+ $7A32 DEFB $80             ; END

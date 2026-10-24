@@ -1,26 +1,41 @@
-; Entity handler: second state of the one at $BAB1
-c$BB07 POP BC        ;
- $BB08 POP DE        ;
- $BB09 POP HL        ;
- $BB0A ADD HL,BC     ;
- $BB0B PUSH HL       ;
+; Entity handler: Death's scythe sliding along a floor
+;
+; Second state of the scythe (see #R$BAB1, which sets it when the scythe lands). The signed x speed in slot +2 is
+; added to x ($FF80 moves the scythe left, $0080 right). It disappears (#R$BADF) when x is $71 or more or less than 8
+; (2-pixel units, the edges of the room) or when a cell under it is harmful. If the cells under its lower edge have no
+; solid flag the floor has ended and the handler word goes back to #R$BAB1 (it falls again); otherwise it is drawn.
+; .
+; Slot layout: see #R$BAB1.
+; .
+; Bug candidate: the drawing path at $BB50 (a solid cell under the scythe: with the scythe at its rounded height that
+; only happens when it slides into a ledge or wall) loads D and E from the x position, because H holds x here and not
+; y, so the scythe would be drawn at y = x. It was not reached in any run, so the bug is not observed; the usual path
+; (#R$BAB1 and this routine alternating, see the findings) draws through #R$BB02.
+;
+; SP Slot address + 2 (the handler word was popped by the RET that entered the routine)
+@label=UpdateScytheSliding
+c$BB07 POP BC        ; x speed
+ $BB08 POP DE        ; y speed (not used)
+ $BB09 POP HL        ; x
+ $BB0A ADD HL,BC     ; x moves
+ $BB0B PUSH HL       ; store x
  $BB0C EXX           ;
- $BB0D POP DE        ;
+ $BB0D POP DE        ; D' = x word
  $BB0E EXX           ;
- $BB0F POP DE        ;
- $BB10 LD A,D        ;
+ $BB0F POP DE        ; y word
+ $BB10 LD A,D        ; A = y
  $BB11 EXX           ;
- $BB12 ADD A,$07     ;
+ $BB12 ADD A,$07     ; cell row of the lower edge, as a word index
  $BB14 RRA           ;
  $BB15 AND $3E       ;
  $BB17 LD L,A        ;
- $BB18 LD H,$61      ;
- $BB1A LD A,D        ;
- $BB1B CP $71        ;
+ $BB18 LD H,$61      ; row address table at $6100
+ $BB1A LD A,D        ; x in 2-pixel units
+ $BB1B CP $71        ; right edge of the room
  $BB1D JR NC,$BADF   ;
- $BB1F CP $08        ;
+ $BB1F CP $08        ; left edge
  $BB21 JR C,$BADF    ;
- $BB23 LD C,A        ;
+ $BB23 LD C,A        ; byte column and cell address as in #R$BAB1
  $BB24 RRA           ;
  $BB25 RRA           ;
  $BB26 AND $1F       ;
@@ -36,24 +51,24 @@ c$BB07 POP BC        ;
 *$BB33 OR (HL)       ;
  $BB34 INC L         ;
  $BB35 OR (HL)       ;
- $BB36 BIT 2,A       ;
+ $BB36 BIT 2,A       ; harmful?
  $BB38 JR NZ,$BADF   ;
- $BB3A AND $03       ;
+ $BB3A AND $03       ; solid cell under it: stay in this state
  $BB3C JR NZ,$BB50   ;
- $BB3E LD HL,$FFF8   ;
+ $BB3E LD HL,$FFF8   ; no floor: back to falling
  $BB41 ADD HL,SP     ;
  $BB42 LD SP,HL      ;
- $BB43 LD HL,$BAB1   ;
- $BB46 PUSH HL       ;
+ $BB43 LD HL,$BAB1   ; new handler: falling
+ $BB46 PUSH HL       ; written over the handler word at slot+0
  $BB47 POP HL        ;
  $BB48 EXX           ;
- $BB49 POP BC        ;
+ $BB49 POP BC        ; pop x speed, y speed, x and y again
  $BB4A POP BC        ;
  $BB4B POP DE        ;
  $BB4C POP HL        ;
  $BB4D LD A,D        ;
  $BB4E JR $BB02      ;
-*$BB50 LD A,D        ;
+*$BB50 LD A,D        ; see the description: D and E both get x
  $BB51 EXX           ;
  $BB52 LD D,H        ;
  $BB53 LD E,A        ;

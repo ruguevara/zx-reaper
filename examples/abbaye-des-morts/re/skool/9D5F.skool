@@ -1,28 +1,72 @@
-; Routine at 9D5F
+; Bytecode interpreter: runs the script at HL until its end code $80
 ;
-; Used by the routines at #R$85FC, #R$86B9, #R$887B, #R$9C52, #R$9CE7, #R$9DA4,
-; #R$A04B, #R$A058, #R$A336, #R$A3B9 and #R$A47D.
+; Room scripts, the parchment and ending windows, the menus and the title screens are all scripts in one bytecode: a stream of bytes, each either a character to print or a command with operands. #R$86B9 runs the script of room N, the word at $7236 + 2*N, when a room is entered; room 25, entered by the ending (#R$887B), just calls room 24's script. A script ends with $80; a subscript is run by the commands $83, $95 and $9C (and by #R$9CE7) and ends with its own $80.
+; .
+; How it runs: the interpreter handles one code per pass and pushes its own address as the return address of what it calls, so every handler ends with RET and falls back here. Code < $80 is a character: #R$9E79 draws it at the text cursor ($9F26/$9F27) and advances the cursor. Code >= $80 is a command: its handler is the word at #R$9D1F + 2*(code - $80); it is entered with HL at the first operand byte and returns HL after the last one. DE and BC are scratch for the handlers and not preserved. The code $80 pops the loop address and returns to the caller (HL = $9D5F then, not the script address). Codes from $A0 up index past the table and are not used.
+; .
+; Notation of the operands (all single bytes unless stated): y = row, x = column (tile and attribute commands: tile row 0-21 of the room, cell row 0-23 of the screen; $81 and the text: pixel row 0-191), w and h = width and height in cells (bytes for $81), t = tile number, a = attribute byte, b = bitmap byte, n and k = counts, word = little-endian address, (y x)*k = k pairs. A position is always row first, then column. Tile commands write the tile map and the tile flag map (#R$9E6A); the screen is redrawn from them later.
+; .
+; Code      Operands                    Effect
+; $00-$7F   -                           print the character
+; $80       -                           end of script (#R$9D7F)
+; $81       y x w h b                   fill w bytes x h pixel rows of the bitmap with b (#R$9D81)
+; $82       mode y                      alignment of numbered strings (1 left at x=0, 2 centred, else right-aligned to x=256) and text row y (#R$9D99)
+; $83       word                        run the subscript at the address (#R$9DA4)
+; $84       word                        print the string whose number is in the byte at the address: $850D room name, $850E, $850F parchment lines (#R$9DB7)
+; $85       n                           print string number n of the table at $9048 (#R$9DAF)
+; $86       y x w h t                   fill a w x h rectangle of tiles with t (#R$9DD2)
+; $87       n                           set the room name: string number n into $850D (#R$9DEA)
+; $88       w h, w*h tile numbers       define the block pattern; the tile numbers follow inline, row by row (#R$A104)
+; $89       y x w h                     fill the rectangle with the block pattern, repeated (#R$A0BE)
+; $8A       mask                        set flag bit 1 on border cells of the tile flag map: bit 0 left column, bit 1 right column, bit 2 top row (#R$A065)
+; $8B       n, t1..tn, k, (y x)*k       draw the row of n tiles at each of k positions (#R$9DF7)
+; $8C       y x t                       place one tile (#R$9E1B)
+; $8D       y x t c, c counts           stripes of t from (y,x): the counts alternate draw n tiles, skip n cells (a skip wraps to the next row at column 32) (#R$9E3D)
+; $8E       y x                         set the text cursor, pixel row y and pixel column x (#R$9F28)
+; $8F       y x w h a                   fill a w x h rectangle of attribute cells with a (#R$9D8D)
+; $90       f                           f=1: mark every cell of the room for redraw (flag bit 7), f=0: clear the marks (#R$9FBE)
+; $91       t w h k, (y x)*k            draw the w x h block of tiles t, t+1, ... (row by row) at each of k positions (#R$9FD6)
+; $92       t k, (y x)*k                place the tile t at each of k positions (#R$9DF0)
+; $93       y x n, t1..tn               a row of n tiles (#R$9E29)
+; $94       y x t c, c bytes            tile t where a two-level bitmap has bits set: a mask byte holds 8 bits for 8 groups of 8 cells (high bit first), each group with its bit set is followed by one data byte of 8 cells; c counts all mask and data bytes (#R$9FFF)
+; $95       word1 word2                 run the subscript word1 if the byte at word2 is 0 (#R$A04B)
+; $96       y x w h f                   fill a rectangle of the tile flag map with f (#R$A123)
+; $97       n                           unpack sprite set n for the room (#R$A146)
+; $98       t k, (y x w h)*k            fill k rectangles with t (#R$9DC2)
+; $99       k, (y x w h)*k              fill k rectangles with the block pattern (#R$A0B4)
+; $9A       t y x n                     vertical line of n tiles t (not used by the scripts) (#R$A15A)
+; $9B       t k, (y x n)*k              k vertical lines of tile t (#R$A14E)
+; $9C       word1 word2                 run the subscript word1 if the byte at word2 is not 0 (#R$A058)
+; $9D       y x a n                     water or lava strip of n cells at (y,x) with attribute a: starts the per-frame reflection effect #R$AD88 and marks the cells with the harmful flag value 4 (#R$A168)
+; $9E       -                           start the flame animation of the bottom row, tiles $3B/$3C (#R$A1B9)
+; $9F       -                           start the twelve-crosses effect (#R$A1BE)
+; .
+; Hardware: the character and bitmap commands write the screen bitmap and the attribute commands the attribute file directly; the tile commands only write the buffers.
+;
+; HL Address of the script
+; O:HL $9D5F after the end code (the script address is lost)
+@label=RunScript
 c$9D5F PUSH HL       ;
- $9D60 LD HL,$9D5F   ;
+ $9D60 LD HL,$9D5F   ; the loop address becomes the return address of every handler
  $9D63 EX (SP),HL    ;
  $9D64 LD A,(HL)     ;
- $9D65 ADD A,A       ;
+ $9D65 ADD A,A       ; bit 7 to carry: a command
  $9D66 JR C,$9D6E    ;
  $9D68 LD A,(HL)     ;
  $9D69 INC HL        ;
- $9D6A CALL $9E79    ;
- $9D6D RET           ;
-*$9D6E INC HL        ;
- $9D6F PUSH HL       ;
+ $9D6A CALL $9E79    ; character: draw it at the text cursor
+ $9D6D RET           ; back into the loop
+*$9D6E INC HL        ; skip the code
+ $9D6F PUSH HL       ; script pointer for the handler
  $9D70 PUSH DE       ;
  $9D71 LD L,A        ;
  $9D72 LD H,$00      ;
  $9D74 LD DE,$9D1F   ;
- $9D77 ADD HL,DE     ;
+ $9D77 ADD HL,DE     ; HL = table entry: code*2 (bit 7 gone) + table
  $9D78 LD A,(HL)     ;
  $9D79 INC HL        ;
  $9D7A LD H,(HL)     ;
  $9D7B LD L,A        ;
  $9D7C POP DE        ;
- $9D7D EX (SP),HL    ;
+ $9D7D EX (SP),HL    ; RET enters the handler; HL = script pointer
  $9D7E RET           ;

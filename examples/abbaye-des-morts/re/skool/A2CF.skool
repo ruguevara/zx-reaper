@@ -1,2 +1,6 @@
-; Control bits read this frame ($A271, or $A290 for Kempston)
+; Control bits read this frame
+;
+; Stored by #R$A240 (any key held, bits 0-4), then by #R$A271 and, with a joystick, #R$A290. Bit 0 RIGHT, 1 LEFT, 2
+; CROUCH, 3 and 4 JUMP, 5 T (debug warp), 6 R, 7 Y. Read directly by the title loop #R$8832.
+@label=ControlsRead
 g$A2CF DEFB $00

@@ -1,3 +1,6 @@
 ; Script: "RIGHT"
+;
+; Name of the control in the redefinition prompt, printed after #R$A4FB.
+@label=TextRight
 t$A520 DEFM "RIGHT"
  $A525 DEFB $80

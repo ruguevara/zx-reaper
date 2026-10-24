@@ -1,11 +1,18 @@
-; Routine at 9F43
+; Find string number A in the text table
 ;
-; Used by the routine at #R$9F30.
+; The text table at $9048 is a run of strings, each a length byte followed by that many characters. Skips A strings by
+; stepping HL over length+1 bytes each; string 0 is at $9048 itself, so A = 0 returns at once. The table holds strings
+; 0-52; a larger number would run past it (not checked).
+;
+; A String number
+; O:HL Address of the string's length byte
+@label=FindString
 c$9F43 LD HL,$9048   ;
  $9F46 OR A          ;
  $9F47 RET Z         ;
  $9F48 LD B,A        ;
  $9F49 LD DE,$0000   ;
+@label=FindString_Loop
 *$9F4C LD E,(HL)     ;
  $9F4D INC HL        ;
  $9F4E ADD HL,DE     ;

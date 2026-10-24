@@ -1,2 +1,7 @@
-; Word for $9719/$97B7
+; Write pointer of the redraw run list
+;
+; Word. #R$97B7 sets it to $C200, the start of the redraw run list, at the beginning of the redraw pass of each frame;
+; #R$9719 advances it as it appends the records of the runs of marked cells of a row and keeps a $FF after the last
+; record. #R$95FF later walks the list and draws the cells.
+@label=RedrawListPtr
 g$855D DEFW $0000

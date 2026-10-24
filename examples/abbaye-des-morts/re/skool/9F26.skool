@@ -1,3 +1,9 @@
-; Text cursor: y (pixel row), x (pixel column); set by script code $8E
+; Text cursor: y (pixel row) and x (pixel column)
+;
+; Where #R$9E79 draws the next character; read as a word with L = y and H = x. +0 byte: y, pixel row 0-191, set by
+; script codes $82 (y only) and $8E (y and x). +1 byte: x, pixel column 0-255; recomputed by #R$9F75 before each
+; string from the alignment mode and the string width, and advanced by the width of every character drawn (#R$9F0A).
+@label=TextCursorY
 g$9F26 DEFB $00
+@label=TextCursorX
  $9F27 DEFB $00

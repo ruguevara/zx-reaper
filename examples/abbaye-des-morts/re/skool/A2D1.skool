@@ -1,2 +1,6 @@
-; Controls newly pressed this frame ($A596)
+; Control bits newly pressed this frame
+;
+; Bits that are set in #R$A2CF and were not in the previous frame, computed by #R$A596. Used for the jump (bits 3 and
+; 4) and the debug warp (bit 5). Same bit layout as #R$A2CF.
+@label=ControlsPressed
 g$A2D1 DEFB $00

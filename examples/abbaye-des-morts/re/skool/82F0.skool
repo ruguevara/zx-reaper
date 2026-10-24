@@ -1,8 +1,16 @@
-; Script: room frame and title bar, prints the room name (message ($850D))
-b$82F0 DEFB $8F,$16,$0C,$14,$02,$07
- $82F6 DEFB $81,$B0,$0C,$14,$10,$00
- $82FC DEFB $86,$00,$00,$20,$16,$80
- $8302 DEFB $82,$00,$B0
- $8305 DEFB $84,$0D,$85
- $8308 DEFB $90,$01
- $830A DEFB $80
+; Standard start of a room: clear the map and draw the name panel
+;
+; Called by the script of nearly every room (all but 0 and 4) right after the room name is set. It sets the colours of
+; the bottom right panel (rows 22-23, columns 12-31: white on black), clears its pixels, clears the whole tile map
+; with the blank tile $80, prints the room name from #R$850D right-aligned at pixel row 176 and marks every cell for
+; redraw.
+@label=ScriptRoomPanel
+b$82F0 DEFB $8F,$16,$0C,$14,$02,$07 ; FILLATTR row 22, col 12, 20x2, attribute $07
+ $82F6 DEFB $81,$B0,$0C,$14,$10,$00 ; FILLPIX pixel row 176, byte col 12, 20 bytes x 16 rows, byte $00
+ $82FC DEFB $86,$00,$00,$20,$16,$80 ; FILLTILE row 0, col 0, 32x22, tile $80
+ $8302 DEFB $82,$00,$B0     ; ALIGN mode 0, pixel row 176
+ $8305 DEFB $84 ; PRINTVAR string number in RoomNameString
+@isub=DEFW RoomNameString
+ $8306 DEFW $850D
+ $8308 DEFB $90,$01         ; REDRAWMARK mark all cells
+ $830A DEFB $80             ; END

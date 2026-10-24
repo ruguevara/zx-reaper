@@ -1,20 +1,42 @@
-; Routine at 9BF3
+@equ=LIVES_BAR_SCREEN=$50C0
+@equ=LIVES_BAR_ATTRS=$5AC0
+; Draw the lives bar (hearts) of the status line, when asked to
 ;
-; Used by the routine at #R$85FC.
-c$9BF3 NOP           ;
+; Row 22 of the screen holds the lives bar, row 23 the crosses (#R$9C1B). The main loop calls this every frame, but the
+; routine works only when its first byte is NOP: it then overwrites that byte with RET and so does nothing on the later
+; calls. Writing 0 to $9BF3 asks for a redraw: done at the start of a game (#R$85FC), after a heart is picked up
+; (#R$A70B), at a death (#R$AA3D) and after #R$9C52 has printed text over the screen. It draws 9 heart tiles (tile
+; $7B, MAX_LIVES of them) and 3 blank cells in row 22, columns 0-11, and then sets the attributes: as many cells as the
+; player has lives ($854C) are bright red, the rest (lost hearts and the blank cells) blue. Observed with $854C = 5: five
+; red hearts, then four blue ones.
+; .
+; Hardware: writes bitmap bytes of screen row 22 ($50C0...) and its attributes ($5AC0...).
+; .
+; All registers are changed.
+@label=DrawLivesBar
+c$9BF3 NOP           ; NOP: draw the bar; RET: already drawn. Callers write 0 here to ask for a redraw
  $9BF4 LD HL,$9BF3   ;
- $9BF7 LD (HL),$C9   ;
+@isub=LD (HL),OP_RET
+ $9BF7 LD (HL),$C9   ; switch off until the next request
  $9BF9 LD DE,$50C0   ;
+; The heart tile bitmap.
+@isub=LD HL,TileGfx+TILE_HEART*CELL_SIZE
  $9BFC LD HL,$D2D8   ;
+@isub=LD C,MAX_LIVES
  $9BFF LD C,$09      ;
  $9C01 CALL $9C3B    ;
+; Blank cells for the rest of the 12.
+@isub=LD C,STATUS_CELLS-MAX_LIVES
  $9C04 LD C,$03      ;
  $9C06 LD HL,$CF00   ;
  $9C09 CALL $9C3B    ;
+; Attributes: the first `lives` cells (A = lives + 1 as the DJNZ count of #R$9C47) get ink red, bright; the rest ink blue.
  $9C0C LD HL,$5AC0   ;
  $9C0F LD A,($854C)  ;
  $9C12 INC A         ;
+@isub=LD C,STATUS_CELLS
  $9C13 LD C,$0C      ;
  $9C15 LD B,A        ;
+@isub=LD A,BRIGHT+RED
  $9C16 LD A,$42      ;
  $9C18 JP $9C47      ;

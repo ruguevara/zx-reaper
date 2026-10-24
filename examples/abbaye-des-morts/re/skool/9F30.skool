@@ -1,11 +1,21 @@
-; Routine at 9F30
+; Print string number A at the text cursor, aligned
 ;
-; Used by the routines at #R$9DAF and #R$9DB7.
+; Finds string A in the text table (#R$9F43), measures it (#R$9F52), lets #R$9F75 set the cursor x from the alignment
+; mode (#R$9F93) and the width, then draws the characters one at a time with #R$9E79, each advancing the cursor by its
+; width. The cursor y is not changed; HL ends after the string. Reached from script codes $85 (string number in the
+; script, #R$9DAF) and $84 (string number read from a variable, #R$9DB7).
+; .
+; Hardware: draws the proportional font into the screen bitmap by XOR (through #R$9E79); the attributes are not
+; touched, so the text takes the colours the cells already have.
+;
+; A String number 0-52 (the text table at $9048)
+@label=PrintString
 c$9F30 CALL $9F43    ;
  $9F33 CALL $9F52    ;
  $9F36 CALL $9F75    ;
- $9F39 LD B,(HL)     ;
+ $9F39 LD B,(HL)     ; string length
  $9F3A INC HL        ;
+@label=PrintString_Loop
 *$9F3B LD A,(HL)     ;
  $9F3C INC HL        ;
  $9F3D CALL $9E79    ;

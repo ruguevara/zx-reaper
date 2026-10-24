@@ -1,21 +1,38 @@
-; Routine at B9F8
-c$B9F8 LD IY,$B3D2   ;
- $B9FC POP BC        ;
- $B9FD POP DE        ;
- $B9FE POP HL        ;
- $B9FF ADD HL,BC     ;
- $BA00 PUSH HL       ;
- $BA01 POP HL        ;
- $BA02 LD A,H        ;
- $BA03 CP D          ;
+; Entity handler: Death flying right (room 18)
+;
+; Death, the flying reaper of room 18 (Banquet of Death), during the half of its patrol in which it moves right (the
+; other half is #R$BA15). Entity handlers are not called: the slot walker #R$A5E9 sets SP to a slot of #R$C100 and
+; RETs, so the handler is entered with SP at slot+2 (the handler word has been popped) and finds its state on the
+; stack. It pops the words it needs, pushes back the ones that changed, and ends by jumping to #R$A5F0 with HL at the
+; next slot (here through #R$B41F).
+; .
+; State used by this half, from the slot (#R$C100): +2 word speed (signed 8.8, 2-pixel units per frame), +4 byte left
+; turning point, +5 byte right turning point, +6 word x (8.8; the high byte is in 2-pixel units). The speed is added
+; to x; when the high byte of x equals the right turning point the handler word of the slot is rewritten with #R$BA15,
+; so that from the next frame on the same speed is subtracted. Both halves go on at #R$BA32. IY is the address the
+; animation code at #R$BA79 jumps to when it has chosen the graphics: $B3D2 takes the second of the two frame tables
+; of the sprite block (#R$B3D2 skips the first), which is the table for this direction; #R$BA15 uses $B3D4, the first
+; table.
+;
+; SP Slot address + 2 (the handler word was popped by the RET that entered the routine)
+@label=UpdateDeathRight
+c$B9F8 LD IY,$B3D2   ; frame table for moving right (the second one)
+ $B9FC POP BC        ; speed
+ $B9FD POP DE        ; D right turning point, E left turning point
+ $B9FE POP HL        ; x (8.8)
+ $B9FF ADD HL,BC     ; x moves right
+ $BA00 PUSH HL       ; store x
+ $BA01 POP HL        ; SP is back at +8
+ $BA02 LD A,H        ; x in 2-pixel units
+ $BA03 CP D          ; at the right turning point?
  $BA04 JR NZ,$BA32   ;
- $BA06 LD HL,$FFFA   ;
+ $BA06 LD HL,$FFFA   ; -6: back to slot+2
  $BA09 ADD HL,SP     ;
  $BA0A LD SP,HL      ;
- $BA0B LD HL,$BA15   ;
- $BA0E PUSH HL       ;
+ $BA0B LD HL,$BA15   ; next frame this slot is handled by the moving-left half
+ $BA0E PUSH HL       ; written over the handler word at slot+0
  $BA0F POP HL        ;
- $BA10 POP BC        ;
+ $BA10 POP BC        ; pop speed, limits and x again
  $BA11 POP DE        ;
  $BA12 POP HL        ;
  $BA13 JR $BA32      ;

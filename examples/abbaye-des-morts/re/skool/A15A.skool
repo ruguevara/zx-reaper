@@ -1,3 +1,10 @@
-; Script code $9A: one count byte, then as $A15C (never used by the scripts)
-c$A15A LD C,(HL)     ;
+; Script code $9A: draw one vertical line of a tile (never used)
+;
+; Operands: tile, row, column, length. Loads the tile number into C and continues in #R$A15C. No room script uses it
+; (a static decode of the scripts at $726A-$83A7 finds no $9A).
+;
+; HL Script pointer, at the operands
+; O:HL Script pointer after the operands
+@label=OpTileVLine
+c$A15A LD C,(HL)     ; C = tile
  $A15B INC HL        ;

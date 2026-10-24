@@ -1,30 +1,43 @@
-; Room 16 script: Lake of despair
-b$7C8F DEFB $87,$10
- $7C91 DEFB $83,$F0,$82
- $7C94 DEFB $83,$55,$79
- $7C97 DEFB $99,$0A,$00,$00,$06,$16,$00,$00,$18,$01,$11,$1E,$02,$02,$00,$1E
+; Room script 16: Lake of despair
+;
+; Op $96 turns an area into free space (flag $80). Op $9D animates a strip of liquid at the bottom row of the room:
+; row 21, from column 6, 16 cells wide, attribute $13 (#R$AD88).
+; .
+; Room 16: column 1, row 3 of the 5x5 map (left is room 15, right 17, up 11, down 21, counted modulo 25). Subscripts:
+; #R$82F0, #R$7955, #R$7A2B. Items (#R$8EDF) at row,column: parchment 5,22, cross 6,2.
+@label=RoomScript16
+b$7C8F DEFB $87,$10         ; ROOMNAME 16 "Lake of despair"
+ $7C91 DEFB $83 ; CALL ScriptRoomPanel
+@isub=DEFW ScriptRoomPanel
+ $7C92 DEFW $82F0
+ $7C94 DEFB $83 ; CALL BlockCaveRock
+@isub=DEFW BlockCaveRock
+ $7C95 DEFW $7955
+ $7C97 DEFB $99,$0A,$00,$00,$06,$16,$00,$00,$18,$01,$11,$1E,$02,$02,$00,$1E ; TILEBLOCKS 10 rectangles
  $7CA7 DEFB $02,$12,$00,$1C,$02,$01,$0A,$1C,$02,$01,$03,$1A,$02,$01,$07,$10
  $7CB7 DEFB $02,$01,$07,$14,$06,$01,$0E,$1A,$02,$01
- $7CC1 DEFB $98,$80,$02,$04,$02,$04,$04,$0C
+ $7CC1 DEFB $98,$80,$02,$04,$02,$04,$04,$0C ; RECTS tile $80, 2 rectangles
  $7CC9 DEFB $00,$06,$04
- $7CCC DEFB $83,$2B,$7A
- $7CCF DEFB $99,$03,$08,$02,$04,$02,$10,$00
+ $7CCC DEFB $83 ; CALL BlockCaveGrass
+@isub=DEFW BlockCaveGrass
+ $7CCD DEFW $7A2B
+ $7CCF DEFB $99,$03,$08,$02,$04,$02,$10,$00 ; TILEBLOCKS 3 rectangles
  $7CD7 DEFB $06,$02,$14,$16,$0A,$02
- $7CDD DEFB $92,$B1,$14,$11,$0A,$11,$0B,$12,$09,$12,$0B,$12,$0C,$12,$12,$12
+ $7CDD DEFB $92,$B1,$14,$11,$0A,$11,$0B,$12,$09,$12,$0B,$12,$0C,$12,$12,$12 ; STAMP1 tile $B1 at 20 positions
  $7CED DEFB $13,$13,$08,$13,$09,$13,$11,$13,$12,$13,$13,$14,$07,$14,$09,$14
  $7CFD DEFB $0A,$14,$0C,$14,$0D,$14,$0E,$14,$14,$14,$15
- $7D08 DEFB $92,$49,$03,$12,$18,$12,$1A,$13
+ $7D08 DEFB $92,$49,$03,$12,$18,$12,$1A,$13 ; STAMP1 tile $49 at 3 positions
  $7D10 DEFB $0B
- $7D11 DEFB $92,$4B,$0A,$12,$19,$13,$0A,$13,$0C,$13,$0D,$13,$17,$13,$18,$13
+ $7D11 DEFB $92,$4B,$0A,$12,$19,$13,$0A,$13,$0C,$13,$0D,$13,$17,$13,$18,$13 ; STAMP1 tile $4B at 10 positions
  $7D21 DEFB $19,$13,$1B,$14,$11,$14,$12
- $7D28 DEFB $92,$24,$05,$00,$03,$13,$05,$04
+ $7D28 DEFB $92,$24,$05,$00,$03,$13,$05,$04 ; STAMP1 tile $24 at 5 positions
  $7D30 DEFB $1F,$09,$1E,$15,$1C
- $7D35 DEFB $92,$25,$05,$01,$06,$01,$1D,$08
+ $7D35 DEFB $92,$25,$05,$01,$06,$01,$1D,$08 ; STAMP1 tile $25 at 5 positions
  $7D3D DEFB $18,$0B,$1D,$0C,$01
- $7D42 DEFB $9B,$A6,$03,$01,$0B,$07,$01,$0D
+ $7D42 DEFB $9B,$A6,$03,$01,$0B,$07,$01,$0D ; RUNS_V tile $A6, 3 vertical runs
  $7D4A DEFB $03,$01,$14,$03
- $7D4E DEFB $8C,$12,$06,$26
- $7D52 DEFB $8C,$13,$1A,$4A
- $7D56 DEFB $96,$00,$02,$02,$04,$80
- $7D5C DEFB $9D,$15,$06,$13,$10
- $7D61 DEFB $80
+ $7D4E DEFB $8C,$12,$06,$26 ; TILE1 row 18, col 6, tile $26
+ $7D52 DEFB $8C,$13,$1A,$4A ; TILE1 row 19, col 26, tile $4A
+ $7D56 DEFB $96,$00,$02,$02,$04,$80 ; FLAGS row 0, col 2, 2x4, flags $80
+ $7D5C DEFB $9D,$15,$06,$13,$10 ; MOD9D liquid strip: row 21, col 6, attribute $13, 16 cells
+ $7D61 DEFB $80             ; END

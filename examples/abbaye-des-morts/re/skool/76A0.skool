@@ -1,3 +1,8 @@
-; Script: tiles drawn when flag $851A is set (room 7), also run by $A615
-b$76A0 DEFB $91,$BC,$01,$04,$01,$0E,$00
- $76A7 DEFB $80
+; Picture: the shut door at the left edge, rows 14-17 (tiles $BC-$BF)
+;
+; Draws a 1x4 picture of the red studded door (tiles $BC,$BD,$BE,$BF) at row 14, column 0. Run by room 7 while the
+; church door flag #R$851A is set, and by the church trigger #R$A615 (script address stored in $9CEE) when the door
+; shuts. Alternates with #R$76A8.
+@label=DoorLeftShut
+b$76A0 DEFB $91,$BC,$01,$04,$01,$0E,$00 ; PICTURES tiles from $BC, 1x4, at 1 positions
+ $76A7 DEFB $80             ; END

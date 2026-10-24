@@ -1,2 +1,8 @@
-; Room flag read by $9B5A (cleared at game start)
+; Direction of the last room change (0 right, 1 left, 2 down, 3 up)
+;
+; Set by #R$ACEF when the player crosses a screen edge: 0 = left the room through the right edge, 1 = left edge, 2 =
+; bottom edge, 3 = top edge. #R$9B5A (called when a room is entered) indexes the four scroll set-ups at #R$9BD3 with
+; it to choose from which side the new room is drawn in. Cleared by #R$85FC at the start of a game and by #R$9C52
+; after a parchment has been read (so that the room is redrawn from the right).
+@label=ExitDirection
 g$850B DEFB $00

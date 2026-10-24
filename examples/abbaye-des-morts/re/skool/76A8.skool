@@ -1,3 +1,8 @@
-; Script: tiles run by $A615 (room 7 animation)
-b$76A8 DEFB $91,$77,$01,$04,$01,$0E,$00
- $76AF DEFB $80
+; Picture: the left door of the church in its second look (tiles $77-$7A)
+;
+; Draws a 1x4 picture of the door (tiles $77,$78,$79,$7A) at row 14, column 0, over the picture of #R$76A0: the church
+; trigger #R$A615 alternates the two scripts at random intervals while sound 8 plays, so the shut door seems to
+; rattle.
+@label=DoorLeftRattle
+b$76A8 DEFB $91,$77,$01,$04,$01,$0E,$00 ; PICTURES tiles from $77, 1x4, at 1 positions
+ $76AF DEFB $80             ; END

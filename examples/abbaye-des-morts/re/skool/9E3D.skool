@@ -1,33 +1,39 @@
-; Routine at 9E3D
-c$9E3D LD E,(HL)     ;
+; Script opcode $8D: draw a tile in stripes (runs and gaps along the rows)
+;
+; Operands: y x t c, then c count bytes. From the cell (y, x) the counts alternate: draw that many cells with the tile t, skip that many cells (a skip that passes column 31 continues on the next row), draw, skip... c counts both kinds, so it is odd when the last count is a run. A run is not wrapped. Used for the tree trunks and similar patterns of the room scripts; cells are placed through #R$9E6A.
+;
+; HL Operand bytes
+; O:HL Address after the counts
+@label=OpTileStripes
+c$9E3D LD E,(HL)     ; E = y, D = x
  $9E3E INC HL        ;
  $9E3F LD D,(HL)     ;
  $9E40 INC HL        ;
- $9E41 LD A,(HL)     ;
+ $9E41 LD A,(HL)     ; tile
  $9E42 INC HL        ;
- $9E43 LD C,(HL)     ;
+ $9E43 LD C,(HL)     ; C = number of counts
  $9E44 INC HL        ;
  $9E45 PUSH HL       ;
  $9E46 EX DE,HL      ;
  $9E47 LD E,A        ;
-*$9E48 EX (SP),HL    ;
+*$9E48 EX (SP),HL    ; HL = script, stack = position: B = next count
  $9E49 LD A,(HL)     ;
  $9E4A INC HL        ;
  $9E4B EX (SP),HL    ;
  $9E4C LD B,A        ;
-*$9E4D CALL $9E6A    ;
- $9E50 INC H         ;
+*$9E4D CALL $9E6A    ; draw a run of B cells
+ $9E50 INC H         ; next column
  $9E51 DJNZ $9E4D    ;
- $9E53 DEC C         ;
+ $9E53 DEC C         ; all counts used?
  $9E54 JR Z,$9E68    ;
  $9E56 EX (SP),HL    ;
  $9E57 LD A,(HL)     ;
  $9E58 INC HL        ;
  $9E59 EX (SP),HL    ;
  $9E5A LD B,A        ;
-*$9E5B INC H         ;
+*$9E5B INC H         ; skip B cells
  $9E5C LD A,H        ;
- $9E5D SUB $20       ;
+ $9E5D SUB $20       ; past column 31: next row
  $9E5F JR C,$9E63    ;
  $9E61 LD H,A        ;
  $9E62 INC L         ;

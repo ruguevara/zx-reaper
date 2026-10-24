@@ -1,26 +1,43 @@
-; Routine at BA54
-c$BA54 POP HL        ;
- $BA55 LD A,(HL)     ;
+; Death: attribute, width and height of the sprite for the current shift phase
+;
+; Continuation of #R$BA15 after the hit test at #R$A851 (reached by a JP through $A881; SP is at slot+16, the hit test
+; has popped the two hit box words). It pops the pointer in slot +$10, which points five bytes into the behaviour
+; block of kind 16 (#R$95B9): attribute byte, pointer to the pair table of (column offset, width) per shift phase,
+; height in 2-pixel units, then the two frame tables. The attribute goes to the draw command at $ACD1 (+9, $ACDA); the
+; pair for shift phase x AND 3 gives the offset of the shifted copy inside the frame (kept in A') and the width, and
+; with the height they go to $ACD7. Then the animation counter and frame number in slot +$12..+$15 are stepped by
+; #R$A883, which continues at #R$BA79.
+; .
+; Each frame is stored in the sprite sheet as four copies, each 2 pixels further right than the one before (4, 5, 5
+; and 5 columns for Death, 19 per frame), so x AND 3 picks the copy to draw.
+;
+; A' x of Death in 2-pixel units; AND 3 is the shift phase
+; IY Address #R$BA79 passes on control to (#R$B3D2 or #R$B3D4)
+; O:A' Column offset of the shifted copy, added to the frame's column by #R$B3D8
+; O:HL Sprite block + 9: the first frame table
+@label=SetDeathSprite
+c$BA54 POP HL        ; pointer to the sprite block + 5
+ $BA55 LD A,(HL)     ; attribute
  $BA56 INC HL        ;
- $BA57 LD ($ACDA),A  ;
- $BA5A LD E,(HL)     ;
+ $BA57 LD ($ACDA),A  ; attribute of the draw command
+ $BA5A LD E,(HL)     ; DE = pair table
  $BA5B INC HL        ;
  $BA5C LD D,(HL)     ;
  $BA5D INC HL        ;
- $BA5E EX DE,HL      ;
- $BA5F EX AF,AF'     ;
- $BA60 AND $03       ;
- $BA62 ADD A,A       ;
+ $BA5E EX DE,HL      ; HL = pair table, DE = block + 8
+ $BA5F EX AF,AF'     ; A = x
+ $BA60 AND $03       ; shift phase
+ $BA62 ADD A,A       ; two bytes per pair
  $BA63 LD C,A        ;
  $BA64 LD B,$00      ;
  $BA66 ADD HL,BC     ;
- $BA67 LD A,(HL)     ;
- $BA68 EX AF,AF'     ;
+ $BA67 LD A,(HL)     ; column offset of that copy
+ $BA68 EX AF,AF'     ; keep it in A'
  $BA69 INC HL        ;
- $BA6A LD C,(HL)     ;
+ $BA6A LD C,(HL)     ; width of that copy
  $BA6B EX DE,HL      ;
- $BA6C LD B,(HL)     ;
+ $BA6C LD B,(HL)     ; B = height
  $BA6D INC HL        ;
- $BA6E LD ($ACD7),BC ;
- $BA72 LD IX,$BA79   ;
+ $BA6E LD ($ACD7),BC ; width, height of the draw command
+ $BA72 LD IX,$BA79   ; animation step continues at #R$BA79
  $BA76 JP $A883      ;

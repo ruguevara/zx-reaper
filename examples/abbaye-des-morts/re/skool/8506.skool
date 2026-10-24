@@ -1,2 +1,7 @@
-; Machine type (1 = 48K)
+; Machine type left by the loader
+;
+; 1 on a 48K Spectrum. On a 128K it is the value written to port $7FFD to page in the bank that holds the music
+; (#R$85C7 writes it back to page that bank in). Stored by #R$6000 from the word the loader leaves on the stack; the
+; 48K start of #R$85FC compares it with 1 to run the 48K-only screen script.
+@label=MachineType
 g$8506 DEFB $00

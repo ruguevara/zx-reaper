@@ -1,3 +1,6 @@
-; Alignment of numbered strings (1 at x=0, 2 centred, other values
-; right-aligned), set by script code $82
+; Alignment mode of numbered strings
+;
+; One byte read by #R$9F75 and set by script code $82 (its first operand, #R$9D99): 1 left-aligned at x = 0, 2
+; centred, any other value (0 at the start) right-aligned, flush with the right edge of the screen.
+@label=TextAlignMode
 g$9F93 DEFB $00

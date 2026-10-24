@@ -1,15 +1,23 @@
-; Routine at 9E6A
+; Put a tile in the room: tile map and tile flag map
 ;
-; Used by the routines at #R$9DD2, #R$9DF7, #R$9E1B, #R$9E29, #R$9E3D, #R$9FD6,
-; #R$9FFF, #R$A0BE and #R$AE4B.
+; Writes the tile number E in the tile map at row L, column H (address $5B00 + 32*row + column, via #R$A20D) and the flag byte of that tile (TileFlags, $CD00 + tile; bit 7 set marks the cell for redraw, bits 0-2 are the tile class) in the same cell of the tile flag map, three pages higher ($5E00 + 32*row + column). Nothing is drawn: the redraw routines (#R$9B5A, #R$97B7) paint the marked cells later. All the tile commands of the room scripts end up here. HL is preserved, D and A are not.
+;
+; E Tile number
+; H Column (0-31)
+; L Row (0-21)
+; O:A Flag byte of the tile
+; O:D High byte of TileFlags ($CD)
+@label=PlaceTile
 c$9E6A PUSH HL       ;
- $9E6B CALL $A20D    ;
- $9E6E LD D,$CD      ;
- $9E70 LD (HL),E     ;
+ $9E6B CALL $A20D    ; HL = tile map address
+@isub=LD D,TileFlags/256
+ $9E6E LD D,$CD      ; DE = TileFlags + tile
+ $9E70 LD (HL),E     ; tile map
  $9E71 LD A,H        ;
- $9E72 ADD A,$03     ;
+@isub=ADD A,FLAGS_PAGE_OFFSET
+ $9E72 ADD A,$03     ; the flag map is 3 pages higher
  $9E74 LD H,A        ;
- $9E75 LD A,(DE)     ;
- $9E76 LD (HL),A     ;
+ $9E75 LD A,(DE)     ; flags of the tile
+ $9E76 LD (HL),A     ; tile flag map
  $9E77 POP HL        ;
  $9E78 RET           ;

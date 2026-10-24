@@ -1,18 +1,80 @@
-; Room 0 script: intro text (messages 38-42)
-b$726A DEFB $97,$01
- $726C DEFB $86,$00,$00,$20,$16,$00
- $7272 DEFB $8F,$00,$00,$20,$18,$00
- $7278 DEFB $81,$00,$00,$20,$C0,$00
- $727E DEFB $82,$02,$0C
- $7281 DEFB $85,$26
- $7283 DEFB $82,$02,$20
- $7286 DEFB $85,$27
- $7288 DEFB $82,$02,$34
- $728B DEFB $85,$28
- $728D DEFB $82,$02,$93
- $7290 DEFB $85,$29
- $7292 DEFB $82,$02,$A7
- $7295 DEFB $85,$2A
- $7297 DEFB $8F,$00,$00,$20,$18,$07
- $729D DEFB $90,$00
- $729F DEFB $80
+; Room script 0: intro text screen
+;
+; Room scripts are bytecode programs run by the script interpreter #R$9D5F: #R$86B9 looks up the script of room N in
+; the table #R$7236 and runs it when the room is entered, #R$9D5F loops over its codes until an END ($80). A script
+; paints the room: it writes tile numbers into the tile map (and their flags into the tile flag map, through #R$9E6A),
+; unpacks the sprite sets, prints the room name, and occasionally prints text or fills screen memory directly (the
+; parchment, ending and title screens). Everything else about a room (enemies, items) comes from the object tables
+; #R$8B8F and #R$8EDF, not from the script.
+; .
+; Format. A byte below $80 is a character: it is printed in the proportional font at the text cursor (#R$9E79). A byte
+; of $80 or more is an opcode, which indexes the jump table #R$9D1F with (opcode-$80)*2; the operand bytes follow it.
+; y is a row and x a column in tile (character cell) units unless marked as a pixel position; a "position (y,x)" is
+; two bytes in that order; w and h are a width and height in cells; (...)*n is a list repeated n times. Tiles are
+; numbers into the tile tables at #R$CD00 (flags), #R$CE00 (attributes) and #R$CF00 (bitmaps).
+; .
+; $80 END: end of the script (of a subscript too: it returns to the caller)
+; $81 y,x,w,h,b: FILLPIX, fill screen bitmap bytes with b: y is a pixel row (0-191), x a byte column, w bytes by h
+; pixel rows (#R$9D81)
+; $82 mode,y: ALIGN, set how the next string is aligned (1 left, 2 centred, 0 right) and its pixel row (#R$9D99)
+; $83 addr: CALL the subscript at addr (a word), then go on (#R$9DA4)
+; $84 addr: PRINTVAR, print the string whose number is in the byte at addr (a word, #R$9DB7)
+; $85 n: PRINT string number n (#R$9DAF)
+; $86 y,x,w,h,t: FILLTILE, fill a rectangle of the tile map with tile t (#R$9DD2)
+; $87 n: ROOMNAME, store n as the room name string number #R$850D (#R$9DEA)
+; $88 w,h,t...: BLOCK, define the current block, a pattern of w x h tiles that follows (#R$A104)
+; $89 y,x,w,h: TILEBLOCK, fill a rectangle with the current block repeated, its top-left tile at the rectangle's
+; corner (#R$A0BE)
+; $8A m: EDGES, make room edges solid by setting flag bit 1 on the border cells: bit 0 left column, 1 right column, 2
+; top row, 3 bottom row (#R$A065)
+; $8B c,t1..tc,n,(y,x)*n: STAMPS, draw a row of the c tiles at n positions (#R$9DF7)
+; $8C y,x,t: TILE1, one tile at a position (#R$9E1B)
+; $8D y,x,t,n,r1..rn: RUNS, from (y,x) draw tile t along the row (continuing on the next row after column 31): runs
+; r1, r3, ... are drawn, r2, r4, ... are skipped (#R$9E3D)
+; $8E y,x: CURSOR, set the text cursor to a pixel row and a pixel column (#R$9F28)
+; $8F y,x,w,h,a: FILLATTR, fill attribute bytes with a: y is a character row (#R$9D8D)
+; $90 b: REDRAWMARK, with 1 mark every cell of the flag map for redraw, with 0 clear all marks (#R$9FBE)
+; $91 t,w,h,n,(y,x)*n: PICTURES, draw a picture of w x h tiles numbered t, t+1, ... (row by row) at n positions
+; (#R$9FD6)
+; $92 t,n,(y,x)*n: STAMP1, draw tile t at n positions (#R$9DF0)
+; $93 y,x,n,t1..tn: ROW, draw a row of n listed tiles (#R$9E29)
+; $94 y,x,t,c,bytes: BITMAP, draw tile t where a compressed bit map has set bits: c bytes follow, flag bits say
+; whether 8 cells are skipped or described by the next byte (#R$9FFF)
+; $95 sub,var: IFZERO, run the subscript at sub (a word) if the byte at address var (a word) is 0 (#R$A04B)
+; $96 y,x,w,h,f: FLAGS, set the flag map bytes of a rectangle to f, leaving the tiles alone (#R$A123)
+; $97 n: SPRITESET, unpack packed sprite set n into the sprite sheet (#R$A146, #R$AF15)
+; $98 t,n,(y,x,w,h)*n: RECTS, fill n rectangles with tile t (#R$9DC2)
+; $99 n,(y,x,w,h)*n: TILEBLOCKS, as $89 for n rectangles (#R$A0B4)
+; $9A t,y,x,len: RUN1, a vertical run of tile t; never used (#R$A15A)
+; $9B t,n,(y,x,len)*n: RUNS_V, n vertical runs of tile t (#R$A14E)
+; $9C sub,var: IFNZ, run the subscript if the byte at var is not 0 (#R$A058)
+; $9D y,x,a,w: MOD9D, start the animated liquid strip (#R$AD88): w cells at row y from column x painted with attribute
+; a (#R$A168)
+; $9E: enable the animation of the blood tiles in the bottom row: the RET at the start of #R$AE20 is replaced by a NOP (#R$A1B9)
+; $9F: enable the ring of twelve crosses: the RET at the start of #R$AE4B is replaced by a NOP (#R$A1BE)
+; .
+; The room scripts of the 26 rooms follow in the order of #R$7236, interleaved with the small subscripts they call
+; (blocks, doors, the room panel).
+; .
+; Not a room of the abbey: the intro text screen shown before the game starts (#R$8832 enters it as room 0). It clears
+; the tile map, the attributes and the whole screen bitmap, prints the five lines of the story (strings 38-42, centred
+; at pixel rows 12, 32, 52, 147 and 167), sets the attributes to white on black and clears the redraw marks (op $90
+; with 0) so that nothing is redrawn over the text.
+@label=RoomScript00
+b$726A DEFB $97,$01         ; SPRITESET 1
+ $726C DEFB $86,$00,$00,$20,$16,$00 ; FILLTILE row 0, col 0, 32x22, tile $00
+ $7272 DEFB $8F,$00,$00,$20,$18,$00 ; FILLATTR row 0, col 0, 32x24, attribute $00
+ $7278 DEFB $81,$00,$00,$20,$C0,$00 ; FILLPIX pixel row 0, byte col 0, 32 bytes x 192 rows, byte $00
+ $727E DEFB $82,$02,$0C     ; ALIGN mode 2, pixel row 12
+ $7281 DEFB $85,$26         ; PRINT string 38 "13th Century. The Cathars were"
+ $7283 DEFB $82,$02,$20     ; ALIGN mode 2, pixel row 32
+ $7286 DEFB $85,$27         ; PRINT string 39 "being expelled by the Catholic"
+ $7288 DEFB $82,$02,$34     ; ALIGN mode 2, pixel row 52
+ $728B DEFB $85,$28         ; PRINT string 40 "Church out of the Lanquedoc"
+ $728D DEFB $82,$02,$93     ; ALIGN mode 2, pixel row 147
+ $7290 DEFB $85,$29         ; PRINT string 41 "The Cathar Jean Raymond"
+ $7292 DEFB $82,$02,$A7     ; ALIGN mode 2, pixel row 167
+ $7295 DEFB $85,$2A         ; PRINT string 42 "runs to escape the crusaders..."
+ $7297 DEFB $8F,$00,$00,$20,$18,$07 ; FILLATTR row 0, col 0, 32x24, attribute $07
+ $729D DEFB $90,$00         ; REDRAWMARK clear all marks
+ $729F DEFB $80             ; END

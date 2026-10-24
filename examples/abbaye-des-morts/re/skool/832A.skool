@@ -1,9 +1,19 @@
-; Script: parchment text (messages ($850E) and ($850F)), run by $9C52
-b$832A DEFB $8F,$00,$00,$20,$18,$00
- $8330 DEFB $81,$00,$00,$20,$B0,$00
- $8336 DEFB $82,$02,$41
- $8339 DEFB $84,$0E,$85
- $833C DEFB $82,$02,$55
- $833F DEFB $84,$0F,$85
- $8342 DEFB $90,$01
- $8344 DEFB $80
+; Parchment page: clear the screen and print the two lines of text
+;
+; Run by #R$9C52 when a parchment is read. It sets all the attributes to black, clears the screen bitmap above the
+; status bar (176 pixel rows), prints the strings numbered #R$850E and #R$850F centred at pixel rows 65 and 85 with
+; two PRINTVAR ops, and marks every cell for redraw so that the room comes back when the parchment is closed. The
+; frame is drawn afterwards by #R$9C96.
+@label=ScriptParchment
+b$832A DEFB $8F,$00,$00,$20,$18,$00 ; FILLATTR row 0, col 0, 32x24, attribute $00
+ $8330 DEFB $81,$00,$00,$20,$B0,$00 ; FILLPIX pixel row 0, byte col 0, 32 bytes x 176 rows, byte $00
+ $8336 DEFB $82,$02,$41     ; ALIGN mode 2, pixel row 65
+ $8339 DEFB $84 ; PRINTVAR string number in ParchmentLine1
+@isub=DEFW ParchmentLine1
+ $833A DEFW $850E
+ $833C DEFB $82,$02,$55     ; ALIGN mode 2, pixel row 85
+ $833F DEFB $84 ; PRINTVAR string number in ParchmentLine2
+@isub=DEFW ParchmentLine2
+ $8340 DEFW $850F
+ $8342 DEFB $90,$01         ; REDRAWMARK mark all cells
+ $8344 DEFB $80             ; END

@@ -1,10 +1,17 @@
-; Routine at A058
+; Script code $9C: run a subscript when a flag byte is not zero
+;
+; As #R$A04B ($95) but the subscript runs when the byte at the flag address is not 0. Used 3 times (rooms 6, 7 and 8,
+; flags $851A and $851B).
+;
+; HL Script pointer, at the operands
+; O:HL Script pointer after the operands
+@label=OpRunIfNonZero
 c$A058 CALL $A11A    ;
- $A05B LD A,(BC)     ;
+ $A05B LD A,(BC)     ; flag byte
  $A05C OR A          ;
  $A05D RET Z         ;
  $A05E PUSH HL       ;
  $A05F EX DE,HL      ;
- $A060 CALL $9D5F    ;
+ $A060 CALL $9D5F    ; run the subscript
  $A063 POP HL        ;
  $A064 RET           ;

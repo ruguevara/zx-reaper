@@ -1,4 +1,12 @@
-; Routine at A146
+; Script code $97: unpack sprite set A into the sprite sheet
+;
+; Operand: one byte, a record number 0-19. Calls #R$AF15, which reads the 6-byte record at $AE9D + 6 x number
+; (destination, source, flags, width) and unpacks that packed graphic into the columns of the sprite sheet that are
+; filled per room. Used 32 times: the room scripts start with the sprites the room needs.
+;
+; HL Script pointer, at the operands
+; O:HL Script pointer after the operands
+@label=OpUnpackSprites
 c$A146 LD A,(HL)     ;
  $A147 INC HL        ;
  $A148 PUSH HL       ;

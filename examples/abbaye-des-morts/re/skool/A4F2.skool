@@ -1,4 +1,8 @@
-; Key names shown on the controls screen (8 characters, rewritten by
-; $A336/$A3F6), end of the script at $A4DD
+; Key names shown on the controls screen
+;
+; Eight characters of the names of the keys JUMP, CROUCH, LEFT, RIGHT in that order (QAOP at start-up; ENTER, SPACE,
+; CAPS SHIFT and SYMBOL SHIFT take two letters), blank-filled; rewritten by #R$A336 (blanked) and #R$A3F6 (appended).
+; Followed by the $80 that ends the script #R$A4DD.
+@label=KeyNames
 g$A4F2 DEFM "QAOP    "
- $A4FA DEFB $80
+ $A4FA DEFB $80      ; end of script #R$A4DD

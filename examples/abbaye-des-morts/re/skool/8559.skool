@@ -1,2 +1,18 @@
-; Variables for $B44B
-g$8559 DEFB $00,$00,$00,$00
+; Tile flags around the entity being updated by #R$B44B
+;
+; Four scratch bytes written each time #R$B44B samples the tile flag map around an entity (a 16x24 pixel sprite, 2 x 3
+; cells) from its position: each is the OR of the flags of two neighbouring cells. #R$B44B then turns them into a mask
+; of free directions. The player has its own copy in #R$A89C.
+; .
+; +0 ProbeRight: the two cells to the right of the sprite (rows 1 and 2)
+; +1 ProbeLeft: the two cells to the left (rows 1 and 2)
+; +2 ProbeBelow: the two cells under the feet
+; +3 ProbeHead: the two cells of the top row of the sprite
+@label=ProbeRight
+g$8559 DEFB $00
+@label=ProbeLeft
+ $855A DEFB $00
+@label=ProbeBelow
+ $855B DEFB $00
+@label=ProbeHead
+ $855C DEFB $00

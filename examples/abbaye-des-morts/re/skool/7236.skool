@@ -1,8 +1,20 @@
-; Room script addresses (rooms 0-25), read by $86B9
+; Room script table: the address of the script of each room 0-25
+;
+; Word n is the address of the script of room n (#R$9D5F runs it when #R$86B9 enters the room): index = room number
+; #R$8509 times 2, 26 entries. The scripts follow from $726A in the same order, each followed by the subscripts that
+; belong to the rooms around it. Room 25 is the ending room (#R$887B).
+@label=RoomScriptTable
+@isub=DEFW RoomScript00,RoomScript01,RoomScript02,RoomScript03
 w$7236 DEFW $726A,$72A0,$72F1,$7368
+@isub=DEFW RoomScript04,RoomScript05,RoomScript06,RoomScript07
  $723E DEFW $73BE,$7453,$7519,$75E1
+@isub=DEFW RoomScript08,RoomScript09,RoomScript10,RoomScript11
  $7246 DEFW $76B8,$7792,$786B,$795D
+@isub=DEFW RoomScript12,RoomScript13,RoomScript14,RoomScript15
  $724E DEFW $7A33,$7AD0,$7B4E,$7BED
+@isub=DEFW RoomScript16,RoomScript17,RoomScript18,RoomScript19
  $7256 DEFW $7C8F,$7D62,$7DF8,$7ED2
+@isub=DEFW RoomScript20,RoomScript21,RoomScript22,RoomScript23
  $725E DEFW $7F8F,$804F,$812C,$81C3
+@isub=DEFW RoomScript24,RoomScript25
  $7266 DEFW $826C,$82D0

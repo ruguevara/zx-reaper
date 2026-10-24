@@ -1,12 +1,20 @@
-; Routine at BE48
+; Build a table of the 256 bit-reversed bytes
 ;
-; Used by the routine at #R$86B9.
-c$BE48 LD BC,$0800   ;
- $BE4B LD A,L        ;
-*$BE4C RLA           ;
- $BE4D RR C          ;
+; Fills the page that HL points to (from L up to $FF) with the bit-reversed value of the low byte of each address: the
+; byte at page + n is n with bits 7 to 0 swapped. Room entry (#R$86B9) builds the table at $C500, where #R$AFC9 and
+; #R$B006 use it to make the mirrored copies of sprites when a room's sprite sets are unpacked. It shares the memory
+; of the first pixel-row page of the redraw buffer (#R$C500), which the table overwrites on every room entry and which
+; the redraw code overwrites again.
+;
+; HL Start of the page; L is 0 for a whole table
+; O:HL The same page address with L = 0
+@label=BuildMirrorTable
+c$BE48 LD BC,$0800   ; B counts 8 bits, C collects the reversed byte
+ $BE4B LD A,L        ; A = n
+*$BE4C RLA           ; bit 7 of A goes to the carry ...
+ $BE4D RR C          ; ... and enters C at the top: after 8 turns the bits are reversed
  $BE4F DJNZ $BE4C    ;
- $BE51 LD (HL),C     ;
+ $BE51 LD (HL),C     ; store at page + n
  $BE52 INC L         ;
- $BE53 JR NZ,$BE48   ;
+ $BE53 JR NZ,$BE48   ; until L wraps to 0
  $BE55 RET           ;

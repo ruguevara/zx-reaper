@@ -1,9 +1,17 @@
-; Routine at 9D81
-c$9D81 CALL $A11A    ;
- $9D84 LD A,(HL)     ;
+; Script opcode $81: fill a block of the screen bitmap with one byte
+;
+; Operands: y x w h b (5 bytes): the block starts at pixel row y (0-191) and byte column x (0-31), is w bytes wide and h pixel rows high and is filled with b. The room scripts use it to clear the status bar rows and the text windows to 0. The fill is done by #R$9F94.
+; .
+; Hardware: writes the screen bitmap.
+;
+; HL Operand bytes
+; O:HL Address after the operands
+@label=OpFillPixels
+c$9D81 CALL $A11A    ; E = y, D = x, C = w, B = h
+ $9D84 LD A,(HL)     ; b
  $9D85 INC HL        ;
  $9D86 PUSH HL       ;
- $9D87 EX DE,HL      ;
+ $9D87 EX DE,HL      ; HL = y (L), x (H)
  $9D88 CALL $9F94    ;
  $9D8B POP HL        ;
  $9D8C RET           ;

@@ -1,30 +1,45 @@
-; Room 20 script: Unexpected gate
-b$7F8F DEFB $97,$0B
- $7F91 DEFB $97,$04
- $7F93 DEFB $87,$14
- $7F95 DEFB $83,$F0,$82
- $7F98 DEFB $88,$04,$02,$3D,$3E,$3F,$47,$42
+; Room script 20: Unexpected gate
+;
+; The door #R$778A is drawn at the right edge while the lever of this room (#R$851F) is 0; pulling it runs #R$8048,
+; which erases the door.
+; .
+; Room 20: column 0, row 4 of the 5x5 map (left is room 19, right 21, up 15, down 0, counted modulo 25). Unpacks
+; sprite sets #R$6D1D, #R$6B02. Subscripts: #R$82F0, #R$7955. Items (#R$8EDF) at row,column: lever 6,24.
+@label=RoomScript20
+b$7F8F DEFB $97,$0B         ; SPRITESET 11
+ $7F91 DEFB $97,$04         ; SPRITESET 4
+ $7F93 DEFB $87,$14         ; ROOMNAME 20 "Unexpected gate"
+ $7F95 DEFB $83 ; CALL ScriptRoomPanel
+@isub=DEFW ScriptRoomPanel
+ $7F96 DEFW $82F0
+ $7F98 DEFB $88,$04,$02,$3D,$3E,$3F,$47,$42 ; BLOCK 4x2: $3D $3E $3F $47 $42 $41 $40 $48
  $7FA0 DEFB $41,$40,$48
- $7FA3 DEFB $99,$04,$08,$17,$04,$02,$00,$1D,$03,$0E,$12,$1D,$03,$02,$13,$1C
+ $7FA3 DEFB $99,$04,$08,$17,$04,$02,$00,$1D,$03,$0E,$12,$1D,$03,$02,$13,$1C ; TILEBLOCKS 4 rectangles
  $7FB3 DEFB $02,$01
- $7FB5 DEFB $83,$55,$79
- $7FB8 DEFB $99,$0B,$00,$00,$02,$16,$00,$00,$06,$01,$00,$0A,$16,$01,$14,$02
+ $7FB5 DEFB $83 ; CALL BlockCaveRock
+@isub=DEFW BlockCaveRock
+ $7FB6 DEFW $7955
+ $7FB8 DEFB $99,$0B,$00,$00,$02,$16,$00,$00,$06,$01,$00,$0A,$16,$01,$14,$02 ; TILEBLOCKS 11 rectangles
  $7FC8 DEFB $10,$02,$14,$1C,$04,$02,$02,$06,$02,$01,$06,$0A,$02,$01,$09,$06
  $7FD8 DEFB $04,$01,$0C,$02,$02,$01,$10,$06,$02,$02,$12,$06,$04,$02
- $7FE6 DEFB $86,$14,$12,$0A,$01,$13
- $7FEC DEFB $86,$08,$0F,$06,$01,$00
- $7FF2 DEFB $86,$11,$03,$03,$02,$B1
- $7FF8 DEFB $92,$B1,$03,$10,$03,$12,$0C,$10
+ $7FE6 DEFB $86,$14,$12,$0A,$01,$13 ; FILLTILE row 20, col 18, 10x1, tile $13
+ $7FEC DEFB $86,$08,$0F,$06,$01,$00 ; FILLTILE row 8, col 15, 6x1, tile $00
+ $7FF2 DEFB $86,$11,$03,$03,$02,$B1 ; FILLTILE row 17, col 3, 3x2, tile $B1
+ $7FF8 DEFB $92,$B1,$03,$10,$03,$12,$0C,$10 ; STAMP1 tile $B1 at 3 positions
  $8000 DEFB $18
- $8001 DEFB $8B,$02,$B1,$B1,$06,$13,$13,$12,$19,$13,$04,$13,$0B,$13,$19,$11
+ $8001 DEFB $8B,$02,$B1,$B1,$06,$13,$13,$12,$19,$13,$04,$13,$0B,$13,$19,$11 ; STAMPS 2 tiles $B1 $B1 at 6 positions
  $8011 DEFB $17
- $8012 DEFB $92,$4B,$02,$12,$06,$12,$16
- $8019 DEFB $8B,$02,$4B,$4B,$04,$11,$08,$13
+ $8012 DEFB $92,$4B,$02,$12,$06,$12,$16 ; STAMP1 tile $4B at 2 positions
+ $8019 DEFB $8B,$02,$4B,$4B,$04,$11,$08,$13 ; STAMPS 2 tiles $4B $4B at 4 positions
  $8021 DEFB $02,$13,$15,$13,$17
- $8026 DEFB $8C,$13,$16,$4A
- $802A DEFB $92,$25,$05,$01,$02,$01,$0C,$01
+ $8026 DEFB $8C,$13,$16,$4A ; TILE1 row 19, col 22, tile $4A
+ $802A DEFB $92,$25,$05,$01,$02,$01,$0C,$01 ; STAMP1 tile $25 at 5 positions
  $8032 DEFB $18,$01,$1A,$0A,$08
- $8037 DEFB $92,$49,$04,$10,$08,$12,$02,$12
+ $8037 DEFB $92,$49,$04,$10,$08,$12,$02,$12 ; STAMP1 tile $49 at 4 positions
  $803F DEFB $17,$13,$14
- $8042 DEFB $95,$8A,$77,$1F,$85
- $8047 DEFB $80
+ $8042 DEFB $95 ; IFZERO run DoorRight if LeverRoom20 is 0
+@isub=DEFW DoorRight
+ $8043 DEFW $778A
+@isub=DEFW LeverRoom20
+ $8045 DEFW $851F
+ $8047 DEFB $80             ; END

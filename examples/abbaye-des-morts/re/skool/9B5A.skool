@@ -1,12 +1,27 @@
-; Routine at 9B5A
+; Draw the flagged cells of the room, sweeping in the direction of the last exit
 ;
-; Used by the routines at #R$85FC, #R$8832 and #R$9C52.
-c$9B5A LD A,($850B)  ;
- $9B5D ADD A,A       ;
+; Redraws the room area (32 x 22 character cells) from the tile map: every cell whose redraw flag (bit 7 in the tile flag
+; map) is set is drawn by #R$9BA7, the others are skipped. Called after a room has been built (every cell is flagged by
+; then), at the title and after #R$9C52 has printed a screen of text. The cells are visited line by line in an order
+; taken from the table #R$9BD3, indexed by the exit direction in $850B (0 = left to right by columns, after leaving the
+; room through the right edge; 1 = right to left; 2 = top to bottom by rows, after leaving through the bottom edge; 3 =
+; bottom to top). There is no waiting, but the drawing of 704 cells takes about 8 frames (observed: 580,000 to 650,000
+; T-states), so the new room is seen to wipe in.
+; .
+; The four step bytes of the setup are copied into the operands of the LD A,0 instructions at #R$9B90, #R$9B94, #R$9B9C
+; and #R$9BA0, which add them to the column (H) and row (L) after every cell and after every line.
+; .
+; Hardware: writes the attribute and bitmap of the flagged cells on screen (through #R$9BA7); no port or interrupt use.
+; .
+; All registers are changed.
+@label=RedrawRoom
+c$9B5A LD A,($850B)  ; direction of the last exit
+ $9B5D ADD A,A       ; x8: offset of the setup
  $9B5E ADD A,A       ;
  $9B5F ADD A,A       ;
  $9B60 LD HL,$9BD3   ;
- $9B63 CALL $A1D9    ;
+ $9B63 CALL $A1D9    ; HL = HL + A
+; B = number of lines, C = cells per line; DE = start row (E), column (D); DE and BC are kept for the loop.
  $9B66 LD B,(HL)     ;
  $9B67 INC HL        ;
  $9B68 LD C,(HL)     ;
@@ -17,36 +32,53 @@ c$9B5A LD A,($850B)  ;
  $9B6D INC HL        ;
  $9B6E PUSH DE       ;
  $9B6F PUSH BC       ;
+; Copy the 4 step bytes to the operands below.
+@isub=LD DE,SmcSweepInnerCol+1
  $9B70 LD DE,$9B91   ;
  $9B73 LDI           ;
+@isub=LD DE,SmcSweepInnerRow+1
  $9B75 LD DE,$9B95   ;
  $9B78 LDI           ;
+@isub=LD DE,SmcSweepOuterCol+1
  $9B7A LD DE,$9B9D   ;
  $9B7D LDI           ;
+@isub=LD DE,SmcSweepOuterRow+1
  $9B7F LD DE,$9BA1   ;
  $9B82 LDI           ;
+; HL = start (H = column, L = row); one line per pass of the outer loop.
  $9B84 POP BC        ;
  $9B85 POP HL        ;
+@label=RedrawRoom_Line
 *$9B86 PUSH BC       ;
  $9B87 PUSH HL       ;
  $9B88 LD B,C        ;
+@label=RedrawRoom_Cell
 *$9B89 PUSH HL       ;
  $9B8A PUSH BC       ;
+; Draw the cell at (H = column, L = row) if it is flagged.
  $9B8B CALL $9BA7    ;
  $9B8E POP BC        ;
  $9B8F POP HL        ;
+; Operand = step of the column between cells of a line (setup byte 4).
+@label=SmcSweepInnerCol
  $9B90 LD A,$00      ;
  $9B92 ADD A,H       ;
  $9B93 LD H,A        ;
+; Operand = step of the row between cells of a line (setup byte 5).
+@label=SmcSweepInnerRow
  $9B94 LD A,$00      ;
  $9B96 ADD A,L       ;
  $9B97 LD L,A        ;
  $9B98 DJNZ $9B89    ;
  $9B9A POP HL        ;
  $9B9B POP BC        ;
+; Operand = step of the column from line to line (setup byte 6).
+@label=SmcSweepOuterCol
  $9B9C LD A,$00      ;
  $9B9E ADD A,H       ;
  $9B9F LD H,A        ;
+; Operand = step of the row from line to line (setup byte 7).
+@label=SmcSweepOuterRow
  $9BA0 LD A,$00      ;
  $9BA2 ADD A,L       ;
  $9BA3 LD L,A        ;

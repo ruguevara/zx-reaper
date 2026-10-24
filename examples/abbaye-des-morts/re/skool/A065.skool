@@ -1,21 +1,40 @@
-; Routine at A065
+; Script code $8A: set tile flag bit 1 along the room edges
+;
+; Operand: one byte, a mask of the edges: bit 0 the left column, bit 1 the right column, bit 2 the top row, bit 3 the
+; bottom edge. Sets bit 1 of the tile flag of every cell along each edge with #R$A090. Bit 1 of a cell stops the monk
+; walking sideways into it (observed: a flagged column in the middle of room 5 stopped him; code: the walking routine
+; tests the flags to his left and right with AND 2, #R$AAC6), so this closes an edge that has no exit. Used once: room
+; 5, operand 1 (the left edge, $7516).
+; .
+; The bottom edge starts at $60E0, which is row 23 of the flag map and not its last row (row 21 is at $60A0): those 32
+; bytes are the top of the main stack, so operand bit 3 would corrupt the stack (observed: a call with operand 8 does
+; not return). Never used by the scripts.
+;
+; HL Script pointer, at the operands
+; O:HL Script pointer after the operands
+@label=OpFlagEdges
 c$A065 LD A,(HL)     ;
  $A066 INC HL        ;
  $A067 PUSH HL       ;
- $A068 LD C,$16      ;
- $A06A LD DE,$0020   ;
+@isub=LD C,MAP_ROWS
+ $A068 LD C,$16      ; a column has 22 cells
+@isub=LD DE,SCREEN_COLS
+ $A06A LD DE,$0020   ; step down one row
  $A06D LD HL,$5E00   ;
- $A070 RRA           ;
+ $A070 RRA           ; bit 0: left column
  $A071 CALL C,$A090  ;
- $A074 LD HL,$5E1F   ;
+@isub=LD HL,FLAG_MAP+SCREEN_COLS-1
+ $A074 LD HL,$5E1F   ; bit 1: right column
  $A077 RRA           ;
  $A078 CALL C,$A090  ;
- $A07B LD C,$20      ;
- $A07D LD DE,$0001   ;
+@isub=LD C,SCREEN_COLS
+ $A07B LD C,$20      ; a row has 32 cells
+ $A07D LD DE,$0001   ; step along the row
  $A080 LD HL,$5E00   ;
- $A083 RRA           ;
+ $A083 RRA           ; bit 2: top row
  $A084 CALL C,$A090  ;
- $A087 LD HL,$60E0   ;
+@isub=LD HL,FLAG_MAP+23*SCREEN_COLS
+ $A087 LD HL,$60E0   ; bit 3: "bottom row", but row 23 is outside the map
  $A08A RRA           ;
  $A08B CALL C,$A090  ;
  $A08E POP HL        ;

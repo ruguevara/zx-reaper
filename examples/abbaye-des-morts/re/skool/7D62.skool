@@ -1,20 +1,29 @@
-; Room 17 script: The wheel of faith
-b$7D62 DEFB $97,$00
- $7D64 DEFB $87,$11
- $7D66 DEFB $83,$F0,$82
- $7D69 DEFB $83,$C8,$7A
- $7D6C DEFB $99,$11,$00,$00,$02,$13,$00,$1E,$02,$16,$14,$00,$1E,$02,$00,$02
+; Room script 17: The wheel of faith
+;
+; Room 17: column 2, row 3 of the 5x5 map (left is room 16, right 18, up 12, down 22, counted modulo 25). Unpacks
+; sprite set #R$68CC. Subscripts: #R$82F0, #R$7AC8. Items (#R$8EDF) at row,column: wheel of faith 2,15, heart 18,3,
+; cross 18,28, cross 10,3.
+@label=RoomScript17
+b$7D62 DEFB $97,$00         ; SPRITESET 0
+ $7D64 DEFB $87,$11         ; ROOMNAME 17 "The wheel of faith"
+ $7D66 DEFB $83 ; CALL ScriptRoomPanel
+@isub=DEFW ScriptRoomPanel
+ $7D67 DEFW $82F0
+ $7D69 DEFB $83 ; CALL BlockYellowBricks
+@isub=DEFW BlockYellowBricks
+ $7D6A DEFW $7AC8
+ $7D6C DEFB $99,$11,$00,$00,$02,$13,$00,$1E,$02,$16,$14,$00,$1E,$02,$00,$02 ; TILEBLOCKS 17 rectangles
  $7D7C DEFB $18,$01,$12,$0D,$06,$02,$13,$0C,$01,$01,$13,$13,$01,$01,$00,$0F
  $7D8C DEFB $02,$01,$06,$04,$02,$01,$06,$0A,$02,$01,$06,$14,$02,$01,$06,$1A
  $7D9C DEFB $04,$01,$09,$0E,$02,$01,$0C,$04,$02,$01,$0C,$08,$04,$01,$0C,$14
  $7DAC DEFB $04,$01,$0C,$1C,$02,$01
- $7DB2 DEFB $91,$2E,$04,$02,$03,$10,$0E,$12
+ $7DB2 DEFB $91,$2E,$04,$02,$03,$10,$0E,$12 ; PICTURES tiles from $2E, 4x2, at 3 positions
  $7DBA DEFB $06,$12,$16
- $7DBD DEFB $8B,$02,$29,$2A,$08,$00,$06,$00,$16,$06,$02,$06,$08,$06,$16,$09
+ $7DBD DEFB $8B,$02,$29,$2A,$08,$00,$06,$00,$16,$06,$02,$06,$08,$06,$16,$09 ; STAMPS 2 tiles $29 $2A at 8 positions
  $7DCD DEFB $10,$0C,$02,$0C,$1A
- $7DD2 DEFB $92,$2B,$08,$03,$01,$00,$0E,$0A,$1F,$11,$1E,$12,$00,$14,$1C,$15
+ $7DD2 DEFB $92,$2B,$08,$03,$01,$00,$0E,$0A,$1F,$11,$1E,$12,$00,$14,$1C,$15 ; STAMP1 tile $2B at 8 positions
  $7DE2 DEFB $03,$15,$17
- $7DE5 DEFB $92,$49,$02,$03,$1F,$14,$12
- $7DEC DEFB $92,$4A,$02,$09,$00,$15,$0C
- $7DF3 DEFB $8C,$03,$1D,$26
- $7DF7 DEFB $80
+ $7DE5 DEFB $92,$49,$02,$03,$1F,$14,$12 ; STAMP1 tile $49 at 2 positions
+ $7DEC DEFB $92,$4A,$02,$09,$00,$15,$0C ; STAMP1 tile $4A at 2 positions
+ $7DF3 DEFB $8C,$03,$1D,$26 ; TILE1 row 3, col 29, tile $26
+ $7DF7 DEFB $80             ; END

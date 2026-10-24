@@ -1,5 +1,14 @@
-; Font glyphs, 16 rows: mask word (bit 15 = row 0, set = new row pattern), then
-; 1 byte per new row (2 if width>8)
+; Font glyphs: 16 pixel rows each, only the rows that differ are stored
+;
+; The glyphs of the proportional font (a gothic hand with 16 pixel rows), addressed through #R$6130. A glyph is a
+; 16-bit mask word (low byte first) followed by one pattern per set mask bit. Mask bit 15 is pixel row 0 and bit 0 is
+; row 15; a set bit means that a new row pattern follows, a clear bit repeats the pattern of the row above (the first
+; row is blank when its bit is clear). A mask of 0 is an empty glyph (the space).
+; .
+; A pattern is one byte (the pixels from the left edge) when the glyph is up to 8 pixels wide, and two bytes when it
+; is 9 or more (WIDE_GLYPH): the right byte first, then the left one. The glyphs follow each other without gaps up to
+; $66DB.
+@label=FontGlyphs
 b$61F0 DEFB $00,$00
  $61F2 DEFB $68,$20,$C0,$00,$C0,$00
  $61F8 DEFB $00,$24,$90,$00

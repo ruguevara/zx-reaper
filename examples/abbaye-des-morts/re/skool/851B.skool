@@ -1,2 +1,30 @@
-; Object flags ($FF = gone) read by $896B; $851B-$851F also test scripts
-g$851B DEFB $00,$00,$00,$00,$00,$00
+; State flags of the bell, three levers and the wheel of faith ($851B-$8520)
+;
+; One byte for each of the interactive items (type 4, 9 and 10 of the item types, see #R$8EDF). They are read by the
+; item routines, which choose the sprite frame from them, and by the room scripts (ops $95 and $9C test a byte through
+; its address, #R$A04B and #R$A058), which open or close doors and remove blocks.
+; .
+; +0 BellRung ($851B): 0, or 1 once the bell of the Tower of the Bell (room 2) has been touched (#R$A748, sound 3).
+; The script of room 8 (The Altar) erases a 2x2 block of wall at row 20, column 26 when it is set.
+; +1 LeverRoom9 ($851C): 0 or 1, the lever of room 9 (Hangman tree). While it is 0 the script of room 20 draws a door
+; at the left edge (#R$7F87).
+; +2 LeverRoom10 ($851D): 0 or 1, the lever of room 10 (Pestilent Beast). While it is 0 the script of room 8 draws a
+; door at its right edge (#R$778A).
+; +3 WheelState ($851E): the wheel of faith in room 17: 0 at rest, $06 once turned; each touch toggles bits 1-2 (XOR
+; $86) and bit 7 is set while the player still touches it (#R$A6A1). It decides which crosses can be picked up: the
+; crosses of type 1 only while it is 0, those of type 2 only while it is not (#R$A782, #R$A777), and which of the two
+; cross shapes is drawn.
+; +4 LeverRoom20 ($851F): 0 or 1, the lever of room 20 (Unexpected gate). While it is 0 the script of room 20 draws a
+; door at its right edge (#R$778A).
+; +5 $8520: unused
+@label=BellRung
+g$851B DEFB $00
+@label=LeverRoom9
+ $851C DEFB $00
+@label=LeverRoom10
+ $851D DEFB $00
+@label=WheelState
+ $851E DEFB $00
+@label=LeverRoom20
+ $851F DEFB $00
+ $8520 DEFB $00

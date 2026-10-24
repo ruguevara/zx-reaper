@@ -1,2 +1,9 @@
-; Flag $851A (scripts, $A615)
+; Church door flag: the way back to room 6 is shut
+;
+; Zero at the start of a game, $FF once the player has walked into the Abandoned church (room 7) through its left
+; door: the trigger item of that room (#R$A615, item type 7, which also makes checkpoint 0 active) sets it, closes the
+; door with the script #R$76A0 and plays the door sound. While it is nonzero, the script of room 6 draws the door
+; (#R$778A) at its right edge and the script of room 7 draws the door (#R$76A0) at its left edge, so the player cannot
+; go back (op $9C, #R$A058).
+@label=ChurchDoorShut
 g$851A DEFB $00

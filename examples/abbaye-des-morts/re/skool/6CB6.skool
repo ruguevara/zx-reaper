@@ -1,5 +1,9 @@
-; Packed sprite set 9 (op $97): 4 columns of 2 chars; flag bytes, set bit =
-; literal byte, clear = 0
+; Packed sprite set 9 (op $97 $09): 4 columns of 2 character rows
+;
+; Unpacked by room script op $97 $09 into the sprite sheet at $D76B (page = first pixel row, low byte = first column)
+; with record 9 of #R$AE9D: frame width 2 columns, mirrored copies (bit 6). 4 columns x 2 character rows (16 pixel
+; rows), 59 bytes packed. Used by rooms: 12.
+@label=PackedSet9
 b$6CB6 DEFB $04,$02
  $6CB8 DEFB $EF,$02,$07,$06,$04,$01,$3C,$7E,$FE,$12,$5E,$1F,$06,$24,$19,$00
  $6CC8 DEFB $FF,$1C,$3E,$7E,$FC,$F8,$F0,$C8,$04,$FE,$56,$D4,$F8,$A8,$A4,$40

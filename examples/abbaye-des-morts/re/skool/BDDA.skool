@@ -1,4 +1,11 @@
-; Routine at BDDA
+; Frame call list gate: RET while the list is not complete, NOP when it is
 ;
-; Used by the routines at #R$85FC, #R$8832 and #R$88DE.
-c$BDDA RET           ;
+; The first byte of the frame call list runner (#R$BDDB), which it falls into when it is a NOP. It is a flag and an
+; entry point at once. Observed over a frame: #R$A5DB (the end of the game frame, when the frame list is complete)
+; stores 0 here, so a CALL to this address runs the list; #R$BDDB stores $C9 (RET) as the first thing it does, so a
+; second call does nothing until the next list is complete. #R$86B9 also stores $C9 when a room is entered. The main
+; loop (#R$85FC) and the cutscene loops ($8832, $88DE, #R$8869) wait until the byte is zero and then CALL it.
+; .
+; The byte is not data to read as a number only: the same address is read with LD A,(nn) by those loops.
+@label=FrameListGate
+c$BDDA RET           ; RET until the list is complete; 0 (NOP) when it is

@@ -1,3 +1,18 @@
-; Checkpoint position (two words, to $A8A1/$A8A3)
-g$8512 DEFB $00,$00
- $8514 DEFB $00,$00
+; Respawn position of the player (X and Y, 8.8 fixed point)
+;
+; The place where the player appears when a room is entered in state 2 or 4 (#R$850C): #R$85FC copies the two words to
+; the player's X and Y (#R$A8A1, #R$A8A3). The high bytes are in 2-pixel units (X 0-$7F, Y 0-$57), the low bytes are
+; 0. #R$BDF3 sets the high bytes from the active checkpoint record (#R$BE2A: column*4, row*4); the passage items
+; #R$A6BC and #R$A6D8 set both words to the exit of the doorway they lead to, so that after a death in the other room
+; the player reappears there. The block $8512-$854D is zeroed by #R$85FC at the start of a game.
+; .
+; +0 word RespawnX (low byte, then RespawnXHi)
+; +2 word RespawnY (low byte, then RespawnYHi)
+@label=RespawnX
+g$8512 DEFB $00
+@label=RespawnXHi
+ $8513 DEFB $00
+@label=RespawnY
+ $8514 DEFB $00
+@label=RespawnYHi
+ $8515 DEFB $00

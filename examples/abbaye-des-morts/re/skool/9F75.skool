@@ -1,18 +1,23 @@
-; Routine at 9F75
+; Set the text cursor x for a string of width C
 ;
-; Used by the routine at #R$9F30.
+; Applies the alignment mode in #R$9F93 to the string width: 1 puts the string at the left edge (x = 0), 2 centres it
+; on the 256-pixel line (x = 128 - ceil(C/2)), anything else, including the initial 0, makes it end at the right edge
+; (x = 256 - C). The cursor y is kept.
+;
+; C Width of the string in pixels
+@label=AlignText
 c$9F75 LD DE,($9F26) ;
  $9F79 LD D,$00      ;
- $9F7B LD A,($9F93)  ;
+ $9F7B LD A,($9F93)  ; alignment mode
  $9F7E DEC A         ;
- $9F7F JR Z,$9F8E    ;
+ $9F7F JR Z,$9F8E    ; mode 1: left, x = 0
  $9F81 DEC A         ;
  $9F82 LD A,C        ;
  $9F83 JR NZ,$9F8B   ;
- $9F85 SRL A         ;
+ $9F85 SRL A         ; mode 2: x = 128 - ceil(C/2)
  $9F87 ADC A,$00     ;
  $9F89 SUB $80       ;
-*$9F8B NEG           ;
+*$9F8B NEG           ; x = -A: 128 - ceil(C/2) in mode 2, 256 - C in the other modes
  $9F8D LD D,A        ;
 *$9F8E LD ($9F26),DE ;
  $9F92 RET           ;

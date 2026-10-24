@@ -1,5 +1,9 @@
-; Packed sprite set 13 (op $97): 4 columns of 2 chars; flag bytes, set bit =
-; literal byte, clear = 0
+; Packed sprite set 13 (op $97 $0D): 4 columns of 2 character rows
+;
+; Unpacked by room script op $97 $0D into the sprite sheet at $D763 (page = first pixel row, low byte = first column)
+; with record 13 of #R$AE9D: frame width 2 columns, pre-shifted copies (bit 7) and mirrored copies (bit 6). 4 columns
+; x 2 character rows (16 pixel rows), 47 bytes packed. Used by rooms: 2. Rats (the cyan rats of room 2).
+@label=PackedSet13
 b$6DC6 DEFB $04,$02
  $6DC8 DEFB $03,$05,$1B,$FF,$3F,$6F,$CF,$FF,$5B,$02,$04,$00,$03,$86,$C1,$FF
  $6DD8 DEFB $F1,$FB,$FF,$DE,$1C,$0F,$03,$06,$00,$FF,$05,$1B,$3F,$6F,$CF,$FF

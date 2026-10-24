@@ -1,3 +1,7 @@
-; Script: block pattern 2x2 (op $88)
-b$8114 DEFB $88,$02,$02,$3E,$3F,$39,$3A
- $811B DEFB $80
+; Block pattern: stone with blood (tiles $3E,$3F,$39,$3A)
+;
+; Defines the current block as grey stone tiles over blood-stained tiles, used for the floor. Called by rooms 21, 22,
+; 23, 24.
+@label=BlockAbbeyBlood
+b$8114 DEFB $88,$02,$02,$3E,$3F,$39,$3A ; BLOCK 2x2: $3E $3F $39 $3A
+ $811B DEFB $80             ; END

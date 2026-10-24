@@ -1,2 +1,7 @@
-; Lives (HUD, $9BF3)
+; Lives left
+;
+; Number of lives, 9 at the start of a game (the image holds 9). Decremented by the death routine #R$AA3D; raised by
+; one, up to 9 (MAX_LIVES), by a heart (#R$A70B). The status bar draws that many hearts (#R$9BF3). When it is 0 at the
+; end of the death animation the room state becomes 5, Game Over (#R$850C).
+@label=Lives
 g$854C DEFB $09

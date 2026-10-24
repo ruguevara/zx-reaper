@@ -1,22 +1,37 @@
-; Room 24 script: Satan !!!
-b$826C DEFB $97,$0E
- $826E DEFB $97,$01
- $8270 DEFB $87,$18
- $8272 DEFB $83,$F0,$82
- $8275 DEFB $83,$04,$81
- $8278 DEFB $89,$00,$00,$20,$14
- $827D DEFB $83,$14,$81
- $8280 DEFB $89,$14,$00,$20,$02
- $8285 DEFB $98,$80,$03,$10,$00,$15,$04,$01
+; Room script 24: Satan !!!
+;
+; Satan's room. The last op, $9F, switches on the ring of crosses (#R$AE4B), which shows the twelve crosses one by one
+; when all of them have been collected. The sprite set 14 (Satan) is unpacked by the room objects, the script itself
+; unpacks sets 14 and 1.
+; .
+; Room 24: column 4, row 4 of the 5x5 map (left is room 23, right 0, up 19, down 4, counted modulo 25). Unpacks sprite
+; sets #R$6DF5, #R$6916. Subscripts: #R$82F0, #R$8104, #R$8114. Items (#R$8EDF) at row,column: chalice 2,16, red
+; scroll 14,28.
+@label=RoomScript24
+b$826C DEFB $97,$0E         ; SPRITESET 14
+ $826E DEFB $97,$01         ; SPRITESET 1
+ $8270 DEFB $87,$18         ; ROOMNAME 24 "Satan !!!"
+ $8272 DEFB $83 ; CALL ScriptRoomPanel
+@isub=DEFW ScriptRoomPanel
+ $8273 DEFW $82F0
+ $8275 DEFB $83 ; CALL BlockAbbeyStoneA
+@isub=DEFW BlockAbbeyStoneA
+ $8276 DEFW $8104
+ $8278 DEFB $89,$00,$00,$20,$14 ; TILEBLOCK row 0, col 0, 32x20
+ $827D DEFB $83 ; CALL BlockAbbeyBlood
+@isub=DEFW BlockAbbeyBlood
+ $827E DEFW $8114
+ $8280 DEFB $89,$14,$00,$20,$02 ; TILEBLOCK row 20, col 0, 32x2
+ $8285 DEFB $98,$80,$03,$10,$00,$15,$04,$01 ; RECTS tile $80, 3 rectangles
  $828D DEFB $02,$1C,$0F,$10,$00,$17,$02
- $8294 DEFB $92,$3D,$04,$10,$17,$11,$16,$12
+ $8294 DEFB $92,$3D,$04,$10,$17,$11,$16,$12 ; STAMP1 tile $3D at 4 positions
  $829C DEFB $15,$13,$14
- $829F DEFB $9B,$B5,$04,$01,$04,$04,$01,$05
+ $829F DEFB $9B,$B5,$04,$01,$04,$04,$01,$05 ; RUNS_V tile $B5, 4 vertical runs
  $82A7 DEFB $02,$01,$1A,$02,$01,$1B,$04
- $82AE DEFB $91,$E0,$04,$01,$01,$06,$0E
- $82B5 DEFB $91,$E4,$06,$04,$01,$07,$0D
- $82BC DEFB $91,$FC,$04,$01,$01,$0B,$0E
- $82C3 DEFB $92,$B4,$04,$12,$05,$13,$04,$13
+ $82AE DEFB $91,$E0,$04,$01,$01,$06,$0E ; PICTURES tiles from $E0, 4x1, at 1 positions
+ $82B5 DEFB $91,$E4,$06,$04,$01,$07,$0D ; PICTURES tiles from $E4, 6x4, at 1 positions
+ $82BC DEFB $91,$FC,$04,$01,$01,$0B,$0E ; PICTURES tiles from $FC, 4x1, at 1 positions
+ $82C3 DEFB $92,$B4,$04,$12,$05,$13,$04,$13 ; STAMP1 tile $B4 at 4 positions
  $82CB DEFB $05,$13,$07
- $82CE DEFB $9F
- $82CF DEFB $80
+ $82CE DEFB $9F             ; enable the ring of crosses
+ $82CF DEFB $80             ; END

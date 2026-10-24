@@ -1,25 +1,34 @@
-; Routine at A0BE
+; Script code $89: fill a rectangle by repeating the $88 block
 ;
-; Used by the routine at #R$A0B4.
+; Operands: row, column, width, height. Fills that rectangle of the tile map: the cell at offset (dy, dx) from the
+; top-left gets the tile at (dy mod block height, dx mod block width) of the block set by $88 (#R$A104), looked up by
+; #R$A0DF and placed with #R$9E6A, which also stores the tile's default flags. Used 24 times (this entry) and 37 times
+; through $99.
+;
+; HL Script pointer, at the operands
+; O:HL Script pointer after the operands
+@label=OpFillWithBlock
 c$A0BE CALL $A11A    ;
  $A0C1 PUSH HL       ;
  $A0C2 EX DE,HL      ;
- $A0C3 LD DE,$0000   ;
+ $A0C3 LD DE,$0000   ; D = row offset, E = column offset in the rectangle
+@label=OpFillWithBlock_Row
 *$A0C6 PUSH BC       ;
  $A0C7 PUSH DE       ;
  $A0C8 PUSH HL       ;
  $A0C9 LD B,C        ;
+@label=OpFillWithBlock_Cell
 *$A0CA PUSH DE       ;
- $A0CB CALL $A0DF    ;
+ $A0CB CALL $A0DF    ; E = tile of the block
  $A0CE CALL $9E6A    ;
  $A0D1 POP DE        ;
- $A0D2 INC H         ;
+ $A0D2 INC H         ; next column
  $A0D3 INC E         ;
  $A0D4 DJNZ $A0CA    ;
  $A0D6 POP HL        ;
  $A0D7 POP DE        ;
  $A0D8 POP BC        ;
- $A0D9 INC L         ;
+ $A0D9 INC L         ; next row
  $A0DA INC D         ;
  $A0DB DJNZ $A0C6    ;
  $A0DD POP HL        ;

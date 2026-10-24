@@ -1,3 +1,7 @@
-; Script: block pattern 2x2 (op $88)
-b$7AC8 DEFB $88,$02,$02,$27,$28,$29,$2A
- $7ACF DEFB $80
+; Block pattern: yellow bricks (tiles $27-$2A)
+;
+; Defines the current block as 2x2 tiles of yellow brick, the walls of the ruins and catacombs. Called by rooms 12,
+; 13, 17.
+@label=BlockYellowBricks
+b$7AC8 DEFB $88,$02,$02,$27,$28,$29,$2A ; BLOCK 2x2: $27 $28 $29 $2A
+ $7ACF DEFB $80             ; END

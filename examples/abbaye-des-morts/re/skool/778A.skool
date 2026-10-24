@@ -1,3 +1,8 @@
-; Script: tiles drawn by flag $851A/$851D/$851F (rooms 6, 8, 20)
-b$778A DEFB $91,$B8,$01,$04,$01,$0E,$1F
- $7791 DEFB $80
+; Picture: the door at the right edge, rows 14-17 (tiles $B8-$BB)
+;
+; Draws a 1x4 picture of the red studded door (tiles $B8,$B9,$BA,$BB) at row 14, column 31, closing the passage to the
+; right. Run by room 6 while #R$851A is set, by room 8 while the lever #R$851D is 0 and by room 20 while the lever
+; #R$851F is 0.
+@label=DoorRight
+b$778A DEFB $91,$B8,$01,$04,$01,$0E,$1F ; PICTURES tiles from $B8, 1x4, at 1 positions
+ $7791 DEFB $80             ; END

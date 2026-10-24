@@ -1,7 +1,21 @@
-; Routine at BDDB
-c$BDDB LD A,$C9      ;
- $BDDD LD ($AA1F),A  ;
- $BDE0 LD ($BDDA),A  ;
- $BDE3 LD ($BDEC),SP ;
- $BDE7 LD SP,$BE5A   ;
- $BDEA RET           ;
+; Run the frame call list
+;
+; Runs the draw commands the game frame queued in the frame call list (#R$BE5A) and returns to the caller of #R$BDDA.
+; The list is a chain of calls without CALL: each command is a routine address followed by the parameters that routine
+; pops (see #R$9836 for the usual one), and the RET that ends each routine pops the address of the next command. So
+; the routine saves SP in the operand of the LD SP,nn at #R$BDEB (self-modified here), sets SP to the start of the
+; list and RETs into the first command; the last entry of the list is #R$BDEB, which restores SP and returns. The
+; routine first stores $C9 (RET) at #R$BDDA, so the list is taken once, and at #R$AA1F, so that while the list runs no
+; frame code adds commands to it (the game frame runs from the interrupt; while this flag is set it does not queue, so
+; a frame that starts while the list runs leaves the list as it is and #R$A596 skips #R$A5DB).
+; .
+; Hardware: none directly. SP points into the list while the commands run.
+@label=RunFrameList
+@isub=LD A,OP_RET
+c$BDDB LD A,$C9      ; RET
+ $BDDD LD ($AA1F),A  ; the code at $AA1F that queues a command now returns at once
+ $BDE0 LD ($BDDA),A  ; the list is taken: callers of #R$BDDA return until the next one
+@isub=LD (LeaveFrameList+1),SP
+ $BDE3 LD ($BDEC),SP ; saved SP: operand of the LD SP,nn at #R$BDEB
+ $BDE7 LD SP,$BE5A   ; start of the frame call list
+ $BDEA RET           ; run the first command

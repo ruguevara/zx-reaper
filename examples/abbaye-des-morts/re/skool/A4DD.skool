@@ -1,4 +1,8 @@
 ; Script: "2. Keyboard " followed by the key names at $A4F2
+;
+; Clears the bitmap row of the line (y = $50, 16 pixel rows), prints "2. Keyboard " at y = $50 and has no $80 of its
+; own: the script goes on into the key-name buffer #R$A4F2, whose last byte is the $80.
+@label=ScriptKeyboardLine
 t$A4DD DEFB $81,$50,$00,$20,$10,$00
- $A4E3 DEFB $8E,$50,$00
+ $A4E3 DEFB $8E,$50,$00; text cursor at y = $50, x = 0
  $A4E6 DEFM "2. Keyboard "

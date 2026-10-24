@@ -1,10 +1,24 @@
-; Redefinable keys: 8 (keyboard row index, bit mask) pairs into the row buffer
-; at $A2D3
-g$A2BF DEFB $05,$01
- $A2C1 DEFB $05,$02
- $A2C3 DEFB $01,$01
- $A2C5 DEFB $02,$01
- $A2C7 DEFB $02,$01
- $A2C9 DEFB $02,$10
- $A2CB DEFB $02,$08
- $A2CD DEFB $05,$10
+; Control keys: 8 (half-row index, bit mask) pairs
+;
+; Pair n gives the key for control bit n (see #R$A2CF); #R$A271 tests each pair against the row buffer at #R$A2D3. The
+; values here are the defaults (QAOP); #R$A3B9 overwrites the first four pairs when the player redefines the keys and
+; #R$A336 copies the JUMP pair into the fifth. Each pair is +0 byte: half-row index 0-7 (port high bytes $FE, $FD,
+; $FB, $F7, $EF, $DF, $BF, $7F), +1 byte: bit mask of the key in that half-row (bit 0 is the key nearest the edge).
+; .
+; The last three pairs are fixed: T, R and Y.
+@label=ControlKeys
+g$A2BF DEFB $05,$01  ; bit 0 RIGHT: P
+@label=KeyLeft
+ $A2C1 DEFB $05,$02  ; bit 1 LEFT: O
+@label=KeyCrouch
+ $A2C3 DEFB $01,$01  ; bit 2 CROUCH: A
+@label=KeyJump
+ $A2C5 DEFB $02,$01  ; bit 3 JUMP: Q
+@label=KeyJumpCopy
+ $A2C7 DEFB $02,$01  ; bit 4 JUMP again: a copy of the pair above (the Kempston fire bit is bit 4)
+@label=KeyWarp
+ $A2C9 DEFB $02,$10  ; bit 5 fixed: T, the debug room warp (only if the cheat is on)
+@label=KeyAbortR
+ $A2CB DEFB $02,$08  ; bit 6 fixed: R, with Y it ends the game
+@label=KeyAbortY
+ $A2CD DEFB $05,$10  ; bit 7 fixed: Y

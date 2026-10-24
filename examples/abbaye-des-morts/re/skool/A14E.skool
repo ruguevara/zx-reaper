@@ -1,8 +1,16 @@
-; Routine at A14E
+; Script code $9B: draw several vertical lines of one tile
+;
+; Operands: tile, count, then count groups of three bytes (row, column, length). Each group draws a vertical line of
+; that tile, length cells long, from (row, column) downwards (#R$A15C). Used 9 times.
+;
+; HL Script pointer, at the operands
+; O:HL Script pointer after the operands
+@label=OpTileVLines
 c$A14E LD C,(HL)     ;
  $A14F INC HL        ;
  $A150 LD B,(HL)     ;
  $A151 INC HL        ;
+@label=OpTileVLines_Loop
 *$A152 PUSH BC       ;
  $A153 CALL $A15C    ;
  $A156 POP BC        ;

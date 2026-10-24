@@ -1,30 +1,49 @@
-; Room 21 script: Evil church
-b$804F DEFB $97,$00
- $8051 DEFB $97,$03
- $8053 DEFB $87,$15
- $8055 DEFB $83,$F0,$82
- $8058 DEFB $83,$04,$81
- $805B DEFB $99,$04,$00,$00,$20,$01,$00,$1E,$02,$10,$13,$16,$01,$01,$12,$17
+; Room script 21: Evil church
+;
+; Op $9E starts the animation of the blood tiles $3B/$3C in the bottom row (#R$AE20).
+; .
+; Room 21: column 1, row 4 of the 5x5 map (left is room 20, right 22, up 16, down 1, counted modulo 25). Unpacks
+; sprite sets #R$68CC, #R$6AA7. Subscripts: #R$82F0, #R$8104, #R$810C, #R$8114, #R$811C, #R$8124. Items (#R$8EDF) at
+; row,column: parchment 6,3, checkpoint 5,19.
+@label=RoomScript21
+b$804F DEFB $97,$00         ; SPRITESET 0
+ $8051 DEFB $97,$03         ; SPRITESET 3
+ $8053 DEFB $87,$15         ; ROOMNAME 21 "Evil church"
+ $8055 DEFB $83 ; CALL ScriptRoomPanel
+@isub=DEFW ScriptRoomPanel
+ $8056 DEFW $82F0
+ $8058 DEFB $83 ; CALL BlockAbbeyStoneA
+@isub=DEFW BlockAbbeyStoneA
+ $8059 DEFW $8104
+ $805B DEFB $99,$04,$00,$00,$20,$01,$00,$1E,$02,$10,$13,$16,$01,$01,$12,$17 ; TILEBLOCKS 4 rectangles
  $806B DEFB $04,$02
- $806D DEFB $83,$0C,$81
- $8070 DEFB $99,$02,$00,$00,$02,$0E,$12,$00
+ $806D DEFB $83 ; CALL BlockAbbeyStoneB
+@isub=DEFW BlockAbbeyStoneB
+ $806E DEFW $810C
+ $8070 DEFB $99,$02,$00,$00,$02,$0E,$12,$00 ; TILEBLOCKS 2 rectangles
  $8078 DEFB $02,$02
- $807A DEFB $83,$14,$81
- $807D DEFB $89,$14,$00,$20,$02
- $8082 DEFB $83,$1C,$81
- $8085 DEFB $89,$14,$12,$02,$02
- $808A DEFB $98,$B2,$06,$04,$07,$02,$0B,$04,$0F,$02,$0B,$04,$17,$02,$0B,$0B
+ $807A DEFB $83 ; CALL BlockAbbeyBlood
+@isub=DEFW BlockAbbeyBlood
+ $807B DEFW $8114
+ $807D DEFB $89,$14,$00,$20,$02 ; TILEBLOCK row 20, col 0, 32x2
+ $8082 DEFB $83 ; CALL BlockBloodPool
+@isub=DEFW BlockBloodPool
+ $8083 DEFW $811C
+ $8085 DEFB $89,$14,$12,$02,$02 ; TILEBLOCK row 20, col 18, 2x2
+ $808A DEFB $98,$B2,$06,$04,$07,$02,$0B,$04,$0F,$02,$0B,$04,$17,$02,$0B,$0B ; RECTS tile $B2, 6 rectangles
  $809A DEFB $05,$06,$02,$0B,$0D,$06,$02,$0B,$15,$06,$02
- $80A5 DEFB $83,$24,$81
- $80A8 DEFB $99,$05,$08,$02,$0C,$02,$08,$12,$04,$02,$08,$1A,$01,$02,$0B,$1D
+ $80A5 DEFB $83 ; CALL BlockStoneHalfB
+@isub=DEFW BlockStoneHalfB
+ $80A6 DEFW $8124
+ $80A8 DEFB $99,$05,$08,$02,$0C,$02,$08,$12,$04,$02,$08,$1A,$01,$02,$0B,$1D ; TILEBLOCKS 5 rectangles
  $80B8 DEFB $01,$02,$0E,$1C,$02,$02
- $80BE DEFB $92,$B3,$17,$04,$0F,$04,$18,$05,$18,$07,$08,$07,$10,$07,$17,$08
+ $80BE DEFB $92,$B3,$17,$04,$0F,$04,$18,$05,$18,$07,$08,$07,$10,$07,$17,$08 ; STAMP1 tile $B3 at 23 positions
  $80CE DEFB $0F,$08,$10,$09,$0F,$09,$18,$0B,$05,$0B,$07,$0B,$09,$0B,$11,$0B
  $80DE DEFB $17,$0C,$0A,$0C,$0F,$0C,$10,$0C,$15,$0C,$1A,$0E,$07,$0E,$10,$0E
  $80EE DEFB $17
- $80EF DEFB $8C,$12,$16,$3D
- $80F3 DEFB $8C,$12,$1B,$47
- $80F7 DEFB $8C,$13,$1B,$48
- $80FB DEFB $9E
- $80FC DEFB $91,$7E,$02,$01,$01,$07,$13
- $8103 DEFB $80
+ $80EF DEFB $8C,$12,$16,$3D ; TILE1 row 18, col 22, tile $3D
+ $80F3 DEFB $8C,$12,$1B,$47 ; TILE1 row 18, col 27, tile $47
+ $80F7 DEFB $8C,$13,$1B,$48 ; TILE1 row 19, col 27, tile $48
+ $80FB DEFB $9E             ; enable the blood animation
+ $80FC DEFB $91,$7E,$02,$01,$01,$07,$13 ; PICTURES tiles from $7E, 2x1, at 1 positions
+ $8103 DEFB $80             ; END

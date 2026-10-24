@@ -2,7 +2,7 @@
 """MegaLZ: the packer format of both tape stages (decoder, optimal encoder).
 
   megalz.py unpack [--rcs] IN OUT    decode a stream
-  megalz.py pack [--rcs] IN OUT      encode a file (cached in build/mlz-cache/)
+  megalz.py pack [--rcs] IN OUT      encode a file (cached in the project's build/mlz-cache/)
   megalz.py rcs IN OUT               a screen to RCS order
 --rcs: the file is a screen, the stream holds it in RCS order (rcs_address).
 
@@ -18,6 +18,7 @@ gamma: k zero bits, a one, k+1 bits v; length 2 + 2^(k+1) + v.
 offset: 0 + byte n (distance 256-n, 1..256) or
         1 + 4 bits d + byte n (distance (17-d)*256 - n, 257..4352).
 """
+import os
 import sys
 
 
@@ -207,20 +208,26 @@ def from_rcs(data):
     return bytes(screen)
 
 
-def pack(data, cache=None):
+# The cache lives in the project's build/ even when the build runs elsewhere
+# (tools/zxq.py check builds in a temporary directory of links).
+CACHE = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))),
+                     'build', 'mlz-cache')
+
+
+def pack(data, cache=CACHE):
     """encode(parse(data)), kept in CACHE/<sha1> (the parse is slow)."""
     if cache:
         import hashlib
-        import os
         path = os.path.join(cache, hashlib.sha1(data).hexdigest())
         if os.path.exists(path):
             return open(path, 'rb').read()
     out = encode(parse(data))
     if cache:
         os.makedirs(cache, exist_ok=True)
-        open(path, 'wb').write(out)
+        tmp = '%s.%d' % (path, os.getpid())
+        open(tmp, 'wb').write(out)
+        os.replace(tmp, path)
     return out
-
 
 def main():
     args = sys.argv[1:]
@@ -235,7 +242,7 @@ def main():
         if rcs:
             out = from_rcs(out)
     else:
-        out = pack(to_rcs(data) if rcs else data, 'build/mlz-cache')
+        out = pack(to_rcs(data) if rcs else data)
     open(dst, 'wb').write(out)
 
 

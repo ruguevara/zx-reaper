@@ -1,44 +1,62 @@
-; Routine at BA15
-c$BA15 LD IY,$B3D4   ;
- $BA19 POP BC        ;
- $BA1A POP DE        ;
- $BA1B POP HL        ;
- $BA1C OR A          ;
- $BA1D SBC HL,BC     ;
- $BA1F PUSH HL       ;
- $BA20 POP HL        ;
- $BA21 LD A,H        ;
- $BA22 CP E          ;
+@equ=SPAWN_POSITION=$5DFE
+; Entity handler: Death flying left (room 18), and the body shared with #R$B9F8
+;
+; Death during the half of its patrol in which it moves left (see #R$B9F8, which has the layout of the slot and the
+; way the two halves hand over to each other). The speed is subtracted from x; when the high byte of x equals the left
+; turning point (slot +4) the handler word is rewritten with #R$B9F8. IY = $B3D4 selects the first frame table of the
+; sprite block (left). This is the handler of room object kind 16 (#R$B028 entry 16), so it is the half that runs
+; first, from x = $09 down to the turning point $08.
+;
+; SP Slot address + 2 (the handler word was popped by the RET that entered the routine)
+@label=UpdateDeathLeft
+c$BA15 LD IY,$B3D4   ; frame table for moving left (the first one)
+ $BA19 POP BC        ; speed
+ $BA1A POP DE        ; D right turning point, E left turning point
+ $BA1B POP HL        ; x (8.8)
+ $BA1C OR A          ; carry clear
+ $BA1D SBC HL,BC     ; x moves left
+ $BA1F PUSH HL       ; store x
+ $BA20 POP HL        ; SP is back at +8
+ $BA21 LD A,H        ; x in 2-pixel units
+ $BA22 CP E          ; at the left turning point?
  $BA23 JR NZ,$BA32   ;
- $BA25 LD HL,$FFFA   ;
+ $BA25 LD HL,$FFFA   ; -6: back to slot+2
  $BA28 ADD HL,SP     ;
  $BA29 LD SP,HL      ;
- $BA2A LD HL,$B9F8   ;
- $BA2D PUSH HL       ;
+ $BA2A LD HL,$B9F8   ; next frame this slot is handled by the moving-right half
+ $BA2D PUSH HL       ; written over the handler word at slot+0
  $BA2E POP HL        ;
- $BA2F POP BC        ;
+ $BA2F POP BC        ; pop speed, limits and x again
  $BA30 POP DE        ;
  $BA31 POP HL        ;
-; This entry point is used by the routine at #R$B9F8.
-*$BA32 LD D,H        ;
- $BA33 POP HL        ;
- $BA34 POP BC        ;
- $BA35 LD B,$32      ;
- $BA37 DEC C         ;
+; Common body of both halves. On entry H is the high byte of x, SP is at slot+8 (the y word) and IY is set. It pops
+; the y word and the timer (+$A counter, +$B reload): the timer counts down to 1 and reloads with the 50 frames of
+; ATTACK_PERIOD, and a copy goes to BC' for #R$BA79, which throws a scythe when the counter equals 20. Then it builds
+; the position (H = x, L = y, both in 2-pixel units) in HL: A' keeps x (its low two bits select the shifted copy of
+; the sprite), the word at SPAWN_POSITION is the position a spawned scythe starts from (y low, x high), and x/4 (the
+; byte column) with y becomes the position of the draw command at $ACD1. Last, #R$A851 tests Death's hit box against
+; the player and continues at #R$BA54.
+@label=UpdateDeath_Common
+*$BA32 LD D,H        ; D = x
+ $BA33 POP HL        ; y (8.8)
+ $BA34 POP BC        ; timer: C counter, B reload
+@isub=LD B,ATTACK_PERIOD
+ $BA35 LD B,$32      ; period of Death's throw
+ $BA37 DEC C         ; count down
  $BA38 JR NZ,$BA3B   ;
- $BA3A LD C,B        ;
-*$BA3B PUSH BC       ;
- $BA3C EXX           ;
+ $BA3A LD C,B        ; reload
+*$BA3B PUSH BC       ; store the timer back
+ $BA3C EXX           ; BC' = timer, for #R$BA79
  $BA3D POP BC        ;
  $BA3E EXX           ;
- $BA3F LD E,H        ;
- $BA40 LD L,H        ;
- $BA41 LD H,D        ;
- $BA42 LD A,H        ;
+ $BA3F LD E,H        ; E = y
+ $BA40 LD L,H        ; L = y
+ $BA41 LD H,D        ; H = x
+ $BA42 LD A,H        ; A' = x, its low 2 bits are the shift phase
  $BA43 EX AF,AF'     ;
- $BA44 LD ($5DFE),HL ;
- $BA47 SRA H         ;
+ $BA44 LD ($5DFE),HL ; start position of a thrown scythe (low y, high x)
+ $BA47 SRA H         ; x / 4: byte column
  $BA49 SRA H         ;
- $BA4B LD ($ACD3),HL ;
- $BA4E LD HL,$BA54   ;
+ $BA4B LD ($ACD3),HL ; position of the draw command: y, byte column
+ $BA4E LD HL,$BA54   ; hit test, then continue at #R$BA54
  $BA51 JP $A851      ;

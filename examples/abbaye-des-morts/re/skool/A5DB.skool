@@ -1,11 +1,14 @@
-; Routine at A5DB
+; End the frame call list
 ;
-; Used by the routine at #R$A596.
+; Appends the address $BDEB to the list of drawing routines at ($BE58) and writes 0 (a NOP) over the RET at #R$BDDA.
+; $BDEB is the routine that ends the list (it restores SP); the NOP is the signal the main loop waits for (#R$8869)
+; before it calls #R$BDDA, which falls into #R$BDDB and runs the list.
+@label=EndFrameList
 c$A5DB LD HL,($BE58) ;
- $A5DE LD DE,$BDEB   ;
+ $A5DE LD DE,$BDEB   ; the routine that ends the call list
  $A5E1 LD (HL),E     ;
  $A5E2 INC HL        ;
  $A5E3 LD (HL),D     ;
  $A5E4 XOR A         ;
- $A5E5 LD ($BDDA),A  ;
+ $A5E5 LD ($BDDA),A  ; NOP: the list is ready
  $A5E8 RET           ;

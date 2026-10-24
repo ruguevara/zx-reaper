@@ -1,12 +1,23 @@
-; Routine at A734
-c$A734 POP HL        ;
- $A735 LD A,(HL)     ;
- $A736 JR NC,$A73C   ;
- $A738 SBC A,A       ;
+; Item action: the chalice that appears after twelve crosses (room 24)
+;
+; The room item of room 24 (Satan !!!) at row 2, column 16 with flag $8521. It is drawn (frame 0) only while twelve
+; crosses have been collected ($854D >= 12); with fewer it is not drawn. A touch takes it whatever the cross count
+; (observed: with 0 crosses and Jean placed on its spot): the flag becomes $FF and the item is freed with sound effect
+; 5. The flag is what #R$A668 and the room script of room 24 test: Satan disappears in a cloud of smoke and the final
+; parchment appears.
+;
+; F Carry set when Jean's box overlaps the item's box
+; SP Slot address + 4 on entry: the next stack word is the flag pointer (the action pops it); see #R$A5E9 for the slot layout
+@label=ActionChalice
+c$A734 POP HL        ; flag pointer
+ $A735 LD A,(HL)     ; flag
+ $A736 JR NC,$A73C   ; not touching: show it if twelve crosses
+ $A738 SBC A,A       ; touching: A = $FF
  $A739 LD (HL),A     ;
- $A73A JR $A71F      ;
-*$A73C LD A,($854D)  ;
+ $A73A JR $A71F      ; taken: sound, free the slot
+*$A73C LD A,($854D)  ; crosses collected
+@isub=CP CROSSES_NEEDED
  $A73F CP $0C        ;
- $A741 JP C,$A724    ;
- $A744 XOR A         ;
+ $A741 JP C,$A724    ; fewer than twelve: free the slot without a sound (not drawn this frame)
+ $A744 XOR A         ; frame 0
  $A745 JP $A7DB      ;

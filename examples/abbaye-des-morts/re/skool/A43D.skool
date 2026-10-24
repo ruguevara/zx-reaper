@@ -1,6 +1,17 @@
-; Routine at A43D
+; Frame routine of the title and controls menus
+;
+; Called by the interrupt handler through the vector at $8504. The start of the game #R$85FC installs it before the
+; title is drawn and replaces it with #R$85E2 when the game starts. Each frame it runs the sound effects (#R$871A),
+; reads the keyboard into #R$A2D3 (#R$A240), finds the first key held (#R$A29C) and stores its half-row index and mask
+; in $8502/$8503 (the mask in $8502, the row in $8503; read by #R$A3B9), then finishes with #R$A304 which sets the key
+; code #R$A2D2.
+; .
+; Hardware: beeper (through #R$871A) and keyboard ports (through #R$A240).
+;
+; O:A Key code of the key held, 0 for none
+@label=MenuFrame
 c$A43D CALL $871A    ;
  $A440 CALL $A240    ;
  $A443 CALL $A29C    ;
- $A446 LD ($8502),BC ;
- $A44A JP $A304      ;
+ $A446 LD ($8502),BC ; $8502 = mask of the key found, $8503 = its half-row index
+ $A44A JP $A304      ; tail call: the key code goes to #R$A2D2

@@ -1,2 +1,13 @@
-; Title screen: word written by $A43D, read by $A3B9
-g$8502 DEFB $00,$00
+; Key found by the menu key scan: bit mask and keyboard row
+;
+; Written every frame by the menu interrupt routine #R$A43D from the result of #R$A29C (the first key pressed in the
+; key row buffer #R$A2D3). Read by #R$A3B9 when the player redefines a key: the two bytes (row, mask) are stored as
+; the new entry of the key table #R$A2BF. The mask is $01-$10 for a key and the row is the index (0-7) of the
+; half-row; both are 0 while no key is down.
+; .
+; +0 byte PressedKeyMask: bit mask of the key within its half-row
+; +1 byte PressedKeyRow: index of the keyboard half-row
+@label=PressedKeyMask
+g$8502 DEFB $00
+@label=PressedKeyRow
+ $8503 DEFB $00

@@ -1,3 +1,7 @@
-; Script: block pattern 2x2 (op $88)
-b$811C DEFB $88,$02,$02,$80,$80,$3B,$3C
- $8123 DEFB $80
+; Block pattern: blood pool (tiles $80,$80,$3B,$3C)
+;
+; Defines the current block as two blank tiles over the two blood tiles $3B and $3C, which the animation #R$AE20 swaps
+; ($3B and $3C alternate) when op $9E is set. Called by rooms 21, 22, 23.
+@label=BlockBloodPool
+b$811C DEFB $88,$02,$02,$80,$80,$3B,$3C ; BLOCK 2x2: $80 $80 $3B $3C
+ $8123 DEFB $80             ; END

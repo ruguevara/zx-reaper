@@ -1,6 +1,12 @@
-; Routine at 9DF0
-c$9DF0 LD D,H        ;
+; Script opcode $92: place one tile at several positions
+;
+; Operands: t k, then k positions (y x). The single tile is handled as a list of one tile by the code it shares with $8B (#R$9DFE).
+;
+; HL Operand bytes
+; O:HL Address after the last position
+@label=OpStampOne
+c$9DF0 LD D,H        ; DE = address of the tile list (the operand t)
  $9DF1 LD E,L        ;
- $9DF2 LD C,$01      ;
- $9DF4 INC HL        ;
+ $9DF2 LD C,$01      ; list length 1
+ $9DF4 INC HL        ; skip t
  $9DF5 JR $9DFE      ;

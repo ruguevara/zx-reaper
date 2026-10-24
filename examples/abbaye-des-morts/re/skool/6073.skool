@@ -1,3 +1,11 @@
-; Room tile map buffer ($5E00-$60BF, 32x22 tile numbers), rows 19-21; the
-; start-up code at $6000 is overwritten
+; Tile flag map, end of row 19 and rows 20-21 (image fill)
+;
+; The tile flag map is the 22 x 32 byte buffer at $5E00-$60BF: one byte per character cell of the room, 3 pages above
+; the tile map at $5B00. This entry is its last 77 bytes; the rest of the map lies below the image, and the start-up
+; code #R$6000 occupies rows 16-19 until the first room is entered. The $FF here is only the fill of the packed image:
+; a room script rebuilds the whole map, because every tile opcode of the script interpreter #R$9D5F writes the tile
+; into the tile map and its flags (the byte at #R$CD00+tile) into this map through #R$9E6A.
+; .
+; Cell byte: bits 0-2 the class of the tile (see #R$CD00), bit 7 the "redraw this cell" mark, bit 6 the "a sprite was
+; drawn here, erase it next frame" mark (see #R$9836).
 b$6073 DEFS $4D,$FF

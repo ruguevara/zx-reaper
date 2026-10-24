@@ -1,23 +1,40 @@
-; Routine at A70B
-c$A70B POP HL        ;
- $A70C JP NC,$A7CB   ;
+; Item action: heart (an extra life)
+;
+; Room items of type 0 (hearts). When Jean touches one its flag becomes $FF (it is not created again), the status-bar
+; hearts redraw #R$9BF3 is armed (it is a RET until a 0 is written to it) and the lives at $854C go up by one, to a
+; maximum of 9, then the item is freed with sound effect 5 (#R$A71F). Without a touch the heart is animated and drawn
+; by #R$A7CB.
+;
+; F Carry set when Jean's box overlaps the item's box
+; SP Slot address + 4 on entry: the next stack word is the flag pointer (the action pops it); see #R$A5E9 for the slot layout
+@label=ActionHeart
+c$A70B POP HL        ; flag pointer
+ $A70C JP NC,$A7CB   ; not touching: animate and draw
+@isub=LD (HL),ITEM_GONE
  $A70F LD (HL),$FF   ;
- $A711 LD HL,$9BF3   ;
+ $A711 LD HL,$9BF3   ; hearts redraw: NOP
  $A714 LD (HL),$00   ;
- $A716 LD HL,$854C   ;
+ $A716 LD HL,$854C   ; lives
  $A719 LD A,(HL)     ;
- $A71A CP $09        ;
- $A71C ADC A,$00     ;
+@isub=CP MAX_LIVES
+ $A71A CP $09        ; carry set below the maximum
+ $A71C ADC A,$00     ; +1 when below the maximum
  $A71E LD (HL),A     ;
-; This entry point is used by the routines at #R$A668, #R$A734 and #R$A782.
+; Entry point used by the other actions (taking a cross, the chalice, the final parchment): play sound effect 5, then
+; free the slot; SP is at slot + 8.
+@label=FreeSlotWithSound
+@isub=LD A,SFX_PICKUP
 *$A71F LD A,$05      ;
  $A721 LD ($854F),A  ;
-; This entry point is used by the routines at #R$A734 and #R$A836.
-*$A724 LD HL,$FFFA   ;
+; Entry point used by #R$A734 and #R$A836: free the object slot (zero its handler word) and go on with the next one;
+; SP is at slot + 8.
+@label=FreeSlot
+*$A724 LD HL,$FFFA   ; SP back to slot + 2
  $A727 ADD HL,SP     ;
  $A728 LD SP,HL      ;
  $A729 LD HL,$0000   ;
- $A72C PUSH HL       ;
+ $A72C PUSH HL       ; handler = 0: the slot is free
+@isub=LD HL,SLOT_SIZE
  $A72D LD HL,$0016   ;
  $A730 ADD HL,SP     ;
  $A731 JP $A5F0      ;

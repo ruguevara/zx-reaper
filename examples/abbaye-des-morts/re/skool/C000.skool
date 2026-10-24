@@ -1,2 +1,11 @@
-; Sprite draw queue: 16 records of 16 bytes, word 0 the routine
-g$C000 DEFS $0100,$FF
+; Sprite draw queue: 16 jobs of 16 bytes
+;
+; Jobs for drawing sprites into the redraw buffers. #R$9836 and #R$97FD, run from the frame call list, fill a template
+; and #R$98B1 appends a copy at the end of the queue (the tail address is the operand of its first instruction).
+; #R$97B7 then walks the queue (#R$97E1): for each job whose first word is not zero it calls the routine at that
+; address with DE = job + 1 and clears the word, so the queue is empty again afterwards and the first word is also the
+; marker of a free job. Fields: +0 word routine ($9972 for a masked sprite, $98F7 for an object sprite), the other 14
+; bytes are the parameters of the routine (#R$98D9 and #R$982E list them). A 17th job would run into the object slots
+; at #R$C100.
+@label=DrawQueue
+g$C000 DEFS $0100,$FF ;

@@ -1,6 +1,12 @@
-; Routine at 9D99
-c$9D99 LD DE,$9F93   ;
+; Script opcode $82: set the alignment of numbered strings and the text row
+;
+; Operands: mode y (2 bytes). mode goes to $9F93 and y to the text cursor row $9F26. The alignment is applied by #R$9F75 when a string is printed with $84 or $85: mode 1 starts at x=0, mode 2 centres the string on x=128, any other value (the scripts use 0) right-aligns it to x=256.
+;
+; HL Operand bytes
+; O:HL Address after the operands
+@label=OpSetTextAlign
+c$9D99 LD DE,$9F93   ; mode into $9F93
  $9D9C LDI           ;
- $9D9E LD DE,$9F26   ;
+ $9D9E LD DE,$9F26   ; y into the text cursor row $9F26
  $9DA1 LDI           ;
  $9DA3 RET           ;

@@ -1,6 +1,14 @@
-; Routine at A0B4
+; Script code $99: fill several rectangles with the $88 block
+;
+; Operands: count, then count groups of four bytes (row, column, width, height). Each group is handled like script
+; code $89 (#R$A0BE) with the block defined by the last $88 (#R$A104). Used 37 times.
+;
+; HL Script pointer, at the operands
+; O:HL Script pointer after the operands
+@label=OpFillBlockList
 c$A0B4 LD B,(HL)     ;
  $A0B5 INC HL        ;
+@label=OpFillBlockList_Loop
 *$A0B6 PUSH BC       ;
  $A0B7 CALL $A0BE    ;
  $A0BA POP BC        ;

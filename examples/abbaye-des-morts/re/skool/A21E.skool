@@ -1,6 +1,12 @@
-; Routine at A21E
+; Tile flag map address of a cell
 ;
-; Used by the routines at #R$97FD and #R$9836.
+; $5E00 + 32 x row + column: the address in the tile flag map of the cell at row L, column H. Used by the sprite
+; drawers #R$97FD and #R$9836 to read the flags under a sprite.
+;
+; L Row 0-21
+; H Column 0-31
+; O:HL Flag map address
+@label=FlagMapAddress
 c$A21E LD A,L        ;
  $A21F RRCA          ;
  $A220 RRCA          ;
@@ -12,6 +18,7 @@ c$A21E LD A,L        ;
  $A227 LD L,A        ;
  $A228 LD A,H        ;
  $A229 AND $03       ;
+@isub=ADD A,FLAGMAP_HIGH
  $A22B ADD A,$5E     ;
  $A22D LD H,A        ;
  $A22E RET           ;

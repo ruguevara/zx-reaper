@@ -1,2 +1,4 @@
-; Unused
+; Unused byte
+;
+; No code reads or writes $8550.
 g$8550 DEFB $00

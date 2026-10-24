@@ -1,11 +1,18 @@
-; Routine at A1C3
+; Wait until a key is pressed
 ;
-; Used by the routines at #R$85FC, #R$887B and #R$9C52.
+; Enables interrupts and halts until the next frame interrupt, then reads all eight keyboard half-rows at once (port
+; $FE with a zero high byte) and repeats until one of the five key bits shows a pressed key. Called by the main loop
+; (#R$85FC), the ending (#R$887B) and #R$9C52.
+; .
+; Hardware: HALT for the frame interrupt; reads the ULA keyboard port $FE.
+@label=WaitKeyPress
 c$A1C3 EI            ;
  $A1C4 HALT          ;
- $A1C5 XOR A         ;
+ $A1C5 XOR A         ; A = 0 selects every half-row
+@isub=IN A,(ULA_PORT)
  $A1C6 IN A,($FE)    ;
  $A1C8 CPL           ;
- $A1C9 AND $1F       ;
+@isub=AND KEY_BITS
+ $A1C9 AND $1F       ; bits set = keys down
  $A1CB JR Z,$A1C3    ;
  $A1CD RET           ;

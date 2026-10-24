@@ -1,5 +1,9 @@
-; Short names of ENTER, SPACE, CAPS SHIFT, SYMBOL SHIFT, read by $A3F6
-t$A41A DEFM "en"
- $A41C DEFM "sp"
- $A41E DEFM "cs"
- $A420 DEFM "ss"
+; Short names of the keys ENTER, SPACE, CAPS SHIFT, SYMBOL SHIFT
+;
+; Four two-letter names in the order ENTER, SPACE, CAPS SHIFT, SYMBOL SHIFT; #R$A3F6 copies one into the key-name
+; buffer #R$A4F2.
+@label=ShortKeyNames
+t$A41A DEFM "en"     ; ENTER
+ $A41C DEFM "sp"     ; SPACE
+ $A41E DEFM "cs"     ; CAPS SHIFT
+ $A420 DEFM "ss"     ; SYMBOL SHIFT

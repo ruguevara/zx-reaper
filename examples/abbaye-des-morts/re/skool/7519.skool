@@ -1,40 +1,59 @@
-; Room 6 script: Death is close
-b$7519 DEFB $97,$01
- $751B DEFB $87,$06
- $751D DEFB $83,$F0,$82
- $7520 DEFB $83,$0B,$83
- $7523 DEFB $83,$4B,$74
- $7526 DEFB $89,$08,$02,$02,$0C
- $752B DEFB $83,$43,$74
- $752E DEFB $89,$14,$00,$20,$02
- $7533 DEFB $88,$01,$02,$80,$05
- $7538 DEFB $99,$03,$14,$0A,$02,$02,$14,$10
+; Room script 6: Death is close
+;
+; The door of the Abandoned church: while #R$851A is nonzero (the player has entered room 7) the script draws the door
+; #R$778A at the right edge so that the way into room 7 stays shut.
+; .
+; Room 6: column 1, row 1 of the 5x5 map (left is room 5, right 7, up 1, down 11, counted modulo 25). Unpacks sprite
+; set #R$6916. Subscripts: #R$82F0, #R$830B, #R$744B, #R$7443. No items.
+@label=RoomScript06
+b$7519 DEFB $97,$01         ; SPRITESET 1
+ $751B DEFB $87,$06         ; ROOMNAME 6 "Death is close"
+ $751D DEFB $83 ; CALL ScriptRoomPanel
+@isub=DEFW ScriptRoomPanel
+ $751E DEFW $82F0
+ $7520 DEFB $83 ; CALL ScriptSky
+@isub=DEFW ScriptSky
+ $7521 DEFW $830B
+ $7523 DEFB $83 ; CALL BlockTreeBark
+@isub=DEFW BlockTreeBark
+ $7524 DEFW $744B
+ $7526 DEFB $89,$08,$02,$02,$0C ; TILEBLOCK row 8, col 2, 2x12
+ $752B DEFB $83 ; CALL BlockGrassEarth
+@isub=DEFW BlockGrassEarth
+ $752C DEFW $7443
+ $752E DEFB $89,$14,$00,$20,$02 ; TILEBLOCK row 20, col 0, 32x2
+ $7533 DEFB $88,$01,$02,$80,$05 ; BLOCK 1x2: $80 $05
+ $7538 DEFB $99,$03,$14,$0A,$02,$02,$14,$10 ; TILEBLOCKS 3 rectangles
  $7540 DEFB $02,$02,$14,$14,$02,$02
- $7546 DEFB $91,$91,$02,$02,$05,$10,$0B,$10
+ $7546 DEFB $91,$91,$02,$02,$05,$10,$0B,$10 ; PICTURES tiles from $91, 2x2, at 5 positions
  $754E DEFB $15,$11,$09,$11,$10,$11,$17
- $7555 DEFB $88,$03,$02,$06,$07,$08,$0B,$0A
+ $7555 DEFB $88,$03,$02,$06,$07,$08,$0B,$0A ; BLOCK 3x2: $06 $07 $08 $0B $0A $09
  $755D DEFB $09
- $755E DEFB $89,$00,$1D,$03,$0E
- $7563 DEFB $98,$8A,$02,$00,$00,$0A,$04,$04
+ $755E DEFB $89,$00,$1D,$03,$0E ; TILEBLOCK row 0, col 29, 3x14
+ $7563 DEFB $98,$8A,$02,$00,$00,$0A,$04,$04 ; RECTS tile $8A, 2 rectangles
  $756B DEFB $00,$08,$02
- $756E DEFB $98,$89,$02,$05,$00,$04,$02,$06
+ $756E DEFB $98,$89,$02,$05,$00,$04,$02,$06 ; RECTS tile $89, 2 rectangles
  $7576 DEFB $02,$04,$02
- $7579 DEFB $8B,$02,$89,$89,$03,$05,$06,$06
+ $7579 DEFB $8B,$02,$89,$89,$03,$05,$06,$06 ; STAMPS 2 tiles $89 $89 at 3 positions
  $7581 DEFB $05,$0C,$00
- $7584 DEFB $8B,$03,$06,$07,$08,$02,$12,$1D
+ $7584 DEFB $8B,$03,$06,$07,$08,$02,$12,$1D ; STAMPS 3 tiles $06 $07 $08 at 2 positions
  $758C DEFB $13,$1C
- $758E DEFB $8B,$02,$95,$96,$04,$0F,$0F,$0F
+ $758E DEFB $8B,$02,$95,$96,$04,$0F,$0F,$0F ; STAMPS 2 tiles $95 $96 at 4 positions
  $7596 DEFB $15,$10,$0D,$11,$12
- $759B DEFB $8B,$02,$97,$98,$02,$11,$0D,$12
+ $759B DEFB $8B,$02,$97,$98,$02,$11,$0D,$12 ; STAMPS 2 tiles $97 $98 at 2 positions
  $75A3 DEFB $12
- $75A4 DEFB $8B,$02,$8C,$86,$01,$0A,$01
- $75AB DEFB $8B,$02,$87,$88,$01,$0C,$03
- $75B2 DEFB $92,$81,$03,$13,$00,$13,$05,$13
+ $75A4 DEFB $8B,$02,$8C,$86,$01,$0A,$01 ; STAMPS 2 tiles $8C $86 at 1 positions
+ $75AB DEFB $8B,$02,$87,$88,$01,$0C,$03 ; STAMPS 2 tiles $87 $88 at 1 positions
+ $75B2 DEFB $92,$81,$03,$13,$00,$13,$05,$13 ; STAMP1 tile $81 at 3 positions
  $75BA DEFB $19
- $75BB DEFB $92,$0C,$02,$02,$1E,$0A,$1E
- $75C2 DEFB $92,$89,$07,$02,$09,$03,$09,$04,$02,$04,$08,$08,$00,$0B,$00,$0F
+ $75BB DEFB $92,$0C,$02,$02,$1E,$0A,$1E ; STAMP1 tile $0C at 2 positions
+ $75C2 DEFB $92,$89,$07,$02,$09,$03,$09,$04,$02,$04,$08,$08,$00,$0B,$00,$0F ; STAMP1 tile $89 at 7 positions
  $75D2 DEFB $01
- $75D3 DEFB $8C,$0E,$02,$8B
- $75D7 DEFB $8C,$13,$1F,$07
- $75DB DEFB $9C,$8A,$77,$1A,$85
- $75E0 DEFB $80
+ $75D3 DEFB $8C,$0E,$02,$8B ; TILE1 row 14, col 2, tile $8B
+ $75D7 DEFB $8C,$13,$1F,$07 ; TILE1 row 19, col 31, tile $07
+ $75DB DEFB $9C ; IFNZ run DoorRight if ChurchDoorShut is not 0
+@isub=DEFW DoorRight
+ $75DC DEFW $778A
+@isub=DEFW ChurchDoorShut
+ $75DE DEFW $851A
+ $75E0 DEFB $80             ; END

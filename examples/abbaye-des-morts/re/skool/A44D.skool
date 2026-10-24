@@ -1,5 +1,11 @@
-; Routine at A44D
+; Save the middle of the screen and the attributes
 ;
-; Used by the routine at #R$A336.
+; Called by #R$A336 before the controls screen is drawn. Sets A = 0 (NOPs) and jumps into the copier at #R$A45E: the
+; bitmap of the middle screen third ($4800-$4FFF) goes to $C500 and the whole attribute file ($5800-$5AFF) to $5B00.
+; Both are scratch areas of the game (the redraw buffer at $C500 and the tile map at $5B00) that are not in use while
+; the title and the menus are shown.
+; .
+; Hardware: reads the screen bitmap and attributes.
+@label=SaveMenuArea
 c$A44D XOR A         ;
- $A44E JR $A45E      ;
+ $A44E JR $A45E      ; copy screen to buffers (the copier gets NOPs)

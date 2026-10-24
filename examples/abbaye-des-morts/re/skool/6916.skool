@@ -1,5 +1,10 @@
-; Packed sprite set 1 (op $97): 4 columns of 3 chars; flag bytes, set bit =
-; literal byte, clear = 0
+; Packed sprite set 1 (op $97 $01): 4 columns of 3 character rows
+;
+; Unpacked by room script op $97 $01 into the sprite sheet at $D763 (page = first pixel row, low byte = first column)
+; with record 1 of #R$AE9D: frame width 2 columns, pre-shifted copies (bit 7) and mirrored copies (bit 6). 4 columns x
+; 3 character rows (24 pixel rows), 99 bytes packed. Used by rooms: 0, 4, 5, 6, 24. Probably the crusaders (rooms 4-6
+; are the chase, room 24 and 25 the ending).
+@label=PackedSet1
 b$6916 DEFB $04,$03
  $6918 DEFB $FF,$01,$03,$04,$0B,$17,$11,$15,$14,$FF,$12,$09,$84,$C2,$E4,$62
  $6928 DEFB $74,$32,$EF,$48,$30,$06,$03,$05,$0E,$0F,$FE,$E0,$F0,$38,$DC,$EE

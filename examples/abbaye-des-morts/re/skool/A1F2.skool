@@ -1,6 +1,14 @@
-; Routine at A1F2
+; Attribute address of a cell
 ;
-; Used by the routines at #R$9BA7, #R$9CA5, #R$9FA8 and #R$A168.
+; Converts a cell row and column into the address of the cell's attribute byte: $5800 + 32 x row + column. Used by
+; #R$9FA8, #R$A168 and two routines at #R$9BA7 and #R$9CA5.
+; .
+; Hardware: knows the address of the attribute file.
+;
+; L Cell row 0-23
+; H Cell column 0-31
+; O:HL Attribute address
+@label=AttrAddress
 c$A1F2 LD A,L        ;
  $A1F3 RRCA          ;
  $A1F4 RRCA          ;
@@ -11,6 +19,7 @@ c$A1F2 LD A,L        ;
  $A1FA LD H,A        ;
  $A1FB LD A,L        ;
  $A1FC AND $03       ;
+@isub=ADD A,ATTRS_HIGH
  $A1FE ADD A,$58     ;
  $A200 LD L,H        ;
  $A201 LD H,A        ;

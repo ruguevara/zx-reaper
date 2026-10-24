@@ -1,6 +1,12 @@
-; Routine at A20D
+; Tile map address of a cell
 ;
-; Used by the routines at #R$9BA7, #R$9E6A and #R$A13D.
+; $5B00 + 32 x row + column: the address in the tile map (22 rows of 32 tile numbers) of the cell at row L, column H.
+; The flag map is 3 pages above (#R$A21E). Used by #R$9E6A, #R$A13D and #R$9BA7.
+;
+; L Row 0-21
+; H Column 0-31
+; O:HL Tile map address
+@label=TileMapAddress
 c$A20D LD A,L        ;
  $A20E RRCA          ;
  $A20F RRCA          ;
@@ -12,6 +18,7 @@ c$A20D LD A,L        ;
  $A216 LD L,A        ;
  $A217 LD A,H        ;
  $A218 AND $03       ;
+@isub=ADD A,TILEMAP_HIGH
  $A21A ADD A,$5B     ;
  $A21C LD H,A        ;
  $A21D RET           ;

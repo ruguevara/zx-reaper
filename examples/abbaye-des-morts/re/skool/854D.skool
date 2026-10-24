@@ -1,2 +1,7 @@
-; Crosses collected (HUD, $9C1B)
+; Crosses collected (0-12)
+;
+; Incremented by #R$A782 and #R$A777 when a cross is picked up. The status bar draws that many crosses (#R$9C1B). With
+; 12 (CROSSES_NEEDED) the chalice appears in room 24 (#R$A734) and the ring of crosses is shown (#R$AE4B). Zeroed at
+; the start of a game.
+@label=Crosses
 g$854D DEFB $00

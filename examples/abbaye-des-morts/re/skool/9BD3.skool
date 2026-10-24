@@ -1,6 +1,21 @@
-; Screen-scroll setups: 4 x 8 bytes (rows, columns, start address, 4 step bytes
-; poked into $9B91/$9B95/$9B9D/$9BA1), indexed by $850B
-b$9BD3 DEFB $20,$16,$00,$00,$00,$01,$01,$00
- $9BDB DEFB $20,$16,$00,$1F,$00,$01,$FF,$00
- $9BE3 DEFB $16,$20,$00,$00,$01,$00,$00,$01
- $9BEB DEFB $16,$20,$15,$00,$01,$00,$00,$FF
+; Sweep setups for the room redraw, 4 x 8 bytes
+;
+; Indexed by the exit direction in $850B (0 = right, 1 = left, 2 = down, 3 = up; set by #R$ACEF). #R$9B5A copies the
+; four step bytes into the operands of its loop and walks the cells line by line. Fields:
+; .
+; +0 byte: number of lines (outer loop count)
+; +1 byte: cells per line (inner loop count)
+; +2 byte: row of the first cell
+; +3 byte: column of the first cell
+; +4 byte: column step between the cells of a line
+; +5 byte: row step between the cells of a line
+; +6 byte: column step from one line to the next
+; +7 byte: row step from one line to the next
+; .
+; Setup 0: 32 columns of 22 cells, left to right; 1: the same, right to left (starts at column 31); 2: 22 rows of 32 cells,
+; top to bottom; 3: the same, bottom to top (starts at row 21). Steps $FF are -1.
+@label=SweepSetups
+b$9BD3 DEFB $20,$16,$00,$00,$00,$01,$01,$00 ; 0: columns, left to right
+ $9BDB DEFB $20,$16,$00,$1F,$00,$01,$FF,$00 ; 1: columns, right to left
+ $9BE3 DEFB $16,$20,$00,$00,$01,$00,$00,$01 ; 2: rows, top to bottom
+ $9BEB DEFB $16,$20,$15,$00,$01,$00,$00,$FF ; 3: rows, bottom to top

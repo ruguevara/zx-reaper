@@ -1,5 +1,11 @@
-; Routine at BDEB
-c$BDEB LD SP,$BDEB   ;
+; End of the frame call list: restore SP and leave the runner
+;
+; The word #R$A5DB appends as the last entry of every frame call list, so the RET of the last command lands here. The
+; operand of the LD SP,nn is self-modified: #R$BDDB stores there the SP it had on entry, so this instruction puts the
+; stack back. The routine then zeroes #R$AA1F, which lets the frame code queue commands again, and returns to the
+; caller of #R$BDDB.
+@label=LeaveFrameList
+c$BDEB LD SP,$BDEB   ; the operand is stored by #R$BDDB
  $BDEE XOR A         ;
- $BDEF LD ($AA1F),A  ;
- $BDF2 RET           ;
+ $BDEF LD ($AA1F),A  ; frame code may queue commands again
+ $BDF2 RET           ; return to the caller of #R$BDDA

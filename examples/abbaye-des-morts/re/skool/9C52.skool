@@ -1,32 +1,43 @@
-; Routine at 9C52
+; Show a parchment: clear the screen, print its two lines, frame, wait for a key
+;
+; Runs the parchment text script #R$832A, which blacks out the whole screen and prints the two messages (string numbers in $850E and $850F) centred at pixel rows 65 and 85. Then it draws the parchment frame in black on yellow (#R$9C96), waits for a key (release, press, release), redraws the room and the status bar and returns to the game. Entered through #R$9C51.
+; .
+; Hardware: clears and draws the screen, reads the keyboard through #R$A1CE and #R$A1C3 (HALT until the interrupt).
+@label=ShowParchment
 c$9C52 LD HL,$832A   ;
- $9C55 LD BC,$3006   ;
-; This entry point is used by the routine at #R$887B.
-*$9C58 LD A,($850C)  ;
+@isub=LD BC,(YELLOW*PAPER+BLACK)*256+YELLOW
+ $9C55 LD BC,$3006   ; B: frame interior black on yellow, C: frame tiles yellow on black
+; Entry point of the full-screen text window, also used by the ending (#R$887B).
+; HL Script that draws the text (it also clears the screen), BC Frame attributes:
+; B for the blank (interior) cells, C for the frame tiles. O: the screen shows the room again.
+@label=ShowTextWindow
+*$9C58 LD A,($850C)  ; save the room state; it is restored at the end
  $9C5B PUSH AF       ;
  $9C5C PUSH BC       ;
  $9C5D PUSH HL       ;
- $9C5E XOR A         ;
+ $9C5E XOR A         ; room state 0 while the window is up
  $9C5F LD ($850C),A  ;
- $9C62 LD HL,$9C51   ;
+ $9C62 LD HL,$9C51   ; disarm the parchment gate (#R$9C51)
+@isub=LD (HL),OP_RET
  $9C65 LD (HL),$C9   ;
  $9C67 POP HL        ;
- $9C68 CALL $9D5F    ;
+ $9C68 CALL $9D5F    ; print the window text; the script clobbers BC
  $9C6B POP BC        ;
- $9C6C EXX           ;
- $9C6D CALL $9C96    ;
- $9C70 CALL $A1CE    ;
- $9C73 CALL $A1C3    ;
- $9C76 CALL $A1CE    ;
- $9C79 XOR A         ;
+ $9C6C EXX           ; BC -> BC': #R$9CB7 reads the frame attributes there
+ $9C6D CALL $9C96    ; draw the frame
+ $9C70 CALL $A1CE    ; wait until no key is pressed
+ $9C73 CALL $A1C3    ; wait for a key
+ $9C76 CALL $A1CE    ; wait for the release
+ $9C79 XOR A         ; arm the status bar redraws (hearts #R$9BF3, crosses #R$9C1B)
  $9C7A LD ($9BF3),A  ;
  $9C7D LD ($9C1B),A  ;
- $9C80 LD ($850B),A  ;
- $9C83 CALL $9B5A    ;
- $9C86 LD HL,$0C16   ;
- $9C89 LD BC,$0214   ;
- $9C8C LD A,$07      ;
- $9C8E CALL $9FA8    ;
+ $9C80 LD ($850B),A  ; scroll setup 0
+ $9C83 CALL $9B5A    ; redraw the room from the tile map
+ $9C86 LD HL,$0C16   ; row 22, column 12: the 20x2 message area
+ $9C89 LD BC,$0214   ; 20 cells wide, 2 rows
+@isub=LD A,WHITE
+ $9C8C LD A,$07      ; attribute: white ink on black
+ $9C8E CALL $9FA8    ; fill the message area attributes (the room name is drawn again by the room)
  $9C91 POP AF        ;
  $9C92 LD ($850C),A  ;
  $9C95 RET           ;

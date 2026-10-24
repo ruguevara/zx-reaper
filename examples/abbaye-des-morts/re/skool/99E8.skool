@@ -1,6 +1,16 @@
-; Jump table of the sprite drawers used by $99C9 (index A-1)
-w$99E8 DEFW $9A02
- $99EA DEFW $9A36
- $99EC DEFW $9A7C
- $99EE DEFW $9AD4
- $99F0 DEFW $9B3E
+; Table of the five sprite drawers
+;
+; Words indexed by the sprite width in bytes minus 1; #R$99C9 jumps through it. Each drawer draws one character row of
+; the sprite (up to 8 pixel rows) as four calls of its strip routine.
+; .
+; +0 word: #R$9A02, 1 byte wide
+; +2 word: #R$9A36, 2 bytes wide
+; +4 word: #R$9A7C, 3 bytes wide
+; +6 word: #R$9AD4, 4 bytes wide
+; +8 word: #R$9B3E, 5 bytes wide
+@label=SpriteDrawerTable
+w$99E8 DEFW $9A02    ; width 1
+ $99EA DEFW $9A36    ; width 2
+ $99EC DEFW $9A7C    ; width 3
+ $99EE DEFW $9AD4    ; width 4
+ $99F0 DEFW $9B3E    ; width 5

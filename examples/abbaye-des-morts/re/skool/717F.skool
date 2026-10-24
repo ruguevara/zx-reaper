@@ -1,4 +1,12 @@
-; Parchment frame tiles: 12 8x8 bitmaps, read by $9CB7
+; Parchment frame tiles: 12 bitmaps of 8x8 pixels
+;
+; The border pieces of the parchment window (a scroll with torn edges), 8 bytes each, copied to the screen by #R$9CB7
+; (frame tile number = layout code - 2). The attributes of the frame cells and of the blank interior cells come from BC of #R$9C58 (C = frame, B = interior).
+; .
+; +0 top-left corner, +1 and +2 two variants of the top edge, +3 top-right corner, +4 and +6 left edge variants, +5
+; and +7 right edge variants, +8 bottom-left corner, +9 and +10 bottom edge variants, +11 bottom-right corner (tile n
+; is at $717F+8*n)
+@label=ParchmentFrameTiles
 b$717F DEFB $06,$0F,$1F,$3E,$5C,$89,$93,$47
  $7187 DEFB $00,$00,$FF,$FF,$FF,$FF,$FF,$FF
  $718F DEFB $00,$00,$61,$FF,$FF,$FF,$FF,$FF

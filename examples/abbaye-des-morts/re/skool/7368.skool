@@ -1,18 +1,28 @@
-; Room 3 script: Wine supplies
-b$7368 DEFB $87,$03
- $736A DEFB $83,$F0,$82
- $736D DEFB $83,$0B,$83
- $7370 DEFB $83,$58,$73
- $7373 DEFB $99,$03,$14,$00,$20,$02,$0A,$1E
+; Room script 3: Wine supplies
+;
+; Room 3: column 3, row 0 of the 5x5 map (left is room 2, right 4, up 23, down 8, counted modulo 25). Subscripts:
+; #R$82F0, #R$830B, #R$7358. Items (#R$8EDF) at row,column: parchment 16,18, cross 18,28.
+@label=RoomScript03
+b$7368 DEFB $87,$03         ; ROOMNAME 3 "Wine supplies"
+ $736A DEFB $83 ; CALL ScriptRoomPanel
+@isub=DEFW ScriptRoomPanel
+ $736B DEFW $82F0
+ $736D DEFB $83 ; CALL ScriptSky
+@isub=DEFW ScriptSky
+ $736E DEFW $830B
+ $7370 DEFB $83 ; CALL BlockStoneA
+@isub=DEFW BlockStoneA
+ $7371 DEFW $7358
+ $7373 DEFB $99,$03,$14,$00,$20,$02,$0A,$1E ; TILEBLOCKS 3 rectangles
  $737B DEFB $02,$0A,$0A,$00,$20,$01
- $7381 DEFB $86,$06,$00,$20,$04,$11
- $7387 DEFB $86,$05,$00,$20,$01,$13
- $738D DEFB $8B,$02,$A1,$A2,$02,$0D,$1A,$0E
+ $7381 DEFB $86,$06,$00,$20,$04,$11 ; FILLTILE row 6, col 0, 32x4, tile $11
+ $7387 DEFB $86,$05,$00,$20,$01,$13 ; FILLTILE row 5, col 0, 32x1, tile $13
+ $738D DEFB $8B,$02,$A1,$A2,$02,$0D,$1A,$0E ; STAMPS 2 tiles $A1 $A2 at 2 positions
  $7395 DEFB $1A
- $7396 DEFB $8B,$02,$17,$18,$04,$10,$14,$12
+ $7396 DEFB $8B,$02,$17,$18,$04,$10,$14,$12 ; STAMPS 2 tiles $17 $18 at 4 positions
  $739E DEFB $0E,$12,$12,$12,$14
- $73A3 DEFB $8B,$02,$19,$1A,$04,$11,$14,$13
+ $73A3 DEFB $8B,$02,$19,$1A,$04,$11,$14,$13 ; STAMPS 2 tiles $19 $1A at 4 positions
  $73AB DEFB $0E,$13,$12,$13,$14
- $73B0 DEFB $92,$12,$05,$06,$00,$06,$1C,$07
+ $73B0 DEFB $92,$12,$05,$06,$00,$06,$1C,$07 ; STAMP1 tile $12 at 5 positions
  $73B8 DEFB $15,$08,$04,$08,$1E
- $73BD DEFB $80
+ $73BD DEFB $80             ; END

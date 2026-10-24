@@ -1,2 +1,7 @@
-; Redraw cells: run length of each queued cell
-g$C300 DEFS $0100,$FF
+; Redraw cells: length of the run that starts at this cell
+;
+; One byte per queued cell, indexed like #R$C400 and #R$C500. Only the entry of the first cell of a run is meaningful:
+; it holds the number of cells in the run (#R$976B writes it, #R$95FF reads it). Observed after a frame: runs of 1 to
+; 7 cells.
+@label=RedrawLengths
+g$C300 DEFS $0100,$FF ;

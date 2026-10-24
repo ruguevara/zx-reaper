@@ -1,11 +1,22 @@
-; Wait for SPACE to be released (128K only: the RET here becomes CALL $85EE,
-; patched by $605F)
-c$A31E RET           ;
- $A31F DEFB $EE,$85  ;
-*$A321 HALT          ;
- $A322 LD A,($A2D2)  ;
+; Title: SPACE pressed, wait for it to be released (128K music only)
+;
+; Called from #R$A336 when SPACE is pressed on the title screen. On the 48K the first byte is a RET, so SPACE does
+; nothing. On the 128K the start-up code #R$605F turns the RET into CALL $85EE (the two bytes after it are that
+; address), which calls into the music bank at $CA8A; the routine then waits for the key to be released and calls
+; #R$85F3 (music bank routine at $C09D). What the two music calls do is Unknown (the 128K code was not run: the
+; simulator is 48K).
+; .
+; Hardware: 128K only: calls into the music player.
+;
+; O:A 0 (the key code is lost, so the caller's tests for C fail)
+@label=WaitSpaceRelease
+c$A31E RET           ; 48K: return; 128K: CALL $85EE (patched by #R$605F)
+ $A31F DEFB $EE,$85  ; operand of the patched CALL ($85EE)
+@label=WaitSpaceRelease_Loop
+*$A321 HALT          ; wait for a frame
+ $A322 LD A,($A2D2)  ; key code
  $A325 OR A          ;
  $A326 JR NZ,$A321   ;
- $A328 CALL $85F3    ;
+ $A328 CALL $85F3    ; 128K: music bank routine at $C09D
  $A32B XOR A         ;
  $A32C RET           ;

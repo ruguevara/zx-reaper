@@ -1,20 +1,31 @@
-; Routine at A29C
+; Find the first key held in the row buffer
 ;
-; Used by the routine at #R$A43D.
+; Scans the 8 half-rows of #R$A2D3 in order (port high bytes $FE, $FD, $FB, $F7, $EF, $DF, $BF, $7F) and in each row
+; the five key bits from bit 4 down to bit 0, and stops at the first key that is held (bit = 0). The caller (#R$A43D)
+; stores the result for the key redefinition (#R$A3B9). Note that #R$A304, which gives the key's code, scans each row
+; from bit 0 up, so with two keys held in one row the two routines can pick different keys.
+;
+; O:B Row index of the key (0-7), 0 when no key is held
+; O:C Bit mask of the key within its half-row ($10, 8, 4, 2 or 1), 0 when no key is held
+; O:HL Corrupted
+@label=FindPressedKey
 c$A29C LD HL,$A2D3   ;
- $A29F LD B,$08      ;
-*$A2A1 LD C,$10      ;
+@isub=LD B,KEY_ROWS
+ $A29F LD B,$08      ; row counter (counts down from 8)
+@label=FindPressedKey_Row
+*$A2A1 LD C,$10      ; start of a row: first mask $10
+@label=FindPressedKey_Bit
 *$A2A3 LD A,(HL)     ;
  $A2A4 AND C         ;
- $A2A5 CP $01        ;
+ $A2A5 CP $01        ; carry set when the key is held
  $A2A7 JR C,$A2B2    ;
- $A2A9 RRC C         ;
+ $A2A9 RRC C         ; next mask; carry out after $01
  $A2AB JR NC,$A2A3   ;
  $A2AD INC HL        ;
  $A2AE DJNZ $A2A1    ;
- $A2B0 LD C,B        ;
+ $A2B0 LD C,B        ; no key held: BC = 0
  $A2B1 RET           ;
-*$A2B2 LD A,$08      ;
+*$A2B2 LD A,$08      ; row index = 8 - counter
  $A2B4 SUB B         ;
  $A2B5 LD B,A        ;
  $A2B6 RET           ;

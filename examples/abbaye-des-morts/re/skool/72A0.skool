@@ -1,16 +1,24 @@
-; Room 1 script: A prayer of Hope
-b$72A0 DEFB $87,$01
- $72A2 DEFB $83,$F0,$82
- $72A5 DEFB $83,$0B,$83
- $72A8 DEFB $88,$02,$02,$06,$07,$0B,$0A
- $72AF DEFB $89,$00,$1E,$02,$16
- $72B4 DEFB $88,$02,$01,$7D,$80
- $72B9 DEFB $89,$04,$1E,$02,$04
- $72BE DEFB $98,$8A,$02,$13,$00,$09,$03,$12
+; Room script 1: A prayer of Hope
+;
+; Room 1: column 1, row 0 of the 5x5 map (left is room 0, right 2, up 21, down 6, counted modulo 25). Subscripts:
+; #R$82F0, #R$830B. No items.
+@label=RoomScript01
+b$72A0 DEFB $87,$01         ; ROOMNAME 1 "A prayer of Hope"
+ $72A2 DEFB $83 ; CALL ScriptRoomPanel
+@isub=DEFW ScriptRoomPanel
+ $72A3 DEFW $82F0
+ $72A5 DEFB $83 ; CALL ScriptSky
+@isub=DEFW ScriptSky
+ $72A6 DEFW $830B
+ $72A8 DEFB $88,$02,$02,$06,$07,$0B,$0A ; BLOCK 2x2: $06 $07 $0B $0A
+ $72AF DEFB $89,$00,$1E,$02,$16 ; TILEBLOCK row 0, col 30, 2x22
+ $72B4 DEFB $88,$02,$01,$7D,$80 ; BLOCK 2x1: $7D $80
+ $72B9 DEFB $89,$04,$1E,$02,$04 ; TILEBLOCK row 4, col 30, 2x4
+ $72BE DEFB $98,$8A,$02,$13,$00,$09,$03,$12 ; RECTS tile $8A, 2 rectangles
  $72C6 DEFB $00,$07,$01
- $72C9 DEFB $98,$89,$02,$10,$00,$04,$02,$10
+ $72C9 DEFB $98,$89,$02,$10,$00,$04,$02,$10 ; RECTS tile $89, 2 rectangles
  $72D1 DEFB $1D,$01,$06
- $72D4 DEFB $92,$89,$09,$11,$04,$11,$05,$12,$02,$12,$1C,$13,$08,$13,$1C,$14
+ $72D4 DEFB $92,$89,$09,$11,$04,$11,$05,$12,$02,$12,$1C,$13,$08,$13,$1C,$14 ; STAMP1 tile $89 at 9 positions
  $72E4 DEFB $09,$14,$1C,$15,$09
- $72E9 DEFB $92,$0C,$02,$00,$1F,$12,$1F
- $72F0 DEFB $80
+ $72E9 DEFB $92,$0C,$02,$00,$1F,$12,$1F ; STAMP1 tile $0C at 2 positions
+ $72F0 DEFB $80             ; END

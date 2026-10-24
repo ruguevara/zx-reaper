@@ -1,3 +1,7 @@
-; Routine at A5FC
-c$A5FC LD SP,$A5FC   ;
+; End of the object slots
+;
+; The handler word of the end mark at $C1F2. Loads SP with the value saved by #R$A5E9 (the operand of this instruction
+; is written by it) and returns to the caller of #R$A5E9.
+@label=EndOfSlots
+c$A5FC LD SP,$A5FC   ; operand = SP saved by #R$A5E9
  $A5FF RET           ;

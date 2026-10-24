@@ -1,13 +1,23 @@
-; Routine at A6BC
-c$A6BC POP HL        ;
- $A6BD JR NC,$A706   ;
- $A6BF BIT 7,(HL)    ;
+; Item action: arch from Underground river to Pestilent Beast (room 19)
+;
+; The blue arch of room 19 at row 15, column 21 with flag $8524. When Jean touches it (and its latch, bit 7 of the
+; flag, is clear) the latch of the other arch ($8523) is set, #R$8512/#R$8514 are set to the position of the room 10
+; arch (X $5C, Y $44), and #R$A6F2 enters room 10. The latch of the arch Jean arrives at stays set until he has walked
+; away from it (#R$A706), so he is not sent back at once.
+;
+; F Carry set when Jean's box overlaps the item's box
+; SP Slot address + 4 on entry: the next stack word is the flag pointer (the action pops it); see #R$A5E9 for the slot layout
+@label=ActionArchToBeast
+c$A6BC POP HL        ; flag pointer
+ $A6BD JR NC,$A706   ; not touching: release the latch
+ $A6BF BIT 7,(HL)    ; latched: Jean has just arrived here
  $A6C1 JR NZ,$A708   ;
- $A6C3 LD HL,$8523   ;
- $A6C6 SET 7,(HL)    ;
- $A6C8 LD HL,$5C00   ;
+ $A6C3 LD HL,$8523   ; latch of the arch in room 10
+ $A6C6 SET 7,(HL)    ; it is where Jean arrives
+ $A6C8 LD HL,$5C00   ; arrival position: X = $5C (column 23) ...
  $A6CB LD ($8512),HL ;
- $A6CE LD HL,$4400   ;
+ $A6CE LD HL,$4400   ; ... Y = $44 (row 17), 2-pixel units
  $A6D1 LD ($8514),HL ;
+@isub=LD A,ROOM_BEAST
  $A6D4 LD A,$0A      ;
  $A6D6 JR $A6F2      ;

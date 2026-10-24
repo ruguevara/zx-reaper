@@ -1,2 +1,11 @@
-; Pointer to the current entry of the object list at $5DC0
-g$BE56 DEFW $5DC0
+; Object list write pointer: where the next spawn request goes
+;
+; Address of the next free entry of the object list at $5DC0-$5DFF, which holds requests to create objects in the
+; slots at #R$C100. An entry is 4 bytes: word template address (the templates start at #R$BC92), byte y, byte x, the
+; position the object starts from, in 2-pixel units; the template adds its own offsets. The enemies that throw things
+; (#R$BA79, #R$BB57, and the routines at $B620, $B687, $B7C6, $B818 and $B8C5) build the entry in the four bytes at
+; $5DFC-$5DFF, copy it to this address, advance this pointer by 4 and add 1 to the count in #R$8552. Near the end of
+; every frame #R$A596 calls #R$8905 when the count is not zero: that resets this pointer to $5DC0, creates the objects
+; in free slots (#R$8A6E) and counts the entries down. The cutscene actor lists (#R$8870) use the same list.
+@label=ObjectListPtr
+g$BE56 DEFW $5DC0    ;

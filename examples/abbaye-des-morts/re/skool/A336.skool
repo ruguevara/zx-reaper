@@ -1,42 +1,79 @@
-; Routine at A336
-c$A336 CALL $A450    ;
-; This entry point is used by the routine at #R$85FC.
-*$A339 EI            ;
+; Title screen key loop and controls menu
+;
+; Entered from the start of the game #R$85FC at $A339 with the title screen on the screen (the script #R$A526 when a
+; game restarts after Game Over or the ending; the first time, start-up jumps to $8606 past that drawing and the
+; loading picture, which shows the same three prompts, stays); the interrupt runs #R$A43D, which keeps #R$A2D2 up to
+; date. It waits for no key to be held, then for a key: ENTER returns to the caller (the game starts), SPACE calls
+; #R$A31E (128K music only; the loading picture says "hold Space for info" but on the 48K nothing happens), C opens
+; the controls screen, anything else is ignored.
+; .
+; The controls screen: #R$A44D saves the middle of the screen and the attributes, then the scripts #R$A493, #R$A4DD
+; and (through #R$A47D) #R$A4B6 draw it: line 1 is the Kempston joystick (on or off), line 2 the keyboard with the
+; names of the keys, ENTER goes back to the title (the entry at $A336 restores the screen with #R$A450 and waits
+; again). 1 toggles the joystick (#R$A32D). 2 redefines the keys: it blanks the key-name buffer #R$A4F2, asks for
+; JUMP, CROUCH, LEFT and RIGHT in turn with #R$A3B9 (prompts at #R$A3A9), copies the JUMP pair into the fifth pair,
+; runs the cheat check #R$A422 and draws the controls screen again.
+; .
+; Hardware: waits with HALT for the frame interrupt; draws through the script interpreter #R$9D5F; keys come from the
+; interrupt routine #R$A43D.
+;
+; O:A $0D (ENTER) when the loop ends
+@label=TitleMenu
+c$A336 CALL $A450    ; restore the title screen (coming back from the controls screen)
+; Entry point used by #R$85FC when the title has just been drawn. Wait for all keys to be released.
+@label=TitleWaitKey
+*$A339 EI            ; interrupts on: the key code is updated by the frame routine
  $A33A HALT          ;
  $A33B LD A,($A2D2)  ;
  $A33E OR A          ;
  $A33F JR NZ,$A339   ;
+; Wait for a key: ENTER starts, SPACE (128K music), C controls.
+@label=TitleWaitKey_Loop
 *$A341 HALT          ;
  $A342 LD A,($A2D2)  ;
+@isub=CP KEYCODE_ENTER
  $A345 CP $0D        ;
  $A347 RET Z         ;
+@isub=CP CHAR_SPACE
  $A348 CP $20        ;
  $A34A CALL Z,$A31E  ;
- $A34D CP $43        ;
+@isub=CP KEYCODE_C
+ $A34D CP $43        ; C: controls
  $A34F JR NZ,$A341   ;
- $A351 CALL $A44D    ;
+ $A351 CALL $A44D    ; save the middle of the screen and the attributes
+; Draw the controls screen: background, then the keyboard line.
+@label=ShowControlsMenu
 *$A354 LD HL,$A493   ;
  $A357 CALL $9D5F    ;
  $A35A LD HL,$A4DD   ;
  $A35D CALL $9D5F    ;
-; This entry point is used by the routine at #R$A32D.
+; Entry point used by #R$A32D. Draw the Kempston line, then wait for no key and for a menu key.
+@label=ShowKempstonLine
 *$A360 CALL $A47D    ;
-*$A363 HALT          ;
+*$A363 HALT          ; wait until no key is held
  $A364 LD A,($A2D2)  ;
  $A367 OR A          ;
  $A368 JR NZ,$A363   ;
-*$A36A HALT          ;
+@label=ControlsMenuLoop
+*$A36A HALT          ; wait for a key
  $A36B LD A,($A2D2)  ;
- $A36E CP $0D        ;
+@isub=CP KEYCODE_ENTER
+ $A36E CP $0D        ; ENTER: back to the title
  $A370 JR Z,$A336    ;
- $A372 CP $31        ;
+@isub=CP KEYCODE_1
+ $A372 CP $31        ; 1: Kempston on/off
  $A374 JR Z,$A32D    ;
- $A376 CP $32        ;
+@isub=CP KEYCODE_2
+ $A376 CP $32        ; 2: redefine the keys
  $A378 JR NZ,$A36A   ;
+; Redefine the keys: blank the 8-character key-name buffer, then ask for JUMP, CROUCH, LEFT and RIGHT in turn.
+@label=RedefineKeys
  $A37A LD DE,$A4F2   ;
  $A37D LD H,D        ;
  $A37E LD L,E        ;
- $A37F LD BC,$0820   ;
+@isub=LD BC,KEY_NAMES_LEN*256+CHAR_SPACE
+ $A37F LD BC,$0820   ; B = 8 characters, C = space
+@label=RedefineKeys_Blank
 *$A382 LD (HL),C     ;
  $A383 INC HL        ;
  $A384 DJNZ $A382    ;
@@ -48,7 +85,7 @@ c$A336 CALL $A450    ;
  $A395 CALL $A3B9    ;
  $A398 LD HL,$A3B5   ;
  $A39B CALL $A3B9    ;
- $A39E LD HL,($A2C5) ;
+ $A39E LD HL,($A2C5) ; the fifth pair (JUMP again) is a copy of the JUMP pair
  $A3A1 LD ($A2C7),HL ;
- $A3A4 CALL $A422    ;
+ $A3A4 CALL $A422    ; cheat check: do the keys spell RAGE?
  $A3A7 JR $A354      ;

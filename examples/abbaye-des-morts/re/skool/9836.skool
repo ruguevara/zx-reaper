@@ -1,10 +1,40 @@
-; Routine at 9836
+; Queue a masked sprite: clip it, flag its cells, add a job to the draw queue
+;
+; A routine of the frame call list. The frame code appends draw commands (a routine address and 8 bytes of parameters,
+; see #R$ACD1) to the call list at $BE5A, and the routine at $BDDB runs the list by RET with SP at its start. So this
+; routine is entered by a RET and finds its parameters on the stack: it pops all eight bytes and ends with a RET into
+; the next entry of the list (the early RETs taken when nothing is visible do the same).
+; .
+; The sprite is clipped to the room area. x is a byte column (0-31), y a row of 2 pixels (0-87, 4 per character row),
+; the height is in 2-pixel units and the width in bytes. An x of $20 or more, or a y of $58 or more, is a negative
+; position (the sprite starts left of or above the room): the hidden columns or rows are skipped in the graphics and
+; the size is cut; a sprite wholly outside the room is dropped. Then each character cell the sprite covers gets bit 6
+; set and bit 7 clear in the tile flag map at $5E00 (one byte per cell, 32 per row, 3 pages above the tile map).
+; #R$97B7 takes cells with either bit into the redraw run list of the frame and #R$9719 then turns bit 6 into bit 7, so
+; that the next frame redraws the cell from the tile map and so erases the sprite from its old place (observed on the
+; monk's cell: $80 -> $C0 -> $40 here, $40 -> $00 -> $80 in #R$9719). The clipped values go into the job template
+; #R$98D9, which #R$98B1 appends to the draw queue at $C000; #R$9972 draws the sprite into the redraw cell buffers
+; when #R$97B7 runs the queue.
+; .
+; The graphics are in the sprite sheet (#R$D700): a 256-byte page per pixel row and one byte per column, so the
+; graphics address has the pixel row in D and the first column in E.
+; .
+; Hardware: none; it only changes the tile flag map in RAM. The screen is written later, by #R$95FF.
+;
+; HL Popped from the call list: L = y in 2-pixel units, H = x byte column
+; DE Popped: address of the graphics in the sprite sheet (D = pixel row, E = column)
+; BC Popped: C = width in bytes (1-5), B = height in 2-pixel units
+; AF Popped: A = attribute of the sprite's cells (F unused)
+@label=QueueSprite
 c$9836 POP HL        ;
  $9837 POP DE        ;
  $9838 POP BC        ;
  $9839 POP AF        ;
- $983A LD ($98E3),A  ;
+ $983A LD ($98E3),A  ; attribute
+; Clip horizontally. H >= $20 means the sprite starts left of the room: if some of it shows, shorten the width,
+; skip the hidden columns of the graphics (E = E - H) and start at column 0.
  $983D LD A,H        ;
+@isub=CP SCREEN_COLS
  $983E CP $20        ;
  $9840 JR C,$984D    ;
  $9842 ADD A,C       ;
@@ -16,13 +46,19 @@ c$9836 POP HL        ;
  $9848 LD E,A        ;
  $9849 LD H,$00      ;
  $984B JR $9856      ;
+; H < $20: if the sprite runs past column 31, shorten the width.
 *$984D ADD A,C       ;
+@isub=SUB SCREEN_COLS
  $984E SUB $20       ;
  $9850 JR C,$9856    ;
  $9852 NEG           ;
  $9854 ADD A,C       ;
  $9855 LD C,A        ;
+; Clip vertically the same way: L >= $58 means the sprite starts above the room (D skips 2 pixel rows of graphics
+; per unit); otherwise cut the height at the bottom.
+@label=QueueSprite_ClipY
 *$9856 LD A,L        ;
+@isub=CP ROOM_HEIGHT_2PX
  $9857 CP $58        ;
  $9859 JR C,$9867    ;
  $985B ADD A,B       ;
@@ -36,21 +72,27 @@ c$9836 POP HL        ;
  $9863 LD L,$00      ;
  $9865 JR $9870      ;
 *$9867 ADD A,B       ;
+@isub=SUB ROOM_HEIGHT_2PX
  $9868 SUB $58       ;
  $986A JR C,$9870    ;
  $986C NEG           ;
  $986E ADD A,B       ;
  $986F LD B,A        ;
-*$9870 LD ($98DB),DE ;
+; Fill the job template: graphics address, height, offset inside the cell row (y mod 4), cell rows covered
+; (rounded up), cell row (y / 4) and column, width.
+@label=QueueSprite_Fill
+*$9870 LD ($98DB),DE ; graphics address
  $9874 LD A,B        ;
- $9875 LD ($98E1),A  ;
+ $9875 LD ($98E1),A  ; height
  $9878 LD A,L        ;
+@isub=AND SUBROW_MASK
  $9879 AND $03       ;
- $987B LD ($98E0),A  ;
+ $987B LD ($98E0),A  ; offset of the first row inside its cell
  $987E ADD A,B       ;
  $987F LD B,A        ;
  $9880 SRL B         ;
  $9882 SRL B         ;
+@isub=AND SUBROW_MASK
  $9884 AND $03       ;
  $9886 JR Z,$9889    ;
  $9888 INC B         ;
@@ -58,25 +100,34 @@ c$9836 POP HL        ;
  $988B SRL L         ;
  $988D LD ($98DE),HL ;
  $9890 LD A,B        ;
- $9891 LD ($98DD),A  ;
+ $9891 LD ($98DD),A  ; cell rows covered
  $9894 LD A,C        ;
- $9895 LD ($98E2),A  ;
+ $9895 LD ($98E2),A  ; width
+; Flag the covered cells: HL = address of the top-left cell in the tile flag map.
  $9898 CALL $A21E    ;
  $989B LD A,L        ;
+@label=QueueSprite_MarkRow
 *$989C PUSH BC       ;
  $989D LD B,C        ;
-*$989E SET 6,(HL)    ;
+@label=QueueSprite_MarkCell
+*$989E SET 6,(HL)    ; bit 6 = a sprite is on this cell, bit 7 = already in this frame's redraw
  $98A0 RES 7,(HL)    ;
  $98A2 INC L         ;
  $98A3 DJNZ $989E    ;
  $98A5 POP BC        ;
+@isub=ADD A,SCREEN_COLS
  $98A6 ADD A,$20     ;
  $98A8 LD L,A        ;
  $98A9 JR NC,$98AC   ;
  $98AB INC H         ;
 *$98AC DJNZ $989C    ;
+; Append the job template to the draw queue.
  $98AE LD HL,$98D9   ;
-; This entry point is used by the routine at #R$97FD.
+; Append the 16 bytes at HL to the draw queue; also entered from #R$97FD with its own template. A template of less
+; than 16 bytes brings along the code bytes after it, which nobody uses. The queue tail is the operand of the first
+; instruction (#R$97B7 resets it to $C000 every frame). There is no check for a full queue (16 jobs): the 17th
+; would be copied over the object slots at $C100.
+@label=AddQueueJob
 *$98B1 LD DE,$C000   ;
  $98B4 LDI           ;
  $98B6 LDI           ;
@@ -94,5 +145,6 @@ c$9836 POP HL        ;
  $98CE LDI           ;
  $98D0 LDI           ;
  $98D2 LDI           ;
- $98D4 LD ($98B2),DE ;
+@isub=LD (AddQueueJob+1),DE
+ $98D4 LD ($98B2),DE ; queue tail moves on
  $98D8 RET           ;

@@ -1,2 +1,7 @@
-; Interrupt stack (SP=$8585 in the handler)
+; Interrupt stack: 38 bytes below $8585
+;
+; The interrupt handler #R$8585 switches SP to $8585 and pushes all the registers here (IX, HL, AF, BC, DE and the
+; alternate set: 20 bytes), so the routine it calls runs on this stack and the game stacks are untouched. The stack
+; ends at $8585, where the handler's code begins. The image holds $FF.
+@label=InterruptStack
 b$855F DEFS $26,$FF

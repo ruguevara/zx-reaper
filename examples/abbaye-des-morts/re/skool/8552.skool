@@ -1,2 +1,9 @@
-; Cutscene actor count
+; Objects waiting to be spawned
+;
+; Count of the 4-byte records (template address, x, y) queued in the object list that starts at $5DC0 (pointer
+; #R$BE56) and have not yet been turned into live objects. #R$8870 sets it from the actor lists of the cutscenes and
+; the enemies and entities that shoot or split add one with the record they append (#R$B620, #R$BB57, ...); the frame
+; update #R$A596 calls #R$8905 while it is nonzero, and that routine spawns the records into free object slots at
+; $C100 and decrements it (it is cleared at once when no slot is free).
+@label=SpawnQueueCount
 g$8552 DEFB $00

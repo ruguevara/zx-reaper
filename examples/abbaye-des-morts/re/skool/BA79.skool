@@ -1,28 +1,46 @@
-; Routine at BA79
-c$BA79 EXX           ;
- $BA7A LD A,C        ;
+@equ=SPAWN_TEMPLATE=$5DFC
+; Death: throw a scythe every 50 frames, then pick the frame graphics and queue the sprite
+;
+; Continuation of #R$BA54 after the animation step #R$A883 (SP is at slot+18 and E holds the frame number). BC' holds
+; the timer of #R$BA15 (C' is its counter after this frame's decrement). When C' is exactly 20 Death throws: sound
+; effect 7 is requested, one of the two scythe templates (#R$BD46 flying left, #R$BD58 flying right, chosen by bit 0
+; of the Z80's R register) goes into the word at SPAWN_TEMPLATE, which together with the start position at $5DFE is
+; appended as a four-byte entry to the object list at $5DC0 (the pointer is #R$BE56) and the pending count in #R$8552
+; goes up; #R$A596 spawns the scythe at the end of the frame (#R$8905). In every case it jumps to IY, which is #R$B3D2
+; or #R$B3D4: they pick the graphics address of the frame from the table at HL and queue the draw command.
+; .
+; Hardware: reads the R register as a random number.
+;
+; C' Timer counter of Death (50 down to 1)
+; HL Sprite block + 9, passed on to IY
+; IY Where to continue: #R$B3D2 or #R$B3D4
+@label=ThrowDeathScythe
+c$BA79 EXX           ; switch to the alternate registers
+ $BA7A LD A,C        ; A = timer counter (C')
  $BA7B EXX           ;
- $BA7C CP $14        ;
+ $BA7C CP $14        ; throw when it is exactly 20 (the Z flag is kept to $BA81)
  $BA7E JR NC,$BA81   ;
- $BA80 LD E,D        ;
+ $BA80 LD E,D        ; no effect (E is not used again)
 *$BA81 JR NZ,$BAAF   ;
- $BA83 LD E,D        ;
+ $BA83 LD E,D        ; no effect either
  $BA84 EXX           ;
- $BA85 LD A,$07      ;
+@isub=LD A,SFX_ENEMY_SHOT
+ $BA85 LD A,$07      ; sound effect
  $BA87 LD ($854F),A  ;
- $BA8A LD HL,$BD46   ;
- $BA8D LD DE,$BD58   ;
- $BA90 LD A,R        ;
+ $BA8A LD HL,$BD46   ; scythe flying left
+ $BA8D LD DE,$BD58   ; scythe flying right
+ $BA90 LD A,R        ; random bit
  $BA92 AND $01       ;
  $BA94 JR NZ,$BA97   ;
  $BA96 EX DE,HL      ;
-*$BA97 LD ($5DFC),HL ;
- $BA9A LD HL,$8552   ;
+*$BA97 LD ($5DFC),HL ; template address of the new object
+ $BA9A LD HL,$8552   ; one more spawn pending for #R$8905
  $BA9D INC (HL)      ;
  $BA9E LD HL,$5DFC   ;
- $BAA1 LD DE,($BE56) ;
- $BAA5 LD BC,$0004   ;
+ $BAA1 LD DE,($BE56) ; end of the object list
+@isub=LD BC,OBJECT_ENTRY_SIZE
+ $BAA5 LD BC,$0004   ; one entry: template, start position
  $BAA8 LDIR          ;
- $BAAA LD ($BE56),DE ;
+ $BAAA LD ($BE56),DE ; object list pointer moves on
  $BAAE EXX           ;
-*$BAAF JP (IY)       ;
+*$BAAF JP (IY)       ; continue at #R$B3D2 or #R$B3D4
