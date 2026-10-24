@@ -94,10 +94,14 @@ of its run.
    ([comparison](examples/the-hobbit/re/comparison.md)). The errors are
    listed but not corrected in the example; the
    [run report](docs/the-hobbit-run.md) shows what each one changed in the
-   harness. A second session after the full run, with a prompt such as
-   "Review the sources, logic, messages, sprites and graphics and rename
-   variables, fields, routines and so on to more accurate names", would fix
-   the shortcomings above in this run.
+   harness. The naming slips are cheap to fix after the fact: a second
+   session with a prompt such as "Review the sources, logic, messages,
+   sprites and graphics and rename variables, fields, routines and so on to
+   more accurate names" should correct them. It has not been run, since the
+   example stays as the run left it, and `zx-annotate` now has a rule
+   against each slip. The missed bugs are another matter: finding every bug
+   in a program is an open problem even given a specification, and the
+   references together missed the 14 that this run found.
 
 Current limits: the 48K ZX Spectrum. AY music and effects (128K) come later,
 through [pyayay](https://github.com/ruguevara/pyayay) (Ayumi). Out of scope:
