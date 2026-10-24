@@ -1,0 +1,23 @@
+; Title: wait for ENTER, SPACE or C
+;
+; Entry point used by #R$85FC when the title has just been drawn. Wait for all keys to be released.
+@label=TitleWaitKey
+c$A339 EI            ; interrupts on: the key code is updated by the frame routine
+ $A33A HALT          ;
+ $A33B LD A,($A2D2)  ;
+ $A33E OR A          ;
+ $A33F JR NZ,$A339   ;
+; Wait for a key: ENTER starts, SPACE (128K music), C controls.
+@label=TitleWaitKey_Loop
+*$A341 HALT          ;
+ $A342 LD A,($A2D2)  ;
+@isub=CP KEYCODE_ENTER
+ $A345 CP $0D        ;
+ $A347 RET Z         ;
+@isub=CP CHAR_SPACE
+ $A348 CP $20        ;
+ $A34A CALL Z,$A31E  ;
+@isub=CP KEYCODE_C
+ $A34D CP $43        ; C: controls
+ $A34F JR NZ,$A341   ;
+ $A351 CALL $A44D    ; save the middle of the screen and the attributes

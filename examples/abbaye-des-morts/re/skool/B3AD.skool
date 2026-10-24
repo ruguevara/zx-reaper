@@ -1,0 +1,32 @@
+; Read the sprite description and animate (facing right or down)
+;
+; Entry point used through #R$A851 by #R$B365, #R$B2F9, #R$B344 and #R$B436 (creatures facing right or down) and by this
+; routine. Like #R$B2D4, but picks the second frame table. SP is at slot+$10.
+;
+; SP Slot address + $10
+@label=ReadSpriteRight
+c$B3AD POP HL        ; address of the sprite description
+ $B3AE LD A,(HL)     ; attribute
+ $B3AF INC HL        ;
+ $B3B0 LD ($ACDA),A  ; into the main draw command
+ $B3B3 LD C,(HL)     ; BC = shift table
+ $B3B4 INC HL        ;
+ $B3B5 LD B,(HL)     ;
+ $B3B6 INC HL        ;
+ $B3B7 EX DE,HL      ; DE = description at its height byte
+ $B3B8 EX AF,AF'     ; A = x
+ $B3B9 AND $03       ; shift phase 0-3
+ $B3BB ADD A,A       ; 2 bytes per phase
+ $B3BC LD L,A        ;
+ $B3BD LD H,$00      ;
+ $B3BF ADD HL,BC     ; entry of the shift table
+ $B3C0 LD A,(HL)     ; byte offset of this phase
+ $B3C1 EX AF,AF'     ; kept in A' for #R$B3D8
+ $B3C2 INC HL        ;
+ $B3C3 LD C,(HL)     ; width
+ $B3C4 EX DE,HL      ; HL = height byte
+ $B3C5 LD B,(HL)     ; height; HL = the frame table pointer
+ $B3C6 INC HL        ;
+ $B3C7 LD ($ACD7),BC ; draw command: width, height
+ $B3CB LD IX,$B3D2   ; the second frame table: #R$B3D2 skips the first
+ $B3CF JP $A883      ; #R$A883 steps the animation, then jumps to IX

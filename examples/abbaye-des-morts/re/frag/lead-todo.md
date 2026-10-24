@@ -130,3 +130,21 @@
   ignored in the intro; $861E redundant.
 - Timing (F103): logic once per interrupt; the foreground draws; a busy
   frame overruns and its sprites are not queued (586 draws / 800 frames).
+- W3: $A851 block bytes +E/+F are the far corner relative to the position,
+  not a size: handler docs saying "hit box size" are wrong when the offset
+  is not 0. $B04C `DEFW $93E5` -> BehaviourCrusader+5; $BC92 templates can
+  use SpriteBlock* labels ($94F9, $9595, $95DA). Text typos in the game:
+  "Lanquedoc", "Gloomy tunels". Bugs: redraw index and $C200 list size
+  unchecked; $97B7 EXX never undone (harmless); $976B SP in tile bitmaps.
+- W9 splits: $B1D4 "Entity handler: crusader following its path script",
+  $B1F3 "Take the next path command", $B18E "Common tail of the crusader
+  jumps".
+- W9: PackedSet descriptions wrong: a clear flag bit repeats the previous
+  byte of the column (0 only at the top) (F113). Stores into the effects:
+  $A168 -> `@isub=LD (SmcWaterAttr+1),A` etc.; `LD ($AD88),A` -> `LD
+  (DrawWaterReflection),A`; $A1B9 -> AnimateBloodTiles; $A1BE -> ShowCrossRing.
+- W9 bugs: path scripts have no terminator (room 25 runs into $B236 after
+  command 5, inferred); spawner reload byte used only once (then 40); the
+  spawner reloads even without a free slot; set 6 width 5 with 4 columns;
+  $AF7B/$AFC9 advance E without carry. Main loop runs a pass per frame in
+  room 5, one per 1.7-2.5 frames in rooms 22, 24.

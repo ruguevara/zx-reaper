@@ -1,0 +1,27 @@
+; Controls screen: draw it and run its menu
+;
+; Draw the controls screen: background, then the keyboard line.
+@label=ShowControlsMenu
+c$A354 LD HL,$A493   ;
+ $A357 CALL $9D5F    ;
+ $A35A LD HL,$A4DD   ;
+ $A35D CALL $9D5F    ;
+; Entry point used by #R$A32D. Draw the Kempston line, then wait for no key and for a menu key.
+@label=ShowKempstonLine
+*$A360 CALL $A47D    ;
+*$A363 HALT          ; wait until no key is held
+ $A364 LD A,($A2D2)  ;
+ $A367 OR A          ;
+ $A368 JR NZ,$A363   ;
+@label=ControlsMenuLoop
+*$A36A HALT          ; wait for a key
+ $A36B LD A,($A2D2)  ;
+@isub=CP KEYCODE_ENTER
+ $A36E CP $0D        ; ENTER: back to the title
+ $A370 JR Z,$A336    ;
+@isub=CP KEYCODE_1
+ $A372 CP $31        ; 1: Kempston on/off
+ $A374 JR Z,$A32D    ;
+@isub=CP KEYCODE_2
+ $A376 CP $32        ; 2: redefine the keys
+ $A378 JR NZ,$A36A   ;

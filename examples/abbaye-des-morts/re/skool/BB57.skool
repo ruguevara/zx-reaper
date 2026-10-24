@@ -150,6 +150,3 @@ c$BB57 LD A,($8521)  ; flag of the cross item in room 24 ($FF once taken)
  $BC19 LDIR          ;
  $BC1B LD ($BE56),DE ; object list pointer moves on
  $BC1F EXX           ;
-@label=UpdateSatan_Sprite
-*$BC20 LD HL,$BC26   ; hit test, then continue at #R$BC26
- $BC23 JP $A851      ;

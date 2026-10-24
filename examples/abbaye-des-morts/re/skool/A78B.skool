@@ -1,0 +1,14 @@
+; Take a cross
+;
+; Entry point used by #R$A777: Jean takes the cross. The flag becomes $FF (never created again), the status-bar
+; crosses redraw #R$9C1B is armed (a RET until a 0 is written to it), the number of crosses at $854D goes up by one,
+; then the slot is freed with sound effect 5.
+@label=TakeCross
+c$A78B POP HL        ; flag pointer
+@isub=LD (HL),ITEM_GONE
+ $A78C LD (HL),$FF   ;
+ $A78E LD HL,$9C1B   ; crosses redraw: NOP
+ $A791 LD (HL),$00   ;
+ $A793 LD HL,$854D   ; crosses collected + 1
+ $A796 INC (HL)      ;
+ $A797 JR $A71F      ; sound, free the slot

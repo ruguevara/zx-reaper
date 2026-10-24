@@ -1,17 +1,19 @@
-; Behaviour block: Satan (kind 17, room 24)
+; Behaviour block: Satan, and the sprite block of the smoke (kind 17, room 24)
 ;
-; Used by Satan (attribute $42), a two-part sprite: the upper half 4 bytes wide and the lower half. After the 5 header
-; bytes (hit box 30 x 46 pixels, #R$BB57 describes the slot): attribute, width in bytes (4), height in 2-pixel units
-; (12), four sprite addresses of the body, then the attribute of the shots and four sprite addresses of the shots.
+; Used by Satan (attribute $42, #R$BB57), a two-part sprite: the upper half 4 bytes wide and the lower half. After the 5
+; header bytes (hit box 30 x 46 pixels): attribute, width in bytes (4), height in 2-pixel units (12), four sprite
+; addresses of the body. Then the sprite block of the cloud of smoke that replaces Satan (#R$95F6, used by the template
+; #R$BD6A): attribute and four sprite addresses.
 @label=BehaviourSatan
 b$95E6 DEFB $00,$00,$17,$0F,$02  ; hit box top, left, bottom, right (2-pixel units); slot +$15 (Unknown)
  $95EB DEFB $42,$04,$0C  ; attribute, width (bytes), height (2-pixel units)
- $95EE DEFW $D78F    ; body sprite $D78F
- $95F0 DEFW $D796    ; body sprite $D796
- $95F2 DEFW $D793    ; body sprite $D793
- $95F4 DEFW $D79A    ; body sprite $D79A
- $95F6 DEFB $47      ; attribute of the shots
- $95F7 DEFW $D79D    ; shot sprite $D79D
- $95F9 DEFW $D7A5    ; shot sprite $D7A5
- $95FB DEFW $D7A1    ; shot sprite $D7A1
- $95FD DEFW $D7A9    ; shot sprite $D7A9
+ $95EE DEFW $D78F    ; body sprite
+ $95F0 DEFW $D796    ; body sprite
+ $95F2 DEFW $D793    ; body sprite
+ $95F4 DEFW $D79A    ; body sprite
+@label=SpriteBlockSmoke
+ $95F6 DEFB $47      ; smoke: attribute
+ $95F7 DEFW $D79D    ; sprite
+ $95F9 DEFW $D7A5    ; sprite
+ $95FB DEFW $D7A1    ; sprite
+ $95FD DEFW $D7A9    ; sprite

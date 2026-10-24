@@ -24,24 +24,3 @@ c$A851 LD ($A881),HL ; continuation address
  $A859 LD B,H        ; BC = maximum corner
  $A85A LD C,L        ;
  $A85B LD IX,$A87A   ; continue at #R$A87A after the test
-; Entry point of #R$A600, #R$A822 and #R$B665 (which load IX themselves): the overlap test. Compares the box (D,
-; E)..(B, C) with the player box #R$8516 (min x, max x, min y, max y of Jean) and jumps to IX with carry set when they
-; overlap, clear when not.
-@label=OverlapTest
-*$A85F LD HL,($8516) ; H = player min x, L = player max x
- $A862 LD A,B        ; entity max x below the player min x: no
- $A863 CP H          ;
- $A864 JR C,$A877    ; no
- $A866 LD A,D        ; entity min x not below the player max x: no
- $A867 CP L          ;
- $A868 JR NC,$A877   ; no
- $A86A LD HL,($8518) ; H = player min y, L = player max y
- $A86D LD A,C        ; entity max y below the player min y: no
- $A86E CP H          ;
- $A86F JR C,$A877    ; no
- $A871 LD A,E        ; entity min y not below the player max y: no
- $A872 CP L          ;
- $A873 JR NC,$A877   ; no
- $A875 JP (IX)       ; overlap: carry is set by the last CP
-*$A877 OR A          ; no overlap: carry clear
- $A878 JP (IX)       ;

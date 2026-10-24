@@ -41,15 +41,3 @@ c$B5EB POP BC        ; +2, not used
  $B60A JR C,$B611    ; monk on the left: keep left
  $B60C EX DE,HL      ; facing right: HL' = ArrowRightTemplate
  $B60D LD IY,$B3D2   ; the second frame table
-; Common part of the archer and the stone head of rooms 20 and 22 (#R$B5D6 jumps here). HL' = address of the arrow
-; template, IY = #R$B3D4 or #R$B3D2 (see above), main HL = x (H) and y (L), SPAWN_POSITION already set, SP at slot+10
-; with the hit box words next. Makes the position of the sprite draw command (#R$ACD1: y, x/4), then tests the shooter's
-; hit box against the monk (#R$A851), which continues at #R$B620.
-@label=UpdateShooter_Common
-*$B611 EXX           ; back to the main set: HL = x, y
- $B612 SRA H         ; x / 4 = byte column
- $B614 SRA H         ;
- $B616 LD ($ACD3),HL ; position of the draw command: y, byte column
- $B619 POP HL        ; +$A, dropped
- $B61A LD HL,$B620   ; continue after the hit test
- $B61D JP $A851      ; hit test: sets the hit flag when the monk touches the box

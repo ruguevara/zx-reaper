@@ -1,0 +1,18 @@
+; Select an entity's frame
+;
+; Entry point used by #R$B687, #R$B880 and #R$B9F4, which have their own frame table in HL: HL = frame table, E = frame number,
+; A' = shift byte offset.
+;
+; HL Frame table
+; E Frame number
+; A' Shift byte offset
+@label=SelectFrame
+c$B3D8 LD D,$00      ; DE = frame number
+ $B3DA ADD HL,DE     ; HL = address of the frame word
+ $B3DB ADD HL,DE     ;
+ $B3DC EX AF,AF'     ; A = shift byte offset
+ $B3DD ADD A,(HL)    ; add the low byte of the frame address
+ $B3DE INC HL        ;
+ $B3DF LD H,(HL)     ; H = sprite sheet page of the frame
+ $B3E0 LD L,A        ;
+ $B3E1 LD ($ACD5),HL ; draw command: graphics address

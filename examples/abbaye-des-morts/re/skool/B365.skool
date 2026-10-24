@@ -33,18 +33,3 @@ c$B365 POP BC        ; speed
  $B37D POP HL        ; y (8.8)
  $B37E POP BC        ; skip the unused word at +$A
  $B37F LD E,H        ; E = y
-; Entry point used by #R$B344 and #R$B436 (movers whose sprite faces right or down): D = x, E = y, H = y. Puts the
-; position into the draw command and goes on to the hit box test with the second frame table.
-@label=PlaceEntityRight
-*$B380 LD L,H        ; L = y
- $B381 LD H,D        ; H = x
- $B382 LD A,H        ; A = x in 2-pixel units
- $B383 EX AF,AF'     ; kept in A': its low two bits are the shift phase
- $B384 SRA H         ; x / 4: byte column
- $B386 SRA H         ;
- $B388 LD ($ACD3),HL ; draw command position: (y, x/4)
-; Entry point used by #R$B2F9: the position is already in the draw command. D = x, E = y, SP at slot+$C (the next words
-; are the hit box). Tests the hit box against Jean and continues at #R$B3AD.
-@label=TestEntityHitRight
-*$B38B LD HL,$B3AD   ;
- $B38E JP $A851      ; #R$A851 tests the hit box, then jumps to the address in HL

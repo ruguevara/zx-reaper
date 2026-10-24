@@ -1,38 +1,46 @@
-; Behaviour block: the fire breath of the Pestilent Beast (kind 15, room 10)
+; Behaviour block: the fire breath of the Pestilent Beast, and the sprite blocks of the flames and the ending (kind 15)
 ;
-; Used by the fire breath of the Beast (attribute $42): a red jet of two sprites, one under the other, that comes down
-; from the mouth for the last 38 frames of a 110-frame cycle and kills Jean on contact; at the end of the cycle
-; #R$B8C5 makes the two flames of #R$BD22 and #R$BD34 (hit box 46 x 14 pixels). After the 5 header bytes: attribute,
-; width in bytes, height in 2-pixel units, and the four sprite addresses of the jet (two frames of each of the two
-; sprites). Five groups of (attribute, shift table #R$AC9F, height, sprite addresses) follow, the last four with the
-; sprites of the monk and of the crusaders: Unknown whether anything reads them (TODO).
+; Used by the fire breath of the Beast of room 10 (attribute $42, #R$B8C5): a red jet of two sprites, one under the
+; other, that comes down from the mouth for the last 38 frames of a 110-frame cycle and kills Jean on contact (hit box 46 x
+; 14 pixels). After the 5 header bytes: attribute, width in bytes, height in 2-pixel units and the four sprite addresses
+; of the jet (two frames of each of the two sprites).
+; .
+; The rest of the entry holds sprite blocks (attribute, shift table #R$AC9F, height, sprite addresses) that the templates
+; at #R$BC92 point at: #R$9595 the flames (two frames: the flames of the Beast #R$BD22 and #R$BD34 and the flames of the
+; pyre), #R$959D the monk of the first scene of the ending, #R$95A5 the monk on the pyre, #R$95AD and #R$95B3 the
+; crusaders at the pyre (right and left).
 @label=BehaviourBeastFire
 b$9585 DEFB $00,$00,$17,$07,$02  ; hit box top, left, bottom, right (2-pixel units); slot +$15 (Unknown)
  $958A DEFB $42,$02,$0C  ; attribute, width (bytes), height (2-pixel units)
- $958D DEFW $D768    ; sprite $D768
- $958F DEFW $D76D    ; sprite $D76D
- $9591 DEFW $D76A    ; sprite $D76A
- $9593 DEFW $D76F    ; sprite $D76F
- $9595 DEFB $42      ; group 1: attribute
+ $958D DEFW $D768    ; jet, upper sprite, frame 0
+ $958F DEFW $D76D    ; jet, upper sprite, frame 1
+ $9591 DEFW $D76A    ; jet, lower sprite, frame 0
+ $9593 DEFW $D76F    ; jet, lower sprite, frame 1
+@label=SpriteBlockFlame
+ $9595 DEFB $42      ; flame: attribute
  $9596 DEFW $AC9F    ; shift table
  $9598 DEFB $04      ; height
- $9599 DEFW $EF40    ; sprite $EF40
- $959B DEFW $F740    ; sprite $F740
- $959D DEFB $46      ; group 2: attribute
+ $9599 DEFW $EF40    ; flame frame 0
+ $959B DEFW $F740    ; flame frame 1
+@label=SpriteBlockEndingMonk
+ $959D DEFB $46      ; monk of the first ending scene: attribute
  $959E DEFW $AC9F    ; shift table
  $95A0 DEFB $0C      ; height
- $95A1 DEFW $D700    ; sprite $D700 (monk)
- $95A3 DEFW $D721    ; sprite $D721 (monk)
- $95A5 DEFB $46      ; group 3: attribute
+ $95A1 DEFW $D700    ; sprite (standing, facing left)
+ $95A3 DEFW $D721    ; sprite (standing, facing right)
+@label=SpriteBlockPyreMonk
+ $95A5 DEFB $46      ; monk on the pyre: attribute
  $95A6 DEFW $AC9F    ; shift table
  $95A8 DEFB $0C      ; height
- $95A9 DEFW $D716    ; sprite $D716 (monk)
- $95AB DEFW $D737    ; sprite $D737 (monk)
- $95AD DEFB $45      ; group 4: attribute
+ $95A9 DEFW $D716    ; sprite
+ $95AB DEFW $D737    ; sprite
+@label=SpriteBlockPyreCrusaderR
+ $95AD DEFB $45      ; crusader right of the pyre: attribute
  $95AE DEFW $AC9F    ; shift table
  $95B0 DEFB $0C      ; height
- $95B1 DEFW $D76E    ; sprite $D76E
- $95B3 DEFB $45      ; group 5: attribute
+ $95B1 DEFW $D76E    ; sprite
+@label=SpriteBlockPyreCrusaderL
+ $95B3 DEFB $45      ; crusader left of the pyre: attribute
  $95B4 DEFW $AC9F    ; shift table
  $95B6 DEFB $0C      ; height
- $95B7 DEFW $D784    ; sprite $D784
+ $95B7 DEFW $D784    ; sprite

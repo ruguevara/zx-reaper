@@ -25,23 +25,3 @@ c$B3D2 INC HL        ; skip the pointer of the first frame table
  $B3D5 INC HL        ;
  $B3D6 LD H,(HL)     ;
  $B3D7 LD L,A        ;
-; Entry point used by #R$B687, #R$B880 and #R$B9F4, which have their own frame table in HL: HL = frame table, E = frame number,
-; A' = shift byte offset.
-@label=SelectFrame
-*$B3D8 LD D,$00      ; DE = frame number
- $B3DA ADD HL,DE     ; HL = address of the frame word
- $B3DB ADD HL,DE     ;
- $B3DC EX AF,AF'     ; A = shift byte offset
- $B3DD ADD A,(HL)    ; add the low byte of the frame address
- $B3DE INC HL        ;
- $B3DF LD H,(HL)     ; H = sprite sheet page of the frame
- $B3E0 LD L,A        ;
- $B3E1 LD ($ACD5),HL ; draw command: graphics address
-; Entry point used by #R$B730 and #R$B77F, which have set the graphics address themselves: queue the main draw command.
-@label=QueueEntitySprite
-*$B3E4 LD A,($AA1F)  ; the frame list is being run?
- $B3E7 OR A          ;
- $B3E8 JR NZ,$B41F   ; yes: do not queue, go on with the next slot
- $B3EA LD HL,$ACD1   ; draw command to copy
- $B3ED LD DE,($BE58) ; write pointer of the frame call list
- $B3F1 JR $B407      ; copy the 10 bytes of the main command

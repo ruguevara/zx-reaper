@@ -1,0 +1,11 @@
+; Go to the next slot after the animation step
+;
+; Entry point used by every entity handler that has pushed back its animation counters (and by those that draw nothing):
+; go on with the next slot. SP is at slot+$12.
+;
+; SP Slot address + $12
+@label=NextSlotAfterAnim
+@isub=LD HL,SLOT_SIZE-$12
+c$B41F LD HL,$0004   ; slot+$12 + 4 = the next slot
+ $B422 ADD HL,SP     ;
+ $B423 JP $A5F0      ; #R$A5F0 enters the handler of the slot at HL

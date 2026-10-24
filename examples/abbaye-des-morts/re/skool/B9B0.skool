@@ -32,16 +32,3 @@ c$B9B0 POP BC        ; x speed
  $B9BB LD D,H        ; D = x
  $B9BC POP HL        ; y word
  $B9BD LD E,H        ; E = y
-; Draw part, also entered from the sliding scythe (#R$BAB1 and #R$BB07 through #R$BB02) with D = x and E = y in
-; 2-pixel units and SP at slot+$A: makes the draw command position and tests the hit box (#R$A851, which goes on at
-; #R$B9CF).
-@label=UpdateMovingSprite_Draw
-*$B9BE LD L,E        ; L = y
- $B9BF LD H,D        ; H = x
- $B9C0 LD A,H        ;
- $B9C1 EX AF,AF'     ; A' = x: its low 2 bits select the shifted copy
- $B9C2 SRA H         ; x / 4 = byte column
- $B9C4 SRA H         ;
- $B9C6 LD ($ACD3),HL ; position of the draw command: y, byte column
- $B9C9 LD HL,$B9CF   ; continue after the hit test
- $B9CC JP $A851      ; hit test: sets the hit flag when the monk touches the box

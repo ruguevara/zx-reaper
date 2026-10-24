@@ -1,0 +1,19 @@
+; Queue the sprite of a frame table
+;
+; Queue the sprite of an entity with one frame table. The attribute is already in the draw command. HL points to the
+; sprite block + 1 (height, width, then the frame table: one word per frame, the address of its graphics) and E is the
+; frame number. Used by the plant, the fish (#R$B87D); makes the draw command with width and height from the block,
+; the graphics from the table (A' = 0: the sprite is at a multiple of 4 and needs no shifted copy) and goes on to #R$B3D8
+; (which queues it and goes to the next slot).
+;
+; HL Sprite block + 1
+; E Frame number
+@label=QueueFrameSprite
+c$B6D9 XOR A         ;
+ $B6DA EX AF,AF'     ; A' = 0: column offset
+ $B6DB LD B,(HL)     ; height
+ $B6DC INC HL        ;
+ $B6DD LD C,(HL)     ; width
+ $B6DE INC HL        ; HL = frame table
+ $B6DF LD ($ACD7),BC ; width, height of the draw command
+ $B6E3 JP $B3D8      ; graphics = table[E]; queue it

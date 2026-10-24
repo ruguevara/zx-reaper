@@ -23,23 +23,3 @@ c$B3F3 LDI           ; the main command ...
  $B401 LDI           ;
  $B403 LDI           ; ... 10 bytes
  $B405 LDI           ; and then the second command (10 bytes)
-; Entry point used by #R$B3D2 and #R$B512 (through IY): copy one command, 10 bytes.
-@label=QueueOneCommand
-*$B407 LDI           ; 10 bytes
- $B409 LDI           ;
- $B40B LDI           ;
- $B40D LDI           ;
- $B40F LDI           ;
- $B411 LDI           ;
- $B413 LDI           ;
- $B415 LDI           ;
- $B417 LDI           ;
- $B419 LDI           ;
- $B41B LD ($BE58),DE ; new end of the frame call list
-; Entry point used by every entity handler that has pushed back its animation counters (and by those that draw nothing):
-; go on with the next slot. SP is at slot+$12.
-@label=NextSlotAfterAnim
-@isub=LD HL,SLOT_SIZE-$12
-*$B41F LD HL,$0004   ; slot+$12 + 4 = the next slot
- $B422 ADD HL,SP     ;
- $B423 JP $A5F0      ; #R$A5F0 enters the handler of the slot at HL

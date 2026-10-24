@@ -1,0 +1,25 @@
+; Draw a cross of the lever-off set
+;
+; Not takeable (no touch, or the lever is on): step the frame animation (countdown in +8, reload in +9, frame in +A of
+; the frame count in +B) as #R$A7CB does, and draw frame E + (lever state bits), that is the bright cross when the
+; lever is off and the thin one (frames 6-11) when it is on.
+@label=DrawCrossLeverOff
+c$A799 POP HL        ; flag pointer
+ $A79A POP BC        ; C = countdown, B = reload
+ $A79B POP DE        ; E = frame, D = number of frames
+ $A79C LD A,E        ;
+ $A79D DEC C         ;
+ $A79E JR NZ,$A7A8   ; countdown not over
+ $A7A0 LD C,B        ; reload the countdown, next frame, wrap at D
+ $A7A1 INC A         ;
+ $A7A2 LD E,A        ;
+ $A7A3 CP D          ;
+ $A7A4 JR C,$A7A8    ;
+ $A7A6 SUB D         ;
+ $A7A7 LD E,A        ;
+*$A7A8 LD L,A        ; frame without the lever offset
+ $A7A9 LD A,($851E)  ;
+@isub=AND LEVER_STATE_MASK
+ $A7AC AND $07       ; + 0 (lever off) or + 6 (on)
+ $A7AE ADD A,L       ;
+ $A7AF JR $A7D9      ; store the counters, draw frame A (#R$A7D9)

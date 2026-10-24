@@ -1,0 +1,25 @@
+; Redefine the four keys
+;
+; Redefine the keys: blank the 8-character key-name buffer, then ask for JUMP, CROUCH, LEFT and RIGHT in turn.
+@label=RedefineKeys
+c$A37A LD DE,$A4F2   ;
+ $A37D LD H,D        ;
+ $A37E LD L,E        ;
+@isub=LD BC,KEY_NAMES_LEN*256+CHAR_SPACE
+ $A37F LD BC,$0820   ; B = 8 characters, C = space
+@label=RedefineKeys_Blank
+*$A382 LD (HL),C     ;
+ $A383 INC HL        ;
+ $A384 DJNZ $A382    ;
+ $A386 LD HL,$A3A9   ;
+ $A389 CALL $A3B9    ;
+ $A38C LD HL,$A3AD   ;
+ $A38F CALL $A3B9    ;
+ $A392 LD HL,$A3B1   ;
+ $A395 CALL $A3B9    ;
+ $A398 LD HL,$A3B5   ;
+ $A39B CALL $A3B9    ;
+ $A39E LD HL,($A2C5) ; the fifth pair (JUMP again) is a copy of the JUMP pair
+ $A3A1 LD ($A2C7),HL ;
+ $A3A4 CALL $A422    ; cheat check: do the keys spell RAGE?
+ $A3A7 JR $A354      ;

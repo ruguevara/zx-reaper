@@ -15,7 +15,7 @@
 ; +5 byte: frame width in columns (the packed set holds frames x width columns)
 ; .
 ; The sheet bytes written by #R$AF15 for all 20 records agree with a model of the format described here (see finding
-; FINDINGID).
+; F114).
 @label=UnpackRecords
 b$AE9D DEFW $D7F8,$68CC ; set 0: skeleton archers (rooms 17, 21)
  $AEA1 DEFB $40,$02

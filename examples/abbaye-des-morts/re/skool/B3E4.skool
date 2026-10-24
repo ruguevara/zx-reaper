@@ -1,0 +1,10 @@
+; Queue an entity's sprite
+;
+; Entry point used by #R$B730 and #R$B77F, which have set the graphics address themselves: queue the main draw command.
+@label=QueueEntitySprite
+c$B3E4 LD A,($AA1F)  ; the frame list is being run?
+ $B3E7 OR A          ;
+ $B3E8 JR NZ,$B41F   ; yes: do not queue, go on with the next slot
+ $B3EA LD HL,$ACD1   ; draw command to copy
+ $B3ED LD DE,($BE58) ; write pointer of the frame call list
+ $B3F1 JR $B407      ; copy the 10 bytes of the main command

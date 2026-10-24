@@ -19,30 +19,3 @@ c$A450 LD HL,$5800   ;
  $A45A LDIR          ;
 @isub=LD A,OP_EX_DE_HL
  $A45C LD A,$EB      ; makes both copies run buffer -> screen
-; Entry point used by #R$A44D. The two copies below are patched by A: 0 (NOP) copies screen to buffers (save), $EB (EX
-; DE,HL) copies buffers to screen (restore).
-@label=CopyMenuArea
-@isub=LD (SmcCopyAttrs),A
-*$A45E LD ($A479),A  ; patch the NOP at the end (attributes)
-@isub=LD (SmcCopyBitmap),A
- $A461 LD ($A46D),A  ; patch the NOP below (bitmap)
-@isub=LD HL,SCREEN_THIRD2
- $A464 LD HL,$4800   ; middle third of the bitmap
- $A467 LD DE,$C500   ;
-@isub=LD BC,THIRD_SIZE
- $A46A LD BC,$0800   ;
-; Self-modified: NOP or EX DE,HL, written by #R$A45E.
-@label=SmcCopyBitmap
- $A46D NOP           ; NOP: screen to buffer; EX DE,HL: buffer to screen
- $A46E LDIR          ;
-@isub=LD HL,ATTRS
- $A470 LD HL,$5800   ;
-@isub=LD DE,TILE_MAP
- $A473 LD DE,$5B00   ; attribute save area (the tile map buffer, unused before the game)
-@isub=LD BC,ATTRS_SIZE
- $A476 LD BC,$0300   ;
-; Self-modified: NOP or EX DE,HL, written by #R$A45E.
-@label=SmcCopyAttrs
- $A479 NOP           ;
- $A47A LDIR          ;
- $A47C RET           ;
