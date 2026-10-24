@@ -35,29 +35,42 @@ keeps the original memory layout and the routine names, so a change ports
 back to asm routine by routine, with the same differential tests run the
 other way.
 
-## Status and goal
+## Examples
 
-Done on Hungry Horace (1982): stages 1 and 2 compared with the SkoolKit
-reference disassembly; stage 3 identical to the Z80 at every main-loop pass
-of three recorded runs; stage 4 identical to stage 3 at every step, in
-faithful mode (the original's quirks kept, no fixed mode yet); the sound
-judged by ear. Jet Set Willy (1984) has been through stages 1 and 2.
+Three games so far, in the order they were done. Every run ended with a
+comparison against the existing work, and what the run got wrong became a
+rule in a skill or a check in the tools before the next game: the harness
+learns from its own runs and their mistakes. Each example is the record of
+its run.
 
-The most recent example, The Hobbit (Melbourne House, 1982), a text
-adventure with a parser,
-characters that act on their own and vector pictures, has been through
-stages 1 to 4 blind, with no help from the author beyond the stage 4
-interview on graphics, input and sound: the stage 3 port is identical to
-the Z80 at every main-loop pass of six recorded runs (one plays the game to
-the end), the stage 4 game identical to stage 3 at every pass, the screen
-included; both play on the desktop and in the browser. Compared afterwards
-with the existing disassemblies, a C port and the author's account: the
-bytes, the code map and the meaning agree with the most complete reference
-wherever both describe something; the run named two record fields the wrong
-way round and missed 17 of 50 known bugs, and found 14 that no reference
-has ([the comparison](examples/the-hobbit/re/comparison.md)). The example is
-kept as the one run left it: the errors the comparison found are listed, not
-corrected.
+1. **Hungry Horace** (Psion/Melbourne House, 1982),
+   [`examples/hungry-horace/`](examples/hungry-horace/): the reference run.
+   Stages 1 and 2 compared with the SkoolKit reference disassembly; stage 3
+   identical to the Z80 at every main-loop pass of three recorded runs;
+   stage 4 identical to stage 3 at every step, in faithful mode (the
+   original's quirks kept); the sound judged by ear.
+   [Run report](docs/hungry-horace-run.md).
+2. **Jet Set Willy** (Software Projects, 1984),
+   [`examples/jet-set-willy/`](examples/jet-set-willy/): stages 1 and 2,
+   compared with the SkoolKit reference disassembly
+   ([comparison](examples/jet-set-willy/re/comparison.md)).
+3. **The Hobbit** (Melbourne House, 1982),
+   [`examples/the-hobbit/`](examples/the-hobbit/): the most recent, a text
+   adventure with a parser, characters that act on their own and vector
+   pictures, done blind through stages 1 to 4 with no help from the author
+   beyond the stage 4 interview on graphics, input and sound. The stage 3
+   port is identical to the Z80 at every main-loop pass of six recorded runs
+   (one plays the game to the end), the stage 4 game identical to stage 3 at
+   every pass, the screen included; both play on the desktop and in the
+   browser. Compared afterwards with the existing disassemblies, a C port and
+   the author's account: the bytes, the code map and the meaning agree with
+   the most complete reference wherever both describe something; the run
+   named two record fields the wrong way round, missed 17 of 50 known bugs
+   and found 14 that no reference has
+   ([comparison](examples/the-hobbit/re/comparison.md)). The errors are
+   listed, not corrected in the example; the
+   [run report](docs/the-hobbit-run.md) shows what each one changed in the
+   harness.
 
 Scope: the 48K Spectrum. AY music and effects (128K) come later, through
 [pyayay](https://github.com/ruguevara/pyayay) (Ayumi). Out of scope: stage 5
@@ -71,7 +84,6 @@ snapshot instead of the tape), games that need contention-exact timing.
 | [docs/method.md](docs/method.md) | the method and its reasons: decisions, phases, evidence, the stages, what has been tested |
 | [docs/hungry-horace-run.md](docs/hungry-horace-run.md) | the reference run: Hungry Horace through every stage, time and tokens, the comparison with SkoolKit |
 | [docs/the-hobbit-run.md](docs/the-hobbit-run.md) | the blind run: The Hobbit through stages 1 to 4, time and tokens, the comparison with the existing work |
-| [examples/the-hobbit/re/comparison.md](examples/the-hobbit/re/comparison.md) | the most recent example: The Hobbit's one-shot run compared with the existing disassemblies, a C port and the author's account |
 | [docs/stage3.md](docs/stage3.md) | stage 3: the library, the port's shape, the replay check, results |
 | [docs/stage4.md](docs/stage4.md) | stage 4: the clean state, the bridge to stage 3, the checks, results |
 | [examples/hungry-horace/docs/](examples/hungry-horace/docs/README.md) | the article on how Hungry Horace works, with its gallery |
