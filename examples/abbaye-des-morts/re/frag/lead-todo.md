@@ -91,3 +91,17 @@
   F77); exit test depends on facing; $A96F duplicates $A9B4; $A9FE column
   mask always $1F; one side blocked skips the other direction; dying frame 7
   not drawn (monk invisible 4 frames).
+- W11 splits: $B6ED "Entity handler: projectile in a straight line
+  (arrows)", $B716 "Remove a projectile", $B71B "Draw a projectile", $B6D9
+  "Queue the sprite of a frame table", $B7D6 "Fish jumps out of the water",
+  $B9BE "Moving sprite: position and hit test", $B611 (optional).
+- $B5D6 is the stone head of rooms 20 and 22 (kind 11): shoots
+  WallShotTemplate every 70 frames; its jump target $B611 is
+  UpdateShooter_Common.
+- C-report and $BC92 template comments outdated: $B74B and $B924 run; the
+  flames $BD22/$BD34 and the splash $BD12 are known ($BD22 says "never seen").
+- In the ending $B9A3 sets $A894 and $A8A0 to 2: the player's sprite runs
+  the dying animation.
+- Bugs (W11): pyre monk countdown wraps to $FFFF (harmless); plant reload
+  read from +$B not +$13 (same value); seeds test one flag cell, arrows two.
+- Tool: `zxq.py check FILE...` now builds HEAD + the given files.

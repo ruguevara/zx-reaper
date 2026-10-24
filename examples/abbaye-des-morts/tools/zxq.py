@@ -27,8 +27,10 @@ The agent should read the disassembly through this tool, never whole.
                                     block=N draws each N-byte block as a separate
                                     tile (sprite banks); tiles are laid out in a
                                     square-ish grid with 1-byte gaps
-  zxq.py check                      `make verify` in a private copy (safe for
-                                    parallel agents: uses its own build dir)
+  zxq.py check [FILE...]            `make verify` in a private copy (safe for
+                                    parallel agents: uses its own build dir);
+                                    with FILEs, only those skool files from the
+                                    working tree, the rest from git HEAD
   zxq.py equs [--uses|--consolidate]
                                     list @equ address names; --uses: every 16-bit
                                     operand each one replaces (add @keep before
@@ -395,15 +397,30 @@ def cmd_gfx(addr, n, width, out, cells=False, scale=4, block=0):
     print('wrote %s (%dx%d px, %d rows of %d bytes)' % (out, w, h, len(rows), width))
 
 
-def cmd_check():
+def cmd_check(files=()):
+    """Build in a private directory and compare with the original. With
+    FILES (skool entry files), the other entries come from git HEAD: a check
+    of one agent's files while other agents are half-way through theirs."""
     import shutil
     import subprocess
     import tempfile
     tmp = tempfile.mkdtemp(prefix='zxcheck-')
     try:
         for name in os.listdir('.'):
-            if name not in ('build', '.git'):
-                os.symlink(os.path.abspath(name), os.path.join(tmp, name))
+            if name in ('build', '.git') or (files and name == 're'):
+                continue
+            os.symlink(os.path.abspath(name), os.path.join(tmp, name))
+        if files:
+            os.mkdir(os.path.join(tmp, 're'))
+            for name in os.listdir('re'):
+                if name != 'skool':
+                    os.symlink(os.path.abspath(os.path.join('re', name)), os.path.join(tmp, 're', name))
+            git = subprocess.run('git archive HEAD %s | tar -x -C %s' % (SKOOL_DIR, tmp), shell=True,
+                                 capture_output=True, text=True)
+            if git.returncode:
+                sys.exit('git archive failed: %s' % git.stderr)
+            for f in files:
+                shutil.copy(f, os.path.join(tmp, SKOOL_DIR, os.path.basename(f)))
         r = subprocess.run(['make', '-s', 'verify'], cwd=tmp, capture_output=True, text=True)
         out = (r.stdout + r.stderr).strip().splitlines()
         print('\n'.join(out[-15:]))
@@ -965,7 +982,7 @@ def main():
                 next((int(x) for x in a[5:] if x.isdigit()), 4),
                 next((parse_addr(x[6:]) for x in a[5:] if x.startswith('block=')), 0))
     elif cmd == 'check':
-        sys.exit(cmd_check())
+        sys.exit(cmd_check(a[1:]))
     elif cmd == 'equs' and '--uses' in a:
         cmd_equ_uses()
     elif cmd == 'equs':
