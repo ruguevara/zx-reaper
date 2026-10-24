@@ -1,0 +1,4 @@
+; Unused debug: leave the room-warp mode (player state 4)
+c$AD82 LD A,$04      ;
+ $AD84 LD ($A894),A  ;
+ $AD87 RET           ;

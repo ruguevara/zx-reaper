@@ -1,5 +1,11 @@
-; Data block at BE2A
-b$BE2A DEFB $07,$10,$02,$08,$11,$07,$0B,$11
- $BE32 DEFB $0E,$0C,$07,$08,$0E,$11,$08,$0F
- $BE3A DEFB $07,$15,$13,$0B,$08,$15,$05,$13
- $BE42 DEFB $17,$11,$11,$05,$11,$09
+; Checkpoints: (room, row, column)
+b$BE2A DEFB $07,$10,$02
+ $BE2D DEFB $08,$11,$07
+ $BE30 DEFB $0B,$11,$0E
+ $BE33 DEFB $0C,$07,$08
+ $BE36 DEFB $0E,$11,$08
+ $BE39 DEFB $0F,$07,$15
+ $BE3C DEFB $13,$0B,$08
+ $BE3F DEFB $15,$05,$13
+ $BE42 DEFB $17,$11,$11
+ $BE45 DEFB $05,$11,$09

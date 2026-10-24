@@ -1,11 +1,18 @@
-; Data block at AC9F
-b$AC9F DEFB $00,$02,$02,$03,$05,$03,$08,$03
- $ACA7 DEFB $00,$D7,$0B,$D7,$16,$D7,$21,$D7
- $ACAF DEFB $2C,$D7,$37,$D7,$42,$D7,$4D,$D7
- $ACB7 DEFB $42,$D7,$4D,$D7,$58,$D7,$4D,$D7
- $ACBF DEFB $58,$D7,$00,$03,$03,$03,$06,$03
- $ACC7 DEFB $09,$03,$00,$EF,$0C,$EF,$18,$EF
- $ACCF DEFB $24,$EF,$36,$98,$00,$00,$00,$00
- $ACD7 DEFB $00,$00,$00,$00,$36,$98,$00,$00
- $ACDF DEFB $00,$00,$00,$00,$00,$00,$FD,$97
- $ACE7 DEFB $00,$00,$00,$00,$00,$00,$00,$00
+; Player sprite frame tables
+b$AC9F DEFB $00,$02                                   ; {Standing: (byte
+ $ACA1 DEFB $02,$03                                   ; offset, width) for X
+ $ACA3 DEFB $05,$03                                   ; mod 4
+ $ACA5 DEFB $08,$03                                   ; }
+ $ACA7 DEFW $D700,$D70B,$D716                         ; Standing frames, facing
+                                                      ; left
+ $ACAD DEFW $D721,$D72C,$D737                         ; Standing frames, facing
+                                                      ; right
+ $ACB3 DEFW $D742,$D74D,$D742,$D74D,$D758,$D74D,$D758 ; Dying frames
+ $ACC1 DEFB $00,$03                                   ; {Crouching: (byte
+ $ACC3 DEFB $03,$03                                   ; offset, width) for X
+ $ACC5 DEFB $06,$03                                   ; mod 4
+ $ACC7 DEFB $09,$03                                   ; }
+ $ACC9 DEFW $EF00,$EF0C                               ; Crouching frames,
+                                                      ; facing left
+ $ACCD DEFW $EF18,$EF24                               ; Crouching frames,
+                                                      ; facing right

@@ -1,0 +1,9 @@
+; Sprite draw commands
+g$ACD1 DEFW $9836,$0000,$0000 ; Main sprite: routine, position (y, x/4 = byte
+                              ; column), graphics
+ $ACD7 DEFB $00,$00,$00,$00   ; Width, height, unused, attribute
+ $ACDB DEFW $9836,$0000,$0000 ; Second sprite: routine, position, graphics
+ $ACE1 DEFB $00,$00,$00,$00   ; Width, height, unused, attribute
+ $ACE5 DEFW $97FD,$0000,$0000 ; Object sprite (drawn by $97FD): routine,
+                              ; position, graphics
+ $ACEB DEFB $00,$00,$00,$00   ; Width, height, unused, attribute

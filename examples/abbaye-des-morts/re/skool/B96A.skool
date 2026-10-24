@@ -1,4 +1,0 @@
-; Data block at B96A
-b$B96A DEFB $DF,$AC,$3A,$1F,$AA,$B7,$C2,$1F
- $B972 DEFB $B4,$21,$D1,$AC,$ED,$5B,$58,$BE
- $B97A DEFB $C3,$F3,$B3

@@ -1,5 +1,36 @@
-; Data block at B74B
-b$B74B DEFB $D1,$E1,$01,$14,$00,$09,$E5,$E1
- $B753 DEFB $EB,$C1,$09,$EB,$C1,$09,$E5,$D5
- $B75B DEFB $7C,$FE,$60,$D2,$16,$B7,$CB,$7A
- $B763 DEFB $C2,$16,$B7,$CB,$2C,$CB,$84
+; Entity handler: falling projectile, removed off screen or on a solid tile
+c$B74B POP DE        ;
+ $B74C POP HL        ;
+ $B74D LD BC,$0014   ;
+ $B750 ADD HL,BC     ;
+ $B751 PUSH HL       ;
+ $B752 POP HL        ;
+ $B753 EX DE,HL      ;
+ $B754 POP BC        ;
+ $B755 ADD HL,BC     ;
+ $B756 EX DE,HL      ;
+ $B757 POP BC        ;
+ $B758 ADD HL,BC     ;
+ $B759 PUSH HL       ;
+ $B75A PUSH DE       ;
+ $B75B LD A,H        ;
+ $B75C CP $60        ;
+ $B75E JP NC,$B716   ;
+ $B761 BIT 7,D       ;
+ $B763 JP NZ,$B716   ;
+ $B766 SRA H         ;
+ $B768 RES 0,H       ;
+ $B76A LD L,H        ;
+ $B76B LD H,$61      ;
+ $B76D LD A,D        ;
+ $B76E RRA           ;
+ $B76F RRA           ;
+ $B770 AND $1F       ;
+ $B772 ADD A,(HL)    ;
+ $B773 INC L         ;
+ $B774 LD H,(HL)     ;
+ $B775 LD L,A        ;
+ $B776 LD A,(HL)     ;
+ $B777 AND $07       ;
+ $B779 JP Z,$B71B    ;
+ $B77C JP $B716      ;

@@ -1,4 +1,12 @@
-; Data block at A894
-b$A894 DEFB $04,$00,$00,$00,$00,$00,$00,$00
- $A89C DEFB $00,$00,$00,$00,$00,$00,$24,$00
- $A8A4 DEFB $44
+; Player variables
+g$A894 DEFB $04             ; State: 0 none, 1 dying, 2 jumping, 3 crouching, 4
+                            ; standing/walking, 5 falling, $FF debug room warp
+ $A895 DEFB $00             ; Animation timer
+ $A896 DEFB $00             ; Animation frame
+ $A897 DEFB $00             ; Facing: 0 right, 1 left
+ $A898 DEFW $0000           ; Vertical speed (8.8)
+ $A89A DEFB $00,$00         ; Unused
+ $A89C DEFB $00,$00,$00,$00 ; Tile flags at the head, right, feet, left
+ $A8A0 DEFB $00             ; Hit flag (bit 2 or $FF)
+ $A8A1 DEFW $2400           ; X (8.8, high byte in 2-pixel units, 0-$7F)
+ $A8A3 DEFW $4400           ; Y (8.8, high byte in 2-pixel units, 0-$57)

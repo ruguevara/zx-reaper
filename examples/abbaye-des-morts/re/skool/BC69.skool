@@ -1,48 +1,23 @@
-; Data block at BC69
-b$BC69 DEFB $C1,$10,$04,$C5,$C3,$8E,$B0,$C5
- $BC71 DEFB $C1,$E1,$22,$D3,$AC,$E1,$22,$DD
- $BC79 DEFB $AC,$C1,$ED,$43,$D7,$AC,$ED,$43
- $BC81 DEFB $E1,$AC,$F1,$F1,$F1,$E1,$7E,$23
- $BC89 DEFB $32,$DA,$AC,$32,$E4,$AC,$C3,$3C
- $BC91 DEFB $BC,$ED,$B6,$00,$FE,$00,$00,$00
- $BC99 DEFB $06,$00,$00,$00,$04,$02,$02,$F9
- $BCA1 DEFB $94,$ED,$B6,$00,$02,$00,$00,$03
- $BCA9 DEFB $06,$00,$00,$00,$04,$02,$02,$FC
- $BCB1 DEFB $94,$ED,$B6,$00,$FE,$00,$00,$FE
- $BCB9 DEFB $05,$00,$00,$01,$04,$02,$02,$F6
- $BCC1 DEFB $94,$4B,$B7,$91,$FF,$90,$FE,$02
- $BCC9 DEFB $04,$00,$00,$01,$01,$02,$02,$F3
- $BCD1 DEFB $94,$4B,$B7,$6F,$00,$90,$FE,$04
- $BCD9 DEFB $04,$00,$00,$01,$01,$02,$02,$F3
- $BCE1 DEFB $94,$E6,$B6,$09,$FF,$BF,$FF,$FF
- $BCE9 DEFB $09,$00,$00,$01,$01,$02,$02,$F0
- $BCF1 DEFB $94,$E6,$B6,$00,$FF,$00,$00,$FF
- $BCF9 DEFB $09,$00,$00,$01,$01,$02,$02,$F0
- $BD01 DEFB $94,$E6,$B6,$09,$FF,$41,$00,$FF
- $BD09 DEFB $09,$00,$00,$01,$01,$02,$02,$F0
- $BD11 DEFB $94,$7F,$B7,$00,$00,$00,$00,$00
- $BD19 DEFB $00,$02,$02,$00,$03,$02,$04,$FF
- $BD21 DEFB $94,$B0,$B9,$C0,$FF,$18,$00,$00
- $BD29 DEFB $14,$00,$00,$03,$07,$95,$95,$02
- $BD31 DEFB $02,$00,$02,$B0,$B9,$40,$00,$70
- $BD39 DEFB $00,$00,$14,$00,$00,$03,$07,$95
- $BD41 DEFB $95,$02,$02,$00,$02,$B1,$BA,$80
- $BD49 DEFB $FF,$C0,$00,$08,$0C,$00,$00,$07
- $BD51 DEFB $07,$DA,$95,$02,$02,$00,$04,$B1
- $BD59 DEFB $BA,$80,$00,$C0,$00,$08,$0C,$00
- $BD61 DEFB $00,$07,$07,$DA,$95,$02,$02,$00
- $BD69 DEFB $04,$69,$BC,$00,$96,$00,$00,$00
- $BD71 DEFB $00,$04,$0C,$00,$00,$00,$00,$00
- $BD79 DEFB $00,$F6,$95,$05,$05,$00,$02,$B0
- $BD81 DEFB $B9,$00,$00,$00,$00,$00,$00,$00
- $BD89 DEFB $00,$00,$00,$9D,$95,$50,$3C,$00
- $BD91 DEFB $02,$7D,$B9,$18,$01,$AF,$00,$00
- $BD99 DEFB $00,$00,$00,$00,$00,$A5,$95,$23
- $BDA1 DEFB $19,$00,$02,$B0,$B9,$00,$00,$00
- $BDA9 DEFB $00,$00,$00,$00,$00,$00,$00,$95
- $BDB1 DEFB $95,$02,$02,$00,$02,$B0,$B9,$00
- $BDB9 DEFB $00,$00,$00,$00,$00,$00,$00,$00
- $BDC1 DEFB $00,$AD,$95,$02,$02,$00,$01,$B0
- $BDC9 DEFB $B9,$00,$00,$00,$00,$00,$00,$00
- $BDD1 DEFB $00,$00,$00,$B3,$95,$02,$02,$00
- $BDD9 DEFB $01
+; Entity handler: two-part sprite with a lifetime (template at $BD6A)
+c$BC69 POP BC        ;
+ $BC6A DJNZ $BC70    ;
+ $BC6C PUSH BC       ;
+ $BC6D JP $B08E      ;
+*$BC70 PUSH BC       ;
+ $BC71 POP BC        ;
+ $BC72 POP HL        ;
+ $BC73 LD ($ACD3),HL ;
+ $BC76 POP HL        ;
+ $BC77 LD ($ACDD),HL ;
+ $BC7A POP BC        ;
+ $BC7B LD ($ACD7),BC ;
+ $BC7F LD ($ACE1),BC ;
+ $BC83 POP AF        ;
+ $BC84 POP AF        ;
+ $BC85 POP AF        ;
+ $BC86 POP HL        ;
+ $BC87 LD A,(HL)     ;
+ $BC88 INC HL        ;
+ $BC89 LD ($ACDA),A  ;
+ $BC8C LD ($ACE4),A  ;
+ $BC8F JP $BC3C      ;

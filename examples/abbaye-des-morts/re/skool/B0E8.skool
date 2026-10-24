@@ -1,6 +1,4 @@
-; Data block at B0E8
-b$B0E8 DEFB $B7,$FD,$DB,$FE,$6E,$FF,$B7,$FF
- $B0F0 DEFB $00,$00,$49,$00,$20,$00,$42,$00
- $B0F8 DEFB $84,$00,$08,$01,$0E,$02,$04,$04
- $B100 DEFB $DB,$FE,$6E,$FF,$B7,$FF,$49,$00
- $B108 DEFB $92,$00,$25,$01
+; Speed curves for path movers (6 signed 8.8 words each)
+b$B0E8 DEFW $FDB7,$FEDB,$FF6E,$FFB7,$0000,$0049
+ $B0F4 DEFW $0020,$0042,$0084,$0108,$020E,$0404
+ $B100 DEFW $FEDB,$FF6E,$FFB7,$0049,$0092,$0125

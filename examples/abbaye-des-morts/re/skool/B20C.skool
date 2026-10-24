@@ -1,7 +1,2 @@
-; Data block at B20C
-b$B20C DEFB $D4,$B1,$63,$B1,$0C,$B1,$39,$B1
- $B214 DEFB $8E,$B0,$CF,$B1,$48,$01,$50,$01
- $B21C DEFB $64,$03,$7F,$04,$24,$02,$3C,$02
- $B224 DEFB $4C,$02,$68,$01,$6C,$01,$7F,$04
- $B22C DEFB $48,$01,$4C,$01,$50,$01,$54,$01
- $B234 DEFB $64,$05
+; Path command handlers
+w$B20C DEFW $B1D4,$B163,$B10C,$B139,$B08E,$B1CF

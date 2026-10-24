@@ -721,6 +721,29 @@ def cmd_cut(addr, title):
 
 
 def cmd_reclassify(frag, force):
+    """Each run of the fragment (up to and including an `i` line) is applied
+    on its own, so the entries between runs stay as they are."""
+    import tempfile
+    runs, cur = [], []
+    for line in open(frag):
+        cur.append(line)
+        if re.match(r'^i *\$?[0-9A-Fa-f]', line):
+            runs.append(cur)
+            cur = []
+    if any(re.match(r'^[a-zA-Z@ ] *\$?[0-9A-Fa-f]', l) for l in cur):
+        sys.exit('the fragment must end with an `i $END` line (END = first address not covered)')
+    # check every run before changing anything
+    for check in (True, False):
+        for run in runs:
+            with tempfile.NamedTemporaryFile('w', suffix='.ctl', delete=False) as f:
+                f.writelines(run)
+            try:
+                reclassify_run(f.name, force, check)
+            finally:
+                os.remove(f.name)
+
+
+def reclassify_run(frag, force, check):
     import subprocess
     addrs = []
     end = None
@@ -745,6 +768,8 @@ def cmd_reclassify(frag, force):
     if done and not force:
         sys.exit('annotated entries would be replaced (use -f): %s'
                  % ' '.join(e.name for e in done))
+    if check:
+        return
     r = subprocess.run(['sna2skool.py', '-H', '-c', frag, '-s', str(start), '-e', str(end), IMAGE],
                        capture_output=True, text=True)
     if r.returncode:

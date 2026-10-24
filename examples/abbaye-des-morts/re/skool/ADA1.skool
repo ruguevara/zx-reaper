@@ -1,5 +1,17 @@
-; Data block at ADA1
-b$ADA1 DEFB $ED,$A0,$ED,$A0,$ED,$A0,$ED,$A0
- $ADA9 DEFB $ED,$A0,$ED,$A0,$ED,$A0,$ED,$A0
- $ADB1 DEFB $ED,$A0,$ED,$A0,$ED,$A0,$ED,$A0
- $ADB9 DEFB $ED,$A0,$ED,$A0,$ED,$A0,$ED,$A0
+; Block copier: first 16 LDIs of the chain entered from $AD9F
+c$ADA1 LDI           ;
+ $ADA3 LDI           ;
+ $ADA5 LDI           ;
+ $ADA7 LDI           ;
+ $ADA9 LDI           ;
+ $ADAB LDI           ;
+ $ADAD LDI           ;
+ $ADAF LDI           ;
+ $ADB1 LDI           ;
+ $ADB3 LDI           ;
+ $ADB5 LDI           ;
+ $ADB7 LDI           ;
+ $ADB9 LDI           ;
+ $ADBB LDI           ;
+ $ADBD LDI           ;
+ $ADBF LDI           ;

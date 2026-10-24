@@ -1,2 +1,4 @@
-; Data block at AAC0
-b$AAC0 DEFB $3E,$FF,$32,$94,$A8,$C9
+; Unused: enter the debug room-warp mode (player state $FF)
+c$AAC0 LD A,$FF      ;
+ $AAC2 LD ($A894),A  ;
+ $AAC5 RET           ;

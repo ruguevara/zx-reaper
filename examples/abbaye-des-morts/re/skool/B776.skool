@@ -1,3 +1,0 @@
-; Data block at B776
-b$B776 DEFB $7E,$E6,$07,$CA,$1B,$B7,$C3,$16
- $B77E DEFB $B7

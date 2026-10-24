@@ -1,10 +1,55 @@
-; Data block at B924
-b$B924 DEFB $E1,$7E,$23,$4E,$23,$46,$23,$32
- $B92C DEFB $DA,$AC,$32,$E4,$AC,$ED,$43,$D7
- $B934 DEFB $AC,$0C,$ED,$43,$E1,$AC,$C1,$D1
- $B93C DEFB $0D,$20,$0D,$48,$3E,$07,$32,$4F
- $B944 DEFB $85,$1C,$7B,$BA,$20,$02,$92,$5F
- $B94C DEFB $D5,$C5,$16,$00,$19,$19,$1D,$D9
- $B954 DEFB $21,$DE,$AC,$28,$01,$35,$D9,$5E
- $B95C DEFB $23,$56,$23,$ED,$53,$D5,$AC,$23
- $B964 DEFB $23,$7E,$23
+; Continuation of the routine at $B8C5 after the draw at $A851
+c$B924 POP HL        ;
+ $B925 LD A,(HL)     ;
+ $B926 INC HL        ;
+ $B927 LD C,(HL)     ;
+ $B928 INC HL        ;
+ $B929 LD B,(HL)     ;
+ $B92A INC HL        ;
+ $B92B LD ($ACDA),A  ;
+ $B92E LD ($ACE4),A  ;
+ $B931 LD ($ACD7),BC ;
+ $B935 INC C         ;
+ $B936 LD ($ACE1),BC ;
+ $B93A POP BC        ;
+ $B93B POP DE        ;
+ $B93C DEC C         ;
+ $B93D JR NZ,$B94C   ;
+ $B93F LD C,B        ;
+ $B940 LD A,$07      ;
+ $B942 LD ($854F),A  ;
+ $B945 INC E         ;
+ $B946 LD A,E        ;
+ $B947 CP D          ;
+ $B948 JR NZ,$B94C   ;
+ $B94A SUB D         ;
+ $B94B LD E,A        ;
+*$B94C PUSH DE       ;
+ $B94D PUSH BC       ;
+ $B94E LD D,$00      ;
+ $B950 ADD HL,DE     ;
+ $B951 ADD HL,DE     ;
+ $B952 DEC E         ;
+ $B953 EXX           ;
+ $B954 LD HL,$ACDE   ;
+ $B957 JR Z,$B95A    ;
+ $B959 DEC (HL)      ;
+*$B95A EXX           ;
+ $B95B LD E,(HL)     ;
+ $B95C INC HL        ;
+ $B95D LD D,(HL)     ;
+ $B95E INC HL        ;
+ $B95F LD ($ACD5),DE ;
+ $B963 INC HL        ;
+ $B964 INC HL        ;
+ $B965 LD A,(HL)     ;
+ $B966 INC HL        ;
+ $B967 LD H,(HL)     ;
+ $B968 LD L,A        ;
+ $B969 LD ($ACDF),HL ;
+ $B96C LD A,($AA1F)  ;
+ $B96F OR A          ;
+ $B970 JP NZ,$B41F   ;
+ $B973 LD HL,$ACD1   ;
+ $B976 LD DE,($BE58) ;
+ $B97A JP $B3F3      ;

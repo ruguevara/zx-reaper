@@ -1,0 +1,16 @@
+; Path scripts: (target coordinate, command) pairs
+b$B218 DEFB $48,$01
+ $B21A DEFB $50,$01
+ $B21C DEFB $64,$03
+ $B21E DEFB $7F,$04
+ $B220 DEFB $24,$02
+ $B222 DEFB $3C,$02
+ $B224 DEFB $4C,$02
+ $B226 DEFB $68,$01
+ $B228 DEFB $6C,$01
+ $B22A DEFB $7F,$04
+ $B22C DEFB $48,$01
+ $B22E DEFB $4C,$01
+ $B230 DEFB $50,$01
+ $B232 DEFB $54,$01
+ $B234 DEFB $64,$05
