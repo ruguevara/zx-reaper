@@ -84,7 +84,7 @@ Details and evidence: `re/frag/[ABCD]-report.md` (classification reports).
   -1, down +5, up -5, wrapped modulo 25; rooms 0-4 are not reachable from
   below, F124). Room 0 is the intro, room 25 the first ending scene. Room
   state $850C, checked by the main loop: $80 playing, 1 enter the room, 2
-  back to the arrival position, 3 the ending ($887B), 4 restart at a
+  back to the arrival position, 3 the ending ($887B), 4 restart at the active
   checkpoint after a death, 5 game over (script $A57E); bit 7 keeps the
   frame routines running (F25).
 - A room is built by its bytecode script (RoomScriptTable $7236, the

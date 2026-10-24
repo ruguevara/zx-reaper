@@ -246,7 +246,7 @@ Each skill is one procedure with a done criterion, copied into every project
 | --- | --- |
 | `tools/zxinit.py` | tape → project: split, simulated load, image, coverage, ctl, skool, build glue |
 | `tools/zxrun.py` | headless runner on SkoolKit's C simulator: scripted keys/Kempston and typed text (`TYPE`), fuzz, execution map, per-frame hashes, screenshots, the screen as text (`--text`, 32 or 42 columns), pokes, write watchpoints, shift test loading, `--call` a game routine and save the screen (renders levels for docs), `--record` the reads, interrupts and checkpoint states a port replays, `--save-input` a fuzz run as an input script |
-| `tools/zxq.py` | skool split into one file per entry; show/refs/next/status/unexec/peek/strings/gfx/reclassify/cut/check/const/equs/addrs/export; question and finding registers, audit |
+| `tools/zxq.py` | skool split into one file per entry; show/refs/next/status/unexec/peek/strings/gfx/reclassify/cut/check/const/equs/addrs/export; rename (labels and constants everywhere), links (article links to the labels' lines); question and finding registers, audit |
 | `tools/zxtape.py` | TAP/TZX ↔ text manifest + payloads, byte-exact rebuild, per-block diff |
 | `tools/zxbasic.py` | lossless BASIC ↔ text (hidden numbers, REM code, odd lines) |
 | `tools/zxgfx.py` | colour sprite/tile sheets, captions and animated GIFs from memory, for the docs gallery |

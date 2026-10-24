@@ -69,7 +69,7 @@ Tools: sjasmplus, Python 3 with SkoolKit 10.1 (`pip install -r ../../requirement
 | player | $A894 | Jean: tile probes, walking, jumping, falling, crouching, dying, exits |
 | effects | $AD88 | the water reflection, the bubbling blood, the ring of crosses |
 | unpack | $AE9D | unpacking the sprite sets of a room into the sprite sheet |
-| entities | $B028 | the creatures: crusaders, patrollers, hanged men, ghost, drops, archers, plants, fish, the Beast, Death, Satan |
+| entities | $B028 | the creatures: crusaders, patrollers, hanged men, the chasing ghost, drops, archers, stone heads, plants, fish, the Beast, Death, Satan |
 | templates | $BC92 | initial states of objects created during play |
 | buffers | $BE56 | frame call list, sprite queue, object slots, redraw buffers |
 | tiles | $CD00 | tile flags, attributes and bitmaps |
