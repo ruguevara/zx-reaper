@@ -34,7 +34,8 @@
   $B04C's templates (handler $B1D4: +2 speed, +4 path, +6 coordinate) are
   pointed to from $8BC2/$8BCD/$8BD8; $BD80-$BDC8 from a table at $83A9-$83CA.
 - Checkpoints $BE2A: the first zero among the nine flags at $8543 picks the
-  record, else the 10th ($BDF3).
+  record, else the 10th ($BDF3). [Corrected later: the first NONZERO flag
+  picks the record, F33/F48.]
 - Debug warp (observed): poke $A894=$FF; $AAAF jumps to $83CE (code inside
   the $811B data block), reads $A2D1, calls $AD71 to move rooms; bit 5 jumps
   to $AD82 (back to state 4). P moved room 5->6->7, A 7->12.

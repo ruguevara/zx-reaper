@@ -2,7 +2,7 @@
 ;
 ; The stone head set into the right-hand wall of Unexpected gate (room 20, at x = $6C, y = $0C) and Tortured souls
 ; (room 22, at x = $70, y = $34). It does not move: the handler takes its position, makes it the position of the
-; shot to be created (SPAWN_POSITION, the (y, x) half of the object list record, #R$5DFC) and prepares the arguments
+; shot to be created (SPAWN_POSITION, the (y, x) half of the object list record at $5DFC) and prepares the arguments
 ; of the shared tail #R$B611 of the archer #R$B5EB: the template of the shot in the alternate HL (#R$BCB2, the arrow
 ; flying left, #R$B6ED) and IY = #R$B3D4, the first frame table. The tail puts the position into the draw command and
 ; tests the hit box; the continuation #R$B620 counts the shot cycle down (70 frames: the head fires when the countdown
