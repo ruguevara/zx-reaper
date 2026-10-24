@@ -54,10 +54,15 @@
 ; (DrawWaterReflection water strip, AnimateBloodTiles blood tiles,
 ; ShowCrossRing ring of crosses; each a RET until a room script enables it) and
 ; tests the room state again. A quiet frame is drawn by about T 55,000 of the
-; frame; a busy one takes the whole frame or more. When the drawing outlasts
-; the next interrupt, that frame's game logic still runs but its sprites are
-; not queued, so the screen is updated on fewer frames than the logic
-; (observed, same run: 586 draws for 800 frames).
+; frame (observed in room 7 with Jean standing: back at the JP MainLoop at T
+; 54,700-54,850 on every frame); a busy one takes the whole frame or more. The
+; game logic never waits for the drawing: every game frame starts its frame
+; list again, so the loop draws only the latest complete list, and a game frame
+; whose interrupt comes while RunFrameList is running queues nothing at all
+; (QueueDrawCmd is a RET then). So the screen is updated on fewer frames than
+; the logic (observed: 586 draws for 800 frames in the run above; 300 frames
+; with enemy hits off gave 301 draws in room 7, 224-243 in rooms 5, 8, 13 and
+; 22, 128 in room 10 and 145 in room 14).
 ;
 ; Hardware: none directly. The pacing comes from the gate FrameListGate that
 ; the 50 Hz interrupt opens; the screen is written by the routines called from
@@ -184,8 +189,6 @@ MainLoop_GameOver:
 ; InterruptRoutine before the game starts (NoFrameRoutine).
 ;
 ; Hardware: none directly (the room script may write screen and attributes).
-;
-; O:IX Changed (by the spawners)
 EnterRoom:
   LD HL,RedrawPixels      ; redraw pixel buffer page
   CALL BuildMirrorTable   ; = BuildMirrorTable; leaves B = 0
@@ -496,11 +499,18 @@ SoundNext:
 ; RELOAD (later segments, frames), +7 NEXT (chained effect). Effect 1 (noise)
 ; is built into the routine and has no record.
 ;
-; Who plays what (SFX_ constants; observed by watching SoundRequest in runs,
-; F107; the checkpoint and the portal by touching their items): 2
-; jump, 3 bell or lever touched, 4 passage between rooms 10 and 19, 5 item
-; taken or lever pulled, 6 Jean dies, 7 Death throws a scythe or Satan fires, 8
-; the church door, 9 a checkpoint.
+; Who plays what (SFX_ constants; observed by watching or sampling SoundRequest
+; in runs with Jean placed on every item, F107): 2 jump; 3 the bell of room 2
+; and the levers of rooms 9 and 10; 4 the arches between rooms 10 and 19; 5 a
+; heart, cross, chalice, parchment or the final parchment taken, the wheel of
+; faith turned, the gate lever of room 20 pulled, a cross added to the ring of
+; room 24 (ShowCrossRing), a key accepted in the controls menu; 6 Jean dies; 7
+; an enemy shoots: Death's scythe, Satan's fireballs, the arrows of the
+; skeleton archers and of the stone head (UpdateShooter), the plants' seeds,
+; the fish's splash as it leaves the water and as it falls back (room 19: 7 at
+; frames 47 and 100 for one fish), and the Pestilent Beast's fire
+; (every second frame while its jet burns); 8 the church door, when it shuts and
+; each time it rattles; 9 a checkpoint.
 ;
 ; Effects 2 and 8 are the same record, 5 and 9 too. Lengths and sweeps, from
 ; the fields: every effect is one segment except effect 6; the lengths are 2,

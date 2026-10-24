@@ -7,7 +7,7 @@ RED                      EQU 2 ; colour: red
 WHITE                    EQU 7 ; colour: white
 PAPER                    EQU 8 ; attribute multiplier of the paper colour (ink colour is the low 3 bits)
 BRIGHT                   EQU 0x40 ; attribute bit 6: bright
-OP_RET                   EQU 0xC9 ; opcode of RET, stored over a NOP to switch a one-shot routine off
+OP_RET                   EQU 0xC9 ; opcode of RET, written over the NOP at the start of a routine to switch it off: the one-shot gates (HUD, parchment, event script), the tile animations at room entry, the frame-list gate, QueueDrawCmd while the list runs, the Kempston read
 SCREEN_COLS              EQU 0x20 ; character cells per screen row; also the row stride of the tile map, the flag map and the attribute file
 ROOM_HEIGHT_2PX          EQU 0x58 ; height of the room area in 2-pixel units (22 cell rows of 4)
 SUBROW_MASK              EQU 3 ; mask for the position of a sprite inside a cell row, in 2-pixel units (0-3)
@@ -27,7 +27,7 @@ ATTRS_HIGH               EQU 0x58 ; high byte of the attribute area address ($58
 SCREEN_HIGH              EQU 0x40 ; high byte of the screen bitmap address ($4000)
 MAP_ROWS                 EQU 22 ; rows of the tile map and the tile flag map (the room area)
 FLAG_REDRAW              EQU 0x80 ; tile flag bit 7: the cell is marked for redraw
-FLAG_HARMFUL             EQU 4 ; tile flag value of a cell that hurts the monk (observed: the lake of room 16)
+FLAG_HARMFUL             EQU 4 ; tile flag bit 2 (class 4): the cell kills the monk (ProbePlayer sets PlayerHit to 4) and removes Death's scythes; tiles $05, $3B, $3C, $4E-$74 (tile flag $84) and the water strips of rooms 16 and 19 (OpSetupWater)
 TILEMAP_HIGH             EQU 0x5B ; high byte of the tile map address ($5B00)
 FLAGMAP_HIGH             EQU 0x5E ; high byte of the tile flag map address ($5E00)
 LDI_CHAIN_LEN            EQU 32 ; LDI instructions in the block copier chain at $ADA1-$ADE0
@@ -62,12 +62,12 @@ CROSSES_NEEDED           EQU 12 ; crosses to collect before the chalice appears
 CHECKPOINT_FLAGS         EQU 9 ; checkpoint flag bytes at $8543 (0 inactive, nonzero the active checkpoint)
 WHEEL_STATE_MASK         EQU 7 ; bits of the wheel of faith flag ($851E) that tell its state (0 at rest, 6 turned)
 WHEEL_TURNED             EQU 6 ; value of the state bits of the wheel of faith ($851E) when it is turned
-STATE_RESPAWN            EQU 2 ; room state: respawn at the checkpoint position ($8512/$8514)
+STATE_RESPAWN            EQU 2 ; room state: put Jean at RespawnX/RespawnY ($8512/$8514) and enter the room (the arches of rooms 10 and 19 set it; state 4 goes on here after SelectCheckpoint)
 STATE_ENDING             EQU 3 ; room state: ending sequence ($887B)
 STATE_GAME_OVER          EQU 5 ; room state: Game Over screen ($A57E)
 SFX_TRIGGER              EQU 3 ; sound effect: bell or lever touched once ($A748)
 SFX_PORTAL               EQU 4 ; sound effect: passage between rooms 10 and 19
-SFX_PICKUP               EQU 5 ; sound effect: item taken, lever pulled, key accepted in the menu
+SFX_PICKUP               EQU 5 ; sound effect: an item taken (heart, cross, chalice, the final scroll), the wheel turned, the gate lever of room 20 pulled, a parchment read, a cross added to the ring of room 24, a key accepted in the menu
 SFX_DOOR                 EQU 8 ; sound effect: the church door rattles
 SFX_CHECKPOINT           EQU 9 ; sound effect: checkpoint touched
 ROOM_BEAST               EQU 10 ; room number of Pestilent Beast (the dragon room)
@@ -91,8 +91,8 @@ CTRL_RIGHT               EQU 1 ; control bit 0: right
 CTRL_LEFT                EQU 2 ; control bit 1: left
 CTRL_CROUCH              EQU 4 ; control bit 2: crouch
 CTRL_JUMP                EQU 0x18 ; control bits 3 and 4: jump (the keyboard sets both, Kempston fire only bit 4)
-TILE_BLOCKS              EQU 2 ; tile flag bit 1: the cell blocks the monk walking sideways or jumping up into it (classes 2 and 3)
-TILE_STANDABLE           EQU 1 ; tile flag bit 0: the monk can stand on the cell (classes 1 and 3); class 1 only from above
+TILE_BLOCKS              EQU 2 ; tile flag bit 1: the cell blocks the monk walking sideways or jumping up into it, and a fall stops on it (classes 2 and 3)
+TILE_STANDABLE           EQU 1 ; tile flag bit 0: the monk can stand on the cell (classes 1 and 3); class 1 only from above: a jump that leaves the feet inside its row falls back through it
 WALK_SPEED               EQU 0x80 ; horizontal speed of the monk, 8.8 per frame: half a unit of 2 pixels, one pixel
 CROUCH_SPEED             EQU 0x20 ; horizontal speed of the crouching monk, 8.8 per frame: a quarter of a pixel
 JUMP_SPEED               EQU 0x01FE ; vertical speed at the start of a jump, 8.8 units of 2 pixels per frame, upwards
@@ -101,14 +101,14 @@ FALL_SPEED_CAP_HI        EQU 2 ; high byte of the fall speed from which it stops
 DYING_RISE               EQU 0x80 ; how far the dying monk rises per frame, 8.8 (one pixel)
 WALK_ANIM_PERIOD         EQU 8 ; frames the walking monk keeps one animation frame
 DYING_ANIM_PERIOD        EQU 4 ; frames each frame of the dying animation lasts
-DYING_LAST_FRAME         EQU 7 ; frame number of the dying animation after which the monk is gone (the frame itself is not drawn)
+DYING_LAST_FRAME         EQU 7 ; first frame of the dying animation that is not drawn (frames 0-6 are; frame 7 lasts 4 frames, frame 8 ends the death)
 MONK_HEIGHT              EQU 12 ; height of the standing monk sprite in 2-pixel units (24 pixels)
 CROUCH_HEIGHT            EQU 8 ; height of the crouching monk sprite in 2-pixel units (16 pixels)
 SFX_JUMP                 EQU 2 ; sound effect: the monk jumps
 SFX_DEATH                EQU 6 ; sound effect: the monk dies
-STATE_DEATH              EQU 0x84 ; room state: restart the room after a death ($85, Game Over, when no life is left)
+STATE_DEATH              EQU 0x84 ; room state 4 with STATE_RUNNING: restart at the active checkpoint after a death (SelectCheckpoint, then as 2); UpdateDying_End makes it $85 (Game Over) when no life is left
 STATE_ENTER_ROOM         EQU 1 ; room state: enter the room whose number is in $8509
-EXIT_RIGHT               EQU 0 ; exit direction: through the right edge
+EXIT_RIGHT               EQU 0 ; exit direction: through the right edge (not used: LeaveRight stores it with XOR A)
 EXIT_LEFT                EQU 1 ; exit direction: through the left edge
 EXIT_DOWN                EQU 2 ; exit direction: through the bottom edge
 EXIT_UP                  EQU 3 ; exit direction: through the top edge
@@ -130,9 +130,9 @@ WATER_Y                  EQU 0x50 ; y (2-pixel units) of the water surface of ro
 TILE_BLOOD_A             EQU 0x3B ; tile number of the bubbling blood, first phase (swapped with TILE_BLOOD_B by AnimateBloodTiles)
 TILE_BLOOD_B             EQU 0x3C ; tile number of the bubbling blood, second phase
 TILE_RING_CROSS          EQU 0x4C ; tile number of the red crosses of the ring of twelve crosses in Satan's room
-CROSS_FLASH_PERIOD       EQU 5 ; frames between two colour steps of the ring of crosses (CrossFlashTimer reload)
+CROSS_FLASH_PERIOD       EQU 5 ; passes of the main loop (drawn frames, not interrupts: 8-9 frames in room 24, F117) between two steps of the ring of crosses (CrossFlashTimer reload)
 CROSS_COLOURS            EQU 6 ; attributes in the colour cycle of the ring of crosses (CrossColours)
-BLOOD_ANIM_PERIOD        EQU 2 ; frames between two swaps of the blood tiles (BloodAnimTimer reload)
+BLOOD_ANIM_PERIOD        EQU 2 ; passes of the main loop (drawn frames, not interrupts, F116) between two swaps of the blood tiles (BloodAnimTimer reload)
 COLUMN_MASK              EQU 0x1F ; mask of a cell column number (0-31)
 PAGING_BANK0             EQU 0x10 ; value for port $7FFD: RAM bank 0 at $C000, ROM 1 (48K BASIC), normal screen: the paging state of the game
 SPEAKER_BIT              EQU 0x10 ; bit 4 of port $FE: the speaker (EAR output); the beeper effects toggle it

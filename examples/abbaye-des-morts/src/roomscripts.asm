@@ -296,7 +296,7 @@ BlockTreeBark:
 ;
 ; Op $8A with 1 makes the left edge solid: the player cannot leave this room to
 ; the left (observed: holding left stays at the edge), so the crusaders' chase
-; of rooms 4-6 only goes one way.
+; of rooms 5 and 6 only goes one way.
 ;
 ; Room 5: column 0, row 1 of the 5x5 map (left is room 4, right 6, up 0, down
 ; 10, counted modulo 25). Unpacks sprite set PackedSet1. Subscripts:
@@ -497,9 +497,10 @@ BlockStoneHalfA:
 
 ; Room script 8: The Altar
 ;
-; Two conditional parts: the door DoorRight at the right edge while the lever
-; of room 10 (LeverRoom10) is still 0, and EraseWallBlock which erases a 2x2
-; block of wall once the bell of room 2 (BellRung) has rung.
+; Two conditional parts: the door DoorRight at the right edge (the way to room
+; 9) while the lever of room 10 (LeverRoom10) is still 0, and EraseWallBlock,
+; which erases a 2x2 block of the floor once the bell of room 2 (BellRung) has
+; rung and so opens the way down to room 13, Catacombs (observed, F142).
 ;
 ; Room 8: column 3, row 1 of the 5x5 map (left is room 7, right 9, up 3, down
 ; 13, counted modulo 25). Unpacks sprite set PackedSet15. Subscripts:
@@ -558,10 +559,12 @@ RoomScript08:
   DEFW BellRung
   DEFB $80                ; END
 
-; Erase the 2x2 wall block of The Altar after the bell has rung
+; Open the floor of The Altar after the bell has rung
 ;
-; Fills the 2x2 cells at row 20, column 26 with the blank tile $80. Run by room
-; 8 (op $9C) when BellRung, the bell of the Tower of the Bell, is nonzero.
+; Fills the 2x2 cells at row 20, column 26 (the bottom two rows of the floor)
+; with the blank tile $80, class 0, so that Jean can drop through into room 13,
+; Catacombs (observed, F142). Run by room 8 (op $9C) when BellRung, the bell of
+; the Tower of the Bell, is nonzero.
 EraseWallBlock:
   DEFB $86,$14,$1A,$02,$02,$80 ; FILLTILE row 20, col 26, 2x2, tile $80
   DEFB $80                ; END
@@ -579,8 +582,9 @@ DoorRight:
 
 ; Room script 9: Hangman tree
 ;
-; Draws the tree with a compressed bitmap (op $94) and sets up the second
-; sprite set.
+; The trunk and branches of the tree are drawn with ordinary tile ops, the
+; leaves (tile $89 at the top of the room) with a compressed bitmap (op $94,
+; the last op, F3).
 ;
 ; Room 9: column 4, row 1 of the 5x5 map (left is room 8, right 10, up 4, down
 ; 14, counted modulo 25). Unpacks sprite sets PackedSet10, PackedSet19.
@@ -637,8 +641,10 @@ RoomScript09:
 
 ; Room script 10: Pestilent Beast
 ;
-; Op $96 turns some cells into free space (flag $80), so that parts of the cave
-; that look solid can be walked through.
+; Op $96 turns row 5, columns 28-31 into free space (flag $80, class 0) while
+; they keep their rock tiles: a hidden tunnel one cell high through the rock of
+; the right edge, which room 11 continues (its own op $96 at row 5, columns
+; 0-1); Jean passes it crouching (F133; flag maps read in a run).
 ;
 ; Room 10: column 0, row 2 of the 5x5 map (left is room 9, right 11, up 5, down
 ; 15, counted modulo 25). Unpacks sprite sets PackedSet5, PackedSet6.
@@ -709,8 +715,13 @@ BlockCaveRock:
 
 ; Room script 11: Cave of illusions
 ;
-; Two op $96 areas are turned into free space (flag $80): false walls, as the
-; room name says (Cave of illusions).
+; Two op $96 areas are turned into free space (flag $80, class 0) while they
+; keep their tiles, as the room name says (Cave of illusions): row 5, columns
+; 0-1, the rock at the left edge where the hidden tunnel from room 10 comes
+; out; and rows 20-21, columns 2-3, two spikes that do not hurt (the other
+; spikes of the row are harmful, class 4) over rock that is not solid: a hidden
+; hole down into room 16 (F134), which continues in room 16's op $96 at
+; columns 2-3. Flag maps read in a run.
 ;
 ; Room 11: column 1, row 2 of the 5x5 map (left is room 10, right 12, up 6,
 ; down 16, counted modulo 25). Unpacks sprite set PackedSet12. Subscripts:
@@ -950,10 +961,11 @@ RoomScript15:
 
 ; Room script 16: Lake of despair
 ;
-; Op $96 turns an area into free space (flag $80). Op $9D makes the bottom row
-; of the room a water strip (DrawWaterReflection, the lake of blood reflecting
-; the scenery, harmful): row 21, from column 6, 16 cells wide, attribute $13
-; (DrawWaterReflection).
+; Op $96 turns rows 0-3, columns 2-3 into free space (flag $80, class 0) while
+; they keep their rock tiles: the hidden shaft under the hole in room 11's
+; floor (flag map read in a run). Op $9D makes part of the bottom row a water
+; strip (DrawWaterReflection, the lake of blood reflecting the scenery,
+; harmful): row 21, from column 6, 16 cells wide, attribute $13.
 ;
 ; Room 16: column 1, row 3 of the 5x5 map (left is room 15, right 17, up 11,
 ; down 21, counted modulo 25). Subscripts: ScriptRoomPanel, BlockCaveRock,

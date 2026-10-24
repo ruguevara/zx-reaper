@@ -14,10 +14,9 @@
 ; Hardware: none itself; the ports were read by ScanKeyboard. The routine
 ; executes an odd number of EXX, so it returns with the other register set
 ; selected (the alternate set is used for the loop counter and the result
-; bits); the callers do not rely on either set.
+; bits); the caller GameFrame does not rely on either set.
 ;
-; O:A Control bits (bit n = key pair n held)
-; O:E Control bits, for the Kempston code that follows
+; O:E Control bits (bit n = key pair n held), for ReadKempston that follows
 ReadKeyControls:
   LD BC,ControlKeys
   LD DE,KeyRows
@@ -56,8 +55,7 @@ KempstonSwitch:
 ;
 ; Hardware: reads the Kempston joystick port $1F.
 ;
-;   E Keyboard control bits from ReadKeyControls
-; O:A Control bits, also stored in ControlsRead
+; E Keyboard control bits from ReadKeyControls
 ReadKempston:
   LD BC,PORT_KEMPSTON
   IN A,(C)
@@ -79,7 +77,6 @@ ReadKempston:
 ; O:B Row index of the key (0-7), 0 when no key is held
 ; O:C Bit mask of the key within its half-row ($10, 8, 4, 2 or 1), 0 when no
 ;     key is held
-; O:HL Corrupted
 FindPressedKey:
   LD HL,KeyRows
   LD B,KEY_ROWS           ; row counter (counts down from 8)
@@ -151,7 +148,7 @@ KeyAbortY:
 ;
 ; Stored by ScanKeyboard (any key held, bits 0-4), then by ReadKeyControls and,
 ; with a joystick, ReadKempston. Bit 0 RIGHT, 1 LEFT, 2 CROUCH, 3 and 4 JUMP, 5
-; T (debug warp), 6 R, 7 Y. Read directly by the title loop RunIntro.
+; T (debug warp), 6 R, 7 Y. Read directly by the intro loop RunIntro.
 ControlsRead:
   DEFB $00
 
@@ -167,8 +164,10 @@ ControlsHeld:
 ; Control bits newly pressed this frame
 ;
 ; Bits that are set in ControlsRead and were not in the previous frame,
-; computed by GameFrame. Used for the jump (bits 3 and 4) and the debug warp
-; (bit 5). Same bit layout as ControlsRead.
+; computed by GameFrame. Used for the jump (bits 3 and 4, PlayerStanding) and
+; the debug warp: T (bit 5) enters and leaves it (UpdatePlayer, DebugWarpRoom)
+; and in the warp mode the direction bits 0-3 move one room (DebugWarpRoom).
+; Same bit layout as ControlsRead.
 ControlsPressed:
   DEFB $00
 
@@ -176,7 +175,7 @@ ControlsPressed:
 ;
 ; Set by GetKeyCode from the key code table KeyCodeTable. Updated every
 ; interrupt only while the menu frame routine MenuFrame is installed, and by
-; the title loop RunIntro; the menus wait on it.
+; the intro loop RunIntro; the menus wait on it.
 KeyCode:
   DEFB $00
 
@@ -207,8 +206,6 @@ KeyCodeTable:
 ; reaches the 0 after the table. The code is stored in KeyCode.
 ;
 ; Hardware: none (the ports were read by ScanKeyboard).
-;
-; O:A Key code, 0 when no key is held
 GetKeyCode:
   LD DE,KeyCodeTable
   LD HL,KeyRows
@@ -275,9 +272,9 @@ ToggleKempston:
 ; loading picture, which shows the same three prompts, stays); the interrupt
 ; runs MenuFrame, which keeps KeyCode up to date. It waits for no key to be
 ; held, then for a key: ENTER returns to the caller (the game starts), SPACE
-; calls WaitSpaceRelease (128K music only; the loading picture says "hold Space
-; for info" but on the 48K nothing happens), C opens the controls screen,
-; anything else is ignored.
+; calls WaitSpaceRelease (128K only: the info screen while SPACE is held; the
+; loading picture says "hold Space for info" but on the 48K nothing happens), C
+; opens the controls screen, anything else is ignored.
 ;
 ; The controls screen: SaveMenuArea saves the middle of the screen and the
 ; attributes, then the scripts ScriptControlsScreen, ScriptKeyboardLine and
@@ -292,8 +289,9 @@ ToggleKempston:
 ;
 ; Hardware: waits with HALT for the frame interrupt; draws through the script
 ; interpreter RunScript; keys come from the interrupt routine MenuFrame.
-;
-; O:A $0D (ENTER) when the loop ends
+; Observed: C, then 1 on the controls screen writes RET at KempstonSwitch
+; (from ToggleKempston) and shows "Kempston disabled"; ENTER brings the title
+; picture back.
 TitleMenu:
   CALL RestoreMenuArea    ; restore the title screen (coming back from the
                           ; controls screen)
@@ -459,7 +457,6 @@ RedefineOneKey_Press:
 ;   A Key code (from KeyCode)
 ;   DE Cursor in the buffer KeyNames
 ; O:DE Cursor after the name
-; O:BC Reduced by 2 when a short name was copied (LDI)
 AddKeyName:
   PUSH HL
   LD HL,ShortKeyNames
@@ -499,9 +496,9 @@ ShortKeyNames:
 
 ; Cheat check: toggle the debug room warp if the keys spell RAGE
 ;
-; Called by TitleMenu after the player has redefined the keys. XORs together,
-; over the eight bytes of the first four key pairs of ControlKeys and the eight
-; bytes of CheatKeyPairs (E, G, A, R), their differences, and if the final
+; Called by TitleMenu after the player has redefined the keys. XORs each of
+; the eight bytes of the first four key pairs of ControlKeys with the matching
+; byte of CheatKeyPairs (E, G, A, R) into one running value, and if the final
 ; value is 0 flips the opcode at SmcWarpCheat between JR ($18) and JR Z ($28)
 ; (XOR $30). With JR Z in place the T key during play puts the player in the
 ; debug room-warp mode (UpdatePlayer, DebugWarpRoom); with the JR it does
@@ -511,8 +508,6 @@ ShortKeyNames:
 ; the same keys again turns it off.
 ;
 ; Hardware: none.
-;
-; O:A The new opcode at $AABE when the cheat was toggled
 CheckCheatKeys:
   LD HL,ControlKeys
   LD DE,CheatKeyPairs
@@ -533,9 +528,11 @@ CheckCheatKeys_Loop:
 
 ; Frame routine of the title and controls menus
 ;
-; Called by the interrupt handler through the vector at $8504. The start of the
-; game StartGame installs it before the title is drawn and replaces it with
-; GameFrameRoutine when the game starts. Each frame it runs the sound effects
+; Called by the interrupt handler through the vector InterruptRoutine ($8504).
+; The start of the game StartGame installs it at StartGame_NoTitle, after
+; drawing the title script (on a restart) and before the title menu, and
+; replaces it with GameFrameRoutine when ENTER starts the game. Each frame it
+; runs the sound effects
 ; (PlaySoundStep), reads the keyboard into KeyRows (ScanKeyboard), finds the
 ; first key held (FindPressedKey) and stores its half-row index and mask in
 ; $8502/$8503 (the mask in $8502, the row in $8503; read by RedefineOneKey),
@@ -543,8 +540,6 @@ CheckCheatKeys_Loop:
 ;
 ; Hardware: beeper (through PlaySoundStep) and keyboard ports (through
 ; ScanKeyboard).
-;
-; O:A Key code of the key held, 0 for none
 MenuFrame:
   CALL PlaySoundStep
   CALL ScanKeyboard

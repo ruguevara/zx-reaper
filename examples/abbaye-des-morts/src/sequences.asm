@@ -53,8 +53,6 @@ RunIntro_Loop:
 ; its own copy of the wait with the one-shot gates inside it (MainLoop_Play).
 ;
 ; Hardware: waits for the frame interrupt without HALT.
-;
-; O:A 0
 WaitFrameList:
   LD A,(FrameListGate)
   OR A
@@ -97,7 +95,8 @@ LoadCutsceneList:
 ; is hidden on the throne of Satan, burn him", black on cyan). Jean's X and Y
 ; are set to $3E00 and $3A00 (the middle of the room), actor list CutsceneList2
 ; (8 actors) is loaded and the second cutscene runs (observed: 457 frames): a
-; forest at night, Jean on a red pyre, the crusaders round it.
+; forest at night, Jean on a red pyre (an actor; after 280 frames it makes the
+; real Jean, at the same place, die), the crusaders round it.
 ;
 ; 4 Music track 2, the script ScriptEnding3 ("Your body has burned in the
 ; flames, but your soul has found a place in Heaven."), the stub at
@@ -160,8 +159,12 @@ RunEnding_Music:
 ; as the intro does: wait for a completed frame list (WaitFrameList), run it
 ; (FrameListGate), build and copy the cells (BuildRedrawList, DrawRedrawList).
 ; It stops when an actor sets CutsceneDone (the end of its path script,
-; UpdateCrusaderSignal, or its countdown, UpdatePyreMonk) and then sets the
-; room state to 0. Jean is not in play (state 0) and the keys do nothing.
+; UpdateCrusaderSignal, or its countdown, UpdatePyreMonk; observed in the
+; ending run: $B1D1 at frame 406, $B988 at frame 897) and then sets the room
+; state to 0. The keys do nothing. Jean is not in play (state 0), except in the
+; second scene, where UpdatePyreMonk sets his state to 2 and his hit flag, so
+; that he dies on the pyre (state 2, then 1 in the same frame, 722 in that run;
+; F85), which costs a life (F137).
 ;
 ; Hardware: none directly.
 RunCutscene:
@@ -188,8 +191,6 @@ RunCutscene_Loop:
 ; queue (SpawnQueueCount = 0) and returns to the caller of SpawnQueuedObjects.
 ; Happens in room 14, where the plants' volleys find all 11 slots busy and
 ; some seeds are never spat (observed, F126).
-;
-; O:A 0
 SpawnQueued_NoSlot:
   POP AF                  ; drop the pushed position (BC)...
   POP AF                  ; ... and template (DE)
@@ -211,8 +212,11 @@ SpawnQueued_NoSlot:
 ; (the high byte of Y) and copies the template bytes 8-17 to +$A..+$13 (hit
 ; box, sprite pointer, animation counters); then it decrements SpawnQueueCount.
 ; The same list is filled by the cutscene loader LoadCutsceneList and by the
-; enemies that shoot (Death, Satan, the archers). When no slot is free the rest
-; of the list is dropped (SpawnQueued_NoSlot).
+; enemies that shoot or throw, which append through ObjectListPtr: Death (a
+; scythe), Satan (three fireballs), UpdateShooter (an arrow of a skeleton
+; archer or of the stone head), the plants (two seeds), the fish (a splash) and
+; the Pestilent Beast's fire (two flames). When no slot is free the rest of the
+; list is dropped (SpawnQueued_NoSlot).
 ;
 ; The routine keeps the record in the main register set and the slot address in
 ; the alternate one (EXX).
@@ -282,10 +286,10 @@ SpawnQueuedObjects_Next:
 ; Spawn the room's items
 ;
 ; Walks the room item table RoomItems (8-byte records in the order of their
-; flag addresses, not of their rooms, ended by room $1A) and calls SpawnItem for every record of the current room
-; RoomNumber. The room and the end mark are loaded together: C = the room, B =
-; $1A (RoomTableEnd). Called by EnterRoom after the room script, with every
-; slot free.
+; flag addresses, not of their rooms, ended by room $1A) and calls SpawnItem
+; for every record of the current room RoomNumber. The room and the end mark
+; are loaded together: C = the room, B = $1A (RoomTableEnd). Called by
+; EnterRoom after the room script, with every slot free.
 ;
 ; Hardware: none.
 SpawnRoomItems:
@@ -308,7 +312,9 @@ SpawnRoomItems_Loop:
 ; The flag byte of an item (its address is the word at +1 of the record) is $FF
 ; once the item is taken or finished (ITEM_GONE: a heart, a cross, the church
 ; trigger...); such an item is not created again when the room is entered
-; later. Otherwise MakeItemSlot makes its slot. All registers are preserved.
+; later. Otherwise MakeItemSlot makes its slot. AF, BC, DE and HL are
+; preserved; IX, IY and the alternate set are changed (MakeItemSlot,
+; FindFreeSlot).
 ;
 ; HL Address of the room item record (RoomItems)
 SpawnItem:
@@ -348,10 +354,9 @@ SpawnItem:
 ; which have at most 10 records in a room (room 15), for 11 slots, all free on
 ; room entry (checked from the tables).
 ;
-;   HL Address of the record + 2 (the high byte of the flag pointer: SpawnItem
-;      has read the pointer)
-;   BC Address of the item's flag byte
-; O:IX Address of the slot
+; HL Address of the record + 2 (the high byte of the flag pointer: SpawnItem
+;    has read the pointer)
+; BC Address of the item's flag byte
 MakeItemSlot:
   INC HL                  ; HL = record + 3: the type
   LD A,(HL)               ; type
@@ -444,10 +449,10 @@ SpawnRoomObjects_Loop:
 ; described at ObjectSlots.
 ;
 ; As in MakeItemSlot, the carry of FindFreeSlot is not tested (no problem with
-; the shipped tables). All registers but IX and IY are preserved.
+; the shipped tables). AF, BC, DE and HL are preserved; IX, IY and the
+; alternate set are changed (FindFreeSlot).
 ;
-;   HL Address of the room object record
-; O:IX Address of the slot
+; HL Address of the room object record
 SpawnRoomObject:
   PUSH AF
   PUSH HL
@@ -535,14 +540,18 @@ SpawnRoomObject:
 ; The routine pops its return address into IY and returns with JP (IY), and
 ; does its work in the alternate register set, so HL, DE and BC of the caller
 ; are preserved. Used by the three spawners MakeItemSlot, SpawnRoomObject and
-; SpawnQueuedObjects (which takes the slot address from DE' after its own EXX).
+; SpawnQueuedObjects (which takes the slot address from DE' after its own EXX),
+; and entered at FindFreeSlot_IY by the crusader spawner UpdateCrusaderSpawner,
+; which loads IY itself so that the search goes on at SpawnCrusader.
 ;
-; O:F Carry set when a free slot was found, clear when all are in use O:IX
-; Address of the free slot (unchanged when none) O:DE' Address of the free slot
-; (the alternate DE; SpawnQueuedObjects uses it) O:IY Changed (holds the return
-; address)
+; O:F Carry set when a free slot was found, clear when all are in use
+; O:IX Address of the free slot (unchanged when none)
+; O:DE' Address of the free slot, in the alternate set (SpawnQueuedObjects
+;       reads it after an EXX); the alternate HL and BC are changed too
 FindFreeSlot:
   POP IY                  ; return address; the routine ends with JP (IY)
+; Entry point used by UpdateCrusaderSpawner: IY = where to go on (instead of a
+; return address).
 FindFreeSlot_IY:
   EXX                     ; alternate set
   LD HL,ObjectSlots       ; ObjectSlots

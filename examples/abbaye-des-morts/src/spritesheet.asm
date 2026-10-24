@@ -269,10 +269,13 @@ SpriteSheet:
 ; The rest of the sprite sheet (SpriteSheet): the pages $EF-$FE are the pixel
 ; rows 24-39 (the page of row r is $D7 + r). Columns $00-$2F hold the crouching
 ; monk, 4 frames of 12 columns (four shifted copies of 3 columns), columns
-; $30-$62 small sprites of the objects and enemies (the object table
-; BehaviourJean points to $EF30-$EF55, $F357 and $F759; the red flames of
-; SpriteBlockFlame are at $EF40 and $F740), and columns $63-$FF are filled at
-; run time with the room's sprites (UnpackSpriteSet) and are zero in the image,
+; $30-$62 small sprites of the objects and enemies (the behaviour blocks and
+; sprite blocks of behaviours.asm point there: fireball and seed $EF30, the
+; stone head's arrow $EF32, arrows $EF34/$EF36, the stone head $EF3C/$EF3E,
+; the flames of SpriteBlockFlame $EF40/$F740, the plant $EF4B/$EF4D, the fish
+; $EF4F/$EF51, the drop $EF53/$EF55/$F357, the splash $F759-$F75D), and
+; columns $63-$FF are filled at run time with the room's sprites
+; (UnpackSpriteSet; birds, set 4, start at $EF63) and are zero in the image,
 ; like those of SpriteSheet. Sprites that begin on a page of this range (such
 ; as the flames at $F740, 8 rows) end at row 39.
 SpriteSheetLower:

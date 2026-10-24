@@ -7,7 +7,10 @@
 ; cross taken while the wheel is turned, 3 checkpoint (gravestone cross), 4
 ; bell, 5 parchment, 6 the red scroll of room 24, 7 the church door trigger (no
 ; sprite), 8 arch between two rooms, 9 lever, 10 the wheel of faith of room 17,
-; 11 the chalice.
+; 11 the chalice. The records of types 1 and 2 are identical: which set a
+; cross belongs to is decided by the action word of its room item record
+; (ActionCrossWheelRest for the type 1 records, ActionCrossWheelTurned for type
+; 2).
 ;
 ; The table is not read for the room objects (enemies) of RoomObjects, which
 ; use the handler table at EntityHandlers.
@@ -34,8 +37,8 @@ ObjectTypeTable:
 ;
 ; +1 byte: number of animation frames (slot +$0B)
 ;
-; +2 word: the slot's handler, RoomItemHandler (RoomItemHandler), or
-; ParchmentHandler for parchments (slot +0)
+; +2 word: the slot's handler, RoomItemHandler, or ParchmentHandler for
+; parchments (slot +0)
 ;
 ; +4 word: frame list (FramesHeart), 4 bytes per frame (slot +$0C)
 ;
@@ -47,7 +50,10 @@ ObjectTypeTable:
 ; themselves (delays of 20, 5 and 3 frames; 2, 6 and 9 frames each). The other
 ; types have a frame count of 0: their action routine chooses the frame from
 ; the item's flag (the checkpoint, bell, levers, wheel) or there is only one.
-; The church door trigger (type 7) has no frame list: it draws nothing.
+; The church door trigger (type 7) has no frame list: it draws nothing; its
+; +0 byte, 1, is the first countdown of the door rattle that ActionChurchDoor
+; keeps in slot +8, so the first rattle (with sound 8) comes on the frame after
+; the door shuts (observed).
 ObjectTypeRecords:
   DEFB $14,$02            ; type 0 heart: frame delay, number of frames
   DEFW RoomItemHandler    ; handler
@@ -104,19 +110,22 @@ ObjectTypeRecords:
 
 ; Frame lists of the room items: 34 frames of 4 bytes
 ;
-; Each frame: +0 word: graphics address of a 16 x 16 pixel sprite (32 bytes, in
-; the sprite block at SpriteArch), +2 byte: attribute, +3 byte: 0 (unused: it
-; is popped as the flags of the sprite command). The type records
-; (ObjectTypeRecords) point into this table; the item's current frame number
-; (slot +$0A) is an index in its list, read by DrawItemFrame (DrawItemFrame).
-; The lists:
+; Each frame: +0 word: graphics address of a 16 x 16 pixel sprite (32 bytes;
+; the arch is 16 x 24, 48 bytes) in the sprite block at SpriteArch, +2 byte:
+; attribute, +3 byte: 0 (unused: it is popped as the flags of the sprite
+; command). The type records (ObjectTypeRecords) point into this table; the
+; item's current frame number (slot +$0A) is an index in its list, read by
+; DrawItemFrame. The lists:
 ;
 ; FramesHeart (2 frames), FramesCross (12: 6 bright crosses in the colours of
 ; CrossColours, then 6 thin ones, the plus sign sprite), FramesCheckpoint (2:
 ; not active, active), FramesArch (9, all the arch with changing ink),
 ; FramesScroll (1: the parchment), FramesRedScroll (1: the same sprite in red,
-; attribute $42), FramesBell (2: at rest, ringing), FramesLever (2: up,
-; pulled), FramesWheel (2) and FramesChalice (1).
+; attribute $42), FramesBell (2: before and after the touch, the second not
+; bright), FramesLever (2: before and after the pull, the handle tilted the
+; other way and not bright), FramesWheel (2: at rest, turned: grey and turned
+; by 45 degrees) and FramesChalice (1). Seen in rooms 2, 9 and 17 with the
+; flags poked.
 FramesHeart:
   DEFW SpriteHeart0
   DEFB $02,$00
@@ -202,8 +211,9 @@ FramesChalice:
 ; Read by the spawner SpawnRoomObjects when a room is entered: it scans the
 ; table from the start, calls SpawnRoomObject for every record whose room (+0)
 ; is the current room and stops at the room byte $1A (the end mark at 8EDE,
-; which is also the value in $850A, so room and end mark are compared as a word
-; with $8509). The records of one room are not sorted. Record:
+; which is also the value in $850A, RoomTableEnd: room and end mark are loaded
+; as one word from $8509). The table is not sorted by room: the records of a
+; room need not be together (room 15's drops and knights are apart). Record:
 ;
 ; +0 byte: room number
 ;
@@ -226,15 +236,22 @@ FramesChalice:
 ; +5 byte: y position in 2-pixel units (high byte of the slot's y word at
 ; +8/+9)
 ;
-; +6 byte: initial animation state (slot +$0A and +$0B)
+; +6 byte: a timer, copied to slot +$0A and to its reload +$0B (not an
+; animation state: the animation frame +$14 starts at 0): the start delay of
+; the drops (kind 9, +$B), the reload of the plants' spit countdown (12, $78),
+; the delay before the Beast's fire jet (15, $48 = 72 frames), the first
+; attack delay of Death (16, $28) and of Satan (17, $96 = 150 frames, F52); 0
+; and unused for the other kinds
 ;
-; +7 byte: slot +4: lower limit of the patrol (x for kinds 2 and 3, y for kinds
-; 4-7); the countdown of the timer kinds (13-15); low byte of the entity
-; template address for kind 1
+; +7 byte: slot +4: lower limit of the patrol (x for kinds 2 and 3 and for
+; Death 16, y for kinds 4-7 and for Satan 17); y of the stalactite tip (drops,
+; 9); the cycle countdown of the fish (13) and of the Beast's fire (15); low
+; byte of the entity template address for kind 1
 ;
-; +8 byte: slot +5: upper limit of the patrol; the reload of the countdown
-; (kinds 13-15); high byte of the template address for kind 1; the x position
-; where a runner of kind 0 ends ($80)
+; +8 byte: slot +5: upper limit of the patrol (same kinds); y where a drop's
+; fall ends (9); the reload of the cycle countdown (13, 15); high byte of the
+; template address for kind 1; the x position where a runner of kind 0 ends
+; ($80); the start delay of the chasing ghost (8, $1E = 30 frames)
 ;
 ; +9 word: behaviour block (BehaviourJean to BehaviourSatan) that tells how the
 ; kind looks and how large its hit box is
@@ -243,11 +260,11 @@ FramesChalice:
 ; of the handlers): 0 the runners of the intro in room 0 (Jean and three
 ; crusaders crossing the screen); 1 spawns a running crusader every 40 frames
 ; (rooms 5, 6 and 25, where crusaders chase Jean in from the left edge); 2 and
-; 3 patrol horizontally (rats, bats, skeletons, soldiers, worms, birds, demons:
-; the behaviour block tells which sprite); 4 and 5 patrol vertically (spiders
-; on a thread, flies, fire wheels); 6 and 7 the hanged men of room 9 (bob on
-; their ropes; no record starts as kind 7); 8 the grinning ghost of room 11
-; that chases Jean; 9 the water drops of rooms 15 and 19; 10 skeleton archers;
+; 3 patrol horizontally (rats, bats, skeletons, ceiling ghosts, knights,
+; worms, birds, demons: the behaviour block tells which sprite); 4 and 5 patrol
+; vertically (spiders on a thread, flies, fire wheels); 6 and 7 the hanged men
+; of room 9 (bob on their ropes; no record starts as kind 7); 8 the chasing
+; ghost of room 11; 9 the water drops of rooms 15 and 19; 10 skeleton archers;
 ; 11 the stone heads in the wall of rooms 20 and 22 that shoot arrows; 12
 ; the spitting plants of room 14; 13 the fish of rooms 16 and 19 that jump out
 ; of the water; 14 the head of the Pestilent Beast; 15 the fire breath of the
@@ -388,8 +405,8 @@ RoomObjects:
                                            ; starts up), x $58 y $40, y limits
                                            ; $05-$48
   DEFW BehaviourFlyA
-  DEFB $0B,$08,$10,$08,$40,$24,$00,$00,$1E ; room 11: chaser (ghost), x $40 y
-                                           ; $24, params $00 $00 $1E
+  DEFB $0B,$08,$10,$08,$40,$24,$00,$00,$1E ; room 11: chasing ghost, x $40 y
+                                           ; $24, start delay $1E (30 frames)
   DEFW BehaviourChaser
   DEFB $0D,$02,$20,$08,$2C,$2C,$00,$28,$60 ; room 13: skeleton (patroller,
                                            ; starts left), x $2C y $2C, x
@@ -403,11 +420,11 @@ RoomObjects:
                                            ; starts left), x $48 y $20, x
                                            ; limits $3C-$4C
   DEFW BehaviourSkeleton
-  DEFB $16,$02,$20,$08,$20,$04,$00,$08,$38 ; room 22: white flyer (patroller,
+  DEFB $16,$02,$20,$08,$20,$04,$00,$08,$38 ; room 22: ceiling ghost (patroller,
                                            ; starts left), x $20 y $04, x
                                            ; limits $08-$38
   DEFW BehaviourWhiteFlyer
-  DEFB $17,$02,$20,$08,$50,$04,$00,$08,$70 ; room 23: white flyer (patroller,
+  DEFB $17,$02,$20,$08,$50,$04,$00,$08,$70 ; room 23: ceiling ghost (patroller,
                                            ; starts left), x $50 y $04, x
                                            ; limits $08-$70
   DEFW BehaviourWhiteFlyer
@@ -423,50 +440,57 @@ RoomObjects:
                                            ; left), x $64 y $34, x limits
                                            ; $08-$6C
   DEFW BehaviourBird
-  DEFB $0F,$09,$40,$46,$10,$2C,$3D,$2C,$3C ; room 15: water drop (drop), x $10
-                                           ; y $2C, params $3D $2C $3C
+  DEFB $0F,$09,$40,$46,$10,$2C,$3D,$2C,$3C ; room 15: water drop, x $10, tip
+                                           ; y $2C, start delay $3D, falls to y
+                                           ; $3C
   DEFW BehaviourDrop
-  DEFB $0F,$09,$40,$46,$2C,$10,$29,$10,$24 ; room 15: water drop (drop), x $2C
-                                           ; y $10, params $29 $10 $24
+  DEFB $0F,$09,$40,$46,$2C,$10,$29,$10,$24 ; room 15: water drop, x $2C, tip
+                                           ; y $10, start delay $29, falls to y
+                                           ; $24
   DEFW BehaviourDrop
-  DEFB $0F,$09,$40,$46,$2C,$2C,$15,$2C,$3C ; room 15: water drop (drop), x $2C
-                                           ; y $2C, params $15 $2C $3C
+  DEFB $0F,$09,$40,$46,$2C,$2C,$15,$2C,$3C ; room 15: water drop, x $2C, tip
+                                           ; y $2C, start delay $15, falls to y
+                                           ; $3C
   DEFW BehaviourDrop
-  DEFB $0F,$09,$40,$46,$60,$10,$33,$10,$34 ; room 15: water drop (drop), x $60
-                                           ; y $10, params $33 $10 $34
+  DEFB $0F,$09,$40,$46,$60,$10,$33,$10,$34 ; room 15: water drop, x $60, tip
+                                           ; y $10, start delay $33, falls to y
+                                           ; $34
   DEFW BehaviourDrop
-  DEFB $0F,$09,$40,$46,$68,$10,$0B,$10,$44 ; room 15: water drop (drop), x $68
-                                           ; y $10, params $0B $10 $44
+  DEFB $0F,$09,$40,$46,$68,$10,$0B,$10,$44 ; room 15: water drop, x $68, tip
+                                           ; y $10, start delay $0B, falls to y
+                                           ; $44
   DEFW BehaviourDrop
-  DEFB $13,$09,$40,$46,$18,$04,$15,$04,$14 ; room 19: water drop (drop), x $18
-                                           ; y $04, params $15 $04 $14
+  DEFB $13,$09,$40,$46,$18,$04,$15,$04,$14 ; room 19: water drop, x $18, tip
+                                           ; y $04, start delay $15, falls to y
+                                           ; $14
   DEFW BehaviourDrop
-  DEFB $13,$09,$40,$46,$40,$04,$3D,$04,$1C ; room 19: water drop (drop), x $40
-                                           ; y $04, params $3D $04 $1C
+  DEFB $13,$09,$40,$46,$40,$04,$3D,$04,$1C ; room 19: water drop, x $40, tip
+                                           ; y $04, start delay $3D, falls to y
+                                           ; $1C
   DEFW BehaviourDrop
-  DEFB $0F,$02,$10,$08,$28,$1C,$00,$26,$3B ; room 15: soldier (patroller,
+  DEFB $0F,$02,$10,$08,$28,$1C,$00,$26,$3B ; room 15: knight (patroller,
                                            ; starts left), x $28 y $1C, x
                                            ; limits $26-$3B
   DEFW BehaviourSoldier
-  DEFB $0F,$02,$10,$08,$60,$44,$00,$40,$60 ; room 15: soldier (patroller,
+  DEFB $0F,$02,$10,$08,$60,$44,$00,$40,$60 ; room 15: knight (patroller,
                                            ; starts left), x $60 y $44, x
                                            ; limits $40-$60
   DEFW BehaviourSoldier
-  DEFB $14,$02,$10,$08,$44,$44,$00,$28,$48 ; room 20: soldier (patroller,
+  DEFB $14,$02,$10,$08,$44,$44,$00,$28,$48 ; room 20: knight (patroller,
                                            ; starts left), x $44 y $44, x
                                            ; limits $28-$48
   DEFW BehaviourSoldier
-  DEFB $11,$0A,$00,$50,$08,$0C,$00,$00,$00 ; room 17: archer (skeleton archer),
-                                           ; x $08 y $0C
+  DEFB $11,$0A,$00,$50,$08,$0C,$00,$00,$00 ; room 17: skeleton archer, x $08 y
+                                           ; $0C, shoots every $50 frames
   DEFW BehaviourArcher
-  DEFB $11,$0A,$00,$50,$70,$24,$00,$00,$00 ; room 17: archer (skeleton archer),
-                                           ; x $70 y $24
+  DEFB $11,$0A,$00,$50,$70,$24,$00,$00,$00 ; room 17: skeleton archer, x $70 y
+                                           ; $24, shoots every $50 frames
   DEFW BehaviourArcher
-  DEFB $11,$0A,$00,$50,$3C,$34,$00,$00,$00 ; room 17: archer (skeleton archer),
-                                           ; x $3C y $34
+  DEFB $11,$0A,$00,$50,$3C,$34,$00,$00,$00 ; room 17: skeleton archer, x $3C y
+                                           ; $34, shoots every $50 frames
   DEFW BehaviourArcher
-  DEFB $15,$0A,$00,$50,$60,$3C,$00,$00,$00 ; room 21: archer (skeleton archer),
-                                           ; x $60 y $3C
+  DEFB $15,$0A,$00,$50,$60,$3C,$00,$00,$00 ; room 21: skeleton archer, x $60 y
+                                           ; $3C, shoots every $50 frames
   DEFW BehaviourArcher
   DEFB $14,$0B,$00,$46,$6C,$0C,$00,$00,$00 ; room 20: stone head in the wall, x
                                            ; $6C y $0C
@@ -475,23 +499,31 @@ RoomObjects:
                                            ; $70 y $34
   DEFW BehaviourStoneHead
   DEFB $0E,$0C,$00,$94,$44,$10,$78,$00,$00 ; room 14: seed-spitting plant, x
-                                           ; $44 y $10, timer $94
+                                           ; $44 y $10, first spit countdown $94,
+                                           ; then every $78
   DEFW BehaviourSeedPlant
   DEFB $0E,$0C,$00,$B0,$70,$18,$78,$00,$00 ; room 14: seed-spitting plant, x
-                                           ; $70 y $18, timer $B0
+                                           ; $70 y $18, first spit countdown $B0,
+                                           ; then every $78
   DEFW BehaviourSeedPlant
   DEFB $0E,$0C,$00,$78,$38,$38,$78,$00,$00 ; room 14: seed-spitting plant, x
-                                           ; $38 y $38, timer $78
+                                           ; $38 y $38, first spit countdown $78,
+                                           ; then every $78
   DEFW BehaviourSeedPlant
-  DEFB $13,$0D,$00,$04,$48,$4C,$3B,$54,$54 ; room 19: fish (fish), x $48 y $4C
+  DEFB $13,$0D,$00,$04,$48,$4C,$3B,$54,$54 ; room 19: fish, x $48 y $4C, cycle
+                                           ; $54 frames, first $54
   DEFW BehaviourFish
-  DEFB $13,$0D,$00,$04,$60,$4C,$3B,$7C,$54 ; room 19: fish (fish), x $60 y $4C
+  DEFB $13,$0D,$00,$04,$60,$4C,$3B,$7C,$54 ; room 19: fish, x $60 y $4C, cycle
+                                           ; $54 frames, first $7C
   DEFW BehaviourFish
-  DEFB $10,$0D,$00,$04,$1C,$4C,$3B,$54,$54 ; room 16: fish (fish), x $1C y $4C
+  DEFB $10,$0D,$00,$04,$1C,$4C,$3B,$54,$54 ; room 16: fish, x $1C y $4C, cycle
+                                           ; $54 frames, first $54
   DEFW BehaviourFish
-  DEFB $10,$0D,$00,$04,$3C,$4C,$3B,$7C,$54 ; room 16: fish (fish), x $3C y $4C
+  DEFB $10,$0D,$00,$04,$3C,$4C,$3B,$7C,$54 ; room 16: fish, x $3C y $4C, cycle
+                                           ; $54 frames, first $7C
   DEFW BehaviourFish
-  DEFB $10,$0D,$00,$04,$50,$4C,$3B,$68,$54 ; room 16: fish (fish), x $50 y $4C
+  DEFB $10,$0D,$00,$04,$50,$4C,$3B,$68,$54 ; room 16: fish, x $50 y $4C, cycle
+                                           ; $54 frames, first $68
   DEFW BehaviourFish
   DEFB $15,$02,$20,$08,$2D,$14,$00,$08,$30 ; room 21: demon (patroller, starts
                                            ; left), x $2D y $14, x limits
@@ -533,17 +565,21 @@ RoomObjects:
                                            ; patroller, starts down), x $50 y
                                            ; $22, y limits $06-$62
   DEFW BehaviourFireWheel
-  DEFB $0A,$0E,$00,$6E,$3C,$04,$00,$00,$00 ; room 10: beast head (beast head),
-                                           ; x $3C y $04
+  DEFB $0A,$0E,$00,$6E,$3C,$04,$00,$00,$00 ; room 10: head of the Pestilent
+                                           ; Beast, x $3C y $04, cycle $6E (110
+                                           ; frames)
   DEFW BehaviourBeastHead
-  DEFB $0A,$0F,$03,$02,$40,$18,$48,$6E,$6E ; room 10: fire breath (fire
-                                           ; breath), x $40 y $18
+  DEFB $0A,$0F,$03,$02,$40,$18,$48,$6E,$6E ; room 10: fire jet of the Beast, x
+                                           ; $40 y $18, first jet after $48
+                                           ; frames, cycle $6E
   DEFW BehaviourBeastFire
-  DEFB $12,$10,$20,$05,$09,$04,$28,$08,$68 ; room 18: Death (Death), x $09 y
-                                           ; $04
+  DEFB $12,$10,$20,$05,$09,$04,$28,$08,$68 ; room 18: Death, x $09 y $04, x
+                                           ; limits $08-$68, first throw after
+                                           ; $28 frames
   DEFW BehaviourDeath
-  DEFB $18,$11,$20,$06,$60,$27,$96,$05,$28 ; room 24: Satan (Satan), x $60 y
-                                           ; $27
+  DEFB $18,$11,$20,$06,$60,$27,$96,$05,$28 ; room 24: Satan, x $60 y $27, y
+                                           ; limits $05-$28, first volley after
+                                           ; $96 frames
   DEFW BehaviourSatan
   DEFB $1A
 

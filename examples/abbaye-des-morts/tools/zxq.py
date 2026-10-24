@@ -27,6 +27,8 @@ The agent should read the disassembly through this tool, never whole.
                                     block=N draws each N-byte block as a separate
                                     tile (sprite banks); tiles are laid out in a
                                     square-ish grid with 1-byte gaps
+  zxq.py rename [-n] LIST.md...     rename labels and constants everywhere from
+                                    `Old -> New` lines (-n: only count)
   zxq.py links [--check] DOC.md...  point [Label](../src/F.asm#Ln) links at the
                                     label's current line (after source edits)
   zxq.py check [FILE...]            `make verify` in a private copy (safe for
@@ -694,6 +696,65 @@ def cmd_dollars(paths, check):
         sys.exit(1)
 
 
+RENAME_FILES = ('src/*.asm', 're/skool/*.skool', 'docs/*.md', 're/notes.md', 're/findings.md',
+                're/questions.md', 'README.md', 'scripts/*.py', 'scripts/*.sh', 're/layout.mk')
+
+
+def cmd_rename(lists, dry):
+    """Apply label and constant renames from list files, lines `Old -> New`
+    (anything after a `|` is a comment), across the sources (src/ or
+    re/skool/, whichever exists), docs/, re/*.md, README.md and scripts/.
+    A label that starts with `Old_` (a loop head, an entry point) becomes
+    `New_...` too. Refuses names longer than 24 characters, names already
+    defined, and one name given two new names."""
+    import glob
+    pairs = {}
+    for path in lists:
+        for line in open(path):
+            m = re.match(r'\s*([A-Za-z_]\w*)\s*->\s*([A-Za-z_]\w*)\s*(\||$)', line)
+            if not m:
+                continue
+            old, new = m.group(1), m.group(2)
+            if pairs.get(old, new) != new:
+                sys.exit('%s: two new names: %s and %s' % (old, pairs[old], new))
+            pairs[old] = new
+    files = sorted(f for g in RENAME_FILES for f in glob.glob(g))
+    text = {f: open(f).read() for f in files}
+    names = set()
+    for f, s in text.items():
+        if f.startswith(('src/', 're/skool/')):
+            names |= set(re.findall(r'^([A-Za-z_]\w*)(?::|\s+EQU\b)', s, re.M))
+            names |= set(re.findall(r'^@label=(\w+)', s, re.M))
+    errors = []
+    for old, new in pairs.items():
+        if old not in names:
+            errors.append('%s is not defined' % old)
+        if len(new) > 24:
+            errors.append('%s is longer than 24 characters' % new)
+        if new in names and new not in pairs:
+            errors.append('%s is already defined' % new)
+    targets = list(pairs.values())
+    errors += ['%s is the new name of two labels' % n for n in set(targets) if targets.count(n) > 1]
+    if errors:
+        sys.exit('\n'.join(errors))
+    # one pass with a placeholder per name, so that A -> B, B -> C does not chain
+    pattern = re.compile(r'\b(%s)(?=\b|_[A-Za-z0-9])' % '|'.join(
+        re.escape(o) for o in sorted(pairs, key=len, reverse=True)))
+    counts = {o: 0 for o in pairs}
+
+    def sub(m):
+        counts[m.group(1)] += 1
+        return pairs[m.group(1)]
+    for f, s in text.items():
+        new = pattern.sub(sub, s)
+        if new != s and not dry:
+            open(f, 'w').write(new)
+    for old, new in sorted(pairs.items()):
+        print('%-24s -> %-24s %d' % (old, new, counts[old]))
+    if not dry:
+        print('then: make, the tests, tools/zxq.py links docs/*.md')
+
+
 def cmd_links(paths, check):
     """Point every [Label](../src/F.asm#Ln) link of the markdown files at the
     line where Label is defined now (after an edit of the sources moved it);
@@ -1087,6 +1148,8 @@ def main():
         cmd_gfx(parse_addr(a[1]), parse_addr(a[2]), int(a[3]), a[4], 'cells' in a[5:],
                 next((int(x) for x in a[5:] if x.isdigit()), 4),
                 next((parse_addr(x[6:]) for x in a[5:] if x.startswith('block=')), 0))
+    elif cmd == 'rename' and len(a) > 1:
+        cmd_rename([x for x in a[1:] if x != '-n'], '-n' in a)
     elif cmd == 'links' and len(a) > 1:
         cmd_links([x for x in a[1:] if x != '--check'], '--check' in a)
     elif cmd == 'check':

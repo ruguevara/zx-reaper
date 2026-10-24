@@ -9,45 +9,46 @@
 ;
 ; 0 the runners of the intro screen: Jean and three crusaders (0); 1 the
 ; spawner of the crusaders that chase Jean (5, 6 and the ending room 25); 2 and
-; 3 patrollers along a platform, 2 starting to the left and 3 to the right:
-; rats (2), red bats (8), cyan worms (9, 14), skeletons (13, 22), green zombies
-; (15, 20), white ghosts (22, 23), magenta winged flyers (20, 23), red devils
-; (21, 22); 4 and 5 patrollers along a thread or in the air, 4 starting down
-; and 5 up: green spiders (3, 14, 16, 19), red whirling fireballs (22, 23),
-; green flies (12); 6 hanged men on their ropes (9); 8 the cyan ghost face that
-; chases Jean (11); 9 water drops falling from the ceiling (15, 19); 10
-; skeleton archers (17, 21); 11 stone heads in the wall that shoot arrows (20,
-; 22); 12 plants that spit seeds (14); 13 fish jumping out of the water (16,
-; 19); 14 the head of the Pestilent Beast (10); 15 its fire breath (10); 16
-; Death (18); 17 Satan (24). Kind 7 has no room object: the hanged man's
-; handler for going up is entered from UpdateHangedDown when it reaches the
-; bottom (and the other way round).
+; 3 patrollers along a horizontal line, 2 starting to the left and 3 to the
+; right: rats (2), bats (8), worms (9, 14), skeletons (13, 22), knights (15,
+; 20), ceiling ghosts (22, 23), birds (20, 23), demons (21, 22) (kind 3 only
+; for one rat, one bat and one demon); 4 and 5 patrollers along a vertical
+; line, 4 starting down and 5 up: green spiders (3, 14, 16, 19) and fire wheels
+; (22, 23) of kind 4, yellow spiders (3) and flies (12) of kind 5; 6 hanged men
+; on their ropes (9); 8 the chasing ghost (11); 9 water drops falling from the
+; ceiling (15, 19); 10 skeleton archers (17, 21); 11 stone heads in the wall
+; that shoot arrows (20, 22); 12 plants that spit seeds (14); 13 fish jumping
+; out of the water (16, 19); 14 the head of the Pestilent Beast (10); 15 its
+; fire breath (10); 16 Death (18); 17 Satan (24). Kind 7 has no room object:
+; the hanged man's handler for going up is entered from UpdateHangedDown when
+; it reaches the bottom (and the other way round). Checked against the kind
+; byte of every record of RoomObjects and the slots of each room.
 ;
 ; Handlers that change their own slot's first word to another (the patrollers
 ; between going left and right, the crusaders between walking and jumping) are
 ; not looked up in this table again.
 EntityHandlers:
-  DEFW UpdateIntroRunner  ; kind 0: UpdateIntroRunner
-  DEFW UpdateCrusaderSpawner ; kind 1: UpdateCrusaderSpawner, makes a crusader
-                             ; every 40 frames from a template at
-                             ; CrusaderTemplateRoom5
-  DEFW UpdateWalkLeft     ; kind 2: UpdateWalkLeft
-  DEFW UpdateWalkRight    ; kind 3: UpdateWalkRight
-  DEFW UpdateWalkDown     ; kind 4: UpdateWalkDown
-  DEFW UpdateWalkUp       ; kind 5: UpdateWalkUp
-  DEFW UpdateHangedDown   ; kind 6: UpdateHangedDown
-  DEFW UpdateHangedUp     ; kind 7: UpdateHangedUp (no room object has this
-                          ; kind)
-  DEFW UpdateChaser       ; kind 8: UpdateChaser
-  DEFW UpdateDropHanging  ; kind 9: UpdateDropHanging
-  DEFW UpdateArcher       ; kind 10: UpdateArcher
-  DEFW UpdateStoneHead    ; kind 11: UpdateStoneHead
-  DEFW UpdatePlant        ; kind 12: UpdatePlant
-  DEFW UpdateFishWaiting  ; kind 13: UpdateFishWaiting
-  DEFW UpdateBeastHead    ; kind 14: UpdateBeastHead
-  DEFW UpdateBeastFire    ; kind 15: UpdateBeastFire
-  DEFW UpdateDeathLeft    ; kind 16: UpdateDeathLeft
-  DEFW UpdateSatan        ; kind 17: UpdateSatan
+  DEFW UpdateIntroRunner  ; kind 0: Jean and the crusaders of the intro
+  DEFW UpdateCrusaderSpawner ; kind 1: makes a crusader every 40 frames from
+                             ; the template at the record's parameter word
+                             ; (CrusaderTemplateRoom5, 6, 25)
+  DEFW UpdateWalkLeft     ; kind 2: horizontal patroller, starts left
+  DEFW UpdateWalkRight    ; kind 3: horizontal patroller, starts right
+  DEFW UpdateWalkDown     ; kind 4: vertical patroller, starts down
+  DEFW UpdateWalkUp       ; kind 5: vertical patroller, starts up
+  DEFW UpdateHangedDown   ; kind 6: hanged man, starts down
+  DEFW UpdateHangedUp     ; kind 7: hanged man going up (no room object has
+                          ; this kind)
+  DEFW UpdateChaser       ; kind 8: the chasing ghost
+  DEFW UpdateDropHanging  ; kind 9: water drop, starts hanging
+  DEFW UpdateArcher       ; kind 10: skeleton archer
+  DEFW UpdateStoneHead    ; kind 11: stone head
+  DEFW UpdatePlant        ; kind 12: plant
+  DEFW UpdateFishWaiting  ; kind 13: fish, starts under the water
+  DEFW UpdateBeastHead    ; kind 14: head of the Pestilent Beast
+  DEFW UpdateBeastFire    ; kind 15: fire breath of the Pestilent Beast
+  DEFW UpdateDeathLeft    ; kind 16: Death, starts moving left
+  DEFW UpdateSatan        ; kind 17: Satan
 
 ; Crusader templates: the initial object slot of a crusader, one per chase room
 ;
@@ -96,9 +97,11 @@ CrusaderTemplateRoom25:
 ; For handlers that remove their entity before popping anything: SP is at slot
 ; + 2, so the PUSH writes the zero over the handler word at slot + 0 (the slot
 ; is free from now on) and the next slot is 22 bytes on. Used by the path
-; command 4 of the crusaders (PathCommands), the arrows and seeds
-; (UpdateFireball, UpdateSplash) and by Death's scythe and Satan
-; (UpdateScytheFalling, UpdateSatan) when they have to go. FreeEntitySlot is
+; command 4 of the crusaders (PathCommands), by Satan's fireballs once Satan is
+; gone (UpdateFireball), by the arrows, fireballs and seeds that leave the room
+; or hit a wall (Projectile_Remove), by the splash (UpdateSplash), Death's
+; scythe (Scythe_Destroy), Satan (UpdateSatan) and his smoke
+; (UpdateSatanSmoke), each after putting SP back at slot + 2. FreeEntitySlot is
 ; the same for a handler that has already popped its words.
 ;
 ; Hardware: none.
@@ -373,6 +376,14 @@ UpdateCrusaderStepUp_0:
 ; in 2-pixel units, SP = slot + $A. Adds the curve value to y and stores it,
 ; puts (y, x/4) in the draw command, tests the hit box and goes on at
 ; ReadSpriteCrusaderJump.
+;
+; Hardware: none.
+;
+; A x in 2-pixel units
+; BC Speed curve (JumpCurveStepUp, JumpCurveHop or JumpCurveFall)
+; DE y (8.8)
+; HL Index in the curve (0-5)
+; SP Slot address + $A (the jump state has just been stored)
 UpdateCrusaderJump:
   ADD HL,HL               ; 2 bytes per curve value
   ADD HL,BC
@@ -557,8 +568,8 @@ UpdateCrusader_Command:
 ;
 ; 0 UpdateCrusader keep running (the handler itself: nothing changes) 1
 ; UpdateCrusaderStepUp step up 8 pixels (x speed $00A0, curve JumpCurveStepUp)
-; 2 UpdateCrusaderHop hop in place over a pit (x speed $0150, curve
-; JumpCurveHop) 3 UpdateCrusaderFall fall 16 pixels (x speed unchanged, curve
+; 2 UpdateCrusaderHop hop over a pit (x speed $0150, curve JumpCurveHop: about
+; 8 units forward, back to the same y) 3 UpdateCrusaderFall fall 16 pixels (x speed unchanged, curve
 ; JumpCurveFall) 4 FreeEntitySlotAtEntry remove the crusader (free the slot) 5
 ; UpdateCrusaderSignal signal the end of the cutscene, then keep running
 PathCommands:
@@ -697,12 +708,12 @@ UpdateHangedUp_0:
 ;
 ; The counterpart of UpdateWalkDown for a creature that starts its vertical
 ; patrol moving up (the flies of room 12, the yellow spiders of room 3; also
-; every kind 4 creature after its first turn). The y coordinate goes up by the
-; speed each frame; when its high byte falls below the upper turning point (+4)
-; the handler word of the slot is rewritten with UpdateWalkDown. The sprite is
-; placed at (x, y) through PlaceEntityLeft, which tests the hit box and draws
-; the first frame table (facing up). Stack scheme and slot fields as in
-; UpdateWalkLeft and ReadSpriteLeft.
+; every kind 4 creature, green spiders and fire wheels, after its first turn).
+; The y coordinate goes up by the speed each frame; when its high byte falls
+; below the upper turning point (+4) the handler word of the slot is rewritten
+; with UpdateWalkDown. The sprite is placed at (x, y) through PlaceEntityLeft,
+; which tests the hit box and draws the first frame table (facing up). Stack
+; scheme and slot fields as in UpdateWalkLeft and ReadSpriteLeft.
 ;
 ; Hardware: none.
 ;
@@ -743,13 +754,14 @@ UpdateWalkUp_0:
 ; movers that go left or up
 ;
 ; The handler of every enemy that walks or flies along a horizontal line: rats
-; (room 2), red bats (room 8), worms (rooms 9, 14), skeletons (rooms 13, 22),
-; crusaders (rooms 15, 20), red demons (rooms 21, 22), magenta flyers (rooms
-; 20, 23) and the white ceiling ghosts of rooms 22 and 23. Which creature it is
-; depends on the sprite description of its room record, not on the handler. A
-; record of kind 2 starts moving left (this handler), a record of kind 3 starts
-; moving right (UpdateWalkRight); the two handlers turn the slot into each
-; other at the ends of the patrol.
+; (room 2), bats (room 8), worms (rooms 9, 14), skeletons (rooms 13, 22),
+; knights (rooms 15, 20), demons (rooms 21, 22), birds (rooms 20, 23) and the
+; ceiling ghosts of rooms 22 and 23. Which creature it is depends on the sprite
+; description of its room record, not on the handler. A record of kind 2
+; starts moving left (this handler), a record of kind 3 starts moving right
+; (UpdateWalkRight); the two handlers turn the slot into each other at the ends
+; of the patrol. The first frame table faces left (observed: the rat of room 2
+; moving left has its snout on the left, the one moving right on the right).
 ;
 ; Handlers of the object slots are entered with SP at slot+2 (the RET of
 ; RunObjectSlots popped the handler word); they pop the words they need, push
@@ -800,13 +812,20 @@ UpdateWalkLeft_0:
 
 ; Place an entity sprite (facing left or up) and test its hit box
 ;
-; Entry point used by UpdateWalkUp and UpdateChaser_Wait (movers whose sprite
-; faces left or up): D = x, E = y, H = y. Puts the position into the draw
-; command and goes on to the hit box test with the first frame table.
+; Reached by falling through from UpdateWalkLeft and by jumps from UpdateWalkUp
+; and the chaser (UpdateChaser_Draw, when Jean is on its left): movers whose
+; sprite faces left or up. Puts the position into the draw command, keeps x in
+; A' for the shift phase and goes on to the hit box test with the first frame
+; table. E is not read here: HitTest takes the position from DE. Observed at
+; every entry in rooms 2, 9, 12 and 22: SP = slot + $C, D and E the high bytes
+; of the slot's x and y, H = E.
 ;
-; D X
-; E Y
-; H Y
+; Hardware: none.
+;
+; D x (2-pixel units)
+; E y (2-pixel units, for HitTest)
+; H y (2-pixel units)
+; SP Slot address + $C (the hit box words come next)
 PlaceEntityLeft:
   LD L,H                  ; L = y
   LD H,D                  ; H = x
@@ -816,8 +835,8 @@ PlaceEntityLeft:
   SRA H
   LD (SpriteCmdPos),HL    ; draw command position: (y, x/4)
 ; Entry point used by UpdateHangedUp: the position is already in the draw
-; command. D = x, E = y, SP at slot+$C (the next words are the hit box). Tests
-; the hit box against Jean and continues at ReadSpriteLeft.
+; command. D = x, E = y, A' = x, SP at slot+$C (the next words are the hit
+; box). Tests the hit box against Jean and continues at ReadSpriteLeft.
 TestEntityHitLeft:
   LD HL,ReadSpriteLeft
   JP HitTest              ; HitTest tests the hit box, then jumps to the
@@ -827,9 +846,9 @@ TestEntityHitLeft:
 ; the decreasing direction)
 ;
 ; Reached through HitTest from TestEntityHitLeft, that is from the movers that
-; go left or up (UpdateWalkLeft, UpdateWalkUp, UpdateHangedUp) and from
-; UpdateChaser when Jean is on its left. ReadSpriteRight does the same for the
-; increasing direction (right or down). SP is at slot+$10, after the hit box
+; go left or up (UpdateWalkLeft, UpdateWalkUp, UpdateHangedUp) and from the
+; chasing ghost (UpdateChaser) when Jean is on its left. ReadSpriteRight does
+; the same for the increasing direction (right or down). SP is at slot+$10, after the hit box
 ; words (+$C..+$F) that HitTest popped. The routine copies the attribute, the
 ; width and the height of the sprite into the main draw command at SpriteCmd
 ; (the position is already there), picks the column offset for the shift phase
@@ -842,7 +861,8 @@ TestEntityHitLeft:
 ; byte 4 is x, byte 5 is y, byte 6 is +$A and +$B, bytes 7 and 8 are +4 and +5,
 ; the pointer at +9 is the sprite description block): +0 word handler, +2 word
 ; speed (8.8 in 2-pixel units per frame), +4 byte and +5 byte turning points
-; (the lower and the higher coordinate; UpdateChaser uses +5 as a start delay),
+; (the lower and the higher coordinate; the chasing ghost uses +5 as a start
+; delay),
 ; +6 word x (8.8), +8 word y (8.8), +$A word not used by the walkers, +$C byte
 ; hit box y offset, +$D byte x offset, +$E byte y far corner, +$F byte x far
 ; corner (2-pixel units, both pairs relative to the position), +$10 word
@@ -975,12 +995,13 @@ UpdateHangedDown_0:
 ; Entity handler: patroller moving down (kind 4)
 ;
 ; The handler of the enemies that move along a vertical line: green and yellow
-; spiders (rooms 3, 14, 16, 19), the green flies of room 12 and the red
-; fireballs of rooms 22 and 23. Which one it is depends on the sprite
-; description of its room record. A record of kind 4 starts moving down (this
-; handler), a record of kind 5 starts moving up (UpdateWalkUp); the two
-; handlers turn the slot into each other at the ends of the patrol (stack
-; scheme and slot fields as in UpdateWalkLeft, ReadSpriteLeft).
+; spiders (rooms 3, 14, 16, 19), the flies of room 12 and the fire wheels of
+; rooms 22 and 23. Which one it is depends on the sprite description of its
+; room record. A record of kind 4 (the green spiders and the fire wheels)
+; starts moving down (this handler), a record of kind 5 (the yellow spiders and
+; the flies) starts moving up (UpdateWalkUp); the two handlers turn the slot
+; into each other at the ends of the patrol (stack scheme and slot fields as in
+; UpdateWalkLeft, ReadSpriteLeft).
 ;
 ; The y coordinate goes down by the speed each frame; when its high byte
 ; reaches the lower turning point (+5) the handler word of the slot is
@@ -1030,8 +1051,9 @@ UpdateWalkDown_0:
 ; movers that go right or down
 ;
 ; The counterpart of UpdateWalkLeft for a creature that starts its patrol
-; moving right (rats, bats, skeletons, crusaders and the other horizontal
-; patrollers listed there; room record kind 3). The x coordinate goes up by the
+; moving right (room record kind 3: one rat of room 2, one bat of room 8 and
+; one demon of room 21; every horizontal patroller listed there after its first
+; turn). The x coordinate goes up by the
 ; speed each frame; when its high byte equals the right turning point the
 ; handler word of the slot is rewritten with UpdateWalkLeft, so from the next
 ; frame the speed is subtracted. The position goes into the draw command, then
@@ -1069,13 +1091,20 @@ UpdateWalkRight_0:
 
 ; Place an entity sprite (facing right or down) and test its hit box
 ;
-; Entry point used by UpdateWalkDown and UpdateChaser_Wait (movers whose sprite
-; faces right or down): D = x, E = y, H = y. Puts the position into the draw
-; command and goes on to the hit box test with the second frame table.
+; Reached by falling through from UpdateWalkRight and by jumps from
+; UpdateWalkDown and the chaser (UpdateChaser_Draw, when Jean is level with it
+; or on its right): movers whose sprite faces right or down. Puts the position
+; into the draw command, keeps x in A' and goes on to the hit box test with the
+; second frame table. E is not read here: HitTest takes the position from DE.
+; Observed at every entry in rooms 2, 9, 11, 12 and 22: SP = slot + $C, D and E
+; the high bytes of the slot's x and y, H = E.
 ;
-; D X
-; E Y
-; H Y
+; Hardware: none.
+;
+; D x (2-pixel units)
+; E y (2-pixel units, for HitTest)
+; H y (2-pixel units)
+; SP Slot address + $C (the hit box words come next)
 PlaceEntityRight:
   LD L,H                  ; L = y
   LD H,D                  ; H = x
@@ -1085,8 +1114,8 @@ PlaceEntityRight:
   SRA H
   LD (SpriteCmdPos),HL    ; draw command position: (y, x/4)
 ; Entry point used by UpdateHangedDown: the position is already in the draw
-; command. D = x, E = y, SP at slot+$C (the next words are the hit box). Tests
-; the hit box against Jean and continues at ReadSpriteRight.
+; command. D = x, E = y, A' = x, SP at slot+$C (the next words are the hit
+; box). Tests the hit box against Jean and continues at ReadSpriteRight.
 TestEntityHitRight:
   LD HL,ReadSpriteRight
   JP HitTest              ; HitTest tests the hit box, then jumps to the
@@ -1097,8 +1126,9 @@ TestEntityHitRight:
 ;
 ; Room 0 (the intro text, "The Cathar Jean Raymond runs to escape the
 ; crusaders...") has four entities of this kind: the monk (sprite description
-; BehaviourJean, the standing frames of Jean from MonkFramesLeft) and three
-; cyan crusaders (BehaviourCrusader) running after him. The slot is entered
+; BehaviourJean; as it runs right it is drawn from the second table,
+; MonkFramesRight, frames 0 and 1: Jean's walk) and three cyan crusaders
+; (BehaviourCrusader) running after him. The slot is entered
 ; with SP at slot+2 (see UpdateWalkLeft for the stack scheme). The x coordinate
 ; goes up by the speed each frame; when its high byte equals the end coordinate
 ; (+5, $80, off the right of the screen) the slot is freed through
@@ -1140,10 +1170,15 @@ UpdateIntroRunner:
 ; Read the sprite description and animate (facing right or down)
 ;
 ; Entry point used through HitTest by UpdateWalkRight, UpdateHangedDown,
-; UpdateWalkDown and UpdateChaser_Wait (creatures facing right or down) and by
-; this routine. Like ReadSpriteLeft, but picks the second frame table. SP is at
-; slot+$10.
+; UpdateWalkDown, the chasing ghost (UpdateChaser, Jean level with it or on its
+; right) and the walking crusaders (UpdateCrusader_Draw), and by
+; UpdateIntroRunner, which falls into it without a hit test. Like
+; ReadSpriteLeft, but picks the second frame table. Observed in rooms 2, 9 and
+; 11: SP = slot + $10 and A' = the high byte of the slot's x at every entry.
 ;
+; Hardware: none.
+;
+; A' x in 2-pixel units (the low two bits are the shift phase)
 ; SP Slot address + $10
 ReadSpriteRight:
   POP HL                  ; address of the sprite description
@@ -1199,8 +1234,10 @@ SelectFrameRight:
   INC HL                  ; skip the pointer of the first frame table
   INC HL
 ; Entry point of the first frame table (creatures facing left or up), reached
-; through IX from ReadSpriteLeft and through IY from UpdateStoneHead and
-; others.
+; through IX from ReadSpriteLeft and through IY from UpdateStoneHead,
+; UpdateArcher (Jean on its left) and UpdateDeathLeft. SelectFrameRight is
+; reached through IX from ReadSpriteRight, by a jump from
+; ReadSpriteCrusaderJump and through IY from UpdateArcher and UpdateDeathRight.
 SelectFrameLeft:
   LD A,(HL)               ; HL = frame table (word array)
   INC HL
@@ -1209,13 +1246,18 @@ SelectFrameLeft:
 
 ; Select an entity's frame
 ;
-; Entry point used by UpdatePlant_Spit, UpdateBeastHead and QueueMovingSprite,
-; which have their own frame table in HL: HL = frame table, E = frame number,
-; A' = shift byte offset.
+; Entry point used by QueueFrameSprite (the plants and the fish),
+; UpdateBeastHead and QueueMovingSprite, which have their own frame table in
+; HL: HL = frame table, E = frame number, A' = shift byte offset. It goes on
+; through QueueEntitySprite to NextSlotAfterAnim, so SP must be at slot + $12
+; (observed at every entry in rooms 10, 14, 16, 17, 18, 19 and 20).
+;
+; Hardware: none.
 ;
 ; HL Frame table
 ; E Frame number
 ; A' Shift byte offset
+; SP Slot address + $12
 SelectFrame:
   LD D,$00                ; DE = frame number
   ADD HL,DE               ; HL = address of the frame word
@@ -1230,7 +1272,8 @@ SelectFrame:
 ; Queue an entity's sprite
 ;
 ; Entry point used by SetProjectileSprite and UpdateSplash, which have set the
-; graphics address themselves: queue the main draw command.
+; graphics address themselves: queue the main draw command. SP is at slot +
+; $12, as for SelectFrame.
 QueueEntitySprite:
   LD A,(QueueDrawCmd)     ; the frame list is being run?
   OR A
@@ -1246,11 +1289,12 @@ QueueEntitySprite:
 ; frame call list at DE and stores the new end in FrameListPtr.
 ; QueueTwoCommands copies two commands in a row (20 bytes: the commands at
 ; SpriteCmd and SpriteCmd2, used by the entities that draw two sprites: the
-; falling drop of UpdateDropFalling, Satan, the smoke), QueueOneCommand copies
-; one. Both fall through to NextSlotAfterAnim, which ends every entity handler
-; that has pushed back its animation counters: it sets HL to the slot after the
-; current one and jumps to RunObjectSlot. Entered through IY
-; (UpdateDropFalling, UpdateDropHanging, AnimateDrop) or by a jump.
+; falling drop, through IY from UpdateDropFalling and AnimateDrop, and by jumps
+; from the Beast's fire jet (UpdateBeastFire_Draw) and from Satan and his smoke
+; (QueueTwoPartSprite)), QueueOneCommand copies one. Both fall through to
+; NextSlotAfterAnim, which ends every entity handler that has pushed back its
+; animation counters: it sets HL to the slot after the current one and jumps
+; to RunObjectSlot.
 ;
 ; Hardware: none.
 ;
@@ -1271,8 +1315,9 @@ QueueTwoCommands:
 
 ; Queue one draw command
 ;
-; Entry point used by SelectFrameRight and UpdateDropHanging (through IY): copy
-; one command, 10 bytes.
+; Entry point used by QueueEntitySprite (the end of SelectFrame) and, through
+; IY, by the hanging water drop (UpdateDropHanging, AnimateDrop): copy one
+; command, 10 bytes.
 QueueOneCommand:
   LDI                     ; 10 bytes
   LDI
@@ -1289,8 +1334,13 @@ QueueOneCommand:
 ; Go to the next slot after the animation step
 ;
 ; Entry point used by every entity handler that has pushed back its animation
-; counters (and by those that draw nothing): go on with the next slot. SP is at
-; slot+$12.
+; counters, by the frame queueing code when the frame list is being run
+; (QueueEntitySprite, AnimateDrop, UpdateBeastFire_Draw, QueueTwoPartSprite)
+; and by the crusader spawner, which draws nothing (UpdateCrusaderSpawner,
+; SpawnCrusader): go on with the next slot. SP is at slot+$12 (observed at
+; every entry in rooms 10, 14, 16, 17, 18, 19, 20 and 24).
+;
+; Hardware: none.
 ;
 ; SP Slot address + $12
 NextSlotAfterAnim:
@@ -1319,7 +1369,7 @@ FreeEntitySlot:
   ADD HL,SP
   JP RunObjectSlot        ; RunObjectSlot enters the handler of the slot at HL
 
-; Chaser: face Jean, then hit box test and draw
+; Chasing ghost: face Jean, then hit box test and draw
 ;
 ; The second half of UpdateChaser, entered at UpdateChaser_Draw after the
 ; chaser has moved (or at UpdateChaser_Wait while its start delay still runs).
@@ -1354,10 +1404,10 @@ UpdateChaser_Wait_0:
   JP C,PlaceEntityLeft    ; yes: face left
   JP PlaceEntityRight     ; no: face right
 
-; Entity handler: the apparition that chases Jean (kind 8, room 11)
+; Entity handler: the chasing ghost (kind 8, room 11)
 ;
-; The cyan grinning face that floats through the Cave of illusions (room 11;
-; the only room record of kind 8). After a start delay it moves toward Jean
+; The chasing ghost, a cyan grinning head that floats through the Cave of
+; illusions (room 11; the only room record of kind 8). After a start delay it moves toward Jean
 ; along both axes, through free space only, then faces Jean and is drawn (the
 ; tail UpdateChaser_Wait/UpdateChaser_Draw). Entered with SP at slot+2, see
 ; UpdateWalkLeft for the stack scheme.
@@ -1367,8 +1417,8 @@ UpdateChaser_Wait_0:
 ; sprite (UpdateChaser_Wait). After that the byte is reset to 1, so that it
 ; drops to 0 on every following frame. The movement then works in four steps.
 ; First, the tile flag map is sampled around the sprite, which is 2 cells wide
-; and 3 high at (x/4, y/4): the flags of the two cells of the top row
-; (ProbeHead), of the two cells right of rows 1 and 2 (ProbeRight), of the two
+; and 3 high at (x/4, y/4): the flags of the two cells of its own top row
+; (ProbeHead; not the row above it, unlike the other three sides), of the two cells right of rows 1 and 2 (ProbeRight), of the two
 ; cells under the bottom row (ProbeBelow) and of the two cells left of rows 1
 ; and 2 (ProbeLeft) are ORed in pairs (ProbeRight-ProbeHead) and a side counts
 ; as free when its class (flag AND 7) is 0. Second, Jean's x and y (A8A2, A8A4;
@@ -1379,7 +1429,7 @@ UpdateChaser_Wait_0:
 ; 3-2, y code in bits 1-0). Third, the mask is ANDed with the free sides (bit 3
 ; right, bit 2 left, bit 1 below, bit 0 above). Last, the speed is subtracted
 ; from or added to y for bits 0 and 1 and to x for bits 2 and 3, so each axis
-; is blocked separately (the apparition slides along a wall: it does not move
+; is blocked separately (the ghost slides along a wall: it does not move
 ; toward a side whose probed cells are not class 0), and it does not move on an
 ; axis on which it is level with Jean. Observed in room 11 with Jean at x =
 ; $70, y = $40: after the delay the face moved diagonally from (x $40, y $24),
@@ -1781,9 +1831,10 @@ AnimateDrop_1:
 ; not move: the handler takes its position, makes it the position of the shot
 ; to be created (SPAWN_POSITION, $5DFE: the (y, x) half of the 4-byte record
 ; built at $5DFC) and prepares the arguments of the shared tail
-; UpdateShooter_Common of the archer UpdateArcher: the template of the shot in
-; the alternate HL (WallShotTemplate, the arrow flying left, UpdateArrow) and
-; IY = SelectFrameLeft, the first frame table. The tail puts the position into
+; UpdateShooter_Common of the archer UpdateArcher: after an EXX (the position
+; stays in the other HL) the template of the shot in HL (WallShotTemplate, the
+; arrow flying left, UpdateArrow) and IY = SelectFrameLeft, the first frame
+; table. The tail puts the position into
 ; the draw command and tests the hit box; the continuation UpdateShooter_Tail
 ; counts the shot cycle down (70 frames: the head fires when the countdown
 ; reaches 0) and queues the arrow, animates and draws the head. Observed in
@@ -1829,9 +1880,10 @@ UpdateStoneHead:
 ; word hit box far corner (y, x), +$10 pointer to the sprite block (attribute,
 ; height, width, then a pointer to the frame table for facing left and one for
 ; facing right, 2 frames each), +$12 byte shot countdown and +$13 its reload
-; ($50), +$14 byte frame number and +$15 number of frames (2). The archer is
-; one cell wide in x steps of 4 (x is a multiple of 4, so no shifted copies of
-; the sprite are needed: A' is 0 for the frame lookup).
+; ($50), +$14 byte frame number and +$15 number of frames (2). The archer's x
+; is a multiple of 4 (a whole cell; $08, $70, $3C in room 17, $60 in room 21),
+; so no shifted copies of its 2-byte wide sprite are needed: A' is 0 for the
+; frame lookup.
 ;
 ; This routine reads the position, stores it as the start position of the arrow
 ; (SPAWN_POSITION), decides which way to face by comparing the monk's x
@@ -1870,15 +1922,21 @@ UpdateArcher_0:
 ; Shooter: position and hit test
 ;
 ; Common part of the archer and the stone head of rooms 20 and 22
-; (UpdateStoneHead jumps here). HL' = address of the arrow template, IY =
-; SelectFrameLeft or SelectFrameRight (see above), main HL = x (H) and y (L),
-; SPAWN_POSITION already set, SP at slot+10 with the hit box words next. Makes
+; (UpdateStoneHead jumps here). Both callers load the template after an EXX,
+; so on entry HL = address of the arrow template and HL' = x (H) and y (L);
+; the EXX here swaps them, so the template waits in HL' for
+; UpdateShooter_Tail. IY = SelectFrameLeft or SelectFrameRight (see above),
+; SPAWN_POSITION already set, SP at slot+$A with the hit box words next. Makes
 ; the position of the sprite draw command (SpriteCmd: y, x/4), then tests the
 ; shooter's hit box against the monk (HitTest), which continues at
-; UpdateShooter_Tail.
+; UpdateShooter_Tail. Observed in rooms 17 and 20: on entry H, L = $BC, $A2
+; (ArrowRightTemplate) or $BC, $B2 (WallShotTemplate), SP = slot + $A.
 ;
-; HL X (H) and y (L)
-; HL' Address of the arrow template
+; Hardware: none.
+;
+; HL Address of the arrow template
+; HL' x (H) and y (L), 2-pixel units
+; IY SelectFrameLeft or SelectFrameRight (used by UpdateShooter_Tail)
 ; SP Slot address + $A
 UpdateShooter_Common:
   EXX                     ; back to the main set: HL = x, y
@@ -1893,9 +1951,9 @@ UpdateShooter_Common:
 ; Archer and stone head: draw attributes, shot countdown, throw an arrow, queue
 ; the sprite
 ;
-; Continuation of UpdateShooter_Common after the hit test HitTest (reached by a
-; JP through $A881; SP is at slot+$10, the hit test has popped the two hit box
-; words). It pops the pointer to the sprite block (slot +$10: attribute,
+; Continuation of UpdateShooter_Common after the hit test HitTest (reached by
+; the JP at SmcHitContinue; SP is at slot+$10, the hit test has popped the two
+; hit box words). It pops the pointer to the sprite block (slot +$10: attribute,
 ; height, width, frame tables) and puts the attribute, width and height in the
 ; draw command at SpriteCmd (A' = 0: no shifted copy), then steps the shot
 ; countdown (slot +$12 counter, +$13 reload: $50 for the archers, $46 for the
@@ -2099,13 +2157,18 @@ UpdatePlant_Spit_2:
 ; Queue the sprite of an entity with one frame table. The attribute is already
 ; in the draw command. HL points to the sprite block + 1 (height, width, then
 ; the frame table: one word per frame, the address of its graphics) and E is
-; the frame number. Used by the plant, the fish (UpdateFish_Queue); makes the
-; draw command with width and height from the block, the graphics from the
-; table (A' = 0: the sprite is at a multiple of 4 and needs no shifted copy)
-; and goes on to SelectFrame (which queues it and goes to the next slot).
+; the frame number. Used by the plant (UpdatePlant_Spit falls into it) and the
+; fish (UpdateFish_Queue); makes the draw command with width and height from
+; the block, the graphics from the table (A' = 0: the sprite is at a multiple
+; of 4 and needs no shifted copy) and goes on to SelectFrame (which queues it
+; and goes to the next slot, so SP must be at slot + $12: observed at every
+; entry in rooms 14, 16 and 19).
+;
+; Hardware: none.
 ;
 ; HL Sprite block + 1
 ; E Frame number
+; SP Slot address + $12
 QueueFrameSprite:
   XOR A
   EX AF,AF'               ; A' = 0: column offset
@@ -2121,7 +2184,7 @@ QueueFrameSprite:
 ; The fireballs Satan fires in room 24 (templates FireballUpTemplate,
 ; FireballLeftTemplate and FireballDownTemplate, spawned in a volley of three
 ; by UpdateSatan). This 3-instruction entry removes the fireball as soon as
-; Satan has been turned into smoke (SatanSmoked nonzero, see UpdateSatanSmoke):
+; Satan has been turned into smoke (SatanSmoked nonzero, set by UpdateSatan):
 ; FreeEntitySlotAtEntry clears the handler word and goes on to the next slot.
 ; Otherwise it falls through to UpdateArrow, which is the handler of the arrows
 ; (ArrowLeftTemplate, ArrowRightTemplate and WallShotTemplate are spawned with
@@ -2153,7 +2216,14 @@ UpdateFireball:
 ; against the monk (HitTest), which continues at SetProjectileSprite with A' =
 ; x. Cells are looked up as in the other entities: the row address table
 ; FlagRowTable (H = $61, L = 2 * (y / 4)) gives the address of the row of the
-; tile flag map and x / 4 is the column.
+; tile flag map and x / 4 is the column. The handler word of the arrows
+; (ArrowLeftTemplate, ArrowRightTemplate, WallShotTemplate); Satan's fireballs
+; fall into it from UpdateFireball.
+;
+; Hardware: none.
+;
+; SP Slot address + 2 (the handler word was popped by the RET that entered the
+;    routine)
 UpdateArrow:
   POP HL                  ; x speed
   POP DE                  ; y speed
@@ -2189,12 +2259,17 @@ UpdateArrow:
 
 ; Remove a projectile
 ;
-; Remove a projectile: also used by the seeds (UpdateSeed). The two pushes put
-; SP back at slot+2 (they overwrite the position, which does not matter) and
-; FreeEntitySlotAtEntry then zeroes the handler word and goes on to the next
-; slot.
+; Remove a projectile (arrow, fireball) that has left the room or hit a cell
+; that is not free; also used by the seeds (UpdateSeed). Entered with SP at
+; slot+6, just after the new x and y have been stored. The two pushes put SP
+; back at slot+2 (they write HL over the two speed words at +4 and +2, which
+; does not matter) and FreeEntitySlotAtEntry then zeroes the handler word and
+; goes on to the next slot. Observed in rooms 14 and 17: SP = slot + 6 at every
+; entry.
 ;
-; SP Slot address + 2
+; Hardware: none.
+;
+; SP Slot address + 6
 Projectile_Remove:
   PUSH HL
   PUSH HL
@@ -2203,10 +2278,12 @@ Projectile_Remove:
 ; Draw a projectile
 ;
 ; Draw a projectile that stays: also used by the seeds (UpdateSeed). SP is at
-; slot+6, the position words (x, then y) are the next ones. Makes HL = x (H)
-; and y (L), keeps x in A' for the shift phase of the sprite, makes the draw
-; command position (y, x/4) and tests the hit box (HitTest, which continues at
-; SetProjectileSprite).
+; slot+6, the position words (x, then y) are the next ones (observed in rooms
+; 14, 17, 20 and 24). Makes HL = x (H) and y (L), keeps x in A' for the shift
+; phase of the sprite, makes the draw command position (y, x/4) and tests the
+; hit box (HitTest, with D = x and E = y; it continues at SetProjectileSprite).
+;
+; Hardware: none.
 ;
 ; SP Slot address + 6
 Projectile_Draw:
@@ -2442,8 +2519,16 @@ UpdateFishWaiting:
 
 ; Fish: jump out of the water
 ;
-; The fish jumps. SP is at slot+6.
+; Reached from UpdateFishWaiting when its countdown, already decremented, equals
+; FISH_JUMP_TIME. Queues a splash at the water surface below the fish and
+; rewrites the slot words +0 to +8 for the jump (see UpdateFishWaiting). DE is
+; kept across the EXX and stored back at +4: the countdown goes on through the
+; jump. Observed in rooms 16 and 19: SP = slot + 6, E = $36, D = $54 at every
+; entry.
 ;
+; Hardware: none.
+;
+; DE E countdown (FISH_JUMP_TIME), D its reload
 ; SP Slot address + 6
 UpdateFishWaiting_Jump:
   POP HL                  ; x word
@@ -2958,13 +3043,18 @@ UpdateMovingSprite_Move:
 
 ; Moving sprite: position, hit test and draw
 ;
-; Draw part, also entered from the sliding scythe (UpdateScytheFalling and
-; UpdateScytheSliding through Scythe_Draw) with D = x and E = y in 2-pixel
-; units and SP at slot+$A: makes the draw command position and tests the hit
-; box (HitTest, which goes on at SetMovingSprite).
+; Draw part of UpdateMovingSprite (which falls into it), also entered from
+; Death's scythe: from UpdateScytheFalling and UpdateScytheSliding through
+; Scythe_Draw, and from UpdateScytheSliding directly on its bug path (F51, E =
+; x there). D = x and E = y in 2-pixel units, SP at slot+$A: makes the draw
+; command position, keeps x in A' and tests the hit box (HitTest, which goes on
+; at SetMovingSprite). Observed in rooms 10 and 18: SP = slot + $A, D and E the
+; high bytes of the slot's x and y.
 ;
-; D X (2-pixel units)
-; E Y (2-pixel units)
+; Hardware: none.
+;
+; D x (2-pixel units)
+; E y (2-pixel units)
 ; SP Slot address + $A
 UpdateMovingSprite_Draw:
   LD L,E                  ; L = y
@@ -3053,9 +3143,11 @@ QueueMovingSprite:
 ; handler word of the slot is rewritten with UpdateDeathLeft, so that from the
 ; next frame on the same speed is subtracted. Both halves go on at
 ; UpdateDeath_Common. IY is the address the animation code at ThrowDeathScythe
-; jumps to when it has chosen the graphics: $B3D2 takes the second of the two
-; frame tables of the sprite block (SelectFrameRight skips the first), which is
-; the table for this direction; UpdateDeathLeft uses $B3D4, the first table.
+; jumps to when it has chosen the graphics: SelectFrameRight takes the second
+; of the two frame tables of the sprite block (it skips the first), which is
+; the table for this direction; UpdateDeathLeft uses SelectFrameLeft, the first
+; table. Observed in room 18: with this handler Death moves right and its skull
+; faces right, with UpdateDeathLeft it faces left.
 ;
 ; SP Slot address + 2 (the handler word was popped by the RET that entered the
 ;    routine)
@@ -3089,8 +3181,8 @@ UpdateDeathRight:
 ; UpdateDeathRight, which has the layout of the slot and the way the two halves
 ; hand over to each other). The speed is subtracted from x; when the high byte
 ; of x equals the left turning point (slot +4) the handler word is rewritten
-; with UpdateDeathRight. IY = $B3D4 selects the first frame table of the sprite
-; block (left). This is the handler of room object kind 16 (EntityHandlers
+; with UpdateDeathRight. IY = SelectFrameLeft selects the first frame table of
+; the sprite block (left). This is the handler of room object kind 16 (EntityHandlers
 ; entry 16), so it is the half that runs first, from x = $09 down to the
 ; turning point $08.
 ;
@@ -3124,15 +3216,21 @@ UpdateDeathLeft:
 ; Common body of both halves. On entry H is the high byte of x, SP is at slot+8
 ; (the y word) and IY is set. It pops the y word and the timer (+$A counter,
 ; +$B reload): the timer counts down to 1 and reloads with the 50 frames of
-; ATTACK_PERIOD, and a copy goes to BC' for ThrowDeathScythe, which throws a
-; scythe when the counter equals 20. Then it builds the position (H = x, L = y,
-; both in 2-pixel units) in HL: A' keeps x (its low two bits select the shifted
-; copy of the sprite), the word at SPAWN_POSITION is the position a spawned
-; scythe starts from (y low, x high), and x/4 (the byte column) with y becomes
-; the position of the draw command at $ACD1. Last, HitTest tests Death's hit
-; box against the player and continues at SetDeathSprite.
+; ATTACK_PERIOD (B is loaded with it every frame, so +$B always ends up 50),
+; and a copy goes to BC' for ThrowDeathScythe, which throws a scythe when the
+; counter equals 20 and shows the throwing frame from then on to the end of the
+; cycle. Then it builds the position (H = x, L = y, both in 2-pixel units) in
+; HL: A' keeps x (its low two bits select the shifted copy of the sprite), the
+; word at SPAWN_POSITION is the position a spawned scythe starts from (y low, x
+; high), and x/4 (the byte column) with y becomes the position of the draw
+; command (SpriteCmdPos). Last, HitTest tests Death's hit box against the
+; player and continues at SetDeathSprite. Observed in room 18: SP = slot + 8, H
+; = the high byte of the slot's x at every entry.
 ;
-; H X (2-pixel units)
+; Hardware: none.
+;
+; H x (2-pixel units)
+; IY SelectFrameLeft or SelectFrameRight (passed on to ThrowDeathScythe)
 ; SP Slot address + 8
 UpdateDeath_Common:
   LD D,H                  ; D = x
@@ -3161,9 +3259,9 @@ UpdateDeath_Common_0:
 
 ; Death: attribute, width and height of the sprite for the current shift phase
 ;
-; Continuation of UpdateDeathLeft after the hit test at HitTest (reached by a
-; JP through $A881; SP is at slot+16, the hit test has popped the two hit box
-; words). It pops the pointer in slot +$10, which points five bytes into the
+; Continuation of UpdateDeath_Common after the hit test at HitTest (reached by
+; the JP at SmcHitContinue; SP is at slot+16, the hit test has popped the two
+; hit box words). It pops the pointer in slot +$10, which points five bytes into the
 ; behaviour block of kind 16 (BehaviourDeath): attribute byte, pointer to the
 ; pair table of (column offset, width) per shift phase, height in 2-pixel
 ; units, then the two frame tables. The attribute goes to the draw command at
@@ -3209,12 +3307,18 @@ SetDeathSprite:
   LD IX,ThrowDeathScythe  ; animation step continues at ThrowDeathScythe
   JP StepAnimation
 
-; Death: throw a scythe every 50 frames, then pick the frame graphics and queue
+; Death: throw a scythe every 50 frames, show the throwing frame, then queue
 ; the sprite
 ;
 ; Continuation of SetDeathSprite after the animation step StepAnimation (SP is
-; at slot+18 and E holds the frame number). BC' holds the timer of
-; UpdateDeathLeft (C' is its counter after this frame's decrement). When C' is
+; at slot+18, E holds the frame number and D the number of frames, 2). BC'
+; holds the timer of UpdateDeath_Common (C' is its counter after this frame's
+; decrement). While C' is 20 or less E is replaced by D: frame 2, the third
+; word of each of Death's frame tables, the throwing pose (arm stretched out,
+; the scythe gone from its hands), is shown for the last 20 frames of the
+; 50-frame cycle, from the frame of the throw on; frames 0 and 1 (flying with
+; the scythe) alternate the rest of the time. Observed in room 18: E = 2 at
+; SelectFrame for counters 20 to 1, screenshots of both poses. When C' is
 ; exactly 20 Death throws: sound effect 7 is requested, one of the two scythe
 ; templates (ScytheLeftTemplate flying left, ScytheRightTemplate flying right,
 ; chosen by bit 0 of the Z80's R register) goes into the word at
@@ -3229,19 +3333,22 @@ SetDeathSprite:
 ; Hardware: reads the R register as a random number.
 ;
 ; C' Timer counter of Death (50 down to 1)
+; D Number of frames (2), the frame shown while C' is 20 or less
+; E Frame number from StepAnimation (0 or 1)
 ; HL Sprite block + 9, passed on to IY
 ; IY Where to continue: SelectFrameRight or SelectFrameLeft
+; SP Slot address + $12
 ThrowDeathScythe:
   EXX                     ; switch to the alternate registers
   LD A,C                  ; A = timer counter (C')
   EXX
   CP $14                  ; throw when it is exactly 20 (the Z flag is kept to
-                          ; $BA81)
+                          ; ThrowDeathScythe_0)
   JR NC,ThrowDeathScythe_0
-  LD E,D                  ; no effect (E is not used again)
+  LD E,D                  ; below 20: frame 2, the throwing pose
 ThrowDeathScythe_0:
   JR NZ,ThrowDeathScythe_2
-  LD E,D                  ; no effect either
+  LD E,D                  ; exactly 20: the throwing pose from this frame on
   EXX
   LD A,SFX_ENEMY_SHOT     ; sound effect
   LD (SoundRequest),A
@@ -3270,10 +3377,12 @@ ThrowDeathScythe_2:
 ; ScytheRightTemplate, spawned by ThrowDeathScythe). In this state it falls
 ; straight down: its y moves by the vertical speed and the cells under it are
 ; looked at. When they are free it is drawn (UpdateMovingSprite_Draw) and keeps
-; falling. When a cell is harmful (tile class 4, FLAG_HARMFUL; from the code,
-; no scythe was seen to take this exit) the slot is freed by way of
-; FreeEntitySlotAtEntry (the four state words are pushed back first so that SP
-; is at the slot again). When a cell is solid (class 1 to 3) the scythe lands:
+; falling. When a cell is harmful (tile class 4, FLAG_HARMFUL) the slot is
+; freed by way of FreeEntitySlotAtEntry (the four state words are pushed back
+; first so that SP is at the slot again). This is how most scythes end: in
+; 5000 frames of room 18 (Jean out of play) 54 of the 96 scythes removed fell
+; onto the harmful bottom row (y $4D, x $28-$58), the other 42 slid off the
+; room edges (UpdateScytheSliding). When a cell is solid (class 1 to 3) the scythe lands:
 ; y is rounded down to a multiple of 4 (a whole character row), the handler
 ; word becomes UpdateScytheSliding and the scythe is drawn. UpdateScytheSliding
 ; then slides it sideways and hands it back to this routine when the floor
@@ -3507,8 +3616,8 @@ UpdateScytheSliding_1:
 ; When the flag at ChaliceTaken is not zero Satan is finished: the first time
 ; this is seen (SatanSmoked is zero, and set to $FF) music track 7 starts, the
 ; script at $82D4 is started (the main loop runs the script whose address is in
-; $9CEE when $9CE7 holds a NOP), the done flag of the crosses display at $8542
-; is cleared, and Satan's own slot is overwritten with the smoke template
+; $9CEE when $9CE7 holds a NOP; it erases the ring of crosses), the done flag
+; of the crosses display CrossRingDone is cleared (no code reads it), and Satan's own slot is overwritten with the smoke template
 ; SmokeTemplate, whose handler UpdateSatanSmoke draws a cloud of smoke in the
 ; place of Satan for 150 frames (observed: a white cloud, then nothing). Later,
 ; when the room is entered again with SatanSmoked set, the slot is freed at
@@ -3517,7 +3626,7 @@ UpdateScytheSliding_1:
 ; SP Slot address + 2 (the handler word was popped by the RET that entered the
 ;    routine)
 UpdateSatan:
-  LD A,(ChaliceTaken)     ; flag of the cross item in room 24 ($FF once taken)
+  LD A,(ChaliceTaken)     ; flag of the chalice of room 24 ($FF once taken)
   OR A
   JR Z,UpdateSatan_Alive  ; not taken: Satan is alive
   LD HL,SatanSmoked       ; smoke already made once?
@@ -3532,7 +3641,7 @@ UpdateSatan:
   XOR A
   LD (RunEventScript),A   ; let the main loop run the script step
   LD (CrossRingDone),A    ; clear the done flag of the twelve crosses display
-                          ; ($AE4B)
+                          ; (ShowCrossRing sets it; nothing reads it)
   POP AF                  ; drop y speed ...
   POP AF                  ; ... and the limits
   POP HL                  ; x word

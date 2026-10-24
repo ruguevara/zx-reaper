@@ -38,10 +38,9 @@ DrawCrossesHud:
 ;
 ; Hardware: writes the screen bitmap.
 ;
-;   C Number of cells
-;   DE Screen address of pixel row 0 of the first cell
-;   HL Address of the 8 bitmap bytes (not advanced)
-; O:C 0
+; C Number of cells
+; DE Screen address of pixel row 0 of the first cell
+; HL Address of the 8 bitmap bytes (not advanced)
 DrawTileCells:
   PUSH HL
   PUSH DE
@@ -91,12 +90,13 @@ ParchmentGate:
 ; Show a parchment: clear the screen, print its two lines, frame, wait for a
 ; key
 ;
-; Runs the parchment text script ScriptParchment, which blacks out the whole
-; screen and prints the two messages (string numbers in $850E and $850F)
-; centred at pixel rows 65 and 85. Then it draws the parchment frame in black
-; on yellow (DrawParchmentFrame), waits for a key (release, press, release),
-; redraws the room and the status bar and returns to the game. Entered through
-; ParchmentGate.
+; Runs the parchment text script ScriptParchment, which sets every attribute to
+; black, clears the bitmap above the status bar and prints the two messages
+; (string numbers in $850E and $850F) centred at pixel rows 65 and 85. Then it
+; draws the parchment frame in black on yellow (DrawParchmentFrame), waits for
+; a key (release, press, release), redraws the room, gives the status bar and
+; the room name their colours back and returns to the game (ShowTextWindow).
+; Entered through ParchmentGate.
 ;
 ; Hardware: clears and draws the screen, reads the keyboard through
 ; WaitKeyRelease and WaitKeyPress (HALT until the interrupt).
@@ -108,7 +108,16 @@ ShowParchment:
 ; Show a full-screen text window
 ;
 ; Entry point of the full-screen text window, also used by the ending
-; (RunEnding). Afterwards the screen shows the room again.
+; (RunEnding) for its first two texts. Saves the room state and sets it to 0
+; while the window is up (the frame routine runs no game logic), disarms
+; ParchmentGate, runs the script, draws the parchment frame in the colours B
+; and C (DrawParchmentFrame), waits for no key, a key, no key, then re-arms the
+; status bar redraws (DrawLivesBar, DrawCrossesHud), redraws the room
+; (RedrawRoom, sweeping in from the left), makes the attributes of the room
+; name area white again and restores the room state. The scripts leave the
+; bitmap of the status bar rows alone and only black out their attributes, so
+; the room name comes back by its attributes (observed: the parchment of room
+; 8 closed with SPACE, "The Altar" and the hearts and crosses back on screen).
 ;
 ; HL Script that draws the text (it also clears the screen)
 ; B Attribute of the blank (interior) cells
@@ -140,8 +149,8 @@ ShowTextWindow:
   LD HL,$0C16             ; row 22, column 12: the 20x2 message area
   LD BC,$0214             ; 20 cells wide, 2 rows
   LD A,WHITE              ; attribute: white ink on black
-  CALL FillAttrRect       ; fill the message area attributes (the room name is
-                          ; drawn again by the room)
+  CALL FillAttrRect       ; fill the message area attributes: the room name,
+                          ; whose pixels were not cleared, shows again
   POP AF
   LD (RoomState),A
   RET
@@ -156,8 +165,8 @@ ShowTextWindow:
 ; ParchmentFrameTiles (attribute C'). Rows are drawn by DrawFrameRow, cells by
 ; DrawFrameCell.
 ;
-; The caller does EXX so that B' and C' hold the attributes (ShowParchment sets
-; them from its BC).
+; The caller does EXX so that B' and C' hold the attributes (ShowTextWindow:
+; its BC, set by ShowParchment or RunEnding, becomes BC').
 ;
 ; Hardware: writes the screen bitmap and the attribute file.
 ;
@@ -190,7 +199,6 @@ DrawParchmentFrame_0:
 ;   C' Attribute of frame tile cells
 ; O:DE Position of the next row (E + 1)
 ; O:HL Layout pointer after the row
-; O:C 0
 DrawFrameRow:
   LD C,PARCHMENT_COLS     ; cells in the row
   PUSH DE                 ; keep the row position

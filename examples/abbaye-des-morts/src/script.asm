@@ -26,54 +26,69 @@
 ; position is always row first, then column. Tile commands write the tile map
 ; and the tile flag map (PlaceTile); the screen is redrawn from them later.
 ;
-; Code      Operands                    Effect $00-$7F   -
-; print the character $80       -                           end of script
-; (OpEnd) $81       y x w h b                   fill w bytes x h pixel rows of
-; the bitmap with b (OpFillPixels) $82       mode y
-; alignment of numbered strings (1 left at x=0, 2 centred, else right-aligned
-; to x=256) and text row y (OpSetTextAlign) $83       word
-; run the subscript at the address (OpCallScript) $84       word
-; print the string whose number is in the byte at the address: $850D room name,
-; $850E, $850F parchment lines (OpPrintStringVar) $85       n
-; print string number n of the table at $9048 (OpPrintString) $86       y x w h
-; t                   fill a w x h rectangle of tiles with t (OpFillTiles) $87
-; n                           set the room name: string number n into $850D
-; (OpSetRoomName) $88       w h, w*h tile numbers       define the block
-; pattern; the tile numbers follow inline, row by row (OpDefineBlock) $89
-; y x w h                     fill the rectangle with the block pattern,
-; repeated (OpFillWithBlock) $8A       mask                        set flag bit
-; 1 on border cells of the tile flag map: bit 0 left column, bit 1 right
-; column, bit 2 top row (OpFlagEdges) $8B       n, t1..tn, k, (y x)*k
-; draw the row of n tiles at each of k positions (OpStampRun) $8C       y x t
-; place one tile (OpPlaceTile) $8D       y x t c, c counts           stripes of
-; t from (y,x): the counts alternate draw n tiles, skip n cells (a skip wraps
-; to the next row at column 32) (OpTileStripes) $8E       y x
-; set the text cursor, pixel row y and pixel column x (OpSetTextCursor) $8F
-; y x w h a                   fill a w x h rectangle of attribute cells with a
-; (OpFillAttrs) $90       f                           f=1: mark every cell of
-; the room for redraw (flag bit 7), f=0: clear the marks (OpMarkRedraw) $91
-; t w h k, (y x)*k            draw the w x h block of tiles t, t+1, ... (row by
-; row) at each of k positions (OpStampTileBlock) $92       t k, (y x)*k
-; place the tile t at each of k positions (OpStampOne) $93       y x n, t1..tn
-; a row of n tiles (OpTileRow) $94       y x t c, c bytes            tile t
-; where a two-level bitmap has bits set: a mask byte holds 8 bits for 8 groups
-; of 8 cells (high bit first), each group with its bit set is followed by one
-; data byte of 8 cells; c counts all mask and data bytes (OpDrawTileMask) $95
-; word1 word2                 run the subscript word1 if the byte at word2 is 0
-; (OpRunIfZero) $96       y x w h f                   fill a rectangle of the
-; tile flag map with f (OpSetFlagRect) $97       n
-; unpack sprite set n for the room (OpUnpackSprites) $98       t k, (y x w h)*k
-; fill k rectangles with t (OpFillTilesList) $99       k, (y x w h)*k
-; fill k rectangles with the block pattern (OpFillBlockList) $9A       t y x n
-; vertical line of n tiles t (not used by the scripts) (OpTileVLine) $9B
-; t k, (y x n)*k              k vertical lines of tile t (OpTileVLines) $9C
-; word1 word2                 run the subscript word1 if the byte at word2 is
-; not 0 (OpRunIfNonZero) $9D       y x a n                     water strip of n
-; cells at (y,x) with attribute a: starts the per-frame reflection effect
-; DrawWaterReflection and marks the cells with the harmful flag value 4
-; (OpSetupWater) $9E       -                           start the bubbling blood
-; of the bottom row, tiles $3B/$3C (OpAnimateBlood) $9F       -
-; start the twelve-crosses effect (OpTwelveCrosses)
+; The codes (code, operands: effect, handler):
+;
+; $00-$7F, none: print the character.
+; $80, none: end of script (OpEnd).
+; $81, y x w h b: fill w bytes x h pixel rows of the bitmap with b
+; (OpFillPixels).
+; $82, mode y: alignment of numbered strings (1 left at x=0, 2 centred, else
+; right-aligned to x=256) and text row y (OpSetTextAlign).
+; $83, word: run the subscript at the address (OpCallScript).
+; $84, word: print the string whose number is in the byte at the address:
+; $850D room name, $850E, $850F parchment lines (OpPrintStringVar).
+; $85, n: print string number n of the table at $9048 (OpPrintString).
+; $86, y x w h t: fill a w x h rectangle of tiles with t (OpFillTiles).
+; $87, n: set the room name: string number n into $850D (OpSetRoomName).
+; $88, w h then w*h tile numbers: define the block pattern, row by row
+; (OpDefineBlock).
+; $89, y x w h: fill the rectangle with the block pattern, repeated
+; (OpFillWithBlock).
+; $8A, mask: set flag bit 1 on border cells of the tile flag map: bit 0 left
+; column, bit 1 right column, bit 2 top row (OpFlagEdges).
+; $8B, n t1..tn k (y x)*k: draw the row of n tiles at each of k positions
+; (OpStampRun).
+; $8C, y x t: place one tile (OpPlaceTile).
+; $8D, y x t c then c counts: stripes of t from (y,x): the counts alternate
+; draw n tiles, skip n cells (a skip wraps to the next row at column 32)
+; (OpTileStripes).
+; $8E, y x: set the text cursor, pixel row y and pixel column x
+; (OpSetTextCursor).
+; $8F, y x w h a: fill a w x h rectangle of attribute cells with a
+; (OpFillAttrs).
+; $90, f: f=1 mark every cell of the room for redraw (flag bit 7), f=0 clear
+; the marks (OpMarkRedraw).
+; $91, t w h k (y x)*k: draw the w x h block of tiles t, t+1, ... (row by row)
+; at each of k positions (OpStampTileBlock).
+; $92, t k (y x)*k: place the tile t at each of k positions (OpStampOne).
+; $93, y x n t1..tn: a row of n tiles (OpTileRow).
+; $94, y x t c then c bytes: tile t where a two-level bitmap has bits set: an
+; index byte holds 8 bits for 8 groups of 8 cells (high bit first), each group
+; with its bit set is followed by one mask byte of 8 cells; c counts all index
+; and mask bytes (OpDrawTileMask).
+; $95, word1 word2: run the subscript word1 if the byte at word2 is 0
+; (OpRunIfZero).
+; $96, y x w h f: fill a rectangle of the tile flag map with f
+; (OpSetFlagRect).
+; $97, n: unpack sprite set n for the room (OpUnpackSprites).
+; $98, t k (y x w h)*k: fill k rectangles with t (OpFillTilesList).
+; $99, k (y x w h)*k: fill k rectangles with the block pattern
+; (OpFillBlockList).
+; $9A, t y x n: vertical line of n tiles t, not used by the scripts
+; (OpTileVLine).
+; $9B, t k (y x n)*k: k vertical lines of tile t (OpTileVLines).
+; $9C, word1 word2: run the subscript word1 if the byte at word2 is not 0
+; (OpRunIfNonZero).
+; $9D, y x a n: water strip of n cells at (y,x) with attribute a: starts the
+; per-frame reflection effect DrawWaterReflection and gives the cells the
+; harmful flag value 4 (OpSetupWater).
+; $9E, none: start the bubbling blood of the bottom row, tiles $3B/$3C
+; (OpAnimateBlood).
+; $9F, none: start the ring of twelve crosses (OpTwelveCrosses).
+;
+; Every code above was run on hand-made scripts from a game snapshot and the
+; tile map, flag map, screen and variables read back: each does what its line
+; says (review R3).
 ;
 ; Hardware: the character and bitmap commands write the screen bitmap and the
 ; attribute commands the attribute file directly; the tile commands only write
@@ -121,8 +136,11 @@ OpEnd:
 ;
 ; Operands: y x w h b (5 bytes): the block starts at pixel row y (0-191) and
 ; byte column x (0-31), is w bytes wide and h pixel rows high and is filled
-; with b. The room scripts use it to clear the status bar rows and the text
-; windows to 0. The fill is done by FillBitmapRect.
+; with b. The scripts use it with b = 0: the whole screen (room 0, the
+; windows ScriptParchment and ScriptEnding1-3), the two bottom rows (room 4),
+; the room name panel (ScriptRoomPanel) and the lines of the controls screen
+; (ScriptControlsScreen and the line scripts after it). The fill is done by
+; FillBitmapRect.
 ;
 ; Hardware: writes the screen bitmap.
 ;
@@ -256,8 +274,9 @@ OpFillTilesList_0:
 ; Script opcode $86: fill a rectangle of the tile map with one tile
 ;
 ; Operands: y x w h t (5 bytes): rows y to y+h-1 and columns x to x+w-1 get the
-; tile t, one cell at a time through PlaceTile. Also entered at FillTilesRect
-; by OpFillTilesList and DrawTileVLine with the rectangle already in registers.
+; tile t, one cell at a time through PlaceTile. Falls into FillTilesRect, which
+; OpFillTilesList calls and DrawTileVLine jumps to with the rectangle already in
+; registers.
 ;
 ;   HL Operand bytes
 ; O:HL Address after the operands
@@ -268,13 +287,17 @@ OpFillTiles:
 
 ; Fill a rectangle of the tile map
 ;
-; Entry point: fill a rectangle of tiles; HL is kept.
+; Fill the rectangle (E row, D column, C wide, B high) with tile A through
+; PlaceTile. HL is kept (it is the script pointer of the callers, and
+; DrawTileVLine returns to the interpreter through here); B ends 0, C is kept,
+; D and E are changed.
 ;
-; A Tile number
-; E Row
-; D Column
-; C Width
-; B Height
+;   A Tile number
+;   E Row
+;   D Column
+;   C Width
+;   B Height
+; O:HL Unchanged
 FillTilesRect:
   PUSH HL                 ; keep the script pointer
   EX DE,HL                ; HL = position: L row, H column
@@ -297,8 +320,9 @@ FillTilesRect_1:
 ; Script opcode $87: set the room name
 ;
 ; Operand: n (1 byte): the number of the room name string, stored in $850D. It
-; is printed later with $84 by the banner script at $82F0 (bottom right of the
-; screen).
+; is printed later with $84 by the room name panel script ScriptRoomPanel
+; ($82F0, bottom right of the screen), which every room script but those of
+; rooms 0 and 4 runs.
 ;
 ;   HL Operand byte
 ; O:HL Address after the operand
@@ -421,9 +445,11 @@ OpTileRow_0:
 ; Operands: y x t c, then c count bytes. From the cell (y, x) the counts
 ; alternate: draw that many cells with the tile t, skip that many cells (a skip
 ; that passes column 31 continues on the next row), draw, skip... c counts both
-; kinds, so it is odd when the last count is a run. A run is not wrapped. Used
-; for the tree trunks and similar patterns of the room scripts; cells are
-; placed through PlaceTile.
+; kinds, so it is odd when the last count is a run. The code does not wrap a
+; run, but the address arithmetic of TileMapAddress carries a column above 31
+; into the next row (except from rows 7 and 15, which go back to rows 0 and 8):
+; room 4's stripes at $742C have a run that reaches column 37. Used twice, rooms
+; 4 and 5 ($742C, $74D4); cells are placed through PlaceTile.
 ;
 ;   HL Operand bytes
 ; O:HL Address after the counts
@@ -479,13 +505,12 @@ OpTileStripes_4:
 ; the tile class) in the same cell of the tile flag map, three pages higher
 ; ($5E00 + 32*row + column). Nothing is drawn: the redraw routines (RedrawRoom,
 ; BuildRedrawList) paint the marked cells later. All the tile commands of the
-; room scripts end up here. HL is preserved, D and A are not.
+; room scripts end up here, and ShowCrossRing. HL, E and BC are preserved (the
+; fill loops rely on HL and E); D and A are not.
 ;
 ;   E Tile number
 ;   H Column (0-31)
 ;   L Row (0-21)
-; O:A Flag byte of the tile
-; O:D High byte of TileFlags ($CD)
 PlaceTile:
   PUSH HL
   CALL TileMapAddress     ; HL = tile map address
@@ -527,7 +552,6 @@ PlaceTile:
 ; Hardware: writes the screen bitmap.
 ;
 ;   A Character code ($20-$7F)
-; O:A Destroyed
 DrawGlyph:
   PUSH HL
   PUSH DE
@@ -739,9 +763,11 @@ TextCursorX:
 ; Script code $8E: set the text cursor
 ;
 ; Operands: y (pixel row), x (pixel column), copied to TextCursorY and
-; TextCursorX. No room script uses it (a static decode of the scripts at
-; $726A-$83A7 finds no $8E); the rooms set only y, with $82 (OpSetTextAlign),
-; and let the alignment choose x.
+; TextCursorX. Used by the controls screen scripts (ScriptControlsScreen,
+; ScriptKempstonLine, ScriptKeyboardLine, ScriptPressKey), whose characters
+; follow it; no room or window script uses it (a static decode of the scripts
+; at $726A-$83A7 finds no $8E): those set only y, with $82 (OpSetTextAlign), and
+; let the alignment choose x for the numbered strings.
 ;
 ;   HL Script pointer, at the operands
 ; O:HL Script pointer after the two operands
@@ -912,7 +938,7 @@ FillBitmapRect_0:
 
 ; Fill a rectangle of the attribute file with a byte
 ;
-; Worker of script code $8F (OpFillAttrs); also called by ShowParchment. Fills
+; Worker of script code $8F (OpFillAttrs); also called by ShowTextWindow. Fills
 ; B rows of C attribute cells with A, starting at row L, column H.
 ;
 ; Hardware: writes the attribute file at $5800-$5AFF directly.
@@ -946,9 +972,11 @@ FillAttrRect_0:
 ; Operand: one byte v. Rewrites every cell of the tile flag map at $5E00-$60BF:
 ; the old bit 7 (the redraw mark) is cleared and v rotated right by one bit is
 ; ORed in, so bit 0 of v becomes the new mark in bit 7 and bits 1-7 of v land
-; in bits 0-6 of the flags. The scripts use 0 (clear all marks: room 0, the
-; intro text) and 1 (mark every cell, so the next redraw pass repaints the
-; whole room from the tile map: room 4 and the scripts at $82D0-$83A7).
+; in bits 0-6 of the flags. The scripts use 0 (clear all marks: room 0, so
+; that the intro text is not drawn over) and 1 (mark every cell, so the next
+; redraw repaints the whole room from the tile map: the room name panel
+; ScriptRoomPanel, which every room but 0 and 4 runs, room 4's own script, and
+; the windows ScriptParchment, ScriptEnding1 and ScriptEnding2).
 ;
 ; Observed: the cell at $6000 (row 16, column 0) is left alone, because the
 ; loop ends when L reaches 0 on its first page and so skips offset 0 of that
@@ -1038,7 +1066,10 @@ OpStampTileBlock_1:
 ; stored in two levels. An index byte is read from its most significant bit
 ; down and has one bit for each group of 8 cells: 0 skips the 8 cells, 1 takes
 ; the next byte of the stream as the mask of those 8 cells (most significant
-; bit first) and puts the tile on the cells whose bit is 1. C counts every byte
+; bit first) and puts the tile on the cells whose bit is 1. A skip that passes
+; column 31 goes to column 0 of the next row, dropping the rest (the groups
+; stay in step only when the start column is a multiple of 8, as in the one
+; use, column 0); a mask byte wraps cell by cell. C counts every byte
 ; of the stream, index and mask bytes alike; the routine stops when it runs
 ; out, so a last index byte is read but its bits are not used. Used once (room
 ; 9, the foliage at $7851).
@@ -1305,11 +1336,11 @@ OpFillWithBlock_Cell:
 ; subtraction: a block of width or height 0, the initial state of BlockWidth,
 ; would never end) and reads the tile from the block data set by OpDefineBlock.
 ;
+; BC and HL are preserved; D is changed.
+;
 ;   D Row offset in the rectangle
 ;   E Column offset in the rectangle
 ; O:E Tile number
-; O:D 0
-;   BC and HL are preserved
 GetBlockTile:
   PUSH HL
   PUSH BC
@@ -1445,12 +1476,12 @@ OpSetFlagRect_0:
 ; Store a flag value in the tile flag map
 ;
 ; Finds the tile map cell with TileMapAddress and writes E three pages higher,
-; in the tile flag map (FlagMapAddress gives the same address).
+; in the tile flag map (FlagMapAddress gives the same address). HL is left at
+; the flag (SetFlagRect keeps its own copy).
 ;
 ;   L Row 0-21
 ;   H Column 0-31
 ;   E Flag value
-; O:HL Address of the flag in the flag map
 SetTileFlag:
   CALL TileMapAddress
   LD A,FLAGS_PAGE_OFFSET  ; the flag map is 3 pages above the tile map
@@ -1537,10 +1568,13 @@ DrawTileVLine:
 ; (NOP) over the RET at DrawWaterReflection so that routine runs from the main
 ; loop on every frame, and patches that routine's operands: the attribute and
 ; the width, the address of the attribute cells, and the two bitmap addresses
-; of the copy (the source is the cell row 3 rows above, the destination the
-; bottom pixel line of the water cell row, so the copy comes out upside down: a
-; reflection); the JR into the LDI chain is set to copy `width` bytes per pixel
-; line and the BC count to width x 8. Finally it stores the flag value 4 in the
+; of the copy (the source starts at the top pixel line of the cell row 3 rows
+; above, the destination at the bottom pixel line of the water cell row; the
+; copy takes every third line going down and writes going up, so the three
+; rows above come out squashed and upside down: a reflection); the JR into the
+; LDI chain is set to copy `width` bytes per pixel line and the BC count to
+; width x 8. Observed with operands 21, 6, $13, 16: the operands written are
+; $5AA6, $13, 16, $5046, $57A6, $0080 and the JR offset $20. Finally it stores the flag value 4 in the
 ; width cells (the entry SetFlagRect of OpSetFlagRect), which kills the monk
 ; when he enters them (observed in room 16).
 ;
@@ -1611,9 +1645,9 @@ OpSetupWater_0:
 ; No operands. Writes 0 (NOP) over the RET at AnimateBloodTiles, so that
 ; routine runs from the main loop on every frame; it swaps the tiles $3B and
 ; $3C in the bottom row of the tile map (row 21) every second pass and marks
-; those cells for redraw. Observed: $AE20 holds 0 in room 22 and $C9 in the
-; other rooms tried (5, 16, 19, 25), so the room entry puts the RET back. Used
-; by rooms 21, 22 and 23 ($80FB, $81C1, $8263).
+; those cells for redraw. Observed 40 frames after entering the room: $AE20
+; holds 0 in rooms 21, 22 and 23 and $C9 in rooms 5, 16, 19 and 24, so the room
+; entry puts the RET back. Used by rooms 21, 22 and 23 ($80FB, $81C1, $8263).
 OpAnimateBlood:
   XOR A
   LD (AnimateBloodTiles),A ; NOP over the RET at $AE20
@@ -1623,10 +1657,12 @@ OpAnimateBlood:
 ;
 ; No operands. Writes 0 (NOP) over the RET at ShowCrossRing, so that routine
 ; runs from the main loop on every frame; once the player holds 12 crosses
-; ($854D) it draws tile $4C at each cell of the coordinate list at $82D7 (room
-; 25's script holds the list). Observed: $AE4B holds 0 in room 25 and $C9 in
-; the other rooms tried. Used once, at the end of room 24's script ($82CE),
-; which room 25 calls.
+; ($854D) it adds the crosses one by one (tile $4C) at the cells of the list
+; CrossRingPositions ($82D7, the positions of the script ScriptEraseCrosses,
+; which blanks the same cells when the chalice is taken). Observed 40 frames
+; after entering the room: $AE4B holds 0 in room 24 (and 25, F10) and $C9 in
+; rooms 5, 16, 19, 21, 22 and 23. Used once, at the end of room 24's script
+; ($82CE), which room 25 calls.
 OpTwelveCrosses:
   XOR A
   LD (ShowCrossRing),A    ; NOP over the RET at $AE4B

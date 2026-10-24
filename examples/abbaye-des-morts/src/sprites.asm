@@ -27,14 +27,26 @@
 ; row and one byte per column, so the graphics address has the pixel row in D
 ; and the first column in E.
 ;
+; The parameters are not in registers: the routine pops them from the call
+; list, in this order: the position (low byte y in 2-pixel units, high byte x
+; byte column), the address of the graphics in the sprite sheet (high byte
+; pixel row, low byte column), the size (low byte width in bytes 1-5, high
+; byte height in 2-pixel units) and the attribute of the sprite's cells (high
+; byte; the low byte is popped into F and not used). SP stays in the call list
+; while it runs, so its CALL FlagMapAddress and PUSH BC write over the bytes of
+; its own command, which are already popped (observed: writes from $9898 and
+; $989C into $BE62-$BE8B during play). An interrupt in the middle writes there
+; too and the PUSH BC of InterruptHandler leaves BC in those two bytes, which
+; is harmless here for the same reason.
+;
+; Observed: 903 sprites queued by hand on a room 5 snapshot (widths 1-5,
+; heights 1-12, y offsets 0-3 in the cell row, clipped at all four edges) and
+; drawn by BuildRedrawList and DrawRedrawList put exactly (OutlineMasks[g] AND
+; background) OR g on the screen at pixel row 2y and byte column x, nothing
+; for a sprite wholly outside.
+;
 ; Hardware: none; it only changes the tile flag map in RAM. The screen is
 ; written later, by DrawRedrawList.
-;
-; HL Popped from the call list: L = y in 2-pixel units, H = x byte column
-; DE Popped: address of the graphics in the sprite sheet (D = pixel row, E =
-;    column)
-; BC Popped: C = width in bytes (1-5), B = height in 2-pixel units
-; AF Popped: A = attribute of the sprite's cells (F unused)
 QueueSprite:
   POP HL
   POP DE
@@ -510,10 +522,14 @@ DrawSpriteJob_3:
 
 ; Run the sprite drawer for a width and a number of row pairs
 ;
-; Takes the drawer for the sprite's width from SpriteDrawerTable and enters it
-; at its (4 - C)th call: every drawer is four times CALL strip + INC H, 4 bytes
-; each, so entering later draws only the last C pairs of pixel rows (C = 4: the
-; whole character row). It switches to the alternate register set, which holds
+; Takes the drawer for the sprite's width from SpriteDrawerTable and skips 4 -
+; C of its calls: every drawer is four times CALL strip + INC H, 4 bytes each,
+; and the calls are alike, so entering later only draws fewer pairs of pixel
+; rows (C = 4: the whole character row). Where the pairs land is set by H',
+; which DrawSpriteJob points at pixel row 2 x offset of the cell row: the first
+; character row of a sprite offset by n 2-pixel units draws 4 - n pairs from
+; pixel row 2n, the last row the pairs of height left from pixel row 0
+; (observed with every offset, see QueueSprite). It switches to the alternate register set, which holds
 ; the drawer's pointers (see DrawSpriteJob), and jumps into the drawer with
 ; RET. The drawer ends with POP AF, which takes the BC pushed here (A = the
 ; attribute), and RET: it returns to the caller of this routine, which executes
@@ -633,8 +649,6 @@ DrawStripW1:
 ; DE Graphics: D = pixel row, E = column of the first byte (alternate set)
 ; HL Destination: H = $C5 + first pixel row, L = cell index of the first byte
 ;    (alternate set)
-; AF Popped from the stack (pushed by DispatchDrawer as BC): A = attribute of
-;    the cells
 DrawSpriteW1:
   CALL DrawStripW1
   INC H
@@ -722,8 +736,6 @@ DrawStripW2:
 ; DE Graphics: D = pixel row, E = column of the first byte (alternate set)
 ; HL Destination: H = $C5 + first pixel row, L = cell index of the first byte
 ;    (alternate set)
-; AF Popped from the stack (pushed by DispatchDrawer as BC): A = attribute of
-;    the cells
 DrawSpriteW2:
   CALL DrawStripW2
   INC H
@@ -829,8 +841,6 @@ DrawStripW3:
 ; DE Graphics: D = pixel row, E = column of the first byte (alternate set)
 ; HL Destination: H = $C5 + first pixel row, L = cell index of the first byte
 ;    (alternate set)
-; AF Popped from the stack (pushed by DispatchDrawer as BC): A = attribute of
-;    the cells
 DrawSpriteW3:
   CALL DrawStripW3
   INC H
@@ -954,8 +964,6 @@ DrawStripW4:
 ; DE Graphics: D = pixel row, E = column of the first byte (alternate set)
 ; HL Destination: H = $C5 + first pixel row, L = cell index of the first byte
 ;    (alternate set)
-; AF Popped from the stack (pushed by DispatchDrawer as BC): A = attribute of
-;    the cells
 DrawSpriteW4:
   CALL DrawStripW4
   INC H
@@ -1097,8 +1105,6 @@ DrawStripW5:
 ; DE Graphics: D = pixel row, E = column of the first byte (alternate set)
 ; HL Destination: H = $C5 + first pixel row, L = cell index of the first byte
 ;    (alternate set)
-; AF Popped from the stack (pushed by DispatchDrawer as BC): A = attribute of
-;    the cells
 DrawSpriteW5:
   CALL DrawStripW5
   INC H
@@ -1126,9 +1132,14 @@ DrawSpriteW5:
 ;
 ; Redraws the room area (32 x 22 character cells) from the tile map: every cell
 ; whose redraw flag (bit 7 in the tile flag map) is set is drawn by RedrawCell,
-; the others are skipped. Called after a room has been built (every cell is
-; flagged by then), at the title and after ShowParchment has printed a screen
-; of text. The cells are visited line by line in an order taken from the table
+; the others are skipped. Called after a room has been built (MainLoop: every
+; cell is flagged by then, by the $90 1 of the room name panel script
+; ScriptRoomPanel or of room 4's script, except the water cells of rooms 16
+; and 19, whose flag OpSetupWater sets to 4 afterwards and which
+; DrawWaterReflection paints; observed at the call in rooms 1-24), by the
+; intro RunIntro (room 0's script clears every mark with $90 0 so that the
+; intro text stays: only the cell at $6000 is drawn, see OpMarkRedraw) and by
+; ShowTextWindow after a parchment or an ending window. The cells are visited line by line in an order taken from the table
 ; SweepSetups, indexed by the exit direction in $850B (0 = left to right by
 ; columns, after leaving the room through the right edge; 1 = right to left; 2
 ; = top to bottom by rows, after leaving through the bottom edge; 3 = bottom to
@@ -1264,8 +1275,9 @@ RedrawCell:
 ; Copy a tile bitmap to a screen cell
 ;
 ; Copy 8 bytes from HL to the screen cell at DE, one byte per pixel row: DE
-; moves down a row with INC D. Also entered from DrawTileCells and
-; DrawFrameCell (the status bar and the parchment frame).
+; moves down a row with INC D. RedrawCell falls into it; DrawTileCells and
+; DrawFrameCell (the status bar and the parchment frame) call it. B ends 0, HL
+; and D are moved on by 8; no caller uses them.
 ;
 ; HL The 8 bytes of the bitmap
 ; DE Screen address of the cell

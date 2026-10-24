@@ -8,25 +8,30 @@
 ; ends at $8585), pushes IX, HL, AF, BC, DE, IY and the alternate set, and
 ; calls the routine whose address is in InterruptRoutine through JumpToHL (JP
 ; (HL)). Afterwards it pops everything, enables interrupts and returns with LD
-; SP and JP through the two patched operands. The interrupted code needs no
-; stack room: the main loop runs the frame list with SP as a data pointer
-; (RunFrameList) and is interrupted in the middle of it.
+; SP and JP through the two patched operands. The handler keeps nothing on the
+; interrupted stack, because the foreground often uses SP as a data pointer
+; (RunFrameList runs the frame list by RET; the cell and sprite copiers read
+; tile bitmaps and item sprites with POP BC). Only the CPU's own push of the
+; return address writes the two bytes below the interrupted SP, and the PUSH BC
+; at $858E puts back what was there when the interrupted code had just popped
+; them into BC (observed, F139).
 ;
 ; The routine called is GameFrameRoutine while the game (or the intro room 0)
 ; runs, MenuFrame during the title and the controls menu, and the RET at
-; NoFrameRoutine before the game starts (StartUp). One run of GameFrameRoutine
-; takes about 5,500 to 7,300 T-states, plus a burst of up to 9,000 for a beeper
-; sound effect, of the 69,888 of a frame (observed with the simulator, frames
-; 200-260 of tests/inputs/play.txt: interrupt accepted at T 19-28 of the frame,
-; EndFrameList reached at T 5,700-7,300).
+; NoFrameRoutine before the game starts (StartUp). The interrupt is accepted at
+; T 19-28 of the 69,888 of a frame; GameFrameRoutine returns at T 7,550 in a
+; quiet room (room 7, Jean standing, no sound) and at a median of 9,300-15,700,
+; up to 24,000, in rooms with enemies (rooms 5, 10, 14, 15, 18 and 24, 300
+; frames each with enemy hits off, beeper bursts included; observed with the
+; simulator). In the intro (frames 200-260 of tests/inputs/play.txt)
+; EndFrameList is reached at T 5,700-7,300.
 ;
 ; Hardware: the IM 2 frame interrupt. Interrupts stay disabled until the EI at
 ; 85B5, so the frame routine is never interrupted. By reading the code (not
 ; seen): an interrupt accepted between that EI and the JP at SmcInterruptReturn
 ; would store $85B9 as the return address and then hang on JP $85B9; it needs a
-; run of the handler that ends exactly as the next frame starts.
-;
-; O:All All registers are restored; the interrupted code goes on unaware
+; run of the handler that ends exactly as the next frame starts. All registers
+; are restored, so the interrupted code goes on unaware.
 InterruptHandler:
   EX (SP),HL              ; HL = interrupted PC; the old HL is now on the stack
   LD (SmcInterruptReturn+$0001),HL ; return address: operand of the JP at $85B9
@@ -100,8 +105,6 @@ UnusedRet:
 ; calls it on every machine, where on a 48K Spectrum it does nothing visible.
 ;
 ; Hardware: writes the 128K paging port $7FFD (through PageInBank).
-;
-; O:A $10, the value written
 PageInBank0:
   LD A,PAGING_BANK0
   JR PageInBank
@@ -111,15 +114,15 @@ PageInBank0:
 ; Pushes the address of PageInBank0 (page bank 0 back in) and then DE, and
 ; falls into PageInMusicBank, which pages the music bank in and RETs: the RET
 ; jumps to DE, and the RET at the end of that routine returns to PageInBank0,
-; which restores bank 0 and returns to the caller of this routine. HL and the
-; other registers reach the music routine unchanged, except BC.
+; which restores bank 0 and returns to the caller of this routine. HL, DE and
+; the other registers reach the music routine unchanged, except A (the paging
+; value from MachineType) and BC (the address of PageInBank0).
 ;
 ; Hardware: writes the paging port $7FFD (through PageInBank).
 ;
-;   DE Address of the routine in the music bank ($C000-$FFFF)
-;   HL Argument passed on to that routine (module address, see
-;      BankEndingDoor)
-; O:BC Changed
+; DE Address of the routine in the music bank ($C000-$FFFF)
+; HL Argument passed on to that routine (the packed screen for BankShowTitle
+;    and BankShowInfo; whatever the caller left for BankEndingDoor)
 CallInMusicBank:
   LD BC,PageInBank0       ; return address of the music routine
   PUSH BC
@@ -215,5 +218,6 @@ BankShowInfo:
 BankShowTitle:
   LD HL,$C09D             ; the packed title screen in the bank
 BankDrawScreen:
-  LD DE,$F9D7             ; bank routine: clear the attributes, unpack the screen
+  LD DE,$F9D7             ; bank routine: clear the attributes, unpack the
+                          ; screen
   JP CallInMusicBank

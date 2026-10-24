@@ -1,6 +1,6 @@
 ; Draw the water row: its attribute and the reflection of the scenery above it
 ;
-; Called once per pass by the main loop StartGame. The byte at
+; Called once per pass by the main loop (MainLoop_Play). The byte at
 ; DrawWaterReflection is RET until a room script uses op $9D, which
 ; OpSetupWater turns into NOP (room entry EnterRoom puts the RET back), and
 ; then writes the operands of the instructions below: this routine is the water
@@ -12,9 +12,11 @@
 ; water, so the 24 lines of the three cell rows above the water come out
 ; squashed to a third of their height and upside down). The copy is made by the
 ; chain of 32 LDI instructions at WaterCopyChain: the JR at SmcWaterJump jumps
-; into the chain so that only `width` of them run (WaterChainTail steps the two pointers
-; to the next line, see there). The patched operands are labelled; OpSetupWater
-; writes them:
+; into the chain so that only `width` of them run (WaterChainTail steps the two
+; pointers to the next line, see there). Observed in room 16: after 60 frames
+; all 8 lines of the 16 water bytes equal the source lines 21, 18, ..., 0
+; counted from the top of screen row 18 (F115). The patched operands are
+; labelled; OpSetupWater writes them:
 ;
 ; SmcWaterAttrAddr attribute address of the first water cell
 ; (SmcWaterAttrAddr+1), SmcWaterAttr attribute (SmcWaterAttr+1), SmcWaterWidth
@@ -48,9 +50,9 @@ SmcWaterDst:
                           ; (patched)
 SmcWaterCount:
   LD BC,$0000             ; width x 8 (patched): reaches 0 after the 8th line
-; Loop head, one pixel line per pass (also jumped to from WaterChainTail): remember the
-; start of the source and destination lines, then copy the line by jumping into
-; the LDI chain.
+; Loop head, one pixel line per pass (also jumped to from WaterChainTail):
+; remember the start of the source and destination lines, then copy the line by
+; jumping into the LDI chain.
 DrawWaterReflection_Line:
   PUSH HL
   PUSH DE
@@ -60,12 +62,13 @@ SmcWaterJump:
 
 ; Water reflection: first 16 of the 32 LDIs that copy one pixel line
 ;
-; The chain of WaterCopyChain-ADE0 copies up to 32 bytes from (HL) to (DE) and
-; counts BC down. The JR at SmcWaterJump of DrawWaterReflection enters it 2 x
-; (32 - width) bytes after its start so that exactly `width` (at most 32,
-; LDI_CHAIN_LEN) bytes are copied, then execution runs on into WaterChainTail, which
-; ends with the second half of the chain. Falls through to WaterChainTail after the 16th
-; LDI.
+; The 32 LDIs from here to the end of the first half of WaterChainTail copy up
+; to 32 bytes from (HL) to (DE) and count BC down. The JR at SmcWaterJump of
+; DrawWaterReflection enters the chain 2 x (32 - width) bytes after its start
+; so that exactly `width` (at most 32, LDI_CHAIN_LEN) bytes are copied; this
+; part falls through to WaterChainTail after the 16th LDI. Both water strips
+; (rooms 16 and 19) are 16 cells wide, so the JR lands on WaterChainTail and
+; these 16 LDIs are never run by the game (F130).
 WaterCopyChain:
   LDI                     ; the chain: 32 LDIs from here to ADE0
   LDI
@@ -87,7 +90,7 @@ WaterCopyChain:
 ; Water reflection: last 16 LDIs of the chain, then step to the next pixel line
 ;
 ; Continues the chain of WaterCopyChain with its second half; after the 32nd
-; LDI the code at ADE1 finishes one pixel line of DrawWaterReflection: it
+; LDI the code that follows finishes one pixel line of DrawWaterReflection: it
 ; restores the start of the source and destination lines, returns when BC is 0
 ; (all 8 lines of the water row are done) and otherwise moves the destination
 ; one pixel line up (DEC D, the reflection is upside down) and the source three
@@ -130,12 +133,13 @@ WaterChainTail:
                           ; source
   INC H                   ; source line + 1
   CP H
-  JR NZ,WaterChainTail_1           ; still inside the row
+  JR NZ,WaterChainTail_1  ; still inside the row
   LD A,L                  ; reached the next row after one step: 32 to L, wrap
                           ; the third
   ADD A,$20
   LD L,A
-  JR C,WaterChainTail_0            ; carry: next third of the screen, H is already right
+  JR C,WaterChainTail_0   ; carry: next third of the screen, H is already
+                          ; right
   LD A,H
   SUB $08
   LD H,A
@@ -173,7 +177,7 @@ WaterChainTail_4:
 
 ; Animate the bubbling blood tiles of the bottom row
 ;
-; Called once per pass by the main loop StartGame. The byte at
+; Called once per pass by the main loop (MainLoop_Play). The byte at
 ; AnimateBloodTiles is RET until the room script uses op $9E (OpAnimateBlood,
 ; rooms 21, 22 and 23: the red blood at the foot of the room), which makes it
 ; NOP; room entry (EnterRoom) puts the RET back. Every second pass
@@ -220,7 +224,7 @@ AnimateBloodTiles_2:
 
 ; Show the ring of twelve crosses in Satan's room, flashing in colour
 ;
-; Called once per pass by the main loop StartGame. The byte at ShowCrossRing is
+; Called once per pass by the main loop (MainLoop_Play). The byte at ShowCrossRing is
 ; RET until the room script uses op $9F (OpTwelveCrosses, at the end of room
 ; 24's script, which room 25 calls too); room entry (EnterRoom) puts the RET
 ; back. Once the player holds 12 crosses (Crosses) it acts on every fifth pass
@@ -235,8 +239,9 @@ AnimateBloodTiles_2:
 ; script ScriptEraseCrosses), which marks them for redraw; with all 12 shown it
 ; restamps them every time, so they keep flashing.
 ;
-; Hardware: none directly (the crosses are drawn by the redraw routine
-; RedrawRoom); requests sound effect 5 through SoundRequest.
+; Hardware: none directly (PlaceTile marks the cells, and the redraw step of
+; the main loop, BuildRedrawList and DrawRedrawList, paints them); requests
+; sound effect 5 through SoundRequest.
 ShowCrossRing:
   NOP                     ; RET unless op $9F of the room script switched the
                           ; ring on

@@ -4,9 +4,9 @@
 ; byte of this table is stored in the flag map three pages above ($5E00, one
 ; byte per cell, 22 rows of 32); the script can change the flags of a cell
 ; afterwards (observed: in room 16 row 21, columns 6-21 hold class 4 under the
-; blank tile $80, the pit with the bones). Bit 7 is the redraw mark: set when
-; the cell must be drawn this frame (every tile starts with it, so a new room
-; is drawn in full). Bit 6 is set by the sprite queue (QueueSprite) on the
+; blank tile $80: the lake of blood, set by OpSetupWater). Bit 7 is the redraw
+; mark: set when the cell must be drawn this frame (every tile of the table has
+; it, so a placed tile is drawn). Bit 6 is set by the sprite queue (QueueSprite) on the
 ; cells a sprite covers and CollectRedrawRun turns it into bit 7 on the next
 ; pass, which erases the sprite. Bits 0-2 are the class that the player and
 ; enemies test:
@@ -82,11 +82,11 @@ TileAttrs:
 ; 8 * n. CopyRunCells copies them into the pixel-row pages of the redraw buffer
 ; (RedrawPixels). Tiles $00 and $80 are blank ($80 is the background most rooms
 ; are filled with), $7B is the heart and $7C the cross of the status bar,
-; $E0-$FF are the pieces of the red pentagram of room 24 (a block of 6 by 6
-; cells in its tile map); the rest are the walls, floors and decorations of the
-; rooms and are not described tile by tile here (the attributes in TileAttrs
-; give their colours: for instance the tiles of rows $C0-$DF are blue and
-; $20-$2F cave rock in cyan).
+; $E0-$FF are the pieces of the red pentagram of room 24 (rows 6-11, columns
+; 13-18 of its tile map: 6 by 6 cells with the four corners left blank); the
+; rest are the walls, floors and decorations of the rooms and are not described
+; tile by tile here (the attributes in TileAttrs give their colours: for
+; instance the tiles $C0-$DF are blue and $20-$25, the cave rock, cyan).
 TileGfx:
   DEFB $00,$00,$00,$00,$00,$00,$00,$00
   DEFB $72,$F8,$71,$06,$6F,$76,$B8,$DA

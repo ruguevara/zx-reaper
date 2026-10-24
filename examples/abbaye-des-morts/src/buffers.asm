@@ -5,8 +5,10 @@
 ; word template address (the templates start at ArrowLeftTemplate), byte y,
 ; byte x, the position the object starts from, in 2-pixel units; the template
 ; adds its own offsets. The enemies that throw things (ThrowDeathScythe,
-; UpdateSatan, and the routines at $B620, $B687, $B7C6, $B818 and $B8C5) build
-; the entry in the four bytes at $5DFC-$5DFF, copy it to this address, advance
+; UpdateSatan, UpdateShooter_Tail for the archers and the stone heads,
+; UpdatePlant_Spit, UpdateFishWaiting and UpdateFishJumping for the splashes,
+; UpdateBeastFire) build the entry in the four bytes at $5DFC-$5DFF (so the
+; list has room for 15 entries), copy it to this address, advance
 ; this pointer by 4 and add 1 to the count in SpawnQueueCount. Near the end of
 ; every frame GameFrame calls SpawnQueuedObjects when the count is not zero:
 ; that resets this pointer to $5DC0, creates the objects in free slots
@@ -19,14 +21,14 @@ ObjectListPtr:
 ;
 ; Address of the next free byte of the frame call list at FrameList. GameFrame
 ; sets it to $BE5A at the start of every game frame, each draw command queued
-; (QueueDrawCmd, AnimateItem, SelectFrameRight, QueueTwoCommands,
+; (QueueDrawCmd, DrawItemFrame, QueueEntitySprite, QueueTwoPartSprite,
 ; UpdateBeastFire_Draw and others) copies its 10 bytes there and advances it by
 ; 10, and EndFrameList appends the closing entry LeaveFrameList. The value in
 ; the loaded image (0) is never used.
 FrameListPtr:
   DEFW $0000
 
-; Frame call list: the draw commands of one frame, closed by $BDEB
+; Frame call list: the draw commands of one frame, closed by LeaveFrameList
 ;
 ; Built by the game frame and run by RunFrameList. A command is 10 bytes: the
 ; address of a routine (QueueSprite for sprites that are masked in the redraw
@@ -35,12 +37,16 @@ FrameListPtr:
 ; pixel-row page in the high byte), width in bytes, height in 2-pixel units, a
 ; byte that is popped as the flags and not used, and the attribute (the fields
 ; are described at SpriteCmd). The list has room for 16 commands and the
-; closing word $BDEB ($A2 bytes); no check for a full list was seen, and the
+; closing word, the address of LeaveFrameList ($A2 bytes); no check for a full list was seen, and the
 ; fill after it (SpareFill1) would take the overflow. The most seen in fuzzed runs
 ; of all 25 rooms was 14 commands (rooms 10 and 15, F44).
 ;
-; The interrupt handler writes into this area while SP points here and puts the
-; bytes back.
+; While RunFrameList runs, SP points into the list, so the routines it enters
+; (QueueSprite, QueueBlockSprite) and an interrupt use the bytes below SP as
+; their stack: these are bytes of commands already run, so nothing is lost.
+; The PUSH BC of InterruptHandler (F139) does not restore them here: BC is not
+; the popped pair (observed at frame 79 of a fuzzed run in room 5: the word
+; $98AC below SP became $0203).
 FrameList:
   DEFS $A2
 
@@ -62,8 +68,8 @@ SpareFill1:
 ; (RunDrawQueue): for each job whose first word is not zero it calls the
 ; routine at that address with DE = job + 1 and clears the word, so the queue
 ; is empty again afterwards and the first word is also the marker of a free
-; job. Fields: +0 word routine ($9972 for a masked sprite, $98F7 for an object
-; sprite), the other 14 bytes are the parameters of the routine (SpriteJob and
+; job. Fields: +0 word routine (DrawSpriteJob for a masked sprite,
+; DrawBlockJob for an object sprite), the other 14 bytes are the parameters of the routine (SpriteJob and
 ; BlockJob list them). A 17th job would run into the object slots at
 ; ObjectSlots.
 DrawQueue:
@@ -170,8 +176,8 @@ RedrawAttrs:
 ; draw into them, and DrawRedrawList writes them to the screen. The first page
 ; ($C500-$C5FF) is also the table of bit-reversed bytes built by
 ; BuildMirrorTable on room entry and used while the sprites of a room are
-; unpacked; and RestoreMenuArea and its partner copy the middle third of the
-; screen bitmap ($4800-$4FFF, 2048 bytes) to $C500 and back to save the screen
-; under the menus.
+; unpacked; and SaveMenuArea and RestoreMenuArea (through CopyMenuArea) copy
+; the middle third of the screen bitmap ($4800-$4FFF, 2048 bytes) to $C500 and
+; back to save the screen under the menus.
 RedrawPixels:
   DEFS $0800,$FF

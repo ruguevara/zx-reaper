@@ -1,26 +1,45 @@
 ; Item sprites: the doorway arch (16x24) and 14 sprites of 16x16 pixels
 ;
-; Plain (unpacked) sprite graphics, 16 pixels wide: 2 bytes per pixel row, no
-; mask (the outline comes from the table built at $FF00 by StartUp). They are
-; not copied to the sprite sheet: the frame lists at FramesHeart point here and
-; the sprite drawer reads them directly (popping 2 bytes per row, see
-; DrawBlockJob). A frame is selected by the item handlers from RoomItemHandler
-; on; frames are listed with the item they belong to.
+; Plain (unpacked) sprite graphics, 16 pixels wide: 2 bytes per pixel row. They
+; are not copied to the sprite sheet: the frame lists at FramesHeart point here
+; and the block drawer DrawBlockJob reads them directly (popping 2 bytes per
+; row) and stores them over the cells with no mask and no outline: an item
+; replaces the background of its two cell columns. A frame is selected by the
+; item handlers from RoomItemHandler on; the frame lists (FramesHeart to
+; FramesChalice) give each frame its attribute.
 ;
 ; +$0000 SpriteArch: doorway arch, 24 rows (48 bytes), the passage between
-; rooms 10 and 19 +$0030 SpriteCheckpoint0: checkpoint (cross in a ring), not
-; yet touched +$0050 SpriteCheckpoint1: checkpoint, active +$0070 SpriteBell0:
-; bell at rest (Tower of the Bell) +$0090 SpriteBell1: bell swinging +$00B0
-; SpriteLever0: lever, not pulled +$00D0 SpriteLever1: lever, pulled +$00F0
-; SpriteWheel0: the wheel of faith at rest +$0110 SpriteWheel1: the wheel of
-; faith turned (ornate frame) +$0130 SpriteChalice: the chalice in Satan's room
+; rooms 10 and 19 (nine frames of FramesArch, the ink changing)
+; .
+; +$0030 SpriteCheckpoint0: checkpoint (a cross in a ring on a gravestone), not
+; active; +$0050 SpriteCheckpoint1: checkpoint, active
+; .
+; +$0070 SpriteBell0: bell of Tower of the Bell, not rung (drawn bright);
+; +$0090 SpriteBell1: the bell once rung, the clapper on the other side (not
+; bright; the frame is the flag, ActionBellOrLever)
+; .
+; +$00B0 SpriteLever0: lever, not pulled (leaning left); +$00D0 SpriteLever1:
+; lever, pulled (leaning right, not bright)
+; .
+; +$00F0 SpriteWheel0: the wheel of faith at rest; +$0110 SpriteWheel1: the
+; wheel of faith turned (ornate frame)
+; .
+; +$0130 SpriteChalice: the chalice in Satan's room
+; .
 ; +$0150 SpriteHeart0, +$0170 SpriteHeart1: heart (extra life), two frames
-; (beating) +$0190 SpriteCross: cross, drawn in six colours by the frame lists
-; +$01B0 SpritePlus: plus-shaped cross, the other look of the crosses: the
-; frame lists FramesHeart repeat the cross in six colours as SpriteCross and as
-; SpritePlus, and ActionCrossWheelTurned/ActionCrossWheelRest pick one
-; depending on the wheel of faith (WheelState) +$01D0 SpriteScroll: parchment;
-; drawn red for the scroll that ends the game
+; (beating)
+; .
+; +$0190 SpriteCross: cross (pattee), the cross that can be taken, drawn in six
+; colours by frames 0-5 of FramesCross
+; .
+; +$01B0 SpritePlus: an inverted cross (thin, the crossbar low), frames 6-11 of
+; FramesCross in the same six colours: the look of a cross that cannot be taken
+; in the current state of the wheel of faith (WheelState; DrawCrossWheelRest
+; adds 6 to the frame, ActionCrossWheelTurned draws it). Observed: the
+; wheel-turned cross of room 9, with the wheel at rest, is drawn as a magenta
+; inverted cross.
+; .
+; +$01D0 SpriteScroll: parchment; drawn red for the scroll that ends the game
 SpriteArch:
   DEFB $07,$E0
   DEFB $1D,$50

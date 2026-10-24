@@ -55,13 +55,15 @@ PagingState:
 
 ; Unused byte
 ;
-; No code reads or writes $8508, nor $8520 further on (see BellRung): they are
-; padding of the variable block ($8550 is used by the 128K music bank). ($8503 is
-; PressedKeyRow, $8505 the high byte of InterruptRoutine.)
+; No instruction refers to $8508, nor to $8520 further on (see BellRung); $8520
+; is only zeroed with the block $8512-$854D by StartGame (observed: the write
+; at $861A in a play run). Both are padding of the variable block ($8550 is
+; used by the 128K music bank). ($8503 is PressedKeyRow, $8505 the high byte of
+; InterruptRoutine.)
 UnusedByte:
   DEFB $00
 
-; Current room number (0-24)
+; Current room number (0-24, 25 in the ending)
 ;
 ; The room the player is in; the rooms form a 5x5 grid: left and right are -1
 ; and +1, up and down are -5 and +5, and a number of 25 or more wraps modulo 25
@@ -71,17 +73,19 @@ UnusedByte:
 ; RoomScriptTable by EnterRoom, of the music table RoomMusicTable, and as the
 ; key when SpawnRoomItems and SpawnRoomObjects search the room item table
 ; RoomItems and the object table RoomObjects. Written by CheckRoomExit (edge
-; crossing), RunIntro/RunEnding (title, ending), the passage items
-; ActionArchToBeast/ActionArchToRiver (room 10 or 19), the checkpoint restore
-; SelectCheckpoint and the debug room warp of the cheat DebugWarpRoom.
+; crossing), RunIntro (room 0) and RunEnding (rooms 25 and 4), the arches of
+; rooms 10 and 19 (EnterRoomAtArch, from ActionArchToBeast/ActionArchToRiver),
+; the checkpoint restore SelectCheckpoint and the debug room warp of the cheat
+; (DebugMoveRoom through the tails of CheckRoomExit, then DebugWarpRoom).
 RoomNumber:
   DEFB $00
 
 ; Terminator of the room-keyed tables
 ;
 ; Constant $1A (26, one more than the last room 25). The tables of room items
-; (RoomItems) and room objects (RoomObjects) are sorted by room number and end
-; with this value; SpawnRoomItems and SpawnRoomObjects load BC from RoomNumber
+; (RoomItems) and room objects (RoomObjects) end with a record of this room
+; number (neither table is sorted by room: both are scanned to the end);
+; SpawnRoomItems and SpawnRoomObjects load BC from RoomNumber
 ; (C = the room, B = this byte) and stop their scan when a record's first byte
 ; equals B. Never written.
 RoomTableEnd:
@@ -93,8 +97,10 @@ RoomTableEnd:
 ; through the right edge, 1 = left edge, 2 = bottom edge, 3 = top edge.
 ; RedrawRoom (called when a room is entered) indexes the four scroll set-ups at
 ; SweepSetups with it to choose from which side the new room is drawn in.
-; Cleared by StartGame at the start of a game and by ShowParchment after a
-; parchment has been read (so that the room is redrawn from the right).
+; Cleared by StartGame at the start of a game and by the text window
+; ShowTextWindow (a parchment, the ending screens) before it redraws the room,
+; so that the room comes back by columns from left to right, as after an exit
+; through the right edge.
 ExitDirection:
   DEFB $00
 
@@ -106,13 +112,16 @@ ExitDirection:
 ; ActionArchToBeast/ActionArchToRiver); 3 = ending sequence RunEnding (set by
 ; the red scroll in Satan's room, ActionFinalScroll); 4 = restore the last
 ; checkpoint (SelectCheckpoint), then as 2 (set to $84 by the end of the dying
-; animation UpdateDying_End when lives are left); 5 = Game Over screen
-; (UpdateDying_End makes it $85 when no life is left; both abort keys,
-; GameFrame); 0 or anything above 5: run the frame routines. Bit 7 keeps the
-; frame routines (player, entities, drawing) running: the loop sets the state
-; to $80 after a room has been entered. ShowParchment and the cutscene loop
-; clear and restore it so that the frame update stops while a parchment is
-; shown. The room-entry code EnterRoom clears it.
+; animation UpdateDying_End when lives are left; it is also set in the pyre
+; scene of the ending, where the cutscene loop ignores it and clears it at the
+; end, observed); 5 = Game Over screen (UpdateDying_End makes it $85 when no
+; life is left; both abort keys, GameFrame); 0 or anything above 5: run the
+; frame routines. Bit 7 keeps the frame routines (player, entities, drawing)
+; running: the loop sets the state to $80 after a room has been entered. The
+; text window ShowTextWindow (parchments, ending screens) sets it to 0 while
+; the window is up and restores it afterwards; the cutscene loop RunCutscene
+; sets it to $80 and clears it when the scene ends. The room-entry code
+; EnterRoom clears it.
 RoomState:
   DEFB $00
 
@@ -141,21 +150,26 @@ ParchmentLine2:
 
 ; Timer of the bubbling blood tiles
 ;
-; Counts down from 2 once per frame in AnimateBloodTiles; when it reaches zero
-; it is reloaded with 2 and the cells of the bottom tile row (row 21 of the
-; tile map) that hold tile $3B or $3C are swapped ($3B to $3C and back) and
-; marked for redraw: the blood at the foot of the room bubbles every other
-; frame. AnimateBloodTiles is a NOP only in the rooms whose script contains op
-; $9E (rooms 21, 22 and 23); everywhere else it starts with a RET.
+; Counts down from 2 once per pass of the main loop in AnimateBloodTiles; when
+; it reaches zero it is reloaded with 2 and the cells of the bottom tile row
+; (row 21 of the tile map) that hold tile $3B or $3C are swapped ($3B to $3C
+; and back) and marked for redraw: the blood at the foot of the room bubbles
+; every second pass (observed in room 22: a pass takes about 2 interrupt
+; frames, a swap comes every 4 or 5). AnimateBloodTiles is a NOP only in the
+; rooms whose script contains op $9E (rooms 21, 22 and 23); everywhere else it
+; starts with a RET.
 BloodAnimTimer:
   DEFB $02
 
 ; Timer of the colour cycle of the twelve crosses
 ;
-; Counts down from 5 in ShowCrossRing (active once all 12 crosses are
-; collected, in rooms 24 and 25); at zero it is reloaded with 5, the cycle
-; position (the operand of the LD A,0 at SmcCrossColour) advances through 0-5
-; and the attribute of the cross tile $4C (CE4C) is set from CrossColours.
+; Counts down from 5 once per pass of the main loop in ShowCrossRing (active
+; once all 12 crosses are collected, in rooms 24 and 25); at zero it is
+; reloaded with 5, the cycle position (the operand of the LD A,0 at
+; SmcCrossColour) advances through 0-5, the attribute of the cross tile $4C
+; (CE4C) is set from CrossColours and, while the ring is not complete, one
+; cross is added (CrossRingCount). Observed in room 24: a step every 8 or 9
+; interrupt frames.
 CrossFlashTimer:
   DEFB $05
 
@@ -186,9 +200,10 @@ RespawnYHi:
 ; Hit box of the player (2-pixel units)
 ;
 ; The rectangle in which the player can be hit, rebuilt every frame by
-; ProbePlayer from the player's position and state (smaller while crouching:
-; X+1..X+8 and Y+7..Y+13; otherwise X+2..X+6 and Y+2..Y+12, with X, Y the high
-; bytes of PlayerX/PlayerY). HitTest/OverlapTest compare the box of each entity
+; ProbePlayer from the player's position and state (lower and wider while
+; crouching: X+1..X+8 and Y+7..Y+13; otherwise X+2..X+6 and Y+2..Y+12, with X,
+; Y the high bytes of PlayerX/PlayerY; observed at X $4A, Y $44: $50 $4C $50
+; $46 standing, $52 $4B $51 $4B crouching). HitTest/OverlapTest compare the box of each entity
 ; with it as words: the first word is (min X, max X), the second (min Y, max Y)
 ; with the maximum in the low byte; an entity hits when its X range reaches min
 ; X and starts below max X, and likewise for Y.
@@ -208,9 +223,11 @@ PlayerBoxYMin:
 ;
 ; Zero at the start of a game, $FF once the player has walked into the
 ; Abandoned church (room 7) through its left door: the trigger item of that
-; room (ActionChurchDoor, item type 7, which also makes checkpoint 0 active)
-; sets it, closes the door with the script DoorLeftShut and plays the door
-; sound. While it is nonzero, the script of room 6 draws the door (DoorRight)
+; room (ActionChurchDoor, item type 7, which also sets checkpoint flag 0 to 1)
+; sets it and closes the door with the script DoorLeftShut; on the next frame
+; the door rattles for the first time with sound 8 (observed: $851A FF at
+; frame 18, sound 8 requested at frame 19). While it is nonzero, the script
+; of room 6 draws the door (DoorRight)
 ; at its right edge and the script of room 7 draws the door (DoorLeftShut) at
 ; its left edge, so the player cannot go back (op $9C, OpRunIfNonZero).
 ChurchDoorShut:
@@ -225,20 +242,26 @@ ChurchDoorShut:
 ; doors and remove blocks.
 ;
 ; +0 BellRung ($851B): 0, or 1 once the bell of the Tower of the Bell (room 2)
-; has been touched (ActionBellOrLever, sound 3). The script of room 8 (The
-; Altar) erases a 2x2 block of wall at row 20, column 26 when it is set. +1
+; has been touched (ActionBellOrLever, sound 3). When it is set the script of
+; room 8 (The Altar) erases the 2x2 block of floor at row 20, column 26
+; (EraseWallBlock), which opens the way down into room 13, Catacombs (observed:
+; Jean falls through into room 13 only with the flag set, F142). +1
 ; LeverRoom9 ($851C): 0 or 1, the lever of room 9 (Hangman tree). While it is 0
 ; the script of room 19 (Underground river) draws a door at its left edge
 ; (DoorLeftLow). +2 LeverRoom10 ($851D): 0 or 1, the lever of room 10
 ; (Pestilent Beast). While it is 0 the script of room 8 draws a door at its
 ; right edge (DoorRight). +3 WheelState ($851E): the wheel of faith in room 17:
 ; 0 at rest, $06 once turned; each touch toggles bits 1-2 (XOR $86) and bit 7
-; is set while the player still touches it (ActionWheel). It decides which
-; crosses can be picked up: the crosses of type 1 only while it is 0, those of
-; type 2 only while it is not (ActionCrossWheelRest, ActionCrossWheelTurned),
-; and which of the two cross shapes is drawn. +4 LeverRoom20 ($851F): 0 or 1,
-; the lever of room 20 (Unexpected gate). While it is 0 the script of room 20
-; draws a door at its right edge (DoorRight). +5 $8520: unused
+; is set while the player still touches it (ActionWheel; observed: 0 -> $86 on
+; the touch, $06 once Jean is off it). It decides which crosses can be picked
+; up: the crosses of type 1 only while it is 0, those of type 2 only while it
+; is not (ActionCrossWheelRest, ActionCrossWheelTurned), and which of the two
+; cross shapes is drawn. +4 LeverRoom20 ($851F): 0 or 1, the lever of room 20
+; (Unexpected gate, ActionGateLever, sound 5). While it is 0 the script of room
+; 20 draws a door at its right edge (DoorRight); the pull itself erases the
+; door at once (EraseDoorRight). The doors are solid (class 3) and close
+; the way to rooms 18 (room 19's door), 9 (room 8's) and 21 (room 20's). +5
+; $8520: no instruction refers to it (only cleared by StartGame)
 BellRung:
   DEFB $00
 LeverRoom9:
@@ -270,10 +293,12 @@ ChaliceTaken:
 ;
 ; 0, or $FF once UpdateSatan has seen the chalice taken (ChaliceTaken) and has
 ; replaced Satan by the smoke object: it then switches the music to track 7
-; (MusicTrack), runs the script ScriptEraseCrosses to erase the twelve crosses
-; and clears CrossRingDone. Other entity routines (for instance UpdateFireball)
-; test it and remove themselves while it is set, so that Satan's fire
-; disappears.
+; (MusicTrack), arms the event script ScriptEraseCrosses, which erases the
+; twelve crosses of the ring, and clears CrossRingDone (observed: chalice taken
+; with the ring shown, $8522 FF in the same frame, the crosses gone and the
+; smoke and the red scroll on screen 40 frames later). The only other reader is
+; UpdateFireball, the handler of Satan's fireballs, which removes a fireball
+; while it is set.
 SatanSmoked:
   DEFB $00
 
@@ -304,7 +329,9 @@ DoorwayRoom19:
 ; a taken item stays gone. The flags are zeroed by StartGame at the start of a
 ; game; the flag of an item taken in a room survives leaving and re-entering
 ; the room. Each flag is named after its item and the room it is in; the
-; comment gives the item's row and column in the room.
+; comment gives the item's row and column in the room (observed for all 28:
+; Jean put on each item's row and column in its room sets that flag to $FF,
+; with sound 5).
 ;
 ; +$00-$08: hearts (item type 0, ActionHeart): one more life, up to 9 (the
 ;           status bar shows them, Lives).
@@ -314,10 +341,10 @@ DoorwayRoom19:
 ;           present after the chalice.
 ; +$10-$1B: the twelve crosses (types 1 and 2,
 ;           ActionCrossWheelRest/ActionCrossWheelTurned, counted in Crosses).
-;           The eight crosses of type 1
-;          CrossRoomN can be taken while the wheel of faith WheelState is at
-;                     rest, the four of type 2 (WheelCrossRoomN) only
-;          after it has been turned.
+;           The eight crosses of type 1 (CrossRoomN) can be taken while
+;           the wheel of faith WheelState is at rest, the four of type 2
+;           (WheelCrossRoomN) only while it is turned (observed: each
+;           cross touched with the wheel at 0 and at 6).
 HeartRoom2:
   DEFB $00                ; room 2, row 7, column 12, item type 0
 HeartRoom10:
@@ -378,16 +405,20 @@ WheelCrossRoom22:
 ; The ring of twelve crosses: how many are shown, and a completion flag
 ;
 ; State of the crosses routine ShowCrossRing, which runs in rooms 24 and 25
-; (script op $9F) once all 12 crosses are collected (Crosses). Every 5 frames
-; it increments the count (while the chalice is not taken, ChaliceTaken) and
-; re-stamps that many crosses (tile $4C) at the positions listed from
-; CrossRingPositions, so that the ring of twelve crosses appears one cross at a
-; time with sound 5. The values survive leaving the room, so on a later visit
-; the whole ring is drawn at once. Zeroed at the start of a game.
+; (script op $9F) once all 12 crosses are collected (Crosses). At every colour
+; step (every fifth pass of the main loop, CrossFlashTimer) it increments the
+; count (while the chalice is not taken, ChaliceTaken) and re-stamps that many
+; crosses (tile $4C, solid: the platforms that lead to the chalice, F125) at
+; the positions listed from CrossRingPositions, so that the ring of twelve
+; crosses appears one cross at a time with sound 5 (observed in room 24: the
+; count goes 1 to 12 at frames 32 to 128, CrossRingDone becomes 12 with the
+; twelfth). The values survive leaving the room, so on a later visit the whole
+; ring is drawn at once (observed with the count poked to 12). Zeroed at the
+; start of a game.
 ;
 ; +0 CrossRingCount: crosses of the ring drawn so far, 0-12 +1 CrossRingDone:
 ; set to 12 when the twelfth cross appears and cleared by UpdateSatan when
-; Satan is turned into smoke; no code reads it
+; Satan is turned into smoke; no instruction of the game reads it
 CrossRingCount:
   DEFB $00
 CrossRingDone:
@@ -437,8 +468,8 @@ Lives:
 
 ; Crosses collected (0-12)
 ;
-; Incremented by ActionCrossWheelRest and ActionCrossWheelTurned when a cross
-; is picked up. The status bar draws that many crosses (DrawCrossesHud). With
+; Incremented by TakeCross (from ActionCrossWheelRest and
+; ActionCrossWheelTurned) when a cross is picked up. The status bar draws that many crosses (DrawCrossesHud). With
 ; 12 (CROSSES_NEEDED) the chalice appears in room 24 (ActionChalice) and the
 ; ring of crosses is shown (ShowCrossRing). Zeroed at the start of a game.
 Crosses:
@@ -458,22 +489,29 @@ SoundPlaying:
 ; (the routine called each frame through the interrupt) when it picks the
 ; request up. 1 is a noise built in the routine (never requested, F106), 2-9
 ; are the 8-byte descriptions at SoundEffects (effect n at $87F2+8*(n-2)).
-; Known requests: 2 jump (UpdatePlayerActive), 3 bell or lever touched
-; (ActionBellOrLever), 4 passage between rooms 10 and 19 (ActionArchToRiver), 5
-; item taken, wheel turned, chalice, key accepted in the controls menu
-; (ActionHeart, ActionWheel, RedefineOneKey), 6 the player dies (KillPlayer), 7
-; an enemy shoots or throws (SFX_ENEMY_SHOT: ThrowDeathScythe, UpdateSatan,
-; UpdateShooter_Tail, UpdatePlant_Spit, UpdateFishWaiting_Jump,
-; UpdateBeastFire_Draw), 8 the church door (ActionChurchDoor), 9 checkpoint
-; touched (ActionCheckpoint). On a 128K machine the AY player handles the
-; request instead (PlayEffectOnAY).
+; Known requests (every store in the code): 2 jump (PlayerStanding), 3 the bell
+; or the levers of rooms 9 and 10 touched (ActionBellOrLever), 4 passage
+; through an arch between rooms 10 and 19 (EnterRoomAtArch, both arches), 5 a
+; heart, cross, chalice or the red scroll taken (FreeSlotWithSound), a
+; parchment taken (ActionParchment), the wheel turned (ActionWheel), the lever
+; of room 20 pulled (ActionGateLever), each cross added to the ring
+; (ShowCrossRing), a key accepted in the controls menu (RedefineOneKey), 6 the
+; player dies (KillPlayer), 7 an enemy shoots or throws (SFX_ENEMY_SHOT:
+; ThrowDeathScythe, UpdateSatan, UpdateShooter_Tail, UpdatePlant_Spit, the fish
+; splashes UpdateFishWaiting_Jump and UpdateFishJumping, UpdateBeastFire_Draw),
+; 8 each rattle of the shut church door (ActionChurchDoor), 9 a checkpoint
+; touched (ActionCheckpoint). Observed for every item: the values above at
+; each touch. On a 128K machine the AY player handles the request instead
+; (PlayEffectOnAY); the music bank code also reads and writes this byte.
 SoundRequest:
   DEFB $00
 
 ; Track of the 128K music bank
 ;
 ; No code of the game reads or writes $8550; the 128K music bank keeps the
-; track it plays here (read from the bank's bytes).
+; track it plays here (read from the bank's bytes: data/music128.bin, loaded
+; at $C000, has LD A,($8550) at $C03F, LD HL,$8550 at $C049 and LD ($8550),A
+; at $C056).
 BankMusicTrack:
   DEFB $00
 
@@ -482,10 +520,12 @@ BankMusicTrack:
 ; The track the 128K music player should play: set to 3 by StartGame at the
 ; start of a game (the title), to the track of the room from RoomMusicTable
 ; each time a room is entered (EnterRoom), to 7 when Satan is turned into smoke
-; (UpdateSatan), to 5 and 2 during the two parts of the ending (RunEnding) and
-; to 7 on the Game Over screen. The player lives in the 128K bank (see
-; CallInMusicBank) and reads this byte there; on a 48K machine nothing reads
-; it.
+; (UpdateSatan), by RunEnding to 5 for the first cutscene and to 2 for the
+; last text (between them EnterRoom sets the track of rooms 25 and 4, 7;
+; observed), and to 7 on the Game Over screen. The player lives in the 128K
+; bank (see CallInMusicBank) and reads this byte there (the bank also writes
+; it: LD ($8551),A at $C059, $C061 and $EEE6 of data/music128.bin); on a 48K
+; machine nothing reads it.
 MusicTrack:
   DEFB $00
 
@@ -494,8 +534,9 @@ MusicTrack:
 ; Count of the 4-byte records (template address, y, x) queued in the object
 ; list that starts at $5DC0 (pointer ObjectListPtr) and have not yet been
 ; turned into live objects. LoadCutsceneList sets it from the actor lists of
-; the cutscenes and the enemies and entities that shoot or split add one with
-; the record they append (UpdateShooter_Tail, UpdateSatan, ...); the frame
+; the cutscenes, and the enemies that shoot or throw add one per record they
+; append (one: UpdateShooter_Tail, the fish splashes, ThrowDeathScythe; two:
+; UpdatePlant_Spit, UpdateBeastFire; three: UpdateSatan); the frame
 ; update GameFrame calls SpawnQueuedObjects while it is nonzero, and that
 ; routine spawns the records into free object slots at $C100 and decrements it
 ; (it is cleared at once when no slot is free).
@@ -506,22 +547,24 @@ SpawnQueueCount:
 ;
 ; Attributes (bright yellow, red, magenta, blue, cyan, green) that
 ; ShowCrossRing copies one by one to the attribute of the cross tile $4C
-; (CE4C), advancing every 5 frames (CrossFlashTimer), so that the twelve
-; crosses flash through the rainbow.
+; (CE4C), advancing every fifth pass of the main loop (CrossFlashTimer), so
+; that the twelve crosses flash through the colours (observed: $CE4C takes
+; $42 $43 $41 $45 $44 $46 in turn, F117).
 CrossColours:
   DEFB $46,$42,$43,$41,$45,$44
 
 ; Tile flags around the entity being updated by UpdateChaser
 ;
-; Four scratch bytes written each time UpdateChaser samples the tile flag map
-; around an entity (a 16x24 pixel sprite, 2 x 3 cells) from its position: each
-; is the OR of the flags of two neighbouring cells. UpdateChaser then turns
-; them into a mask of free directions. The player has its own copy in
-; PlayerTileHead.
+; Four scratch bytes written each time UpdateChaser (the chasing ghost of room
+; 11, the only user) samples the tile flag map around itself: each is the OR
+; of the flags of two neighbouring cells of a box 2 cells wide and 3 rows high
+; whose top left cell is (x/4, y/4) (the ghost is 16x16 pixels, which covers 3
+; cell rows when y is not a multiple of 4). UpdateChaser then turns them into a
+; mask of free directions. The player has its own copy in PlayerTileHead.
 ;
-; +0 ProbeRight: the two cells to the right of the sprite (rows 1 and 2) +1
-; ProbeLeft: the two cells to the left (rows 1 and 2) +2 ProbeBelow: the two
-; cells under the feet +3 ProbeHead: the two cells of the top row of the sprite
+; +0 ProbeRight: the cells right of the box in rows 1 and 2 +1 ProbeLeft: the
+; cells left of the box in rows 1 and 2 +2 ProbeBelow: the two cells under the
+; box (row 3) +3 ProbeHead: the two cells of the top row of the box itself
 ProbeRight:
   DEFB $00
 ProbeLeft:
@@ -544,9 +587,10 @@ RedrawListPtr:
 ; Interrupt stack: 38 bytes below $8585
 ;
 ; The interrupt handler InterruptHandler switches SP to $8585 and pushes all
-; the registers here (IX, HL, AF, BC, DE and the alternate set: 20 bytes), so
-; the routine it calls runs on this stack and the game stacks are untouched.
-; The stack ends at $8585, where the handler's code begins. The image holds
-; $FF.
+; the registers here (IX, HL, AF, BC, DE, IY and the alternate HL, AF, BC, DE:
+; 20 bytes), so the routine it calls runs on this stack and the game stacks
+; are untouched. The stack ends at $8585, where the handler's code begins. The
+; image holds $FF. The deepest write seen over tests/inputs/play.txt is $8565
+; (32 bytes used, observed with a watch of $855F-$8584).
 InterruptStack:
   DEFS $26,$FF

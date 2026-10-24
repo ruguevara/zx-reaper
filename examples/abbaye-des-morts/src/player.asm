@@ -10,26 +10,30 @@
 ; Positions outside the room are held modulo 256: just left of the room X is
 ; $FC-$FF, just above it Y is $FA-$FF (CheckRoomExit).
 ;
-; +0 byte PlayerState: 0 none (nothing runs), 1 dying, 2 jumping (rising), 3
-; crouching, 4 standing or walking, 5 falling, $FF debug room warp
-; (DebugWarpRoom, entered by EnterRoomWarp with the cheat on) +1 byte
-; PlayerAnimTimer: frames left to the next animation frame (reloaded with 8
-; when walking, 4 when dying) +2 byte PlayerFrame: animation frame, 0-1 walking
-; (also crouching), 2 in the air, 0-7 when dying +3 byte PlayerFacing: 0 right,
-; 1 left +4 word PlayerSpeedY: vertical speed, 8.8 units per frame, positive up
-; while jumping and down while falling ($01FE at the start of a jump, at most
-; $021C in a fall) +6 word PlayerSpare: unused +8 byte PlayerTileHead: OR of
+; +0 byte PlayerState: 0 no player (the intro and the ending: nothing runs), 1
+; dying, 2 jumping (rising), 3 crouching, 4 standing or walking, 5 falling, $FF
+; debug room warp (DebugWarpRoom, entered by EnterRoomWarp with the cheat on)
+; +1 byte PlayerAnimTimer: frames left to the next animation frame (reloaded
+; with 8 when walking, 4 when dying) +2 byte PlayerFrame: animation frame, 0-1
+; walking (also crouching), 2 in the air, 0-8 when dying (7 is not drawn, 8
+; ends the death) +3 byte PlayerFacing: 0 right, 1 left +4 word PlayerSpeedY:
+; vertical speed, 8.8 units per frame, positive up while jumping and down while
+; falling ($01FE at the start of a jump, at most $021C in a fall) +6 word
+; PlayerSpare: unused (no instruction refers to it, and it was not written in
+; tests/inputs/play.txt or a 3000-frame fuzz run) +8 byte PlayerTileHead: OR of
 ; the tile flags (TileFlags) at the head +9 byte PlayerTileRight: the same at
 ; the right side +A byte PlayerTileFeet: the same just below the feet +B byte
 ; PlayerTileLeft: the same at the left side +C byte PlayerHit: 0, 4 when a
 ; harmful tile (class 4) touches the body, $FF when an enemy box overlaps
-; (HitTestDone), 2 set by the pyre monk of the ending (UpdatePyreMonk, with
-; PlayerState 2); any value but 0 kills the monk in UpdatePlayerActive +D word
+; (HitTestDone, UpdatePlant_Spit), 2 set by the pyre monk of the ending
+; (UpdatePyreMonk, with PlayerState 2 so that UpdatePlayerActive runs); any
+; value but 0 kills the monk in UpdatePlayerActive +D word
 ; PlayerX: horizontal position, 8.8 (high byte 0-$7F) +F word PlayerY: vertical
 ; position, 8.8 (high byte 0-$57)
 PlayerState:
-  DEFB $04                ; State: 0 none, 1 dying, 2 jumping, 3 crouching, 4
-                          ; standing/walking, 5 falling, $FF debug warp
+  DEFB $04                ; State: 0 no player, 1 dying, 2 jumping, 3
+                          ; crouching, 4 standing/walking, 5 falling, $FF
+                          ; debug warp
 PlayerAnimTimer:
   DEFB $00                ; Animation timer
 PlayerFrame:
@@ -64,15 +68,18 @@ PlayerY:
 ; per side: PlayerTileHead head, PlayerTileRight right, PlayerTileFeet feet
 ; (the row just under the sprite), PlayerTileLeft left, and the hit flag
 ; PlayerHit (4 when a harmful tile, flag bit 2, touches the body; the enemy
-; tests HitTestDone may set it to $FF later in the frame). The player routine
-; UpdatePlayerActive reads these bytes.
+; tests HitTestDone and UpdatePlant_Spit may set it to $FF later in the frame).
+; The player routine UpdatePlayerActive reads these bytes.
 ;
 ; Standing (any state but crouching): hit box x X+2..X+6, y Y+2..Y+12; head at
 ; (X+2 and X+5, Y+1), left at X+1 and right at X+6 (y Y+3, Y+7, Y+11), feet at
-; (X+2 and X+5, Y+12), harmful tiles anywhere on the ring of ProbeRing from
-; (X+2, Y+2). Crouching: hit box x X+1..X+8, y Y+7..Y+13; head at (X+2 and X+5,
-; Y+6), left (X, Y+11), right (X+8, Y+11), feet at (X+1, X+4 and X+7, Y+12),
-; harmful tiles in the 3x2 block of ProbeBlock3x2 from (X+1, Y+7).
+; (X+2 and X+5, Y+12), harmful tiles at the eight points of ProbeRing (X+2 and
+; X+5; Y+2, Y+5, Y+8, Y+11). Crouching: hit box x X+1..X+8, y Y+7..Y+13; head
+; at (X+2 and X+5, Y+6), left (X, Y+11), right (X+8, Y+11), feet at (X+1, X+4
+; and X+7, Y+12), harmful tiles at the six points of ProbeBlock3x2 (X+1, X+4,
+; X+7; Y+7, Y+11). Every point and both boxes observed: the routine run with
+; one marked cell of the flag map at a time, for each X mod 4 and Y mod 4 in
+; both postures.
 ;
 ; Hardware: none; reads the tile flag map.
 ProbePlayer:
@@ -204,7 +211,6 @@ LandPlayer:
 ;   C Offset of the first point in y
 ;   D Column mask (always $1F)
 ; O:E OR of the tile flags at the points
-; O:B B + 3
 ProbePair2:
   LD E,$00
   CALL ProbeCell
@@ -226,7 +232,6 @@ ProbePair2:
 ;   C Offset of the first point in y
 ;   D Column mask (always $1F)
 ; O:E OR of the tile flags at the points
-; O:B B + 6
 ProbeRowOf3:
   LD E,$00
   CALL ProbeCell
@@ -247,11 +252,10 @@ ProbeRowOf3:
 ; Hardware: none; reads the tile flag map.
 ;
 ;   HL Position: H = x, L = y (2-pixel units)
-;   B Offset of the first point in x
-;   C Offset of the first point in y
+;   B Offset of the point in x
+;   C Offset of the point in y
 ;   D Column mask (always $1F)
-; O:E OR of the tile flags at the points
-; O:B B unchanged
+; O:E Tile flags of the cell
 ProbePoint:
   LD E,$00
   JP ProbeCell
@@ -270,7 +274,6 @@ ProbePoint:
 ;   C Offset of the first point in y
 ;   D Column mask (always $1F)
 ; O:E OR of the tile flags at the points
-; O:C C + 4
 ProbeBlock3x2:
   LD E,$00
   CALL ProbeCell
@@ -309,7 +312,6 @@ ProbeBlock3x2:
 ;   C Offset of the first point in y
 ;   D Column mask (always $1F)
 ; O:E OR of the tile flags at the points
-; O:B B + 3
 ProbePair:
   LD E,$00
   CALL ProbeCell
@@ -331,7 +333,6 @@ ProbePair:
 ;   C Offset of the first point in y
 ;   D Column mask (always $1F)
 ; O:E OR of the tile flags at the points
-; O:C C + 8
 ProbeColumnOf3:
   LD E,$00
   CALL ProbeCell
@@ -348,11 +349,11 @@ ProbeColumnOf3:
 
 ; Probe the ring of 8 points around the body
 ;
-; ORs the tile flags of eight cells into E (E starts at 0): the corners and
-; edge points of a 4 x 9 unit area, (x+B, y+C), (x+B+3, y+C), then down the
-; right side (y+C+3, +6, +9), and back up the left side (x+B, y+C+9, +6, +3).
-; The standing monk (ProbePlayer) tests it for harmful tiles. B and C are left
-; unchanged.
+; ORs the tile flags of eight cells into E (E starts at 0): the points x+B and
+; x+B+3 by y+C, y+C+3, y+C+6 and y+C+9 (all eight of that 2 x 4 grid), taken as
+; a ring: (x+B, y+C), (x+B+3, y+C), down the right side (y+C+3, +6, +9) and
+; back up the left side (x+B, y+C+9, +6, +3). The standing monk (ProbePlayer)
+; tests it for harmful tiles. B is left unchanged, C increased by 3.
 ;
 ; Hardware: none; reads the tile flag map.
 ;
@@ -361,7 +362,6 @@ ProbeColumnOf3:
 ;   C Offset of the first point in y
 ;   D Column mask (always $1F)
 ; O:E OR of the tile flags at the points
-; O:B B unchanged
 ProbeRing:
   LD E,$00
   CALL ProbeCell
@@ -430,8 +430,9 @@ ProbeCell_Skip:
 ; Queue a draw command on the frame call list
 ;
 ; Appends the 10 bytes of the draw command at HL to the frame call list at
-; (FrameListPtr) and advances the pointer by 10: the player (AC49, AA96) uses
-; it for the monk's sprite command SpriteCmd. The first byte is self-modifying
+; (FrameListPtr) and advances the pointer by 10: the player (DrawPlayerSprite,
+; for the living and the dying monk) uses it for the monk's sprite command
+; SpriteCmd. The first byte is self-modifying
 ; and doubles as a flag: it is a NOP in the game frame and $C9 (RET) while the
 ; call list is being run by RunFrameList, which writes it at the start of the
 ; drawing phase and clears it at the end (LeaveFrameList), so that nothing is
@@ -466,10 +467,13 @@ QueueDrawCmd:
 ; starts the dying animation (animation timer 4, frame 0), clears the hit flag
 ; and sets the player state to 1 (dying). Falls into UpdateDying, which also
 ; runs on every later frame of the animation. The dying monk rises one pixel
-; per frame, 7 frames of the animation each 4 frames long in bright red (frames
-; of MonkDyingFrames), then 4 frames with nothing drawn; after that
-; UpdateDying_End asks for the restart of the room. The animation takes 32
-; frames (observed).
+; per frame while frames 0-6 of MonkDyingFrames are drawn in bright red: frame
+; 0 for 3 frames (the timer is first counted down in the frame of the hit),
+; frames 1-6 for 4 frames each, 27 frames and 27 pixels in all; then frame 7
+; draws nothing for 4 frames, and in the 32nd frame (the frame of the hit
+; counted) UpdateDying_End asks for the restart at the active checkpoint
+; (observed: room 5, Y $4400 to $3680, the room state $84 in the 32nd frame;
+; Jean dying in room 6 with no checkpoint touched restarts in room 5).
 ;
 ; Hardware: none; sound effect request only.
 KillPlayer:
@@ -518,15 +522,16 @@ UpdateDying_Frame:
   PUSH AF
   LD A,BRIGHT+RED         ; attribute: bright red
   LD (SpriteCmdAttr),A    ; attribute of the draw command
-  JP DrawPlayerSprite     ; draw frame A896 of the table, like the walking monk
-; The animation is over: ask the main loop (StartGame) to restart the room, or
-; to show Game Over when no life is left, and have the hearts of the status bar
-; redrawn (DrawLivesBar).
+  JP DrawPlayerSprite     ; draw frame PlayerFrame of the table, as walking
+; The animation is over: ask the main loop (MainLoop) to restart at the active
+; checkpoint (room state 4: SelectCheckpoint chooses the room and position),
+; or to show Game Over when no life is left, and have the hearts of the status
+; bar redrawn (DrawLivesBar).
 UpdateDying_End:
   LD A,(Lives)            ; lives left?
   OR A
   LD HL,RoomState         ; room state
-  LD (HL),STATE_DEATH     ; restart the room after a death
+  LD (HL),STATE_DEATH     ; $84: restart at the checkpoint
   JR NZ,KillPlayer_0      ; lives left
   INC (HL)                ; room state $85: Game Over
 KillPlayer_0:
@@ -541,16 +546,14 @@ KillPlayer_0:
 ; PlayerState: $FF runs the debug room warp DebugWarpRoom (JP, it returns to
 ; the frame code), 0 does nothing, 1 (dying) goes on with the dying animation
 ; UpdateDying. For states 2 to 5 (jumping, crouching, standing, falling) it
-; leaves C = state - 1 and B = the control bits newly pressed this frame
-; (ControlsPressed) and goes on at UpdatePlayerActive. The JR at SmcWarpCheat
-; is changed by the RAGE cheat (CheckCheatKeys) into JR Z: then the T key (bit
-; 5 of B) falls through to EnterRoomWarp, which enters the debug room warp;
-; without the cheat it always goes to UpdatePlayerActive.
+; goes on at UpdatePlayerActive with C = state - 1, after testing bit 5 (T) of
+; the control bits newly pressed this frame (ControlsPressed, loaded into B).
+; The JR at SmcWarpCheat is changed by the RAGE cheat (CheckCheatKeys) into JR
+; Z: then the T key falls through to EnterRoomWarp, which enters the debug room
+; warp; without the cheat it always goes to UpdatePlayerActive. GameFrame uses
+; no register after the call.
 ;
 ; Hardware: none.
-;
-; O:C Player state minus 1 (1 jumping, 2 crouching, 3 standing, 4 falling)
-; O:B Control bits newly pressed (ControlsPressed)
 UpdatePlayer:
   LD A,(PlayerState)      ; state
   INC A                   ; $FF becomes 0
@@ -586,9 +589,9 @@ EnterRoomWarp:
 ; Player: die on a hit, walk, then run the action of the state and draw the
 ; monk
 ;
-; The main player routine, entered from UpdatePlayer with C = state - 1 and B =
-; the newly pressed controls. It uses the tile flag bytes
-; PlayerTileHead-PlayerTileLeft that ProbePlayer filled in this frame.
+; The main player routine, entered from UpdatePlayer with C = state - 1 (B, the
+; newly pressed controls, is written before it is read). It uses the tile flag
+; bytes PlayerTileHead-PlayerTileLeft that ProbePlayer filled in this frame.
 ;
 ; 1. A hit flag PlayerHit other than 0 (a harmful tile or an enemy) goes to
 ; KillPlayer: Jean dies.
@@ -610,12 +613,22 @@ EnterRoomWarp:
 ; 17.9 units (35.9 pixels) and then falls; a fall gains $1E per frame up to
 ; $021C (4.2 pixels per frame). Standing starts a jump (control bits 3 or 4
 ; pressed: sound effect 2) or crouching (bit 2 held); if there is no floor
-; under the feet (bit 0 of PlayerTileFeet) Jean falls. A fall ends when the
-; feet flags show a floor (AB3A): tile class 3 at once, class 1 (a platform
-; that can be passed from below) only when the fall carries Jean across the top
-; of a cell row; LandPlayer then snaps Y to the cell row. A fall has no damage
-; and no height limit. Crouching stands up when the crouch key is released and
-; nothing blocks the head.
+; under the feet (bit 0 of PlayerTileFeet) Jean falls. A fall ends at once
+; when the feet flags have bit 1 (classes 2 and 3); otherwise Y moves by the
+; speed and LandPlayer snaps Y to the cell row if the feet have come into a
+; floor cell, which is how Jean lands on a platform (class 1) from above. When
+; the feet are already inside a platform's cell row (the top of a jump up
+; through it) he lands only if he is exactly on its top (Y mod 4 = 0) or when
+; the fall takes him into the next cell row and that is a floor, so a jump that
+; does not lift the feet above the platform falls back through it (observed: a
+; platform 5 rows above the floor is passed and fallen through, 3 or 4 rows
+; above it is landed on, F141). A fall has no damage and no height limit.
+; Crouching stands up when the crouch key is released and nothing blocks the
+; head.
+; Quirk: on a class 2 cell (bit 1 without bit 0) Jean lands and is set falling
+; again in every frame, so he stays put in state 5 with the in-air frame and
+; cannot jump or crouch (observed with flags poked; no room has a class 2
+; floor, F140).
 ;
 ; 4. The monk's sprite: frame, shift phase (X mod 4 selects the copy of the
 ; frame shifted by 0, 2, 4 or 6 pixels and its width, ShiftPairs) and attribute
@@ -707,7 +720,8 @@ UpdatePlayerActive_3:
   LD A,(PlayerTileFeet)   ; feet flags (old)
   AND TILE_BLOCKS|TILE_STANDABLE
   CP TILE_STANDABLE
-  JR NZ,PlayerFalling_Land ; free or solid below: check for landing
+  JR NZ,PlayerFalling_Land ; free below (solid went to PlayerLanded): check
+                          ; for landing
   EX AF,AF'               ; platform: only when the fall crossed a cell row
   AND SUBROWS_PER_CELL    ; carry into bit 2 = crossed
 PlayerFalling_Land:
@@ -806,14 +820,14 @@ DrawPlayerAttr:
   PUSH AF                 ; height on the stack
   LD A,BRIGHT+YELLOW      ; attribute: bright yellow
   LD (SpriteCmdAttr),A    ; attribute of the draw command
-; Entry point of the dying code (AA96): the frame table is chosen by the
-; facing, the frame by PlayerFrame; the copy of the frame by X mod 4 gives the
-; address and width of the graphics.
+; Entry point of the dying code (UpdateDying): the frame table is chosen by the
+; facing (HL for left, DE for right), the frame by PlayerFrame; the copy of the
+; frame by X mod 4 gives the address and width of the graphics.
 DrawPlayerSprite:
   LD A,(PlayerFacing)     ; facing
   OR A
-  JR Z,UpdatePlayerActive_6 ; facing left: use the left table
-  EX DE,HL                ; the other table
+  JR Z,UpdatePlayerActive_6 ; facing right (0): keep DE, the right table
+  EX DE,HL                ; facing left: DE = the left table
 UpdatePlayerActive_6:
   LD HL,(PlayerFrame)     ; HL = frame number
   LD H,$00
@@ -868,6 +882,11 @@ PlayerCrouching_Floor:
   LD HL,$0000
   LD (PlayerSpeedY),HL
 ; Draw the crouching monk, 4 units (8 pixels) lower than the standing sprite.
+; When the floor has just gone, frame 2 is read from the two-word crouching
+; tables for this one frame: facing left gives CrouchFramesRight[0] (a frame
+; facing the other way), facing right the first word of SpriteCmd, so the monk
+; is drawn from the code bytes of QueueSprite (observed: graphics $9839 at X
+; mod 4 = 1; F120).
 DrawPlayerCrouch:
   LD HL,(PlayerY)         ; H = Y
   LD A,H
@@ -881,7 +900,7 @@ DrawPlayerCrouch:
   LD HL,CrouchFramesLeft  ; crouching frames facing left
   LD DE,CrouchFramesRight ; crouching frames facing right
   LD A,CROUCH_HEIGHT      ; height
-  JP DrawPlayerAttr       ; as DrawPlayerAttr
+  JP DrawPlayerAttr       ; draw in bright yellow
 
 ; Sprite shift pairs and the frame tables of the monk
 ;
@@ -896,14 +915,16 @@ DrawPlayerCrouch:
 ; DrawPlayerSprite picks the table by the facing (PlayerFacing) and the entry
 ; by the animation frame (PlayerFrame).
 ;
-; +$00 ShiftPairs: 4 x (byte offset of the copy, width) for X mod 0, 1, 2, 3,
-; shared with the enemies +$08 MonkFramesLeft: 3 words, facing left
-; (PlayerFacing = 1): walking 0, walking 1, in the air +$0E MonkFramesRight: 3
-; words, facing right: walking 0, walking 1, in the air +$14 MonkDyingFrames: 7
-; words, the dying animation (3 pictures, repeated, KillPlayer) +$22
-; ShiftPairsCrouch: 4 x (offset, width) for the crouching monk (3 bytes wide in
-; every phase) +$2A CrouchFramesLeft: 2 words, crouching facing left (sprite
-; sheet rows 24-39) +$2E CrouchFramesRight: 2 words, crouching facing right
+; +$00 ShiftPairs: 4 x (byte offset of the copy, width) for X mod 4 = 0, 1, 2,
+; 3, shared with the enemies +$08 MonkFramesLeft: 3 words, facing left
+; (PlayerFacing = 1; observed: the hood opens to the left): walking 0, walking
+; 1, in the air +$0E MonkFramesRight: 3 words, facing right: walking 0, walking
+; 1, in the air +$14 MonkDyingFrames: 7 words, the dying animation (3 pictures,
+; repeated, KillPlayer) +$22 ShiftPairsCrouch: 4 x (offset, width) for the
+; crouching monk (3 bytes wide in every phase) +$2A CrouchFramesLeft: 2 words,
+; crouching facing left (sprite sheet rows 24-39) +$2E CrouchFramesRight: 2
+; words, crouching facing right (both read one word too far for frame 2, see
+; DrawPlayerCrouch)
 ShiftPairs:
   DEFB $00,$02            ; Standing: (byte offset, width) for X mod 4
   DEFB $02,$03            ;
@@ -933,8 +954,9 @@ CrouchFramesRight:
 ; list, which RunFrameList later runs by RET: the first word is the routine,
 ; the other eight bytes are popped by it as HL, DE, BC and AF. The entities and
 ; the player share the first template, one after the other in the same frame;
-; the second is used with it by the two-part sprites (Satan), the third by the
-; room items.
+; the second is used with it by the entities that draw two sprites (the falling
+; water drop, the fire of the Pestilent Beast, Satan and his smoke), the third
+; by the room items.
 ;
 ; Sprite command (routine QueueSprite, the masked sprite; SpriteCmd and
 ; SpriteCmd2): +0 word: routine QueueSprite +2 word: position, low byte y in
@@ -986,22 +1008,22 @@ ItemCmdAttr:
 ; Room exits: change the room when Jean walks off an edge
 ;
 ; The last routine of the game frame (GameFrame). Does nothing in the states 0
-; and 1 (none, dying). Otherwise it looks at the position of the monk (X and Y,
-; high bytes in 2-pixel units, kept modulo 256, so a position left of or above
-; the room is $FC-$FF resp. $FA-$FF). Horizontal exits are tested first and
-; only on the side Jean faces (PlayerFacing): facing right he leaves through
-; the right edge when $7C <= X < $FC, facing left through the left edge when
-; $80 <= X <= $FC. The sprite is 8 units wide, so Jean has half of his width
-; outside the room when the room changes. Vertical exits: up when $80 <= Y <=
-; $F9 (5 units of the sprite are still in the room), down when $52 <= Y < $80
-; (only 6 of the 12 units are left).
+; and 1 (no player, dying). Otherwise it looks at the position of the monk (X
+; and Y, high bytes in 2-pixel units, kept modulo 256, so a position left of or
+; above the room is $FC-$FF resp. $FA-$FF). Horizontal exits are tested first
+; and only on the side Jean faces (PlayerFacing): facing right he leaves
+; through the right edge when $7C <= X < $FC, facing left through the left edge
+; when $80 <= X <= $FC. The sprite is 8 units wide, so Jean has half of his
+; width outside the room when the room changes. Vertical exits: up when $80 <=
+; Y <= $F9 (5 units of the sprite are still in the room), down when $52 <= Y <
+; $80 (only 6 of the 12 units are left).
 ;
 ; On an exit the room number RoomNumber changes by +1 (right), -1 (left), +5
 ; (down) or -5 (up), the position wraps by the size of the room (X by $80, Y by
 ; $58, so that the monk appears at the opposite edge half outside the room),
 ; the exit direction ExitDirection is set (0 right, 1 left, 2 down, 3 up: the
 ; new room is drawn from that side by RedrawRoom) and the room state RoomState
-; becomes 1, which makes the main loop (StartGame) enter the room. Last the
+; becomes 1, which makes the main loop (MainLoop) enter the room. Last the
 ; room number is reduced modulo 25 by subtracting 25 until it is below 25. The
 ; subtraction works on the byte, so a room number below zero (the left of room
 ; 0, the top row of rooms going up) is $FB-$FF and ends as 6 more than the
@@ -1113,7 +1135,7 @@ WrapRoomNumber:
 ; 10 and 5. Reached only through the RAGE cheat (EnterRoomWarp).
 ;
 ; A Direction bits as in ControlsPressed: bit 0 right, bit 1 left, bit 2 down,
-;   bit 3 up (higher bits are shifted out)
+;   bit 3 up (DebugWarpRoom has masked off the higher bits)
 DebugMoveRoom:
   RRA                     ; bit 0: right
   JP C,LeaveRight         ; room + 1

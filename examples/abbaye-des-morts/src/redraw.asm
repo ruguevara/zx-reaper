@@ -1,8 +1,8 @@
 ; Copy the redraw list to the screen: attributes and eight pixel rows of every
 ; run of cells
 ;
-; The last step of the drawing of a frame (main loop StartGame, title RunIntro
-; and cutscenes RunCutscene call it after BuildRedrawList). It walks the redraw
+; The last step of the drawing of a frame (the main loop MainLoop_Play, the
+; intro RunIntro and the cutscenes RunCutscene call it after BuildRedrawList). It walks the redraw
 ; run list at RedrawRuns and copies each run of cells from the redraw cell
 ; buffers to the screen. The list holds one record per character row that has
 ; cells to draw: the row number, the number of runs and for each run the first
@@ -10,7 +10,7 @@
 ; (RedrawListPtr, BuildRedrawList and CollectRedrawRun build it). For a run of
 ; n cells (n = 1-32, from RedrawLengths + index) it copies the n attribute
 ; bytes from RedrawAttrs + index to the attribute file, then the 8 pixel rows
-; from the pages RedrawPixels to CC00 (page + pixel row) to the bitmap of the
+; from the pages RedrawPixels to $CC00 (page + pixel row) to the bitmap of the
 ; cells.
 ;
 ; The copy is done with unrolled chains of LDI (and LDD) instructions that are
@@ -24,14 +24,14 @@
 ; cell of the run back to the first (LDD), row 1 from the first to the last
 ; (LDI), and so on for four pairs of rows (B).
 ;
-; Hardware: writes the attribute file (5800) and the screen bitmap (4000, the 8
-; pixel rows of a cell are 256 bytes apart) directly; no port is used. SP is
+; Hardware: writes the attribute file ($5800) and the screen bitmap ($4000, the
+; 8 pixel rows of a cell are 256 bytes apart) directly; no port is used. SP is
 ; not touched.
 ;
 ; All registers are changed.
 DrawRedrawList:
   LD HL,RedrawRuns
-; Next row record of the redraw list Reads the row number ($FF ends the list:
+; Next row record of the redraw list. Reads the row number ($FF ends the list:
 ; the routine returns), looks up the attribute file address of the row's first
 ; cell in AttrRowAddrs and goes through the runs of the row. Also entered from
 ; CopyBitmapForward_Tail, with HL at the next row record (row number, run
@@ -53,7 +53,7 @@ DrawRedrawList_Row:
   EXX
   INC L
   LD B,(HL)               ; B = number of runs of the row
-; One run of cells Entered for each run of the row (the loop is closed by
+; One run of cells. Entered for each run of the row (the loop is closed by
 ; CopyBitmapForward_Tail) with HL at the run entry in the list (first column,
 ; then the index of the first cell in the buffers, which also gives the address
 ; of the run's length cell in RedrawLengths) and B the runs left in the row.
@@ -80,8 +80,8 @@ DrawRedrawList_Run:
   LD (SmcBitmapBackJump+$0001),A
   LD (SmcAttrJump+$0001),A
   LD H,PAGE_REDRAW_ATTRS  ; HL = attribute of the first cell, in the buffer
-; Self-modified: the offset of this JR is written above (9629 and the two
-; stores after it) as 2 x (32 - run length), so that it jumps into the chain of
+; Self-modified: the offset of this JR is written above (with those of
+; SmcBitmapForwardJump and SmcBitmapBackJump) as 2 x (32 - run length), so that it jumps into the chain of
 ; LDI instructions that follows at the place where as many LDIs remain as the
 ; run has cells but one.
 SmcAttrJump:
@@ -322,8 +322,8 @@ CopyBitmapForward_Tail:
   INC D
   DEC B                   ; one more pair of pixel rows done
   JP NZ,SmcBitmapBackJump ; next pair: back to the LDD chain
-  POP HL                  ; list pointer saved at 9619: the index byte of the
-                          ; run just drawn
+  POP HL                  ; list pointer saved by DrawRedrawList_Run: the
+                          ; index byte of the run just drawn
   POP BC                  ; runs left, saved at DrawRedrawList_Run
   DEC B
   JP NZ,DrawRedrawList_Run ; next run of the row
@@ -333,7 +333,7 @@ CopyBitmapForward_Tail:
 ; Take a run of flagged cells of a row into the redraw list and the cell
 ; buffers
 ;
-; Called by BuildRedrawList when its scan of the tile flag map (5E00) meets a
+; Called by BuildRedrawList when its scan of the tile flag map ($5E00) meets a
 ; cell with bit 7 (redraw) or bit 6 (a sprite covers the cell) set. It walks
 ; along the row for as long as the cells are flagged and counts them (D): a
 ; cell with bit 7 loses it, a cell with only bit 6 has bit 6 cleared and bit 7
@@ -414,12 +414,12 @@ SmcRedrawIndex:
   INC L
   LD (HL),C               ; run entry: index of the first cell
   INC L
-  LD (HL),H               ; filler (not $FF) in the next slot: the INC at 9736
-                          ; then starts no new row
+  LD (HL),H               ; filler (not $FF) in the next slot: the INC (HL)
+                          ; after CollectRedrawRun_3 then starts no new row
   LD (RedrawListPtr),HL
 SmcRunCount:
   LD HL,SmcRunCount       ; operand = address of the run count byte of the row
-                          ; (set at 9740)
+                          ; (set when the row record is started)
   INC (HL)                ; one more run in the row
   POP BC                  ; B and C as on entry
   POP HL                  ; HL = first cell after the run
@@ -433,7 +433,7 @@ SmcRunCount:
 ; cells starting at flag map address HL it looks up the cell's tile number in
 ; the tile map (3 pages below the flag map), then stores the tile's attribute
 ; (TileAttrs + tile) at RedrawAttrs + index and the tile's 8 bitmap bytes
-; (TileGfx + 8 x tile) at RedrawPixels + index, C600 + index ... CC00 + index
+; (TileGfx + 8 x tile) at RedrawPixels + index, $C600 + index ... $CC00 + index
 ; (one page for each pixel row). The first cell of the run also gets the run
 ; length D at RedrawLengths + index. The index starts at the value of
 ; SmcRedrawIndex (the operand of the LD A,0 there) and goes up by one for each
@@ -442,8 +442,8 @@ SmcRunCount:
 ; DrawRedrawList copies the result to the screen.
 ;
 ; The 8 bitmap bytes are fetched with POP: SP is pointed at byte 2 of the tile
-; bitmap and saved in the operand of the LD SP at SmcRestoreSP (SmcRestoreSP),
-; which puts it back. For about 130 T-states per cell SP is inside the tile
+; bitmap and saved in the operand of the LD SP at SmcRestoreSP, which puts it
+; back. For about 130 T-states per cell SP is inside the tile
 ; bitmaps; an interrupt that comes then has its return address written over
 ; the two bitmap bytes below SP, which are the pair just loaded into BC, and
 ; the PUSH BC at the start of InterruptHandler writes them back. This happens:
@@ -512,7 +512,7 @@ CopyRunCells_Cell:
   INC H
   LD (HL),B
 SmcRestoreSP:
-  LD SP,SmcRestoreSP      ; operand = SP saved at 9792
+  LD SP,SmcRestoreSP      ; operand = SP saved before the LD SP,HL above
   LD E,L                  ; E = index of this cell (L has not changed)
   POP BC                  ; loop counter
   POP HL                  ; tile map pointer
@@ -525,16 +525,16 @@ SmcRestoreSP:
 
 ; Build the redraw list of the frame, then run the draw queue
 ;
-; The first of the two drawing steps of a frame (the main loop StartGame, the
-; title RunIntro and the cutscene loop RunCutscene call it after the frame call
-; list has queued the sprites, and DrawRedrawList after it). Two parts:
+; The first of the two drawing steps of a frame (the main loop MainLoop_Play,
+; the intro RunIntro and the cutscene loop RunCutscene call it after the frame
+; call list has queued the sprites, and DrawRedrawList after it). Two parts:
 ;
-; 1. The redraw list. It scans the tile flag map (5E00, 22 rows of 32 cells)
+; 1. The redraw list. It scans the tile flag map ($5E00, 22 rows of 32 cells)
 ; and takes every row's runs of cells that have bit 7 (redraw) or bit 6 (a
 ; sprite is on the cell) set to CollectRedrawRun. That routine clears the
 ; flags, appends the run to the redraw run list at RedrawRuns (RedrawListPtr is
 ; the write pointer) and has CopyRunCells copy the tile attributes and bitmaps
-; of the cells into the redraw cell buffers (RedrawLengths-CCFF). The end mark
+; of the cells into the redraw cell buffers (RedrawLengths-$CCFF). The end mark
 ; $FF follows the list after every row. The index of the next free buffer cell
 ; (the operand of the LD A,0 at SmcRedrawIndex) is reset to 0 first.
 ;
@@ -552,7 +552,7 @@ SmcRestoreSP:
 ;
 ; Hardware: none.
 ;
-; O:All All registers are changed
+; All registers are changed.
 BuildRedrawList:
   LD HL,RedrawRuns        ; the redraw run list starts here...
   LD (RedrawListPtr),HL   ; ... and RedrawListPtr is its write pointer
@@ -613,25 +613,29 @@ RunDrawQueue_Job:
 ; A routine of the frame call list (RunFrameList), like QueueSprite: the call
 ; list holds the address of the routine and 8 bytes of parameters, which it
 ; POPs, and it ends with a RET into the next entry. The room items use it (the
-; sprite command at ItemCmd, made by AnimateItem): a sprite 2 bytes wide,
-; without mask, placed on the character grid. It stores the parameters in the
+; sprite command at ItemCmd, made by DrawItemFrame): a sprite 2 bytes wide,
+; without mask, placed on the character grid, its graphics in the 16-pixel
+; sprites at $66DC-$68CB (observed in room 10: the arch at $66DC with height
+; 12, the other items with height 8, width always 2). It stores the parameters in the
 ; job template BlockJob (the height in 2-pixel units divided by 4 gives the
 ; character rows), marks the 2 cells of each row as for QueueSprite (bit 6 set
 ; and bit 7 clear in the tile flag map, so that the cells are redrawn now and
 ; once more in the next frame to erase the sprite) and adds the template to the
 ; draw queue with AddQueueJob, which is a job for DrawBlockJob. No clipping is
-; done: the sprite must be wholly inside the room.
+; done: the sprite must be wholly inside the room. Drawn as the job sets out
+; (observed: three blocks queued by hand, rows 3, 10 and 19, each screen cell
+; held the graphics bytes unmasked and the attribute).
+;
+; The parameters are not in registers: the routine pops them from the call
+; list (SP points into it), in this order: the cell (low byte row 0-21, high
+; byte column 0-30 of the top-left cell), the address of the graphics (16
+; bytes for each character row), the size (low byte width, not used, always 2;
+; high byte height in 2-pixel units, a multiple of 4: 8 for the items, 12 for
+; the arch), the attribute (high byte; the low byte is popped into F and not
+; used). Like QueueSprite it uses the call list below SP as its stack: the
+; CALL FlagMapAddress writes over bytes of its own command, already popped.
 ;
 ; Hardware: none; it only changes the tile flag map in RAM.
-;
-; HL Popped from the call list: L = character row (0-21), H = column (0-30) of
-;    the top-left cell
-; DE Popped: address of the 16-pixel-wide graphics (16 bytes for each character
-;    row)
-; BC Popped: B = height in 2-pixel units (a multiple of 4: 8 for the items, 12
-;    for the arch), C = width (not used: it
-; is always 2)
-; AF Popped: A = attribute of the sprite's cells (F unused)
 QueueBlockSprite:
   POP HL
   POP DE
@@ -669,8 +673,8 @@ QueueBlockSprite_0:
 ;
 ; QueueBlockSprite stores its parameters here and AddQueueJob copies 16 bytes
 ; from here to the draw queue (DrawQueue); the template is only 8 bytes long,
-; so the next 8 bytes (the first code bytes of QueueSprite) are copied along
-; and not used. The job is run by BuildRedrawList: the handler DrawBlockJob
+; so the next 8 bytes (the first code bytes of QueueSprite, which follows in
+; memory) are copied along and not used. The job is run by BuildRedrawList: the handler DrawBlockJob
 ; draws the sprite into the redraw cell buffers. Fields:
 ;
 ; +0 word: handler, DrawBlockJob

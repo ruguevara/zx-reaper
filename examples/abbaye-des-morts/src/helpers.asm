@@ -3,7 +3,8 @@
 ; Enables interrupts and halts until the next frame interrupt, then reads all
 ; eight keyboard half-rows at once (port $FE with a zero high byte) and repeats
 ; until one of the five key bits shows a pressed key. Called by the main loop
-; (StartGame), the ending (RunEnding) and ShowParchment.
+; (StartGame, the Game Over screen), the ending (RunEnding) and the text window
+; ShowTextWindow (parchments and the ending texts).
 ;
 ; Hardware: HALT for the frame interrupt; reads the ULA keyboard port $FE.
 WaitKeyPress:
@@ -20,7 +21,7 @@ WaitKeyPress:
 ;
 ; Enables interrupts and halts until the next frame interrupt, then reads all
 ; eight keyboard half-rows at once and repeats until no key is pressed. Called
-; together with WaitKeyPress by StartGame and ShowParchment, and jumped to by
+; together with WaitKeyPress by StartGame and ShowTextWindow, and jumped to by
 ; the ending RunEnding.
 ;
 ; Hardware: HALT for the frame interrupt; reads the ULA keyboard port $FE.
@@ -42,7 +43,6 @@ WaitKeyRelease:
 ;   A Value to add
 ;   HL Base
 ; O:HL HL + A
-; O:A Low byte of the result
 AddAToHL:
   ADD A,L
   LD L,A
@@ -211,13 +211,13 @@ UnusedFlagMapAddress:
 ; addressed by BC (B = the half-row selector, rotated left between reads) and
 ; stores it at HL. Then it reads every half-row together and stores the five
 ; key bits, inverted so that 1 is a key down, in ControlsRead; the control
-; reader ReadKeyControls overwrites that byte with the control bits. Used by
-; GameFrame (every frame) and MenuFrame (the key redefinition).
+; reader ReadKeyControls overwrites that byte with the control bits (in
+; GameFrame; under MenuFrame the byte keeps the five key bits). It returns with
+; carry and NZ when a key is down, Z when none, but no caller tests the flags.
+; Used by GameFrame (every frame of play, the intro and the cutscenes) and
+; MenuFrame (every frame of the title and the controls menu).
 ;
 ; Hardware: reads the ULA keyboard port $FE.
-;
-; O:F Carry and not zero when any key is down, zero when none (no caller tests
-;     it)
 ScanKeyboard:
   LD A,KB_CS_V            ; port high byte of the first half-row
   LD C,A                  ; C = $FE, the ULA port

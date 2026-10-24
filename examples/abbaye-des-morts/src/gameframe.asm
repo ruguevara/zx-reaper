@@ -11,8 +11,10 @@
 ; object slot (RunObjectSlots: items, enemies and other objects queue their
 ; sprites), the player state machine (UpdatePlayer), closes the call list
 ; (EndFrameList, unless the list is being drawn: QueueDrawCmd is a RET then),
-; spawns the cutscene actors if $8552 is nonzero (SpawnQueuedObjects) and ends
-; with the room-exit check CheckRoomExit.
+; spawns the objects waiting in the object list (the shots, seeds, flames and
+; splashes the enemies queued this frame, or the cutscene actors) if
+; SpawnQueueCount is nonzero (SpawnQueuedObjects) and ends with the room-exit
+; check CheckRoomExit.
 ;
 ; Hardware: reads the keyboard half-rows (port $FE) and, if on, the Kempston
 ; port $1F; nothing is drawn here, the sprites are queued for the drawing phase
@@ -44,7 +46,7 @@ GameFrame_List:
   LD A,(QueueDrawCmd)     ; $AA1F is a RET while the list is being drawn
   OR A
   CALL Z,EndFrameList     ; otherwise close the list
-  LD A,(SpawnQueueCount)  ; cutscene actors pending?
+  LD A,(SpawnQueueCount)  ; objects waiting in the object list?
   OR A
   CALL NZ,SpawnQueuedObjects
   JP CheckRoomExit        ; room exits; returns to the interrupt handler
@@ -117,7 +119,8 @@ EndOfSlots:
 ;
 ; The handler word (+0) of the slots made from room item records; entered by
 ; the RET of RunObjectSlot with SP at slot + 2. Pops the row and column (+2,
-; +3) into the position of the object sprite command at ItemCmd (y, x/4),
+; +3) into the position of the object sprite command at ItemCmd (character row
+; and column: its routine QueueBlockSprite draws on the character grid),
 ; builds the 16x16-pixel box of the item in 2-pixel units (column * 4, row * 4,
 ; 8 wide and high) and jumps to the overlap test OverlapTest with IX =
 ; ItemActionEntry. The test compares it with Jean's box at PlayerBoxXMax and
@@ -128,7 +131,7 @@ EndOfSlots:
 ; Used by all item types of ObjectTypeTable except type 5 (ParchmentHandler).
 RoomItemHandler:
   POP HL                  ; L = row, H = column
-  LD (ItemCmdPos),HL      ; sprite command position (y, x/4)
+  LD (ItemCmdPos),HL      ; sprite command position (row, column)
   ADD HL,HL               ; x2
   ADD HL,HL               ; x4: D = column * 4, E = row * 4
   EX DE,HL
@@ -158,10 +161,14 @@ ItemActionEntry:
 ; arms the one-shot script runner RunEventScript with the subscript at $76A0,
 ; which draws the door (tiles at column 0, rows 14-17); the room script of room
 ; 7 draws it again whenever the room is entered with $851A nonzero. Once the
-; door is shut the item makes it flicker: a countdown in slot +8 of 32-63
-; frames (random, from the R register) ends with sound effect 8 and the
-; alternative door tiles of the subscript at $76A8 for 3 frames (slot +9 counts
-; them), then the normal $76A0 again.
+; door is shut the item makes it rattle: when the countdown in slot +8 runs out,
+; sound effect 8 plays and the alternative door tiles of the subscript at $76A8
+; are shown for 3 frames (slot +9 counts them), then the normal $76A0 again,
+; and the countdown restarts at 32-63 frames (random, from the R register). The
+; countdown starts at 1 (the type record), so the first rattle comes on the
+; frame after the door shuts, or after the room is entered with the door shut:
+; the shutting is heard as sound 8 (observed: shut at frame 21, rattles with
+; sound 8 at frames 22, 60, 111).
 ;
 ; Hardware: reads the R register as a random number; sound request byte
 ; SoundRequest.
@@ -377,11 +384,17 @@ ActionArchToRiver:
 
 ; Enter a room at an arch
 ;
-; Entry point used by ActionArchToBeast. A = new room. The room state becomes
-; 2, which makes the main loop (StartGame) put Jean at the position in
-; RespawnX/RespawnY and enter the room, as after a death at a checkpoint.
+; The common tail of the two arch actions: ActionArchToRiver falls into it,
+; ActionArchToBeast jumps to it, both after setting RespawnX/RespawnY to the
+; other arch. Stores the new room, sets the room state to 2 (no game logic
+; until the main loop has handled it: StartGame copies RespawnX/RespawnY to
+; Jean's position and enters the room, the path a death takes after
+; SelectCheckpoint), makes Jean stand (player state 4), requests sound effect
+; 4 and draws the arch of this room (AnimateItem). Observed: room 19 -> 10 and
+; 10 -> 19 with sound 4 (F32).
 ;
-; A New room
+;   A New room number
+;   SP Slot address + 8 (the flag pointer is popped)
 EnterRoomAtArch:
   LD (RoomNumber),A       ; new room number
   LD A,STATE_RESPAWN
@@ -391,11 +404,11 @@ EnterRoomAtArch:
   LD A,SFX_PORTAL
   LD (SoundRequest),A
   JP AnimateItem          ; draw the arch, next slot
-; Entry point used by ActionArchToBeast: Jean is not touching the arch, clear
+; Entry point used by both arch actions: Jean is not touching the arch, clear
 ; its latch.
 ArchRelease:
   RES 7,(HL)
-; Entry point used by ActionArchToBeast: draw the arch and go on.
+; Entry point used by both arch actions: draw the arch and go on.
 ArchIdle:
   JP AnimateItem
 
@@ -426,8 +439,9 @@ ActionHeart:
 
 ; Free the object slot with sound 5
 ;
-; Entry point used by the other actions (taking a cross, the chalice, the final
-; parchment): play sound effect 5, then free the slot; SP is at slot + 8.
+; ActionHeart falls into it and the other actions that take an item jump to it
+; (TakeCross, ActionChalice, ActionFinalScroll): play sound effect 5, then free
+; the slot; SP is at slot + 8.
 ;
 ; SP Slot address + 8
 FreeSlotWithSound:
@@ -436,8 +450,9 @@ FreeSlotWithSound:
 
 ; Free the object slot
 ;
-; Entry point used by ActionChalice and ActionParchment: free the object slot
-; (zero its handler word) and go on with the next one; SP is at slot + 8.
+; FreeSlotWithSound falls into it; ActionChalice (fewer than twelve crosses)
+; and ActionParchment jump to it: free the object slot (zero its handler word)
+; and go on with the next one; SP is at slot + 8.
 ;
 ; SP Slot address + 8
 FreeSlot:
@@ -486,8 +501,13 @@ ActionChalice_0:
 ; Room items of room 2 (the bell of Tower of the Bell, flag $851B), room 9 (a
 ; lever, $851C) and room 10 (a lever, $851D). The first touch sets the flag to
 ; 1 and plays sound effect 3; the frame drawn is the flag (0 = rest, 1 = rung
-; or pulled). The room scripts test the flags ($95/$9C opcodes at $7774, $7780,
-; $7F78).
+; or pulled). Nothing changes in the room itself: the scripts of other rooms
+; test the flags ($95/$9C opcodes at $7774, $7780, $7F78) when those rooms are
+; entered. The bell opens a hole in the floor of room 8 (rows 20-21, columns
+; 26-27, beside the parchment), the lever of room 9 removes the red door at
+; the left edge of room 19 (column 0, rows 16-19), the lever of room 10 the red
+; door at the right edge of room 8 (column 31, rows 14-17) (observed: the flag
+; maps of rooms 8 and 19 entered with each flag 0 and 1).
 ;
 ; F Carry set when Jean's box overlaps the item's box
 ; SP Slot address + 6 on entry (the RET of ItemActionEntry popped the action
@@ -513,9 +533,10 @@ DrawFlagValueFrame:
 ; The room item of room 20 (Unexpected gate) at row 6, column 24 with flag
 ; $851F. The first touch sets the flag to 1, plays sound effect 5 and arms the
 ; one-shot script runner RunEventScript with the subscript at $8048, which
-; removes the gate tiles at the right edge of the room (column 31, rows 14-17);
-; the room script tests the flag so the gate stays open. The frame drawn is the
-; flag.
+; removes the red gate at the right edge of the room (column 31, rows 14-17) at
+; once (observed: the flag map cells and the screenshot after the touch); the
+; room script tests the flag so the gate stays open. The frame drawn is the
+; flag. Unlike the levers of ActionBellOrLever this one acts in its own room.
 ;
 ; F Carry set when Jean's box overlaps the item's box
 ; SP Slot address + 6 on entry (the RET of ItemActionEntry popped the action
@@ -540,16 +561,18 @@ ActionGateLever:
 
 ; Item action: cross that can be taken while the wheel is turned
 ;
-; Room items of types 1 and 2 with this action are crosses;
+; The action of the four crosses of type 2 (rooms 9, 15, 17 and 22);
 ; ActionCrossWheelRest is the other set. Which set can be taken depends on the
 ; wheel of faith at WheelState in room 17 (ActionWheel): with the wheel at rest
 ; the ActionCrossWheelRest crosses are the real ones (bright, cycling colours)
 ; and the ActionCrossWheelTurned crosses are drawn thin (frames 6-11); with the
 ; wheel turned it is the other way round. If Jean touches the cross while the
 ; wheel state bits (flag AND 7) are nonzero it is taken (TakeCross), otherwise
-; it is drawn by DrawCrossWheelTurned.
+; it is drawn by DrawCrossWheelTurned (observed: Jean on each of the four
+; crosses takes it with the wheel at 6, not at 0).
 ;
 ; F Carry set when Jean's box overlaps the item's box
+; SP Slot address + 6 on entry (the flag pointer is next)
 ActionCrossWheelTurned:
   JR NC,DrawCrossWheelTurned
   LD A,(WheelState)
@@ -559,13 +582,15 @@ ActionCrossWheelTurned:
 
 ; Item action: cross that can be taken while the wheel is at rest
 ;
-; The other set of crosses (see ActionCrossWheelTurned). If Jean touches the
+; The action of the eight crosses of type 1 (rooms 3, 10, 13, 14, 16, 17, 18
+; and 19), the other set (see ActionCrossWheelTurned). If Jean touches the
 ; cross while the wheel state bits at WheelState are 0 it is taken (TakeCross);
 ; otherwise it is animated and drawn by the code at DrawCrossWheelRest, using
 ; frame offset 0 (bright cross) when the wheel is at rest and 6 (thin cross)
-; when it is turned.
+; when it is turned (observed: taken with the wheel at 0, not at 6).
 ;
 ; F Carry set when Jean's box overlaps the item's box
+; SP Slot address + 6 on entry (the flag pointer is next)
 ActionCrossWheelRest:
   JR NC,DrawCrossWheelRest
   LD A,(WheelState)
@@ -578,6 +603,8 @@ ActionCrossWheelRest:
 ; becomes $FF (never created again), the status-bar crosses redraw
 ; DrawCrossesHud is armed (a RET until a 0 is written to it), the number of
 ; crosses at $854D goes up by one, then the slot is freed with sound effect 5.
+;
+; SP Slot address + 6 (the flag pointer is next)
 TakeCross:
   POP HL                  ; flag pointer
   LD (HL),ITEM_GONE
@@ -594,6 +621,8 @@ TakeCross:
 ; AnimateItem does, and draw frame E + (wheel state bits), that is the bright
 ; cross when the wheel is at rest and the thin one (frames 6-11) when it is
 ; turned.
+;
+; SP Slot address + 6 (the flag pointer is next)
 DrawCrossWheelRest:
   POP HL                  ; flag pointer
   POP BC                  ; C = countdown, B = reload
@@ -609,7 +638,7 @@ DrawCrossWheelRest:
   SUB D
   LD E,A
 DrawCrossWheelRest_0:
-  LD L,A                  ; frame without the wheel at restset
+  LD L,A                  ; frame without the wheel offset
   LD A,(WheelState)
   AND WHEEL_STATE_MASK    ; + 0 (wheel at rest) or + 6 (turned)
   ADD A,L
@@ -623,7 +652,6 @@ DrawCrossWheelRest_0:
 ; 6), that is the thin cross (frames 6-11) when the wheel is at rest and the
 ; bright one when it is turned.
 ;
-; F Carry set when Jean overlaps the item (not used here)
 ; SP Slot address + 6 on entry (flag pointer next)
 DrawCrossWheelTurned:
   POP HL                  ; flag pointer
@@ -640,7 +668,7 @@ DrawCrossWheelTurned:
   SUB D
   LD E,A
 DrawCrossWheelTurned_0:
-  LD L,A                  ; frame without the wheel at restset
+  LD L,A                  ; frame without the wheel offset
   LD A,(WheelState)
   AND WHEEL_STATE_MASK
   XOR WHEEL_TURNED        ; 0 (wheel turned) or 6 (wheel at rest)
@@ -651,9 +679,10 @@ DrawCrossWheelTurned_0:
 ; Item: step the frame animation, then queue the item's sprite
 ;
 ; The common tail of the item actions whose sprite is animated and depends on
-; nothing else (ActionArchToRiver, ActionHeart). The wheel crosses
-; (ActionCrossWheelRest, DrawCrossWheelTurned) do the same with a frame offset
-; of their own and enter at AnimateItem_Store. Entered with SP at slot + 8: the
+; nothing else (the arches: ActionArchToBeast, ActionArchToRiver,
+; EnterRoomAtArch; ActionHeart). The wheel crosses (DrawCrossWheelRest,
+; DrawCrossWheelTurned) do the same with a frame offset of their own and enter
+; at AnimateItem_Store. Entered with SP at slot + 8: the
 ; caller has popped the flag pointer. Pops the animation words of the slot (+8:
 ; C = countdown, B = reload value; +$A: E = frame, D = number of frames); the
 ; countdown goes down by one and at zero it reloads from B, the frame goes up
@@ -677,8 +706,9 @@ AnimateItem:
   JR C,AnimateItem_Store
   SUB D
   LD E,A
-; Entry point of AnimateItem, ActionCrossWheelRest and DrawCrossWheelTurned: A
-; = frame to draw, DE and BC = the animation words to put back into the slot
+; Entry point used by DrawCrossWheelRest and DrawCrossWheelTurned (and
+; AnimateItem itself): A = frame to draw, DE and BC = the animation words to put
+; back into the slot
 AnimateItem_Store:
   PUSH DE                 ; store the animation words back
   PUSH BC
@@ -686,8 +716,9 @@ AnimateItem_Store:
 ; Queue an item's animation frame
 ;
 ; Entry point of the item actions that draw a frame they have already chosen
-; (ActionFinalScroll, ActionWheel, ActionChalice, ActionBellOrLever,
-; ActionGateLever, ActionParchment) and of AnimateItem_Store. A = frame number,
+; (ActionFinalScroll, ActionCheckpoint and ActionWheel through DrawFlagFrame,
+; ActionChalice, ActionBellOrLever, ActionGateLever, ActionParchment) and of
+; AnimateItem_Store. A = frame number,
 ; SP at slot + 8. Skips the animation words (+8..+$B), pops the frame list
 ; pointer (+$C) and the size of the sprite (+$E: C = width in bytes, B = height
 ; in 2-pixel units), takes frame A of the list (4 bytes: sprite address,
@@ -709,8 +740,8 @@ DrawItemFrame:
   ADD HL,HL
   ADD HL,HL
   ADD HL,DE               ; frame entry
-  LD E,(HL)               ; DE = sprite address (D = pixel row page, E =
-                          ; column)
+  LD E,(HL)               ; DE = address of the 16-pixel-wide sprite (16x16,
+                          ; the arch 16x24)
   INC HL
   LD D,(HL)
   INC HL
@@ -756,7 +787,7 @@ DrawItemFrame_Next:
 ;    routine)
 ParchmentHandler:
   POP HL                  ; L = row, H = column
-  LD (ItemCmdPos),HL      ; position of the draw command
+  LD (ItemCmdPos),HL      ; position of the draw command (row, column)
   ADD HL,HL
   ADD HL,HL
   EX DE,HL
@@ -803,8 +834,11 @@ ActionParchment_0:
 ;
 ; Used by the enemy handlers (Death, Satan, the crusaders and the other
 ; entities), which JP here with their slot on the stack: SP points at the
-; slot's two hit box words (+$C offset, +$E far corner; both words have y in
-; the low byte and x in the high byte, in 2-pixel units, see ObjectSlots). The
+; slot's two hit box words, offset then far corner (+$C and +$E in the slots of
+; room objects made by SpawnRoomObject, +$A and +$C in the slots made from a
+; template by SpawnQueuedObjects, e.g. Projectile_Draw pops only x and y
+; first; both words have y in the low byte and x in the high byte, in 2-pixel
+; units, see ObjectSlots). The
 ; minimum corner of the entity's box is its position plus the offset, the
 ; maximum corner its position plus the far corner word (measured from the
 ; position, not from the offset corner: it is a size only while the offset is
@@ -817,7 +851,8 @@ ActionParchment_0:
 ;
 ; DE Position of the entity: D = x, E = y (2-pixel units)
 ; HL Address to continue at after the test
-; SP Slot address + $C (the hit box offset word)
+; SP Address of the slot's hit box offset word (slot + $C, or slot + $A in a
+;    slot made from a template)
 HitTest:
   LD (SmcHitContinue+$0001),HL ; continuation address
   POP HL                  ; hit box offset (y, x)
@@ -832,15 +867,19 @@ HitTest:
 ; Test two boxes for overlap
 ;
 ; Entry point of RoomItemHandler, ParchmentHandler and UpdatePlant (which load
-; IX themselves): the overlap test. Compares the box (D, E)..(B, C) with the
-; player box PlayerBoxXMax (min x, max x, min y, max y of Jean) and jumps to IX
-; with carry set when they overlap, clear when not.
+; IX themselves): the overlap test. Compares the box (D, E)..(B, C) with Jean's
+; box, the four bytes PlayerBoxXMax, PlayerBoxXMin, PlayerBoxYMax, PlayerBoxYMin
+; ($8516-$8519, made by ProbePlayer), and jumps to IX with carry set when they
+; overlap, clear when not. On each axis the test is box max >= Jean's min and
+; box min < Jean's max: a box whose min equals Jean's max does not overlap,
+; one whose max equals Jean's min does.
 ;
-; D Left of the box (min x)
-; E Top of the box (min y)
-; B Right of the box (max x)
-; C Bottom of the box (max y)
-; IX Where to go on (carry set: overlap)
+;   D Left of the box (min x)
+;   E Top of the box (min y)
+;   B Right of the box (max x)
+;   C Bottom of the box (max y)
+;   IX Where to go on
+; O:F Carry set when the boxes overlap (for the code at IX)
 OverlapTest:
   LD HL,(PlayerBoxXMax)   ; H = player min x, L = player max x
   LD A,B                  ; entity max x below the player min x: no
