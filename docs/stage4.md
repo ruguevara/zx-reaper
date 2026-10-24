@@ -1,8 +1,8 @@
 # Stage 4: clean game logic, the Spectrum look kept
 
-Status: built for Hungry Horace in faithful mode (`examples/hungry-horace/
-game/`; results under "Hungry Horace"). How to do it: the `zx-clean` skill;
-this note keeps the reasons.
+Status: built in faithful mode for Hungry Horace (`examples/hungry-horace/
+game/`) and The Hobbit (`examples/the-hobbit/game/`); results under their
+names. How to do it: the `zx-clean` skill; this note keeps the reasons.
 
 Stage 4 rewrites the stage 3 port ([stage3.md](stage3.md)) as plain Python: a
 state of plain values, routines that read as the rules, events for sound
@@ -208,6 +208,71 @@ first pass without a frame), so free play checks for runs of such steps; the
 demo's autopilot made demo passes 6% slower than the flat pass time, now
 charged.
 
+## The Hobbit
+
+The second game, and a different shape. Hungry Horace's step is a pass
+driven by the keys held; The Hobbit waits for keys inside a pass (the line
+editor, the scroll pause, "press any key"), so the game is one generator,
+`Game().run()`, from the first title to the last restart. It yields
+requests that the driver answers with `send` (`ReadKey`: a key code, or None
+when the original's idle time runs out; `TitleKey`: the pictures flag;
+`ReadR`; `Mixed`: the random routine's byte from memory; `TapeLoad`: a saved
+state or None; `PrinterReady`), waits (`WaitKey`, `ScrollPause`), output
+(`Printed`, a line for the transcript; `TapeSave`) and a `Step` at the top of
+the main loop, where the checks compare. In the oracle the answers are the
+inputs stage 3 took (noted as it replays the record); in play the pacer
+answers them from the host's keys and files.
+
+The state: the 80 locations, 61 things (objects and characters), 17
+characters' script positions and behaviour tables, 10 timers, the NPC script
+program (it changes: commands are erased and rewritten), 8 orders, the
+variables, and the screen as a `zxpyxel.display.Display` (the game draws on
+it incrementally, and the story scrolls, so it is state, compared at every
+pass). Messages, handlers, scripts and behaviour tables go by name, words
+by their dictionary offset. The handlers that tables name register under
+their stage 3 names (`registry.handler('VerbTake')`). Assets: the
+dictionary, the messages (a markup of text, words and control codes), the
+commands, the world, the verbs, the handlers' tables as JSON; the 22
+pictures as command text, each with a PNG preview made from it; the font as
+PNG.
+
+The register interface of stage 3 changes the routine check: the bridge's
+`routines_<module>.py` maps each stage 3 routine to its stage 4 routine
+with a `convert_in` that reads the stage 3 registers at the call (`regs.iy`
+becomes a phrase, `regs.hl` a message name) and a `convert_out` for the
+result (a returned flag, a flow target).
+
+| Check | Result |
+| --- | --- |
+| routines: every call of the stage 3 routines the records reach (`--max=200`) on die, verbs and endgame (journey too for the handlers) | all match; 72 hand-built cases (stage 3 on the loaded image against stage 4) for the 30 handlers no record reaches |
+| the game pass by pass, the screen included at every pass | die 8, save 1, load 1, verbs 72, endgame 206, journey 248: all match |
+| free play: typed commands (moves, verbs, orders, SAVE, LOAD, QUIT) through the pacer | 30,000 frames (10 minutes) in 1.6 s, 177 passes, the invariants hold |
+| the idle WAIT | 1171 frames from the start of a line, as on the Z80 |
+| web | `make game-html`: the title, the opening and a command played in Chrome |
+
+Built by the lead (state, decoder, oracle, registry, assets loader, flow,
+pacer, host) and six subagents (Opus) in two waves: the text slice
+(terminal, message printer, words) and the world slice (records, exits,
+lists, random numbers, pictures) first, then engine, verbs, parser with the
+special words, and handlers in parallel; ~6,800 lines in `game/hobbit/`,
+~2,200 in `bridge/`, 1.9 million subagent tokens.
+
+What integration found, now rules in the skill: a routine returned True,
+False or a flow target, and its caller's `if not ok` passed QUIT's target
+as a parsed line; the pacer did not answer one request (the title key);
+LOAD without a save waited forever (the original's BREAK gives a tape
+error, which is what stage 4 does now); a printer flag was a constant
+instead of an input; two values the parser keeps between lines (what IT
+means, the last command matched) were in the scratch dict, which is never
+compared; the pacer counted whole scans per frame (2 instead of 2.56, so
+the idle WAIT came at 30 s instead of 23) and did not restart the count at
+each line. The game check passed through all of them except QUIT: they
+live in the pacer and in inputs the records do not vary.
+
+Not built: the time the original spends drawing a picture (Bag End takes
+338 frames, about 7 s; stage 4 shows it at once), the fixed mode. The
+endless message of F85 (timer 2's handler printing its own code) raises.
+
 ## Next steps
 
 1. Deviations: the fixed mode behind flags, with `re/deviations.md` and its
@@ -217,5 +282,9 @@ charged.
    files, since they hold game data), and the logic in C/C++ (SDL2 or a
    platform library) or JS, with the display, sound and controls
    reimplemented per platform.
-3. A second game through stage 4, to see which parts of the bridge are
-   generic enough to move into `tools/`.
+3. The bridge after two games: the oracle's lockstep driver and the
+   routine check's wrapping (decode around a call, inputs noted, a copy of
+   the state) are the same in both, and can move into `tools/`; the decoder,
+   the assets and the routine maps stay per game.
+4. The Hobbit: the picture drawing time, as `Show` events from stage 3's
+   T-state figures.

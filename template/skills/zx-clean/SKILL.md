@@ -21,7 +21,7 @@ that read like the rules, events for sound and time. It looks the same (the
 | `game/<pkg>/state.py` | the state: dataclasses of plain values; `Actions`, `Sound`, `Show` |
 | `game/<pkg>/assets.py` | loads and checks `game/assets/`: graphics as bytes, maps, texts |
 | `game/<pkg>/world.py` | the leaf helpers (what stage 3's library did, on positions) |
-| `game/<pkg>/flow.py` | `Game`: start, `step(actions)`, the flow between title, play and game over |
+| `game/<pkg>/flow.py` | `Game`: start, `step(actions)` (or `run()`, see Routines), the flow between title, play and game over |
 | `game/assets/` | the game's data as editable files, from the original's image (`python bridge/assets.py`); never committed |
 | `bridge/` | the only code that sees both stages: `decode.py` (stage 3 memory -> state), `assets.py`, `oracle.py` (the checks), `routines_<module>.py` (which stage 4 routine stands for which stage 3 routine) |
 
@@ -38,6 +38,10 @@ test and build code. Setup: `cp -R port/zxpyxel game/` (the library, as in
 - What the game keeps between steps, and nothing else: drop scratch memory (a
   working buffer a record is copied into, an AI's score table), dead
   variables and values only stage 3's check needed (`# check:` in stage 3).
+  A value the original keeps from one step to the next is state however
+  deep it sits (what IT refers to, the last command matched): a field and
+  a line in the decoder. A dict of scratch values that is not compared
+  holds only what lives within one step.
 - If the game's rules read the screen (collision by colour, figures that save
   what they cover), the screen is part of the state: a grid of cells, each an
   8x8 glyph and an attribute. That is the game's real world model; render
@@ -91,7 +95,16 @@ round-trip check: the game loads the files and must still match stage 3.
   which entry of the state.
 - A stage 3 `raise Goto(Target)` is a return value: the routine returns
   `'Target'` (a generator returns it, `x = yield from f(s)`); the step in
-  `flow.py` goes on there.
+  `flow.py` goes on there. A routine that can return a target returns the
+  target or None, never True/False as well: a caller's `if not ok` lets a
+  target through as success.
+- A game that waits inside a pass (a line editor, "press any key", a scroll
+  pause) is one generator, `Game().run()`, instead of `step(actions)`: it
+  yields requests the driver answers by `send` (a key, R, a byte a random
+  routine read, a saved state, whether a printer answers), waits, output,
+  and `Step()` at the top of the main loop, where the checks compare. Every
+  input the original reads is such a request, never a constant in the
+  code: the oracle answers from the record, the pacer from the host.
 
 ## Checks
 
@@ -107,7 +120,11 @@ time, and compares:
    `python bridge/oracle.py routine Name[,Name...] [--max=N] build/record/*.rec`;
    `routine all` checks every registered routine in one replay. A routine
    that works on stage 3 scratch memory (a working buffer) is checked through
-   its caller.
+   its caller. With stage 3's register interface the map is `(clean,
+   convert_in, convert_out)`: `convert_in(regs)` reads the stage 3 registers
+   at the call (an IY that points at a phrase, an HL that is a message),
+   `convert_out(regs)` the result. A handler no record reaches is checked
+   with hand-built cases: stage 3 on the loaded image against stage 4.
 2. **The game** (the stage's gate, `make game-test`): `python
    bridge/oracle.py game build/record/*.rec` runs `Game` in lockstep with
    stage 3: at every step boundary (a pass of the title loop or of the main
@@ -116,8 +133,13 @@ time, and compares:
    every 50 steps; the clock of the Shows is compared with the Z80's (keep it
    within a few per cent: fit the pass time); the routines no record ran are
    listed. Then `python bridge/oracle.py play`: random keys through the pacer
-   as a host runs it, with invariants (positions on the screen, counters in
-   range, no run of steps without time).
+   as a host runs it (a text game types commands from its vocabulary, SAVE
+   and LOAD among them), with invariants (positions on the screen, counters
+   in range, no run of steps without time). The records do not test the
+   pacer: it must answer every request, and each of its time constants (an
+   idle time-out, a pause) is measured on the Z80 (`zxrun.py --watch` the
+   counter, `--stop` where it runs out) and counted in T-states, not in
+   whole loop passes per frame.
 
 A mismatch names the fields (cells by col and row) with both values. Read
 the stage 3 routine and its asm header, not just the failing field. The
@@ -134,8 +156,11 @@ routines first), `assets.py`, `sounds.py`, `flow.py`, the bridge, and the
 contract; subagents port one stage 3 module each into
 `game/<pkg>/<module>.py` with their `bridge/routines_<module>.py`, the
 routine check passing on every record. The lead integrates and runs the
-game check. The contract, one line per routine other modules or the flow
-call:
+game check. Handlers that tables name register under their stage 3 names
+(`registry.handler('VerbTake')`), so slices run each other's handlers by
+name. With many slices, go in waves: the leaf slices (text, world) first,
+then the rest in parallel against their written interfaces. The contract,
+one line per routine other modules or the flow call:
 
 | Stage 3 | Stage 4 | Arguments | Generator | Returns | Events |
 | --- | --- | --- | --- | --- | --- |

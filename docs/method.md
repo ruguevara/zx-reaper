@@ -154,6 +154,7 @@ Before the section on bugs comes a separate "bug hunt" pass at the edges: for ev
 The design and its reasons are in [stage3.md](stage3.md); the way to work is the `zx-port` skill.
 
 - **The asm's shape survives.** Memory is the same 64 KB at the same addresses, a routine is a function named after its label, and registers are arguments and results. A variable is `v.Score`, with the width from its declaration in the asm (DEFB, DEFW, a table). A computed address is `mem[a]` (a byte) and `mem16[a]` (a word). All three are the same memory and wrap round as on the Z80, so a word cannot be written as a byte by mistake.
+- **Or the Z80's interface.** When routines pass values in registers and flags through long chains of callers (The Hobbit: 400 routines), the registers stay shared (`r.a`, `r.hl`, `r.cf`) and each routine reads and leaves what its instructions do: a signature per routine would be a second model of the code, checked by nothing.
 - **The CPU is not emulated.** Time is a T-state counter that the port keeps itself (`zx.spend`; `zxdiff.py` gives the figures). Waiting and blocking sound are `await`. A jump that drops the return address is `raise Goto(...)`.
 - **What was hard, now in the skill:** a routine's inputs read from its instructions rather than its header, flags in the test cases, how to split T-states between a routine and its callees, and a timing race the code does not show (an interrupt the Z80 takes between the ROM's `EI` and the game's `DI`), which only a recorded run could reproduce.
 
@@ -164,7 +165,8 @@ The decisions are in [stage4.md](stage4.md); the way to work is the `zx-clean` s
 - **Plain state, events for the hardware.** Positions are a column and a row; no addresses, registers or T-states. A routine reads as a rule; sound and the time the game holds are events (`Sound`, `Show`) that a pacer and a synthesiser turn into frames and audio. The look stays the Spectrum's: 32×24 cells, attributes, the ROM font through `zxpyxel.display`.
 - **Only a bridge sees both stages.** The decoder, the oracle and the extraction of the game's data live in `bridge/`; the stage 4 game never imports the port or an address.
 - **The data is editable**: graphics as PNG sheets checked as they load (size, Spectrum colours, one ink per cell), maps as text, texts and the start state as JSON. Editing them is how a fork changes the game.
-- **The model is where the work is.** On Hungry Horace the rules read the screen (collisions go by the colour of a cell, a guard keeps the cells under it), so the grid of cells with glyph and attribute is part of the state.
+- **The model is where the work is.** On Hungry Horace the rules read the screen (collisions go by the colour of a cell, a guard keeps the cells under it), so the grid of cells with glyph and attribute is part of the state. On The Hobbit the world is records by id, messages and handlers by name, and the screen (drawn on incrementally, scrolled) is state too.
+- **A game that waits inside a pass is one generator.** The Hobbit waits for keys in its line editor, its scroll pause and its prompts, so the whole game is a generator that yields requests (a key, R, a saved state, whether a printer answers), answered by the oracle from the record and by the pacer from the host, and a `Step` at the top of the main loop.
 
 ### Stage 5 and going back
 
@@ -190,7 +192,7 @@ Going back to the Spectrum works the same way in reverse: stage 3 keeps the memo
 - Comment only where the intent cannot be seen from the code.
 - Check the exit code of `make`, not its output.
 
-An estimate for a 40 KB game (not a measurement): 600–1200 entries; annotating an entry takes 3–8 thousand input tokens, mostly from the cache, and 200–500 output tokens. That is a few million input tokens for the whole game, mostly on the cheap model. A port is cheaper: on Hungry Horace each port stage took 200–450 thousand subagent tokens.
+An estimate for a 40 KB game (not a measurement): 600–1200 entries; annotating an entry takes 3–8 thousand input tokens, mostly from the cache, and 200–500 output tokens. That is a few million input tokens for the whole game, mostly on the cheap model. A port is cheaper: on Hungry Horace each port stage took 200–450 thousand subagent tokens. Measured on The Hobbit (48 KB, 585 entries): about 4.6 million subagent tokens for stages 1 and 2 with the article, 1.5 million for stage 3, 1.9 million for stage 4.
 
 ## Human time
 
@@ -232,6 +234,12 @@ In detail: [Hungry Horace: a run of the method and a comparison with SkoolKit](h
 
 Jet Set Willy (1984) went through stages 1 and 2 and was compared with the SkoolKit reference disassembly (`examples/jet-set-willy/re/comparison.md`).
 
+### Blind run: The Hobbit
+
+The Hobbit (Melbourne House, 1982), a text adventure of another genre and engine, went through stages 1 to 4 without the existing disassemblies and write-ups, and without help from the author beyond the stage 4 interview. Stages 1 and 2: 585 entries annotated, relocatable, in about 2.3 hours; the article (37 images) in parallel with stage 3; 85 findings by the end. Stage 3: the register interface, ~9,300 lines by eight subagents in under an hour, identical to the Z80 at every main-loop pass of six records (one plays the game to the end). Stage 4: one generator for the whole game, ~6,800 lines by six subagents, identical to stage 3 at every pass with the screen; integration found its bugs in the pacer and in inputs the records do not vary, which free play and a measurement on the Z80 caught. The comparison with the existing work is still to do.
+
+In detail: [The Hobbit: a blind run](the-hobbit-run.md).
+
 ### Candidates for further tests
 
 | Game | Why | Rights |
@@ -249,7 +257,7 @@ Jet Set Willy (1984) went through stages 1 and 2 and was compared with the Skool
 - The runner is 48K only and has no memory contention: the hashes check logic, not cycle-exact effects. 128K (`@bank`, `sna2skool -p`) and timings go through ZEsarUX/MAME.
 - Only standard headed blocks are split automatically. Protected loaders are manual work for the agent following `zx-init`; the hardest part is generating a tape with encryption, which needs `scripts/encrypt.py`.
 - The shift test does not move code that is copied to a fixed address at start-up: such code is kept in place with `DISP`, or excluded and noted in `re/notes.md`.
-- The stage 3 replay sees only the ROM's IM1 interrupts; a game with its own IM2 handler needs its checkpoint at a HALT. Stages 3 and 4 have been done on one game so far, and the stage 4 bridge is written per game.
+- The stage 3 replay sees only the ROM's IM1 interrupts; a game with its own IM2 handler needs its checkpoint at a HALT. Stages 3 and 4 have been done on two games, and the stage 4 bridge is still written per game.
 - Copyright: do not put `original/`, built tapes or anything made from them (RAM images, extracted assets, records, web builds) into the project repository unless the game is free.
 
 ## Links

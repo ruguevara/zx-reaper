@@ -1,9 +1,10 @@
 # Stage 3: a Python port on a Spectrum stand-in library
 
 Status: built. The library's core and its Pyxel host exist (`zxpyxel/`), and
-Hungry Horace is ported whole and passes the stage's check
-(`examples/hungry-horace/port/`; results under "Hungry Horace"). How to
-port: the `zx-port` skill; this note keeps the reasons.
+two games are ported whole and pass the stage's check: Hungry Horace
+(`examples/hungry-horace/port/`) and The Hobbit (`examples/the-hobbit/port/`,
+with the register interface); results under their names. How to port: the
+`zx-port` skill; this note keeps the reasons.
 
 Stage 3 turns the annotated asm into Python that runs the same game: the same
 screens, the same behaviour under the same input, and code that follows the
@@ -205,7 +206,10 @@ One Python module per asm module (`src/movement.asm` → `port/movement.py`),
 one function per routine, named as the label.
 
 - Registers become arguments and return values; a flag the caller branches on
-  becomes a returned bool; alternate registers become extra arguments.
+  becomes a returned bool; alternate registers become extra arguments. Or,
+  for a game whose routines pass values in registers and flags that many
+  callers read, the register interface: the registers are shared (`r.a`,
+  `r.hl`, `r.cf`), as on the Z80 (see The Hobbit).
 - Variables stay in memory: `v.Lives`, `v.PlayerPos`, at the addresses
   and widths of the asm. A self-modified operand is `mem[Label + 1]`,
   written where the asm writes it.
@@ -318,6 +322,50 @@ E after the caller's EXX), flags and unused registers in the test cases,
 how to split T-states between a routine and its callees (`zxdiff.py
 --tstates`), whole-screen mismatches flooding the output (only the differing
 bytes are printed now), and a word written as a byte (`mem16` and `v`).
+
+## The Hobbit
+
+A text adventure of 400 routines (17 modules, 585 annotated entries), and a
+different test of the stage: no frames, no sprites, the time spent waiting
+for keys, a parser, a message interpreter, NPC scripts, pictures drawn from
+command streams.
+
+**The register interface.** Hungry Horace's routines take a few values and
+return one; The Hobbit's pass values in registers and flags through chains
+of calls (a phrase pointer in IY across a dozen routines, a carry that three
+callers test, handlers that leave their callers by popping return
+addresses). A signature per routine would have been a second model of the
+code, written by hand and checked by nothing. So the port keeps the Z80's
+interface: `port/regs.py` holds the registers and flags (`r.a`, `r.hl`,
+`r.iy`, `r.zf`, `r.cf`, `r.cp(n)`, `r.exx()`), each routine reads and leaves
+what its instructions do, indirect calls (`JP (HL)`, the tables of verb
+handlers, arrivals, timers, script routines) go through `calls.call_at`, and
+the message arguments pushed under return addresses are a list. The lead
+wrote the contract as a table of all 400 routines (module, address, async,
+entry points inside others) instead of signatures: 240 are `async`, the
+closure of those that wait for a key, the scroll pause, the tape or the
+printer.
+
+**Inputs that are not keys.** The game seeds its random numbers from R
+(`zx.r()`: the record holds what the Z80 read), and its random routine mixes
+in a byte from a pointer that walks the whole 64K, the stack and the code
+included, which a port cannot reproduce: `zx.take(label, a)` gives the
+value the Z80 had at that label (`PORT_TAKE` in `re/layout.mk`). SAVE and
+LOAD go through ROM stand-ins (`rom.SA_BYTES`, `rom.LD_BYTES`).
+
+| Check | Result |
+| --- | --- |
+| whole game, `make port-test` | every main-loop pass identical to the Z80 in all game memory on six records: die 8, save 1, load 1, verbs 72, endgame 206 (the game played to the end), journey 248 (230,000 frames of play) |
+| clock | the port runs 4.5-7.4% fast against the Z80; the game's waits are key scans, so only the idle WAIT's time depends on it |
+| desktop and web | `python port/play.py` and `make port-html` play it |
+
+Ported by the lead (`main.py`, `regs.py`, `calls.py`, the contract) and
+eight subagents (Sonnet) in parallel, one or two modules each, ~9,300 lines,
+1.5 million subagent tokens, 6-27 minutes each. Stage 4 found two gaps
+later, in code no record reaches: the boat's bank test was inverted in a
+handler (stage 4's hand-built cases against stage 3 showed it), and a stale
+IY in the original (F85) can make timer 2's handler the middle of a routine,
+which needed an entry point there (`SpiderEyesFromHL`).
 
 ## Next steps
 

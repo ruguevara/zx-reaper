@@ -43,12 +43,15 @@ of three recorded runs; stage 4 identical to stage 3 at every step, in
 faithful mode (the original's quirks kept, no fixed mode yet); the sound
 judged by ear. Jet Set Willy (1984) has been through stages 1 and 2.
 
-The goal: a game of a different genre and engine, The Hobbit (Melbourne
-House, 1982), runs as a stage 3 port on the desktop and in the browser with
-little help from the author, and goes through stage 4 with the agent asking
-the author how to port graphics, input and sound. The run is blind: the
-existing disassemblies and write-ups of The Hobbit are compared with the
-result afterwards, as the SkoolKit reference was for Hungry Horace.
+The Hobbit (Melbourne House, 1982), a text adventure with a parser,
+characters that act on their own and vector pictures, has been through
+stages 1 to 4 blind, with no help from the author beyond the stage 4
+interview on graphics, input and sound: the stage 3 port is identical to
+the Z80 at every main-loop pass of six recorded runs (one plays the game to
+the end), the stage 4 game identical to stage 3 at every pass, the screen
+included; both play on the desktop and in the browser. Still to do: the
+comparison with the existing disassemblies and write-ups of The Hobbit, as
+the SkoolKit reference was compared for Hungry Horace.
 
 Scope: the 48K Spectrum. AY music and effects (128K) come later, through
 [pyayay](https://github.com/ruguevara/pyayay) (Ayumi). Out of scope: stage 5
@@ -61,9 +64,11 @@ snapshot instead of the tape), games that need contention-exact timing.
 | --- | --- |
 | [docs/method.md](docs/method.md) | the method and its reasons: decisions, phases, evidence, the stages, what has been tested |
 | [docs/hungry-horace-run.md](docs/hungry-horace-run.md) | the reference run: Hungry Horace through every stage, time and tokens, the comparison with SkoolKit |
+| [docs/the-hobbit-run.md](docs/the-hobbit-run.md) | the blind run: The Hobbit through stages 1 to 4, time and tokens |
 | [docs/stage3.md](docs/stage3.md) | stage 3: the library, the port's shape, the replay check, results |
 | [docs/stage4.md](docs/stage4.md) | stage 4: the clean state, the bridge to stage 3, the checks, results |
 | [examples/hungry-horace/docs/](examples/hungry-horace/docs/README.md) | the article on how Hungry Horace works, with its gallery |
+| [examples/the-hobbit/docs/](examples/the-hobbit/docs/README.md) | the article on how The Hobbit works, with its gallery |
 
 The method and the run report are also in Russian (`docs/*.ru.md`).
 

@@ -89,6 +89,19 @@ and its code region (a system variable it reads, such as FRAMES:
   flag the caller branches on becomes a returned bool. Return only the
   outputs some caller uses (check the callers), and say what is returned in
   the docstring.
+- Or the register interface, decided before the contract: when routines
+  pass values in registers and flags through long chains of callers (a
+  pointer in IY across a dozen routines, a carry three callers test,
+  handlers that pop their callers' return addresses), signatures would be a
+  second model of the code that nothing checks. Then the registers are
+  shared (`port/regs.py`: `r.a`, `r.hl`, `r.iy`, `r.zf`, `r.cf`, `r.cp(n)`,
+  `r.exx()`), each routine reads and leaves what its instructions do,
+  indirect calls (`JP (HL)`, tables of handlers) go through
+  `calls.call_at(addr)`, and values pushed under return addresses (message
+  arguments) go on a list. The contract lists every routine (module,
+  address, async, entry points inside others) instead of signatures. Model:
+  zx-reaper's `examples/the-hobbit/port/` (`regs.py`, `calls.py`,
+  `CONTRACT.md`).
 - Flags: a carry chain (`RLA`, `ADC`, `SBC` in a row) is one integer of 9
   or 17 bits, with a comment naming the instructions. A flag that leaks from
   one call into the next becomes an explicit argument, and the comment says
@@ -124,8 +137,12 @@ and its code region (a system variable it reads, such as FRAMES:
   helper (`print_text`), not a routine.
 - Hardware only through `zx`: `zx.inp(port)` with the full 16-bit port
   address the asm uses (`A << 8 | $FE` for `IN A,($FE)`), `zx.out(port, v)`,
-  `zx.tone(...)` for a beeper loop, `zxpyxel.rom` for ROM calls, `zx.di()`,
-  `zx.ei()`.
+  `zx.tone(...)` for a beeper loop, `zxpyxel.rom` for ROM calls (the tape:
+  `rom.SA_BYTES`, `rom.LD_BYTES`), `zx.di()`, `zx.ei()`, `zx.r()` for
+  `LD A,R` (the record holds what the Z80 read). A value the port cannot
+  compute, such as a random routine that reads the code or the stack:
+  `zx.take(Label, a)` at a label where A holds it, the label in `PORT_TAKE`
+  (`re/layout.mk`); the record holds A there.
 - Time: no CPU is emulated, so the port charges it. Delay and sound loops
   exactly (`zx.spend(passes * 26)`, `djnz_t(b)`, `zx.tone`); other routines
   with `zx.spend(T)`, T from the `T-states` that `zxdiff.py` prints for the
