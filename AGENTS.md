@@ -16,7 +16,10 @@ and `template/skills/`, which get copied into each project.
 - `examples/hungry-horace/` is a finished project with its own copies of the
   tools and skills, frozen at the time of the run. Update it only on purpose
   (copy the changed tools in, then `make`, `make test`, `make diff` there with
-  the tape in `original/`).
+  the tape in `original/`). `examples/the-hobbit/` is the record of a
+  one-shot blind run: do not correct its `re/`, `src/`, `port/` or `game/`
+  after the fact; what the comparison found stays listed in
+  `re/comparison.md`.
 - Never commit game tapes, snapshots or RAM images made from them (`re/*.z80`,
   `port/image.bin`), data extracted from them (`game/assets/`, the
   Z80 records and web pages in `build/`) or split tape blocks (`re/tape/`).

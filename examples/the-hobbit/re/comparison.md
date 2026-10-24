@@ -2,8 +2,9 @@
 
 The run (stages 1 to 4, `docs/the-hobbit-run.md` in ZX-REAPER) was blind: no
 disassembly or write-up of the game was read. This report compares it with
-those works afterwards (2026-10-24). Nothing in our sources has been changed
-by the comparison yet; the corrections it calls for are listed at the end.
+those works afterwards (2026-10-24). The example is kept as the one run left
+it, a record of what the method achieves in one shot: the errors the
+comparison found are listed at the end, not corrected.
 
 The details are in three reports, each with the runs that settled its
 differences: [names and meaning](comparison/names.md), [data formats and
@@ -188,9 +189,9 @@ of registers.
    recorded on the Z80 and replayed, as E's fuzzing compares with the
    original.
 
-## Corrections to make
+## The errors found
 
-Not applied yet:
+Listed, not corrected (the example stays as the run left it):
 
 - The weight and size names: `SumHeldWeight`/`SumHeldBulk`, `re/notes.md`,
   F18, F53, F67, the article (02-data, 05-world), and the fields of stages 3
