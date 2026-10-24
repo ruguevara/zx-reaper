@@ -24,6 +24,7 @@ states (`git commit -m "re: <what>"`). Never edit `original/`.
 | `re/notes.md` | memory map, loader notes |
 | `re/questions.md` | what the work must answer, with status (`tools/zxq.py question`) |
 | `re/findings.md` | claims with status observed / inferred / unknown / refuted and evidence (`tools/zxq.py finding`) |
+| `re/pokes.md`, `re/pokes.pok` | POKEs and cheats with how each was checked; the .pok in the World of Spectrum format (skill `zx-poke`) |
 | `tests/models/*.py` | executable models of routines, checked against the Z80 code (`make diff`) |
 | `src/build.asm` | assembles the game, `SAVEBIN`s each tape block |
 | `src/*.bas` | BASIC loaders, lossless text (`tools/zxbasic.py`) |
@@ -55,6 +56,7 @@ tools/zxq.py const [NAME VALUE TEXT] numeric constants (src/constants.asm), used
 tools/zxq.py equs [--uses]           address names (@equ) and every operand they replace
 tools/zxrun.py re/orig.z80 --input tests/inputs/x.txt --shot 200:/tmp/a.png --map re/maps/x.map
 tools/zxrun.py re/orig.z80 --frames 300 --watch $5C00-$5C0F --watch-from 250   # who writes here
+tools/zxpoke.py profile|search|writers|check|keys ...   POKEs and cheats (skill zx-poke)
 ```
 
 ## Token discipline
@@ -82,6 +84,9 @@ Phases (details in the skills in `skills/`):
    Z80 code, `make port-test`.
 9. `zx-clean` — stage 4: the port as clean game logic in `game/`, checked
    against stage 3, `make game-test`.
+- `zx-poke` — POKEs (lives, time, start room, invulnerability) and the
+  developers' cheats, each checked in the simulator: `re/pokes.md`,
+  `re/pokes.pok`, `make pokes`. Any time after the main variables are named.
 
 Orchestration: the lead agent plans, classifies, relocates and reviews. Bulk
 annotation goes to subagents (cheaper model) in batches of 5–15 related entries

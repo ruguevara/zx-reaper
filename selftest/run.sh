@@ -48,6 +48,21 @@ python3 tools/zxq.py finding add observed "cellad returns ATTRS + 32*PY + PX" "z
 python3 tools/zxq.py question set Q6 answered "F1" > /dev/null
 python3 tools/zxq.py audit | head -2
 python3 tools/zxdoctor.py > /dev/null
+echo "== POKE search: the frame timer (zxpoke)"
+python3 tools/zxpoke.py search re/orig.z80 --input tests/inputs/wander.txt --referenced \
+    --at 200=any --at 201=dec --at 202=dec --at 250=less > poke.log
+grep -q '^named by the code: 1 candidates' poke.log || { cat poke.log; exit 1; }
+timer=$(sed -n 's/^\(\$[0-9A-F]*\) .*/\1/p' poke.log | tr -d '$')
+python3 tools/zxpoke.py writers re/orig.z80 --input tests/inputs/wander.txt --from 200 --frames 203 0x$timer > poke.log
+poke=$(sed -n 's/.*try POKE \([0-9]*,[0-9]*\) *(DEC A -> NOP.*/\1/p' poke.log)
+test -n "$poke" || { cat poke.log; exit 1; }
+python3 tools/zxpoke.py check re/orig.z80 --input tests/inputs/wander.txt --poke $poke --addr 0x$timer > poke.log
+grep -q 'patched  changes    0' poke.log || { cat poke.log; exit 1; }
+printf 'NFrozen timer\nZ  8 %s %s\nY\n' "${poke%,*}" "${poke#*,} 61" > re/pokes.pok
+make -s pokes | tail -1
+python3 tools/zxpoke.py pok re/pokes.pok --apply re/orig.z80 build/poked.z80 > /dev/null
+python3 tools/zxpoke.py trace build/poked.z80 --input tests/inputs/wander.txt 0x$timer | awk 'END { if (NR != 2) exit 1 }'
+python3 tools/zxpoke.py keys | grep -q 'keys Q W E R T' && echo "timer \$$timer frozen by POKE $poke"
 echo "== typed input and screen text"
 python3 - "$kit" <<'PY'
 import sys

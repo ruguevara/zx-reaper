@@ -1,0 +1,33 @@
+NInfinite lives
+Z  8 35899   0  53
+NStart with N lives (7)
+Z  8 34785 256   7
+NInfinite time
+Z  8 35408  24  32
+NStart in room N (33, The Bathroom)
+Z  8 34795 256  33
+NSurvive falls
+M  8 36579   0 210
+M  8 36580   0 183
+Z  8 36581   0 144
+NSurvive guardians
+M  8 37425   0 194
+M  8 37426   0 183
+Z  8 37427   0 144
+NSurvive arrows
+M  8 37527   0 194
+M  8 37528   0 183
+Z  8 37529   0 144
+NSurvive nasties
+M  8 38451   0 202
+M  8 38452   0 182
+Z  8 38453   0 144
+NMaria harmless (Willy walks past her)
+M  8 38246   0 194
+M  8 38247   0 183
+Z  8 38248   0 144
+NWRITETYPER cheat on from the start
+Z  8 34275  10   0
+NAny colour code is accepted
+Z  8 34483 195 202
+Y

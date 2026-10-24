@@ -31,7 +31,7 @@ else
   GAME_ASM := build/game.asm
 endif
 
-.PHONY: all verify test expected coverage status labels html shift-test export clean help restore diff audit doctor
+.PHONY: all verify test expected coverage status labels html shift-test export clean help restore diff audit pokes doctor
 all: verify
 
 # The tape and everything copied from it (re/tape/, re/*.z80) stay out of git;
@@ -57,6 +57,7 @@ help:
 	@echo "make restore    recreate re/tape, re/orig.z80, re/image.z80 from original/"
 	@echo "make diff       differential tests: Z80 routines against tests/models/*.py"
 	@echo "make audit      open questions (re/questions.md) and unverified findings (re/findings.md)"
+	@echo "make pokes      check the original bytes of re/pokes.pok against re/orig.z80 (skill zx-poke)"
 	@echo "make doctor     check tools and what this project is missing"
 	@echo "sources: $(MASTER)"
 
@@ -125,6 +126,9 @@ export: build/game.asm
 
 diff: build/blocks.stamp
 	@$(T)/zxdiff.py
+
+pokes: re/orig.z80
+	$(T)/zxpoke.py pok re/pokes.pok --check re/orig.z80
 
 audit:
 	@$(T)/zxq.py audit; true

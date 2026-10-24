@@ -40,7 +40,7 @@ else
 endif
 
 .DELETE_ON_ERROR:
-.PHONY: all verify test expected coverage status labels html shift-test export clean help restore diff audit doctor port-test port-html game-test game-html
+.PHONY: all verify test expected coverage status labels html shift-test export clean help restore diff audit pokes doctor port-test port-html game-test game-html
 all: verify
 
 # The tape and everything copied from it (re/tape/, re/*.z80) stay out of git;
@@ -70,6 +70,7 @@ help:
 	@echo "make game-test  stage 4: the game in game/ against stage 3, step by step (skill zx-clean)"
 	@echo "make game-html  the stage 4 game as one web page, build/web/game.html"
 	@echo "make audit      open questions (re/questions.md) and unverified findings (re/findings.md)"
+	@echo "make pokes      check the original bytes of re/pokes.pok against re/orig.z80 (skill zx-poke)"
 	@echo "make doctor     check tools and what this project is missing"
 	@echo "sources: $(MASTER)"
 
@@ -194,6 +195,9 @@ game-test: game/assets/state.json $(RECORDS)
 
 game-html: game/assets/state.json
 	$(call WEB,game)
+
+pokes: re/orig.z80
+	$(T)/zxpoke.py pok re/pokes.pok --check re/orig.z80
 
 audit:
 	@$(T)/zxq.py audit; true
