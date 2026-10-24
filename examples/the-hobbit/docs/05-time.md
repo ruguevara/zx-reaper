@@ -56,7 +56,7 @@ decremented (F75).
 | 5 | 4 | [LA67E_6](../src/handlers.asm#L782): the magic door examined by an invisible player ("The magic door warns of elves approaching.") | [LA9E5_7](../src/handlers.asm#L1274) (1) | [LA9E5_9](../src/handlers.asm#L1289) | "The magic door opens." and "An elf sweeps past.", then "The magic door closes." |
 | 6 | 2-10 | [LA377_0](../src/handlers.asm#L271): the ring put on | | [LA9E5_10](../src/handlers.asm#L1294) | the ring stops working: the wearer is visible again |
 | 7 | 5 | [LA9E5_11](../src/handlers.asm#L1304): the wine drunk | | [LA9E5_12](../src/handlers.asm#L1313) | the lisp ([LispFlag](../src/world.asm#L43)) ends |
-| 8 | 4 | [ArriveForest](../src/world.asm#L2260) | [LA9E5_14](../src/handlers.asm#L1324) (3) | [LA9E5_16](../src/handlers.asm#L1341) | the forest off the road: "pale bulbous eyes"; leaving it, or staying three more turns, is death (observed, F83) |
+| 8 | 4 | [ArriveForest](../src/world.asm#L2260) | [LA9E5_14](../src/handlers.asm#L1324) (3) | [LA9E5_16](../src/handlers.asm#L1345) | the forest off the road: "pale bulbous eyes"; leaving it, or staying three more turns, is death (observed, F83) |
 | 9 | 5 (3 the first time) | [ArriveCellar](../src/world.asm#L2242); then itself | [LA9E5_5](../src/handlers.asm#L1258) (1) | [LA9E5_3](../src/handlers.asm#L1244) | the side door of the Lonely Mountain: "There is a loud crack and a hole appears..." on one turn, "The hole vanishes." on the next, every 5 turns while the door is not open |
 
 Other events that run by turns without a timer: the trolls' dawn (their
