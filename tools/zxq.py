@@ -797,12 +797,42 @@ def cmd_addrs(skool, lo, hi):
     return 1 if out else 0
 
 
+SKOOL_LINE = re.compile(r'^[ *bcgistuw]\$([0-9A-F]{4}) +([^;]*?)\s*(;.*)?$')
+
+
+def address_slips(text):
+    """Lines of an entry whose address is not the previous instruction's end.
+    skool2asm ignores addresses, so a typo in one (from a hand edit) builds an
+    IDENTICAL tape and leaves wrong addresses in the skool and its HTML."""
+    from skoolkit.z80 import Assembler
+    size, out, prev = Assembler().get_size, [], None
+    for n, line in enumerate(text.split('\n'), 1):
+        m = SKOOL_LINE.match(line)
+        if not m:
+            if not line.strip():
+                prev = None                     # the end of an entry
+            continue
+        addr = int(m.group(1), 16)
+        if prev:
+            a, op, k = prev
+            s = size(op, a)
+            if s and a + s != addr:
+                out.append('  line %d: $%04X %s ends at $%04X, the next line says $%04X'
+                           % (k, a, op, a + s, addr))
+        prev = (addr, m.group(2), n)
+    return out
+
+
 def cmd_asm(skool):
     """skool2asm for sjasmplus: ORG lines below $SHIFT_END get +SHIFT so the
     shift test can move the code; skool2asm writes IXl/IXh/IYl/IYh, which
     sjasmplus rejects in mixed case (unless --syntax=i), so they become
     IXL/IXH/IYL/IYH."""
     import subprocess
+    bad = address_slips(open(skool).read())
+    if bad:
+        sys.exit('%s: an instruction is not where the one before it ends (the asm would '
+                 'still build; fix the address):\n%s' % (skool, '\n'.join(bad[:10])))
     r = subprocess.run(['skool2asm.py', '-q', '-w', '-H', '-c', skool], capture_output=True, text=True)
     if r.returncode:
         sys.exit(r.stderr)

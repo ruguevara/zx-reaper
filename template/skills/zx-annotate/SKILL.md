@@ -70,6 +70,10 @@ c$9100 LD B,$10        ; 16 pixel rows
   after the comparison ("too heavy to lift" makes it the weight, "too full"
   the size). A name taken from how the field is summed or where it sits
   can be the wrong way round, and no check catches a name.
+- A title that says what sets a routine off (a word, a key, an event)
+  needs a run that reaches it and one that does not: compare the two code
+  maps. A guess from a table's layout named the quote mark's handler "the
+  end of the typed words".
 - Every target of a handler table (verb handlers, object and character
   handlers, timers, script routines) is an entry of its own with a title,
   even when the handlers sit back to back: an entry titled "Command

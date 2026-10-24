@@ -118,6 +118,9 @@ and its code region (a system variable it reads, such as FRAMES:
   for a self-modified operand. Data stays in memory: never copy a table into
   Python. Register arithmetic is plain ints: mask it (`& 0xFF`) where the
   register would wrap.
+- A quirk of the original the port keeps (a stale register, a test the
+  wrong way round) gets a comment and a finding in `re/findings.md`: a
+  quirk only in a comment is lost to the article and the bug list.
 - Write exactly the bytes the asm writes, including scratch variables and
   values that look dead: the check compares all of the code region. Stage 3
   does not tidy up: mark each write that is there only for the check (a dead
@@ -142,7 +145,11 @@ and its code region (a system variable it reads, such as FRAMES:
   `LD A,R` (the record holds what the Z80 read). A value the port cannot
   compute, such as a random routine that reads the code or the stack:
   `zx.take(Label, a)` at a label where A holds it, the label in `PORT_TAKE`
-  (`re/layout.mk`); the record holds A there.
+  (`re/layout.mk`); the record holds A there. The port is then identical to
+  the original in replay only: played alone, its random numbers differ. To
+  play the original's sequence alone the port must keep the bytes the
+  routine reads (the return addresses and registers on the stack); say in
+  the contract which one the port does.
 - Time: no CPU is emulated, so the port charges it. Delay and sound loops
   exactly (`zx.spend(passes * 26)`, `djnz_t(b)`, `zx.tone`); other routines
   with `zx.spend(T)`, T from the `T-states` that `zxdiff.py` prints for the
@@ -207,7 +214,12 @@ and its code region (a system variable it reads, such as FRAMES:
    the port changes it only in `zx.handler`.
 
    A pass proves only what the inputs reach. `make port-test` lists the port
-   routines no record ran; add an input that reaches them: search seeds with
+   routines no record ran, and the list is part of the gate: each one gets
+   an input that reaches it or, where no input can (a handler behind a long
+   puzzle), cases at the call: the routine on the loaded image with the
+   state poked, the port against the Z80 (`zxdiff.py`, or `zxrun.py --call`
+   beside the port). A handler no record reached had a bank test inverted
+   that only such cases found. To add an input: search seeds with
    `tools/zxrun.py re/orig.z80 --fuzz SEED:HOLD:KEYS --frames N --map
    /tmp/f.map` for the routine's address, save the one that reaches it with
    `--save-input tests/inputs/NAME.txt`, then `make expected`.

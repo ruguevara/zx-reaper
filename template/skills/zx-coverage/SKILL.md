@@ -23,7 +23,14 @@ routine executed at least once; 100% instruction coverage is not needed.
 3. `make coverage` adds maps from all scripts and RZX files.
 4. Random play reaches odd paths cheaply:
    `tools/zxrun.py re/orig.z80 --frames 20000 --fuzz 2:3:O,P,Q,A,M,SPACE --map re/maps/fuzz2.map`
-   (use the game's real keys; try several seeds).
+   (use the game's real keys; try several seeds). Random keys get nowhere in
+   a game with typed commands: once its dictionary is decoded, write a
+   script that generates lines from it (each verb with the objects of the
+   place, orders to each character, the special words, refused lines
+   followed by the repeat key, junk after ALL and EXCEPT, very long lines),
+   run it over many seeds and keep the scripts that grow the map. Press
+   every key of the key tables once as the first key of a line, and once
+   in the middle.
 5. Later levels and endings need real play. Ask the human for an RZX
    (Fuse: Recording → Record, play 10 minutes) or take one from the RZX Archive;
    put it in `re/rzx/` and run `make coverage`.

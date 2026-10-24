@@ -39,8 +39,9 @@ test and build code. Setup: `cp -R port/zxpyxel game/` (the library, as in
   working buffer a record is copied into, an AI's score table), dead
   variables and values only stage 3's check needed (`# check:` in stage 3).
   A value the original keeps from one step to the next is state however
-  deep it sits (what IT refers to, the last command matched): a field and
-  a line in the decoder. A dict of scratch values that is not compared
+  deep it sits (what IT refers to, the last command matched, the typed
+  line's buffer): a field and a line in the decoder, not an attribute of
+  `Game`. A dict of scratch values that is not compared
   holds only what lives within one step.
 - If the game's rules read the screen (collision by colour, figures that save
   what they cover), the screen is part of the state: a grid of cells, each an
@@ -79,7 +80,8 @@ round-trip check: the game loads the files and must still match stage 3.
 - Arguments are meaningful values (`show_score(s, value)`), never registers;
   `s` is the state, `a` the Actions where the routine reads input.
 - Keep every quirk of the original (findings, stage 3 comments): stage 4 is
-  faithful first. A fix comes later as a deviation behind a flag, with its own
+  faithful first. A quirk a slice finds that is not a finding yet goes into
+  `re/findings.md` (the lead adds it from the slice's report). A fix comes later as a deviation behind a flag, with its own
   golden runs (docs/stage4.md).
 - Sound and time are events. A routine that makes a sound or holds the game
   is a generator: `yield Sound('chirp')` where the original starts the effect
@@ -87,7 +89,9 @@ round-trip check: the game loads the files and must still match stage 3.
   Show(seconds)` where stage 3 awaited `zx.sync()` (the state as it is now is
   shown that long). Callers `yield from` it. Seconds: the effect's length
   from `sounds.py`, or a closed form of stage 3's loop; not tested, judged
-  by eye. Each effect's name and `data` (an order, random lengths) are part
+  by eye. Time the original spends building a screen (a picture drawn line
+  by line) is Shows too, measured on the Z80 (`zxrun.py --stop` at the
+  start and the end), or a deviation the stage note names. Each effect's name and `data` (an order, random lengths) are part
   of the contract: `sounds.py` turns them into speaker edges.
 - Loops over figures run in stage 3's order (LoadGuardRecord(b) visits b = 4
   down to 1, or up): figures draw over each other and save what they cover,
@@ -156,7 +160,10 @@ routines first), `assets.py`, `sounds.py`, `flow.py`, the bridge, and the
 contract; subagents port one stage 3 module each into
 `game/<pkg>/<module>.py` with their `bridge/routines_<module>.py`, the
 routine check passing on every record. The lead integrates and runs the
-game check. Handlers that tables name register under their stage 3 names
+game check. The lead writes the pacer and `oracle.py play` with the flow,
+before the slices, and runs free play at every integration: what the pacer
+answers is not in any record, so its faults show only there. Handlers that
+tables name register under their stage 3 names
 (`registry.handler('VerbTake')`), so slices run each other's handlers by
 name. With many slices, go in waves: the leaf slices (text, world) first,
 then the rest in parallel against their written interfaces. The contract,

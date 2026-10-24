@@ -90,7 +90,10 @@ the new labels and one-line titles, and proposes splits where a second routine
 starts inside an entry. The lead applies splits with `zxq.py cut`, runs `make`,
 commits, and repeats. In a port the lead writes the control flow and a contract
 (signatures, events, what other modules call); subagents port one module each
-and pass its check before the lead puts them together.
+and pass its check before the lead puts them together. Size a subagent's task
+to finish well within an hour (split a module of over ~1,500 lines). A
+subagent that goes quiet: read its last step and resume it with a message;
+do not wait for the human, and do not start a duplicate.
 
 ## Conventions
 

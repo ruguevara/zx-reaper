@@ -57,6 +57,28 @@ After the run, the result was compared with jonsole's complete SkoolKit disassem
 - **Bugs.** Of 50 items the references name that hold in 1.2, the run found 30, partly 3, missed 17: sequences no script typed, the crashes fuzzing finds, and things read but not recognised (FILL never works; "You are in in a clearing" was on a screen of our own run). 14 of our findings are in no reference.
 - **Ports.** The C port made the same choice for its faithful edition, the Z80's register interface, and goes further: it reproduces the stack bytes the random generator reads, so it matches the original without a record; ours is identical in replay. Its clean edition fixes the bugs behind a switch; ours is faithful and moves the data into editable files.
 
+## What the run got wrong, and what changed
+
+The example stays as the run left it; the harness learns instead.
+
+| Stage | Slip | Why it got through | Changed |
+| --- | --- | --- | --- |
+| 1 | coverage stopped at 85% with hand-written scripts | no lines were generated from the game's vocabulary; one key was never pressed | `zx-coverage`: generated command lines over many seeds, every key once |
+| 2 | two record fields named the wrong way round (weight, size) | named from how they are summed; no check reads a name | `zx-annotate`: name a field from the message its failed test prints |
+| 2 | about 60 handlers left in 24 generic entries | handler-table targets merged into blocks | `zx-annotate`: every handler-table target is an entry |
+| 2 | a routine's trigger guessed from a table's layout | no run with and without the input | `zx-annotate`: a trigger claim needs both runs |
+| 2 | a wrong address on one skool line | the build ignores skool addresses: IDENTICAL anyway | `zxq.py asm` checks every address against the instruction before it |
+| 2 | article claims beyond their evidence (an unused control code, free word order, a trap with no escape) | written from some cases | `zx-document`: "never", "unused", "any" need every case |
+| 2 | unknowns left in notes and comments after findings answered them | no closing pass | `zx-document`: change every place that states an answered unknown |
+| 2 | 17 of 50 known bugs missed | no command sequences, no check of patterns against handlers, screens of own runs not read | `zx-document`: bug hunt over sequences, patterns, screens, what a new game keeps |
+| 3 | a handler's test inverted in the port | 70 routines no record ran, and nothing else checked them | `zx-port`: the never-ran list is part of the gate; cases at the call |
+| 3 | the port identical to the original in replay only | the random byte from the stack taken from the record, unstated | `zx-port`: choose, and say which in the contract |
+| 3, 4 | bugs kept as quirks in code comments, not findings | slices reported them, the lead did not register them | `zx-port`, `zx-clean`: a kept quirk is a finding |
+| 4 | four pacer faults found at the very end | the pacer was written early and first run at integration | `zx-clean`: the pacer and free play before the slices |
+| 4 | values kept between lines outside the state | a dict and an attribute of `Game` held them | `zx-clean`: such values are state, buffers included |
+| 4 | the picture drawing time left out | no measurement asked for it | `zx-clean`: Shows measured on the Z80, or a named deviation |
+| all | five agents stalled overnight until the author said "retry" | the lead waited for notifications | `AGENTS.md`: resume a quiet agent; size tasks under an hour |
+
 ## Lessons for the method
 
 1. The genre changes the shape, not the method: the same phases, checks and orchestration carried a text adventure through, with two new shapes (the register interface, the game as one generator).

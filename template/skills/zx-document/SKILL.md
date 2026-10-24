@@ -41,6 +41,11 @@ docs/img/                 PNGs (committed)
   (GitHub renders it); short asm excerpts (5-15 lines) only where the trick is
   in the code itself.
 - State what is verified and what is inferred. Mark guesses as such.
+- Keep a claim inside its evidence. "Never", "always", "unused", "any
+  order", "whatever you do" need a scan of every case (every message, for
+  "this control code is unused") or a run of each case the mechanism allows
+  (each way out of a trap, each word order). A summary of a finding keeps
+  the finding's conditions.
 - Numbers: hex with `$`, decimal in parentheses where it helps (`$0300` (768)).
   GitHub reads `$...$` as inline maths, so `$A000-$A3FF` shows `$A000-$` as
   a formula; `tools/zxq.py dollars docs/*.md` writes every such `$` as
@@ -52,7 +57,12 @@ docs/img/                 PNGs (committed)
 `make audit` lists open questions and `unknown`/`inferred` findings. Answer or
 mark each question (`tools/zxq.py question set Q7 answered "F12, F15"`), try to
 turn important `inferred` findings into `observed` ones (simulator, models),
-and list what stays open in `docs/06-tricks.md` under "Open questions". The
+and list what stays open in `docs/06-tricks.md` under "Open questions".
+When a finding answers an unknown, change every place that still states it:
+grep `re/notes.md`, `re/questions.md`, the README's "Not explained" and the
+comments in `src/` for the address and the term. Code no input ran: `zxq.py
+refs` on each stretch; with no reference it is dead code (a finding), with
+one it is a path the coverage scripts have not taken yet. The
 "verified"/"inferred" marks in the article come from `re/findings.md`; cite
 finding IDs where a claim is not obvious.
 

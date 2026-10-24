@@ -72,6 +72,10 @@ rec = ['checkpoint 8000', 'in 00FE BF 5', 'cp 900', 'in 7FFE BE', 'cp 2000', 'in
 assert zxrun.merge_values(rec, [(2, 10, 'r 15'), (6, 1000, 'r 16'), (6, 2500, 'a 9CE4 17')]) == [
     'checkpoint 8000', 'in 00FE BF 2', 'r 15', 'in 00FE BF 3', 'cp 900', 'in 7FFE BE',
     'r 16', 'cp 2000', 'a 9CE4 17', 'int', 'end 3']
+import zxq
+skool = 'c$8000 LD HL,$709C\n $8003 LD ($B6DC),HL\n $8006 RET\n'
+assert zxq.address_slips(skool) == []
+assert len(zxq.address_slips(skool.replace('$8003', '$8002'))) == 2
 PY
 (cd "$kit" && python3 -m zxpyxel.test_zxpyxel)
 echo "SELFTEST PASSED"
