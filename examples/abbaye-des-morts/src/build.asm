@@ -9,5 +9,5 @@ SHIFT = 0
   IF SHIFT == 0
   SAVEBIN "build/game.bin",$6000,$9F00
   ELSE
-  SAVEBIN "build/shifted.bin",$6000+SHIFT,$9F00
+  SAVEBIN "build/shifted.bin",$6000,$9F00   ; the whole region: only $85BC-$BFFF moves
   ENDIF

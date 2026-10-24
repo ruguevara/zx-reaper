@@ -6,7 +6,9 @@
 @label=BehaviourArcher
 b$951B DEFB $03,$01,$0B,$06,$02  ; hit box top, left, bottom, right (2-pixel units); slot +$15 (Unknown)
  $9520 DEFB $47,$0C,$02  ; attribute, sprite height (2-pixel units), width (bytes)
+@isub=DEFW BehaviourArcher+$C
  $9523 DEFW $9527    ; sprites, first direction (left)
+@isub=DEFW BehaviourArcher+$10
  $9525 DEFW $952B    ; sprites, second direction (right)
  $9527 DEFW $D7F8    ; first direction, frame 0
  $9529 DEFW $D7FA    ; first direction, frame 1

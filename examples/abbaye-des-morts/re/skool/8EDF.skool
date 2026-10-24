@@ -24,54 +24,71 @@
 @label=RoomItems
 b$8EDF DEFB $02      ; room 2: bell, row 1 column 5, flag $851B
  $8EE0 DEFW $851B
+@isub=DEFB $04,$01,$05,low ActionBellOrLever,high ActionBellOrLever
  $8EE2 DEFB $04,$01,$05,$48,$A7
  $8EE7 DEFB $09      ; room 9: lever, row 18 column 27, flag $851C
  $8EE8 DEFW $851C
+@isub=DEFB $09,$12,$1B,low ActionBellOrLever,high ActionBellOrLever
  $8EEA DEFB $09,$12,$1B,$48,$A7
  $8EEF DEFB $0A      ; room 10: lever, row 4 column 7, flag $851D
  $8EF0 DEFW $851D
+@isub=DEFB $09,$04,$07,low ActionBellOrLever,high ActionBellOrLever
  $8EF2 DEFB $09,$04,$07,$48,$A7
  $8EF7 DEFB $11      ; room 17: wheel lever, row 2 column 15, flag $851E
  $8EF8 DEFW $851E
+@isub=DEFB $0A,$02,$0F,low ActionLever,high ActionLever
  $8EFA DEFB $0A,$02,$0F,$A1,$A6
  $8EFF DEFB $14      ; room 20: lever, row 6 column 24, flag $851F
  $8F00 DEFW $851F
+@isub=DEFB $09,$06,$18,low ActionGateLever,high ActionGateLever
  $8F02 DEFB $09,$06,$18,$5A,$A7
  $8F07 DEFB $18      ; room 24: chalice, row 2 column 16, flag $8521
  $8F08 DEFW $8521
+@isub=DEFB $0B,$02,$10,low ActionChalice,high ActionChalice
  $8F0A DEFB $0B,$02,$10,$34,$A7
  $8F0F DEFB $0A      ; room 10: arch, row 17 column 23, flag $8523
  $8F10 DEFW $8523
+@isub=DEFB $08,$11,$17,low ActionArchToRiver,high ActionArchToRiver
  $8F12 DEFB $08,$11,$17,$D8,$A6
  $8F17 DEFB $13      ; room 19: arch, row 15 column 21, flag $8524
  $8F18 DEFW $8524
+@isub=DEFB $08,$0F,$15,low ActionArchToBeast,high ActionArchToBeast
  $8F1A DEFB $08,$0F,$15,$BC,$A6
  $8F1F DEFB $02      ; room 2: heart, row 7 column 12, flag $8525
  $8F20 DEFW $8525
+@isub=DEFB $00,$07,$0C,low ActionHeart,high ActionHeart
  $8F22 DEFB $00,$07,$0C,$0B,$A7
  $8F27 DEFB $0A      ; room 10: heart, row 18 column 10, flag $8526
  $8F28 DEFW $8526
+@isub=DEFB $00,$12,$0A,low ActionHeart,high ActionHeart
  $8F2A DEFB $00,$12,$0A,$0B,$A7
  $8F2F DEFB $0B      ; room 11: heart, row 4 column 2, flag $8527
  $8F30 DEFW $8527
+@isub=DEFB $00,$04,$02,low ActionHeart,high ActionHeart
  $8F32 DEFB $00,$04,$02,$0B,$A7
  $8F37 DEFB $0C      ; room 12: heart, row 6 column 16, flag $8528
  $8F38 DEFW $8528
+@isub=DEFB $00,$06,$10,low ActionHeart,high ActionHeart
  $8F3A DEFB $00,$06,$10,$0B,$A7
  $8F3F DEFB $0F      ; room 15: heart, row 14 column 3, flag $8529
  $8F40 DEFW $8529
+@isub=DEFB $00,$0E,$03,low ActionHeart,high ActionHeart
  $8F42 DEFB $00,$0E,$03,$0B,$A7
  $8F47 DEFB $11      ; room 17: heart, row 18 column 3, flag $852A
  $8F48 DEFW $852A
+@isub=DEFB $00,$12,$03,low ActionHeart,high ActionHeart
  $8F4A DEFB $00,$12,$03,$0B,$A7
  $8F4F DEFB $12      ; room 18: heart, row 11 column 15, flag $852B
  $8F50 DEFW $852B
+@isub=DEFB $00,$0B,$0F,low ActionHeart,high ActionHeart
  $8F52 DEFB $00,$0B,$0F,$0B,$A7
  $8F57 DEFB $13      ; room 19: heart, row 8 column 25, flag $852C
  $8F58 DEFW $852C
+@isub=DEFB $00,$08,$19,low ActionHeart,high ActionHeart
  $8F5A DEFB $00,$08,$19,$0B,$A7
  $8F5F DEFB $17      ; room 23: heart, row 7 column 23, flag $852D
  $8F60 DEFW $852D
+@isub=DEFB $00,$07,$17,low ActionHeart,high ActionHeart
  $8F62 DEFB $00,$07,$17,$0B,$A7
  $8F67 DEFB $03      ; room 3: parchment, row 16 column 18, flag $852E, text lines 25 and 26
  $8F68 DEFW $852E
@@ -93,68 +110,90 @@ b$8EDF DEFB $02      ; room 2: bell, row 1 column 5, flag $851B
  $8F92 DEFB $05,$06,$03,$23,$24
  $8F97 DEFB $18      ; room 24: red scroll, row 14 column 28, flag $8534
  $8F98 DEFW $8534
+@isub=DEFB $06,$0E,$1C,low ActionFinalScroll,high ActionFinalScroll
  $8F9A DEFB $06,$0E,$1C,$68,$A6
  $8F9F DEFB $03      ; room 3: cross (wheel off), row 18 column 28, flag $8535
  $8FA0 DEFW $8535
+@isub=DEFB $01,$12,$1C,low ActionCrossLeverOff,high ActionCrossLeverOff
  $8FA2 DEFB $01,$12,$1C,$82,$A7
  $8FA7 DEFB $09      ; room 9: cross (wheel on), row 4 column 6, flag $8536
  $8FA8 DEFW $8536
+@isub=DEFB $02,$04,$06,low ActionCrossLeverOn,high ActionCrossLeverOn
  $8FAA DEFB $02,$04,$06,$77,$A7
  $8FAF DEFB $0A      ; room 10: cross (wheel off), row 4 column 26, flag $8537
  $8FB0 DEFW $8537
+@isub=DEFB $01,$04,$1A,low ActionCrossLeverOff,high ActionCrossLeverOff
  $8FB2 DEFB $01,$04,$1A,$82,$A7
  $8FB7 DEFB $0D      ; room 13: cross (wheel off), row 18 column 18, flag $8538
  $8FB8 DEFW $8538
+@isub=DEFB $01,$12,$12,low ActionCrossLeverOff,high ActionCrossLeverOff
  $8FBA DEFB $01,$12,$12,$82,$A7
  $8FBF DEFB $0E      ; room 14: cross (wheel off), row 4 column 9, flag $8539
  $8FC0 DEFW $8539
+@isub=DEFB $01,$04,$09,low ActionCrossLeverOff,high ActionCrossLeverOff
  $8FC2 DEFB $01,$04,$09,$82,$A7
  $8FC7 DEFB $0F      ; room 15: cross (wheel on), row 8 column 28, flag $853A
  $8FC8 DEFW $853A
+@isub=DEFB $02,$08,$1C,low ActionCrossLeverOn,high ActionCrossLeverOn
  $8FCA DEFB $02,$08,$1C,$77,$A7
  $8FCF DEFB $10      ; room 16: cross (wheel off), row 6 column 2, flag $853B
  $8FD0 DEFW $853B
+@isub=DEFB $01,$06,$02,low ActionCrossLeverOff,high ActionCrossLeverOff
  $8FD2 DEFB $01,$06,$02,$82,$A7
  $8FD7 DEFB $11      ; room 17: cross (wheel off), row 18 column 28, flag $853C
  $8FD8 DEFW $853C
+@isub=DEFB $01,$12,$1C,low ActionCrossLeverOff,high ActionCrossLeverOff
  $8FDA DEFB $01,$12,$1C,$82,$A7
  $8FDF DEFB $11      ; room 17: cross (wheel on), row 10 column 3, flag $853D
  $8FE0 DEFW $853D
+@isub=DEFB $02,$0A,$03,low ActionCrossLeverOn,high ActionCrossLeverOn
  $8FE2 DEFB $02,$0A,$03,$77,$A7
  $8FE7 DEFB $12      ; room 18: cross (wheel off), row 5 column 3, flag $853E
  $8FE8 DEFW $853E
+@isub=DEFB $01,$05,$03,low ActionCrossLeverOff,high ActionCrossLeverOff
  $8FEA DEFB $01,$05,$03,$82,$A7
  $8FEF DEFB $13      ; room 19: cross (wheel off), row 2 column 3, flag $853F
  $8FF0 DEFW $853F
+@isub=DEFB $01,$02,$03,low ActionCrossLeverOff,high ActionCrossLeverOff
  $8FF2 DEFB $01,$02,$03,$82,$A7
  $8FF7 DEFB $16      ; room 22: cross (wheel on), row 18 column 27, flag $8540
  $8FF8 DEFW $8540
+@isub=DEFB $02,$12,$1B,low ActionCrossLeverOn,high ActionCrossLeverOn
  $8FFA DEFB $02,$12,$1B,$77,$A7
  $8FFF DEFB $07      ; room 7: church door trigger, row 15 column 2, flag $8543
  $9000 DEFW $8543
+@isub=DEFB $07,$0F,$02,low ActionChurchDoor,high ActionChurchDoor
  $9002 DEFB $07,$0F,$02,$15,$A6
  $9007 DEFB $08      ; room 8: checkpoint, row 17 column 7, flag $8544
  $9008 DEFW $8544
+@isub=DEFB $03,$11,$07,low ActionCheckpoint,high ActionCheckpoint
  $900A DEFB $03,$11,$07,$88,$A6
  $900F DEFB $0B      ; room 11: checkpoint, row 17 column 14, flag $8545
  $9010 DEFW $8545
+@isub=DEFB $03,$11,$0E,low ActionCheckpoint,high ActionCheckpoint
  $9012 DEFB $03,$11,$0E,$88,$A6
  $9017 DEFB $0C      ; room 12: checkpoint, row 7 column 8, flag $8546
  $9018 DEFW $8546
+@isub=DEFB $03,$07,$08,low ActionCheckpoint,high ActionCheckpoint
  $901A DEFB $03,$07,$08,$88,$A6
  $901F DEFB $0E      ; room 14: checkpoint, row 17 column 8, flag $8547
  $9020 DEFW $8547
+@isub=DEFB $03,$11,$08,low ActionCheckpoint,high ActionCheckpoint
  $9022 DEFB $03,$11,$08,$88,$A6
  $9027 DEFB $0F      ; room 15: checkpoint, row 7 column 21, flag $8548
  $9028 DEFW $8548
+@isub=DEFB $03,$07,$15,low ActionCheckpoint,high ActionCheckpoint
  $902A DEFB $03,$07,$15,$88,$A6
  $902F DEFB $13      ; room 19: checkpoint, row 11 column 8, flag $8549
  $9030 DEFW $8549
+@isub=DEFB $03,$0B,$08,low ActionCheckpoint,high ActionCheckpoint
  $9032 DEFB $03,$0B,$08,$88,$A6
  $9037 DEFB $15      ; room 21: checkpoint, row 5 column 19, flag $854A
  $9038 DEFW $854A
+@isub=DEFB $03,$05,$13,low ActionCheckpoint,high ActionCheckpoint
  $903A DEFB $03,$05,$13,$88,$A6
  $903F DEFB $17      ; room 23: checkpoint, row 17 column 17, flag $854B
  $9040 DEFW $854B
+@isub=DEFB $03,$11,$11,low ActionCheckpoint,high ActionCheckpoint
  $9042 DEFB $03,$11,$11,$88,$A6
  $9047 DEFB $1A

@@ -11,6 +11,7 @@
 ; O:IY Changed (holds the return address)
 @label=FindFreeSlot
 c$8A6E POP IY               ; return address; the routine ends with JP (IY)
+@label=FindFreeSlot_IY
  $8A70 EXX                  ; alternate set
  $8A71 LD HL,$C100          ; ObjectSlots
 @isub=LD BC,OBJECT_SLOTS*256+SLOT_SIZE-1

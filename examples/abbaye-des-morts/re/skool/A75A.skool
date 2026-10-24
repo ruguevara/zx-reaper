@@ -19,6 +19,7 @@ c$A75A POP HL        ; flag pointer
  $A765 LD ($854F),A  ;
  $A768 LD A,(HL)     ;
  $A769 LD HL,$8048   ; subscript: open the gate
+@isub=LD (SmcEventScript+1),HL
  $A76C LD ($9CEE),HL ; operand of the LD HL at #R$9CED (script address)
  $A76F LD HL,$9CE7   ; re-arm the one-shot runner #R$9CE7
  $A772 LD (HL),$00   ;

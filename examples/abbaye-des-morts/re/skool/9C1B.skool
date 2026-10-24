@@ -1,5 +1,3 @@
-@equ=HUD_CROSSES_SCREEN=$50E0
-@equ=HUD_CROSSES_ATTR=$5AE0
 ; Redraw the crosses counter in the status bar
 ;
 ; One-shot redraw gate: the first byte is NOP while a redraw is wanted and RET otherwise. The main loop (#R$85FC) calls this address on every pass; the routine puts RET over its own first byte at once, so it draws only once per request. A request is a NOP written at the start of a game (#R$85FC), when a cross is picked up (#R$A782) and at the end of a parchment or text window (#R$9C52).

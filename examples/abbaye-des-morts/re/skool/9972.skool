@@ -1,4 +1,3 @@
-@equ=OutlineMasks=$FF00
 ; Draw-queue handler: masked sprite into the redraw cells
 ;
 ; Handler of the jobs that #R$9836 queues (template #R$98D9). #R$97B7 calls it through JP (HL) with DE = job address + 1,

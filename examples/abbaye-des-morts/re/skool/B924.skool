@@ -46,6 +46,7 @@ c$B924 POP HL        ; sprite block
  $B951 ADD HL,DE     ; HL = table + 2 * frame
  $B952 DEC E         ; frame 0: nonzero
  $B953 EXX           ;
+@isub=LD HL,SpriteCmd2Pos+1
  $B954 LD HL,$ACDE   ; byte column of the second draw command
  $B957 JR Z,$B95A    ; frame 1: keep it
  $B959 DEC (HL)      ; frame 0: one cell to the left

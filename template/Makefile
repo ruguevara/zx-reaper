@@ -21,13 +21,15 @@ include re/layout.mk
 -include scripts/rules.mk
 # the default goal is all, not the first rule of scripts/rules.mk
 .DEFAULT_GOAL := all
-# The shift test moves REGION_START..SHIFT_END-1; ORGs at or above SHIFT_END stay
-# fixed (tables reached by page arithmetic, memory full up to $FFFF). SHIFT_LOAD
-# is where build/shifted.bin goes (set it to REGION_START when build.asm saves
-# the whole region in shifted mode).
+# The shift test moves SHIFT_START..SHIFT_END-1 (ORGs in that range get
+# +SHIFT; put an @org on the entries where the range starts and ends); the rest
+# stays fixed (tables reached by page arithmetic, an IM 2 handler at $XYXY,
+# memory full up to $FFFF). SHIFT_LOAD is where build/shifted.bin goes (set it
+# to REGION_START when build.asm saves the whole region in shifted mode).
+SHIFT_START ?= $(REGION_START)
 SHIFT_END  ?= $(REGION_END)
 SHIFT_LOAD ?= $(shell printf '0x%X' $$(($(REGION_START)+$(SHIFT))))
-export SHIFT_END
+export SHIFT_START SHIFT_END
 # SHIFT_GIVE: an address where A holds a value read from the game's own code
 # (a random routine that reads memory): the original's values there are given
 # to the moved build, so its random numbers do not change with the shift.

@@ -1,6 +1,3 @@
-@equ=ATTRS=$5800
-@equ=SCREEN_THIRD2=$4800
-@equ=TILE_MAP=$5B00
 ; Restore the middle of the screen and the attributes
 ;
 ; Called by #R$A336 when the controls screen is left. Fills the attribute file with 0 (black), then loads A with the

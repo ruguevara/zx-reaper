@@ -7,7 +7,10 @@
 @label=BehaviourSpider
 b$9445 DEFB $00,$01,$05,$06,$02  ; hit box top, left, bottom, right; slot +$15 (Unknown)
  $944A DEFB $44      ; attribute
+@isub=DEFW ShiftPairsAligned
  $944B DEFW $9463    ; table of (first column, width) for x AND 3
  $944D DEFB $05      ; sprite height (2-pixel units)
+@isub=DEFW BehaviourSpiderYellow+$D
  $944E DEFW $945F    ; sprites, first direction (left or up)
+@isub=DEFW BehaviourSpiderYellow+$D
  $9450 DEFW $945F    ; sprites, second direction (right or down)

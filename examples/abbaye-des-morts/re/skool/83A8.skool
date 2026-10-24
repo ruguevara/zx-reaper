@@ -10,14 +10,23 @@
 ; room 4. Each cutscene runs until one of the actors sets #R$8501.
 @label=CutsceneList1
 b$83A8 DEFB $01
+@isub=DEFB low ActorMonkTemplate,high ActorMonkTemplate,$34,$6C
  $83A9 DEFB $80,$BD,$34,$6C
 @label=CutsceneList2
  $83AD DEFB $08
+@isub=DEFB low ActorPyreMonkTemplate,high ActorPyreMonkTemplate,$3A,$3E
  $83AE DEFB $92,$BD,$3A,$3E
+@isub=DEFB low ActorFlameTemplate,high ActorFlameTemplate,$44,$36
  $83B2 DEFB $A4,$BD,$44,$36
+@isub=DEFB low ActorFlameTemplate,high ActorFlameTemplate,$44,$3E
  $83B6 DEFB $A4,$BD,$44,$3E
+@isub=DEFB low ActorFlameTemplate,high ActorFlameTemplate,$44,$46
  $83BA DEFB $A4,$BD,$44,$46
+@isub=DEFB low ActorCrusaderLTemplate,high ActorCrusaderLTemplate,$44,$14
  $83BE DEFB $C8,$BD,$44,$14
+@isub=DEFB low ActorCrusaderLTemplate,high ActorCrusaderLTemplate,$44,$24
  $83C2 DEFB $C8,$BD,$44,$24
+@isub=DEFB low ActorCrusaderRTemplate,high ActorCrusaderRTemplate,$44,$54
  $83C6 DEFB $B6,$BD,$44,$54
+@isub=DEFB low ActorCrusaderRTemplate,high ActorCrusaderRTemplate,$44,$60
  $83CA DEFB $B6,$BD,$44,$60

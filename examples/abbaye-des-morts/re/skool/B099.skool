@@ -30,4 +30,5 @@ c$B099 POP DE        ; skip +2 (speed, 0)
 *$B0A6 PUSH BC       ; store the counter (SP back at slot + $12)
  $B0A7 JP NZ,$B41F   ; NextSlotAfterAnim: not yet
  $B0AA LD IY,$B0B1   ; the free slot search returns to #R$B0B1
+@isub=JP FindFreeSlot_IY
  $B0AE JP $8A70      ; find a free slot: IX = slot, carry set when there is one

@@ -29,6 +29,7 @@ c$B5EB POP BC        ; +2, not used
  $B5F1 LD H,D        ;
  $B5F2 LD L,E        ; HL = x (H) and y (L), 2-pixel units
  $B5F3 LD ($5DFE),HL ; start position of an arrow: SPAWN_POSITION
+@isub=LD A,(PlayerX+1)
  $B5F6 LD A,($A8A2)  ; x of the monk (high byte)
  $B5F9 BIT 7,A       ; negative: treat as 0
  $B5FB JR Z,$B5FE    ;

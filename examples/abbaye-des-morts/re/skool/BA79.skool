@@ -1,4 +1,3 @@
-@equ=SPAWN_TEMPLATE=$5DFC
 ; Death: throw a scythe every 50 frames, then pick the frame graphics and queue the sprite
 ;
 ; Continuation of #R$BA54 after the animation step #R$A883 (SP is at slot+18 and E holds the frame number). BC' holds

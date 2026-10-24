@@ -106,6 +106,7 @@ c$B44B POP DE        ; skip the speed (read again at #R$B4B3)
  $B4B4 POP HL        ; skip the countdown word
  $B4B5 POP HL        ; x (8.8)
  $B4B6 POP DE        ; y (8.8)
+@isub=LD A,(PlayerX+1)
  $B4B7 LD A,($A8A2)  ; Jean's x
  $B4BA BIT 7,A       ;
  $B4BC JR Z,$B4BF    ;
@@ -130,6 +131,7 @@ c$B44B POP DE        ; skip the speed (read again at #R$B4B3)
  $B4D4 ADD A,A       ;
  $B4D5 EX AF,AF'     ;
 *$B4D6 EX DE,HL      ; HL = y, DE = x
+@isub=LD A,(PlayerY+1)
  $B4D7 LD A,($A8A4)  ; Jean's y
  $B4DA BIT 7,A       ;
  $B4DC JR Z,$B4DF    ;

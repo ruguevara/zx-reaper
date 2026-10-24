@@ -1,4 +1,3 @@
-@equ=FLAG_MAP=$5E00
 ; Script code $90: mark or unmark every tile for redraw
 ;
 ; Operand: one byte v. Rewrites every cell of the tile flag map at $5E00-$60BF: the old bit 7 (the redraw mark) is

@@ -5,6 +5,7 @@
 @label=BehaviourDragonHead
 b$952F DEFB $00,$00,$07,$07,$02  ; hit box top, left, bottom, right (2-pixel units); slot +$15 (Unknown)
  $9534 DEFB $07,$08,$02  ; attribute, sprite height, width (bytes)
+@isub=DEFW BehaviourDragonHead+$A
  $9537 DEFW $9539    ; sprites
  $9539 DEFW $EF3E    ; sprite $EF3E
  $953B DEFW $EF3C    ; sprite $EF3C

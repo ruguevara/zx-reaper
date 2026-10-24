@@ -10,7 +10,9 @@ b$95B9 DEFB $02,$02,$0C,$0D,$02  ; hit box top, left, bottom, right (2-pixel uni
  $95BE DEFB $47      ; attribute
  $95BF DEFW $95D2    ; shift table (#R$95D2)
  $95C1 DEFB $0E      ; sprite height
+@isub=DEFW BehaviourDeath+$D
  $95C2 DEFW $95C6    ; sprites, first direction (left)
+@isub=DEFW BehaviourDeath+$13
  $95C4 DEFW $95CC    ; sprites, second direction (right)
  $95C6 DEFW $D763    ; first direction, frame 0
  $95C8 DEFW $D776    ; first direction, frame 1

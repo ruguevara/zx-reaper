@@ -23,9 +23,11 @@ c$A168 XOR A         ;
  $A16E LD D,(HL)     ;
  $A16F INC HL        ;
  $A170 LD A,(HL)     ;
+@isub=LD (SmcWaterAttr+1),A
  $A171 LD ($AD8D),A  ; attribute: operand of the LD A,n at $AD8C
  $A174 INC HL        ;
  $A175 LD A,(HL)     ;
+@isub=LD (SmcWaterWidth+1),A
  $A176 LD ($AD8F),A  ; width: operand of the LD B,n at $AD8E
  $A179 LD C,A        ;
  $A17A LD B,$01      ;
@@ -38,14 +40,17 @@ c$A168 XOR A         ;
  $A183 ADD HL,HL     ;
  $A184 ADD HL,HL     ;
  $A185 ADD HL,HL     ;
+@isub=LD (SmcWaterCount+1),HL
  $A186 LD ($AD9B),HL ; width x 8: the count in the LD BC,nn at $AD9A
 @isub=SUB LDI_CHAIN_LEN
  $A189 SUB $20       ;
  $A18B NEG           ;
  $A18D ADD A,A       ;
+@isub=LD (SmcWaterJump+1),A
  $A18E LD ($ADA0),A  ; offset of the JR at $AD9F: skips 32 - width LDIs of the chain
  $A191 EX DE,HL      ;
  $A192 CALL $A1F2    ; attribute address of the first cell
+@isub=LD (SmcWaterAttrAddr+1),HL
  $A195 LD ($AD8A),HL ; operand of the LD HL,nn at $AD89
  $A198 CALL $A203    ; bitmap address of the cell
  $A19B LD D,H        ;
@@ -61,7 +66,9 @@ c$A168 XOR A         ;
 *$A1A6 LD A,$07      ; bottom pixel line of the water cell row
  $A1A8 ADD A,H       ;
  $A1A9 LD H,A        ;
+@isub=LD (SmcWaterSrc+1),DE
  $A1AA LD ($AD95),DE ; source: operand of the LD HL,nn at $AD94
+@isub=LD (SmcWaterDst+1),HL
  $A1AE LD ($AD98),HL ; destination: operand of the LD DE,nn at $AD97
  $A1B1 LD H,A        ;
  $A1B2 POP BC        ;

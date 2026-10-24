@@ -6,9 +6,12 @@
 @label=BehaviourHangedMan
 b$9465 DEFB $00,$01,$07,$06,$01  ; hit box top, left, bottom, right; slot +$15 (Unknown)
  $946A DEFB $46      ; attribute
+@isub=DEFW ShiftPairsAligned
  $946B DEFW $9463    ; table of (first column, width) for x AND 3
  $946D DEFB $0C      ; sprite height (2-pixel units)
+@isub=DEFW BehaviourHangedMan+$D
  $946E DEFW $9472    ; sprites, first direction (left or up)
+@isub=DEFW BehaviourHangedMan+$F
  $9470 DEFW $9474    ; sprites, second direction (right or down)
  $9472 DEFW $D763    ; first direction, frame 0
  $9474 DEFW $D765    ; second direction, frame 0

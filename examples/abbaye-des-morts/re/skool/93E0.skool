@@ -10,7 +10,9 @@ b$93E0 DEFB $00,$01,$0C,$06,$02  ; hit box top, left, bottom, right; slot +$15 (
  $93E5 DEFB $45      ; attribute
  $93E6 DEFW $AC9F    ; table of (first column, width) for x AND 3
  $93E8 DEFB $0C      ; sprite height (2-pixel units)
+@isub=DEFW BehaviourCrusader+$D
  $93E9 DEFW $93ED    ; sprites, first direction (left or up)
+@isub=DEFW BehaviourCrusader+$11
  $93EB DEFW $93F1    ; sprites, second direction (right or down)
  $93ED DEFW $D763    ; first direction, frame 0
  $93EF DEFW $D76E    ; first direction, frame 1

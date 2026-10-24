@@ -51,10 +51,13 @@ b$8B8F DEFB $00,$00,$20,$08,$F7,$30,$00,$00,$80  ; room 0: Jean walker, x $F7 y 
  $8BAE DEFW $93E0
  $8BB0 DEFB $00,$00,$18,$08,$CB,$30,$00,$00,$80  ; room 0: crusader walker, x $CB y $30, ends at x $80
  $8BB9 DEFW $93E0
+@isub=DEFB $05,$01,$00,$5A,$00,$00,$00,low CrusaderTemplateRoom5,high CrusaderTemplateRoom5
  $8BBB DEFB $05,$01,$00,$5A,$00,$00,$00,$4C,$B0  ; room 5: crusader spawner, template $B04C, first after 90 frames
  $8BC4 DEFW $93E0
+@isub=DEFB $06,$01,$00,$5A,$00,$00,$00,low CrusaderTemplateRoom6,high CrusaderTemplateRoom6
  $8BC6 DEFB $06,$01,$00,$5A,$00,$00,$00,$62,$B0  ; room 6: crusader spawner, template $B062, first after 90 frames
  $8BCF DEFW $93E0
+@isub=DEFB $19,$01,$00,$5A,$00,$00,$00,low CrusaderTemplateRoom25,high CrusaderTemplateRoom25
  $8BD1 DEFB $19,$01,$00,$5A,$00,$00,$00,$78,$B0  ; room 25: crusader spawner, template $B078, first after 90 frames
  $8BDA DEFW $93E0
  $8BDC DEFB $08,$02,$20,$07,$48,$18,$00,$10,$50  ; room 8: bat (patroller, starts left), x $48 y $18, x limits $10-$50

@@ -8,7 +8,9 @@ b$9506 DEFB $00,$01,$0C,$06,$02  ; hit box top, left, bottom, right; slot +$15 (
  $950B DEFB $44      ; attribute
  $950C DEFW $AC9F    ; table of (first column, width) for x AND 3
  $950E DEFB $0C      ; sprite height (2-pixel units)
+@isub=DEFW BehaviourSoldier+$D
  $950F DEFW $9513    ; sprites, first direction (left or up)
+@isub=DEFW BehaviourSoldier+$11
  $9511 DEFW $9517    ; sprites, second direction (right or down)
  $9513 DEFW $D763    ; first direction, frame 0
  $9515 DEFW $D76E    ; first direction, frame 1

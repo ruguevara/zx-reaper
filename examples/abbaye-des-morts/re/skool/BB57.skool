@@ -42,6 +42,7 @@ c$BB57 LD A,($8521)  ; flag of the cross item in room 24 ($FF once taken)
 @isub=LD (HL),MUSIC_TRACK_7
  $BB6A LD (HL),$07   ; music track 7
  $BB6C LD HL,$82D4   ; start the script at $82D4
+@isub=LD (SmcEventScript+1),HL
  $BB6F LD ($9CEE),HL ;
  $BB72 XOR A         ;
  $BB73 LD ($9CE7),A  ; let the main loop run the script step
@@ -53,9 +54,11 @@ c$BB57 LD A,($8521)  ; flag of the cross item in room 24 ($FF once taken)
  $BB7D LD L,D        ; HL = (x, y)
  $BB7E SRA H         ; x / 4: byte column
  $BB80 SRA H         ;
+@isub=LD (SmokeTemplate+4),HL
  $BB82 LD ($BD6E),HL ; position of the upper half in the smoke template (y, byte column)
  $BB85 LD BC,$000C   ; 12 units = 24 pixels
  $BB88 ADD HL,BC     ;
+@isub=LD (SmokeTemplate+6),HL
  $BB89 LD ($BD70),HL ; position of the lower half
  $BB8C LD HL,$FFF6   ; SP - 10 is the start of the slot
  $BB8F ADD HL,SP     ;

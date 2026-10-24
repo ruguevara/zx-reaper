@@ -1,3 +1,4 @@
+@org
 ; Jump to HL
 ;
 ; A CALL to this address is an indirect call through HL. Used by the interrupt handler #R$8585 (HL = the frame routine

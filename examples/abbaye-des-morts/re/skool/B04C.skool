@@ -21,8 +21,11 @@
 ; All three are drawn from the sprite set 1 (the crusaders, #R$6916), cyan. The hit box test (#R$A851) makes a crusader
 ; kill Jean on touch.
 @label=CrusaderTemplateRoom5
+@isub=DEFW UpdateCrusader,$0060,PathScriptRoom5,$F700,$4400,$0600,$0100,$060C,BehaviourCrusader+5,$0808,$0200
 b$B04C DEFW $B1D4,$0060,$B218,$F700,$4400,$0600,$0100,$060C,$93E5,$0808,$0200 ; room 5, script $B218
 @label=CrusaderTemplateRoom6
+@isub=DEFW UpdateCrusader,$0060,PathScriptRoom6,$F700,$4400,$0600,$0100,$060C,BehaviourCrusader+5,$0808,$0200
  $B062 DEFW $B1D4,$0060,$B220,$F700,$4400,$0600,$0100,$060C,$93E5,$0808,$0200 ; room 6, script $B220
 @label=CrusaderTemplateRoom25
+@isub=DEFW UpdateCrusader,$0060,PathScriptRoom25,$F700,$4400,$0600,$0100,$060C,BehaviourCrusader+5,$0808,$0200
  $B078 DEFW $B1D4,$0060,$B22C,$F700,$4400,$0600,$0100,$060C,$93E5,$0808,$0200 ; room 25 (the ending), script $B22C

@@ -1,3 +1,4 @@
+@org
 ; Sprite draw queue: 16 jobs of 16 bytes
 ;
 ; Jobs for drawing sprites into the redraw buffers. #R$9836 and #R$97FD, run from the frame call list, fill a template

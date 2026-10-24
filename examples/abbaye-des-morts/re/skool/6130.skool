@@ -7,27 +7,51 @@
 ; 1) to the glyph in #R$61F0; bits 12-15: glyph width in pixels minus 2 (GLYPH_WIDTH_BIAS), so the glyphs are 2-17
 ; pixels wide. The width is also the advance to the next character.
 @label=FontIndex
+@keep
 b$6130 DEFW $30BF,$10BF,$30C3,$70C5
+@keep
  $6138 DEFW $40D1,$80DD,$A0F3,$0109
+@keep
  $6140 DEFW $310B,$3115,$511F,$6125
+@keep
  $6148 DEFW $1129,$612D,$112F,$5131
+@keep
  $6150 DEFW $513D,$3141,$6147,$6152
+@keep
  $6158 DEFW $715D,$5171,$517A,$6182
+@keep
  $6160 DEFW $5189,$518F,$1197,$119B
+@keep
  $6168 DEFW $41A1,$51A9,$41AD,$51B5
+@keep
  $6170 DEFW $31BE,$C1BE,$81D6,$61E6
+@keep
  $6178 DEFW $91EE,$91FE,$8214,$9226
+@keep
  $6180 DEFW $B23A,$7250,$425E,$B264
+@keep
  $6188 DEFW $827A,$D286,$A29A,$72B0
+@keep
  $6190 DEFW $82BE,$72CC,$B2DE,$62F2
+@keep
  $6198 DEFW $82FD,$A307,$8317,$B329
+@keep
  $61A0 DEFW $C33D,$8351,$8365,$337B
+@keep
  $61A8 DEFW $537F,$338B,$438F,$8393
+@keep
  $61B0 DEFW $2397,$839B,$63A7,$53AF
+@keep
  $61B8 DEFW $93B6,$63C6,$53CE,$63D4
+@keep
  $61C0 DEFW $83DD,$53F1,$33FB,$8405
+@keep
  $61C8 DEFW $4419,$E41F,$942F,$643F
+@keep
  $61D0 DEFW $7444,$7452,$5462,$5468
+@keep
  $61D8 DEFW $5470,$9478,$7486,$C496
+@keep
  $61E0 DEFW $94A6,$74B6,$74CA,$34DA
+@keep
  $61E8 DEFW $04E0,$34E2,$54E8,$34EB

@@ -41,6 +41,7 @@ b$BC92 DEFW $B6ED,$FE00,$0000,$0600,$0000,$0400,$0202,$94F9 ; arrow flying left 
 @label=ScytheRightTemplate
  $BD58 DEFW $BAB1,$0080,$00C0,$0C08,$0000,$0707,$95DA,$0202,$0400 ; Death's scythe flying right (x speed +0.5)
 @label=SmokeTemplate
+@isub=DEFW UpdateSatanSmoke,$9600,$0000,$0000,$0C04,$0000,$0000,$0000,SpriteBlockSmoke,$0505,$0200
  $BD6A DEFW $BC69,$9600,$0000,$0000,$0C04,$0000,$0000,$0000,$95F6,$0505,$0200 ; smoke made by #R$BB57: a whole slot, see #R$BC69: lifetime 150, positions (set by #R$BB57), size 4 x 12, behaviour block $95F6
 @label=ActorMonkTemplate
  $BD80 DEFW $B9B0,$0000,$0000,$0000,$0000,$0000,$959D,$3C50,$0200 ; the monk in the first scene of the ending (list #R$83A8, 1 actor, room 25): handler #R$B9B0

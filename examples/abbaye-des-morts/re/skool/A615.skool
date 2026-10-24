@@ -23,6 +23,7 @@ c$A615 JR NC,$A636   ;
  $A620 SBC A,A       ; carry is set: A = $FF
  $A621 LD ($851A),A  ; door shut
  $A624 LD HL,$76A0   ; subscript: the shut door
+@isub=LD (SmcEventScript+1),HL
  $A627 LD ($9CEE),HL ; operand of the LD HL at #R$9CED (script address)
  $A62A LD HL,$9CE7   ; the one-shot runner #R$9CE7 ...
  $A62D LD (HL),$00   ; ... is re-armed: NOP
@@ -43,6 +44,7 @@ c$A615 JR NC,$A636   ;
  $A63F JR NZ,$A659   ; countdown not over
  $A641 LD B,$04      ; flash starts: 3 frames to go
  $A643 LD HL,$76A8   ; subscript: the other door tiles
+@isub=LD (SmcEventScript+1),HL
  $A646 LD ($9CEE),HL ;
  $A649 LD HL,$9CE7   ; re-arm the runner
  $A64C LD (HL),C     ;
@@ -56,6 +58,7 @@ c$A615 JR NC,$A636   ;
 @label=ActionChurchDoor_Count
 *$A659 DJNZ $A665    ; one frame of the flash less
  $A65B LD HL,$76A0   ; flash over: the normal door tiles
+@isub=LD (SmcEventScript+1),HL
  $A65E LD ($9CEE),HL ;
  $A661 LD HL,$9CE7   ;
  $A664 LD (HL),B     ;
