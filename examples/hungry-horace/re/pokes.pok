@@ -1,0 +1,47 @@
+NInfinite passes (lives)
+Z  8 26429   0  61
+NStart with N+1 passes (N = 1-8)
+Z  8 24788 256   3
+NInvulnerable: guards harmless, bell still lets Horace eat them
+Z  8 26291  57  58
+NWalk through guards (no contact at all, guards cannot be eaten)
+Z  8 26284 201 192
+NGuards always edible (touching one eats it)
+Z  8 26290 218 202
+NStart maze (0 = 2nd, 1 = 3rd, 2 = 4th; 255 = 1st)
+Z  8 24778 256 255
+NStarting pace (1 fastest - 8 normal; higher is slower)
+Z  8 24783 256   8
+NNo speed-up after every fourth maze
+Z  8 24815  24  40
+NBell effect lasts until a guard is eaten
+Z  8 26198   0  11
+NBell effect four times longer
+Z  8 26857  36  44
+NGuards do not chase Horace
+Z  8 25793 121 129
+NGuards frozen in place
+Z  8 25535 201  33
+NOnly the first guard comes out
+Z  8 27001   0  27
+NNo guards
+M  8 27001   0  27
+Z  8 27177 255   0
+NPoints per flower (10)
+Z  8 26037 256  10
+NPoints per fruit or bell item (50)
+Z  8 26049 256  50
+NPoints per eaten guard (100)
+Z  8 26297 256 100
+NExtra pass every 1040 points instead of 10000
+Z  8 26073   4  39
+NEaten guards wait N passes at home (90)
+Z  8 26409 256  90
+NFirst fruit soon after the maze starts
+Z  8 24998   0   7
+NSlower game (delay high byte, 1 normal)
+Z  8 27057 256   1
+NBell next to Horace's start in the first maze
+M  8 28633 162 106
+Z  8 28634   8  16
+Y

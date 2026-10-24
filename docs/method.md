@@ -147,6 +147,18 @@ The commands that make them are in `docs/img/Makefile`, so the pictures can be r
 
 Before the section on bugs comes a separate "bug hunt" pass at the edges: for every counter and timer (lives, level, speed, score digits), what happens at the minimum, at the maximum and on overflow, checked in the simulator with `zxrun.py --poke`. The comparison with the reference on Hungry Horace showed that annotation without this pass misses exactly these bugs: [Hungry Horace: a run of the method and a comparison with SkoolKit](hungry-horace-run.md). On The Hobbit the comparison showed what else it misses: sequences of commands no script typed (a refused line, then the repeat key, resets the machine), command patterns with no handler, odd text on screens of its own runs that nobody read, and what a new game does not restore. The pass now covers these too ([The Hobbit: a blind run](the-hobbit-run.md)).
 
+## POKEs and cheats
+
+Once the main variables are named, the `zx-poke` skill finds POKEs and the cheats the developers left in. The same discipline as the rest of the method applies: a POKE is a claim, and only a run makes it observed. The search goes from the effect to the byte:
+
+- the variable: `zxpoke.py profile` keeps addresses whose history looks like the effect (a few steps of 1 down for lives, inside one game), `search` keeps those that hold the values on screen in any encoding games use, or that change when the room changes; `--referenced` drops bytes inside buffers;
+- the code: `writers` runs the pure Python simulator over a short window and prints each instruction that writes the variable, what ran before it, the patches that would stop or change the write, and, for a routine reached in several ways (a kill routine called by each cause of death), the path of each and how to block it;
+- the proof: `check` runs the same input with and without the POKE and shows the variable in both runs, whether the patched code ran at all, how often an address was reached (deaths), and whether the game still moves.
+
+Developer cheats are found from the other side: every keyboard read, with the keys it tests and whether the coverage ever ran it; a progress counter compared with a constant next to a key read; key tables decoded to letters; code nothing calls. Each is then done in the simulator: the word typed slowly in the right room.
+
+The skill was developed on Jet Set Willy with the reference POKE list at hand, then run blind on Hungry Horace; the published POKEs were compared only afterwards (below, "What has been tested").
+
 ## The ports
 
 ### Stage 3: the original's shape
@@ -177,7 +189,7 @@ Going back to the Spectrum works the same way in reverse: stage 3 keeps the memo
 ## The agent harness
 
 - `AGENTS.md` at the project root (`CLAUDE.md` contains `@AGENTS.md`): one rule (`make` green after every edit, commit only when green), the layout, a command cheat sheet, token discipline, naming conventions, when to call the person. About 100 lines; it is read in every session.
-- Skills (`skills/`, symlinked as `.claude/skills` for Claude Code and `.agents/skills` for Codex), one per phase or stage: `zx-init` (loaders, encryption and headerless blocks included), `zx-coverage`, `zx-classify`, `zx-annotate`, `zx-relocate`, `zx-export`, `zx-document`, `zx-port` (models and stage 3), `zx-clean` (stage 4). Each is a procedure with a done criterion, and each is loaded only when needed.
+- Skills (`skills/`, symlinked as `.claude/skills` for Claude Code and `.agents/skills` for Codex), one per phase or stage: `zx-init` (loaders, encryption and headerless blocks included), `zx-coverage`, `zx-classify`, `zx-annotate`, `zx-relocate`, `zx-export`, `zx-document`, `zx-port` (models and stage 3), `zx-clean` (stage 4), and `zx-poke` (POKEs and cheats, any time after annotation). Each is a procedure with a done criterion, and each is loaded only when needed.
 - Roles: a lead agent on a strong model (plan, loader, classification, relocation, review of names; in a port the control flow, the leaf helpers, the contract and the integration); subagents on a cheap model for the bulk: annotation batches, article sections, port modules. Each gets its files, the skill and the contract, and edits nothing else.
 - What a run finds hard becomes a rule in the skill or a check in a tool: every subagent's report ends with what was unclear, and the lead folds it in.
 - State between sessions lives in git and `re/notes.md`; `make status` and `zxq.py next` tell where the work stopped. Long work can run in a loop (`/loop`): "take the next batch, annotate, `make`, commit".
@@ -239,6 +251,12 @@ Jet Set Willy (1984) went through stages 1 and 2 and was compared with the Skool
 The Hobbit (Melbourne House, 1982), a text adventure of another genre and engine, went through stages 1 to 4 without the existing disassemblies and write-ups, and without help from the author beyond the stage 4 interview. Stages 1 and 2: 585 entries annotated, relocatable, in about 2.3 hours; the article (37 images) in parallel with stage 3; 85 findings by the end. Stage 3: the register interface, ~9,300 lines by eight subagents in under an hour, identical to the Z80 at every main-loop pass of six records (one plays the game to the end). Stage 4: one generator for the whole game, ~6,800 lines by six subagents, identical to stage 3 at every pass with the screen; integration found its bugs in the pacer and in inputs the records do not vary, which free play and a measurement on the Z80 caught. Compared afterwards with a complete SkoolKit disassembly of the same version: 4 bytes differ, code and non-code agree on 99.8% of the bytes, and of 506 entries both describe 474 mean the same; 6 differ, among them two record fields named the wrong way round (weight and size) from the annotation through stage 4, which no check could catch. Of 50 known bugs it found 30 and part of 3; it missed sequences of commands no script typed and things it read but did not recognise. 14 of its findings are in no reference.
 
 In detail: [The Hobbit: a blind run](the-hobbit-run.md).
+
+### POKEs: Jet Set Willy, then Hungry Horace blind
+
+On Jet Set Willy the `zx-poke` skill and `zxpoke.py` were built step by step: 11 POKEs and the WRITETYPER cheat (the word decoded from the key table, typed in First Landing in the simulator), each checked by a run. Compared with the SkoolKit POKEs page: six the same byte for byte, five other patches with the same effect, and what the published list showed missing became rules (prefer one byte, removing a hazard is not disarming it, an input for every event, large starting values break displays) (`examples/jet-set-willy/re/pokes.md`).
+
+Then one subagent ran the skill blind on Hungry Horace in 13 minutes: 23 POKEs, all checked by runs, among them both POKEs of the ZXDB file (infinite lives the same byte; immunity a different byte at the same address, the same effect in a run). No developer cheat: every key read is accounted for. A Crash tip from 1985 (touch the bell and step back, it stays and pays again) is a bug the stage 2 run had documented without it. The subagent's list of problems (lives that a new game resets slip past the filter, 16-bit variables, two wrong proposals, no sign of whether a patched byte ran) became fixes in the tool and rules in the skill (`examples/hungry-horace/re/pokes-comparison.md`).
 
 ### Candidates for further tests
 

@@ -23,10 +23,12 @@
       the same input with and without the POKEs (--with: in both runs, e.g.
       a start room next to the hazard): each --addr's values, the first
       frame the screen differs, whether the patched game still moves
-  zxpoke.py pok FILE.pok [--apply SNAP OUT.z80] [--check]
-      list a .pok file (the format of World of Spectrum's POKE database);
-      --apply writes a patched snapshot for Fuse; --check compares each
-      POKE's original value with SNAP
+  zxpoke.py pok FILE.pok [--apply SNAP OUT.z80 [--select N,N] [--ask V]]
+      [--check SNAP]
+      list a .pok file (the format of World of Spectrum's POKE database),
+      numbered; --apply writes a patched snapshot for Fuse (--select: only
+      these POKEs; --ask: the value for a POKE that asks, 256 in the file);
+      --check compares each POKE's original value with SNAP
   zxpoke.py keys
       keyboard reads in the code (IN with the keys of the half-rows it
       reads, the ROM's key routines, LAST_K and the KSTATE system
@@ -69,8 +71,9 @@ SYSVAR_KEYS = {0x5C00: 'KSTATE', 0x5C04: 'KSTATE+4', 0x5C08: 'LAST_K', 0x5C3B: '
 
 
 def addr(s):
-    s = s.strip()
-    return int(s[1:], 16) if s.startswith('$') else int(s, 0)
+    """$8000, 0x8000, 32768, or a label from re/skool (Label+N)."""
+    import zxq
+    return zxq.parse_addr(s)
 
 
 def hexdec(a):
@@ -107,9 +110,11 @@ def make_sim(args, pokes=None, python=False):
     return sim, tracer
 
 
-def run(args, on_frame, pokes=None):
+def run(args, on_frame, pokes=None, exec_map=None, stop=-1):
     """Run the input; on_frame(n, memory) after each frame n (0-based) returns
-    False to stop. Returns the simulator."""
+    False to stop. exec_map: a set that gets every address executed. stop:
+    count the passes through this address (in run.hits). Returns the
+    simulator."""
     events = load_events(args)
     sim, tracer = make_sim(args, pokes)
     f0 = sim.registers[T] // sim.frame_duration
@@ -124,7 +129,10 @@ def run(args, on_frame, pokes=None):
             tracer.set_keys(events[state['ev']][1])
             state['ev'] += 1
         return go and n + 1 < args.frames
-    sim.trace(sim.registers[PC], -1, 0, 0, 1, frame, None, tracer.keyboard, None, None)
+    run.hits = 0
+    while sim.trace(sim.registers[PC], stop, 0, 0, 1, frame, exec_map, tracer.keyboard,
+                    None, None)[0] == 3:
+        run.hits += 1
     return sim
 
 
@@ -227,19 +235,22 @@ def cmd_search(args):
             else:
                 cands = [c for c in cands if c[1] in enc and mem[c[0] - lo] == enc[c[1]]]
         prevf = f
-        print('frame %d %s: %d candidates' % (f, spec, len(cands)))
+        print('frame %d %s: %d candidates' % (f, spec, len({c[0] for c in cands})))
     where = Where()
     if args.referenced:
         cands = [c for c in cands if where.referenced(c[0])]
-        print('named by the code: %d candidates' % len(cands))
+        print('named by the code: %d candidates' % len({c[0] for c in cands}))
     if args.max is not None:
         cands = [c for c in cands if all(snaps[f][c[0] - lo] <= args.max for f, _ in specs)]
-        print('at most %d: %d candidates' % (args.max, len(cands)))
-    for a, name in cands[:args.limit]:
+        print('at most %d: %d candidates' % (args.max, len({c[0] for c in cands})))
+    names = {}
+    for a, name in cands:            # one line per address: 3 is both a value and BCD
+        names.setdefault(a, []).append(name)
+    for a, name in list(names.items())[:args.limit]:
         vals = ' '.join('%d' % snaps[f][a - lo] for f, _ in specs)
-        print('%s  %-8s %s  %s' % (hexdec(a), name, vals, where(a)))
-    if len(cands) > args.limit:
-        print('... %d more (narrow with another --at)' % (len(cands) - args.limit))
+        print('%s  %-8s %s  %s' % (hexdec(a), ','.join(name), vals, where(a)))
+    if len(names) > args.limit:
+        print('... %d more (narrow with another --at)' % (len(names) - args.limit))
 
 
 # --- profile and trace -----------------------------------------------------
@@ -301,12 +312,21 @@ def cmd_profile(args):
 
 
 def cmd_trace(args):
-    hist = histories(args, args.addr)
+    addrs = sorted(set(args.addr + [a + 1 for a in args.addr] if args.word else args.addr))
+    hist = histories(args, addrs)
     where = Where()
     for a in args.addr:
-        print('%s %s' % (hexdec(a), where(a)))
-        for f, v in hist[a]:
-            print('  frame %6d  %3d  $%02X' % (f, v, v))
+        print('%s %s%s' % (hexdec(a), where(a), ' (word)' if args.word else ''))
+        if not args.word:
+            for f, v in hist[a]:
+                print('  frame %6d  %3d  $%02X' % (f, v, v))
+            continue
+        lo, hi = dict(hist[a]), dict(hist[a + 1])
+        cur = [hist[a][0][1], hist[a + 1][0][1]]
+        for f in sorted(set(lo) | set(hi)):
+            cur = [lo.get(f, cur[0]), hi.get(f, cur[1])]
+            v = cur[0] + 256 * cur[1]
+            print('  frame %6d  %5d  $%04X' % (f, v, v))
 
 
 # --- writers ---------------------------------------------------------------
@@ -336,25 +356,31 @@ def proposals(dis, pc, before):
     elif o.startswith('LD(') and o.endswith('),A') and b[0] == 0x32:
         out.append((pc, [0x3A], '%s -> LD A,(nn): reads instead of writing' % op))
     elif o.startswith('LD(') and o.endswith(('),HL', '),DE', '),BC')) and b[0] in (0x22, 0xED):
-        out.append((pc, [0x2A] if b[0] == 0x22 else [0xED, b[1] + 8],
-                    '%s -> load: reads instead of writing' % op))
+        out.append((pc, [0x2A], '%s -> LD HL,(nn): reads instead of writing' % op)
+                   if b[0] == 0x22 else
+                   (pc + 1, [b[1] + 8], '%s -> load: reads instead of writing' % op))
     elif o in ('LD(HL),A',):
         out.append((pc, [0], '%s -> NOP' % op))
     elif o.startswith(('LD(HL),', 'LD(IX', 'LD(IY')) and not o.endswith(
             (',A', ',B', ',C', ',D', ',E', ',H', ',L')):
         out.append((pc + len(b) - 1, [b[-1]], '%s: the value written is this byte' % op))
     a_done = not o.endswith(',A')        # the write stores A: what set A last?
+    pair = o[-2:] if o.startswith('LD(') and o.endswith(('),HL', '),DE', '),BC')) else None
     for p in reversed(before[-4:]):
         pop, pb = instr(dis, p)
         po = pop.upper().replace(' ', '')
         if po.startswith(('JRNZ', 'JRZ', 'JRNC', 'JRC')):
-            if (p + 2 + (pb[1] ^ 128) - 128) & 0xFFFF > pc:
+            if (p + 2 + (pb[1] ^ 128) - 128) & 0xFFFF > pc > p:
                 out.insert(0, (p, [0x18], '%s -> JR: always jumps past the write' % pop))
-            else:
-                out.append((p, [0, 0], '%s -> NOPs: never jumps' % pop))
         elif po.startswith('JP') and len(pb) == 3 and pb[0] & 0xC7 == 0xC2:
-            if pb[1] + 256 * pb[2] > pc:
+            if pb[1] + 256 * pb[2] > pc > p:
                 out.insert(0, (p, [0xC3], '%s -> JP: always jumps past the write' % pop))
+        elif pair and po in ('DEC' + pair, 'INC' + pair):
+            out.append((p, [0], '%s -> NOP (before the write)' % pop))
+            pair = None
+        elif pair and po.startswith('LD' + pair + ',') and len(pb) == 3:
+            out.append((p + 1, pb[1:], '%s: the value written, low byte first' % pop))
+            pair = None
         elif not a_done and po.startswith(SETS_A):
             a_done = True
             if po in ('DECA', 'INCA'):
@@ -366,16 +392,30 @@ def proposals(dis, pc, before):
     return op, out
 
 
-def never(dis, p):
-    """POKEs that make the jump at p never taken, as text, or None."""
+def never(dis, p, to, pc):
+    """POKEs that make the jump at p (to `to`) never taken, as text, or None
+    when the code after the jump runs into the write at pc as well (a short
+    forward jump inside the stretch that leads to the write)."""
     op, b = instr(dis, p)
+    if p < to <= pc and pc - p <= 32:
+        return None
     if b[0] in (0x20, 0x28, 0x30, 0x38, 0x10):          # JR cc / DJNZ: jump to the next
         return 'POKE %d,0 (%s -> offset 0)' % (p + 1, op)
-    if b[0] & 0xC7 in (0xC2, 0xC4):                      # JP cc / CALL cc: 3 NOPs
-        return 'POKE %d,0 POKE %d,0 POKE %d,0 (%s -> NOPs)' % (p, p + 1, p + 2, op)
+    if b[0] & 0xC7 in (0xC2, 0xC4):                      # JP cc / CALL cc
+        return ('POKE %d,42 (%s -> LD HL,(nn): one byte, if HL is free there) or '
+                'POKE %d,0 POKE %d,0 POKE %d,0 (NOPs)' % (p, op, p, p + 1, p + 2))
     if b[0] & 0xC7 == 0xC0:                              # RET cc
         return 'POKE %d,0 (%s -> NOP)' % (p, op)
     return None
+
+
+def straight(mem, pcs):
+    """The PCs after the last return in `pcs` (what ran in the routine that
+    writes, not inside a routine it called before)."""
+    for i in range(len(pcs) - 1, 0, -1):
+        if not 0 <= pcs[i] - pcs[i - 1] <= 4 and transfer(mem, pcs[i - 1]) == 'ret':
+            return pcs[i:]
+    return pcs
 
 
 def transfer(mem, frm):
@@ -416,12 +456,14 @@ def cmd_writers(args):
 
     class WatchMem(list):
         def __setitem__(self, i, v):
-            if i == target:
+            if i == target or args.word and i == target + 1:
                 old = list.__getitem__(self, i)
                 fr = regs[T] // psim.frame_duration - f0
                 rec = found.get(psim.cur_pc)
                 if rec is None:
-                    found[psim.cur_pc] = rec = [0, list(recent), (fr, old, v), 0, {}]
+                    before = straight(mem, recent + [psim.cur_pc])[:-1]
+                    found[psim.cur_pc] = rec = [0, before, (fr, old, v), 0, {}, set()]
+                rec[5].add(i - target)
                 rec[0] += 1
                 rec[3] = v
                 path = tuple([j for lv in levels for j in lv][-args.depth:])
@@ -485,13 +527,15 @@ def cmd_writers(args):
     dis = disassembler(list(mem))
     if not found:
         print('no writes to %s in frames %d-%d' % (hexdec(target), args.start, args.frames))
-    for pc, (count, before, first, last, paths) in sorted(found.items()):
+    for pc, (count, before, first, last, paths, part) in sorted(found.items()):
         if pc < 0:
             print('interrupt (a stack push): %d writes' % count)
             continue
         op, props = proposals(dis, pc, [p for p in before if p != pc])
-        print('PC=%s %-16s %s  %d writes, first frame %d %d->%d, last value %d'
-              % (hexdec(pc), op, where(pc), count, first[0], first[1], first[2], last))
+        print('PC=%s %-16s %s  %d writes%s, first frame %d %d->%d, last value %d'
+              % (hexdec(pc), op, where(pc), count,
+                 {(0,): ' (low byte)', (1,): ' (high byte)'}.get(tuple(part), '')
+                 if args.word else '', first[0], first[1], first[2], last))
         for p in before[-3:]:
             if p != pc:
                 print('    before: $%04X %s' % (p, instr(dis, p)[0]))
@@ -505,9 +549,10 @@ def cmd_writers(args):
                 print('      %4dx  %s' % (n, '  '.join(
                     '$%04X %s [%s] ->' % (f, instr(dis, f)[0], where(f) or '?') for f, t in path)
                     or '(no call or jump since the run started)'))
-                block = never(dis, path[-1][0]) if path else None
+                block = never(dis, path[-1][0], path[-1][1], pc) if path else None
                 if block:
                     print('             block this path: %s' % block)
+                    print('             (check: code after the jump may reach the write too)')
 
 
 # --- check -----------------------------------------------------------------
@@ -522,16 +567,27 @@ def cmd_check(args):
 
         def on_frame(n, mem, rec=rec, label=label):
             for a in args.addr:
-                v = mem[a]
+                v = mem[a] + (256 * mem[a + 1] if args.word else 0)
                 if not rec['vals'][a] or rec['vals'][a][-1][1] != v:
                     rec['vals'][a].append((n, v))
             rec['scr'].append(short_hash(mem[0x4000:0x5B00]))
             if label == 'patched' and n in shots:
                 png(mem[0x4000:0x5B00], shots[n])
-        sim = run(args, on_frame, pokes)
+        rec['ran'] = set()
+        sim = run(args, on_frame, pokes, rec['ran'])
         rec['pc'] = sim.registers[PC]
+        for h in args.hits:
+            run(args, lambda n, mem: None, pokes, None, h)
+            rec.setdefault('hits', {})[h] = run.hits
         runs.append((label, rec))
     (_, a), (_, b) = runs
+    ran = sorted(x for x, _ in args.poke if x in b['ran'])
+    print('patched bytes executed as code: %s' % (
+        ', '.join('%d' % x for x in ran) if ran else 'none (data, or code the input did '
+        'not reach: then the run proves nothing about it)'))
+    for h in args.hits:
+        print('%s %s reached: original %d times, patched %d times' % (
+            hexdec(h), Where()(h), a['hits'][h], b['hits'][h]))
     for adr in args.addr:
         for label, rec in runs:
             vals = [v for _, v in rec['vals'][adr]]
@@ -578,18 +634,23 @@ def cmd_pok(args):
         args.snapshot, args.poke = args.snapshot_in, []
         sim, _ = make_sim(args, python=True)
         mem = sim.memory
+    pristine = list(mem) if mem is not None else None
+    select = {int(x) for x in args.select.split(',')} if args.select else None
     bad = 0
-    for name, pokes in trainers:
-        print(name)
+    for n, (name, pokes) in enumerate(trainers, 1):
+        chosen = select is None or n in select
+        print('%d. %s%s' % (n, name, '' if chosen or not args.apply else '   (not applied)'))
         for bank, a, v, orig in pokes:
             note = ''
-            if mem is not None and mem[a] != orig:
-                note = '   snapshot has %d, not %d' % (mem[a], orig)
+            if pristine is not None and pristine[a] != orig:
+                note = '   snapshot has %d, not %d' % (pristine[a], orig)
                 bad += 1
             print('  POKE %d,%s   ($%04X: %02X -> %s)%s' % (
                 a, 'ask' if v == 256 else v, a, orig, 'ask' if v == 256 else '%02X' % v, note))
-            if args.apply and v < 256:
-                mem[a] = v
+            if args.apply and chosen:
+                if v == 256 and args.ask is None:
+                    sys.exit('POKE %d asks for a value: give it with --ask N' % a)
+                mem[a] = args.ask if v == 256 else v
     if args.apply:
         ram, registers, st, machine = get_state(sim)
         write_snapshot(args.apply, ram, registers, st, machine)
@@ -605,6 +666,22 @@ def half_rows(high):
     """The keys a read of port high*256+$FE sees (a 0 bit selects a row)."""
     rows = [zxrun.ROWS[r] for r in range(8) if not high & (1 << r)]
     return ' | '.join(rows) if rows else 'no row'
+
+
+def bits_tested(e, a):
+    """The key bits the instructions after the IN at a look at: a mask from
+    BIT b,A, AND n or CP n (the keys held for CP), or None."""
+    after = [i.upper().replace(' ', '') for x, i, _ in e.instr if x > a][:3]
+    for i in after:
+        if i.startswith('BIT') and i.endswith(',A'):
+            return 1 << int(i[3])
+        if i.startswith('AND$') and len(i) == 6:
+            return int(i[4:], 16) & 0x1F
+        if i.startswith('CP$') and len(i) == 5:
+            return ~int(i[3:], 16) & 0x1F
+        if not i.startswith(('CPL', 'LD')):
+            return None
+    return None
 
 
 def port_of(e, a, ins):
@@ -651,6 +728,13 @@ def cmd_keys(args):
                     note = 'Kempston'
                 elif port & 1 == 0:
                     note = 'keys %s' % half_rows(port >> 8)
+                    mask = bits_tested(e, a)
+                    if mask == 0x1F:
+                        note += ', any of them'
+                    elif mask:
+                        rows = [zxrun.ROWS[r].split() for r in range(8) if not port >> 8 & (1 << r)]
+                        note += ', tests %s' % ' '.join(
+                            '|'.join(row[b] for row in rows) for b in range(5) if mask & (1 << b))
                 else:
                     note = 'port $%04X' % port
             elif u.startswith(('CALL', 'JP')) and not u.startswith('JP (') and '$' in u:
@@ -728,6 +812,8 @@ def main():
         p.add_argument('--keep', type=int, default=64, help='changes kept per address')
         if name == 'trace':
             p.add_argument('addr', nargs='+', type=addr)
+            p.add_argument('--word', action='store_true',
+                           help='each ADDR is a 16-bit word (low byte first)')
             continue
         p.add_argument('--changes', type=lambda s: tuple(int(x) for x in s.split('-')),
                        metavar='LO-HI')
@@ -737,6 +823,7 @@ def main():
     p = runner('writers')
     p.add_argument('addr', nargs=1, type=addr)
     p.add_argument('--depth', type=int, default=2, help='jumps shown per path (default 2)')
+    p.add_argument('--word', action='store_true', help='ADDR is a 16-bit word: watch ADDR+1 too')
     p.add_argument('--paths', type=int, default=0, help='paths shown (default 8, only when '
                    'there are several)')
     p.add_argument('--from', dest='start', type=int, default=0, metavar='F')
@@ -744,12 +831,17 @@ def main():
     p.add_argument('--with', dest='with_', action='append', default=[], metavar='A,V',
                    type=lambda s: tuple(addr(x) for x in s.split(',')),
                    help='a POKE applied to both runs (a start room that reaches the hazard)')
+    p.add_argument('--hits', action='append', default=[], type=addr, metavar='ADDR',
+                   help='count the passes through ADDR in both runs (deaths: the kill routine)')
     p.add_argument('--addr', action='append', default=[], type=addr)
     p.add_argument('--shot', action='append', default=[], metavar='F:PNG')
+    p.add_argument('--word', action='store_true', help='each --addr is a 16-bit word')
     p = sub.add_parser('pok')
     p.add_argument('file')
     p.add_argument('--apply', nargs=2, metavar=('SNAP', 'OUT'))
     p.add_argument('--check', metavar='SNAP')
+    p.add_argument('--select', metavar='N,N', help='with --apply: only these POKEs (numbers as listed)')
+    p.add_argument('--ask', type=int, metavar='V', help='with --apply: the value for POKEs that ask (256)')
     sub.add_parser('keys')
     p = sub.add_parser('keytab')
     p.add_argument('addr', type=addr)

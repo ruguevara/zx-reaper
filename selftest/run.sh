@@ -58,6 +58,7 @@ poke=$(sed -n 's/.*try POKE \([0-9]*,[0-9]*\) *(DEC A -> NOP.*/\1/p' poke.log)
 test -n "$poke" || { cat poke.log; exit 1; }
 python3 tools/zxpoke.py check re/orig.z80 --input tests/inputs/wander.txt --poke $poke --addr 0x$timer > poke.log
 grep -q 'patched  changes    0' poke.log || { cat poke.log; exit 1; }
+grep -q "patched bytes executed as code: ${poke%,*}" poke.log || { cat poke.log; exit 1; }
 printf 'NFrozen timer\nZ  8 %s %s\nY\n' "${poke%,*}" "${poke#*,} 61" > re/pokes.pok
 make -s pokes | tail -1
 python3 tools/zxpoke.py pok re/pokes.pok --apply re/orig.z80 build/poked.z80 > /dev/null

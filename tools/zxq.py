@@ -69,10 +69,19 @@ FLOW = re.compile(r'^(CALL|JP|JR|DJNZ|RST)\b')
 
 
 def parse_addr(s):
+    """$8000, 0x8000, 32768, or a label from the skool files (Label+N)."""
     s = s.strip()
-    if s.startswith('$'):
-        return int(s[1:], 16)
-    return int(s, 0)
+    try:
+        return int(s[1:], 16) if s.startswith('$') else int(s, 0)
+    except ValueError:
+        pass
+    name, _, off = s.partition('+')
+    if os.path.isdir(SKOOL_DIR):
+        for e in load():
+            for a, label in e.labels.items():
+                if label == name:
+                    return a + (int(off, 0) if off else 0)
+    sys.exit('not an address or a label: %s' % s)
 
 
 class Entry:

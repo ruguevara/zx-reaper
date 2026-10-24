@@ -110,6 +110,28 @@ stage 5, 128K and AY, protected and turbo loaders (such games are better
 started from a snapshot than from the tape), games that need timing exact
 to memory contention.
 
+## POKEs and cheats
+
+The skill `zx-poke` and `tools/zxpoke.py` find POKEs (infinite lives, time,
+start room or level, invulnerability, the game's constants) and the cheats
+the developers left in, and check each one in the simulator: the same input
+runs with and without the POKE, and a POKE counts only when the run reaches
+the event and the patched game still plays. The results go into
+`re/pokes.md` and `re/pokes.pok` (the World of Spectrum format, which
+emulators load).
+
+- Developed on Jet Set Willy: 11 POKEs and the WRITETYPER cheat, its word
+  decoded from the key table and typed in the simulator. Six POKEs are the
+  published ones byte for byte; the other five are different patches with
+  the same effect ([record](examples/jet-set-willy/re/pokes.md)).
+- Then run blind on Hungry Horace by one subagent in 13 minutes: 23 POKEs,
+  every one checked by a run. Both published POKEs are among them, one the
+  same byte, the other a different byte at the same address with the same
+  effect; no developer cheat, with the reasons
+  ([record](examples/hungry-horace/re/pokes.md),
+  [comparison](examples/hungry-horace/re/pokes-comparison.md)). Its list of
+  problems became fixes in the tool and rules in the skill.
+
 ## Documents
 
 | Document | What |
@@ -222,6 +244,7 @@ Each skill is one procedure with a done criterion, copied into every project
 | `zx-document` | 2 | the article in `docs/`, top down, with a gallery rendered from the game's bytes | written, audited, links resolve |
 | `zx-port` | 2, 3 | models that prove annotations; the port to Python routine by routine against the Z80 | routines pass `make diff`; the port passes `make port-test` |
 | `zx-clean` | 4 | the port rewritten as clean logic over plain state, assets as editable files | `make game-test` passes against stage 3 |
+| `zx-poke` | after 2 | POKEs and the developers' cheats: the variable, the code that writes it, the patch, a run that proves it | every POKE in `re/pokes.md` observed or marked inferred; `make pokes` passes |
 
 ## Tools
 
@@ -236,6 +259,7 @@ Each skill is one procedure with a done criterion, copied into every project
 | `tools/zxdiff.py` | differential tests: a Z80 routine against a Python model or a stage 3 port function on generated cases by kind, with its T-states (`--tstates` per kind); `--dump` writes golden cases for a C port |
 | `tools/zxcompare.py` | compare a skool disassembly with a reference: bytes, classification, boundaries, documentation, magic numbers |
 | `tools/zxport.py` | stage 3: `labels.py` and `variables.py` (typed data labels) from the build, the 48K RAM image of a snapshot, and the whole-game check that replays `zxrun.py --record` runs |
+| `tools/zxpoke.py` | POKE search: variables by value or by history (`search`, `profile`, `trace`), the code that writes them with proposed patches and the paths that reach it (`writers`), a run with and without the POKEs (`check`), keyboard reads and key tables for cheats (`keys`, `keytab`), .pok files (`pok`) |
 | `tools/zxdoctor.py` | readiness check: tools, versions, and what a project is missing, with the fixing command |
 
 Working registers in every project: `re/questions.md` (what the work must

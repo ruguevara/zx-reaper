@@ -29,7 +29,9 @@ list is checked and written down; then compare (end of this skill).
 
 List the events the POKEs are about: losing a life by each cause, energy or
 ammo use, collecting, the clock, changing room or level, finishing a level,
-game over. Each needs an input script (`tests/inputs/` or a scratch file)
+game over. Then the game's constants, which published lists rarely have:
+points per object, the extra-life threshold, how long a power-up lasts, the
+game speed, how many enemies come out and when, how they chase. Each needs an input script (`tests/inputs/` or a scratch file)
 that reaches it, and the frames where it happens, read from screenshots
 (`zxrun.py --shots-every 25:/tmp/s`, view a few) or from `--text`. Random
 play reaches deaths and room changes; collecting, later levels and endings
@@ -46,7 +48,9 @@ fast for many action games).
 
 `zxpoke.py profile` when you know roughly when things happen but not the
 values: every address that changes after `--from`, with its history,
-filtered.
+filtered. Keep the window inside one game (`--from` after the start,
+`--frames` before the game over): a new game resets the lives, and the
+reset is a jump the `--step 1` filter throws out with the variable.
 - lives: `--changes 1-9 --max 10 --step 1` (a few steps of 1 down);
 - a timer or clock: `--step 1` with more changes, or digits shown as text
   (ASCII $30-$39 in the history);
@@ -73,6 +77,10 @@ table, or in the code that copies it).
 Counting up or down: items are often a count of the ones left, or 256-N
 counting up to 0. A value may be kept only in the screen digits (the game
 reads its own score from the screen): then the variable is the screen.
+Timers and scores are often 16-bit words, low byte first: `trace --word`,
+`check --word`, `writers --word` read both bytes; a byte history of a word
+shows the low byte only. The operand of `LD HL,$015E` is $5E at the address
+after the opcode and $01 after that.
 
 ## 3. Find the code: `zxpoke.py writers`
 
@@ -86,18 +94,26 @@ patches it proposes:
 - the `LD A,n` before a store at a new game: the starting value (lives,
   level, room, ammo; POKE address of n, N);
 - a `JR cc`/`JP cc` before the write that jumps past it -> `JR` (24) or
-  `JP` (195): the update is skipped (a clock).
+  `JP` (195): the update is skipped (a clock);
+- the `DEC rr` before a 16-bit store -> NOP (a timer that never runs out),
+  the `LD rr,nn` before it: the value, low byte first.
 When a writer is reached in several ways (a kill routine called from each
 cause of death, a new-game routine reached from the title and from the code
 check), it lists the paths, the last `--depth` jumps of each, and how to
 block each path (`JR cc` -> offset 0, `JP cc` and `CALL cc` -> NOPs, `RET
 cc` -> NOP). The input only shows the paths it took: `zxq.py refs` on the
-routine's entry lists every jump to it, one per cause.
+routine's entry lists every jump to it, one per cause. A blocked jump
+helps only if the code after it does not run into the write too; `check`
+shows it.
 
 The proposals are mechanical. Read the routine (`zxq.py show`) and choose:
 - one byte where possible: a compare's operand moved out of range (`CP $0C`
   -> `CP 16`: no fall is high enough), a `JR cc` made `JR`, a `RET` (201)
-  as the first byte of a test routine;
+  as the first byte of a test routine. A 3-byte `JP cc,nn` or `CALL cc,nn`
+  is disarmed in one byte by making it `LD HL,(nn)` (42) where HL is free,
+  by a condition the flags never meet there (`JP Z` -> `JP C` after an `OR`,
+  which clears carry), or by moving its target onto a nearby `RET` (one
+  byte of the address);
 - the master switch over the symptom: skip a whole update rather than
   freeze one digit of it (infinite time froze only the units digit when the
   digit's `INC` was removed);
@@ -117,19 +133,29 @@ run still changes the screen at the end. A POKE is `observed` when:
   screenshot after the event looks right, and a long run (20,000 frames or
   more) does not crash or stall;
 - a starting value is checked at the extremes too (0, 1, 9, 255): large
-  values overflow displays and loops (one Willy drawn per life).
+  values overflow displays and loops (one Willy drawn per life);
+- `patched bytes executed as code` names the patched code the run reached:
+  a code POKE the input never ran is not checked by that run, however long
+  (data POKEs are read, not executed, and are not listed);
+- `--hits ADDR` counts passes through an address in both runs: the kill
+  routine counts deaths, a level's start counts levels.
+"First differ at frame N" can be a few T-states of shifted timing (a
+`RET` instead of a longer path), not a visible change: look at screenshots
+before calling it an effect.
 Anything else is `inferred`, with what is missing.
 
-`zxpoke.py pok re/pokes.pok --apply re/orig.z80 /tmp/cheat.z80` writes a
-patched snapshot to play in Fuse.
+`zxpoke.py pok re/pokes.pok --apply re/orig.z80 /tmp/cheat.z80 --select
+1,4 --ask 9` writes a patched snapshot to play in Fuse with POKEs 1 and 4
+(numbers as `pok` lists them), 9 for any that asks for a value.
 
 ## 5. Developer cheats and debug code
 
 Developers left cheat words, key combinations, level selects and test code.
 Where to look:
 - `zxpoke.py keys`: every keyboard read (IN with the keys of the half-rows
-  it reads, the ROM's key routines, LAST_K and KSTATE), by entry, marked
-  `NEVER RAN` when no coverage map has it. Suspects: reads outside the
+  it reads and, where a `BIT`, `AND` or `CP` follows, the keys it tests;
+  the ROM's key routines, LAST_K and KSTATE), by entry, marked `NEVER RAN`
+  when no coverage map has it. Suspects: reads outside the
   control, pause and menu routines; reads of several rows at once or of
   unusual keys; reads that never ran (code behind a condition no input
   met); keys read while loading or on the title screen.
@@ -173,5 +199,7 @@ Put them in a table next to yours in `re/pokes.md` (or
 `re/comparison.md`): same, different patch with the same effect (run both
 with `check`), found only by them (why not here: no input reached it, a
 kind of POKE not looked for), found only here. Bug-fix POKEs (data
-corrections) are not cheats; list them apart. What a published POKE shows
+corrections) are not cheats; list them apart. Magazine tips that are not
+POKEs ("touch the bell and step back, it stays") are often bugs: look for
+each in `docs/06-tricks.md` and reproduce it. What a published POKE shows
 you missed becomes a rule in this skill.
