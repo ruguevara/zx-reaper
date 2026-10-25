@@ -1,11 +1,12 @@
 # l'Abbaye des Morts — reverse-engineered sources
 
-l'Abbaye des Morts for the 48K ZX Spectrum (DaRkHoRaCe and Jerri, 2014,
-freeware; after Locomalito's 2010 game), taken through stages 1 and 2 of
-[ZX-REAPER](../../README.md) with no disassembly or write-up of the game read
-during the work. The sources build a tape byte-identical to the original
-(zxart.ee, production 189705, `AbbayeDesMorts.tzx.zip`, `ABBAYE.TZX`): the
-loader, its packer and both packed tape blocks included.
+[l'Abbaye des Morts](https://zxart.ee/prod/189705) for the 48K ZX Spectrum
+(DaRkHoRaCe and Jerri, 2014, freeware; after Locomalito's 2010 game), taken
+through stages 1 and 2 of [ZX-REAPER](../../README.md) with no disassembly or
+write-up of the game read during the work. The sources build a tape
+byte-identical to the original (the release file on
+[zxart.ee](https://zxart.ee/prod/189705), `AbbayeDesMorts.tzx.zip`,
+`ABBAYE.TZX`): the loader, its packer and both packed tape blocks included.
 
 The tape is not in git. Put it into `original/game.tzx`, then:
 
