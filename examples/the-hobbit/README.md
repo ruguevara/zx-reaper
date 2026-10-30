@@ -32,6 +32,7 @@ Tools: sjasmplus, Python 3 with SkoolKit 10.1 (`pip install -r ../../requirement
 | `src/constants.asm` | named numbers: location, object and character ids, directions, record fields, flags, keys, ports |
 | `src/loader03.bas` | the BASIC loader, lossless text |
 | `scripts/text.py` | decodes the dictionary, the messages and the command table (`words`, `msg ADDR`, `all`, `verbs`) |
+| `scripts/picdsl/` | the pictures in smaller encodings, each decoded and drawn again and compared with the original ([docs/10-smaller-pictures.md](docs/10-smaller-pictures.md)) |
 | `re/notes.md` | memory map and every data format: dictionary, messages, locations, objects, NPC scripts, timers, pictures; relocation |
 | `re/ids.md` | location, object and character ids, NPC records, timers |
 | `re/questions.md`, `re/findings.md` | what the work had to answer; the claims with evidence |

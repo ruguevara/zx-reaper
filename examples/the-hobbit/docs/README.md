@@ -47,6 +47,9 @@ done blind, without any earlier disassembly or description of the game.
 8. [Porting notes](08-porting.md)
 9. [The pictures as vectors](09-vector.md): the 22 pictures as SVG, fills
    traced into polygons
+10. [Smaller pictures](10-smaller-pictures.md): the picture commands in a
+    language with relative moves, copies, loops and calls, coded in bits:
+    36% smaller drawing the same, 41% with lines moved by up to a pixel
 
 ## How to read the links
 
