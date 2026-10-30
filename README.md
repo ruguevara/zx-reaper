@@ -142,7 +142,7 @@ emulators load).
 | [docs/stage3.md](docs/stage3.md) | stage 3: the library, the port's shape, the replay check, results |
 | [docs/stage4.md](docs/stage4.md) | stage 4: the clean state, the bridge to stage 3, the checks, results |
 | [examples/hungry-horace/docs/](examples/hungry-horace/docs/README.md) | the article on how Hungry Horace works, with its gallery |
-| [examples/the-hobbit/docs/](examples/the-hobbit/docs/README.md) | the article on how The Hobbit works, with its gallery |
+| [examples/the-hobbit/docs/](examples/the-hobbit/docs/README.md) | the article on how The Hobbit works, with its gallery and the 22 pictures as SVG ([09-vector](examples/the-hobbit/docs/09-vector.md)) |
 
 The method and the run reports are also in Russian (`docs/*.ru.md`).
 

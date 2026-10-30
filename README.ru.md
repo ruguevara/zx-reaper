@@ -120,7 +120,7 @@ Skill `zx-poke` и `tools/zxpoke.py` ищут POKE (бесконечные жи�
 | [docs/stage3.md](docs/stage3.md) | этап 3: библиотека, устройство порта, проверка повтором, результаты |
 | [docs/stage4.md](docs/stage4.md) | этап 4: чистое состояние, мост к этапу 3, проверки, результаты |
 | [examples/hungry-horace/docs/](examples/hungry-horace/docs/README.md) | статья о том, как устроен Hungry Horace, с галереей |
-| [examples/the-hobbit/docs/](examples/the-hobbit/docs/README.md) | статья о том, как устроен The Hobbit, с галереей |
+| [examples/the-hobbit/docs/](examples/the-hobbit/docs/README.md) | статья о том, как устроен The Hobbit, с галереей и 22 картинками в SVG ([09-vector](examples/the-hobbit/docs/09-vector.md)) |
 
 На русском — метод и отчёты о прогонах; заметки об этапах и статьи — только
 на английском.
