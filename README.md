@@ -103,7 +103,7 @@ of its run.
    against each slip. The missed bugs are another matter: finding every bug
    in a program is an open problem even given a specification, and the
    references together missed the 14 that this run found.
-4. **l'Abbaye des Morts** (DaRkHoRaCe and Jerri, 2014, freeware, after
+4. **[l'Abbaye des Morts](https://zxart.ee/prod/189705)** (DaRkHoRaCe and Jerri, 2014, freeware, after
    Locomalito's PC game), [`examples/abbaye-des-morts/`](examples/abbaye-des-morts/):
    the most recent, stages 1 and 2 and the article, done in one session with
    subagents working in parallel (classification, annotation, review, audit,
