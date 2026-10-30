@@ -1,0 +1,6 @@
+; Beeper effect being played (0 = none)
+;
+; Number of the sound effect that #R$871A is playing (set from #R$854F when it starts one, cleared when the effect
+; ends). A new request in #R$854F replaces the effect being played at once (observed, F104).
+@label=SoundPlaying
+g$854E DEFB $00

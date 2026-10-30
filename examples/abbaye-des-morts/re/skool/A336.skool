@@ -1,0 +1,22 @@
+; Title screen key loop and controls menu
+;
+; Entered from the start of the game #R$85FC at $A339 with the title screen on the screen (the script #R$A526 when a
+; game restarts after Game Over or the ending; the first time, start-up jumps to $8606 past that drawing and the
+; loading picture, which shows the same three prompts, stays); the interrupt runs #R$A43D, which keeps #R$A2D2 up to
+; date. It waits for no key to be held, then for a key: ENTER returns to the caller (the game starts), SPACE calls
+; #R$A31E (128K music only; the loading picture says "hold Space for info" but on the 48K nothing happens), C opens
+; the controls screen, anything else is ignored.
+; .
+; The controls screen: #R$A44D saves the middle of the screen and the attributes, then the scripts #R$A493, #R$A4DD
+; and (through #R$A47D) #R$A4B6 draw it: line 1 is the Kempston joystick (on or off), line 2 the keyboard with the
+; names of the keys, ENTER goes back to the title (the entry at $A336 restores the screen with #R$A450 and waits
+; again). 1 toggles the joystick (#R$A32D). 2 redefines the keys: it blanks the key-name buffer #R$A4F2, asks for
+; JUMP, CROUCH, LEFT and RIGHT in turn with #R$A3B9 (prompts at #R$A3A9), copies the JUMP pair into the fifth pair,
+; runs the cheat check #R$A422 and draws the controls screen again.
+; .
+; Hardware: waits with HALT for the frame interrupt; draws through the script interpreter #R$9D5F; keys come from the
+; interrupt routine #R$A43D.
+;
+; O:A $0D (ENTER) when the loop ends
+@label=TitleMenu
+c$A336 CALL $A450    ; restore the title screen (coming back from the controls screen)

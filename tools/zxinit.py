@@ -136,7 +136,7 @@ def main():
     open(os.path.join(p, 'tape/tape.txt'), 'w').write('\n'.join(out_manifest) + '\n')
 
     if not savebins:
-        sys.exit('no headed CODE blocks found: custom loader. Run the zx-loader skill by hand.')
+        sys.exit('no headed CODE blocks found: custom loader. Follow the zx-init skill (non-standard tapes) by hand.')
     lo = min(s for s, n, f in savebins)
     hi = max(s + n for s, n, f in savebins)
     cmd = ['snapmod.py']

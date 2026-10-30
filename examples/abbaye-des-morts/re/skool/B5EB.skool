@@ -1,0 +1,44 @@
+; Entity handler: skeleton archer (rooms 17 and 21)
+;
+; The skeleton archers of "The wheel of faith" (room 17, three of them) and "Evil church" (room 21, one): handler of room
+; object kind 10 (#R$B028, behaviour block #R$951B). They stand still, face the monk, aim and throw an arrow every 80
+; frames; an arrow that touches the monk kills him (observed in room 17), and the archer's own hit box is tested the
+; same way. Entity handlers are not called: the slot walker #R$A5E9 sets SP to a slot of #R$C100 and RETs, so the handler is
+; entered with SP at slot+2 and finds its state on the stack.
+; .
+; Slot (the layout of the room enemies made by #R$89ED): +2 and +4 words not used, +6 word x and +8 word y (8.8, high
+; bytes in 2-pixel units), +$A word not used (popped and dropped), +$C word hit box offset (y, x), +$E word hit box far corner
+; (y, x), +$10 pointer to the sprite block (attribute, height, width, then a pointer to the frame table for facing
+; left and one for facing right, 2 frames each), +$12 byte shot countdown and +$13 its reload ($50), +$14 byte frame
+; number and +$15 number of frames (2). The archer is one cell wide in x steps of 4 (x is a multiple of 4, so no
+; shifted copies of the sprite are needed: A' is 0 for the frame lookup).
+; .
+; This routine reads the position, stores it as the start position of the arrow (SPAWN_POSITION), decides which way to
+; face by comparing the monk's x (#R$A8A1, high byte; a negative value counts as 0) with its own, and chooses the arrow
+; template (#R$BC92 when the monk is to the left, #R$BCA2 otherwise) and the frame table (IY = #R$B3D4, the left one,
+; or #R$B3D2, which skips it to take the right one). It goes on at #R$B611, which the stone head #R$B5D6 shares.
+;
+; SP Slot address + 2 (the handler word was popped by the RET that entered the routine)
+@label=UpdateArcher
+c$B5EB POP BC        ; +2, not used
+ $B5EC POP BC        ; +4, not used
+ $B5ED POP HL        ; x word
+ $B5EE LD D,H        ; D = x
+ $B5EF POP HL        ; y word
+ $B5F0 LD E,H        ; E = y
+ $B5F1 LD H,D        ;
+ $B5F2 LD L,E        ; HL = x (H) and y (L), 2-pixel units
+ $B5F3 LD ($5DFE),HL ; start position of an arrow: SPAWN_POSITION
+@isub=LD A,(PlayerX+1)
+ $B5F6 LD A,($A8A2)  ; x of the monk (high byte)
+ $B5F9 BIT 7,A       ; negative: treat as 0
+ $B5FB JR Z,$B5FE    ;
+ $B5FD XOR A         ;
+*$B5FE CP H          ; monk left of the archer: carry
+ $B5FF EXX           ; alternate set: HL' and DE' the two templates
+ $B600 LD IY,$B3D4   ; facing left: the first frame table
+ $B604 LD HL,$BC92   ; ArrowLeftTemplate
+ $B607 LD DE,$BCA2   ; ArrowRightTemplate
+ $B60A JR C,$B611    ; monk on the left: keep left
+ $B60C EX DE,HL      ; facing right: HL' = ArrowRightTemplate
+ $B60D LD IY,$B3D2   ; the second frame table

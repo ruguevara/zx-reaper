@@ -1,0 +1,95 @@
+; Spawn one room object from its record
+;
+; Finds a free slot (#R$8A6E) and fills it from the 11-byte record of #R$8B8F. Slot: +0 word handler, the entry of the
+; record's kind (+1) in #R$B028; +2 word speed, the record byte +2 times 4; +4 and +5 the two limits of the patrol
+; (record +7, +8); +6 and +8 the fractions of x and y, 0; +7 x (record +4); +9 y (record +5); +$A and +$B the timer and its
+; reload (record +6); +$C word hit box offset and +$E word hit box far corner, the first four bytes of the behaviour block
+; the record points to (+9); +$10 word the address after the fifth byte of that block (where the frame data starts);
+; +$12 and +$13 the animation counter and its reload (record +3); +$14 frame number, 0; +$15 number of frames, the fifth
+; byte of the block. The layout is described at #R$C100.
+; .
+; As in #R$897E, the carry of #R$8A6E is not tested (no problem with the shipped tables). All registers but IX and IY
+; are preserved.
+;
+; HL Address of the room object record
+; O:IX Address of the slot
+@label=SpawnRoomObject
+c$89ED PUSH AF
+ $89EE PUSH HL
+ $89EF PUSH DE
+ $89F0 PUSH BC
+ $89F1 CALL $8A6E           ; IX = a free slot
+ $89F4 INC HL               ; kind
+ $89F5 LD E,(HL)
+ $89F6 INC HL
+ $89F7 LD D,$00
+ $89F9 EX DE,HL             ; HL = kind, DE = record + 2
+ $89FA ADD HL,HL            ; two bytes per handler
+ $89FB PUSH DE              ; keep the record pointer
+ $89FC LD DE,$B028          ; EntityHandlers
+ $89FF ADD HL,DE
+ $8A00 LD A,(HL)            ; handler address ...
+ $8A01 LD (IX+$00),A
+ $8A04 INC HL
+ $8A05 LD A,(HL)
+ $8A06 LD (IX+$01),A        ; ... to the slot
+ $8A09 POP DE               ; DE = record + 2
+ $8A0A LD A,(DE)            ; speed byte ...
+ $8A0B INC DE
+ $8A0C LD L,A
+ $8A0D LD H,$00
+ $8A0F ADD HL,HL            ; ... times 4 ...
+ $8A10 ADD HL,HL
+ $8A11 LD (IX+$02),L        ; ... is the speed word (+2)
+ $8A14 LD (IX+$03),H
+ $8A17 LD A,(DE)            ; animation counter ...
+ $8A18 INC DE
+ $8A19 LD (IX+$12),A        ; ... and reload (+$12, +$13)
+ $8A1C LD (IX+$13),A
+ $8A1F XOR A                ; x and y fractions and the frame number = 0
+ $8A20 LD (IX+$06),A
+ $8A23 LD (IX+$08),A
+ $8A26 LD (IX+$14),A
+ $8A29 LD A,(DE)            ; x
+ $8A2A INC DE
+ $8A2B LD (IX+$07),A
+ $8A2E LD A,(DE)            ; y
+ $8A2F INC DE
+ $8A30 LD (IX+$09),A
+ $8A33 LD A,(DE)            ; timer ...
+ $8A34 INC DE
+ $8A35 LD (IX+$0A),A
+ $8A38 LD (IX+$0B),A        ; ... and its reload
+ $8A3B LD A,(DE)            ; lower limit of the patrol (+4)
+ $8A3C INC DE
+ $8A3D LD (IX+$04),A
+ $8A40 LD A,(DE)            ; upper limit (+5)
+ $8A41 INC DE
+ $8A42 LD (IX+$05),A
+ $8A45 EX DE,HL             ; HL = record + 9: the pointer to the behaviour block
+ $8A46 LD E,(HL)
+ $8A47 INC HL
+ $8A48 LD D,(HL)
+ $8A49 EX DE,HL             ; HL = behaviour block
+ $8A4A LD A,(HL)            ; hit box offset (+$C, +$D) ...
+ $8A4B INC HL
+ $8A4C LD (IX+$0C),A
+ $8A4F LD A,(HL)
+ $8A50 INC HL
+ $8A51 LD (IX+$0D),A
+ $8A54 LD A,(HL)            ; ... hit box far corner (+$E, +$F)
+ $8A55 INC HL
+ $8A56 LD (IX+$0E),A
+ $8A59 LD A,(HL)
+ $8A5A INC HL
+ $8A5B LD (IX+$0F),A
+ $8A5E LD A,(HL)            ; number of frames (+$15)
+ $8A5F INC HL
+ $8A60 LD (IX+$15),A
+ $8A63 LD (IX+$10),L        ; pointer to the frame data (+$10, +$11)
+ $8A66 LD (IX+$11),H
+ $8A69 POP BC
+ $8A6A POP DE
+ $8A6B POP HL
+ $8A6C POP AF
+ $8A6D RET

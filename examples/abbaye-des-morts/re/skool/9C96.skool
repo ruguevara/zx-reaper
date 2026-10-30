@@ -1,0 +1,21 @@
+; Draw the parchment frame from the layout at $71DF
+;
+; Draws the 24x11 cell frame of the parchment window. The layout (#R$71DF) starts with a word, row then column of the top-left cell, followed by 11 rows of 24 cells, one code per cell or per run; a 0 code ends it. Code 1 is followed by a count n: n blank cells (attribute B'); code k >= 2 is one frame tile, the 8x8 bitmap number k-2 of the 12 at #R$717F (attribute C'). Rows are drawn by #R$9CA5, cells by #R$9CB7.
+; .
+; The caller does EXX so that B' and C' hold the attributes (#R$9C52 sets them from its BC).
+; .
+; Hardware: writes the screen bitmap and the attribute file.
+;
+; B' Attribute of the blank (interior) cells
+; C' Attribute of the frame tile cells
+@label=DrawParchmentFrame
+c$9C96 LD HL,$71DF   ; layout address
+ $9C99 LD E,(HL)     ; DE = position: E row, D column
+ $9C9A INC HL        ;
+ $9C9B LD D,(HL)     ;
+ $9C9C INC HL        ;
+*$9C9D CALL $9CA5    ; one row of 24 cells
+ $9CA0 LD A,(HL)     ; next code: 0 = end of layout
+ $9CA1 OR A          ;
+ $9CA2 JR NZ,$9C9D   ;
+ $9CA4 RET           ;

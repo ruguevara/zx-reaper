@@ -1,0 +1,6 @@
+; Script opcode $80: end of script
+;
+; Pops the loop address pushed by #R$9D5F so that the RET returns to the caller of the interpreter (or of the subscript).
+@label=OpEnd
+c$9D7F POP HL        ; drop the loop address (HL = $9D5F)
+ $9D80 RET           ;

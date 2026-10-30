@@ -1,0 +1,6 @@
+; Script: "enabled"
+;
+; Printed after "1. Kempston " when the joystick is on (#R$A47D).
+@label=ScriptEnabled
+t$A4CC DEFM "enabled"
+ $A4D3 DEFB $80

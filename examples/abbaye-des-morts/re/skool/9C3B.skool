@@ -1,0 +1,20 @@
+; Draw one 8x8 tile bitmap into C consecutive screen cells
+;
+; Copies the same 8 bytes to the C cells that follow DE on one screen row (INC E per cell; the cells must not cross a 32-cell boundary). Used for the status bar (#R$9BF3, #R$9C1B).
+; .
+; Hardware: writes the screen bitmap.
+;
+; C Number of cells
+; DE Screen address of pixel row 0 of the first cell
+; HL Address of the 8 bitmap bytes (not advanced)
+; O:C 0
+@label=DrawTileCells
+c$9C3B PUSH HL       ;
+ $9C3C PUSH DE       ;
+ $9C3D CALL $9BCA    ; copy 8 bytes HL -> DE, DE steps down the 8 pixel rows
+ $9C40 POP DE        ;
+ $9C41 POP HL        ;
+ $9C42 INC E         ; next cell on the row
+ $9C43 DEC C         ;
+ $9C44 JR NZ,$9C3B   ;
+ $9C46 RET           ;

@@ -1,0 +1,11 @@
+; Intro text: strings 38-42, shown on the intro screen of room 0
+;
+; The Cathar story, printed by the script of room 0 (#R$726A): strings 38-40 (the Cathars expelled from the Languedoc
+; by the Catholic Church) at the top of the screen and 41-42 (Jean Raymond runs to escape the crusaders) at the
+; bottom. The game's text spells it "Lanquedoc".
+@label=IntroText
+t$927C DEFM $1E,"13th Century. The Cathars were"  ; string 38
+ $929B DEFM $1E,"being expelled by the Catholic"  ; string 39
+ $92BA DEFM $1B,"Church out of the Lanquedoc"  ; string 40
+ $92D6 DEFM $17,"The Cathar Jean Raymond"  ; string 41
+ $92EE DEFM $1F,"runs to escape the crusaders..."  ; string 42

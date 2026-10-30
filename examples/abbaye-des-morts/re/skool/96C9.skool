@@ -1,0 +1,34 @@
+; Bitmap copy chain going forward (first 21 of 31 LDI)
+;
+; Part of #R$95FF: copies one pixel row of a run of cells from the redraw buffers to the screen, from the first cell up
+; to the last, entered by the JR at #R$96C7. The chain goes on at #R$96F3.
+; .
+; Hardware: writes the screen bitmap (one byte of the pixel row for each cell).
+;
+; HL Address of the cell's byte in the pixel-row page of the redraw buffers
+; DE Screen bitmap address of the cell's byte
+; BC Decremented by every LDI (the value is not used)
+; O:HL Advanced by the number of LDIs executed
+; O:DE Advanced by the number of LDIs executed
+@label=CopyBitmapForward
+c$96C9 LDI           ;
+ $96CB LDI           ;
+ $96CD LDI           ;
+ $96CF LDI           ;
+ $96D1 LDI           ;
+ $96D3 LDI           ;
+ $96D5 LDI           ;
+ $96D7 LDI           ;
+ $96D9 LDI           ;
+ $96DB LDI           ;
+ $96DD LDI           ;
+ $96DF LDI           ;
+ $96E1 LDI           ;
+ $96E3 LDI           ;
+ $96E5 LDI           ;
+ $96E7 LDI           ;
+ $96E9 LDI           ;
+ $96EB LDI           ;
+ $96ED LDI           ;
+ $96EF LDI           ;
+ $96F1 LDI           ;

@@ -1,0 +1,8 @@
+; Satan has been turned into smoke
+;
+; 0, or $FF once #R$BB57 has seen the chalice taken (#R$8521) and has replaced Satan by the smoke object: it then
+; switches the music to track 7 (#R$8551), runs the script #R$82D4 to erase the twelve crosses and clears #R$8542.
+; Other entity routines (for instance #R$B6E6) test it and remove themselves while it is set, so that Satan's fire
+; disappears.
+@label=SatanSmoked
+g$8522 DEFB $00

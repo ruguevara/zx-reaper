@@ -1,0 +1,26 @@
+; Mirror one pixel line: copy bytes backwards with their bits reversed
+;
+; Reads C bytes from (HL) downwards (DEC L) and writes them upwards from DE, each byte replaced by its bit-reversed value
+; from the table at #R$C500 (built by #R$BE48 on room entry): the line is flipped left to right. Sets the alternate HL'
+; to $C5 for the table and uses its L' as the index, so the alternate set is clobbered.
+;
+; C Bytes in the line
+; HL Address of the last byte of the source line
+; DE Destination
+@label=MirrorPixelLine
+c$B006 EXX           ;
+@isub=LD H,PAGE_REDRAW_PIXELS
+ $B007 LD H,$C5      ; H' = page of the bit-reverse table
+ $B009 EXX           ;
+ $B00A LD B,C        ;
+@label=MirrorPixelLine_Byte
+*$B00B LD A,(HL)     ;
+ $B00C EXX           ;
+ $B00D LD L,A        ; L' = the byte
+ $B00E LD A,(HL)     ; its reverse from the table
+ $B00F EXX           ;
+ $B010 LD (DE),A     ;
+ $B011 DEC L         ;
+ $B012 INC E         ;
+ $B013 DJNZ $B00B    ;
+ $B015 RET           ;

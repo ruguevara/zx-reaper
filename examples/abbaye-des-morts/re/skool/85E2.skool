@@ -1,0 +1,11 @@
+; Frame routine of the game: sound effect, then the game frame
+;
+; The routine the interrupt handler #R$8585 calls each frame during the game and the intro room 0: #R$85FC puts its
+; address in #R$8504 after the title menu. It plays one step of the beeper sound effect (#R$871A) and jumps to the game
+; frame #R$A596. The sound step comes first: when an effect is playing it keeps the CPU for about 7,000 T-states
+; (observed), so the game logic of that frame starts later in the frame.
+; .
+; Hardware: the beeper, through #R$871A.
+@label=GameFrameRoutine
+c$85E2 CALL $871A
+ $85E5 JP $A596

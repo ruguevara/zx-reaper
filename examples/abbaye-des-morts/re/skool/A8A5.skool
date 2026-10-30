@@ -1,0 +1,103 @@
+; Probe the tiles around Jean and build his hit box
+;
+; Run first in every game frame (#R$A596). Does nothing when the player state is 0. Otherwise it turns the position
+; (X, Y: the high bytes of #R$A8A1 and #R$A8A3, 2-pixel units) into the hit box #R$8516 and samples the tile flag map
+; at points around the body with the probe routines below, one result per side: #R$A89C head, #R$A89D right, #R$A89E
+; feet (the row just under the sprite), #R$A89F left, and the hit flag #R$A8A0 (4 when a harmful tile, flag bit 2,
+; touches the body; the enemy tests #R$A87A may set it to $FF later in the frame). The player routine #R$AAC6 reads
+; these bytes.
+; .
+; Standing (any state but crouching): hit box x X+2..X+6, y Y+2..Y+12; head at (X+2 and X+5, Y+1), left at X+1 and
+; right at X+6 (y Y+3, Y+7, Y+11), feet at (X+2 and X+5, Y+12), harmful tiles anywhere on the ring of #R$A9D2 from
+; (X+2, Y+2). Crouching: hit box x X+1..X+8, y Y+7..Y+13; head at (X+2 and X+5, Y+6), left (X, Y+11), right (X+8,
+; Y+11), feet at (X+1, X+4 and X+7, Y+12), harmful tiles in the 3x2 block of #R$A990 from (X+1, Y+7).
+; .
+; Hardware: none; reads the tile flag map.
+@label=ProbePlayer
+c$A8A5 LD HL,($A8A3) ; H = Y
+ $A8A8 LD A,H        ;
+ $A8A9 LD HL,($A8A1) ; HL = (X, Y) in 2-pixel units
+ $A8AC LD L,A        ;
+ $A8AD LD A,($A894)  ; player state
+ $A8B0 OR A          ;
+ $A8B1 RET Z         ; none: nothing to do
+@isub=CP PLAYER_CROUCHING
+ $A8B2 CP $03        ;
+ $A8B4 JR NZ,$A903   ; not crouching
+; Crouching.
+ $A8B6 LD A,H        ; hit box x: X+1 .. X+8
+ $A8B7 ADD A,$01     ;
+ $A8B9 LD D,A        ;
+ $A8BA ADD A,$07     ;
+ $A8BC LD E,A        ;
+ $A8BD LD ($8516),DE ; (PlayerBoxXMax, PlayerBoxXMin)
+ $A8C1 LD A,L        ; hit box y: Y+7 .. Y+13
+ $A8C2 ADD A,$07     ;
+ $A8C4 LD D,A        ;
+ $A8C5 ADD A,$06     ;
+ $A8C7 LD E,A        ;
+ $A8C8 LD ($8518),DE ; (PlayerBoxYMax, PlayerBoxYMin)
+@isub=LD D,COLUMN_MASK
+ $A8CC LD D,$1F      ;
+ $A8CE LD BC,$0206   ; probe (X+2, Y+6) and (X+5, Y+6)
+ $A8D1 CALL $A96F    ;
+ $A8D4 LD A,E        ;
+ $A8D5 LD ($A89C),A  ; head
+ $A8D8 LD BC,$000B   ; (X, Y+11)
+ $A8DB CALL $A98B    ;
+ $A8DE LD A,E        ;
+ $A8DF LD ($A89F),A  ; left
+ $A8E2 LD BC,$080B   ; (X+8, Y+11)
+ $A8E5 CALL $A98B    ;
+ $A8E8 LD A,E        ;
+ $A8E9 LD ($A89D),A  ; right
+ $A8EC LD BC,$010C   ; (X+1, X+4, X+7; Y+12)
+ $A8EF CALL $A97A    ;
+ $A8F2 LD A,E        ;
+ $A8F3 LD ($A89E),A  ; feet
+ $A8F6 LD BC,$0107   ; 3x2 block from (X+1, Y+7)
+ $A8F9 CALL $A990    ;
+ $A8FC LD A,E        ;
+@isub=AND FLAG_HARMFUL
+ $A8FD AND $04       ; harmful tile class
+ $A8FF LD ($A8A0),A  ; hit flag
+ $A902 RET           ;
+; Standing, walking, jumping or falling.
+@label=ProbePlayer_Stand
+*$A903 LD A,H        ; hit box x: X+2 .. X+6
+ $A904 ADD A,$02     ;
+ $A906 LD D,A        ;
+ $A907 ADD A,$04     ;
+ $A909 LD E,A        ;
+ $A90A LD ($8516),DE ; (PlayerBoxXMax, PlayerBoxXMin)
+ $A90E LD A,L        ; hit box y: Y+2 .. Y+12
+ $A90F ADD A,$02     ;
+ $A911 LD D,A        ;
+ $A912 ADD A,$0A     ;
+ $A914 LD E,A        ;
+ $A915 LD ($8518),DE ; (PlayerBoxYMax, PlayerBoxYMin)
+@isub=LD D,COLUMN_MASK
+ $A919 LD D,$1F      ;
+ $A91B LD BC,$0201   ; (X+2 and X+5, Y+1)
+ $A91E CALL $A9B4    ;
+ $A921 LD A,E        ;
+ $A922 LD ($A89C),A  ; head
+ $A925 LD BC,$0103   ; (X+1; Y+3, Y+7, Y+11)
+ $A928 CALL $A9BF    ;
+ $A92B LD A,E        ;
+ $A92C LD ($A89F),A  ; left
+ $A92F LD BC,$0603   ; (X+6; Y+3, Y+7, Y+11)
+ $A932 CALL $A9BF    ;
+ $A935 LD A,E        ;
+ $A936 LD ($A89D),A  ; right
+ $A939 LD BC,$020C   ; (X+2 and X+5, Y+12)
+ $A93C CALL $A9B4    ;
+ $A93F LD A,E        ;
+ $A940 LD ($A89E),A  ; feet
+ $A943 LD BC,$0202   ; ring from (X+2, Y+2)
+ $A946 CALL $A9D2    ;
+ $A949 LD A,E        ;
+@isub=AND FLAG_HARMFUL
+ $A94A AND $04       ; harmful tile class
+ $A94C LD ($A8A0),A  ; hit flag
+ $A94F RET           ;

@@ -1,0 +1,6 @@
+; Cutscene finished flag
+;
+; Zero while a cutscene runs, nonzero when it is over. #R$88DE clears it, runs the cutscene frame loop and polls it
+; each frame; an actor sets it to 1 when its path script ends (#R$B1CF) or when its countdown reaches zero (#R$B97D).
+@label=CutsceneDone
+g$8501 DEFB $00

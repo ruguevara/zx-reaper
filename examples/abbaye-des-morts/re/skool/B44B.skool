@@ -1,0 +1,177 @@
+; Entity handler: the apparition that chases Jean (kind 8, room 11)
+;
+; The cyan grinning face that floats through the Cave of illusions (room 11; the only room record of kind 8). After a
+; start delay it moves toward Jean along both axes, through free space only, then faces Jean and is drawn (the tail
+; #R$B436/#R$B438). Entered with SP at slot+2, see #R$B2A6 for the stack scheme.
+; .
+; The start delay is the byte at slot+5 (30 frames in the room record): each frame it is decremented and, until it
+; reaches 0, the handler only draws the sprite (#R$B436). After that the byte is reset to 1, so that it drops to 0 on
+; every following frame. The movement then works in four steps. First, the tile flag map is sampled around the
+; sprite, which is 2 cells wide and 3 high at (x/4, y/4): the flags of the two cells of the top row (ProbeHead), of the
+; two cells right of rows 1 and 2 (ProbeRight), of the two cells under the bottom row (ProbeBelow) and of the two
+; cells left of rows 1 and 2 (ProbeLeft) are ORed in pairs (#R$8559-#R$855C) and a side counts as free when its class
+; (flag AND 7) is 0. Second, Jean's x and y (#R$A8A2, #R$A8A4; bit 7 set counts as 0) are compared with the
+; chaser's; each compare gives 0 (equal), 1 (Jean is smaller: left or above) or 2 (greater: right or below), and
+; the two codes are shifted into A' (whatever A' held before only reaches the bits above the low nibble) and make a
+; 4-bit move mask (x code in bits 3-2, y code in bits 1-0). Third, the mask is ANDed with the free
+; sides (bit 3 right, bit 2 left, bit 1 below, bit 0 above). Last, the speed is subtracted from or added to y for bits
+; 0 and 1 and to x for bits 2 and 3, so each axis is blocked separately (the apparition slides along a wall: it does not
+; move toward a side whose probed cells are not class 0), and it does not move on an axis on which it is level with Jean. Observed in room 11 with Jean at
+; x = $70, y = $40: after the delay the face moved diagonally from (x $40, y $24), 0.25 unit per frame on each axis.
+; .
+; Slot fields used: +2 word speed (8.8, $0040 = 0.25 unit of 2 pixels per frame), +5 byte start delay, +6 word x
+; (8.8), +8 word y (8.8); the sprite fields are described at #R$B2D4. Hit box and drawing as for the walkers.
+; .
+; Hardware: reads the tile flag map (through #R$6100) and writes the four probe bytes #R$8559-#R$855C.
+;
+; SP Slot address + 2
+@label=UpdateChaser
+c$B44B POP DE        ; skip the speed (read again at #R$B4B3)
+ $B44C POP BC        ; B = start delay
+ $B44D DJNZ $B436    ; delay still running: only draw
+ $B44F INC B         ; the delay stays at 1 from now on
+ $B450 PUSH BC       ; store it
+ $B451 POP AF        ; SP is back at slot+6
+ $B452 POP DE        ; x (8.8)
+ $B453 POP HL        ; y (8.8)
+ $B454 SRA H         ; y / 2
+ $B456 RES 0,H       ; 2 * row of cells (row = y / 4)
+ $B458 LD L,H        ; L = offset into the row address table
+@isub=LD H,FlagRowTable/256
+ $B459 LD H,$61      ;
+ $B45B LD A,D        ; x / 4: column of cells
+ $B45C RRA           ;
+ $B45D RRA           ;
+ $B45E AND $1F       ;
+ $B460 ADD A,(HL)    ; row address (low) + column
+ $B461 INC L         ;
+ $B462 LD H,(HL)     ; row address (high)
+ $B463 LD L,A        ; HL = flag map cell of the top left corner
+ $B464 LD A,(HL)     ; top row, left cell
+ $B465 INC HL        ;
+ $B466 OR (HL)       ; OR the right cell
+ $B467 LD ($855C),A  ; ProbeHead
+@isub=LD BC,SCREEN_COLS+1
+ $B46A LD BC,$0021   ; row 1, two columns right of the corner
+ $B46D ADD HL,BC     ;
+ $B46E LD A,(HL)     ;
+ $B46F DEC BC        ;
+ $B470 ADD HL,BC     ; row 2
+ $B471 OR (HL)       ;
+ $B472 LD ($8559),A  ; ProbeRight
+ $B475 DEC BC        ; row 3, one column right of the corner
+ $B476 ADD HL,BC     ;
+ $B477 LD A,(HL)     ;
+ $B478 DEC HL        ;
+ $B479 OR (HL)       ;
+ $B47A LD ($855B),A  ; ProbeBelow
+ $B47D INC BC        ; row 2, one column left of the corner
+ $B47E INC BC        ;
+ $B47F SBC HL,BC     ;
+ $B481 LD A,(HL)     ;
+ $B482 DEC BC        ;
+ $B483 SBC HL,BC     ; row 1
+ $B485 OR (HL)       ;
+ $B486 LD ($855A),A  ; ProbeLeft
+@isub=LD BC,TILE_CLASS_MASK*256
+ $B489 LD BC,$0700   ; B = class mask, C collects the free bits
+ $B48C LD HL,$8559   ; the four probes: right, left, below, head
+ $B48F LD A,(HL)     ; tile class of the side
+ $B490 AND B         ;
+ $B491 CP $01        ; carry when the class is 0 (free)
+ $B493 RL C          ; shift the free bit into C
+ $B495 INC HL        ;
+ $B496 LD A,(HL)     ;
+ $B497 AND B         ;
+ $B498 CP $01        ;
+ $B49A RL C          ;
+ $B49C INC HL        ;
+ $B49D LD A,(HL)     ;
+ $B49E AND B         ;
+ $B49F CP $01        ;
+ $B4A1 RL C          ;
+ $B4A3 INC HL        ;
+ $B4A4 LD A,(HL)     ;
+ $B4A5 AND B         ;
+ $B4A6 CP $01        ;
+ $B4A8 RL C          ;
+ $B4AA LD A,C        ; C = free sides: bit 3 right, 2 left, 1 below, 0 above
+ $B4AB EXX           ; keep them in C'
+ $B4AC LD C,A        ;
+ $B4AD EXX           ;
+ $B4AE LD HL,$FFF8   ; -8: back to slot+2
+ $B4B1 ADD HL,SP     ;
+ $B4B2 LD SP,HL      ;
+ $B4B3 POP BC        ; speed
+ $B4B4 POP HL        ; skip the countdown word
+ $B4B5 POP HL        ; x (8.8)
+ $B4B6 POP DE        ; y (8.8)
+@isub=LD A,(PlayerX+1)
+ $B4B7 LD A,($A8A2)  ; Jean's x
+ $B4BA BIT 7,A       ;
+ $B4BC JR Z,$B4BF    ;
+ $B4BE XOR A         ; negative counts as 0
+*$B4BF CP H          ; compare with the chaser's x
+ $B4C0 JR C,$B4CB    ; Jean is on the left: code 1
+ $B4C2 JR Z,$B4D2    ; level: code 0
+ $B4C4 EX AF,AF'     ; Jean is on the right: code 2
+ $B4C5 ADD A,A       ;
+ $B4C6 INC A         ;
+ $B4C7 ADD A,A       ;
+ $B4C8 EX AF,AF'     ;
+ $B4C9 JR $B4D6      ;
+*$B4CB EX AF,AF'     ; code 1: shift the code in
+ $B4CC ADD A,A       ;
+ $B4CD ADD A,A       ;
+ $B4CE INC A         ;
+ $B4CF EX AF,AF'     ;
+ $B4D0 JR $B4D6      ;
+*$B4D2 EX AF,AF'     ; code 0
+ $B4D3 ADD A,A       ;
+ $B4D4 ADD A,A       ;
+ $B4D5 EX AF,AF'     ;
+*$B4D6 EX DE,HL      ; HL = y, DE = x
+@isub=LD A,(PlayerY+1)
+ $B4D7 LD A,($A8A4)  ; Jean's y
+ $B4DA BIT 7,A       ;
+ $B4DC JR Z,$B4DF    ;
+ $B4DE XOR A         ;
+*$B4DF CP H          ; compare with the chaser's y
+ $B4E0 JR C,$B4EA    ; Jean is above: code 1
+ $B4E2 JR Z,$B4F0    ; level: code 0
+ $B4E4 EX AF,AF'     ; Jean is below: code 2
+ $B4E5 ADD A,A       ;
+ $B4E6 INC A         ;
+ $B4E7 ADD A,A       ;
+ $B4E8 JR $B4F3      ;
+*$B4EA EX AF,AF'     ; code 1
+ $B4EB ADD A,A       ;
+ $B4EC ADD A,A       ;
+ $B4ED INC A         ;
+ $B4EE JR $B4F3      ;
+*$B4F0 EX AF,AF'     ; code 0
+ $B4F1 ADD A,A       ;
+ $B4F2 ADD A,A       ;
+*$B4F3 EXX           ; move mask AND free sides
+ $B4F4 LD B,A        ;
+ $B4F5 AND C         ;
+ $B4F6 EXX           ;
+ $B4F7 RRA           ; bit 0: above
+ $B4F8 JR NC,$B4FD   ;
+ $B4FA OR A          ; y goes up
+ $B4FB SBC HL,BC     ;
+*$B4FD RRA           ; bit 1: below
+ $B4FE JR NC,$B501   ;
+ $B500 ADD HL,BC     ; y goes down
+*$B501 EX DE,HL      ; HL = x, DE = y
+ $B502 RRA           ; bit 2: left
+ $B503 JR NC,$B508   ;
+ $B505 OR A          ; x goes left
+ $B506 SBC HL,BC     ;
+*$B508 RRA           ; bit 3: right
+ $B509 JR NC,$B50C   ;
+ $B50B ADD HL,BC     ; x goes right
+*$B50C EX DE,HL      ; HL = y, DE = x
+ $B50D PUSH HL       ; store y
+ $B50E PUSH DE       ; store x
+ $B50F JP $B438      ; face Jean and draw

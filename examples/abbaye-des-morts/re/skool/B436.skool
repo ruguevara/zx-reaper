@@ -1,0 +1,29 @@
+; Chaser: face Jean, then hit box test and draw
+;
+; The second half of #R$B44B, entered at #R$B438 after the chaser has moved (or at #R$B436 while its start delay
+; still runs). It takes x and y from the slot, chooses the sprite that looks toward Jean (Jean's x, #R$A8A2, below the
+; chaser's x: the first frame table, through #R$B2C3; otherwise the second one through #R$B380; a Jean x with bit 7
+; set counts as 0) and goes on with the common tail that puts the position into the draw command, tests the hit
+; box and draws. See #R$B2D4 for the slot fields.
+; .
+; Hardware: none.
+;
+; BC Slot bytes +4 and +5 with the start delay in B already decremented (only at #R$B436: written back first)
+; SP Slot address + 6
+@label=UpdateChaser_Wait
+c$B436 PUSH BC       ; store the countdown
+ $B437 POP BC        ; SP is back at slot+6
+; Entry point used by #R$B44B after it has moved the chaser: x and y are already stored. SP is at slot+6.
+@label=UpdateChaser_Draw
+*$B438 POP DE        ; D = x
+ $B439 POP HL        ; H = y
+ $B43A LD E,H        ; E = y
+ $B43B POP AF        ; skip the word at +$A
+@isub=LD A,(PlayerX+1)
+ $B43C LD A,($A8A2)  ; Jean's x
+ $B43F BIT 7,A       ; x of $80 or more is negative: counts as 0
+ $B441 JR Z,$B444    ;
+ $B443 XOR A         ;
+*$B444 CP D          ; Jean on the left of the chaser?
+ $B445 JP C,$B2C3    ; yes: face left
+ $B448 JP $B380      ; no: face right

@@ -1,0 +1,8 @@
+; The "Heresy" message: strings 46-48
+;
+; The second screen of the ending sequence, printed centred by the script #R$8363 before the second part of the
+; ending (room 25): "Heresy!!! The Cathar is hidden on the throne of Satan, burn him".
+@label=HeresyText
+t$9344 DEFM $14,"Heresy!!! The Cathar"  ; string 46
+ $9359 DEFM $17,"is hidden on the throne"  ; string 47
+ $9371 DEFM $12,"of Satan, burn him"  ; string 48

@@ -1,0 +1,73 @@
+; Entity handler: fish jumping out of the water (rooms 16 and 19)
+;
+; The jumping state of the fish of #R$B7C6, which rewrote the slot with this handler word. Slot: +2 word vertical speed
+; (8.8; starts at FISH_JUMP_SPEED, upwards), +4 byte countdown of the jump (starts at FISH_JUMP_TIME, 54 frames) and +5
+; its reload ($54), +6 word x and +8 word y (8.8, high bytes in 2-pixel units, y starts at FISH_JUMP_Y), +$A word not
+; used, +$C word hit box offset, +$E word hit box far corner (7, 7), +$10 pointer to the sprite block (#R$954E), +$12 and +$13
+; animation counter and reload, +$14 frame and +$15 number of frames (2).
+; .
+; Each frame the speed grows by FISH_GRAVITY (stored back), the y moves by the old speed, and the countdown goes down.
+; When the countdown has fallen to 1 the fish is back at the water: a splash (template #R$BD12) is made at the x of the
+; fish with y = WATER_Y, as at the start of the jump (position at SPAWN_POSITION, record appended to the object list
+; #R$BE56, spawn count #R$8552 raised, sound effect SFX_ENEMY_SHOT). When it reaches 0 the handler word is set back to
+; #R$B7C6 and the countdown reloaded (the fish stays under the water for 30 frames, then jumps again: a cycle of 84
+; frames). The fish is then drawn: the position (y, x/4) goes to the draw command, the hit box is tested against the
+; monk (#R$A851; observed: touching the fish sets the hit flag), which continues at #R$B870.
+;
+; SP Slot address + 2 (the handler word was popped by the RET that entered the routine)
+@label=UpdateFishJumping
+c$B818 POP BC        ; vertical speed
+@isub=LD HL,FISH_GRAVITY
+ $B819 LD HL,$0016   ;
+ $B81C ADD HL,BC     ; faster downwards
+ $B81D PUSH HL       ; store the new speed
+ $B81E POP HL        ; SP back at +4
+ $B81F POP DE        ; E countdown, D reload
+ $B820 DEC E         ;
+ $B821 JR NZ,$B82D   ;
+ $B823 LD E,D        ; back in the water: reload,
+ $B824 PUSH DE       ; store it
+ $B825 PUSH HL       ; store the speed
+ $B826 LD HL,$B7C6   ; and wait under the water again:
+ $B829 PUSH HL       ; handler word at slot +0
+ $B82A POP HL        ; take the three words back
+ $B82B POP HL        ;
+ $B82C POP DE        ;
+*$B82D PUSH DE       ; store the countdown
+ $B82E POP DE        ;
+ $B82F DEC E         ; test only: is the stored countdown 1 (the landing)?
+ $B830 POP DE        ; x word: D = x
+ $B831 JR NZ,$B85B   ;
+ $B833 LD A,D        ; A = x
+ $B834 EXX           ;
+ $B835 LD H,A        ; H = x
+@isub=LD A,SFX_ENEMY_SHOT
+ $B836 LD A,$07      ;
+ $B838 LD ($854F),A  ; sound effect request
+@isub=LD L,WATER_Y
+ $B83B LD L,$50      ; y of the water surface
+ $B83D LD ($5DFE),HL ; SPAWN_POSITION of the splash
+ $B840 LD HL,$BD12   ; SplashTemplate
+ $B843 LD ($5DFC),HL ; SPAWN_TEMPLATE
+ $B846 LD HL,$8552   ; one more record waiting
+ $B849 INC (HL)      ;
+ $B84A LD HL,$5DFC   ; SPAWN_TEMPLATE, SPAWN_POSITION
+ $B84D LD DE,($BE56) ; end of the object list
+@isub=LD BC,OBJECT_ENTRY_SIZE
+ $B851 LD BC,$0004   ;
+ $B854 LDIR          ; append the record
+ $B856 LD ($BE56),DE ;
+ $B85A EXX           ;
+*$B85B POP HL        ; y word
+ $B85C ADD HL,BC     ; y moves by the old speed
+ $B85D PUSH HL       ; store y
+ $B85E POP HL        ;
+ $B85F POP BC        ; +$A, dropped
+ $B860 LD E,H        ; E = y
+ $B861 LD L,H        ;
+ $B862 LD H,D        ; HL = x (H) and y (L)
+ $B863 SRA H         ; x / 4 = byte column
+ $B865 SRA H         ;
+ $B867 LD ($ACD3),HL ; position of the draw command: y, byte column
+ $B86A LD HL,$B870   ; continue after the hit test
+ $B86D JP $A851      ; hit test: sets the hit flag when the monk touches the box

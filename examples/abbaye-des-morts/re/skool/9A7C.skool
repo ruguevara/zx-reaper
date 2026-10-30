@@ -1,0 +1,31 @@
+; Draw a 3-byte-wide sprite across one character row
+;
+; The drawer for width 3 of the table #R$99E8, run by #R$99C9 through RET in the alternate register set: four calls of #R$9A4C,
+; each drawing two pixel rows (8 pixel rows in all); #R$99C9 may enter at a later call to draw fewer. After the last
+; call, POP AF takes the BC that #R$99C9 pushed (A = the attribute) and the attribute is stored at $C400 + cell
+; index for each of the 3 cells of the character row; RET returns to the caller of #R$99C9 (#R$9972).
+; .
+; Hardware: none (the redraw cell buffer is in RAM).
+;
+; BC B = $FF (alternate set; used by the strip routine)
+; DE Graphics: D = pixel row, E = column of the first byte (alternate set)
+; HL Destination: H = $C5 + first pixel row, L = cell index of the first byte (alternate set)
+; AF Popped from the stack (pushed by #R$99C9 as BC): A = attribute of the cells
+@label=DrawSpriteW3
+c$9A7C CALL $9A4C    ;
+ $9A7F INC H         ;
+ $9A80 CALL $9A4C    ;
+ $9A83 INC H         ;
+ $9A84 CALL $9A4C    ;
+ $9A87 INC H         ;
+ $9A88 CALL $9A4C    ;
+ $9A8B POP AF        ;
+; Attribute of the covered cells.
+@isub=LD H,PAGE_REDRAW_ATTRS
+ $9A8C LD H,$C4      ;
+ $9A8E LD (HL),A     ;
+ $9A8F INC L         ;
+ $9A90 LD (HL),A     ;
+ $9A91 INC L         ;
+ $9A92 LD (HL),A     ;
+ $9A93 RET           ;

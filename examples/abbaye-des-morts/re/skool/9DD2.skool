@@ -1,0 +1,10 @@
+; Script opcode $86: fill a rectangle of the tile map with one tile
+;
+; Operands: y x w h t (5 bytes): rows y to y+h-1 and columns x to x+w-1 get the tile t, one cell at a time through #R$9E6A. Also entered at #R$9DD7 by #R$9DC2 and #R$A15C with the rectangle already in registers.
+;
+; HL Operand bytes
+; O:HL Address after the operands
+@label=OpFillTiles
+c$9DD2 CALL $A11A    ; E = y, D = x, C = w, B = h
+ $9DD5 LD A,(HL)     ;
+ $9DD6 INC HL        ;

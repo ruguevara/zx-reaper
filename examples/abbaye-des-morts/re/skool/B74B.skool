@@ -1,0 +1,53 @@
+; Entity handler: seed spat by a plant of room 14, flying in an arc
+;
+; The seeds the plants of "Hidden garden" (#R$B687) spit, two at a time, up and to the left (template #R$BCC2) and up
+; and to the right (#R$BCD2). Slot from the template (see #R$B6E6 for the whole layout): +2 word x speed ($FF91 = -0.43
+; or $006F = +0.43), +4 word y speed (starts at $FE90 = -1.44), +6 word x, +8 word y, +$A hit box offset, +$C hit box
+; far corner, +$E sprite size, +$10 sprite description. Each frame SEED_GRAVITY is added to the y speed (stored back in the
+; slot), so the seed rises, turns and falls; both speeds are then added to the position as in #R$B6ED. It is removed
+; (#R$B716) when it leaves the room (y below PROJECTILE_Y_MAX or x outside 0-$7F) or when the single cell at (x/4, y/4)
+; has a tile class other than 0 (unlike the arrows it does not look at the cell to its right); otherwise it is drawn
+; and hit-tested at #R$B71B like the arrows. Observed (room 14, the monk standing still): the seeds fall from the
+; plants in arcs to both sides and are freed when they reach the floor or leave the room.
+;
+; SP Slot address + 2 (the handler word was popped by the RET that entered the routine)
+@label=UpdateSeed
+c$B74B POP DE        ; x speed
+ $B74C POP HL        ; y speed
+@isub=LD BC,SEED_GRAVITY
+ $B74D LD BC,$0014   ; gravity
+ $B750 ADD HL,BC     ; the seed accelerates downwards
+ $B751 PUSH HL       ; store the new y speed
+ $B752 POP HL        ; SP back at +4
+ $B753 EX DE,HL      ; HL = x speed, DE = y speed
+ $B754 POP BC        ; x
+ $B755 ADD HL,BC     ; x moves
+ $B756 EX DE,HL      ; DE = new x, HL = y speed
+ $B757 POP BC        ; y
+ $B758 ADD HL,BC     ; y moves
+ $B759 PUSH HL       ; store y
+ $B75A PUSH DE       ; store x
+ $B75B LD A,H        ; y in 2-pixel units
+@isub=CP PROJECTILE_Y_MAX
+ $B75C CP $60        ; below the room (or negative)
+ $B75E JP NC,$B716   ;
+ $B761 BIT 7,D       ; x outside 0-$7F
+ $B763 JP NZ,$B716   ;
+ $B766 SRA H         ; y / 2
+ $B768 RES 0,H       ; 2 * (y / 4): index of the row in the table of words
+ $B76A LD L,H        ;
+@isub=LD H,FlagRowTable/256
+ $B76B LD H,$61      ; row address table #R$6100
+ $B76D LD A,D        ; x
+ $B76E RRA           ;
+ $B76F RRA           ;
+ $B770 AND $1F       ; x / 4: cell column
+ $B772 ADD A,(HL)    ; address of the cell in the tile flag map
+ $B773 INC L         ;
+ $B774 LD H,(HL)     ;
+ $B775 LD L,A        ;
+ $B776 LD A,(HL)     ; flags of the cell
+@isub=AND TILE_CLASS_MASK
+ $B777 AND $07       ; tile class
+ $B779 JP Z,$B71B    ; free: draw it
+ $B77C JP $B716      ; solid or harmful: remove it

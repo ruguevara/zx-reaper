@@ -1,0 +1,18 @@
+; Path commands of the crusaders: 6 handler addresses
+;
+; Indexed by the command byte of a path script pair (#R$B218): #R$B1F3 reads word n and writes it over the handler word
+; of the slot, so the crusader runs that handler from the next frame on.
+; .
+; 0 #R$B1D4 keep running (the handler itself: nothing changes)
+; 1 #R$B163 step up 8 pixels (x speed $00A0, curve #R$B0E8)
+; 2 #R$B10C hop in place over a pit (x speed $0150, curve #R$B100)
+; 3 #R$B139 fall 16 pixels (x speed unchanged, curve #R$B0F4)
+; 4 #R$B08E remove the crusader (free the slot)
+; 5 #R$B1CF signal the end of the cutscene, then keep running
+@label=PathCommands
+w$B20C DEFW $B1D4 ; 0: UpdateCrusader, keep running
+ $B20E DEFW $B163 ; 1: UpdateCrusaderStepUp
+ $B210 DEFW $B10C ; 2: UpdateCrusaderHop
+ $B212 DEFW $B139 ; 3: UpdateCrusaderFall
+ $B214 DEFW $B08E ; 4: FreeEntitySlotAtEntry
+ $B216 DEFW $B1CF ; 5: UpdateCrusaderSignal

@@ -1,0 +1,66 @@
+; Unpack a packed sprite set into the sprite sheet
+;
+; Script op $97 (#R$A146) calls this once per sprite set a room needs. It reads record A of #R$AE9D (destination DE in
+; the sheet at #R$D700, source set address, flags, frame width N) and the 2-byte header of the packed set (B = columns,
+; C = character rows of 8 pixel rows). For each frame of N columns it unpacks the columns (#R$AF58) and, if flag bit 7
+; is set, adds the three copies shifted by 2, 4 and 6 pixels (#R$AF7B), so a frame takes N + 3 x (N + 1) columns. If flag
+; bit 6 is set it then makes a mirrored copy of every frame (#R$AFC9), again with the shifted copies when bit 7 is set,
+; placed after all the unmirrored frames. The mirror uses the table #R$C500 built by #R$BE48 on room entry. The routine
+; only reads and writes memory and uses the alternate AF, which it does not preserve; HL, DE and BC are clobbered.
+; .
+; Hardware: none. The sprite sheet is plain memory; the drawers #R$99C9 read it later.
+;
+; A Sprite set number 0-19 (record number)
+@label=UnpackSpriteSet
+c$AF15 LD L,A        ;
+ $AF16 ADD A,A       ;
+ $AF17 ADD A,L       ;
+ $AF18 ADD A,A       ; A = 6 x set
+ $AF19 LD HL,$AE9D   ; record table
+ $AF1C CALL $A1D9    ; HL = record
+ $AF1F LD E,(HL)     ; DE = destination in the sprite sheet
+ $AF20 INC HL        ;
+ $AF21 LD D,(HL)     ;
+ $AF22 INC HL        ;
+ $AF23 LD C,(HL)     ;
+ $AF24 INC HL        ;
+ $AF25 LD B,(HL)     ; BC = address of the packed set
+ $AF26 INC HL        ;
+ $AF27 LD A,(HL)     ; flags
+ $AF28 INC HL        ;
+ $AF29 EX AF,AF'     ; A' = flags
+ $AF2A LD A,(HL)     ; A = frame width N
+ $AF2B LD H,B        ;
+ $AF2C LD L,C        ;
+ $AF2D LD B,(HL)     ; B = columns in the set
+ $AF2E INC HL        ;
+ $AF2F LD C,(HL)     ; C = character rows
+ $AF30 INC HL        ; HL = first flag byte
+ $AF31 PUSH BC       ; keep columns and rows for the mirror pass
+ $AF32 PUSH DE       ; and the start of the sheet columns
+@label=UnpackSpriteSet_Frame
+*$AF33 PUSH DE       ; start of this frame
+ $AF34 CALL $AF58    ; unpack N columns
+ $AF37 EX (SP),HL    ; HL = start of the frame, stack = packed stream
+ $AF38 EX AF,AF'     ; A = flags
+ $AF39 CALL $AF7B    ; bit 7: three shifted copies after the frame
+ $AF3C EX AF,AF'     ; A = N
+ $AF3D POP HL        ; HL = packed stream
+ $AF3E DJNZ $AF33    ; next frame
+ $AF40 POP HL        ; HL = start of the first frame
+ $AF41 POP BC        ; B = columns, C = rows
+ $AF42 EX AF,AF'     ; A = flags
+ $AF43 BIT 6,A       ;
+ $AF45 RET Z         ; no mirrored copies
+ $AF46 EX AF,AF'     ; A = N
+@label=UnpackSpriteSet_Mirror
+*$AF47 PUSH DE       ; start of this mirrored frame
+ $AF48 CALL $AFC9    ; mirror one frame from HL to DE
+ $AF4B EX (SP),HL    ; HL = start of the mirrored frame, stack = next source frame
+ $AF4C EX AF,AF'     ; A = flags
+ $AF4D CALL $AF7B    ; shifted copies of the mirrored frame
+ $AF50 POP HL        ; HL = next source frame ...
+ $AF51 CALL $B016    ; ... past its shifted copies, if there are any
+ $AF54 EX AF,AF'     ; A = N
+ $AF55 DJNZ $AF47    ;
+ $AF57 RET           ;

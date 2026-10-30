@@ -1,0 +1,73 @@
+; Water reflection: last 16 LDIs of the chain, then step to the next pixel line
+;
+; Continues the chain of #R$ADA1 with its second half; after the 32nd LDI the code at #R$ADE1 finishes one pixel line
+; of #R$AD88: it restores the start of the source and destination lines, returns when BC is 0 (all 8 lines of the water
+; row are done) and otherwise moves the destination one pixel line up (DEC D, the reflection is upside down) and the
+; source three pixel lines down. The source step is three INC H; whenever one of them reaches the next character row
+; (the address wraps from pixel line 7 to line 0 of the next row) L gets 32 added and H is reduced by 8, except when
+; the addition carries, which moves to the next third of the screen and needs no correction. Then it loops to
+; #R$AD9D.
+;
+; Hardware: none, the pointers are screen bitmap addresses (the copying was done by the LDIs).
+; HL Source line address, advanced by the LDIs (the entry state is the one saved by #R$AD9D)
+; DE Destination line address, advanced by the LDIs
+; BC Bytes left to copy
+c$ADC1 LDI           ; second half of the chain (16 LDIs)
+ $ADC3 LDI           ;
+ $ADC5 LDI           ;
+ $ADC7 LDI           ;
+ $ADC9 LDI           ;
+ $ADCB LDI           ;
+ $ADCD LDI           ;
+ $ADCF LDI           ;
+ $ADD1 LDI           ;
+ $ADD3 LDI           ;
+ $ADD5 LDI           ;
+ $ADD7 LDI           ;
+ $ADD9 LDI           ;
+ $ADDB LDI           ;
+ $ADDD LDI           ;
+ $ADDF LDI           ;
+ $ADE1 POP DE        ; start of the destination line
+ $ADE2 POP HL        ; start of the source line
+ $ADE3 RET PO        ; BC = 0 (P/V clear after the last LDI): 8 lines done
+ $ADE4 DEC D         ; destination: one pixel line up
+ $ADE5 LD A,H        ;
+ $ADE6 OR $07        ;
+ $ADE8 INC A         ; A = H of the start of the next character row of the source
+ $ADE9 INC H         ; source line + 1
+ $ADEA CP H          ;
+ $ADEB JR NZ,$ADFC   ; still inside the row
+ $ADED LD A,L        ; reached the next row after one step: 32 to L, wrap the third
+ $ADEE ADD A,$20     ;
+ $ADF0 LD L,A        ;
+ $ADF1 JR C,$ADF7    ; carry: next third of the screen, H is already right
+ $ADF3 LD A,H        ;
+ $ADF4 SUB $08       ;
+ $ADF6 LD H,A        ;
+*$ADF7 INC H         ; the other two of the three steps
+ $ADF8 INC H         ;
+ $ADF9 JP $AD9D      ; next line
+*$ADFC INC H         ; source line + 2
+ $ADFD CP H          ;
+ $ADFE JR NZ,$AE0E   ;
+ $AE00 LD A,L        ; reached the next row after two steps
+ $AE01 ADD A,$20     ;
+ $AE03 LD L,A        ;
+ $AE04 JR C,$AE0A    ;
+ $AE06 LD A,H        ;
+ $AE07 SUB $08       ;
+ $AE09 LD H,A        ;
+*$AE0A INC H         ; the third step
+ $AE0B JP $AD9D      ; next line
+*$AE0E INC H         ; source line + 3
+ $AE0F CP H          ;
+ $AE10 JP NZ,$AD9D   ; same row: next line
+ $AE13 LD A,L        ; reached the next row after three steps
+ $AE14 ADD A,$20     ;
+ $AE16 LD L,A        ;
+ $AE17 JR C,$AE1D    ;
+ $AE19 LD A,H        ;
+ $AE1A SUB $08       ;
+ $AE1C LD H,A        ;
+*$AE1D JP $AD9D      ; next line

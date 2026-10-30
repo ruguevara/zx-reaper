@@ -1,0 +1,12 @@
+; Script: Game Over screen
+;
+; Drawn by #R$85FC in room state 5: the screen black and cleared, the alignment mode set to 2 with the text row at y =
+; $58 (script code $82), the text string 37 ("Game Over", script code $85) and the attributes set to 7 (white on
+; black).
+@label=ScriptGameOver
+t$A57E DEFB $8F,$00,$00,$20,$18,$00; attributes: whole screen black
+ $A584 DEFB $81,$00,$00,$20,$C0,$00; bitmap: clear all 192 rows
+ $A58A DEFB $82,$02,$58; alignment mode 2, text row y = $58
+ $A58D DEFB $85,$25  ; string 37: Game Over
+ $A58F DEFB $8F,$00,$00,$20,$18,$07; attributes: whole screen white on black
+ $A595 DEFB $80      ; end

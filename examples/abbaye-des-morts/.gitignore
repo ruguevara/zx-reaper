@@ -1,0 +1,15 @@
+build/
+__pycache__/
+*.pyc
+diverged-*.png
+# the original tape and copies of it: keep out of git (copyright); `make restore`
+original/*.tap
+original/*.tzx
+original/*.pzx
+re/tape/
+re/*.z80
+# RZX recordings embed a snapshot of the game
+re/rzx/*.rzx
+re/tap2sna.log
+port/image.bin
+game/assets/

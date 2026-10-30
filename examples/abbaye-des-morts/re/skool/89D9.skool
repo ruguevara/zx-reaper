@@ -1,0 +1,20 @@
+; Spawn the room's objects
+;
+; Walks the room object table #R$8B8F (11-byte records, ended by room $1A) and calls #R$89ED for every record of the
+; current room #R$8509; the same room/end mark test as #R$8957. These are the enemies and moving scenery (kinds listed
+; at #R$8B8F). Called by #R$86B9 after the items.
+; .
+; Hardware: none.
+@label=SpawnRoomObjects
+c$89D9 LD HL,$8B8F
+@isub=LD DE,ROOM_OBJECT_SIZE
+ $89DC LD DE,$000B
+ $89DF LD BC,($8509)        ; C = room, B = $1A
+@label=SpawnRoomObjects_Loop
+*$89E3 LD A,(HL)
+ $89E4 CP C
+ $89E5 CALL Z,$89ED         ; this room: spawn it (HL = record)
+ $89E8 ADD HL,DE
+ $89E9 CP B
+ $89EA JR NZ,$89E3          ; until the end mark
+ $89EC RET

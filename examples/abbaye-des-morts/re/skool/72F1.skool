@@ -1,0 +1,34 @@
+; Room script 2: Tower of the Bell
+;
+; Room 2: column 2, row 0 of the 5x5 map (left is room 1, right 3, up 22, down 7, counted modulo 25). Unpacks sprite
+; set #R$6DC6. Subscripts: #R$82F0, #R$830B, #R$7360, #R$7358. Items (#R$8EDF) at row,column: bell 1,5, heart 7,12.
+@label=RoomScript02
+b$72F1 DEFB $97,$0D         ; SPRITESET 13
+ $72F3 DEFB $87,$02         ; ROOMNAME 2 "Tower of the Bell"
+ $72F5 DEFB $83 ; CALL ScriptRoomPanel
+@isub=DEFW ScriptRoomPanel
+ $72F6 DEFW $82F0
+ $72F8 DEFB $83 ; CALL ScriptSky
+@isub=DEFW ScriptSky
+ $72F9 DEFW $830B
+ $72FB DEFB $86,$00,$00,$10,$0A,$80 ; FILLTILE row 0, col 0, 16x10, tile $80
+ $7301 DEFB $83 ; CALL BlockStoneB
+@isub=DEFW BlockStoneB
+ $7302 DEFW $7360
+ $7304 DEFB $99,$03,$00,$00,$02,$04,$08,$00 ; TILEBLOCKS 3 rectangles
+ $730C DEFB $02,$0E,$00,$0E,$02,$0A
+ $7312 DEFB $86,$06,$10,$10,$04,$11 ; FILLTILE row 6, col 16, 16x4, tile $11
+ $7318 DEFB $98,$13,$02,$00,$02,$0C,$01,$05 ; RECTS tile $13, 2 rectangles
+ $7320 DEFB $10,$10,$01
+ $7323 DEFB $83 ; CALL BlockStoneA
+@isub=DEFW BlockStoneA
+ $7324 DEFW $7358
+ $7326 DEFB $99,$02,$14,$06,$1A,$02,$0A,$0E ; TILEBLOCKS 2 rectangles
+ $732E DEFB $12,$01
+ $7330 DEFB $8B,$02,$0E,$0F,$04,$09,$02,$09 ; STAMPS 2 tiles $0E $0F at 4 positions
+ $7338 DEFB $04,$09,$06,$09,$0C
+ $733D DEFB $92,$10,$05,$0B,$08,$0D,$09,$0F ; STAMP1 tile $10 at 5 positions
+ $7345 DEFB $0A,$11,$0B,$15,$02
+ $734A DEFB $92,$12,$05,$06,$19,$06,$1C,$06 ; STAMP1 tile $12 at 5 positions
+ $7352 DEFB $1E,$07,$13,$08,$17
+ $7357 DEFB $80             ; END

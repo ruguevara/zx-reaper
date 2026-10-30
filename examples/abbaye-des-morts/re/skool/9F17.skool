@@ -1,0 +1,25 @@
+; Move a bitmap address down one pixel row
+;
+; Steps the address of a screen bitmap byte down by one pixel row, following the Spectrum screen layout: INC H inside
+; a character cell; after the eighth line it moves to the first line of the next character row (L+32) and, on a carry,
+; into the next third of the screen. Used by the character printer (#R$9EE4) and the bitmap fill #R$9F94.
+; .
+; Hardware: knows the layout of the screen bitmap at $4000-$57FF.
+;
+; HL Address of a byte in the screen bitmap
+; O:HL Address of the byte one pixel row below
+@label=NextPixelRow
+c$9F17 INC H         ;
+ $9F18 LD A,H        ;
+ $9F19 AND $07       ;
+ $9F1B RET NZ        ;
+ $9F1C LD A,L        ;
+@isub=ADD A,SCREEN_COLS
+ $9F1D ADD A,$20     ; next character row
+ $9F1F LD L,A        ;
+ $9F20 RET C         ;
+ $9F21 LD A,H        ;
+@isub=SUB THIRD_STEP
+ $9F22 SUB $08       ;
+ $9F24 LD H,A        ;
+ $9F25 RET           ;

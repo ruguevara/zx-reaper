@@ -1,0 +1,43 @@
+; Entity handler: spitting plant of room 14, position and hit test
+;
+; The three magenta plants of "Hidden garden" (room 14): handler of room object kind 12 (#R$B028, behaviour block
+; #R$953D). A plant stays where it is, opens its head and spits two seeds, one flying up and left and one up and right
+; (#R$B74B), every 120 frames; touching a plant kills the monk. Entity handlers are not called: the slot walker
+; #R$A5E9 sets SP to a slot of #R$C100 and RETs, so the handler is entered with SP at slot+2 and finds its state on the
+; stack.
+; .
+; Slot (the layout of the room enemies made by #R$89ED): +2 and +4 words not used, +6 word x and +8 word y (8.8, high
+; bytes in 2-pixel units; x is a multiple of 4), +$A byte not used and +$B byte the reload of the spit countdown (both
+; $78), +$C word hit box offset (y, x), +$E word hit box far corner (y, x), +$10 pointer to the sprite block (attribute,
+; height, width, two frames), +$12 byte spit countdown (the other byte of the word is not used here), +$14 byte frame
+; and +$15 number of frames (2).
+; .
+; This routine stores the position as the start position of the seeds (SPAWN_POSITION), makes the position of the draw
+; command (#R$ACD1: y, x/4), keeps +$B in A', and tests the hit box against the monk with #R$A85F, with #R$B687 as the
+; continuation (carry set when the boxes overlap).
+;
+; SP Slot address + 2 (the handler word was popped by the RET that entered the routine)
+@label=UpdatePlant
+c$B665 POP BC        ; +2, not used
+ $B666 POP BC        ; +4, not used
+ $B667 POP HL        ; x word
+ $B668 LD D,H        ; D = x
+ $B669 POP HL        ; y word
+ $B66A LD E,H        ; E = y
+ $B66B LD H,D        ;
+ $B66C LD L,E        ; HL = x (H) and y (L), 2-pixel units
+ $B66D LD ($5DFE),HL ; start position of the seeds: SPAWN_POSITION
+ $B670 SRA H         ; x / 4 = byte column
+ $B672 SRA H         ;
+ $B674 LD ($ACD3),HL ; position of the draw command: y, byte column
+ $B677 POP AF        ; +$A and +$B: A = the reload of the spit countdown
+ $B678 EX AF,AF'     ; keep it
+ $B679 POP HL        ; hit box offset
+ $B67A ADD HL,DE     ; plus the position
+ $B67B EX DE,HL      ;
+ $B67C POP BC        ; hit box far corner
+ $B67D ADD HL,BC     ;
+ $B67E LD B,H        ; BC = far corner of the box
+ $B67F LD C,L        ;
+ $B680 LD IX,$B687   ; continue after the test
+ $B684 JP $A85F      ; compare the box with the monk's (#R$A851 without its first half)

@@ -1,0 +1,19 @@
+; Bitmap address of the first pixel line of an attribute cell
+;
+; Converts an attribute address into the screen bitmap address of the top pixel line of the same cell: only the high
+; byte changes, from $58-$5A to $40, $48 or $50.
+; .
+; Hardware: knows the layout of the screen bitmap and the attribute file.
+;
+; HL Attribute address
+; O:HL Bitmap address of the top line of the cell
+@label=AttrToBitmap
+c$A203 LD A,H        ;
+ $A204 AND $03       ;
+ $A206 ADD A,A       ;
+ $A207 ADD A,A       ;
+ $A208 ADD A,A       ;
+@isub=OR SCREEN_HIGH
+ $A209 OR $40        ;
+ $A20B LD H,A        ;
+ $A20C RET           ;

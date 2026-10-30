@@ -1,0 +1,73 @@
+; Enter a room
+;
+; Builds the room whose number is in #R$8509 from nothing, in this order: the table of bit-reversed bytes at $C500
+; (#R$BE48: the sprite unpacker mirrors sprites with it); RET ($C9) over the first instruction of five one-shot
+; routines, which switches them off until the room script or an item arms them again (the tile animations #R$AD88,
+; #R$AE20, #R$AE4B, the parchment gate #R$9C51 and the event script gate #R$9CE7); the draw queue $C000-$C0FF is
+; cleared; the 11 object slots at $C100 are freed and the end mark #R$A5FC is written after them; the room state is set
+; to 0 (the frame routine reads the keys but runs no game logic while the room is built); the room script (the word
+; of room N is at $7236 + 2 N) is run by #R$9D5F, which fills the tile map and the tile flags, unpacks the sprites and
+; marks every cell for redraw; the room items (#R$8957) and the room objects (#R$89D9) are spawned; the music track is
+; taken from the table #R$83E6; and the frame list gate #R$BDDA is closed, so that the main loop waits for a complete
+; game frame before it draws.
+; .
+; Nothing is drawn to the screen here apart from what the room script itself prints: the callers follow with #R$9B5A
+; (the sweep in). Jean's position is not touched. The RET at the end is also the address #R$6000 installs in #R$8504
+; before the game starts (#R$8719).
+; .
+; Hardware: none directly (the room script may write screen and attributes).
+;
+; O:IX Changed (by the spawners)
+@label=EnterRoom
+c$86B9 LD HL,$C500          ; redraw pixel buffer page
+ $86BC CALL $BE48           ; = #R$BE48; leaves B = 0
+@isub=LD A,OP_RET
+ $86BF LD A,$C9             ; RET over: #R$AD88, #R$AE20, #R$AE4B (tile animations), #R$9C51, #R$9CE7 (gates)
+ $86C1 LD ($AD88),A
+ $86C4 LD ($AE20),A
+ $86C7 LD ($AE4B),A
+ $86CA LD ($9C51),A
+ $86CD LD ($9CE7),A
+ $86D0 LD HL,$C000          ; clear the draw queue, $C000-$C0FF; B = 0 from #R$BE48
+*$86D3 LD (HL),B
+ $86D4 INC L
+ $86D5 JR NZ,$86D3
+ $86D7 LD HL,$C100          ; object slots
+ $86DA LD DE,$A5FC          ; handler word of the end mark
+@isub=LD BC,OBJECT_SLOTS*256
+ $86DD LD BC,$0B00          ; B = 11 slots, C = 0
+*$86E0 LD (HL),C            ; free the slot: handler word = 0
+ $86E1 INC L
+ $86E2 LD (HL),C
+ $86E3 LD A,L
+@isub=ADD A,SLOT_SIZE-1
+ $86E4 ADD A,$15            ; next slot (22 bytes, L was incremented once)
+ $86E6 LD L,A
+ $86E7 DJNZ $86E0
+ $86E9 LD (HL),E            ; end mark: handler word #R$A5FC after the last slot
+ $86EA INC L
+ $86EB LD (HL),D
+ $86EC XOR A
+ $86ED LD ($850C),A         ; room state 0
+ $86F0 LD HL,($8509)        ; L = room (H is overwritten next)
+ $86F3 LD H,$00
+ $86F5 ADD HL,HL
+ $86F6 LD DE,$7236          ; room script table, one word per room 0-25
+ $86F9 ADD HL,DE
+ $86FA LD A,(HL)
+ $86FB INC HL
+ $86FC LD H,(HL)
+ $86FD LD L,A
+ $86FE CALL $9D5F           ; build the room
+ $8701 CALL $8957           ; room items: hearts, crosses, levers...
+ $8704 CALL $89D9           ; room objects: enemies and scenery movers
+ $8707 LD A,($8509)         ; room number
+ $870A LD HL,$83E6          ; music track of each room
+ $870D CALL $A1D9
+ $8710 LD A,(HL)
+ $8711 LD ($8551),A         ; MusicTrack
+@isub=LD A,OP_RET
+ $8714 LD A,$C9             ; close the frame list gate
+ $8716 LD ($BDDA),A
+@label=NoFrameRoutine
+ $8719 RET                  ; RET: also the do-nothing frame routine before the game starts

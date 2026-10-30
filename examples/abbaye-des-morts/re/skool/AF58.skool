@@ -1,0 +1,49 @@
+; Unpack N columns of a packed sprite set
+;
+; The packed format, per column: for each character row (8 pixel rows) one flag byte, most significant bit first; for
+; each bit a set bit means that a literal byte follows in the stream and becomes the next pixel byte, a clear bit repeats
+; the previous pixel byte of the column (0 at the top of a column). So a run of equal bytes costs one flag bit. Each
+; pixel byte goes to the next page (INC D): pixel row 0 at the destination, row 1 in the page above, and so on; then the
+; next column is the next byte of the page (INC E). Stops after N columns or when the set has no more columns
+; (BC is counted down once per column, the caller's DJNZ takes the last one of a frame).
+;
+; A Frame width N: columns to unpack in this call
+; B Columns of the set left to unpack
+; C Character rows of the set
+; HL Packed stream, at a flag byte
+; DE Destination: D = page of pixel row 0, E = column
+; O:A N
+; O:B Columns left, less N - 1 (1 when the set ran out first)
+; O:HL Packed stream after the columns
+; O:DE Destination of the next column (E + N)
+@label=UnpackColumns
+c$AF58 PUSH AF       ; N
+@label=UnpackColumns_Column
+*$AF59 PUSH BC       ;
+ $AF5A PUSH DE       ;
+ $AF5B PUSH AF       ;
+ $AF5C XOR A         ; the pixel byte "so far" is 0 at the top of a column
+@label=UnpackColumns_Row
+*$AF5D LD B,(HL)     ; flag byte of a character row
+ $AF5E INC HL        ;
+ $AF5F SCF           ;
+ $AF60 RL B          ; carry = first flag bit, a marker bit enters at the bottom to end the loop after 8 bits
+*$AF62 JR NC,$AF66   ; clear: repeat the previous byte
+ $AF64 LD A,(HL)     ; set: a literal byte
+ $AF65 INC HL        ;
+*$AF66 LD (DE),A     ;
+ $AF67 INC D         ; next pixel row
+ $AF68 SLA B         ;
+ $AF6A JR NZ,$AF62   ;
+ $AF6C DEC C         ;
+ $AF6D JR NZ,$AF5D   ; next character row
+ $AF6F POP AF        ;
+ $AF70 POP DE        ;
+ $AF71 POP BC        ;
+ $AF72 INC E         ; next column
+ $AF73 DEC A         ;
+ $AF74 JR Z,$AF79    ; N columns done
+ $AF76 DJNZ $AF59    ; more columns in the set
+ $AF78 INC B         ; the set ran out: B = 1 for the caller's DJNZ
+*$AF79 POP AF        ;
+ $AF7A RET           ;

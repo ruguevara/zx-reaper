@@ -61,9 +61,9 @@ other way.
 
 ## Examples
 
-Three games, in the order they were done. Every run ended with a comparison
-against the existing open analyses, and what the run got wrong became a
-rule in a skill or a test in the tools before the next game: the harness
+Four games, in the order they were done. The first three runs ended with a
+comparison against the existing open analyses, and what a run got wrong
+became a rule in a skill or a test in the tools before the next game: the harness
 learns from its own runs and their mistakes. Each example holds the record
 of its run.
 
@@ -79,7 +79,7 @@ of its run.
    compared with the SkoolKit reference disassembly
    ([comparison](examples/jet-set-willy/re/comparison.md)).
 3. **The Hobbit** (Melbourne House, 1982),
-   [`examples/the-hobbit/`](examples/the-hobbit/): the most recent, a text
+   [`examples/the-hobbit/`](examples/the-hobbit/): a text
    adventure with a parser, characters that act on their own and vector
    pictures, done blind through stages 1 to 4 with no help from the author
    beyond a short stage 4 interview on graphics, input and sound. The stage 3
@@ -103,6 +103,22 @@ of its run.
    against each slip. The missed bugs are another matter: finding every bug
    in a program is an open problem even given a specification, and the
    references together missed the 14 that this run found.
+4. **l'Abbaye des Morts** (DaRkHoRaCe and Jerri, 2014, freeware, after
+   Locomalito's PC game), [`examples/abbaye-des-morts/`](examples/abbaye-des-morts/):
+   the most recent, stages 1 and 2 and the article, done in one session with
+   subagents working in parallel (classification, annotation, review, audit,
+   the article) and no help from the author. The tape has a custom loader:
+   the first stage hides in a BASIC string variable, the second is packed
+   with MegaLZ and loads the game with a copy of the ROM loader that draws an
+   hourglass. The sources rebuild the tape byte for byte, the packed blocks
+   included: an optimal MegaLZ packer whose ties fall the way the original
+   packer's did reproduces all five packed streams. The game runs inside its
+   IM 2 interrupt handler, rooms are bytecode scripts and creatures are stack
+   frames run by `RET`; the code after the interrupt handler is relocatable
+   (shift test at +$100 and +$101, in every room). No comparison with other
+   work was made; the bugs of the original that the article lists were
+   reproduced in the simulator.
+   [Article](examples/abbaye-des-morts/docs/README.md).
 
 Current limits: the 48K ZX Spectrum. AY music and effects (128K) come later,
 through [pyayay](https://github.com/ruguevara/pyayay) (Ayumi). Out of scope:
@@ -143,6 +159,7 @@ emulators load).
 | [docs/stage4.md](docs/stage4.md) | stage 4: the clean state, the bridge to stage 3, the checks, results |
 | [examples/hungry-horace/docs/](examples/hungry-horace/docs/README.md) | the article on how Hungry Horace works, with its gallery |
 | [examples/the-hobbit/docs/](examples/the-hobbit/docs/README.md) | the article on how The Hobbit works, with its gallery and the 22 pictures as SVG ([09-vector](examples/the-hobbit/docs/09-vector.md)) |
+| [examples/abbaye-des-morts/docs/](examples/abbaye-des-morts/docs/README.md) | the article on how l'Abbaye des Morts works, with its gallery and the map of the abbey |
 
 The method and the run reports are also in Russian (`docs/*.ru.md`).
 
@@ -252,7 +269,7 @@ Each skill is one procedure with a done criterion, copied into every project
 | --- | --- |
 | `tools/zxinit.py` | tape → project: split, simulated load, image, coverage, ctl, skool, build glue |
 | `tools/zxrun.py` | headless runner on SkoolKit's C simulator: scripted keys/Kempston and typed text (`TYPE`), fuzz, execution map, per-frame hashes, screenshots, the screen as text (`--text`, 32 or 42 columns), pokes, write watchpoints, shift test loading, `--call` a game routine and save the screen (renders levels for docs), `--record` the reads, interrupts and checkpoint states a port replays, `--save-input` a fuzz run as an input script |
-| `tools/zxq.py` | skool split into one file per entry; show/refs/next/status/unexec/peek/strings/gfx/reclassify/cut/check/const/equs/addrs/export; question and finding registers, audit |
+| `tools/zxq.py` | skool split into one file per entry; show/refs/next/status/unexec/peek/strings/gfx/reclassify/cut/check/const/equs/addrs/export; rename (labels and constants everywhere), links (article links to the labels' lines); question and finding registers, audit |
 | `tools/zxtape.py` | TAP/TZX ↔ text manifest + payloads, byte-exact rebuild, per-block diff |
 | `tools/zxbasic.py` | lossless BASIC ↔ text (hidden numbers, REM code, odd lines) |
 | `tools/zxgfx.py` | colour sprite/tile sheets, captions and animated GIFs from memory, for the docs gallery |
@@ -281,6 +298,8 @@ projects built with it.
 | `docs/` | the documents above |
 | `examples/hungry-horace/` | the reference run: stages 1 to 4 (`src/`, `port/`, `game/` with `bridge/`), compared with the SkoolKit reference disassembly |
 | `examples/jet-set-willy/` | the second run, stages 1 and 2, compared with the SkoolKit reference (`re/comparison.md`) |
+| `examples/the-hobbit/` | the blind run: stages 1 to 4, compared with the existing work (`re/comparison.md`) |
+| `examples/abbaye-des-morts/` | the fourth run, stages 1 and 2: a custom loader with MegaLZ, rebuilt byte for byte |
 
 ## Limits
 

@@ -1,0 +1,27 @@
+; Crusader jump: common tail (next value of the speed curve, move, hit test)
+;
+; Common tail of the three jumps: BC = curve, HL = index, DE = y (8.8), A = x in 2-pixel units, SP = slot + $A.
+; Adds the curve value to y and stores it, puts (y, x/4) in the draw command, tests the hit box and goes on at #R$B1AC.
+@label=UpdateCrusaderJump
+c$B18E ADD HL,HL     ; 2 bytes per curve value
+ $B18F ADD HL,BC     ;
+ $B190 LD C,(HL)     ;
+ $B191 INC HL        ;
+ $B192 LD B,(HL)     ; BC = vertical speed
+ $B193 EX DE,HL      ; HL = y
+ $B194 ADD HL,BC     ; y moves
+ $B195 POP BC        ; SP slot + $C
+ $B196 PUSH BC       ; SP slot + $A again
+ $B197 PUSH HL       ; store y at slot + 8
+ $B198 POP HL        ; SP slot + $A
+ $B199 POP BC        ; SP slot + $C: the hit box words come next
+ $B19A LD E,H        ; E = y in 2-pixel units
+ $B19B LD L,H        ; L = y
+ $B19C LD H,A        ; H = x
+ $B19D LD D,A        ; D = x
+ $B19E EX AF,AF'     ; A' = x: its low two bits select the shifted copy
+ $B19F SRA H         ;
+ $B1A1 SRA H         ; x / 4: byte column
+ $B1A3 LD ($ACD3),HL ; draw command position: (y, x/4)
+ $B1A6 LD HL,$B1AC   ; where the hit test goes on
+ $B1A9 JP $A851      ; HitTest

@@ -1,0 +1,15 @@
+; Queue one draw command
+;
+; Entry point used by #R$B3D2 and #R$B512 (through IY): copy one command, 10 bytes.
+@label=QueueOneCommand
+c$B407 LDI           ; 10 bytes
+ $B409 LDI           ;
+ $B40B LDI           ;
+ $B40D LDI           ;
+ $B40F LDI           ;
+ $B411 LDI           ;
+ $B413 LDI           ;
+ $B415 LDI           ;
+ $B417 LDI           ;
+ $B419 LDI           ;
+ $B41B LD ($BE58),DE ; new end of the frame call list

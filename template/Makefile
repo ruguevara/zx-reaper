@@ -13,16 +13,23 @@ BAS_BIN := $(patsubst src/%.bas,build/%.bin,$(wildcard src/*.bas))
 INPUTS  := $(wildcard tests/inputs/*.txt)
 MAPS    := $(wildcard re/maps/*.map)
 SHIFT   ?= 0x100
+# TAP2SNA_OPTS: options for the simulated load, such as where a custom loader
+# hands over to the game (-c finish-tape=1 --start ADDR)
+TAP2SNA_OPTS ?=
 
 include re/layout.mk
 -include scripts/rules.mk
-# The shift test moves REGION_START..SHIFT_END-1; ORGs at or above SHIFT_END stay
-# fixed (tables reached by page arithmetic, memory full up to $FFFF). SHIFT_LOAD
-# is where build/shifted.bin goes (set it to REGION_START when build.asm saves
-# the whole region in shifted mode).
+# the default goal is all, not the first rule of scripts/rules.mk
+.DEFAULT_GOAL := all
+# The shift test moves SHIFT_START..SHIFT_END-1 (ORGs in that range get
+# +SHIFT; put an @org on the entries where the range starts and ends); the rest
+# stays fixed (tables reached by page arithmetic, an IM 2 handler at $XYXY,
+# memory full up to $FFFF). SHIFT_LOAD is where build/shifted.bin goes (set it
+# to REGION_START when build.asm saves the whole region in shifted mode).
+SHIFT_START ?= $(REGION_START)
 SHIFT_END  ?= $(REGION_END)
 SHIFT_LOAD ?= $(shell printf '0x%X' $$(($(REGION_START)+$(SHIFT))))
-export SHIFT_END
+export SHIFT_START SHIFT_END
 # SHIFT_GIVE: an address where A holds a value read from the game's own code
 # (a random routine that reads memory): the original's values there are given
 # to the moved build, so its random numbers do not change with the shift.
@@ -49,7 +56,7 @@ restore: re/tape/tape.txt re/orig.z80 re/image.z80
 re/tape/tape.txt: $(ORIG)
 	$(T)/zxtape.py split $< re/tape
 re/orig.z80: $(ORIG)
-	tap2sna.py $< $@ > re/tap2sna.log
+	tap2sna.py $(TAP2SNA_OPTS) $< $@ > re/tap2sna.log
 re/image.z80: re/orig.z80 re/tape/tape.txt
 	snapmod.py $(IMAGE_PATCHES) re/orig.z80 $@
 
@@ -98,7 +105,7 @@ verify: build/game$(EXT)
 	else $(T)/zxtape.py diff $(ORIG) $<; exit 1; fi
 
 build/game.z80: build/game$(EXT)
-	tap2sna.py $< $@ > build/tap2sna.log
+	tap2sna.py $(TAP2SNA_OPTS) $< $@ > build/tap2sna.log
 
 expected:
 	@for i in $(INPUTS); do n=$$(basename $$i .txt); \

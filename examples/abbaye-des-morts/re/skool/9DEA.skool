@@ -1,0 +1,11 @@
+; Script opcode $87: set the room name
+;
+; Operand: n (1 byte): the number of the room name string, stored in $850D. It is printed later with $84 by the banner script at $82F0 (bottom right of the screen).
+;
+; HL Operand byte
+; O:HL Address after the operand
+@label=OpSetRoomName
+c$9DEA LD A,(HL)     ;
+ $9DEB INC HL        ;
+ $9DEC LD ($850D),A  ;
+ $9DEF RET           ;

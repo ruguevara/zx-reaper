@@ -1,0 +1,18 @@
+; Script opcode $98: fill several rectangles of the tile map with one tile
+;
+; Operands: t k, then k rectangles of y x w h (4 bytes each). Each rectangle is filled with the tile t through #R$9DD7.
+;
+; HL Operand bytes
+; O:HL Address after the last rectangle
+@label=OpFillTilesList
+c$9DC2 LD C,(HL)     ; C = tile
+ $9DC3 INC HL        ;
+ $9DC4 LD B,(HL)     ; B = number of rectangles
+ $9DC5 INC HL        ;
+*$9DC6 PUSH BC       ; loop over the rectangles
+ $9DC7 LD A,C        ; A = tile
+ $9DC8 CALL $A11A    ; E = y, D = x, C = w, B = h
+ $9DCB CALL $9DD7    ; fill it
+ $9DCE POP BC        ;
+ $9DCF DJNZ $9DC6    ;
+ $9DD1 RET           ;

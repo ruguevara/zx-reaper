@@ -1,0 +1,12 @@
+; Path command 5 of the crusaders: signal the end of the cutscene, then run on
+;
+; Command 5 of the path scripts (#R$B20C) puts this address in the slot: it sets the cutscene-finished flag (#R$8501,
+; which the ending's frame loop polls) and then runs #R$B1D4. As the handler word stays #R$B1CF, the flag is set again
+; in every later frame. The room 25 script ends with this command (the crusaders have reached the top of the stairs).
+; .
+; Hardware: none.
+;
+; SP Slot address + 2 (the handler word has been popped)
+@label=UpdateCrusaderSignal
+c$B1CF LD A,$01      ;
+ $B1D1 LD ($8501),A  ; CutsceneDone: tell the cutscene it is over

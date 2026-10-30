@@ -1,0 +1,23 @@
+; Handler of the room items: position, overlap test, then the item's action
+;
+; The handler word (+0) of the slots made from room item records; entered by the RET of #R$A5F0 with SP at slot + 2.
+; Pops the row and column (+2, +3) into the position of the object sprite command at #R$ACE5 (y, x/4), builds the
+; 16x16-pixel box of the item in 2-pixel units (column * 4, row * 4, 8 wide and high) and jumps to the overlap test
+; #R$A85F with IX = #R$A614. The test compares it with Jean's box at #R$8516 and jumps to IX with carry set when they
+; overlap. #R$A614 is a RET: it pops the item's action routine (slot +4), which gets the carry flag and SP at slot +
+; 6.
+; .
+; Used by all item types of #R$8A8F except type 5 (#R$A822).
+@label=RoomItemHandler
+c$A600 POP HL        ; L = row, H = column
+ $A601 LD ($ACE7),HL ; sprite command position (y, x/4)
+ $A604 ADD HL,HL     ; x2
+ $A605 ADD HL,HL     ; x4: D = column * 4, E = row * 4
+ $A606 EX DE,HL      ;
+@isub=LD HL,ITEM_BOX*256+ITEM_BOX
+ $A607 LD HL,$0808   ; box size 8 x 8 (2-pixel units)
+ $A60A ADD HL,DE     ;
+ $A60B LD B,H        ; BC = far corner
+ $A60C LD C,L        ;
+ $A60D LD IX,$A614   ; continue at the RET: the action routine
+ $A611 JP $A85F      ;

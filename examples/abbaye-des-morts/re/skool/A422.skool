@@ -1,0 +1,31 @@
+; Cheat check: toggle the debug room warp if the keys spell RAGE
+;
+; Called by #R$A336 after the player has redefined the keys. XORs together, over the eight bytes of the first four key
+; pairs of #R$A2BF and the eight bytes of #R$A2B7 (E, G, A, R), their differences, and if the final value is 0 flips
+; the opcode at #R$AABE between JR ($18) and JR Z ($28) (XOR $30). With JR Z in place the T key during play puts the
+; player in the debug room-warp mode (#R$AAAB, #R$83CE); with the JR it does nothing. Because the XOR runs over the
+; whole table at once and only the last result is tested, any four keys whose bytes have the same XOR as E, G, A and R
+; toggle the cheat, not only those four (Z, X, C and 5 do too). Redefining to the same keys again turns it off.
+; .
+; Hardware: none.
+;
+; O:A The new opcode at $AABE when the cheat was toggled
+@label=CheckCheatKeys
+c$A422 LD HL,$A2BF   ;
+ $A425 LD DE,$A2B7   ;
+@isub=LD BC,CHEAT_BYTES*256
+ $A428 LD BC,$0800   ; 8 bytes, running XOR in C
+@label=CheckCheatKeys_Loop
+*$A42B LD A,(DE)     ;
+ $A42C XOR (HL)      ;
+ $A42D XOR C         ; accumulate
+ $A42E LD C,A        ;
+ $A42F INC HL        ;
+ $A430 INC DE        ;
+ $A431 DJNZ $A42B    ;
+ $A433 RET NZ        ; not the cheat keys
+ $A434 LD A,($AABE)  ; the opcode of the JR at #R$AABE
+@isub=XOR CHEAT_OPCODE_FLIP
+ $A437 XOR $30       ; $18 <-> $28
+ $A439 LD ($AABE),A  ;
+ $A43C RET           ;

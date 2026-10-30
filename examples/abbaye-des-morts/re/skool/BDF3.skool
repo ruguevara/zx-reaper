@@ -1,0 +1,52 @@
+; Choose where the monk restarts after dying
+;
+; Called by the main loop (#R$85FC) for room state 4, after the monk has died. It clears the room state (the main loop
+; then enters the room) and the hit flag at $A8A0, turns a dying monk into a standing one, and loads the room and
+; position of the active checkpoint. The nine flags at #R$8543 are all zero, or all zero but one: the checkpoint item
+; the monk touched last (#R$A688) zeroes the others and stores 2 in its own flag. The routine skips the zero flags
+; together with the records of #R$BE2A, so DE ends at the record of the flagged checkpoint, or at the tenth record
+; (room 5, the start) when no flag is set. The record gives the room (to $8509), and the row and column, which are
+; multiplied by 4 to give y and x in 2-pixel units (the high bytes of the start position words at $8514 and $8512,
+; which the main loop copies to the player at $A8A3 and $A8A1).
+; .
+; The loop stops at the first nonzero flag, not at the first zero one (observed with a run of the routine: with $8545
+; set to 2 the monk restarts in room 11 at column 14, row 17; with all flags zero in room 5 at column 9, row 17).
+@label=SelectCheckpoint
+c$BDF3 XOR A         ; room state 0
+ $BDF4 LD ($850C),A  ; it was 4: restart at the checkpoint
+ $BDF7 LD ($A8A0),A  ; clear the player hit flag
+ $BDFA LD HL,$A894   ; player state
+ $BDFD LD A,(HL)     ;
+@isub=CP PLAYER_DYING
+ $BDFE CP $01        ; dying?
+ $BE00 JR NZ,$BE04   ;
+@isub=LD (HL),PLAYER_STANDING
+ $BE02 LD (HL),$04   ; a dying monk stands up
+*$BE04 LD HL,$8543   ; checkpoint flags
+ $BE07 LD DE,$BE2A   ; checkpoint records
+@isub=LD B,CHECKPOINT_FLAGS
+ $BE0A LD B,$09      ; nine flags, ten records
+ $BE0C XOR A         ; A = 0
+@label=SelectCheckpoint_Loop
+*$BE0D CP (HL)       ; flag zero (not the active checkpoint)?
+ $BE0E JR NZ,$BE16   ; no: this is the active one
+ $BE10 INC HL        ; next flag
+ $BE11 INC DE        ; next record, three bytes
+ $BE12 INC DE        ;
+ $BE13 INC DE        ;
+ $BE14 DJNZ $BE0D    ; if all nine are zero DE is at the tenth record
+@label=SelectCheckpoint_Found
+*$BE16 LD A,(DE)     ; room of the checkpoint
+ $BE17 INC DE        ;
+ $BE18 LD ($8509),A  ; room number
+ $BE1B LD A,(DE)     ; row of the checkpoint
+ $BE1C INC DE        ;
+ $BE1D ADD A,A       ; times 4: y in 2-pixel units
+ $BE1E ADD A,A       ;
+ $BE1F LD ($8515),A  ; start y (high byte of $8514)
+ $BE22 LD A,(DE)     ; column
+ $BE23 INC DE        ;
+ $BE24 ADD A,A       ; times 4: x in 2-pixel units
+ $BE25 ADD A,A       ;
+ $BE26 LD ($8513),A  ; start x (high byte of $8512)
+ $BE29 RET           ;

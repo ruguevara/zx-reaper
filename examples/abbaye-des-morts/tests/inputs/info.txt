@@ -1,0 +1,6 @@
+# title: hold SPACE for the info screen, release, start, then idle until the crusaders catch Jean
+150 SPACE
+400 -
+500 ENTER
+505 -
+4000 END

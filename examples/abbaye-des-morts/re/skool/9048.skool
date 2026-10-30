@@ -1,0 +1,38 @@
+; Room names: strings 0-24 of the text table, one per room
+;
+; The text table (#R$9048 to #R$93D2, 53 strings) is a sequence of strings, each a length byte followed by that many
+; characters (ASCII, drawn with the proportional font at #R$6130). #R$9F43 finds string number N by stepping over N
+; strings from here. The string numbers: 0-24 the names of rooms 0-24 (this entry), 25-36 the parchment texts
+; (#R$91A1), 37 "Game Over" (#R$926B), 38-42 the intro (#R$927C), 43-45 Satan's words (#R$930E), 46-48 the "Heresy"
+; message (#R$9344) and 49-52 the ending text (#R$9384).
+; .
+; String N is the name of room N: the room script (op $87, #R$850D) puts it in the name panel at the bottom right of
+; the screen. Rooms 0 and 4 have no name panel; their strings ":)" and ":$" are never shown (Unknown: they look like
+; placeholders). Room 0 is the title and intro screen, room 4 the setting of the second part of the ending. The game's spelling is
+; kept: room 15 is "Gloomy tunels".
+@label=RoomNames
+t$9048 DEFM $02,":)"  ; room 0
+ $904B DEFM $10,"A prayer of Hope"  ; room 1
+ $905C DEFM $11,"Tower of the Bell"  ; room 2
+ $906E DEFM $0D,"Wine supplies"  ; room 3
+ $907C DEFM $02,":$"  ; room 4
+ $907F DEFM $0A,"Escape !!!"  ; room 5
+ $908A DEFM $0E,"Death is close"  ; room 6
+ $9099 DEFM $10,"Abandoned church"  ; room 7
+ $90AA DEFM $09,"The Altar"  ; room 8
+ $90B4 DEFM $0C,"Hangman tree"  ; room 9
+ $90C1 DEFM $0F,"Pestilent Beast"  ; room 10
+ $90D1 DEFM $11,"Cave of illusions"  ; room 11
+ $90E3 DEFM $0D,"Plagued ruins"  ; room 12
+ $90F1 DEFM $09,"Catacombs"  ; room 13
+ $90FB DEFM $0D,"Hidden garden"  ; room 14
+ $9109 DEFM $0D,"Gloomy tunels"  ; room 15
+ $9117 DEFM $0F,"Lake of despair"  ; room 16
+ $9127 DEFM $12,"The wheel of faith"  ; room 17
+ $913A DEFM $10,"Banquet of Death"  ; room 18
+ $914B DEFM $11,"Underground river"  ; room 19
+ $915D DEFM $0F,"Unexpected gate"  ; room 20
+ $916D DEFM $0B,"Evil church"  ; room 21
+ $9179 DEFM $0E,"Tortured souls"  ; room 22
+ $9188 DEFM $0E,"Ashes to ashes"  ; room 23
+ $9197 DEFM $09,"Satan !!!"  ; room 24

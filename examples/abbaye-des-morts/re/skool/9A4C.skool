@@ -1,0 +1,67 @@
+; Draw two pixel rows of a 3-byte-wide sprite
+;
+; Called four times per character row by #R$9A7C. The first pixel row is stored from the left byte to the right, the
+; second from the right byte to the left, so that HL and DE are back at the first column at the end and no pointer
+; has to be reloaded. Each byte is combined with the background as in #R$99F2: (OutlineMasks[g] AND old byte) OR g.
+; HL ends one pixel row down and DE two rows down.
+; .
+; The pointers are in the alternate register set (see #R$9972): HL = destination in the redraw cell buffer (H = pixel-row
+; page, L = cell index), DE = graphics in the sprite sheet (D = pixel row, E = column), B = $FF so that BC addresses the
+; outline mask table OutlineMasks ($FF00) by the graphics byte in C.
+; .
+; Hardware: none (the redraw cell buffer is in RAM).
+;
+; BC B = $FF; C is scratch
+; DE Graphics: D = pixel row, E = column of the first byte
+; HL Destination in the redraw cell buffer: H = pixel-row page, L = cell index of the first byte
+; O:DE D advanced by 2 pixel rows
+; O:HL H advanced by 1 pixel row
+@label=DrawStripW3
+c$9A4C LD A,(DE)     ;
+ $9A4D LD C,A        ;
+ $9A4E LD A,(BC)     ;
+ $9A4F AND (HL)      ;
+ $9A50 OR C          ;
+ $9A51 LD (HL),A     ;
+ $9A52 INC L         ;
+ $9A53 INC E         ;
+ $9A54 LD A,(DE)     ;
+ $9A55 LD C,A        ;
+ $9A56 LD A,(BC)     ;
+ $9A57 AND (HL)      ;
+ $9A58 OR C          ;
+ $9A59 LD (HL),A     ;
+ $9A5A INC L         ;
+ $9A5B INC E         ;
+ $9A5C LD A,(DE)     ;
+ $9A5D LD C,A        ;
+ $9A5E LD A,(BC)     ;
+ $9A5F AND (HL)      ;
+ $9A60 OR C          ;
+ $9A61 LD (HL),A     ;
+ $9A62 INC H         ;
+ $9A63 INC D         ;
+ $9A64 LD A,(DE)     ;
+ $9A65 LD C,A        ;
+ $9A66 LD A,(BC)     ;
+ $9A67 AND (HL)      ;
+ $9A68 OR C          ;
+ $9A69 LD (HL),A     ;
+ $9A6A DEC L         ;
+ $9A6B DEC E         ;
+ $9A6C LD A,(DE)     ;
+ $9A6D LD C,A        ;
+ $9A6E LD A,(BC)     ;
+ $9A6F AND (HL)      ;
+ $9A70 OR C          ;
+ $9A71 LD (HL),A     ;
+ $9A72 DEC L         ;
+ $9A73 DEC E         ;
+ $9A74 LD A,(DE)     ;
+ $9A75 LD C,A        ;
+ $9A76 LD A,(BC)     ;
+ $9A77 AND (HL)      ;
+ $9A78 OR C          ;
+ $9A79 LD (HL),A     ;
+ $9A7A INC D         ;
+ $9A7B RET           ;

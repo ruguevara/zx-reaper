@@ -1,0 +1,31 @@
+; Bitmap address of a cell from its pixel row and byte column
+;
+; Converts a position given as a pixel row L and a byte column H into the address of that byte in the screen bitmap.
+; Only correct when L is a multiple of 8, the top pixel line of a character cell: the low three bits of L would reach
+; the high byte twice (observed: L = 1 gives $6100 instead of $4100). Used by #R$9F94 only, whose operands are
+; cell-aligned.
+; .
+; Hardware: knows the layout of the screen bitmap at $4000-$57FF.
+;
+; L Pixel row, a multiple of 8
+; H Byte column 0-31
+; O:HL Bitmap address
+@label=BitmapAddress
+c$A1DE LD A,L        ;
+ $A1DF ADD A,A       ;
+ $A1E0 ADD A,A       ;
+ $A1E1 AND $E0       ;
+ $A1E3 ADD A,H       ;
+ $A1E4 LD H,A        ;
+ $A1E5 LD A,L        ;
+ $A1E6 RRCA          ;
+ $A1E7 RRCA          ;
+ $A1E8 RRCA          ;
+ $A1E9 XOR L         ;
+ $A1EA AND $F8       ;
+ $A1EC XOR L         ;
+@isub=OR SCREEN_HIGH
+ $A1ED OR $40        ;
+ $A1EF LD L,H        ;
+ $A1F0 LD H,A        ;
+ $A1F1 RET           ;

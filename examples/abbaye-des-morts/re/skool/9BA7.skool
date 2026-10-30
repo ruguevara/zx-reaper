@@ -1,0 +1,47 @@
+; Redraw one cell from the tile map if its redraw flag is set
+;
+; Looks up the cell's tile in the tile map ($5B00, one byte per cell, 32 per row) and its flag in the flag map 3 pages
+; above ($5E00). It always clears bit 7 (redraw) of the flag; if the bit was clear nothing else happens. Otherwise it
+; copies the tile's attribute (#R$CE00, indexed by the tile) to the attribute file and the tile's 8 bitmap bytes
+; (#R$CF00, 8 per tile) to the cell's pixel rows on the screen.
+; .
+; Hardware: writes one byte of the attribute file ($5800) and 8 bytes of the screen bitmap ($4000, a cell's pixel rows
+; are 256 bytes apart).
+;
+; H Column of the cell (0-31)
+; L Row of the cell (0-21)
+; O:HL Unchanged when the cell was not flagged, otherwise changed (the caller keeps HL and BC itself)
+@label=RedrawCell
+c$9BA7 PUSH HL       ;
+ $9BA8 CALL $A20D    ; HL = tile map address of the cell
+ $9BAB LD E,(HL)     ; E = tile number
+@isub=LD D,TileAttrs>>8
+ $9BAC LD D,$CE      ; D = high byte of the attribute table
+; The flag map is 3 pages above the tile map.
+@isub=LD A,FLAGS_PAGE_OFFSET
+ $9BAE LD A,$03      ;
+ $9BB0 ADD A,H       ;
+ $9BB1 LD H,A        ;
+; A = the cell's flag; bit 7 is cleared in the map whatever it was.
+ $9BB2 LD A,(HL)     ;
+ $9BB3 RES 7,(HL)    ; clear the redraw flag
+ $9BB5 POP HL        ;
+; Carry = the old bit 7: return when the cell is not flagged.
+ $9BB6 RLA           ;
+ $9BB7 RET NC        ;
+; HL = attribute file address; set the attribute of the tile.
+ $9BB8 CALL $A1F2    ;
+ $9BBB LD A,(DE)     ;
+ $9BBC LD (HL),A     ;
+; HL = screen address of the cell's first pixel row (D, E = tile number, swapped below).
+ $9BBD CALL $A203    ;
+; HL = tile number x 8 + $CF00: the tile's bitmap.
+ $9BC0 EX DE,HL      ;
+ $9BC1 LD H,$00      ;
+ $9BC3 ADD HL,HL     ;
+ $9BC4 ADD HL,HL     ;
+ $9BC5 ADD HL,HL     ;
+ $9BC6 LD A,H        ;
+@isub=ADD A,TileGfx>>8
+ $9BC7 ADD A,$CF     ;
+ $9BC9 LD H,A        ;

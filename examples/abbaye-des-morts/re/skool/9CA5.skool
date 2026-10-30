@@ -1,0 +1,27 @@
+; Draw one row of 24 cells of the parchment frame
+;
+; Decodes layout codes with #R$9CB7 until 24 cells have been drawn, then moves the position down one row.
+; .
+; Hardware: writes the screen bitmap and the attribute file (through #R$9CB7).
+;
+; DE Position of the first cell: E row (0-23), D column
+; HL Layout pointer
+; B' Attribute of blank cells
+; C' Attribute of frame tile cells
+; O:DE Position of the next row (E + 1)
+; O:HL Layout pointer after the row
+; O:C 0
+@label=DrawFrameRow
+@isub=LD C,PARCHMENT_COLS
+c$9CA5 LD C,$18      ; cells in the row
+ $9CA7 PUSH DE       ; keep the row position
+ $9CA8 EX DE,HL      ;
+ $9CA9 CALL $A1F2    ; HL = attribute address of the first cell
+ $9CAC EX DE,HL      ;
+*$9CAD CALL $9CB7    ; draw one code; C counts the cells left
+ $9CB0 LD A,C        ;
+ $9CB1 OR A          ;
+ $9CB2 JR NZ,$9CAD   ;
+ $9CB4 POP DE        ;
+ $9CB5 INC E         ;
+ $9CB6 RET           ;

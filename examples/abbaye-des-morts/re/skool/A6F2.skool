@@ -1,0 +1,24 @@
+; Enter a room at an arch
+;
+; Entry point used by #R$A6BC. A = new room. The room state becomes 2, which makes the main loop (#R$85FC) put Jean at
+; the position in #R$8512/#R$8514 and enter the room, as after a death at a checkpoint.
+;
+; A New room
+;
+@label=EnterRoomAtArch
+c$A6F2 LD ($8509),A  ; new room number
+@isub=LD A,STATE_RESPAWN
+ $A6F5 LD A,$02      ;
+ $A6F7 LD ($850C),A  ;
+ $A6FA ADD A,A       ; player state 4: standing
+ $A6FB LD ($A894),A  ;
+@isub=LD A,SFX_PORTAL
+ $A6FE LD A,$04      ;
+ $A700 LD ($854F),A  ;
+ $A703 JP $A7CB      ; draw the arch, next slot
+; Entry point used by #R$A6BC: Jean is not touching the arch, clear its latch.
+@label=ArchRelease
+*$A706 RES 7,(HL)    ;
+; Entry point used by #R$A6BC: draw the arch and go on.
+@label=ArchIdle
+*$A708 JP $A7CB      ;

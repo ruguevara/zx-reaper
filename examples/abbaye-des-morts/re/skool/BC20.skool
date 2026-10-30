@@ -1,0 +1,4 @@
+; Satan: sprite and hit test
+@label=UpdateSatan_Sprite
+c$BC20 LD HL,$BC26   ; hit test, then continue at #R$BC26
+ $BC23 JP $A851      ;

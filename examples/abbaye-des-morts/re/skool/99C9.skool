@@ -1,0 +1,46 @@
+; Run the sprite drawer for a width and a number of row pairs
+;
+; Takes the drawer for the sprite's width from #R$99E8 and enters it at its (4 - C)th call: every drawer is four times
+; CALL strip + INC H, 4 bytes each, so entering later draws only the last C pairs of pixel rows (C = 4: the whole character
+; row). It switches to the alternate register set, which holds the drawer's pointers (see #R$9972), and jumps into the
+; drawer with RET. The drawer ends with POP AF, which takes the BC pushed here (A = the attribute), and RET: it returns
+; to the caller of this routine, which executes EXX to get its own registers back; HL and DE are as they were on entry.
+; .
+; Hardware: none.
+;
+; A Width of the sprite in bytes (1-5)
+; B Attribute of the cells, passed to the drawer
+; C Pairs of pixel rows to draw (1-4)
+; HL Passed through (the caller's job pointer)
+; DE Passed through (the caller's run pointer)
+; O:HL Unchanged
+; O:DE Unchanged
+@label=DispatchDrawer
+c$99C9 PUSH BC       ;
+ $99CA PUSH HL       ;
+ $99CB PUSH DE       ;
+ $99CC DEC A         ;
+ $99CD ADD A,A       ;
+ $99CE LD HL,$99E8   ;
+ $99D1 LD E,A        ;
+ $99D2 LD D,$00      ;
+ $99D4 ADD HL,DE     ;
+ $99D5 LD E,(HL)     ;
+ $99D6 INC HL        ;
+ $99D7 LD D,(HL)     ;
+; HL = 4, the size of CALL + INC H; after the swap HL = the drawer and DE = 4.
+ $99D8 LD HL,$0004   ;
+ $99DB EX DE,HL      ;
+; Skip 4 - C of the strip calls: HL = drawer + 4 x (4 - C).
+ $99DC LD A,E        ;
+ $99DD SUB C         ;
+ $99DE JR Z,$99E4    ;
+ $99E0 LD B,A        ;
+@label=DispatchDrawer_Skip
+*$99E1 ADD HL,DE     ;
+ $99E2 DJNZ $99E1    ;
+; Stack: drawer address, BC, return address; HL = the caller's job pointer again. EXX, then RET into the drawer.
+*$99E4 POP DE        ;
+ $99E5 EX (SP),HL    ;
+ $99E6 EXX           ;
+ $99E7 RET           ;

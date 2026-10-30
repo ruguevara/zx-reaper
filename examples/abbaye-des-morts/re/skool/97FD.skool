@@ -1,0 +1,45 @@
+; Queue a 16-pixel-wide object sprite: flag its cells and add a job to the draw queue
+;
+; A routine of the frame call list (#R$BDDB), like #R$9836: the call list holds the address of the routine and 8 bytes
+; of parameters, which it POPs, and it ends with a RET into the next entry. The room items use it (the sprite command
+; at #R$ACE5, made by #R$A7CB): a sprite 2 bytes wide, without mask, placed on the character grid. It stores the
+; parameters in the job template #R$982E (the height in 2-pixel units divided by 4 gives the character rows), marks the
+; 2 cells of each row as for #R$9836 (bit 6 set and bit 7 clear in the tile flag map, so that the cells are redrawn
+; now and once more in the next frame to erase the sprite) and adds the template to the draw queue with #R$98B1, which
+; is a job for #R$98F7. No clipping is done: the sprite must be wholly inside the room.
+; .
+; Hardware: none; it only changes the tile flag map in RAM.
+;
+; HL Popped from the call list: L = character row (0-21), H = column (0-30) of the top-left cell
+; DE Popped: address of the 16-pixel-wide graphics (16 bytes for each character row)
+; BC Popped: B = height in 2-pixel units (a multiple of 4: 8 for the items, 12 for the arch), C = width (not used: it
+; is always 2)
+; AF Popped: A = attribute of the sprite's cells (F unused)
+@label=QueueBlockSprite
+c$97FD POP HL        ;
+ $97FE POP DE        ;
+ $97FF POP BC        ;
+ $9800 POP AF        ;
+ $9801 LD ($9835),A  ; job +7: attribute
+ $9804 LD ($9830),DE ; job +2: graphics address
+ $9808 SRL B         ; height / 4 = character rows
+ $980A SRL B         ;
+ $980C LD A,B        ;
+ $980D LD ($9832),A  ; job +4: character rows
+ $9810 LD ($9833),HL ; job +5: row (L), +6: column (H)
+ $9813 CALL $A21E    ; HL = flag map address of the top-left cell
+ $9816 LD A,L        ; A = low byte of the address of the first cell of the row (+32 for each row)
+@label=QueueBlockSprite_Row
+*$9817 SET 6,(HL)    ; two cells of a row: a sprite is on the cell, not yet redrawn
+ $9819 RES 7,(HL)    ;
+ $981B INC L         ;
+ $981C SET 6,(HL)    ;
+ $981E RES 7,(HL)    ;
+@isub=ADD A,SCREEN_COLS
+ $9820 ADD A,$20     ; next character row
+ $9822 LD L,A        ;
+ $9823 JR NC,$9826   ;
+ $9825 INC H         ;
+*$9826 DJNZ $9817    ;
+ $9828 LD HL,$982E   ; job template
+ $982B JP $98B1      ; append it to the draw queue (the RET there enters the next call list entry)

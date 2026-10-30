@@ -1,0 +1,35 @@
+; Draw two pixel rows of a 1-byte-wide sprite
+;
+; Called four times per character row by #R$9A02. For each of the two pixel rows: C = the graphics byte from (DE); the
+; destination byte becomes (OutlineMasks[C] AND old byte) OR C: the sprite replaces the background under its own
+; pixels and under the pixel on either side of each of them, which gives it a one-pixel outline. HL moves down one
+; pixel row in between (the caller adds the next INC H) and DE down two.
+; .
+; The pointers are in the alternate register set (see #R$9972): HL = destination in the redraw cell buffer (H = pixel-row
+; page, L = cell index), DE = graphics in the sprite sheet (D = pixel row, E = column), B = $FF so that BC addresses the
+; outline mask table OutlineMasks ($FF00) by the graphics byte in C.
+; .
+; Hardware: none (the redraw cell buffer is in RAM).
+;
+; BC B = $FF; C is scratch
+; DE Graphics: D = pixel row, E = column of the first byte
+; HL Destination in the redraw cell buffer: H = pixel-row page, L = cell index of the first byte
+; O:DE D advanced by 2 pixel rows
+; O:HL H advanced by 1 pixel row
+@label=DrawStripW1
+c$99F2 LD A,(DE)     ;
+ $99F3 LD C,A        ; C = graphics byte
+ $99F4 LD A,(BC)     ; A = outline mask of the byte
+ $99F5 AND (HL)      ; clear the pixels around the sprite's pixels
+ $99F6 OR C          ; set the sprite's pixels
+ $99F7 LD (HL),A     ;
+ $99F8 INC H         ;
+ $99F9 INC D         ;
+ $99FA LD A,(DE)     ;
+ $99FB LD C,A        ;
+ $99FC LD A,(BC)     ;
+ $99FD AND (HL)      ;
+ $99FE OR C          ;
+ $99FF LD (HL),A     ;
+ $9A00 INC D         ;
+ $9A01 RET           ;

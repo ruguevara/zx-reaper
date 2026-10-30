@@ -1,0 +1,6 @@
+; Script: "CROUCH"
+;
+; Name of the control in the redefinition prompt, printed after #R$A4FB.
+@label=TextCrouch
+t$A514 DEFM "CROUCH"
+ $A51A DEFB $80

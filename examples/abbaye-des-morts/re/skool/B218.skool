@@ -1,0 +1,30 @@
+; Path scripts of the crusaders: pairs (target x, command)
+;
+; Three scripts, one per chase room, run by #R$B1D4 through the slot word +4 (set by the templates of #R$B04C). A pair
+; is two bytes: the x (high byte of the 8.8 position, 2-pixel units: x $24 is pixel column 72) at which the crusader
+; carries out the command, and the command, an index into #R$B20C. Observed in the simulator (y of a crusader every
+; frame, rooms 5 and 6, room 25 by its picture): the crusaders climb the steps and hop the pits of the screens.
+; .
+; Room 5 (#R$B218, from the forest to the stone block): at $48 and $50 step up 8 pixels each (the two steps of the block),
+; at $64 fall 16 pixels (off the block), at $7F (the right edge) remove the crusader.
+; Room 6 (#R$B220): hops at $24, $3C and $4C (the pits), steps up at $68 and $6C, removal at $7F.
+; Room 25 (#R$B22C, the stairs below the pentagram in the ending): steps up at $48, $4C, $50 and $54, then at $64 command 5:
+; the end of the cutscene.
+@label=PathScriptRoom5
+b$B218 DEFB $48,$01 ; step up
+ $B21A DEFB $50,$01 ; step up
+ $B21C DEFB $64,$03 ; fall
+ $B21E DEFB $7F,$04 ; remove
+@label=PathScriptRoom6
+ $B220 DEFB $24,$02 ; hop
+ $B222 DEFB $3C,$02 ; hop
+ $B224 DEFB $4C,$02 ; hop
+ $B226 DEFB $68,$01 ; step up
+ $B228 DEFB $6C,$01 ; step up
+ $B22A DEFB $7F,$04 ; remove
+@label=PathScriptRoom25
+ $B22C DEFB $48,$01 ; step up
+ $B22E DEFB $4C,$01 ; step up
+ $B230 DEFB $50,$01 ; step up
+ $B232 DEFB $54,$01 ; step up
+ $B234 DEFB $64,$05 ; end of the cutscene

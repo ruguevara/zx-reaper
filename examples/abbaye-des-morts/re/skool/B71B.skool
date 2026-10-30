@@ -1,0 +1,21 @@
+; Draw a projectile
+;
+; Draw a projectile that stays: also used by the seeds (#R$B74B). SP is at slot+6, the position words (x, then y)
+; are the next ones. Makes HL = x (H) and y (L), keeps x in A' for the shift phase of the sprite, makes the draw command
+; position (y, x/4) and tests the hit box (#R$A851, which continues at #R$B730).
+;
+; SP Slot address + 6
+@label=Projectile_Draw
+c$B71B POP HL        ; x word
+ $B71C LD D,H        ; D = x
+ $B71D POP HL        ; y word
+ $B71E LD E,H        ; E = y
+ $B71F LD L,H        ;
+ $B720 LD H,D        ; HL = x (H) and y (L)
+ $B721 LD A,H        ;
+ $B722 EX AF,AF'     ; A' = x: its low 2 bits select the shifted copy
+ $B723 SRA H         ; x / 4 = byte column
+ $B725 SRA H         ;
+ $B727 LD ($ACD3),HL ; position of the draw command: y, byte column
+ $B72A LD HL,$B730   ; continue after the hit test
+ $B72D JP $A851      ; hit test: sets the hit flag when the monk touches the box

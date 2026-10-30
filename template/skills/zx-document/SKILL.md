@@ -35,7 +35,9 @@ docs/img/                 PNGs (committed)
   then details. Each file starts with a 2-3 sentence summary.
 - Link names to sources: `[DrawSprite](../src/screen.asm#L120)` after export,
   or `[DrawSprite](../re/skool/6BD6.skool)` before. Get line numbers with
-  `grep -n '^DrawSprite:' src/*.asm`; re-check them after every export.
+  `grep -n '^DrawSprite:' src/*.asm`; after any edit of `src/` run
+  `tools/zxq.py links docs/*.md`, which points every such link at the
+  label's current line (`--check` only reports).
 - Use tables for record layouts (`Offset | Size | Meaning`), constants and
   memory maps; Mermaid `flowchart` for the main loop and state machines
   (GitHub renders it); short asm excerpts (5-15 lines) only where the trick is

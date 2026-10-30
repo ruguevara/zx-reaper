@@ -1,0 +1,10 @@
+; Remove a projectile
+;
+; Remove a projectile: also used by the seeds (#R$B74B). The two pushes put SP back at slot+2 (they overwrite the
+; position, which does not matter) and #R$B08E then zeroes the handler word and goes on to the next slot.
+;
+; SP Slot address + 2
+@label=Projectile_Remove
+c$B716 PUSH HL       ;
+ $B717 PUSH HL       ;
+ $B718 JP $B08E      ; free the slot

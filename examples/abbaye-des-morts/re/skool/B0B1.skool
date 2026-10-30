@@ -1,0 +1,41 @@
+; Make a crusader: copy the template into the free slot
+;
+; Second half of the spawner #R$B099, entered through IY from the free slot search #R$8A70: when there is no free slot
+; (carry clear) nothing is made. Otherwise the 22 bytes of the template go to the slot (DE = IX), including the handler
+; word #R$B1D4, which makes the crusader start running at the next slot walk or, if the new slot lies after the
+; spawner's, in this same frame.
+; .
+; Hardware: none.
+;
+; F Carry set when #R$8A70 found a free slot
+; DE Template address (kept from #R$B099)
+; IX Address of the free slot
+; SP Slot address + $12 (of the spawner)
+@label=SpawnCrusader
+c$B0B1 JP NC,$B41F   ; no free slot: NextSlotAfterAnim
+ $B0B4 EX DE,HL      ; HL = template
+ $B0B5 LD D,IXh      ;
+ $B0B7 LD E,IXl      ; DE = the new slot
+ $B0B9 LDI           ; 22 LDIs: SLOT_SIZE bytes of the template
+ $B0BB LDI           ;
+ $B0BD LDI           ;
+ $B0BF LDI           ;
+ $B0C1 LDI           ;
+ $B0C3 LDI           ;
+ $B0C5 LDI           ;
+ $B0C7 LDI           ;
+ $B0C9 LDI           ;
+ $B0CB LDI           ;
+ $B0CD LDI           ;
+ $B0CF LDI           ;
+ $B0D1 LDI           ;
+ $B0D3 LDI           ;
+ $B0D5 LDI           ;
+ $B0D7 LDI           ;
+ $B0D9 LDI           ;
+ $B0DB LDI           ;
+ $B0DD LDI           ;
+ $B0DF LDI           ;
+ $B0E1 LDI           ;
+ $B0E3 LDI           ;
+ $B0E5 JP $B41F      ; NextSlotAfterAnim

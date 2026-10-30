@@ -1,0 +1,27 @@
+; Item action: checkpoint (a gravestone cross)
+;
+; Room items of rooms 8, 11, 12, 14, 15, 19, 21 and 23 with flags $8544-$854B; with $8543 of #R$A615 they are the nine
+; checkpoint flags (0 = not active, nonzero = the active one). When Jean touches a checkpoint whose flag is 0 all nine
+; flags are cleared, this one is set to 2 and sound effect 9 plays; #R$BDF3 then restarts Jean after a death at the
+; checkpoint of the first nonzero flag (positions at #R$BE2A). The frame drawn is (flag AND 2) / 2: 0 = not active, 1
+; = active.
+;
+; F Carry set when Jean's box overlaps the item's box
+; SP Slot address + 6 on entry (the RET of #R$A614 popped the action word at +4): the next stack word is the flag pointer (the action pops it); see #R$A5E9 for the slot layout
+@label=ActionCheckpoint
+c$A688 POP HL        ; flag pointer
+ $A689 JR NC,$A6B5   ; not touching: just draw
+ $A68B LD A,(HL)     ; flag
+ $A68C OR A          ;
+ $A68D JR NZ,$A6B5   ; already active: just draw
+ $A68F LD DE,$8543   ; the nine checkpoint flags
+@isub=LD B,CHECKPOINT_FLAGS
+ $A692 LD B,$09      ;
+*$A694 LD (DE),A     ; A = 0: clear all nine
+ $A695 INC DE        ;
+ $A696 DJNZ $A694    ;
+ $A698 LD (HL),$02   ; this one is the active checkpoint
+@isub=LD A,SFX_CHECKPOINT
+ $A69A LD A,$09      ;
+ $A69C LD ($854F),A  ;
+ $A69F JR $A6B5      ;

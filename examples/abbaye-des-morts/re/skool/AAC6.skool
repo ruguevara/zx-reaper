@@ -1,0 +1,314 @@
+; Player: die on a hit, walk, then run the action of the state and draw the monk
+;
+; The main player routine, entered from #R$AAAB with C = state - 1 and B = the newly pressed controls. It uses the
+; tile flag bytes #R$A89C-#R$A89F that #R$A8A5 filled in this frame.
+; .
+; 1. A hit flag #R$A8A0 other than 0 (a harmful tile or an enemy) goes to #R$AA3D: Jean dies.
+; .
+; 2. Walking. The held control bits (#R$A2D0) right (bit 0) and left (bit 1) change X by $0080 (half a unit, one
+; pixel) per frame, by $0020 (a quarter of a pixel) when crouching, in any state: Jean can steer in the air. A side
+; whose tile flags have bit 1 set (#R$A89D right, #R$A89F left) blocks him; a blocked move, no move at all or both
+; blocked leave X as it was. The facing #R$A897 follows the last direction tested (left wins when both keys are down).
+; While walking the animation frame #R$A896 toggles between 0 and 1 every 8 frames; not walking it is held at frame 0
+; with the timer at 8.
+; .
+; 3. The action of the state: jumping #R$AB79, crouching #R$AC4C, standing #R$ABB2, falling #R$AB31 (see below).
+; Jumping and falling move Y by the vertical speed #R$A898 (8.8, units of 2 pixels): a jump starts at $01FE and loses
+; $1E per frame, so it rises for 17 frames by 17.9 units (35.9 pixels) and then falls; a fall gains $1E per frame up
+; to $021C (4.2 pixels per frame). Standing starts a jump (control bits 3 or 4 pressed: sound effect 2) or crouching
+; (bit 2 held); if there is no floor under the feet (bit 0 of #R$A89E) Jean falls. A fall ends when the feet flags
+; show a floor (#R$AB3A): tile class 3 at once, class 1 (a platform that can be passed from below) only when the fall
+; carries Jean across the top of a cell row; #R$A950 then snaps Y to the cell row. A fall has no damage and no height
+; limit. Crouching stands up when the crouch key is released and nothing blocks the head.
+; .
+; 4. The monk's sprite: frame, shift phase (X mod 4 selects the copy of the frame shifted by 0, 2, 4 or 6 pixels and
+; its width, #R$AC9F) and attribute go to the draw command #R$ACD1, which #R$AA1F appends to the frame call list.
+; .
+; Hardware: none; reads the control bits and the tile flags, writes the player variables and queues a draw command.
+;
+; C Player state minus 1 (1 jumping, 2 crouching, 3 standing, 4 falling)
+@label=UpdatePlayerActive
+c$AAC6 LD A,($A8A0)  ; hit flag: die
+ $AAC9 OR A          ;
+ $AACA JP NZ,$AA3D   ; die
+ $AACD LD A,($A2D0)  ; held controls
+@isub=AND CTRL_RIGHT+CTRL_LEFT
+ $AAD0 AND $03       ; right / left
+ $AAD2 JR Z,$AB1B    ; no direction: stand still
+ $AAD4 LD B,A        ; B = direction bits
+ $AAD5 LD A,C        ; state - 1
+@isub=LD DE,WALK_SPEED
+ $AAD6 LD DE,$0080   ; step: one pixel
+@isub=CP PLAYER_CROUCHING-1
+ $AAD9 CP $02        ; crouching (state 3)?
+ $AADB JR NZ,$AAE0   ;
+@isub=LD DE,CROUCH_SPEED
+ $AADD LD DE,$0020   ; crouching steps are a quarter of a pixel
+*$AAE0 LD HL,($A8A1) ; HL = X
+ $AAE3 RR B          ; right?
+ $AAE5 JR NC,$AAF4   ;
+ $AAE7 LD A,($A89D)  ; right side blocked?
+@isub=AND TILE_BLOCKS
+ $AAEA AND $02       ;
+ $AAEC JR NZ,$AB1B   ; blocked: no walking
+ $AAEE ADD HL,DE     ; X + step
+ $AAEF LD A,$00      ; facing right
+ $AAF1 LD ($A897),A  ;
+*$AAF4 RR B          ; left?
+ $AAF6 JR NC,$AB06   ;
+ $AAF8 LD A,($A89F)  ; left side blocked?
+@isub=AND TILE_BLOCKS
+ $AAFB AND $02       ;
+ $AAFD JR NZ,$AB1B   ; blocked: no walking
+ $AAFF SBC HL,DE     ; X - step
+ $AB01 LD A,$01      ; facing left
+ $AB03 LD ($A897),A  ;
+*$AB06 LD ($A8A1),HL ; store X
+ $AB09 LD HL,$A895   ; walk animation: timer
+ $AB0C DEC (HL)      ;
+ $AB0D JR NZ,$AB25   ;
+@isub=LD (HL),WALK_ANIM_PERIOD
+ $AB0F LD (HL),$08   ;
+ $AB11 LD HL,$A896   ;
+ $AB14 LD A,(HL)     ;
+ $AB15 INC A         ;
+ $AB16 AND $01       ; toggle frame 0 / 1
+ $AB18 LD (HL),A     ;
+ $AB19 JR $AB25      ;
+; Not walking (or blocked): animation frame 0, timer reloaded.
+@label=UpdatePlayer_Still
+*$AB1B LD HL,$A895   ;
+@isub=LD (HL),WALK_ANIM_PERIOD
+ $AB1E LD (HL),$08   ;
+ $AB20 LD HL,$A896   ;
+ $AB23 LD (HL),$00   ;
+; Run the action of the state; C = state - 1.
+@label=UpdatePlayer_State
+*$AB25 DEC C         ; C = 1: jumping
+ $AB26 JP Z,$AB79    ;
+ $AB29 DEC C         ; C = 2: crouching
+ $AB2A JP Z,$AC4C    ;
+ $AB2D DEC C         ; C = 3: standing
+ $AB2E JP Z,$ABB2    ;
+; Falling (C = 4). A fall changes Y by the vertical speed #R$A898 and stops when the feet flags show a floor.
+@label=PlayerFalling
+ $AB31 XOR A         ; A' = 0
+ $AB32 EX AF,AF'     ;
+ $AB33 LD HL,($A8A3) ; HL = Y
+ $AB36 LD DE,($A898) ; DE = vertical speed
+ $AB3A LD A,($A89E)  ; feet flags
+@isub=AND TILE_BLOCKS|TILE_STANDABLE
+ $AB3D AND $03       ; free below: keep falling
+ $AB3F JR Z,$AB4E    ;
+@isub=CP TILE_BLOCKS
+ $AB41 CP $02        ; class 2 or 3: landed
+ $AB43 JP NC,$ABA8   ; landed
+ $AB46 LD A,H        ; class 1 (platform): Y mod 4
+@isub=AND SUBROW_MASK
+ $AB47 AND $03       ;
+ $AB49 JP Z,$ABA8    ; exactly at the top of a cell row: landed
+ $AB4C ADD A,D       ; Y mod 4 + speed high byte
+ $AB4D EX AF,AF'     ; A' = that
+*$AB4E ADD HL,DE     ; Y + speed
+ $AB4F LD ($A8A3),HL ;
+ $AB52 LD A,($A89E)  ; feet flags (old)
+@isub=AND TILE_BLOCKS|TILE_STANDABLE
+ $AB55 AND $03       ;
+@isub=CP TILE_STANDABLE
+ $AB57 CP $01        ;
+ $AB59 JR NZ,$AB5E   ; free or solid below: check for landing
+ $AB5B EX AF,AF'     ; platform: only when the fall crossed a cell row
+@isub=AND SUBROWS_PER_CELL
+ $AB5C AND $04       ; carry into bit 2 = crossed
+@label=PlayerFalling_Land
+*$AB5E CALL NZ,$A950 ; snap Y to the floor if the feet are in it
+ $AB61 LD HL,$A896   ; frame 2: in the air
+ $AB64 LD (HL),$02   ;
+ $AB66 LD HL,($A898) ; vertical speed
+ $AB69 LD A,H        ;
+@isub=CP FALL_SPEED_CAP_HI
+ $AB6A CP $02        ; at most $021C
+ $AB6C JP NC,$ABFC   ;
+@isub=LD DE,GRAVITY
+ $AB6F LD DE,$001E   ;
+ $AB72 ADD HL,DE     ;
+ $AB73 LD ($A898),HL ;
+ $AB76 JP $ABFC      ; draw
+; Jumping (C = 1): Y goes up by the vertical speed, which falls by $1E per frame; at zero the fall starts. A blocked
+; head (bit 1 of #R$A89C) stops the rise but not the countdown of the speed.
+@label=PlayerJumping
+*$AB79 LD HL,$A896   ; frame 2: in the air
+ $AB7C LD (HL),$02   ;
+ $AB7E LD DE,($A898) ; vertical speed
+ $AB82 LD A,($A89C)  ; head flags
+@isub=AND TILE_BLOCKS
+ $AB85 AND $02       ;
+ $AB87 JR NZ,$AB91   ; head blocked: do not rise
+ $AB89 LD HL,($A8A3) ; Y - speed
+ $AB8C SBC HL,DE     ;
+ $AB8E LD ($A8A3),HL ;
+*$AB91 LD HL,($A898) ; speed - $1E
+@isub=LD DE,-GRAVITY
+ $AB94 LD DE,$FFE2   ;
+ $AB97 ADD HL,DE     ;
+ $AB98 LD ($A898),HL ;
+ $AB9B LD A,H        ; speed reached zero?
+ $AB9C OR L          ;
+ $AB9D JP NZ,$ABFC   ; not yet
+@isub=LD A,PLAYER_FALLING
+ $ABA0 LD A,$05      ; top of the jump: fall
+ $ABA2 LD ($A894),A  ;
+ $ABA5 JP $ABFC      ;
+; Landed: standing, frame 0; then as standing.
+@label=PlayerLanded
+@isub=LD A,PLAYER_STANDING
+*$ABA8 LD A,$04      ;
+ $ABAA LD ($A894),A  ;
+ $ABAD LD HL,$A896   ;
+ $ABB0 LD (HL),$00   ;
+; Standing (C = 3): a newly pressed jump key starts a jump, a held crouch key crouches; no floor under the feet starts
+; a fall.
+@label=PlayerStanding
+*$ABB2 LD A,($A2D1)  ; jump pressed (bit 3 or 4)?
+@isub=AND CTRL_JUMP
+ $ABB5 AND $18       ;
+ $ABB7 JR Z,$ABD0    ;
+@isub=LD A,SFX_JUMP
+ $ABB9 LD A,$02      ;
+ $ABBB LD ($854F),A  ;
+ $ABBE LD HL,$A895   ;
+@isub=LD (HL),WALK_ANIM_PERIOD
+ $ABC1 LD (HL),$08   ;
+@isub=LD HL,JUMP_SPEED
+ $ABC3 LD HL,$01FE   ; start speed
+ $ABC6 LD ($A898),HL ;
+@isub=LD A,PLAYER_JUMPING
+ $ABC9 LD A,$02      ;
+ $ABCB LD ($A894),A  ;
+ $ABCE JR $ABE5      ;
+*$ABD0 LD A,($A2D0)  ; crouch held?
+@isub=AND CTRL_CROUCH
+ $ABD3 AND $04       ;
+ $ABD5 JR Z,$ABE5    ;
+@isub=LD A,WALK_ANIM_PERIOD
+ $ABD7 LD A,$08      ;
+ $ABD9 LD ($A895),A  ;
+ $ABDC XOR A         ;
+ $ABDD LD ($A896),A  ;
+@isub=LD A,PLAYER_CROUCHING
+ $ABE0 LD A,$03      ;
+ $ABE2 LD ($A894),A  ;
+@label=PlayerStanding_Floor
+*$ABE5 LD A,($A89E)  ; feet flags
+@isub=AND TILE_STANDABLE
+ $ABE8 AND $01       ;
+ $ABEA JR NZ,$ABFC   ; floor below: draw
+@isub=LD A,PLAYER_FALLING
+ $ABEC LD A,$05      ; no floor: fall from rest
+ $ABEE LD ($A894),A  ;
+ $ABF1 LD A,$02      ; frame 2
+ $ABF3 LD ($A896),A  ;
+ $ABF6 LD HL,$0000   ; speed 0
+ $ABF9 LD ($A898),HL ;
+; Draw the standing, walking, jumping or falling monk.
+@label=DrawPlayerStand
+*$ABFC LD HL,($A8A3) ; H = Y
+ $ABFF LD A,H        ;
+ $AC00 LD HL,($A8A1) ; HL = (X, Y)
+ $AC03 LD L,A        ;
+ $AC04 SRA H         ; X / 4: byte column
+ $AC06 SRA H         ;
+ $AC08 LD ($ACD3),HL ; position of the draw command (y, byte column)
+ $AC0B LD BC,$AC9F   ; shift pairs
+ $AC0E LD HL,$ACA7   ; frames facing left
+ $AC11 LD DE,$ACAD   ; frames facing right
+@isub=LD A,MONK_HEIGHT
+ $AC14 LD A,$0C      ; height
+; Entry point used by the crouching code: A = height, HL and DE = the frame tables for facing left and right, BC =
+; shift pairs.
+@label=DrawPlayerAttr
+*$AC16 PUSH AF       ; height on the stack
+@isub=LD A,BRIGHT+YELLOW
+ $AC17 LD A,$46      ; attribute: bright yellow
+ $AC19 LD ($ACDA),A  ; attribute of the draw command
+; Entry point of the dying code (#R$AA96): the frame table is chosen by the facing, the frame by #R$A896; the copy of
+; the frame by X mod 4 gives the address and width of the graphics.
+@label=DrawPlayerSprite
+*$AC1C LD A,($A897)  ; facing
+ $AC1F OR A          ;
+ $AC20 JR Z,$AC23    ; facing left: use the left table
+ $AC22 EX DE,HL      ; the other table
+*$AC23 LD HL,($A896) ; HL = frame number
+ $AC26 LD H,$00      ;
+ $AC28 ADD HL,HL     ;
+ $AC29 ADD HL,DE     ; table + 2 x frame
+ $AC2A LD E,(HL)     ; DE = frame in the sprite sheet
+ $AC2B INC HL        ;
+ $AC2C LD D,(HL)     ;
+ $AC2D LD HL,($A8A1) ; X
+ $AC30 LD A,H        ;
+@isub=AND SUBROW_MASK
+ $AC31 AND $03       ; X mod 4: shift phase
+ $AC33 ADD A,A       ; x 2: index in the pairs
+ $AC34 LD L,A        ;
+ $AC35 XOR A         ;
+ $AC36 LD H,A        ;
+ $AC37 ADD HL,BC     ; pairs + 2 x phase
+ $AC38 LD B,(HL)     ; B = offset of the shifted copy
+ $AC39 INC HL        ;
+ $AC3A LD C,(HL)     ; C = width
+ $AC3B LD H,A        ;
+ $AC3C LD L,B        ;
+ $AC3D ADD HL,DE     ; frame + offset
+ $AC3E LD ($ACD5),HL ; graphics address of the draw command
+ $AC41 POP HL        ; H = height
+ $AC42 LD L,C        ; L = width
+ $AC43 LD ($ACD7),HL ; size of the draw command
+ $AC46 LD HL,$ACD1   ; the draw command
+ $AC49 JP $AA1F      ; queue it
+; Crouching (C = 2): the crouch key released and nothing above the head (bit 1 of #R$A89C) stand the monk up; no floor
+; under the feet starts a fall.
+@label=PlayerCrouching
+*$AC4C LD A,($A2D0)  ; crouch still held?
+@isub=AND CTRL_CROUCH
+ $AC4F AND $04       ;
+ $AC51 JR NZ,$AC69   ; yes: stay
+ $AC53 LD A,($A89C)  ; head flags
+@isub=AND TILE_BLOCKS
+ $AC56 AND $02       ;
+ $AC58 JR NZ,$AC69   ; no room to stand up: stay
+@isub=LD A,PLAYER_STANDING
+ $AC5A LD A,$04      ; stand up
+ $AC5C LD ($A894),A  ;
+ $AC5F LD HL,$A895   ;
+ $AC62 LD (HL),$08   ;
+ $AC64 LD HL,$A896   ;
+ $AC67 LD (HL),$00   ;
+@label=PlayerCrouching_Floor
+*$AC69 LD A,($A89E)  ; feet flags
+@isub=AND TILE_STANDABLE
+ $AC6C AND $01       ;
+ $AC6E JR NZ,$AC80   ; floor below
+@isub=LD A,PLAYER_FALLING
+ $AC70 LD A,$05      ; no floor: fall
+ $AC72 LD ($A894),A  ;
+ $AC75 LD A,$02      ; frame 2
+ $AC77 LD ($A896),A  ;
+ $AC7A LD HL,$0000   ;
+ $AC7D LD ($A898),HL ;
+; Draw the crouching monk, 4 units (8 pixels) lower than the standing sprite.
+@label=DrawPlayerCrouch
+*$AC80 LD HL,($A8A3) ; H = Y
+ $AC83 LD A,H        ;
+ $AC84 LD HL,($A8A1) ;
+ $AC87 ADD A,$04     ; Y + 4
+ $AC89 LD L,A        ;
+ $AC8A SRA H         ; X / 4
+ $AC8C SRA H         ;
+ $AC8E LD ($ACD3),HL ; position of the draw command
+ $AC91 LD BC,$ACC1   ; crouching shift pairs
+ $AC94 LD HL,$ACC9   ; crouching frames facing left
+ $AC97 LD DE,$ACCD   ; crouching frames facing right
+@isub=LD A,CROUCH_HEIGHT
+ $AC9A LD A,$08      ; height
+ $AC9C JP $AC16      ; as #R$AC16

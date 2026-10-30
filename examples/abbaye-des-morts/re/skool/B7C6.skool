@@ -1,0 +1,32 @@
+; Entity handler: fish waiting under the water (rooms 16 and 19)
+;
+; The jumping fish of "Lake of despair" (room 16, three of them) and "Underground river" (room 19, two): handler of room
+; object kind 13 (#R$B028, behaviour block #R$9549). A fish has two states, each with its own handler: this one, in
+; which it is hidden under the water, and #R$B818, in which it jumps out of the water in an arc and falls back. The
+; slot is the one of the room enemies (#R$89ED): +2 word not used while waiting (the jump speed once it jumps), +4
+; byte countdown and +5 byte its reload ($54), +6 word x and +8 word y (8.8, high bytes in 2-pixel units), +$A and +$B
+; bytes not used, +$C word hit box offset, +$E word hit box far corner (7, 7), +$10 pointer to the sprite block (#R$954E:
+; attribute, height, width, two frames), +$12 byte animation counter and +$13 its reload, +$14 byte frame and +$15
+; number of frames (2).
+; .
+; While waiting nothing is drawn and the hit test is not made. The countdown goes down by one per frame; when it equals
+; FISH_JUMP_TIME (30 frames after the reload) the fish jumps: a splash (template #R$BD12) is made at x with y = WATER_Y
+; (position at SPAWN_POSITION, record appended to the object list #R$BE56, spawn count #R$8552 raised, sound effect
+; SFX_ENEMY_SHOT), and the slot is rewritten in place: the handler word becomes #R$B818, +2 the jump speed
+; FISH_JUMP_SPEED (upwards), +4 the countdown (kept: it now counts the 54 frames of the jump), +8 the start y
+; FISH_JUMP_Y, +6 x is kept. The rest of the slot is not touched. The fish of a room start with different countdowns
+; (observed in room 19: $54 and $7C), so that they do not jump together.
+;
+; SP Slot address + 2 (the handler word was popped by the RET that entered the routine)
+@label=UpdateFishWaiting
+c$B7C6 POP BC        ; +2, not used
+ $B7C7 POP DE        ; E countdown, D reload
+ $B7C8 DEC E         ;
+ $B7C9 LD A,E        ;
+@isub=CP FISH_JUMP_TIME
+ $B7CA CP $36        ; time to jump?
+ $B7CC JR Z,$B7D6    ;
+ $B7CE PUSH DE       ; store the countdown
+ $B7CF LD HL,$0012   ; SP is at slot+4: +$12 is the next slot
+ $B7D2 ADD HL,SP     ;
+ $B7D3 JP $A5F0      ; next slot

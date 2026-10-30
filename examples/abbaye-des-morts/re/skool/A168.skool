@@ -1,0 +1,78 @@
+; Script code $9D: set up the water row and its reflection
+;
+; Operands: row, column, attribute, width. Makes a row of width cells the monk can drown in and shows the scenery
+; above it mirrored in it. First it writes 0 (NOP) over the RET at #R$AD88 so that routine runs from the main loop on
+; every frame, and patches that routine's operands: the attribute and the width, the address of the attribute cells,
+; and the two bitmap addresses of the copy (the source is the cell row 3 rows above, the destination the bottom pixel
+; line of the water cell row, so the copy comes out upside down: a reflection); the JR into the LDI chain is set to
+; copy `width` bytes per pixel line and the BC count to width x 8. Finally it stores the flag value 4 in the width
+; cells (the entry #R$A12B of #R$A123), which kills the monk when he enters them (observed in room 16).
+; .
+; Used twice: room 16 (lake, $7D5C: row 21, column 6, attribute $13, width 16) and room 19 (river, $7F7A: row 21,
+; column 14, attribute $0D, width 16).
+; .
+; Hardware: only through the patched #R$AD88, which writes the attribute file and the screen bitmap.
+;
+; HL Script pointer, at the operands
+; O:HL Script pointer after the operands
+@label=OpSetupWater
+c$A168 XOR A         ;
+ $A169 LD ($AD88),A  ; NOP over the RET at $AD88: the effect runs every frame
+ $A16C LD E,(HL)     ; E = row, D = column
+ $A16D INC HL        ;
+ $A16E LD D,(HL)     ;
+ $A16F INC HL        ;
+ $A170 LD A,(HL)     ;
+@isub=LD (SmcWaterAttr+1),A
+ $A171 LD ($AD8D),A  ; attribute: operand of the LD A,n at $AD8C
+ $A174 INC HL        ;
+ $A175 LD A,(HL)     ;
+@isub=LD (SmcWaterWidth+1),A
+ $A176 LD ($AD8F),A  ; width: operand of the LD B,n at $AD8E
+ $A179 LD C,A        ;
+ $A17A LD B,$01      ;
+ $A17C INC HL        ;
+ $A17D PUSH HL       ;
+ $A17E PUSH DE       ;
+ $A17F PUSH BC       ;
+ $A180 LD L,A        ;
+ $A181 LD H,$00      ;
+ $A183 ADD HL,HL     ;
+ $A184 ADD HL,HL     ;
+ $A185 ADD HL,HL     ;
+@isub=LD (SmcWaterCount+1),HL
+ $A186 LD ($AD9B),HL ; width x 8: the count in the LD BC,nn at $AD9A
+@isub=SUB LDI_CHAIN_LEN
+ $A189 SUB $20       ;
+ $A18B NEG           ;
+ $A18D ADD A,A       ;
+@isub=LD (SmcWaterJump+1),A
+ $A18E LD ($ADA0),A  ; offset of the JR at $AD9F: skips 32 - width LDIs of the chain
+ $A191 EX DE,HL      ;
+ $A192 CALL $A1F2    ; attribute address of the first cell
+@isub=LD (SmcWaterAttrAddr+1),HL
+ $A195 LD ($AD8A),HL ; operand of the LD HL,nn at $AD89
+ $A198 CALL $A203    ; bitmap address of the cell
+ $A19B LD D,H        ;
+ $A19C LD A,L        ;
+@isub=SUB 3*SCREEN_COLS
+ $A19D SUB $60       ; three cell rows up (the source of the copy)
+ $A19F LD E,A        ;
+ $A1A0 JR NC,$A1A6   ;
+ $A1A2 LD A,H        ;
+ $A1A3 SUB $08       ;
+ $A1A5 LD D,A        ;
+@isub=LD A,CELL_SIZE-1
+*$A1A6 LD A,$07      ; bottom pixel line of the water cell row
+ $A1A8 ADD A,H       ;
+ $A1A9 LD H,A        ;
+@isub=LD (SmcWaterSrc+1),DE
+ $A1AA LD ($AD95),DE ; source: operand of the LD HL,nn at $AD94
+@isub=LD (SmcWaterDst+1),HL
+ $A1AE LD ($AD98),HL ; destination: operand of the LD DE,nn at $AD97
+ $A1B1 LD H,A        ;
+ $A1B2 POP BC        ;
+ $A1B3 POP HL        ;
+@isub=LD E,FLAG_HARMFUL
+ $A1B4 LD E,$04      ; flag value of the water cells
+ $A1B6 JP $A12B      ; set the flags of the width cells (B = 1 row)

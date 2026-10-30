@@ -1,0 +1,8 @@
+; Satan's words: strings 43-45
+;
+; The first screen of the ending sequence (#R$887B): white text on black, printed centred by the script #R$8345:
+; "your doom will come / not by my hand / but by human hands".
+@label=SatanText
+t$930E DEFM $13,"your doom will come"  ; string 43
+ $9322 DEFM $0E,"not by my hand"  ; string 44
+ $9331 DEFM $12,"but by human hands"  ; string 45

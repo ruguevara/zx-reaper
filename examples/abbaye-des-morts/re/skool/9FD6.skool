@@ -1,0 +1,47 @@
+; Script code $91: stamp a block of consecutive tiles at several places
+;
+; Operands: first tile number, width C, height B, count A, then A positions of two bytes each (row, column). At each
+; position the block is drawn into the tile map with #R$9E6A from its top-left cell, left to right and top to bottom;
+; the tile number goes up by one from cell to cell and keeps counting from one row to the next (a picture cut into C x
+; B tiles stored one after the other in the tile set). Used 29 times.
+;
+; HL Script pointer, at the operands
+; O:HL Script pointer after the operands
+@label=OpStampTileBlock
+c$9FD6 LD E,(HL)     ;
+ $9FD7 INC HL        ;
+ $9FD8 LD C,(HL)     ;
+ $9FD9 INC HL        ;
+ $9FDA LD B,(HL)     ;
+ $9FDB INC HL        ;
+ $9FDC LD A,(HL)     ;
+ $9FDD INC HL        ;
+@label=OpStampTileBlock_At
+*$9FDE PUSH AF       ; one position of the list
+ $9FDF PUSH DE       ;
+ $9FE0 PUSH BC       ;
+ $9FE1 PUSH HL       ;
+ $9FE2 LD A,(HL)     ; HL = this position: L = row, H = column
+ $9FE3 INC HL        ;
+ $9FE4 LD H,(HL)     ;
+ $9FE5 LD L,A        ;
+*$9FE6 PUSH HL       ; one row of the block
+ $9FE7 PUSH BC       ;
+ $9FE8 LD B,C        ;
+*$9FE9 CALL $9E6A    ; place tile E
+ $9FEC INC H         ; next column
+ $9FED INC E         ; next tile number
+ $9FEE DJNZ $9FE9    ;
+ $9FF0 POP BC        ;
+ $9FF1 POP HL        ;
+ $9FF2 INC L         ; next row
+ $9FF3 DJNZ $9FE6    ;
+ $9FF5 POP HL        ;
+ $9FF6 INC HL        ; next position word
+ $9FF7 INC HL        ;
+ $9FF8 POP BC        ;
+ $9FF9 POP DE        ;
+ $9FFA POP AF        ;
+ $9FFB DEC A         ;
+ $9FFC JR NZ,$9FDE   ;
+ $9FFE RET           ;

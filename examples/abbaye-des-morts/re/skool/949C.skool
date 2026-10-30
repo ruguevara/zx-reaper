@@ -1,0 +1,19 @@
+; Behaviour block: a fly, darker colour (kind 5, room 12)
+;
+; Used by three of the flies of Plagued ruins (attribute $04, not bright).
+; .
+; Layout: see #R$93D3.
+@label=BehaviourFlyB
+b$949C DEFB $01,$01,$06,$06,$02  ; hit box top, left, bottom, right; slot +$15 (Unknown)
+ $94A1 DEFB $04      ; attribute
+@isub=DEFW ShiftPairsAligned
+ $94A2 DEFW $9463    ; table of (first column, width) for x AND 3
+ $94A4 DEFB $08      ; sprite height (2-pixel units)
+@isub=DEFW BehaviourFlyB+$D
+ $94A5 DEFW $94A9    ; sprites, first direction (left or up)
+@isub=DEFW BehaviourFlyB+$11
+ $94A7 DEFW $94AD    ; sprites, second direction (right or down)
+ $94A9 DEFW $D763    ; first direction, frame 0
+ $94AB DEFW $D765    ; first direction, frame 1
+ $94AD DEFW $D767    ; second direction, frame 0
+ $94AF DEFW $D769    ; second direction, frame 1

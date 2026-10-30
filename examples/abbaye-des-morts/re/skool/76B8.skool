@@ -1,0 +1,58 @@
+; Room script 8: The Altar
+;
+; Two conditional parts: the door #R$778A at the right edge while the lever of room 10 (#R$851D) is still 0, and
+; #R$7783 which erases a 2x2 block of wall once the bell of room 2 (#R$851B) has rung.
+; .
+; Room 8: column 3, row 1 of the 5x5 map (left is room 7, right 9, up 3, down 13, counted modulo 25). Unpacks sprite
+; set #R$7042. Subscripts: #R$82F0, #R$76B0. Items (#R$8EDF) at row,column: parchment 18,27, checkpoint 17,7.
+@label=RoomScript08
+b$76B8 DEFB $97,$0F         ; SPRITESET 15
+ $76BA DEFB $87,$08         ; ROOMNAME 8 "The Altar"
+ $76BC DEFB $83 ; CALL ScriptRoomPanel
+@isub=DEFW ScriptRoomPanel
+ $76BD DEFW $82F0
+ $76BF DEFB $8B,$02,$95,$96,$01,$0F,$13 ; STAMPS 2 tiles $95 $96 at 1 positions
+ $76C6 DEFB $88,$01,$02,$1B,$16 ; BLOCK 1x2: $1B $16
+ $76CB DEFB $89,$10,$11,$06,$02 ; TILEBLOCK row 16, col 17, 6x2
+ $76D0 DEFB $8B,$02,$9F,$A0,$02,$04,$00,$04 ; STAMPS 2 tiles $9F $A0 at 2 positions
+ $76D8 DEFB $04
+ $76D9 DEFB $88,$02,$01,$A1,$A2 ; BLOCK 2x1: $A1 $A2
+ $76DE DEFB $99,$02,$05,$00,$02,$0A,$05,$04 ; TILEBLOCKS 2 rectangles
+ $76E6 DEFB $02,$0A
+ $76E8 DEFB $92,$A3,$07,$06,$01,$07,$05,$0A,$00,$0A,$04,$0A,$05,$0B,$05,$0D ; STAMP1 tile $A3 at 7 positions
+ $76F8 DEFB $04
+ $76F9 DEFB $83 ; CALL BlockStoneHalfA
+@isub=DEFW BlockStoneHalfA
+ $76FA DEFW $76B0
+ $76FC DEFB $99,$03,$08,$00,$08,$02,$0B,$08 ; TILEBLOCKS 3 rectangles
+ $7704 DEFB $02,$02,$0E,$0A,$04,$02
+ $770A DEFB $88,$02,$02,$07,$08,$09,$0A ; BLOCK 2x2: $07 $08 $09 $0A
+ $7711 DEFB $99,$02,$00,$00,$1E,$01,$14,$00 ; TILEBLOCKS 2 rectangles
+ $7719 DEFB $20,$02
+ $771B DEFB $88,$02,$02,$07,$08,$0D,$09 ; BLOCK 2x2: $07 $08 $0D $09
+ $7722 DEFB $99,$02,$00,$1E,$02,$0E,$12,$1E ; TILEBLOCKS 2 rectangles
+ $772A DEFB $02,$02
+ $772C DEFB $92,$0B,$02,$12,$10,$13,$0F ; STAMP1 tile $0B at 2 positions
+ $7733 DEFB $92,$0C,$04,$03,$1F,$08,$1E,$12 ; STAMP1 tile $0C at 4 positions
+ $773B DEFB $12,$14,$04
+ $773E DEFB $8C,$12,$17,$15 ; TILE1 row 18, col 23, tile $15
+ $7742 DEFB $8C,$13,$18,$14 ; TILE1 row 19, col 24, tile $14
+ $7746 DEFB $93,$12,$11,$06,$08,$0C,$08,$07 ; ROW row 18, col 17, 6 tiles
+ $774E DEFB $08,$07
+ $7750 DEFB $93,$13,$10,$08,$0A,$0A,$0A,$09 ; ROW row 19, col 16, 8 tiles
+ $7758 DEFB $0A,$09,$0A,$09
+ $775C DEFB $91,$C0,$04,$01,$01,$04,$12 ; PICTURES tiles from $C0, 4x1, at 1 positions
+ $7763 DEFB $91,$C4,$06,$04,$01,$05,$11 ; PICTURES tiles from $C4, 6x4, at 1 positions
+ $776A DEFB $91,$DC,$04,$01,$01,$09,$12 ; PICTURES tiles from $DC, 4x1, at 1 positions
+ $7771 DEFB $95 ; IFZERO run DoorRight if LeverRoom10 is 0
+@isub=DEFW DoorRight
+ $7772 DEFW $778A
+@isub=DEFW LeverRoom10
+ $7774 DEFW $851D
+ $7776 DEFB $91,$7E,$02,$01,$01,$13,$07 ; PICTURES tiles from $7E, 2x1, at 1 positions
+ $777D DEFB $9C ; IFNZ run EraseWallBlock if BellRung is not 0
+@isub=DEFW EraseWallBlock
+ $777E DEFW $7783
+@isub=DEFW BellRung
+ $7780 DEFW $851B
+ $7782 DEFB $80             ; END

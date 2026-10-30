@@ -1,0 +1,8 @@
+; Keyboard half-row buffer: 8 bytes
+;
+; Filled by #R$A240 with eight INI reads of port $FE, one per half-row, in the order of the port high bytes $FE, $FD,
+; $FB, $F7, $EF, $DF, $BF, $7F: row 0 CAPS SHIFT Z X C V, row 1 A S D F G, row 2 Q W E R T, row 3 1 2 3 4 5, row 4 0 9
+; 8 7 6, row 5 P O I U Y, row 6 ENTER L K J H, row 7 SPACE SYMBOL SHIFT M N B. Bits 0-4 are the keys, bit 0 the one
+; nearest the edge; a bit is 0 while its key is held.
+@label=KeyRows
+g$A2D3 DEFB $00,$00,$00,$00,$00,$00,$00,$00

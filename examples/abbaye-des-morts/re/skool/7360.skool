@@ -1,0 +1,7 @@
+; Block pattern: grey stone wall, variant (tiles $07,$08,$0A,$0D)
+;
+; Defines the current block (op $88) as a 2x2 pattern of grey cobbled stone: the same as #R$7358 but for the
+; bottom-right tile. Called by rooms 2, 7.
+@label=BlockStoneB
+b$7360 DEFB $88,$02,$02,$07,$08,$0A,$0D ; BLOCK 2x2: $07 $08 $0A $0D
+ $7367 DEFB $80             ; END

@@ -1,0 +1,9 @@
+; Show a parchment: clear the screen, print its two lines, frame, wait for a key
+;
+; Runs the parchment text script #R$832A, which blacks out the whole screen and prints the two messages (string numbers in $850E and $850F) centred at pixel rows 65 and 85. Then it draws the parchment frame in black on yellow (#R$9C96), waits for a key (release, press, release), redraws the room and the status bar and returns to the game. Entered through #R$9C51.
+; .
+; Hardware: clears and draws the screen, reads the keyboard through #R$A1CE and #R$A1C3 (HALT until the interrupt).
+@label=ShowParchment
+c$9C52 LD HL,$832A   ;
+@isub=LD BC,(YELLOW*PAPER+BLACK)*256+YELLOW
+ $9C55 LD BC,$3006   ; B: frame interior black on yellow, C: frame tiles yellow on black

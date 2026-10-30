@@ -1,0 +1,11 @@
+; Sound effect requested
+;
+; Written by the game code to start a sound effect, cleared by #R$871A (the routine called each frame through the
+; interrupt) when it picks the request up. 1 is a noise built in the routine (never requested, F106), 2-9 are the 8-byte
+; descriptions at #R$87F2 (effect n at $87F2+8*(n-2)). Known requests: 2 jump (#R$AAC6), 3 bell or lever touched
+; (#R$A748), 4 passage between rooms 10 and 19 (#R$A6D8), 5 item taken, wheel turned, chalice, key accepted in the
+; controls menu (#R$A70B, #R$A6A1, #R$A3B9), 6 the player dies (#R$AA3D), 7 an enemy shoots or throws (SFX_ENEMY_SHOT:
+; #R$BA79, #R$BB57, #R$B620, #R$B687, #R$B7D6, #R$B924), 8 the church door (#R$A615), 9 checkpoint touched (#R$A688). On
+; a 128K machine the AY player handles the request instead (#R$85D5).
+@label=SoundRequest
+g$854F DEFB $00

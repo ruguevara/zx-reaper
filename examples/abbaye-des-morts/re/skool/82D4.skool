@@ -1,0 +1,21 @@
+; Erase the twelve crosses of Satan's room
+;
+; Run by #R$BB57 (through $9CEE and the hook $9CE7) when Satan has been turned into smoke. Op $92 draws the blank tile
+; $80 at 12 positions, covering the twelve crosses (tile $4C) that #R$AE4B stamped there. The 12 positions (row,
+; column, two bytes each) start at $82D7 and are also read by #R$AE4B, which stamps the crosses at them.
+@label=ScriptEraseCrosses
+b$82D4 DEFB $92,$80,$0C     ; STAMP1 tile $80 at 12 positions
+@label=CrossRingPositions
+ $82D7 DEFB $06,$0B         ; row, column of the 1st cross
+ $82D9 DEFB $06,$0C
+ $82DB DEFB $09,$05
+ $82DD DEFB $09,$06
+ $82DF DEFB $09,$09
+ $82E1 DEFB $0D,$03
+ $82E3 DEFB $0E,$0E
+ $82E5 DEFB $0F,$06
+ $82E7 DEFB $0F,$07
+ $82E9 DEFB $0F,$0A
+ $82EB DEFB $0F,$0B
+ $82ED DEFB $11,$10
+ $82EF DEFB $80             ; END

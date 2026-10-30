@@ -1,0 +1,26 @@
+; Attribute file row addresses: 22 words, $5800 + 32*row
+;
+; One word per row of the room area (rows 0-21): the address of the first attribute cell of the row. Read by the redraw routine #R$95FF.
+@label=AttrRowAddrs
+w$9CF3 DEFW $5800
+ $9CF5 DEFW $5820
+ $9CF7 DEFW $5840
+ $9CF9 DEFW $5860
+ $9CFB DEFW $5880
+ $9CFD DEFW $58A0
+ $9CFF DEFW $58C0
+ $9D01 DEFW $58E0
+ $9D03 DEFW $5900
+ $9D05 DEFW $5920
+ $9D07 DEFW $5940
+ $9D09 DEFW $5960
+ $9D0B DEFW $5980
+ $9D0D DEFW $59A0
+ $9D0F DEFW $59C0
+ $9D11 DEFW $59E0
+ $9D13 DEFW $5A00
+ $9D15 DEFW $5A20
+ $9D17 DEFW $5A40
+ $9D19 DEFW $5A60
+ $9D1B DEFW $5A80
+ $9D1D DEFW $5AA0

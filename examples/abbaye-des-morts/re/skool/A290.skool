@@ -1,0 +1,19 @@
+; Add the Kempston joystick to the control bits
+;
+; Reached only by falling through from #R$A28F when it holds a NOP. Reads the Kempston port and keeps right, left,
+; down and fire (bits 0, 1, 2 and 4); joystick up (bit 3) is ignored. Fire lands in bit 4, the second JUMP bit, so it
+; jumps like the JUMP key. The bits are ORed into the keyboard result and stored in #R$A2CF.
+; .
+; Hardware: reads the Kempston joystick port $1F.
+;
+; E Keyboard control bits from #R$A271
+; O:A Control bits, also stored in #R$A2CF
+@label=ReadKempston
+@isub=LD BC,PORT_KEMPSTON
+c$A290 LD BC,$001F   ;
+ $A293 IN A,(C)      ;
+@isub=AND KEMPSTON_MASK
+ $A295 AND $17       ; right, left, down, fire
+ $A297 OR E          ;
+ $A298 LD ($A2CF),A  ;
+ $A29B RET           ;

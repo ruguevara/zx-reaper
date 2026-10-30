@@ -1,0 +1,9 @@
+; Room script 25: the ending room, runs the script of room 24
+;
+; Room 25 is only entered by the ending sequence #R$887B (first part): it runs the script of room 24 (#R$826C) and
+; nothing else; the crusaders of the actor list #R$83A8 and the text #R$8345 are added by the sequence.
+@label=RoomScript25
+b$82D0 DEFB $83 ; CALL RoomScript24
+@isub=DEFW RoomScript24
+ $82D1 DEFW $826C
+ $82D3 DEFB $80             ; END

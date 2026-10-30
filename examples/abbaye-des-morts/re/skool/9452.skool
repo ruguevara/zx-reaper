@@ -1,0 +1,20 @@
+; Behaviour block: a yellow spider (kind 5, room 3)
+;
+; Used by the yellow spiders of Wine supplies (attribute $06); the sprites and the table #R$9463 at the end of this
+; block are shared with #R$9445.
+; .
+; Layout: see #R$93D3.
+@label=BehaviourSpiderYellow
+b$9452 DEFB $00,$01,$05,$06,$02  ; hit box top, left, bottom, right; slot +$15 (Unknown)
+ $9457 DEFB $06      ; attribute
+@isub=DEFW ShiftPairsAligned
+ $9458 DEFW $9463    ; table of (first column, width) for x AND 3
+ $945A DEFB $05      ; sprite height (2-pixel units)
+@isub=DEFW BehaviourSpiderYellow+$D
+ $945B DEFW $945F    ; sprites, first direction (left or up)
+@isub=DEFW BehaviourSpiderYellow+$D
+ $945D DEFW $945F    ; sprites, second direction (right or down)
+ $945F DEFW $F338    ; both directions, frame 0
+ $9461 DEFW $F33A    ; both directions, frame 1
+@label=ShiftPairsAligned
+ $9463 DEFB $00,$02  ; table for x AND 3 = 0 only: first column 0, width 2 (shared by the vertical walkers)

@@ -1,0 +1,19 @@
+; Script opcode $8C: place one tile
+;
+; Operands: y x t (3 bytes). Puts the tile t at row y, column x through #R$9E6A.
+;
+; HL Operand bytes
+; O:HL Address after the operands
+@label=OpPlaceTile
+c$9E1B LD E,(HL)     ; E = y, D = x
+ $9E1C INC HL        ;
+ $9E1D LD D,(HL)     ;
+ $9E1E INC HL        ;
+ $9E1F LD A,(HL)     ; t
+ $9E20 INC HL        ;
+ $9E21 PUSH HL       ;
+ $9E22 EX DE,HL      ; HL = position
+ $9E23 LD E,A        ;
+ $9E24 CALL $9E6A    ;
+ $9E27 POP HL        ;
+ $9E28 RET           ;

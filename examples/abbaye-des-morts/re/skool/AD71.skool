@@ -1,0 +1,21 @@
+; Debug room warp: change room in the direction of a pressed key
+;
+; Called by the debug room warp #R$83CE with the direction bits of the keys pressed this frame. Does not move the monk:
+; it jumps into the room-change tails of #R$ACEF, which add to the room number (#R$8509), store the exit direction
+; (#R$850B), set the room state to 1 (enter the room) and wrap the room number modulo 25, and then return to the
+; caller of this routine. Bit 0 (right) goes to #R$AD0D (room + 1, direction 0), bit 1 (left) to #R$AD22 (room - 1,
+; direction 1), bit 2 (down) to #R$AD53 (room + 5, direction 2) and bit 3 (up) to #R$AD3C (room - 5, direction 3);
+; only one direction is taken, the first bit set from bit 0 up. Observed with #R$A894 poked to $FF: P, A, O and Q moved
+; room 5 to 6, 11, 10 and 5. Reached only through the RAGE cheat (#R$AAC0).
+;
+; A Direction bits as in #R$A2D1: bit 0 right, bit 1 left, bit 2 down, bit 3 up (higher bits are shifted out)
+@label=DebugMoveRoom
+c$AD71 RRA           ; bit 0: right
+ $AD72 JP C,$AD0D    ; room + 1
+ $AD75 RRA           ; bit 1: left
+ $AD76 JP C,$AD22    ; room - 1
+ $AD79 RRA           ; bit 2: down
+ $AD7A JP C,$AD53    ; room + 5
+ $AD7D RRA           ; bit 3: up
+ $AD7E JP C,$AD3C    ; room - 5
+ $AD81 RET           ;

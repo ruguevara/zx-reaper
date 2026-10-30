@@ -1,0 +1,9 @@
+; Behaviour block: the Pestilent Beast (kind 14, room 10)
+;
+; Used by the head of the Pestilent Beast of room 10 (attribute $06, #R$B880): a 32 x 40 pixel sprite at the top of the
+; room that lowers while the fire breath of kind 15 (#R$9585) is drawn. Hit box 38 x 30 pixels. After the 5 header
+; bytes (hit box as in #R$93D3): attribute, sprite height, width in bytes, then the address of one sprite.
+@label=BehaviourBeastHead
+b$957B DEFB $00,$00,$13,$0F,$01  ; hit box top, left, bottom, right (2-pixel units); slot +$15 (Unknown)
+ $9580 DEFB $06,$14,$04  ; attribute, sprite height, width (bytes)
+ $9583 DEFW $D763    ; sprite

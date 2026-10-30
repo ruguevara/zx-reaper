@@ -1,0 +1,31 @@
+; Bitmap copy chain going back (last 10 LDD), then the next pixel row
+;
+; The end of the chain of #R$9685, the plain copy of the first cell's byte, then HL and DE go to the next pixel row
+; (the next page of the redraw buffers, 256 bytes further in the screen). It falls into the JR at #R$96C7, which enters
+; the chain of LDI instructions at #R$96C9 to copy the next pixel row from the first cell to the last.
+; .
+; Hardware: writes the screen bitmap.
+;
+; HL Redraw buffer address of the first cell
+; DE Screen bitmap address of the first cell
+; O:HL Page + 1 of the first cell
+; O:DE Screen address + $0100: pixel row + 1 of the first cell
+@label=CopyBitmapBack_Tail
+c$96AF LDD           ;
+ $96B1 LDD           ;
+ $96B3 LDD           ;
+ $96B5 LDD           ;
+ $96B7 LDD           ;
+ $96B9 LDD           ;
+ $96BB LDD           ;
+ $96BD LDD           ;
+ $96BF LDD           ;
+ $96C1 LDD           ;
+ $96C3 LD A,(HL)     ;
+ $96C4 LD (DE),A     ;
+ $96C5 INC H         ;
+ $96C6 INC D         ;
+; Self-modified: the offset byte of this JR is written by #R$9615 (2 x (32 - run length)). It enters the chain of LDI
+; instructions at #R$96C9 to copy one pixel row of the run from its first cell to its last.
+@label=SmcBitmapForwardJump
+*$96C7 JR $96C7      ; enter the LDI chain; the offset byte (+1) is patched

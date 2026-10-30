@@ -1,0 +1,19 @@
+; Checkpoints: room, row and column of the 10 places the monk restarts at
+;
+; Ten records of 3 bytes read by #R$BDF3: +0 byte room number, +1 byte row (character rows, 0-21), +2 byte column
+; (0-31). The monk restarts there with y = row * 4 and x = column * 4 in 2-pixel units, in character cells. Records 1
+; to 9 belong to the nine checkpoint flags at #R$8543 in the same order (the checkpoint items of rooms 7, 8, 11, 12,
+; 14, 15, 19, 21 and 23, #R$8FFF to #R$903F); the tenth is used while no checkpoint has been touched: the start of the
+; game in room 5. Room names: 7 Abandoned church, 8 The Altar, 11 Cave of illusions, 12 Plagued ruins, 14 Hidden
+; garden, 15 Gloomy tunels, 19 Underground river, 21 Evil church, 23 Ashes to ashes, 5 Escape !!!.
+@label=Checkpoints
+b$BE2A DEFB $07,$10,$02 ; CheckpointFlag0: Abandoned church
+ $BE2D DEFB $08,$11,$07 ; CheckpointFlag1: The Altar
+ $BE30 DEFB $0B,$11,$0E ; CheckpointFlag2: Cave of illusions
+ $BE33 DEFB $0C,$07,$08 ; CheckpointFlag3: Plagued ruins
+ $BE36 DEFB $0E,$11,$08 ; CheckpointFlag4: Hidden garden
+ $BE39 DEFB $0F,$07,$15 ; CheckpointFlag5: Gloomy tunels
+ $BE3C DEFB $13,$0B,$08 ; CheckpointFlag6: Underground river
+ $BE3F DEFB $15,$05,$13 ; CheckpointFlag7: Evil church
+ $BE42 DEFB $17,$11,$11 ; CheckpointFlag8: Ashes to ashes
+ $BE45 DEFB $05,$11,$09 ; none touched: Escape !!!, the start

@@ -1,0 +1,16 @@
+; Free the object slot
+;
+; Entry point used by #R$A734 and #R$A836: free the object slot (zero its handler word) and go on with the next one;
+; SP is at slot + 8.
+;
+; SP Slot address + 8
+@label=FreeSlot
+c$A724 LD HL,$FFFA   ; SP back to slot + 2
+ $A727 ADD HL,SP     ;
+ $A728 LD SP,HL      ;
+ $A729 LD HL,$0000   ;
+ $A72C PUSH HL       ; handler = 0: the slot is free
+@isub=LD HL,SLOT_SIZE
+ $A72D LD HL,$0016   ;
+ $A730 ADD HL,SP     ;
+ $A731 JP $A5F0      ;

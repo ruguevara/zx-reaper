@@ -1,0 +1,25 @@
+; Queue one or two draw commands of an entity and go on with the next slot
+;
+; Copies draw commands (10 bytes each: routine word, y, x/4, graphics word, width, height, unused, attribute; see
+; #R$ACD1) from HL to the end of the frame call list at DE and stores the new end in #R$BE58. #R$B3F3 copies two
+; commands in a row (20 bytes: the commands at #R$ACD1 and #R$ACDB, used by the entities that draw two sprites: the
+; falling drop of #R$B534, Satan, the smoke), #R$B407 copies one. Both fall through to #R$B41F, which ends every
+; entity handler that has pushed back its animation counters: it sets HL to the slot after the current one and jumps
+; to #R$A5F0. Entered through IY (#R$B534, #R$B512, #R$B56D) or by a jump.
+; .
+; Hardware: none.
+;
+; HL Address of the first draw command (#R$ACD1)
+; DE Write pointer of the frame call list (the value of #R$BE58)
+; SP Slot address + $12
+@label=QueueTwoCommands
+c$B3F3 LDI           ; the main command ...
+ $B3F5 LDI           ;
+ $B3F7 LDI           ;
+ $B3F9 LDI           ;
+ $B3FB LDI           ;
+ $B3FD LDI           ;
+ $B3FF LDI           ;
+ $B401 LDI           ;
+ $B403 LDI           ; ... 10 bytes
+ $B405 LDI           ; and then the second command (10 bytes)

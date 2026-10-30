@@ -1,0 +1,15 @@
+; Flag map row address table: 24 words, $5E00+32*n
+;
+; Built by #R$6000 (the image holds $FFFF). Word n is the address of row n of the tile flag map at $5E00 (32 bytes per
+; row, so the words are $5E00, $5E20, $5E40, ...). The entity update routines find the flag-map cell under a sprite by
+; loading H=$61, L=2*row (row = y/4 of the 2-pixel y coordinate) and reading the row address from here, then adding
+; the column x/4: see #R$B44B. Only the first 22 words (the room area) are used; the last two are spare.
+; .
+; +0 word: address of row 0 ... +46 word: address of row 23
+@label=FlagRowTable
+w$6100 DEFW $FFFF,$FFFF,$FFFF,$FFFF
+ $6108 DEFW $FFFF,$FFFF,$FFFF,$FFFF
+ $6110 DEFW $FFFF,$FFFF,$FFFF,$FFFF
+ $6118 DEFW $FFFF,$FFFF,$FFFF,$FFFF
+ $6120 DEFW $FFFF,$FFFF,$FFFF,$FFFF
+ $6128 DEFW $FFFF,$FFFF,$FFFF,$FFFF

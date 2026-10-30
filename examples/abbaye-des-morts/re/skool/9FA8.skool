@@ -1,0 +1,30 @@
+; Fill a rectangle of the attribute file with a byte
+;
+; Worker of script code $8F (#R$9D8D); also called by #R$9C52. Fills B rows of C attribute cells with A, starting at
+; row L, column H.
+; .
+; Hardware: writes the attribute file at $5800-$5AFF directly.
+;
+; A Attribute byte
+; L Cell row 0-23
+; H Cell column 0-31
+; C Width in cells
+; B Height in cells
+@label=FillAttrRect
+c$9FA8 PUSH AF       ;
+ $9FA9 CALL $A1F2    ;
+ $9FAC POP DE        ;
+@label=FillAttrRect_Row
+*$9FAD PUSH HL       ;
+ $9FAE PUSH BC       ;
+ $9FAF LD B,C        ;
+*$9FB0 LD (HL),D     ;
+ $9FB1 INC L         ;
+ $9FB2 DJNZ $9FB0    ;
+ $9FB4 POP BC        ;
+ $9FB5 POP HL        ;
+@isub=LD A,SCREEN_COLS
+ $9FB6 LD A,$20      ; next row: +32
+ $9FB8 CALL $A1D9    ;
+ $9FBB DJNZ $9FAD    ;
+ $9FBD RET           ;

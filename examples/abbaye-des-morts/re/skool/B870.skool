@@ -1,0 +1,15 @@
+; Fish: attribute, then the animation step
+;
+; Continuation of #R$B818 after the hit test #R$A851 (reached by a JP through $A881; SP is at slot+$10, the hit test
+; has popped the two hit box words). It takes the pointer to the sprite block (slot +$10: attribute, height, width,
+; two frames; #R$954E) and stores the attribute in the draw command at #R$ACD1. The animation counter and frame
+; number in slot +$12..+$15 are stepped by #R$A883, which continues at #R$B87D.
+;
+; SP Slot address + $10
+@label=SetFishSprite
+c$B870 POP HL        ; sprite block
+ $B871 LD A,(HL)     ; attribute
+ $B872 INC HL        ;
+ $B873 LD ($ACDA),A  ; of the draw command
+ $B876 LD IX,$B87D   ; the animation step continues there
+ $B87A JP $A883      ; step the animation: frame in E

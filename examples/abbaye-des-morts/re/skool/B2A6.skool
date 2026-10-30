@@ -1,0 +1,48 @@
+; Entity handler: patroller moving left (kind 2) and the tail shared by the movers that go left or up
+;
+; The handler of every enemy that walks or flies along a horizontal line: rats (room 2), red bats (room 8), worms
+; (rooms 9, 14), skeletons (rooms 13, 22), crusaders (rooms 15, 20), red demons (rooms 21, 22), magenta flyers
+; (rooms 20, 23) and the white ceiling ghosts of rooms 22 and 23. Which creature it is depends on the sprite description
+; of its room record, not on the handler. A record of kind 2 starts moving left (this handler), a record of kind 3
+; starts moving right (#R$B365); the two handlers turn the slot into each other at the ends of the patrol.
+; .
+; Handlers of the object slots are entered with SP at slot+2 (the RET of #R$A5E9 popped the handler word); they pop the
+; words they need, push back the ones they change and end by jumping to #R$A5F0 with HL at the next slot.
+; .
+; The x coordinate goes down by the speed each frame. When its high byte equals the left turning point the handler
+; word of the slot is rewritten with #R$B365, so from the next frame the same speed is added. The test is for
+; equality, so a creature that starts outside its patrol (or a speed that skips a value) runs until x has wrapped
+; round. The sprite is placed at (x, y); the hit box test and the drawing go on at #R$B2D4 (the first frame table of
+; the sprite description, the one for creatures facing left).
+; .
+; Slot fields used: +2 word speed (8.8, 2-pixel units per frame), +4 byte left turning point of x, +5 byte right
+; turning point, +6 word x (8.8; the high byte is in 2-pixel units, its low two bits are the shift phase of the
+; sprite), +8 word y (8.8). The other fields are described at #R$B2D4.
+; .
+; Hardware: none.
+;
+; SP Slot address + 2
+@label=UpdateWalkLeft
+c$B2A6 POP BC        ; speed
+ $B2A7 POP DE        ; D right turning point, E left turning point
+ $B2A8 POP HL        ; x (8.8)
+ $B2A9 OR A          ;
+ $B2AA SBC HL,BC     ; x goes left
+ $B2AC PUSH HL       ; store x
+ $B2AD POP HL        ; SP is back at slot+8
+ $B2AE LD A,H        ; x in 2-pixel units
+ $B2AF CP E          ; at the left turning point?
+ $B2B0 JR NZ,$B2BF   ; no: go on
+ $B2B2 LD HL,$FFFA   ; -6: back to slot+2
+ $B2B5 ADD HL,SP     ;
+ $B2B6 LD SP,HL      ;
+ $B2B7 LD HL,$B365   ; from the next frame the creature goes right
+ $B2BA PUSH HL       ; written over the handler word at slot+0
+ $B2BB POP HL        ; pop the handler again
+ $B2BC POP BC        ; pop speed, limits and x again
+ $B2BD POP DE        ;
+ $B2BE POP HL        ;
+*$B2BF LD D,H        ; D = x
+ $B2C0 POP HL        ; y (8.8)
+ $B2C1 POP BC        ; skip the unused word at +$A
+ $B2C2 LD E,H        ; E = y

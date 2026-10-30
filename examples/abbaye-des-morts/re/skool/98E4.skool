@@ -1,0 +1,30 @@
+; Find a character row in the redraw run list
+;
+; The redraw run list at $C200 (built by #R$97B7 and #R$9719) holds one record per character row that has cells to redraw:
+; the row number, the number of runs, and for each run the first column and the index in the redraw cell buffers of its
+; first cell (2 bytes per run); the list ends with $FF. This searches it from the start for the row whose number is at
+; (DE). The row must be in the list: the draw handlers only ask for rows whose cells #R$9836 or #R$97FD flagged, and
+; a search for an absent row would run on past the end.
+; .
+; Hardware: none.
+;
+; DE Address of a byte holding the character row number (the job's row field)
+; O:HL Address of the row's first run entry (first column, buffer index of its first cell)
+; O:A Number of runs of the row
+@label=FindRedrawRow
+c$98E4 LD HL,$C200   ;
+@label=FindRedrawRow_Next
+*$98E7 LD A,(DE)     ;
+ $98E8 CP (HL)       ;
+ $98E9 JR Z,$98F3    ; found
+ $98EB INC L         ;
+ $98EC LD A,(HL)     ;
+ $98ED INC L         ;
+ $98EE ADD A,A       ; skip the runs: 2 bytes each
+ $98EF ADD A,L       ;
+ $98F0 LD L,A        ;
+ $98F1 JR $98E7      ;
+*$98F3 INC L         ;
+ $98F4 LD A,(HL)     ;
+ $98F5 INC L         ;
+ $98F6 RET           ;

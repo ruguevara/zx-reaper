@@ -1,0 +1,10 @@
+; Tile block descriptor set by script code $88
+;
+; +0 byte: block width in tiles. +1 byte: block height in tiles. +2 word: address of the width x height tile numbers
+; (row by row), inside the room script. Read by #R$A0DF. Both bytes are 0 until the first $88 runs.
+@label=BlockWidth
+g$A116 DEFB $00
+@label=BlockHeight
+ $A117 DEFB $00
+@label=BlockData
+ $A118 DEFW $0000

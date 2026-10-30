@@ -1,0 +1,26 @@
+; Probe three cells in a column
+;
+; ORs the tile flags of the cells at (x+B, y+C), (x+B, y+C+4) and (x+B, y+C+8) into E (E starts at 0): one point in
+; each of the three cell rows of the standing monk's side (#R$A8A5). C is left increased by 8.
+; .
+; Hardware: none; reads the tile flag map.
+;
+; HL Position: H = x, L = y (2-pixel units)
+; B Offset of the first point in x
+; C Offset of the first point in y
+; D Column mask (always $1F)
+; O:E OR of the tile flags at the points
+; O:C C + 8
+@label=ProbeColumnOf3
+c$A9BF LD E,$00   ;
+ $A9C1 CALL $A9FE ;
+ $A9C4 INC C      ;
+ $A9C5 INC C      ;
+ $A9C6 INC C      ;
+ $A9C7 INC C      ;
+ $A9C8 CALL $A9FE ;
+ $A9CB INC C      ;
+ $A9CC INC C      ;
+ $A9CD INC C      ;
+ $A9CE INC C      ;
+ $A9CF JP $A9FE   ;

@@ -27,8 +27,14 @@ The agent should read the disassembly through this tool, never whole.
                                     block=N draws each N-byte block as a separate
                                     tile (sprite banks); tiles are laid out in a
                                     square-ish grid with 1-byte gaps
-  zxq.py check                      `make verify` in a private copy (safe for
-                                    parallel agents: uses its own build dir)
+  zxq.py rename [-n] LIST.md...     rename labels and constants everywhere from
+                                    `Old -> New` lines (-n: only count)
+  zxq.py links [--check] DOC.md...  point [Label](../src/F.asm#Ln) links at the
+                                    label's current line (after source edits)
+  zxq.py check [FILE...]            `make verify` in a private copy (safe for
+                                    parallel agents: uses its own build dir);
+                                    with FILEs, only those skool files from the
+                                    working tree, the rest from git HEAD
   zxq.py equs [--uses|--consolidate]
                                     list @equ address names; --uses: every 16-bit
                                     operand each one replaces (add @keep before
@@ -404,15 +410,49 @@ def cmd_gfx(addr, n, width, out, cells=False, scale=4, block=0):
     print('wrote %s (%dx%d px, %d rows of %d bytes)' % (out, w, h, len(rows), width))
 
 
-def cmd_check():
+def cmd_check(files=()):
+    """Build in a private directory and compare with the original. With
+    FILES (skool entry files), the other entries come from git HEAD: a check
+    of one agent's files while other agents are half-way through theirs."""
     import shutil
     import subprocess
     import tempfile
     tmp = tempfile.mkdtemp(prefix='zxcheck-')
     try:
         for name in os.listdir('.'):
-            if name not in ('build', '.git'):
-                os.symlink(os.path.abspath(name), os.path.join(tmp, name))
+            if name in ('build', '.git') or (files and name == 're'):
+                continue
+            os.symlink(os.path.abspath(name), os.path.join(tmp, name))
+        if files:
+            os.mkdir(os.path.join(tmp, 're'))
+            for name in os.listdir('re'):
+                if name != 'skool':
+                    os.symlink(os.path.abspath(os.path.join('re', name)), os.path.join(tmp, 're', name))
+            git = subprocess.run('git archive HEAD %s | tar -x -C %s' % (SKOOL_DIR, tmp), shell=True,
+                                 capture_output=True, text=True)
+            if git.returncode:
+                sys.exit('git archive failed: %s' % git.stderr)
+            for f in files:
+                shutil.copy(f, os.path.join(tmp, SKOOL_DIR, os.path.basename(f)))
+        dup = duplicate_labels(os.path.join(tmp, SKOOL_DIR))
+        if dup:
+            print('label set more than once: ' + '; '.join(dup))
+            return 1
+        # first the assembled blocks against the image: fast, and names the
+        # entries that differ (a tape built from them may take long, e.g. a
+        # packer, and only says which block differs)
+        r = subprocess.run(['make', '-s', 'build/blocks.stamp'], cwd=tmp, capture_output=True,
+                           text=True)
+        if r.returncode:
+            out = (r.stdout + r.stderr).strip().splitlines()
+            print('\n'.join(out[-15:]))
+            return r.returncode
+        bad = image_diffs(tmp)
+        if bad:
+            print('DIFF from %s:' % IMAGE)
+            for line in bad[:20]:
+                print('  ' + line)
+            return 1
         r = subprocess.run(['make', '-s', 'verify'], cwd=tmp, capture_output=True, text=True)
         out = (r.stdout + r.stderr).strip().splitlines()
         print('\n'.join(out[-15:]))
@@ -421,7 +461,55 @@ def cmd_check():
         shutil.rmtree(tmp, ignore_errors=True)
 
 
+def duplicate_labels(skool_dir):
+    """Labels that two @label lines set (the assembler would say only
+    "label redefined", with a line of the joined source)."""
+    seen = {}
+    for name in sorted(os.listdir(skool_dir)):
+        if name.endswith('.skool'):
+            for line in open(os.path.join(skool_dir, name)):
+                if line.startswith('@label='):
+                    seen.setdefault(line.strip()[7:], []).append(name[:-6])
+    return ['%s in %s' % (k, ', '.join(v)) for k, v in sorted(seen.items()) if len(v) > 1]
+
+
+def image_diffs(root):
+    """Ranges where the files SAVEBIN writes (src/build.asm, unshifted)
+    differ from the image, with the entries they fall in."""
+    from skoolkit.snapshot import get_snapshot
+    mem = get_snapshot(IMAGE)
+    text = open(os.path.join(root, 'src/build.asm')).read().split('ELSE')[0]
+    entries = load()
+    out = []
+    for m in re.finditer(r'SAVEBIN\s+"([^"]+)"\s*,\s*([$\w]+)\s*,\s*([$\w]+)', text):
+        path, start = os.path.join(root, m.group(1)), m.group(2)
+        try:
+            start = int(start[1:], 16) if start.startswith('$') else int(start, 0)
+        except ValueError:
+            continue          # a label: not an address of the image
+        if not os.path.exists(path):
+            continue
+        data = open(path, 'rb').read()
+        diff = [start + i for i, b in enumerate(data) if start + i < 65536 and mem[start + i] != b]
+        runs = []
+        for a in diff:
+            if runs and a <= runs[-1][1] + 1:
+                runs[-1][1] = a
+            else:
+                runs.append([a, a])
+        for lo, hi in runs:
+            e = next((e for e in entries if e.addr <= lo <= e.end), None)
+            out.append('$%04X-$%04X%s' % (lo, hi, '  in %s' % e.name if e else ''))
+    return out
+
+
 EQU = re.compile(r'^@equ=([A-Za-z_][A-Za-z0-9_]*)=(.+?)\s*$')
+
+
+def breaks_shift_build(name):
+    """sjasmplus replaces a define at every `_`-separated part of a name, so
+    the shift test's -DSHIFT=... turns SHIFT_MASK or ROW_SHIFT into numbers."""
+    return 'SHIFT' in name.split('_')
 
 
 def cmd_const(args):
@@ -441,6 +529,10 @@ def cmd_const(args):
             return 0
         name, value = args[0], args[1]
         comment = ' '.join(args[2:])
+        if breaks_shift_build(name):
+            print('%s: SHIFT as a part of the name breaks the shift test (sjasmplus '
+                  'substitutes -DSHIFT there); choose another name' % name)
+            return 1
         names = re.findall(r'[A-Za-z_]\w*', re.sub(r'\$[0-9A-Fa-f]+|0x[0-9A-Fa-f]+|%[01]+|\d+', '', value))
         unknown = [n for n in names if n not in have]
         if unknown or not re.match(r'^[\w$%+\-*/()<>&|~ ]+$', value):
@@ -623,6 +715,111 @@ def cmd_dollars(paths, check):
         sys.exit(1)
 
 
+RENAME_FILES = ('src/*.asm', 're/skool/*.skool', 'docs/*.md', 're/notes.md', 're/findings.md',
+                're/questions.md', 'README.md', 'scripts/*.py', 'scripts/*.sh', 're/layout.mk')
+
+
+def cmd_rename(lists, dry):
+    """Apply label and constant renames from list files, lines `Old -> New`
+    (anything after a `|` is a comment), across the sources (src/ or
+    re/skool/ before the export; after it re/skool/ is history and is left
+    as it is), docs/, re/*.md, README.md and scripts/.
+    A label that starts with `Old_` (a loop head, an entry point) becomes
+    `New_...` too. Refuses names longer than 24 characters, names already
+    defined, and one name given two new names."""
+    import glob
+    pairs = {}
+    for path in lists:
+        for line in open(path):
+            m = re.match(r'\s*([A-Za-z_]\w*)\s*->\s*([A-Za-z_]\w*)\s*(\||$)', line)
+            if not m:
+                continue
+            old, new = m.group(1), m.group(2)
+            if pairs.get(old, new) != new:
+                sys.exit('%s: two new names: %s and %s' % (old, pairs[old], new))
+            pairs[old] = new
+    history = 're/skool/' if os.path.exists('src/game.asm') else '\0'
+    files = sorted(f for g in RENAME_FILES for f in glob.glob(g) if not f.startswith(history))
+    text = {f: open(f).read() for f in files}
+    names = set()
+    for f, s in text.items():
+        if f.startswith(('src/', 're/skool/')):
+            names |= set(re.findall(r'^([A-Za-z_]\w*)(?::|\s+EQU\b)', s, re.M))
+            names |= set(re.findall(r'^@label=(\w+)', s, re.M))
+    errors = []
+    for old, new in pairs.items():
+        if old not in names:
+            errors.append('%s is not defined' % old)
+        if len(new) > 24:
+            errors.append('%s is longer than 24 characters' % new)
+        if breaks_shift_build(new):
+            errors.append('%s: SHIFT as a part of the name breaks the shift test' % new)
+        if new in names and new not in pairs:
+            errors.append('%s is already defined' % new)
+    targets = list(pairs.values())
+    errors += ['%s is the new name of two labels' % n for n in set(targets) if targets.count(n) > 1]
+    if errors:
+        sys.exit('\n'.join(errors))
+    # one pass with a placeholder per name, so that A -> B, B -> C does not chain
+    pattern = re.compile(r'\b(%s)(?=\b|_[A-Za-z0-9])' % '|'.join(
+        re.escape(o) for o in sorted(pairs, key=len, reverse=True)))
+    counts = {o: 0 for o in pairs}
+
+    def sub(m):
+        counts[m.group(1)] += 1
+        return pairs[m.group(1)]
+    for f, s in text.items():
+        new = pattern.sub(sub, s)
+        if new != s and not dry:
+            open(f, 'w').write(new)
+    for old, new in sorted(pairs.items()):
+        print('%-24s -> %-24s %d' % (old, new, counts[old]))
+    if not dry:
+        print('then: make, the tests, tools/zxq.py links docs/*.md')
+
+
+def cmd_links(paths, check):
+    """Point every [Label](../src/F.asm#Ln) link of the markdown files at the
+    line where Label is defined now (after an edit of the sources moved it);
+    report links whose text is not a label. With check, change nothing and
+    exit 1 if a link is off."""
+    import glob
+    labels = {}
+    for f in sorted(glob.glob('src/*.asm')):
+        for i, line in enumerate(open(f), 1):
+            m = (re.match(r'([A-Za-z_]\w*)(?::|\s+EQU\b)', line)
+                 or re.match(r'\s+MACRO\s+([A-Za-z_]\w*)', line))
+            if m:
+                labels.setdefault(m.group(1), {}).setdefault(os.path.basename(f), i)
+    bad = 0
+    for path in paths:
+        s = open(path).read()
+        moved = []
+
+        def fix(m):
+            nonlocal bad
+            text, f, ln = m.group(1), m.group(2), int(m.group(3))
+            name = text.strip('`')
+            if name not in labels:
+                print('%s: not a label: %s' % (path, m.group(0)))
+                bad += 1
+                return m.group(0)
+            where = labels[name]
+            nf = f if f in where else sorted(where)[0]   # the file the link names, if it has the label
+            if (nf, where[nf]) != (f, ln):
+                moved.append(name)
+            return '[%s](../src/%s#L%d)' % (text, nf, where[nf])
+        new = re.sub(r'\[([^\[\]\n]+)\]\(\.\./src/([\w.]+\.asm)#L(\d+)\)', fix, s)
+        if moved:
+            print('%s: %d links %s' % (path, len(moved), 'off' if check else 'moved'))
+            if check:
+                bad += 1
+            else:
+                open(path, 'w').write(new)
+    if check and bad:
+        sys.exit(1)
+
+
 def table_cell(text):
     return math_safe(' '.join(str(text).replace('|', '/').split()))
 
@@ -730,6 +927,29 @@ def cmd_cut(addr, title):
 
 
 def cmd_reclassify(frag, force):
+    """Each run of the fragment (up to and including an `i` line) is applied
+    on its own, so the entries between runs stay as they are."""
+    import tempfile
+    runs, cur = [], []
+    for line in open(frag):
+        cur.append(line)
+        if re.match(r'^i *\$?[0-9A-Fa-f]', line):
+            runs.append(cur)
+            cur = []
+    if any(re.match(r'^[a-zA-Z@ ] *\$?[0-9A-Fa-f]', l) for l in cur):
+        sys.exit('the fragment must end with an `i $END` line (END = first address not covered)')
+    # check every run before changing anything
+    for check in (True, False):
+        for run in runs:
+            with tempfile.NamedTemporaryFile('w', suffix='.ctl', delete=False) as f:
+                f.writelines(run)
+            try:
+                reclassify_run(f.name, force, check)
+            finally:
+                os.remove(f.name)
+
+
+def reclassify_run(frag, force, check):
     import subprocess
     addrs = []
     end = None
@@ -754,6 +974,8 @@ def cmd_reclassify(frag, force):
     if done and not force:
         sys.exit('annotated entries would be replaced (use -f): %s'
                  % ' '.join(e.name for e in done))
+    if check:
+        return
     r = subprocess.run(['sna2skool.py', '-H', '-c', frag, '-s', str(start), '-e', str(end), IMAGE],
                        capture_output=True, text=True)
     if r.returncode:
@@ -833,8 +1055,8 @@ def address_slips(text):
 
 
 def cmd_asm(skool):
-    """skool2asm for sjasmplus: ORG lines below $SHIFT_END get +SHIFT so the
-    shift test can move the code; skool2asm writes IXl/IXh/IYl/IYh, which
+    """skool2asm for sjasmplus: ORG lines from $SHIFT_START up to below
+    $SHIFT_END get +SHIFT so the shift test can move the code; skool2asm writes IXl/IXh/IYl/IYh, which
     sjasmplus rejects in mixed case (unless --syntax=i), so they become
     IXL/IXH/IYL/IYH."""
     import subprocess
@@ -848,9 +1070,10 @@ def cmd_asm(skool):
     org = re.compile(r'^( +ORG +)(\$[0-9A-Fa-f]+)\s*$')
     half = re.compile(r'\b(I[XY])([hl])\b')
     shift_end = int(os.environ.get('SHIFT_END') or '0x10000', 0)
+    shift_start = int(os.environ.get('SHIFT_START') or '0', 0)
     for line in r.stdout.split('\n')[:-1] if r.stdout.endswith('\n') else r.stdout.split('\n'):
         m = org.match(line)
-        if m and int(m.group(2)[1:], 16) < shift_end:
+        if m and shift_start <= int(m.group(2)[1:], 16) < shift_end:
             line = org.sub(r'\1\2+SHIFT', line)
         print(half.sub(lambda m: m.group(1) + m.group(2).upper(), line))
 
@@ -948,8 +1171,12 @@ def main():
         cmd_gfx(parse_addr(a[1]), parse_addr(a[2]), int(a[3]), a[4], 'cells' in a[5:],
                 next((int(x) for x in a[5:] if x.isdigit()), 4),
                 next((parse_addr(x[6:]) for x in a[5:] if x.startswith('block=')), 0))
+    elif cmd == 'rename' and len(a) > 1:
+        cmd_rename([x for x in a[1:] if x != '-n'], '-n' in a)
+    elif cmd == 'links' and len(a) > 1:
+        cmd_links([x for x in a[1:] if x != '--check'], '--check' in a)
     elif cmd == 'check':
-        sys.exit(cmd_check())
+        sys.exit(cmd_check(a[1:]))
     elif cmd == 'equs' and '--uses' in a:
         cmd_equ_uses()
     elif cmd == 'equs':

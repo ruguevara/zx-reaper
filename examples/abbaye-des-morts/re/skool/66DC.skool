@@ -1,0 +1,284 @@
+; Item sprites: the doorway arch (16x24) and 14 sprites of 16x16 pixels
+;
+; Plain (unpacked) sprite graphics, 16 pixels wide: 2 bytes per pixel row, no mask (the outline comes from the table
+; built at $FF00 by #R$6000). They are not copied to the sprite sheet: the frame lists at #R$8B07 point here and the
+; sprite drawer reads them directly (popping 2 bytes per row, see #R$98F7). A frame is selected by the item handlers
+; from #R$A600 on; frames are listed with the item they belong to.
+; .
+; +$0000 SpriteArch: doorway arch, 24 rows (48 bytes), the passage between rooms 10 and 19
+; +$0030 SpriteCheckpoint0: checkpoint (cross in a ring), not yet touched
+; +$0050 SpriteCheckpoint1: checkpoint, active
+; +$0070 SpriteBell0: bell at rest (Tower of the Bell)
+; +$0090 SpriteBell1: bell swinging
+; +$00B0 SpriteLever0: lever, not pulled
+; +$00D0 SpriteLever1: lever, pulled
+; +$00F0 SpriteWheel0: the wheel of faith at rest
+; +$0110 SpriteWheel1: the wheel of faith turned (ornate frame)
+; +$0130 SpriteChalice: the chalice in Satan's room
+; +$0150 SpriteHeart0, +$0170 SpriteHeart1: heart (extra life), two frames (beating)
+; +$0190 SpriteCross: cross, drawn in six colours by the frame lists
+; +$01B0 SpritePlus: plus-shaped cross, the other look of the crosses: the frame lists #R$8B07 repeat the cross in six colours as SpriteCross and as SpritePlus, and #R$A777/#R$A782 pick one depending on the wheel of faith (#R$851E)
+; +$01D0 SpriteScroll: parchment; drawn red for the scroll that ends the game
+@label=SpriteArch
+b$66DC DEFB $07,$E0
+ $66DE DEFB $1D,$50
+ $66E0 DEFB $28,$2C
+ $66E2 DEFB $40,$04
+ $66E4 DEFB $60,$02
+ $66E6 DEFB $40,$06
+ $66E8 DEFB $A0,$03
+ $66EA DEFB $C0,$01
+ $66EC DEFB $80,$03
+ $66EE DEFB $C0,$01
+ $66F0 DEFB $80,$03
+ $66F2 DEFB $C0,$01
+ $66F4 DEFB $80,$03
+ $66F6 DEFB $C0,$01
+ $66F8 DEFB $80,$03
+ $66FA DEFB $C0,$01
+ $66FC DEFB $80,$03
+ $66FE DEFB $C0,$01
+ $6700 DEFB $80,$03
+ $6702 DEFB $C0,$01
+ $6704 DEFB $80,$03
+ $6706 DEFB $C0,$01
+ $6708 DEFB $80,$03
+ $670A DEFB $C0,$01
+@label=SpriteCheckpoint0
+ $670C DEFB $07,$E0
+ $670E DEFB $0C,$30
+ $6710 DEFB $1B,$D8
+ $6712 DEFB $31,$8C
+ $6714 DEFB $29,$94
+ $6716 DEFB $2F,$F4
+ $6718 DEFB $2F,$F4
+ $671A DEFB $29,$94
+ $671C DEFB $31,$8C
+ $671E DEFB $1B,$D8
+ $6720 DEFB $0C,$30
+ $6722 DEFB $0F,$F0
+ $6724 DEFB $0F,$F0
+ $6726 DEFB $0F,$F0
+ $6728 DEFB $1C,$B8
+ $672A DEFB $1F,$F8
+@label=SpriteCheckpoint1
+ $672C DEFB $07,$E0
+ $672E DEFB $0C,$30
+ $6730 DEFB $1A,$58
+ $6732 DEFB $36,$6C
+ $6734 DEFB $2F,$F4
+ $6736 DEFB $23,$C4
+ $6738 DEFB $23,$C4
+ $673A DEFB $2F,$F4
+ $673C DEFB $36,$6C
+ $673E DEFB $1A,$58
+ $6740 DEFB $0C,$30
+ $6742 DEFB $0F,$F0
+ $6744 DEFB $0F,$F0
+ $6746 DEFB $0F,$F0
+ $6748 DEFB $1C,$B8
+ $674A DEFB $1F,$F8
+@label=SpriteBell0
+ $674C DEFB $01,$80
+ $674E DEFB $00,$00
+ $6750 DEFB $07,$E0
+ $6752 DEFB $0F,$D0
+ $6754 DEFB $1F,$E8
+ $6756 DEFB $1F,$E8
+ $6758 DEFB $3F,$F4
+ $675A DEFB $3F,$F4
+ $675C DEFB $3F,$FC
+ $675E DEFB $3F,$F4
+ $6760 DEFB $3F,$FC
+ $6762 DEFB $7F,$FE
+ $6764 DEFB $C0,$03
+ $6766 DEFB $7F,$66
+ $6768 DEFB $00,$70
+ $676A DEFB $00,$30
+@label=SpriteBell1
+ $676C DEFB $01,$80
+ $676E DEFB $00,$00
+ $6770 DEFB $07,$E0
+ $6772 DEFB $0F,$D0
+ $6774 DEFB $1F,$E8
+ $6776 DEFB $1F,$E8
+ $6778 DEFB $3F,$F4
+ $677A DEFB $3F,$F4
+ $677C DEFB $3F,$FC
+ $677E DEFB $3F,$F4
+ $6780 DEFB $3F,$FC
+ $6782 DEFB $7F,$FE
+ $6784 DEFB $C0,$03
+ $6786 DEFB $76,$FE
+ $6788 DEFB $0E,$00
+ $678A DEFB $0C,$00
+@label=SpriteLever0
+ $678C DEFB $00,$00
+ $678E DEFB $00,$00
+ $6790 DEFB $18,$00
+ $6792 DEFB $18,$00
+ $6794 DEFB $0C,$00
+ $6796 DEFB $0C,$00
+ $6798 DEFB $06,$00
+ $679A DEFB $06,$00
+ $679C DEFB $03,$00
+ $679E DEFB $03,$00
+ $67A0 DEFB $01,$80
+ $67A2 DEFB $01,$80
+ $67A4 DEFB $00,$00
+ $67A6 DEFB $1F,$F8
+ $67A8 DEFB $3F,$FC
+ $67AA DEFB $7F,$FE
+@label=SpriteLever1
+ $67AC DEFB $00,$00
+ $67AE DEFB $00,$00
+ $67B0 DEFB $00,$18
+ $67B2 DEFB $00,$18
+ $67B4 DEFB $00,$30
+ $67B6 DEFB $00,$30
+ $67B8 DEFB $00,$60
+ $67BA DEFB $00,$60
+ $67BC DEFB $00,$C0
+ $67BE DEFB $00,$C0
+ $67C0 DEFB $01,$80
+ $67C2 DEFB $01,$80
+ $67C4 DEFB $00,$00
+ $67C6 DEFB $1F,$F8
+ $67C8 DEFB $3F,$FC
+ $67CA DEFB $7F,$FE
+@label=SpriteWheel0
+ $67CC DEFB $01,$80
+ $67CE DEFB $01,$80
+ $67D0 DEFB $07,$E0
+ $67D2 DEFB $0F,$F0
+ $67D4 DEFB $1C,$38
+ $67D6 DEFB $3E,$7C
+ $67D8 DEFB $36,$6C
+ $67DA DEFB $F0,$0F
+ $67DC DEFB $F0,$0F
+ $67DE DEFB $36,$6C
+ $67E0 DEFB $3E,$7C
+ $67E2 DEFB $1C,$38
+ $67E4 DEFB $0F,$F0
+ $67E6 DEFB $07,$E0
+ $67E8 DEFB $01,$80
+ $67EA DEFB $01,$80
+@label=SpriteWheel1
+ $67EC DEFB $00,$00
+ $67EE DEFB $60,$06
+ $67F0 DEFB $77,$EE
+ $67F2 DEFB $3F,$FC
+ $67F4 DEFB $1E,$78
+ $67F6 DEFB $3E,$7C
+ $67F8 DEFB $3E,$7C
+ $67FA DEFB $3E,$7C
+ $67FC DEFB $38,$1C
+ $67FE DEFB $38,$1C
+ $6800 DEFB $3E,$7C
+ $6802 DEFB $1E,$78
+ $6804 DEFB $3F,$FC
+ $6806 DEFB $77,$EE
+ $6808 DEFB $60,$06
+ $680A DEFB $00,$00
+@label=SpriteChalice
+ $680C DEFB $00,$00
+ $680E DEFB $00,$00
+ $6810 DEFB $1F,$F8
+ $6812 DEFB $1F,$F8
+ $6814 DEFB $0D,$B0
+ $6816 DEFB $1F,$F8
+ $6818 DEFB $0F,$F0
+ $681A DEFB $07,$E0
+ $681C DEFB $01,$80
+ $681E DEFB $01,$80
+ $6820 DEFB $01,$80
+ $6822 DEFB $01,$80
+ $6824 DEFB $03,$C0
+ $6826 DEFB $07,$E0
+ $6828 DEFB $1F,$F8
+ $682A DEFB $00,$00
+@label=SpriteHeart0
+ $682C DEFB $00,$00
+ $682E DEFB $00,$00
+ $6830 DEFB $00,$00
+ $6832 DEFB $00,$00
+ $6834 DEFB $06,$C0
+ $6836 DEFB $0F,$E0
+ $6838 DEFB $0F,$E0
+ $683A DEFB $0F,$A0
+ $683C DEFB $0F,$A0
+ $683E DEFB $07,$40
+ $6840 DEFB $03,$80
+ $6842 DEFB $00,$00
+ $6844 DEFB $00,$00
+ $6846 DEFB $00,$00
+ $6848 DEFB $00,$00
+ $684A DEFB $00,$00
+@label=SpriteHeart1
+ $684C DEFB $00,$00
+ $684E DEFB $00,$00
+ $6850 DEFB $00,$00
+ $6852 DEFB $00,$00
+ $6854 DEFB $00,$00
+ $6856 DEFB $06,$C0
+ $6858 DEFB $0F,$E0
+ $685A DEFB $0F,$A0
+ $685C DEFB $07,$40
+ $685E DEFB $03,$80
+ $6860 DEFB $00,$00
+ $6862 DEFB $00,$00
+ $6864 DEFB $00,$00
+ $6866 DEFB $00,$00
+ $6868 DEFB $00,$00
+ $686A DEFB $00,$00
+@label=SpriteCross
+ $686C DEFB $00,$00
+ $686E DEFB $00,$00
+ $6870 DEFB $00,$00
+ $6872 DEFB $00,$00
+ $6874 DEFB $03,$C0
+ $6876 DEFB $01,$80
+ $6878 DEFB $09,$90
+ $687A DEFB $0F,$F0
+ $687C DEFB $0F,$F0
+ $687E DEFB $09,$90
+ $6880 DEFB $01,$80
+ $6882 DEFB $03,$C0
+ $6884 DEFB $00,$00
+ $6886 DEFB $00,$00
+ $6888 DEFB $00,$00
+ $688A DEFB $00,$00
+@label=SpritePlus
+ $688C DEFB $00,$00
+ $688E DEFB $00,$00
+ $6890 DEFB $00,$00
+ $6892 DEFB $00,$00
+ $6894 DEFB $01,$80
+ $6896 DEFB $01,$80
+ $6898 DEFB $01,$80
+ $689A DEFB $01,$80
+ $689C DEFB $07,$E0
+ $689E DEFB $07,$E0
+ $68A0 DEFB $01,$80
+ $68A2 DEFB $01,$80
+ $68A4 DEFB $00,$00
+ $68A6 DEFB $00,$00
+ $68A8 DEFB $00,$00
+ $68AA DEFB $00,$00
+@label=SpriteScroll
+ $68AC DEFB $0F,$FC
+ $68AE DEFB $1F,$FA
+ $68B0 DEFB $1F,$F2
+ $68B2 DEFB $1F,$F4
+ $68B4 DEFB $10,$B0
+ $68B6 DEFB $1F,$F0
+ $68B8 DEFB $12,$30
+ $68BA DEFB $1F,$F0
+ $68BC DEFB $10,$F0
+ $68BE DEFB $1F,$F0
+ $68C0 DEFB $10,$34
+ $68C2 DEFB $1F,$F2
+ $68C4 DEFB $1F,$FA
+ $68C6 DEFB $0F,$FC
+ $68C8 DEFB $00,$00
+ $68CA DEFB $00,$00

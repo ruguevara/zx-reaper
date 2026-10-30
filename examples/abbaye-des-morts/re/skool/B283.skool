@@ -1,0 +1,40 @@
+; Entity handler: patroller moving up (kind 5)
+;
+; The counterpart of #R$B344 for a creature that starts its vertical patrol moving up (the flies of room 12, the
+; yellow spiders of room 3; also every kind 4 creature after its first turn). The y coordinate goes up by the speed
+; each frame; when its high byte falls below the upper turning point (+4) the handler word of the slot is rewritten
+; with #R$B344. The sprite is placed at (x, y) through #R$B2C3, which tests the hit box and draws the first frame
+; table (facing up). Stack scheme and slot fields as in #R$B2A6 and #R$B2D4.
+; .
+; Hardware: none.
+;
+; SP Slot address + 2
+@label=UpdateWalkUp
+c$B283 POP BC        ; speed
+ $B284 POP DE        ; D lower turning point, E upper
+ $B285 POP HL        ; x (8.8); only its high byte is used
+ $B286 LD A,H        ; A = x in 2-pixel units
+ $B287 EX AF,AF'     ; kept in A'
+ $B288 POP HL        ; y (8.8)
+ $B289 OR A          ;
+ $B28A SBC HL,BC     ; y goes up
+ $B28C PUSH HL       ; store y
+ $B28D POP HL        ; SP is back at slot+$A
+ $B28E LD A,H        ; y in 2-pixel units
+ $B28F CP E          ; above the upper turning point?
+ $B290 JR NC,$B2A0   ; no: go on
+ $B292 LD HL,$FFF8   ; -8: back to slot+2
+ $B295 ADD HL,SP     ;
+ $B296 LD SP,HL      ;
+ $B297 LD HL,$B344   ; from the next frame the creature goes down
+ $B29A PUSH HL       ; written over the handler word at slot+0
+ $B29B POP HL        ; pop the handler again
+ $B29C POP BC        ; pop speed, limits, x and y again
+ $B29D POP DE        ;
+ $B29E POP HL        ;
+ $B29F POP HL        ;
+*$B2A0 EX AF,AF'     ; A = x
+ $B2A1 LD D,A        ; D = x
+ $B2A2 POP BC        ; skip the unused word at +$A
+ $B2A3 LD E,H        ; E = y
+ $B2A4 JR $B2C3      ; place the sprite, test the hit box, draw (facing up)

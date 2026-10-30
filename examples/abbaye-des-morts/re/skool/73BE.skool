@@ -1,0 +1,43 @@
+; Room script 4: Room 4 (no name)
+;
+; Has no room name, so the name panel is not drawn. Besides being the room of the grid it is the setting of the second
+; part of the ending (#R$887B): the script clears the two bottom character rows with op $81 and, with op $90, forces a
+; full redraw. Quirk (F67): in play nothing redraws the status bar that op $81 has erased, so the hearts and crosses
+; stay blank, also in the next rooms, until a life or a cross is gained or lost.
+; .
+; Room 4: column 4, row 0 of the 5x5 map (left is room 3, right 5, up 24, down 9, counted modulo 25). Unpacks sprite
+; set #R$6916. Subscripts: #R$830B, #R$744B, #R$7443. No items.
+; .
+; Hardware: writes the screen bitmap and the attribute file directly (ops $81 and $8F), not through the tile map.
+@label=RoomScript04
+b$73BE DEFB $97,$01         ; SPRITESET 1
+ $73C0 DEFB $86,$00,$00,$20,$16,$80 ; FILLTILE row 0, col 0, 32x22, tile $80
+ $73C6 DEFB $81,$B0,$00,$20,$10,$00 ; FILLPIX pixel row 176, byte col 0, 32 bytes x 16 rows, byte $00
+ $73CC DEFB $83 ; CALL ScriptSky
+@isub=DEFW ScriptSky
+ $73CD DEFW $830B
+ $73CF DEFB $83 ; CALL BlockTreeBark
+@isub=DEFW BlockTreeBark
+ $73D0 DEFW $744B
+ $73D2 DEFB $99,$03,$06,$01,$02,$0E,$04,$1C ; TILEBLOCKS 3 rectangles
+ $73DA DEFB $02,$10,$0B,$10,$01,$07
+ $73E0 DEFB $83 ; CALL BlockGrassEarth
+@isub=DEFW BlockGrassEarth
+ $73E1 DEFW $7443
+ $73E3 DEFB $89,$14,$00,$20,$02 ; TILEBLOCK row 20, col 0, 32x2
+ $73E8 DEFB $86,$12,$0D,$07,$02,$1B ; FILLTILE row 18, col 13, 7x2, tile $1B
+ $73EE DEFB $98,$8A,$02,$00,$00,$08,$03,$00 ; RECTS tile $8A, 2 rectangles
+ $73F6 DEFB $17,$09,$03
+ $73F9 DEFB $8B,$04,$8A,$8A,$89,$8A,$04,$00 ; STAMPS 4 tiles $8A $8A $89 $8A at 4 positions
+ $7401 DEFB $05,$00,$16,$03,$01,$03,$18
+ $7408 DEFB $8B,$02,$8C,$86,$03,$08,$1B,$0B ; STAMPS 2 tiles $8C $86 at 3 positions
+ $7410 DEFB $00,$0D,$1B
+ $7413 DEFB $8B,$02,$87,$88,$02,$08,$02,$0B ; STAMPS 2 tiles $87 $88 at 2 positions
+ $741B DEFB $1D
+ $741C DEFB $92,$99,$02,$0E,$02,$0F,$1D ; STAMP1 tile $99 at 2 positions
+ $7423 DEFB $92,$81,$03,$13,$00,$13,$03,$13 ; STAMP1 tile $81 at 3 positions
+ $742B DEFB $1F
+ $742C DEFB $8D,$02,$07,$89,$0F,$01,$15,$01,$02,$01,$04,$02,$15,$0A,$13,$0B ; RUNS from row 2, col 7, tile $89, 15 runs
+ $743C DEFB $16,$02,$02,$01
+ $7440 DEFB $90,$01         ; REDRAWMARK mark all cells
+ $7442 DEFB $80             ; END

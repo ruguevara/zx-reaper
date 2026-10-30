@@ -1,0 +1,34 @@
+; Bitmap copy chain going back (first 21 of 31 LDD)
+;
+; Part of #R$95FF: copies one pixel row of a run of cells from the redraw buffers to the screen, from the last cell down
+; to the first, entered by the JR at #R$9683. The chain goes on at #R$96AF.
+; .
+; Hardware: writes the screen bitmap (one byte of the pixel row for each cell).
+;
+; HL Address of the cell's byte in the pixel-row page of the redraw buffers
+; DE Screen bitmap address of the cell's byte
+; BC Decremented by every LDD (the value is not used)
+; O:HL Decreased by the number of LDDs executed
+; O:DE Decreased by the number of LDDs executed
+@label=CopyBitmapBack
+c$9685 LDD           ;
+ $9687 LDD           ;
+ $9689 LDD           ;
+ $968B LDD           ;
+ $968D LDD           ;
+ $968F LDD           ;
+ $9691 LDD           ;
+ $9693 LDD           ;
+ $9695 LDD           ;
+ $9697 LDD           ;
+ $9699 LDD           ;
+ $969B LDD           ;
+ $969D LDD           ;
+ $969F LDD           ;
+ $96A1 LDD           ;
+ $96A3 LDD           ;
+ $96A5 LDD           ;
+ $96A7 LDD           ;
+ $96A9 LDD           ;
+ $96AB LDD           ;
+ $96AD LDD           ;

@@ -1,0 +1,17 @@
+; Script opcode $8F: fill a rectangle of attribute cells with one attribute
+;
+; Operands: y x w h a (5 bytes): the rectangle starts at cell row y (0-23) and column x, is w cells wide and h rows high and gets the attribute byte a. Fills through #R$9FA8.
+; .
+; Hardware: writes the attribute file.
+;
+; HL Operand bytes
+; O:HL Address after the operands
+@label=OpFillAttrs
+c$9D8D CALL $A11A    ; E = y, D = x, C = w, B = h
+ $9D90 LD A,(HL)     ; a
+ $9D91 INC HL        ;
+ $9D92 PUSH HL       ;
+ $9D93 EX DE,HL      ; HL = y (L), x (H)
+ $9D94 CALL $9FA8    ;
+ $9D97 POP HL        ;
+ $9D98 RET           ;

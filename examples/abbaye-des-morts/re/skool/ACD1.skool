@@ -1,0 +1,54 @@
+; Sprite draw commands
+;
+; Three 10-byte templates in the format of the frame call list (#R$BE5A): the game frame fills a command with the
+; sprite's position, graphics and size, and #R$AA1F (or the copy loops of the entities) appends its 10 bytes to the
+; list, which #R$BDDB later runs by RET: the first word is the routine, the other eight bytes are popped by it as
+; HL, DE, BC and AF. The entities and the player share the first template, one after the other in the same frame; the
+; second is used with it by the two-part sprites (Satan), the third by the room items.
+; .
+; Sprite command (routine #R$9836, the masked sprite; #R$ACD1 and #R$ACDB):
+; +0 word: routine #R$9836
+; +2 word: position, low byte y in 2-pixel units (0-87), high byte x in bytes (0-31); a value of $20 or more or $58 or
+;   more is negative (the sprite starts outside the room)
+; +4 word: graphics address in the sprite sheet, low byte first column, high byte pixel row page
+; +6 byte: width in bytes (1-5)
+; +7 byte: height in 2-pixel units
+; +8 byte: unused (popped as the flags)
+; +9 byte: attribute of the cells the sprite covers
+; .
+; Object command (routine #R$97FD, #R$ACE5): the same fields, but the position is the cell row and column of the top
+; left corner (low byte row 0-21, high byte column 0-31), the height is in 2-pixel units (4 to a cell row) and the width
+; byte is not used: the sprite is always 2 cells wide.
+@label=SpriteCmd
+g$ACD1 DEFW $9836            ; Main sprite: routine
+@label=SpriteCmdPos
+ $ACD3 DEFW $0000            ; Position (y, x/4 = byte column)
+@label=SpriteCmdGfx
+ $ACD5 DEFW $0000            ; Graphics
+@label=SpriteCmdSize
+ $ACD7 DEFB $00,$00          ; Width, height
+ $ACD9 DEFB $00              ; Unused
+@label=SpriteCmdAttr
+ $ACDA DEFB $00              ; Attribute
+@label=SpriteCmd2
+ $ACDB DEFW $9836            ; Second sprite: routine
+@label=SpriteCmd2Pos
+ $ACDD DEFW $0000            ; Position
+@label=SpriteCmd2Gfx
+ $ACDF DEFW $0000            ; Graphics
+@label=SpriteCmd2Size
+ $ACE1 DEFB $00,$00          ; Width, height
+ $ACE3 DEFB $00              ; Unused
+@label=SpriteCmd2Attr
+ $ACE4 DEFB $00              ; Attribute
+@label=ItemCmd
+ $ACE5 DEFW $97FD            ; Object sprite: routine
+@label=ItemCmdPos
+ $ACE7 DEFW $0000            ; Position (row, column)
+@label=ItemCmdGfx
+ $ACE9 DEFW $0000            ; Graphics
+@label=ItemCmdSize
+ $ACEB DEFB $00,$00          ; Width, height
+ $ACED DEFB $00              ; Unused
+@label=ItemCmdAttr
+ $ACEE DEFB $00              ; Attribute

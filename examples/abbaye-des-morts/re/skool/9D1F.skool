@@ -1,0 +1,36 @@
+; Script opcode jump table: handlers of the codes $80-$9F interpreted by $9D5F
+;
+; 32 words indexed by opcode - $80 (#R$9D5F adds twice the code, without bit 7, to this address). The command set and its operand bytes are described at #R$9D5F; each word is commented with its opcode number and what the handler does.
+@label=ScriptOpTable
+w$9D1F DEFW $9D7F ; $80 end of script
+ $9D21 DEFW $9D81 ; $81 fill pixels: y x w h b
+ $9D23 DEFW $9D99 ; $82 text alignment mode and text row: mode y
+ $9D25 DEFW $9DA4 ; $83 run a subscript: word address
+ $9D27 DEFW $9DB7 ; $84 print the string whose number is in the byte at the word address
+ $9D29 DEFW $9DAF ; $85 print string number n
+ $9D2B DEFW $9DD2 ; $86 fill a tile rectangle with one tile: y x w h t
+ $9D2D DEFW $9DEA ; $87 set the room name string number: n
+ $9D2F DEFW $A104 ; $88 define the block pattern: w h, then w*h tile numbers (#R$A104)
+ $9D31 DEFW $A0BE ; $89 fill a rectangle with the block pattern: y x w h (#R$A0BE)
+ $9D33 DEFW $A065 ; $8A flag the room border cells: mask (#R$A065)
+ $9D35 DEFW $9DF7 ; $8B tile run at several positions: n t1..tn k (y x)*k
+ $9D37 DEFW $9E1B ; $8C place one tile: y x t
+ $9D39 DEFW $9E3D ; $8D tile stripes: y x t c, c draw/skip counts
+ $9D3B DEFW $9F28 ; $8E set the text cursor: y x (#R$9F28)
+ $9D3D DEFW $9D8D ; $8F fill attributes: y x w h a
+ $9D3F DEFW $9FBE ; $90 mark all cells for redraw (1) or unmark them (0): f (#R$9FBE)
+ $9D41 DEFW $9FD6 ; $91 tile block at several positions: t w h k (y x)*k (#R$9FD6)
+ $9D43 DEFW $9DF0 ; $92 one tile at several positions: t k (y x)*k
+ $9D45 DEFW $9E29 ; $93 row of tiles: y x n t1..tn
+ $9D47 DEFW $9FFF ; $94 tiles from a two-level bitmap: y x t c, c bytes (#R$9FFF)
+ $9D49 DEFW $A04B ; $95 run a subscript if a variable is 0: word word (#R$A04B)
+ $9D4B DEFW $A123 ; $96 fill a rectangle of the tile flag map: y x w h f (#R$A123)
+ $9D4D DEFW $A146 ; $97 unpack sprite set n: n (#R$A146)
+ $9D4F DEFW $9DC2 ; $98 fill k rectangles with one tile: t k (y x w h)*k
+ $9D51 DEFW $A0B4 ; $99 fill k rectangles with the block pattern: k (y x w h)*k (#R$A0B4)
+ $9D53 DEFW $A15A ; $9A vertical line of a tile: t y x n, never used (#R$A15A)
+ $9D55 DEFW $A14E ; $9B vertical lines of a tile: t k (y x n)*k (#R$A14E)
+ $9D57 DEFW $A058 ; $9C run a subscript if a variable is not 0: word word (#R$A058)
+ $9D59 DEFW $A168 ; $9D water strip with its reflection: y x a n (#R$A168)
+ $9D5B DEFW $A1B9 ; $9E start the bubbling blood of the bottom row, tiles $3B/$3C (#R$A1B9)
+ $9D5D DEFW $A1BE ; $9F start the twelve-crosses effect (#R$A1BE)

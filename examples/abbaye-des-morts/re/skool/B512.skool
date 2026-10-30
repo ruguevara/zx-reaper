@@ -1,0 +1,40 @@
+; Entity handler: water drop hanging from a stalactite (kind 9, rooms 15 and 19)
+;
+; The cyan drops that form at the tip of the stalactites of Gloomy tunnels (room 15) and Underground river (room 19), swell
+; and fall. A drop cycles through two handlers: this one while it hangs and #R$B534 while it falls. Entered with SP
+; at slot+2, see #R$B2A6 for the stack scheme. Slot fields used: +4 byte y of the stalactite tip, +7 byte x, +$B
+; byte start delay; the whole layout is at #R$B56D.
+; .
+; The start delay (byte +$B, the fifth parameter of the room record: $0B-$3D frames, so that the drops of a room do
+; not fall together) is decremented each frame and written back while it is nonzero; the drop is neither drawn nor
+; tested until it reaches 0. From then on it stays 1 (the decrement leaves 0 and the zero is not stored) and each
+; frame the drop is placed at the tip (x/4, y of the tip) and drawn with a single draw command (IY = #R$B407, the hanging
+; drop of the sprite description), without a hit box test (the two hit box words +$C..+$F are skipped), and
+; #R$B56D counts the animation down.
+; .
+; Hardware: none.
+;
+; SP Slot address + 2
+@label=UpdateDropHanging
+c$B512 POP BC        ; skip the speed
+ $B513 POP DE        ; E = y of the tip, D = y where the fall ends
+ $B514 POP HL        ; H = x
+ $B515 LD D,H        ; D = x
+ $B516 POP HL        ; skip y
+ $B517 POP AF        ; A = start delay
+ $B518 DEC A         ;
+ $B519 JR Z,$B523    ; over: draw the drop
+ $B51B PUSH AF       ; store the decremented delay
+@isub=LD HL,SLOT_SIZE-$A
+ $B51C LD HL,$000C   ; SP is slot+$A: not drawn, next slot
+ $B51F ADD HL,SP     ;
+ $B520 JP $A5F0      ; #R$A5F0 enters the handler of the slot at HL
+*$B523 LD H,D        ; H = x
+ $B524 LD L,E        ; L = y of the tip
+ $B525 SRA H         ; x / 4: byte column
+ $B527 SRA H         ;
+ $B529 LD ($ACD3),HL ; draw command position: (y, x/4)
+ $B52C POP HL        ; skip the hit box
+ $B52D POP HL        ;
+ $B52E LD IY,$B407   ; queue one draw command
+ $B532 JR $B56D      ; animate and queue

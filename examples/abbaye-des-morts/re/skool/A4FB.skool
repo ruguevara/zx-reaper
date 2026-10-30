@@ -1,0 +1,9 @@
+; Script: "Press key "
+;
+; Clears the line at y = $70 and prints "Press key " at y = $70, x = $42; #R$A3B9 follows it with the name of the
+; control (JUMP, CROUCH, LEFT, RIGHT).
+@label=ScriptPressKey
+t$A4FB DEFB $81,$70,$00,$20,$10,$00
+ $A501 DEFB $8E,$70,$42; text cursor at y = $70, x = $42
+ $A504 DEFM "Press key "
+ $A50E DEFB $80

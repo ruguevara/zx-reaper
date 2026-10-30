@@ -1,0 +1,10 @@
+; Script code $9F: start the twelve-crosses effect
+;
+; No operands. Writes 0 (NOP) over the RET at #R$AE4B, so that routine runs from the main loop on every frame; once
+; the player holds 12 crosses ($854D) it draws tile $4C at each cell of the coordinate list at $82D7 (room 25's script
+; holds the list). Observed: $AE4B holds 0 in room 25 and $C9 in the other rooms tried. Used once, at the end of room
+; 24's script ($82CE), which room 25 calls.
+@label=OpTwelveCrosses
+c$A1BE XOR A         ;
+ $A1BF LD ($AE4B),A  ; NOP over the RET at $AE4B
+ $A1C2 RET           ;

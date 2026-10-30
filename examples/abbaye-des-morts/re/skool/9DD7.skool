@@ -1,0 +1,25 @@
+; Fill a rectangle of the tile map
+;
+; Entry point: fill a rectangle of tiles; HL is kept.
+;
+; A Tile number
+; E Row
+; D Column
+; C Width
+; B Height
+@label=FillTilesRect
+c$9DD7 PUSH HL       ; keep the script pointer
+ $9DD8 EX DE,HL      ; HL = position: L row, H column
+ $9DD9 LD E,A        ; E = tile
+*$9DDA PUSH HL       ; one row
+ $9DDB PUSH BC       ;
+ $9DDC LD B,C        ; B = width
+*$9DDD CALL $9E6A    ; put the tile in the map
+ $9DE0 INC H         ; next column
+ $9DE1 DJNZ $9DDD    ;
+ $9DE3 POP BC        ;
+ $9DE4 POP HL        ;
+ $9DE5 INC L         ; next row
+ $9DE6 DJNZ $9DDA    ;
+ $9DE8 POP HL        ;
+ $9DE9 RET           ;

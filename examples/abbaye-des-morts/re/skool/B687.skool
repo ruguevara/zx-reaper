@@ -1,0 +1,68 @@
+; Plant: set the hit flag, count down, spit two seeds, queue the sprite
+;
+; Continuation of #R$B665 after the hit test #R$A85F (SP is at slot+$10). Carry set means the boxes overlap: the hit
+; flag #R$A8A0 is set to $FF, which makes the monk die (observed: the death code #R$AA3D clears the flag in the same
+; frame). It then takes the sprite block (slot +$10), stores the attribute in the draw command at #R$ACD1 and steps
+; the spit countdown (slot +$12; the reload comes from +$B through A'):
+; .
+; - when the countdown equals PLANT_SPIT_TIME (50) the frame number is increased (the plant opens its head) and the
+; plant spits: the sound effect SFX_ENEMY_SHOT is requested, two 4-byte records (the templates #R$BCC2 and #R$BCD2 with
+; the position at SPAWN_POSITION) are appended to the object list at #R$BE56 and the spawn count #R$8552 is raised by
+; two, so that #R$8905 turns them into the seeds of #R$B74B in the same frame;
+; - when it reaches 0 it is reloaded and the frame number increased, which wraps to 0 (head closed).
+; .
+; The countdown goes back to the slot and the code goes on at #R$B6D9, which queues the sprite.
+;
+; F Carry set when the plant's hit box overlaps the monk's
+; A' Reload of the spit countdown (slot +$B)
+; SP Slot address + $10
+@label=UpdatePlant_Spit
+c$B687 JR NC,$B68D   ; no overlap
+ $B689 SBC A,A       ; A = $FF
+ $B68A LD ($A8A0),A  ; hit flag
+*$B68D POP HL        ; sprite block
+ $B68E LD A,(HL)     ; attribute
+ $B68F INC HL        ;
+ $B690 LD ($ACDA),A  ; attribute of the draw command
+ $B693 EX AF,AF'     ; A = reload
+ $B694 POP BC        ; C spit countdown
+ $B695 LD B,A        ; B = reload
+ $B696 POP DE        ; E frame, D number of frames
+ $B697 LD A,C        ;
+@isub=CP PLANT_SPIT_TIME
+ $B698 CP $32        ; 50 frames before the end: spit
+ $B69A JR NZ,$B6CC   ;
+ $B69C INC E         ; open head
+ $B69D EXX           ;
+@isub=LD A,SFX_ENEMY_SHOT
+ $B69E LD A,$07      ;
+ $B6A0 LD ($854F),A  ; sound effect request
+ $B6A3 LD HL,$8552   ; two records waiting
+ $B6A6 INC (HL)      ;
+ $B6A7 INC (HL)      ;
+ $B6A8 LD HL,$BCC2   ; SeedLeftTemplate
+ $B6AB LD ($5DFC),HL ; SPAWN_TEMPLATE
+ $B6AE LD HL,$5DFC   ; SPAWN_TEMPLATE, SPAWN_POSITION
+ $B6B1 LD DE,($BE56) ; end of the object list
+@isub=LD BC,OBJECT_ENTRY_SIZE
+ $B6B5 LD BC,$0004   ;
+ $B6B8 LDIR          ; append the record
+ $B6BA LD HL,$BCD2   ; SeedRightTemplate
+ $B6BD LD ($5DFC),HL ;
+ $B6C0 LD HL,$5DFC   ; same position
+@isub=LD C,OBJECT_ENTRY_SIZE
+ $B6C3 LD C,$04      ;
+ $B6C5 LDIR          ; append the second record
+ $B6C7 LD ($BE56),DE ;
+ $B6CB EXX           ;
+*$B6CC DEC C         ; count down
+ $B6CD JR NZ,$B6D7   ;
+ $B6CF LD C,B        ; reload
+ $B6D0 INC E         ; next frame: wraps to 0
+ $B6D1 LD A,E        ;
+ $B6D2 CP D          ;
+ $B6D3 JR NZ,$B6D7   ;
+ $B6D5 SUB D         ;
+ $B6D6 LD E,A        ;
+*$B6D7 PUSH DE       ; store frame
+ $B6D8 PUSH BC       ; store countdown

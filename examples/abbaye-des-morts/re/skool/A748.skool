@@ -1,0 +1,22 @@
+; Item action: bell or lever that can be touched once
+;
+; Room items of room 2 (the bell of Tower of the Bell, flag $851B), room 9 (a lever, $851C) and room 10 (a lever,
+; $851D). The first touch sets the flag to 1 and plays sound effect 3; the frame drawn is the flag (0 = rest, 1 = rung
+; or pulled). The room scripts test the flags ($95/$9C opcodes at $7774, $7780, $7F78).
+;
+; F Carry set when Jean's box overlaps the item's box
+; SP Slot address + 6 on entry (the RET of #R$A614 popped the action word at +4): the next stack word is the flag pointer (the action pops it); see #R$A5E9 for the slot layout
+@label=ActionBellOrLever
+c$A748 POP HL        ; flag pointer
+ $A749 LD A,(HL)     ; flag
+ $A74A JR NC,$A757   ; not touching: draw
+ $A74C OR A          ; already touched: draw
+ $A74D JR NZ,$A757   ; already touched: draw
+ $A74F LD (HL),$01   ; touched
+@isub=LD A,SFX_TRIGGER
+ $A751 LD A,$03      ;
+ $A753 LD ($854F),A  ;
+ $A756 LD A,(HL)     ;
+; Entry point used by #R$A75A: draw frame A of the item; HL is not needed.
+@label=DrawFlagValueFrame
+*$A757 JP $A7DB      ;

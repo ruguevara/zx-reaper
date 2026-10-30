@@ -1,0 +1,30 @@
+; Entity handler: Death flying left (room 18), and the body shared with #R$B9F8
+;
+; Death during the half of its patrol in which it moves left (see #R$B9F8, which has the layout of the slot and the
+; way the two halves hand over to each other). The speed is subtracted from x; when the high byte of x equals the left
+; turning point (slot +4) the handler word is rewritten with #R$B9F8. IY = $B3D4 selects the first frame table of the
+; sprite block (left). This is the handler of room object kind 16 (#R$B028 entry 16), so it is the half that runs
+; first, from x = $09 down to the turning point $08.
+;
+; SP Slot address + 2 (the handler word was popped by the RET that entered the routine)
+@label=UpdateDeathLeft
+c$BA15 LD IY,$B3D4   ; frame table for moving left (the first one)
+ $BA19 POP BC        ; speed
+ $BA1A POP DE        ; D right turning point, E left turning point
+ $BA1B POP HL        ; x (8.8)
+ $BA1C OR A          ; carry clear
+ $BA1D SBC HL,BC     ; x moves left
+ $BA1F PUSH HL       ; store x
+ $BA20 POP HL        ; SP is back at +8
+ $BA21 LD A,H        ; x in 2-pixel units
+ $BA22 CP E          ; at the left turning point?
+ $BA23 JR NZ,$BA32   ;
+ $BA25 LD HL,$FFFA   ; -6: back to slot+2
+ $BA28 ADD HL,SP     ;
+ $BA29 LD SP,HL      ;
+ $BA2A LD HL,$B9F8   ; next frame this slot is handled by the moving-right half
+ $BA2D PUSH HL       ; written over the handler word at slot+0
+ $BA2E POP HL        ;
+ $BA2F POP BC        ; pop speed, limits and x again
+ $BA30 POP DE        ;
+ $BA31 POP HL        ;

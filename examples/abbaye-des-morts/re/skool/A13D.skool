@@ -1,0 +1,17 @@
+; Store a flag value in the tile flag map
+;
+; Finds the tile map cell with #R$A20D and writes E three pages higher, in the tile flag map (#R$A21E gives the same
+; address).
+;
+; L Row 0-21
+; H Column 0-31
+; E Flag value
+; O:HL Address of the flag in the flag map
+@label=SetTileFlag
+c$A13D CALL $A20D    ;
+@isub=LD A,FLAGS_PAGE_OFFSET
+ $A140 LD A,$03      ; the flag map is 3 pages above the tile map
+ $A142 ADD A,H       ;
+ $A143 LD H,A        ;
+ $A144 LD (HL),E     ;
+ $A145 RET           ;

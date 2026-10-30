@@ -1,0 +1,21 @@
+; Place an entity sprite (facing left or up) and test its hit box
+;
+; Entry point used by #R$B283 and #R$B436 (movers whose sprite faces left or up): D = x, E = y, H = y. Puts the
+; position into the draw command and goes on to the hit box test with the first frame table.
+;
+; D X
+; E Y
+; H Y
+@label=PlaceEntityLeft
+c$B2C3 LD L,H        ; L = y
+ $B2C4 LD H,D        ; H = x
+ $B2C5 LD A,H        ; A = x in 2-pixel units
+ $B2C6 EX AF,AF'     ; kept in A': its low two bits are the shift phase
+ $B2C7 SRA H         ; x / 4: byte column
+ $B2C9 SRA H         ;
+ $B2CB LD ($ACD3),HL ; draw command position: (y, x/4)
+; Entry point used by #R$B236: the position is already in the draw command. D = x, E = y, SP at slot+$C (the next words
+; are the hit box). Tests the hit box against Jean and continues at #R$B2D4.
+@label=TestEntityHitLeft
+*$B2CE LD HL,$B2D4   ;
+ $B2D1 JP $A851      ; #R$A851 tests the hit box, then jumps to the address in HL

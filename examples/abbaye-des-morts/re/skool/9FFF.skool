@@ -1,0 +1,73 @@
+; Script code $94: draw one tile wherever a bit mask says
+;
+; Operands: row, column (the first position), tile, then a byte count C and C bytes of mask data. The mask covers the
+; tile map in reading order from the first position, wrapping from column 31 to column 0 of the next row, and is
+; stored in two levels. An index byte is read from its most significant bit down and has one bit for each group of 8
+; cells: 0 skips the 8 cells, 1 takes the next byte of the stream as the mask of those 8 cells (most significant bit
+; first) and puts the tile on the cells whose bit is 1. C counts every byte of the stream, index and mask bytes alike;
+; the routine stops when it runs out, so a last index byte is read but its bits are not used. Used once (room 9, the
+; foliage at $7851).
+;
+; HL Script pointer, at the operands
+; O:HL Script pointer after the operands
+@label=OpDrawTileMask
+c$9FFF LD E,(HL)     ;
+ $A000 INC HL        ;
+ $A001 LD D,(HL)     ;
+ $A002 INC HL        ;
+ $A003 LD A,(HL)     ;
+ $A004 INC HL        ;
+ $A005 LD C,(HL)     ;
+ $A006 INC HL        ;
+ $A007 PUSH HL       ;
+ $A008 EX DE,HL      ;
+ $A009 LD E,A        ;
+ $A00A EX (SP),HL    ;
+ $A00B LD A,$80      ; A = marker bit: after 8 shifts the next index byte is fetched
+@label=OpDrawTileMask_Bit
+*$A00D SLA A         ; next index bit
+ $A00F JR NZ,$A018   ;
+ $A011 LD A,(HL)     ; new index byte; the SCF/RLA puts the marker bit below its bits
+ $A012 INC HL        ;
+ $A013 SCF           ;
+ $A014 RLA           ;
+ $A015 DEC C         ;
+ $A016 JR Z,$A049    ; stream used up
+*$A018 JR C,$A02B    ; bit 1: a mask byte follows
+ $A01A EX (SP),HL    ;
+ $A01B PUSH AF       ;
+ $A01C LD A,H        ;
+ $A01D ADD A,$08     ; bit 0: skip 8 cells
+ $A01F LD H,A        ;
+@isub=CP SCREEN_COLS
+ $A020 CP $20        ; past column 31: first column of the next row
+ $A022 JR C,$A027    ;
+ $A024 INC L         ;
+ $A025 LD H,$00      ;
+*$A027 POP AF        ;
+ $A028 EX (SP),HL    ;
+ $A029 JR $A00D      ;
+*$A02B EX AF,AF'     ;
+ $A02C LD A,(HL)     ; mask byte
+ $A02D INC HL        ;
+ $A02E EX (SP),HL    ;
+ $A02F LD B,$08      ;
+*$A031 ADD A,A       ;
+ $A032 PUSH AF       ;
+ $A033 JR NC,$A038   ;
+ $A035 CALL $9E6A    ; place the tile
+*$A038 INC H         ;
+ $A039 LD A,H        ;
+@isub=CP SCREEN_COLS
+ $A03A CP $20        ;
+ $A03C JR C,$A041    ;
+ $A03E INC L         ;
+ $A03F LD H,$00      ;
+*$A041 POP AF        ;
+ $A042 DJNZ $A031    ;
+ $A044 EX AF,AF'     ;
+ $A045 DEC C         ;
+ $A046 EX (SP),HL    ;
+ $A047 JR NZ,$A00D   ;
+*$A049 POP AF        ;
+ $A04A RET           ;

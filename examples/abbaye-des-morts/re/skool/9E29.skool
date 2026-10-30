@@ -1,0 +1,24 @@
+; Script opcode $93: a row of tiles given inline
+;
+; Operands: y x n, then n tile numbers. The tiles are placed left to right from row y, column x through #R$9E6A.
+;
+; HL Operand bytes
+; O:HL Address after the tile numbers
+@label=OpTileRow
+c$9E29 LD E,(HL)     ; E = y, D = x
+ $9E2A INC HL        ;
+ $9E2B LD D,(HL)     ;
+ $9E2C INC HL        ;
+ $9E2D LD B,(HL)     ; B = n
+ $9E2E INC HL        ;
+ $9E2F PUSH HL       ;
+ $9E30 EX DE,HL      ; HL = position
+*$9E31 EX (SP),HL    ; E = next tile number from the script (pointer on the stack)
+ $9E32 LD E,(HL)     ;
+ $9E33 INC HL        ;
+ $9E34 EX (SP),HL    ;
+ $9E35 CALL $9E6A    ; put the tile in the map
+ $9E38 INC H         ;
+ $9E39 DJNZ $9E31    ;
+ $9E3B POP HL        ;
+ $9E3C RET           ;

@@ -1,0 +1,13 @@
+; Item action: cross that can be taken while the wheel is at rest
+;
+; The other set of crosses (see #R$A777). If Jean touches the cross while the wheel state bits at #R$851E are 0 it is
+; taken (#R$A78B); otherwise it is animated and drawn by the code at #R$A799, using frame offset 0 (bright cross) when
+; the wheel is at rest and 6 (thin cross) when it is turned.
+;
+; F Carry set when Jean's box overlaps the item's box
+@label=ActionCrossWheelRest
+c$A782 JR NC,$A799   ;
+ $A784 LD A,($851E)  ;
+@isub=AND WHEEL_STATE_MASK
+ $A787 AND $07       ;
+ $A789 JR NZ,$A799   ; wheel turned: not takeable

@@ -1,0 +1,13 @@
+; 128K: page in bank 0 with ROM 1
+;
+; Writes $10 to port $7FFD: RAM bank 0 at $C000, ROM 1, normal screen, which is the paging state of the game. The 128K
+; hooks use it as the return address of a call into the music bank (#R$85C2); the start-up code (#R$6000) calls it on
+; every machine, where on a 48K Spectrum it does nothing visible.
+; .
+; Hardware: writes the 128K paging port $7FFD (through #R$85CA).
+;
+; O:A $10, the value written
+@label=PageInBank0
+@isub=LD A,PAGING_BANK0
+c$85BE LD A,$10
+ $85C0 JR $85CA

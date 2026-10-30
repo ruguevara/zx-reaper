@@ -1,0 +1,10 @@
+; Night sky: the moon and the stars
+;
+; Used by the first rooms (1, 2, 3, 4 and 6). Defines a 2x2 block of tiles $8D-$90 (the crescent moon), draws it at
+; row 2, column 20, then draws the single-pixel star tile $8D at seven positions.
+@label=ScriptSky
+b$830B DEFB $88,$02,$02,$8D,$8E,$8F,$90 ; BLOCK 2x2: $8D $8E $8F $90
+ $8312 DEFB $89,$02,$14,$02,$02 ; TILEBLOCK row 2, col 20, 2x2
+ $8317 DEFB $8B,$01,$8D,$07,$04,$01,$05,$03,$02,$05,$03,$0B,$02,$0C,$05,$0F ; STAMPS 1 tiles $8D at 7 positions
+ $8327 DEFB $03,$1A
+ $8329 DEFB $80             ; END

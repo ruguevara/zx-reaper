@@ -1,0 +1,19 @@
+; Colour a status bar row: A for the first B-1 cells, blue for the rest
+;
+; Stores C attribute bytes along one attribute row. The first B-1 cells get A (hearts or crosses owned), every following cell gets blue ink on black paper (the empty slots). Used by #R$9BF3 and #R$9C1B.
+; .
+; Hardware: writes the attribute file.
+;
+; A Attribute of the first B-1 cells
+; B Number of cells to colour with A, plus one
+; C Number of cells in the row
+; HL Attribute address of the first cell
+@label=FillHudAttrs
+c$9C47 DJNZ $9C4B    ; DJNZ falls through when B reaches 0: switch colour
+@isub=LD A,BLUE
+ $9C49 LD A,$01      ;
+*$9C4B LD (HL),A     ; B wraps to $FF afterwards: DJNZ never falls through again
+ $9C4C INC L         ;
+ $9C4D DEC C         ;
+ $9C4E JR NZ,$9C47   ;
+ $9C50 RET           ;

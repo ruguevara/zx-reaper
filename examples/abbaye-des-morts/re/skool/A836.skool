@@ -1,0 +1,27 @@
+; Item action: parchment
+;
+; The action of the room items of type 5 (#R$A822), entered by the overlap test with the carry flag set when Jean
+; touches the parchment. Touched: the two message numbers at slot +4 (the string numbers of the first and second line
+; of the text, #R$9048) go to #R$850E, the item's flag becomes $FF (it is not created again), the parchment gate
+; #R$9C51 is armed (a RET until a 0 is written to it; with the 0 the main loop shows the parchment), sound effect 5 is
+; requested and the slot is freed (#R$A724). Not touched: the flag pointer is dropped and frame 0 of the item is drawn
+; (#R$A7DB).
+;
+; F Carry set when Jean's box overlaps the item's box
+; SP Slot address + 4 on entry: the next stack word is the pair of message numbers (the action pops it)
+@label=ActionParchment
+c$A836 POP HL        ; message numbers: line 1, line 2
+ $A837 JR NC,$A84C   ; not touched
+ $A839 LD ($850E),HL ;
+ $A83C POP HL        ; flag pointer
+@isub=LD (HL),ITEM_GONE
+ $A83D LD (HL),$FF   ; never created again
+ $A83F LD HL,$9C51   ; the gate: NOP now, the main loop shows the parchment
+ $A842 LD (HL),$00   ;
+@isub=LD A,SFX_PICKUP
+ $A844 LD A,$05      ;
+ $A846 LD ($854F),A  ;
+ $A849 JP $A724      ; free the slot
+*$A84C POP HL        ; drop the flag pointer
+ $A84D XOR A         ; frame 0
+ $A84E JP $A7DB      ; draw it

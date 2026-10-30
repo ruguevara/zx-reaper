@@ -1,0 +1,7 @@
+; Control bits held after this frame's update
+;
+; A copy of #R$A2CF made by #R$A596 once it has computed the newly pressed bits, so at the start of that routine it
+; still holds the previous frame's bits and everywhere else (the player routines) the bits held now. Same bit layout
+; as #R$A2CF.
+@label=ControlsHeld
+g$A2D0 DEFB $00

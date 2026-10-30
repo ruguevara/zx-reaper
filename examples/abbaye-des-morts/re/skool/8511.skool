@@ -1,0 +1,7 @@
+; Timer of the colour cycle of the twelve crosses
+;
+; Counts down from 5 in #R$AE4B (active once all 12 crosses are collected, in rooms 24 and 25); at zero it is reloaded
+; with 5, the cycle position (the operand of the LD A,0 at #R$AE5A) advances through 0-5 and the attribute of the
+; cross tile $4C (#R$CE4C) is set from #R$8553.
+@label=CrossFlashTimer
+g$8511 DEFB $05

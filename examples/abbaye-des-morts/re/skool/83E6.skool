@@ -1,0 +1,10 @@
+; Music track of each room (rooms 0-25)
+;
+; One byte for each room number: the track the 128K player is asked to play (#R$8551) when the room is entered;
+; #R$86B9 indexes the table with #R$8509. Tracks 1-9 exist; the 48K version never reads them.
+; .
+; Track by room: 0:1, 1:2, 2:4, 3:4, 4:7, 5:5, 6:5, 7:4, 8:4, 9:7, 10:8, 11:8, 12:4, 13:4, 14:8, 15:8, 16:8, 17:4,
+; 18:9, 19:8, 20:8, 21:6, 22:6, 23:6, 24:9, 25:7.
+@label=RoomMusicTable
+b$83E6 DEFB $01,$02,$04,$04,$07,$05,$05,$04,$04,$07,$08,$08,$04
+ $83F3 DEFB $04,$08,$08,$08,$04,$09,$08,$08,$06,$06,$06,$09,$07

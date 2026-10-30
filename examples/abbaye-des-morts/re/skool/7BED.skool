@@ -1,0 +1,32 @@
+; Room script 15: Gloomy tunels
+;
+; Room 15: column 0, row 3 of the 5x5 map (left is room 14, right 16, up 10, down 20, counted modulo 25). Unpacks
+; sprite set #R$6D1D. Subscripts: #R$82F0, #R$7955. Items (#R$8EDF) at row,column: heart 14,3, cross 8,28, checkpoint
+; 7,21.
+@label=RoomScript15
+b$7BED DEFB $97,$0B         ; SPRITESET 11
+ $7BEF DEFB $87,$0F         ; ROOMNAME 15 "Gloomy tunels"
+ $7BF1 DEFB $83 ; CALL ScriptRoomPanel
+@isub=DEFW ScriptRoomPanel
+ $7BF2 DEFW $82F0
+ $7BF4 DEFB $83 ; CALL BlockCaveRock
+@isub=DEFW BlockCaveRock
+ $7BF5 DEFW $7955
+ $7BF7 DEFB $89,$00,$00,$20,$16 ; TILEBLOCK row 0, col 0, 32x22
+ $7BFC DEFB $98,$80,$07,$00,$06,$04,$16,$00,$10,$04,$14,$04,$06,$18,$06,$0B ; RECTS tile $80, 7 rectangles
+ $7C0C DEFB $02,$1C,$05,$0C,$1E,$02,$04,$0B,$0E,$10,$09,$0A,$18,$04,$01
+ $7C1B DEFB $98,$2C,$06,$01,$00,$06,$02,$01,$14,$0C,$02,$07,$00,$06,$02,$12 ; RECTS tile $2C, 6 rectangles
+ $7C2B DEFB $00,$06,$02,$12,$0A,$05,$01,$13,$0A,$06,$01
+ $7C36 DEFB $89,$0E,$18,$02,$01 ; TILEBLOCK row 14, col 24, 2x1
+ $7C3B DEFB $91,$17,$02,$02,$01,$12,$1A ; PICTURES tiles from $17, 2x2, at 1 positions
+ $7C42 DEFB $92,$24,$09,$03,$02,$03,$0D,$04,$01,$07,$1E,$0B,$01,$10,$03,$10 ; STAMP1 tile $24 at 9 positions
+ $7C52 DEFB $1F,$14,$17,$15,$13
+ $7C57 DEFB $92,$25,$08,$04,$0D,$04,$0E,$04,$15,$04,$17,$04,$1D,$0B,$02,$0B ; STAMP1 tile $25 at 8 positions
+ $7C67 DEFB $0E,$0B,$16
+ $7C6A DEFB $92,$26,$07,$02,$06,$02,$10,$04,$11,$06,$06,$06,$12,$11,$06,$15 ; STAMP1 tile $26 at 7 positions
+ $7C7A DEFB $06
+ $7C7B DEFB $8C,$15,$12,$49 ; TILE1 row 21, col 18, tile $49
+ $7C7F DEFB $8C,$15,$11,$4A ; TILE1 row 21, col 17, tile $4A
+ $7C83 DEFB $8C,$05,$1F,$4B ; TILE1 row 5, col 31, tile $4B
+ $7C87 DEFB $91,$7E,$02,$01,$01,$09,$15 ; PICTURES tiles from $7E, 2x1, at 1 positions
+ $7C8E DEFB $80             ; END

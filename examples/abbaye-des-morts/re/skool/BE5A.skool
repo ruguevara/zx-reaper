@@ -1,0 +1,12 @@
+; Frame call list: the draw commands of one frame, closed by $BDEB
+;
+; Built by the game frame and run by #R$BDDB. A command is 10 bytes: the address of a routine (#R$9836 for sprites
+; that are masked in the redraw buffer, #R$97FD for the object sprite), then the 8 bytes it pops: position (y, byte
+; column), graphics address (column in the low byte, pixel-row page in the high byte), width in bytes, height in
+; 2-pixel units, a byte that is popped as the flags and not used, and the attribute (the fields are described at
+; #R$ACD1). The list has room for 16 commands and the closing word $BDEB ($A2 bytes); no check for a full list was
+; seen, and the fill after it (#R$BEFC) would take the overflow.
+; .
+; The interrupt handler writes into this area while SP points here and puts the bytes back.
+@label=FrameList
+g$BE5A DEFS $A2      ;

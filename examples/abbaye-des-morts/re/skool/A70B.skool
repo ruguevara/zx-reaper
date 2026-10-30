@@ -1,0 +1,22 @@
+; Item action: heart (an extra life)
+;
+; Room items of type 0 (hearts). When Jean touches one its flag becomes $FF (it is not created again), the status-bar
+; hearts redraw #R$9BF3 is armed (it is a RET until a 0 is written to it) and the lives at $854C go up by one, to a
+; maximum of 9, then the item is freed with sound effect 5 (#R$A71F). Without a touch the heart is animated and drawn
+; by #R$A7CB.
+;
+; F Carry set when Jean's box overlaps the item's box
+; SP Slot address + 6 on entry (the RET of #R$A614 popped the action word at +4): the next stack word is the flag pointer (the action pops it); see #R$A5E9 for the slot layout
+@label=ActionHeart
+c$A70B POP HL        ; flag pointer
+ $A70C JP NC,$A7CB   ; not touching: animate and draw
+@isub=LD (HL),ITEM_GONE
+ $A70F LD (HL),$FF   ;
+ $A711 LD HL,$9BF3   ; hearts redraw: NOP
+ $A714 LD (HL),$00   ;
+ $A716 LD HL,$854C   ; lives
+ $A719 LD A,(HL)     ;
+@isub=CP MAX_LIVES
+ $A71A CP $09        ; carry set below the maximum
+ $A71C ADC A,$00     ; +1 when below the maximum
+ $A71E LD (HL),A     ;

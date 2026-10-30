@@ -1,0 +1,31 @@
+; Unused: set a rectangle of tile flags (same operands as $96)
+;
+; Not in the script jump table and never called (no references). Reads row, column, width, height and a value like
+; #R$A123 ($96) and stores the value in every cell of that rectangle of the tile flag map at $5E00, using #R$A22F for
+; the address; the same job as #R$A123 done through a second address routine.
+;
+; HL Script pointer, at the operands
+; O:HL Script pointer after the operands
+@label=UnusedFillFlags
+c$A097 CALL $A11A    ;
+ $A09A LD A,(HL)     ;
+ $A09B INC HL        ;
+ $A09C PUSH HL       ;
+ $A09D EX DE,HL      ;
+ $A09E LD E,A        ;
+ $A09F CALL $A22F    ; flag map address of (row, column)
+@label=UnusedFillFlags_Row
+*$A0A2 PUSH BC       ;
+ $A0A3 PUSH HL       ;
+ $A0A4 LD B,C        ;
+*$A0A5 LD (HL),E     ;
+ $A0A6 INC L         ;
+ $A0A7 DJNZ $A0A5    ;
+ $A0A9 POP HL        ;
+ $A0AA POP BC        ;
+@isub=LD A,SCREEN_COLS
+ $A0AB LD A,$20      ; next row
+ $A0AD CALL $A1D9    ;
+ $A0B0 DJNZ $A0A2    ;
+ $A0B2 POP HL        ;
+ $A0B3 RET           ;

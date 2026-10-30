@@ -1,0 +1,11 @@
+; Current room number (0-24)
+;
+; The room the player is in; the rooms form a 5x5 grid: left and right are -1 and +1, up and down are -5 and +5, and a
+; number of 25 or more wraps modulo 25 (#R$ACEF, after the player crosses a screen edge). Room 25 is only used by the
+; ending sequence (#R$887B, which also uses room 4) and room 0 is the intro text screen (#R$8832). Read as the
+; index of the room script table #R$7236 by #R$86B9, of the music table #R$83E6, and as the key when #R$8957 and
+; #R$89D9 search the room item table #R$8EDF and the object table #R$8B8F. Written by #R$ACEF (edge crossing),
+; #R$8832/#R$887B (title, ending), the passage items #R$A6BC/#R$A6D8 (room 10 or 19), the checkpoint restore #R$BDF3
+; and the debug room warp of the cheat #R$83CE.
+@label=RoomNumber
+g$8509 DEFB $00

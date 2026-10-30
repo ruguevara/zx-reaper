@@ -1,0 +1,11 @@
+; Switch the Kempston joystick on or off
+;
+; Called from #R$A336 when 1 is pressed on the controls screen. Flips the byte at #R$A28F between RET ($C9, joystick
+; off) and NOP ($00, joystick on), then goes on to redraw the Kempston line at #R$A360.
+@label=ToggleKempston
+c$A32D LD HL,$A28F   ;
+ $A330 LD A,(HL)     ;
+@isub=XOR OP_RET
+ $A331 XOR $C9       ; RET <-> NOP
+ $A333 LD (HL),A     ;
+ $A334 JR $A360      ;

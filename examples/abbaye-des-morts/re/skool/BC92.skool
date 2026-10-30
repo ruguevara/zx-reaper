@@ -1,0 +1,55 @@
+; Entity templates: the initial state of objects that are created while the game runs
+;
+; Each line is the template of one kind of object, a stack frame in the format of the object slots (#R$C100). #R$8905
+; copies a template to a free slot when an entry of the object list (#R$BE56: template address, y, x) is consumed:
+; bytes 0-5 (three words) as they are, then slot +6 = 0 and slot +7 = x + template byte 6, slot +8 = 0 and slot +9 = y
+; + template byte 7 (the two offsets are signed, in 2-pixel units, and make the start position relative to the object
+; that threw the thing), then the 10 bytes from template byte 8 to slot +$A..+$13 as they are. The words of a template
+; are therefore: +0 the handler, +2 and +4 the first two state words of the handler (for the projectiles the x and y
+; speed, signed 8.8 in 2-pixel units per frame), +6 the two offsets, +8 hit box offset (y, x), +$A hit box far corner (y,
+; x), then the pointer to the behaviour block with the sprite description (attribute, pair table, height, frames; see
+; #R$93D3) or, for the handlers that keep the animation words in other places, those. A template of 8 words is
+; followed in memory by the next template: the 10-byte copy takes two bytes too many from it and they land in slot
+; +$12/+$13, which the projectile handlers do not use. Slot +$14/+$15 are left as they were.
+; .
+; The last template of the group (#R$BD6A) is not spawned this way: #R$BB57 copies its 22 bytes over its own slot. The
+; templates from #R$BD80 on belong to the actors of the ending (the lists at #R$83A8).
+@label=ArrowLeftTemplate
+b$BC92 DEFW $B6ED,$FE00,$0000,$0600,$0000,$0400,$0202,$94F9 ; arrow flying left ($FE00 = -2.0 per frame), thrown by an archer when the monk is to its left (#R$B5EB); handler #R$B6ED
+@label=ArrowRightTemplate
+ $BCA2 DEFW $B6ED,$0200,$0000,$0603,$0000,$0400,$0202,$94FC ; arrow flying right ($0200), same archer when the monk is to its right
+@label=WallShotTemplate
+ $BCB2 DEFW $B6ED,$FE00,$0000,$05FE,$0000,$0401,$0202,$94F6 ; arrow flying left from the stone head in the wall of rooms 20 and 22 (#R$B5D6)
+@label=SeedLeftTemplate
+ $BCC2 DEFW $B74B,$FF91,$FE90,$0402,$0000,$0101,$0202,$94F3 ; seed spat up and left by a plant of room 14 (#R$B687), handler #R$B74B; y speed $FE90 = -1.44, changes with time
+@label=SeedRightTemplate
+ $BCD2 DEFW $B74B,$006F,$FE90,$0404,$0000,$0101,$0202,$94F3 ; seed spat up and right
+@label=FireballUpTemplate
+ $BCE2 DEFW $B6E6,$FF09,$FFBF,$09FF,$0000,$0101,$0202,$94F0 ; Satan's fireball, up and left (x speed -0.96, y speed -0.25), handler #R$B6E6 (#R$BB57)
+@label=FireballLeftTemplate
+ $BCF2 DEFW $B6E6,$FF00,$0000,$09FF,$0000,$0101,$0202,$94F0 ; Satan's fireball, straight left (x speed -1.0)
+@label=FireballDownTemplate
+ $BD02 DEFW $B6E6,$FF09,$0041,$09FF,$0000,$0101,$0202,$94F0 ; Satan's fireball, down and left (x speed -0.96, y speed +0.25)
+@label=SplashTemplate
+ $BD12 DEFW $B77F,$0000,$0000,$0000,$0202,$0300,$0402,$94FF ; water splash of room 19 (thrown up by #R$B7C6 and #R$B818), handler #R$B77F (observed, F83)
+@label=FlameLeftTemplate
+ $BD22 DEFW $B9B0,$FFC0,$0018,$1400,$0000,$0703,$9595,$0202,$0200 ; flame moving left (x speed -0.25) until x = $18, red, 2 frames, handler #R$B9B0, spawned by #R$B8C5 (the Pestilent Beast of room 10; observed, F84)
+@label=FlameRightTemplate
+ $BD34 DEFW $B9B0,$0040,$0070,$1400,$0000,$0703,$9595,$0202,$0200 ; flame moving right (x speed +0.25) until x = $70
+@label=ScytheLeftTemplate
+ $BD46 DEFW $BAB1,$FF80,$00C0,$0C08,$0000,$0707,$95DA,$0202,$0400 ; Death's scythe flying left: x speed $FF80 (-0.5), y speed $00C0 (+0.75), starts 8 units right of and 12 below Death (#R$BA79)
+@label=ScytheRightTemplate
+ $BD58 DEFW $BAB1,$0080,$00C0,$0C08,$0000,$0707,$95DA,$0202,$0400 ; Death's scythe flying right (x speed +0.5)
+@label=SmokeTemplate
+@isub=DEFW UpdateSatanSmoke,$9600,$0000,$0000,$0C04,$0000,$0000,$0000,SpriteBlockSmoke,$0505,$0200
+ $BD6A DEFW $BC69,$9600,$0000,$0000,$0C04,$0000,$0000,$0000,$95F6,$0505,$0200 ; smoke made by #R$BB57: a whole slot, see #R$BC69: lifetime 150, positions (set by #R$BB57), size 4 x 12, behaviour block $95F6
+@label=ActorMonkTemplate
+ $BD80 DEFW $B9B0,$0000,$0000,$0000,$0000,$0000,$959D,$3C50,$0200 ; the monk in the first scene of the ending (list #R$83A8, 1 actor, room 25): handler #R$B9B0
+@label=ActorPyreMonkTemplate
+ $BD92 DEFW $B97D,$0118,$00AF,$0000,$0000,$0000,$95A5,$1923,$0200 ; the monk on the pyre in the second scene (list #R$83AD), handler #R$B97D
+@label=ActorFlameTemplate
+ $BDA4 DEFW $B9B0,$0000,$0000,$0000,$0000,$0000,$9595,$0202,$0200 ; a flame of the pyre (three of them), handler #R$B9B0, 2 frames, red
+@label=ActorCrusaderRTemplate
+ $BDB6 DEFW $B9B0,$0000,$0000,$0000,$0000,$0000,$95AD,$0202,$0100 ; a crusader on the right of the pyre (two of them), cyan, 1 frame
+@label=ActorCrusaderLTemplate
+ $BDC8 DEFW $B9B0,$0000,$0000,$0000,$0000,$0000,$95B3,$0202,$0100 ; a crusader on the left of the pyre (two of them), cyan, 1 frame

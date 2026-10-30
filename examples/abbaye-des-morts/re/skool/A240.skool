@@ -1,0 +1,50 @@
+; Read the keyboard into the half-row buffer
+;
+; Reads the eight keyboard half-rows into the eight bytes at #R$A2D3: row 0 from port $FEFE (CAPS SHIFT, Z, X, C, V),
+; then $FDFE (A-G), $FBFE (Q-T), $F7FE (1-5), $EFFE (0-6), $DFFE (P-Y), $BFFE (ENTER-H) and $7FFE (SPACE-B); bits 0-4
+; are the keys, a 0 bit is a key down. Each INI reads the port addressed by BC (B = the half-row selector, rotated
+; left between reads) and stores it at HL. Then it reads every half-row together and stores the five key bits,
+; inverted so that 1 is a key down, in #R$A2CF; the control reader #R$A271 overwrites that byte with the control bits.
+; Used by #R$A596 (every frame) and #R$A43D (the key redefinition).
+; .
+; Hardware: reads the ULA keyboard port $FE.
+;
+; O:F Carry and not zero when any key is down, zero when none (no caller tests it)
+@label=ScanKeyboard
+@isub=LD A,KB_CS_V
+c$A240 LD A,$FE      ; port high byte of the first half-row
+ $A242 LD C,A        ; C = $FE, the ULA port
+ $A243 LD HL,$A2D3   ; row buffer
+ $A246 LD B,A        ;
+ $A247 INI           ;
+ $A249 RLCA          ; next half-row: $FD, $FB, $F7, $EF, $DF, $BF, $7F
+ $A24A LD B,A        ;
+ $A24B INI           ;
+ $A24D RLCA          ;
+ $A24E LD B,A        ;
+ $A24F INI           ;
+ $A251 RLCA          ;
+ $A252 LD B,A        ;
+ $A253 INI           ;
+ $A255 RLCA          ;
+ $A256 LD B,A        ;
+ $A257 INI           ;
+ $A259 RLCA          ;
+ $A25A LD B,A        ;
+ $A25B INI           ;
+ $A25D RLCA          ;
+ $A25E LD B,A        ;
+ $A25F INI           ;
+ $A261 RLCA          ;
+ $A262 LD B,A        ;
+ $A263 INI           ;
+ $A265 XOR A         ; A = 0: every half-row at once
+@isub=IN A,(ULA_PORT)
+ $A266 IN A,($FE)    ;
+ $A268 CPL           ;
+@isub=AND KEY_BITS
+ $A269 AND $1F       ;
+ $A26B LD ($A2CF),A  ;
+ $A26E RET Z         ; no key: carry is clear
+ $A26F SCF           ; some key down
+ $A270 RET           ;

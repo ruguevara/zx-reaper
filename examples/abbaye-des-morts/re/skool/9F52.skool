@@ -1,0 +1,40 @@
+; Measure a string in the proportional font
+;
+; Adds up the advance of every character of a length-prefixed string. The advance of a character is the high nibble of
+; the second byte of its word in the font index at $6130 plus 2, the same field #R$9E79 uses when it moves the cursor.
+; The sum is kept in 8 bits.
+;
+; HL Address of the string (length byte first)
+; O:C Width of the string in pixels
+; O:HL Unchanged
+@label=MeasureString
+c$9F52 PUSH HL       ;
+ $9F53 LD B,(HL)     ;
+ $9F54 INC HL        ;
+ $9F55 LD C,$00      ;
+@label=MeasureString_Loop
+*$9F57 LD A,(HL)     ;
+ $9F58 INC HL        ;
+ $9F59 PUSH HL       ;
+@isub=SUB CHAR_SPACE
+ $9F5A SUB $20       ;
+ $9F5C ADD A,A       ; index word of the character
+ $9F5D LD L,A        ;
+ $9F5E LD H,$00      ;
+ $9F60 LD DE,$6130   ;
+ $9F63 ADD HL,DE     ;
+ $9F64 INC HL        ; second byte of the word: bits 12-15 of the word hold the width minus 2
+ $9F65 LD A,(HL)     ;
+ $9F66 RRA           ;
+ $9F67 RRA           ;
+ $9F68 RRA           ;
+ $9F69 RRA           ;
+ $9F6A AND $0F       ;
+@isub=ADD A,GLYPH_WIDTH_BIAS
+ $9F6C ADD A,$02     ;
+ $9F6E ADD A,C       ;
+ $9F6F LD C,A        ;
+ $9F70 POP HL        ;
+ $9F71 DJNZ $9F57    ;
+ $9F73 POP HL        ;
+ $9F74 RET           ;

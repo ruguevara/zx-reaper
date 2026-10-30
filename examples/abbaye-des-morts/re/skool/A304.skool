@@ -1,0 +1,28 @@
+; Find the code of the key held now
+;
+; Scans the 8 half-rows of #R$A2D3, bit 0 to bit 4 in each, and takes the code of the first key held (bit = 0) from
+; #R$A2DB; with no key held it reaches the 0 after the table. The code is stored in #R$A2D2.
+; .
+; Hardware: none (the ports were read by #R$A240).
+;
+; O:A Key code, 0 when no key is held
+@label=GetKeyCode
+c$A304 LD DE,$A2DB   ;
+ $A307 LD HL,$A2D3   ;
+@isub=LD C,KEY_ROWS
+ $A30A LD C,$08      ; rows left
+@label=GetKeyCode_Row
+*$A30C LD A,(HL)     ;
+ $A30D INC HL        ;
+ $A30E LD B,$05      ; five keys per row
+@label=GetKeyCode_Key
+*$A310 RRA           ; bit 0 into carry
+ $A311 JR NC,$A319   ; carry clear: this key is held
+ $A313 INC DE        ; next code
+ $A314 DJNZ $A310    ;
+ $A316 DEC C         ;
+ $A317 JR NZ,$A30C   ;
+@label=GetKeyCode_Found
+*$A319 LD A,(DE)     ;
+ $A31A LD ($A2D2),A  ;
+ $A31D RET           ;

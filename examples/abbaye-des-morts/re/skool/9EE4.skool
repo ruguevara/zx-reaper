@@ -1,0 +1,66 @@
+; Shift a glyph row into place, XOR it onto the screen and finish the character
+;
+; Second half of the character printer #R$9E79, which lies in the middle of that routine's address range. #R$9E79
+; builds the 16-bit pattern of one glyph row in HL and then runs the self-modified `JR $9EE2`; it sets the offset byte
+; at $9EE3 to 2*(x mod 8) for each character, so the jump lands in this chain of eight `ADD HL,HL` / `ADC A,A` pairs
+; and shifts the pattern left by 8-(x mod 8) bits into the 24-bit value A:H:L, aligned with the pixel column where the
+; glyph starts.
+; .
+; The three bytes are XORed onto the bitmap at the row's address, the address is moved down one pixel row with #R$9F17
+; and control goes back to the row loop of #R$9E79 at $9ECB until its 16 rows are done. The common exit of the printer
+; is #R$9F0A: it adds the glyph width to the cursor x and restores the registers; #R$9E79 jumps straight to it for an
+; empty glyph (a space).
+; .
+; Hardware: XORs three bytes per glyph row into the screen bitmap; the attributes are not touched.
+;
+; HL Glyph row pattern: H the leftmost 8 pixels (bit 7 leftmost), L the next 8
+; DE Screen address of the first byte of this row of the glyph
+; A 0 (the top byte of the 24-bit shift)
+@label=ShiftGlyphRow
+c$9EE4 ADD HL,HL     ; start of the chain: shift A:HL left (entered 0-7 pairs later for x mod 8 > 0)
+ $9EE5 ADC A,A       ;
+ $9EE6 ADD HL,HL     ;
+ $9EE7 ADC A,A       ;
+ $9EE8 ADD HL,HL     ;
+ $9EE9 ADC A,A       ;
+ $9EEA ADD HL,HL     ;
+ $9EEB ADC A,A       ;
+ $9EEC ADD HL,HL     ;
+ $9EED ADC A,A       ;
+ $9EEE ADD HL,HL     ;
+ $9EEF ADC A,A       ;
+ $9EF0 ADD HL,HL     ;
+ $9EF1 ADC A,A       ;
+ $9EF2 ADD HL,HL     ;
+ $9EF3 ADC A,A       ;
+ $9EF4 EX DE,HL      ; HL = screen address, DE = shifted pattern (D middle byte, E right byte)
+ $9EF5 XOR (HL)      ; left byte: XOR onto the screen
+ $9EF6 LD (HL),A     ;
+ $9EF7 INC L         ;
+ $9EF8 LD A,D        ;
+ $9EF9 XOR (HL)      ;
+ $9EFA LD (HL),A     ;
+ $9EFB INC L         ;
+ $9EFC LD A,E        ;
+ $9EFD XOR (HL)      ;
+ $9EFE LD (HL),A     ;
+ $9EFF POP HL        ; screen address saved by #R$9E79 at $9EDD
+ $9F00 CALL $9F17    ; next pixel row
+ $9F03 POP DE        ; glyph mask word
+ $9F04 POP AF        ; rows left
+ $9F05 EX (SP),HL    ; HL = glyph data pointer, the new row address goes on the stack
+ $9F06 DEC A         ;
+ $9F07 JR NZ,$9ECB   ; next glyph row
+ $9F09 POP HL        ; drop the screen address
+; Exit of the character printer, also reached directly for an empty glyph: add the glyph width (in A') to the cursor x
+; and restore BC, DE, HL.
+@label=AdvanceTextX
+*$9F0A EX AF,AF'     ; A = glyph width
+ $9F0B LD HL,($9F26) ; cursor: L = y, H = x
+ $9F0E ADD A,H       ;
+ $9F0F LD H,A        ;
+ $9F10 LD ($9F26),HL ;
+ $9F13 POP BC        ;
+ $9F14 POP DE        ;
+ $9F15 POP HL        ;
+ $9F16 RET           ;

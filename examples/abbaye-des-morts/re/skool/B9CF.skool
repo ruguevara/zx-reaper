@@ -1,0 +1,39 @@
+; Moving sprite: attribute, size and shifted copy, then the animation step
+;
+; Continuation of #R$B9BE after the hit test #R$A851 (reached by a JP through $A881; SP is at slot+$E, the hit test has
+; popped the two hit box words). It pops the pointer to the sprite block (slot +$E): attribute (to the draw command at
+; #R$ACD1, +9, $ACDA), pointer to the shift pairs #R$AC9F, height, then the frame table. The pair for the shift phase x
+; AND 3 (A') gives the column offset of that copy of the sprite, kept in A' for #R$B3D8, and its width; with the height
+; they go to the draw command (+6, $ACD7). The animation counter and frame number in slot +$10..+$13 are stepped by
+; #R$A883, which continues at #R$B9F4.
+;
+; A' x in 2-pixel units; AND 3 is the shift phase
+; O:A' Column offset of the shifted copy
+; O:HL Sprite block + 4: the frame table
+; SP Slot address + $E
+@label=SetMovingSprite
+c$B9CF POP HL        ; sprite block
+ $B9D0 LD A,(HL)     ; attribute
+ $B9D1 INC HL        ;
+ $B9D2 LD ($ACDA),A  ; of the draw command
+ $B9D5 LD C,(HL)     ;
+ $B9D6 INC HL        ;
+ $B9D7 LD B,(HL)     ; BC = shift pair table
+ $B9D8 INC HL        ;
+ $B9D9 EX DE,HL      ; DE = block + 3
+ $B9DA EX AF,AF'     ; A = x
+ $B9DB AND $03       ; shift phase
+ $B9DD ADD A,A       ; two bytes per pair
+ $B9DE LD L,A        ;
+ $B9DF LD H,$00      ;
+ $B9E1 ADD HL,BC     ;
+ $B9E2 LD A,(HL)     ; column offset of that copy
+ $B9E3 EX AF,AF'     ; keep it in A'
+ $B9E4 INC HL        ;
+ $B9E5 LD C,(HL)     ; width of that copy
+ $B9E6 EX DE,HL      ;
+ $B9E7 LD B,(HL)     ; B = height
+ $B9E8 INC HL        ; HL = frame table
+ $B9E9 LD ($ACD7),BC ; width, height of the draw command
+ $B9ED LD IX,$B9F4   ; the animation step continues there
+ $B9F1 JP $A883      ; step the animation: frame in E

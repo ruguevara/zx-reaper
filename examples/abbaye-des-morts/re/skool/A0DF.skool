@@ -1,0 +1,38 @@
+; Tile of the repeated block at an offset
+;
+; Reduces the offsets modulo the block width and height (by repeated subtraction: a block of width or height 0, the
+; initial state of #R$A116, would never end) and reads the tile from the block data set by #R$A104.
+;
+; D Row offset in the rectangle
+; E Column offset in the rectangle
+; O:E Tile number
+; O:D 0
+; BC and HL are preserved
+@label=GetBlockTile
+c$A0DF PUSH HL       ;
+ $A0E0 PUSH BC       ;
+ $A0E1 LD BC,($A116) ; C = block width, B = block height
+ $A0E5 LD A,E        ;
+*$A0E6 SUB C         ;
+ $A0E7 JR NC,$A0E6   ;
+ $A0E9 ADD A,C       ;
+ $A0EA LD E,A        ;
+ $A0EB LD A,D        ;
+*$A0EC SUB B         ;
+ $A0ED JR NC,$A0EC   ;
+ $A0EF ADD A,B       ;
+ $A0F0 LD D,A        ;
+ $A0F1 LD HL,($A118) ; HL = block data
+ $A0F4 LD A,D        ;
+ $A0F5 LD D,$00      ;
+ $A0F7 ADD HL,DE     ;
+ $A0F8 OR A          ;
+ $A0F9 JR Z,$A100    ;
+ $A0FB LD B,A        ;
+ $A0FC LD E,C        ;
+*$A0FD ADD HL,DE     ; add the block width once per row
+ $A0FE DJNZ $A0FD    ;
+*$A100 LD E,(HL)     ;
+ $A101 POP BC        ;
+ $A102 POP HL        ;
+ $A103 RET           ;

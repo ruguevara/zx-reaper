@@ -1,0 +1,19 @@
+; Copy a run of bytes along one pixel line
+;
+; The source and destination are columns of one page each, so only L and E move.
+;
+; C Bytes to copy
+; HL Source
+; DE Destination
+; O:B 0
+; O:HL Source + C (low byte only)
+; O:DE Destination + C (low byte only)
+@label=CopyPixelLine
+c$AFF4 LD B,C        ;
+@label=CopyPixelLine_Byte
+*$AFF5 LD A,(HL)     ;
+ $AFF6 LD (DE),A     ;
+ $AFF7 INC L         ;
+ $AFF8 INC E         ;
+ $AFF9 DJNZ $AFF5    ;
+ $AFFB RET           ;

@@ -1,0 +1,23 @@
+; Unused copy of $A21E
+;
+; Identical to #R$A21E; called only by the unused #R$A097.
+;
+; L Row 0-21
+; H Column 0-31
+; O:HL Flag map address
+@label=UnusedFlagMapAddress
+c$A22F LD A,L        ;
+ $A230 RRCA          ;
+ $A231 RRCA          ;
+ $A232 RRCA          ;
+ $A233 LD L,A        ;
+ $A234 AND $E0       ;
+ $A236 ADD A,H       ;
+ $A237 LD H,L        ;
+ $A238 LD L,A        ;
+ $A239 LD A,H        ;
+ $A23A AND $03       ;
+@isub=ADD A,FLAGMAP_HIGH
+ $A23C ADD A,$5E     ;
+ $A23E LD H,A        ;
+ $A23F RET           ;

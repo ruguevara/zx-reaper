@@ -1,0 +1,16 @@
+; Script opcode $83: run a subscript
+;
+; Operand: word (the address of a script). Runs it with #R$9D5F and continues after the operand. HL is saved because the end code of the subscript leaves HL = $9D5F.
+;
+; HL Operand bytes
+; O:HL Address after the operand
+@label=OpCallScript
+c$9DA4 LD E,(HL)     ;
+ $9DA5 INC HL        ;
+ $9DA6 LD D,(HL)     ;
+ $9DA7 INC HL        ;
+ $9DA8 PUSH HL       ;
+ $9DA9 EX DE,HL      ;
+ $9DAA CALL $9D5F    ; run the subscript
+ $9DAD POP HL        ;
+ $9DAE RET           ;

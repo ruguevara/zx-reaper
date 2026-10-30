@@ -1,0 +1,56 @@
+; Ask for one key and store it
+;
+; Prints "Press key " (#R$A4FB) and the name of the control from the prompt record, waits for all keys to be released
+; and for a key to be pressed, appends the key's name to the buffer #R$A4F2 (#R$A3F6), plays sound effect 5 and stores
+; the key's (row, mask) into the pair named by the record. The row and mask come from #R$8502, which the frame routine
+; #R$A43D filled with #R$A29C's answer, while the name comes from the key code of #R$A304; with two keys held at once
+; these can differ. Finally the keyboard line is redrawn with the new names (#R$A4DD).
+; .
+; Hardware: waits for frame interrupts with HALT; beeper effect through the request byte #R$854F; text through
+; #R$9D5F.
+;
+; HL Address of the prompt record in #R$A3A9
+; DE Cursor in the key-name buffer #R$A4F2
+; O:DE Cursor after the name that was added
+@label=RedefineOneKey
+c$A3B9 PUSH DE       ;
+ $A3BA PUSH HL       ;
+ $A3BB LD HL,$A4FB   ;
+ $A3BE CALL $9D5F    ; "Press key " (script, ends at the cursor)
+ $A3C1 POP HL        ;
+ $A3C2 LD E,(HL)     ;
+ $A3C3 INC HL        ;
+ $A3C4 LD D,(HL)     ;
+ $A3C5 INC HL        ;
+ $A3C6 PUSH HL       ;
+ $A3C7 EX DE,HL      ;
+ $A3C8 CALL $9D5F    ; print the name of the control after it
+@label=RedefineOneKey_Release
+*$A3CB HALT          ; wait until no key is held
+ $A3CC LD A,($A2D2)  ;
+ $A3CF OR A          ;
+ $A3D0 JR NZ,$A3CB   ;
+@label=RedefineOneKey_Press
+*$A3D2 HALT          ; wait for a key
+ $A3D3 LD A,($A2D2)  ;
+ $A3D6 OR A          ;
+ $A3D7 JR Z,$A3D2    ;
+ $A3D9 POP HL        ;
+ $A3DA POP DE        ;
+ $A3DB CALL $A3F6    ; add its name to the buffer
+@isub=LD A,SFX_PICKUP
+ $A3DE LD A,$05      ; sound request: key accepted
+ $A3E0 LD ($854F),A  ;
+ $A3E3 PUSH DE       ;
+ $A3E4 LD E,(HL)     ;
+ $A3E5 INC HL        ;
+ $A3E6 LD D,(HL)     ;
+ $A3E7 LD HL,($8502) ; L = mask, H = row of the key found by #R$A29C
+ $A3EA EX DE,HL      ; DE = row, mask; HL = address of the pair
+ $A3EB LD (HL),D     ;
+ $A3EC INC HL        ;
+ $A3ED LD (HL),E     ;
+ $A3EE LD HL,$A4DD   ; redraw "2. Keyboard " and the names
+ $A3F1 CALL $9D5F    ;
+ $A3F4 POP DE        ;
+ $A3F5 RET           ;

@@ -1,0 +1,27 @@
+; Step the frame animation of an entity, then continue at IX
+;
+; Used by the entities with an animation (#R$BA54, #R$BC26 and others) after their hit test. Pops the animation words
+; of the slot: C = countdown and B = reload value, E = frame number and D = number of frames. The countdown goes down
+; by one; at zero it reloads from B, the frame number goes up by one and wraps to 0 at D. Both words are pushed back
+; (SP is as before) and the routine jumps to IX, which the caller has loaded with its continuation.
+; .
+; Hardware: none.
+;
+; IX Address to continue at
+; SP Slot address of the animation words
+; O:E Frame number after the step
+@label=StepAnimation
+c$A883 POP BC      ; C = countdown, B = reload
+ $A884 POP DE      ; E = frame, D = number of frames
+ $A885 DEC C       ;
+ $A886 JR NZ,$A890 ; countdown not over
+ $A888 LD C,B      ; reload
+ $A889 INC E       ; next frame
+ $A88A LD A,E      ;
+ $A88B CP D        ; wrap at D
+ $A88C JR C,$A890  ;
+ $A88E SUB D       ;
+ $A88F LD E,A      ;
+*$A890 PUSH DE     ; put the words back
+ $A891 PUSH BC     ;
+ $A892 JP (IX)     ; continue at IX

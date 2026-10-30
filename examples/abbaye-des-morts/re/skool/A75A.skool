@@ -1,0 +1,26 @@
+; Item action: lever that opens the gate of room 20
+;
+; The room item of room 20 (Unexpected gate) at row 6, column 24 with flag $851F. The first touch sets the flag to 1,
+; plays sound effect 5 and arms the one-shot script runner #R$9CE7 with the subscript at $8048, which removes the gate
+; tiles at the right edge of the room (column 31, rows 14-17); the room script tests the flag so the gate stays open.
+; The frame drawn is the flag.
+;
+; F Carry set when Jean's box overlaps the item's box
+; SP Slot address + 6 on entry (the RET of #R$A614 popped the action word at +4): the next stack word is the flag pointer (the action pops it); see #R$A5E9 for the slot layout
+@label=ActionGateLever
+c$A75A POP HL        ; flag pointer
+ $A75B LD A,(HL)     ; flag
+ $A75C JR NC,$A757   ; not touching: draw
+ $A75E OR A          ; already pulled: draw
+ $A75F JR NZ,$A757   ; already pulled: draw
+ $A761 LD (HL),$01   ;
+@isub=LD A,SFX_PICKUP
+ $A763 LD A,$05      ;
+ $A765 LD ($854F),A  ;
+ $A768 LD A,(HL)     ;
+ $A769 LD HL,$8048   ; subscript: open the gate
+@isub=LD (SmcEventScript+1),HL
+ $A76C LD ($9CEE),HL ; operand of the LD HL at #R$9CED (script address)
+ $A76F LD HL,$9CE7   ; re-arm the one-shot runner #R$9CE7
+ $A772 LD (HL),$00   ;
+ $A774 JP $A7DB      ;

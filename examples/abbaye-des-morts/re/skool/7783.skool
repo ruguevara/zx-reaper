@@ -1,0 +1,7 @@
+; Erase the 2x2 wall block of The Altar after the bell has rung
+;
+; Fills the 2x2 cells at row 20, column 26 with the blank tile $80. Run by room 8 (op $9C) when #R$851B, the bell of
+; the Tower of the Bell, is nonzero.
+@label=EraseWallBlock
+b$7783 DEFB $86,$14,$1A,$02,$02,$80 ; FILLTILE row 20, col 26, 2x2, tile $80
+ $7789 DEFB $80             ; END

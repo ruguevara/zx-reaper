@@ -1,0 +1,7 @@
+; Continuation of an item handler: RET into the item's action
+;
+; #R$A600 and #R$A822 load IX with this address before the overlap test #R$A85F, which ends with JP (IX). The RET pops
+; the next word of the slot (+4), the item's action routine, and enters it with the carry flag from the test (set when
+; Jean overlaps the item) and SP at slot + 6.
+@label=ItemActionEntry
+c$A614 RET           ;

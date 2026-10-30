@@ -1,0 +1,8 @@
+; Frame call list write pointer
+;
+; Address of the next free byte of the frame call list at #R$BE5A. #R$A596 sets it to $BE5A at the start of every game
+; frame, each draw command queued (#R$AA1F, #R$A7CB, #R$B3D2, #R$B3F3, #R$B924 and others) copies its 10 bytes there
+; and advances it by 10, and #R$A5DB appends the closing entry #R$BDEB. The value in the loaded image (0) is never
+; used.
+@label=FrameListPtr
+g$BE58 DEFW $0000    ;

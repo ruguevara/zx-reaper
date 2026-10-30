@@ -1,0 +1,22 @@
+; Read four script operand bytes
+;
+; Loads the next four bytes of the script into E, D, C, B, in that order. The handlers use them as a position and a
+; size (E row, D column, C width, B height: #R$9D81, #R$9D8D, #R$9DC2, #R$9DD2, #R$A0BE, #R$A123) or as two words (DE
+; and BC: #R$A04B, #R$A058).
+;
+; HL Script pointer
+; O:E First byte
+; O:D Second byte
+; O:C Third byte
+; O:B Fourth byte
+; O:HL Script pointer after the four bytes
+@label=GetFourOperands
+c$A11A LD E,(HL)     ;
+ $A11B INC HL        ;
+ $A11C LD D,(HL)     ;
+ $A11D INC HL        ;
+ $A11E LD C,(HL)     ;
+ $A11F INC HL        ;
+ $A120 LD B,(HL)     ;
+ $A121 INC HL        ;
+ $A122 RET           ;

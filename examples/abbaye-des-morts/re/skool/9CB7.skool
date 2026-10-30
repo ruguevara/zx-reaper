@@ -1,0 +1,53 @@
+; Decode one parchment layout code and draw its cell or run of blank cells
+;
+; Reads a layout code (see #R$9C96). Code 1 is followed by a count n and sets n attribute cells to B' (the bitmap is left alone). Any other code k draws frame tile k-2: its attribute C' is stored and its 8x8 bitmap, 8 bytes at #R$717F + 8*(k-2), is copied over the cell on screen.
+; .
+; Hardware: writes the attribute file and the screen bitmap.
+;
+; C Cells left in the row
+; DE Attribute address of the cell
+; HL Layout pointer
+; B' Attribute of blank cells
+; C' Attribute of frame tile cells
+; O:C Cells left in the row (minus the cells drawn)
+; O:DE Attribute address of the next cell
+; O:HL Layout pointer after the code
+@label=DrawFrameCell
+c$9CB7 LD A,(HL)     ;
+ $9CB8 INC HL        ;
+ $9CB9 DEC A         ; code 1: run of blank cells
+ $9CBA JR Z,$9CD9    ;
+ $9CBC DEC A         ; A = frame tile number
+ $9CBD PUSH HL       ;
+ $9CBE PUSH DE       ;
+ $9CBF ADD A,A       ; x 8: bytes per tile
+ $9CC0 ADD A,A       ;
+ $9CC1 ADD A,A       ;
+ $9CC2 LD HL,$717F   ; frame tile bitmaps
+ $9CC5 CALL $A1D9    ; HL = bitmap of the tile
+ $9CC8 EXX           ; EXX
+ $9CC9 LD A,C        ;
+ $9CCA EXX           ;
+ $9CCB LD (DE),A     ; attribute of the frame tile
+ $9CCC EX DE,HL      ; HL = attribute address
+ $9CCD CALL $A203    ; H = screen high byte of the cell
+ $9CD0 EX DE,HL      ;
+ $9CD1 CALL $9BCA    ; copy 8 bitmap bytes to the cell
+ $9CD4 POP DE        ;
+ $9CD5 POP HL        ;
+ $9CD6 INC E         ;
+ $9CD7 DEC C         ;
+ $9CD8 RET           ;
+*$9CD9 LD A,(HL)     ; blank run: A = number of cells
+ $9CDA INC HL        ;
+*$9CDB PUSH AF       ; attribute of blank cells
+ $9CDC EXX           ;
+ $9CDD LD A,B        ;
+ $9CDE EXX           ;
+ $9CDF LD (DE),A     ;
+ $9CE0 POP AF        ;
+ $9CE1 INC E         ;
+ $9CE2 DEC C         ;
+ $9CE3 DEC A         ;
+ $9CE4 JR NZ,$9CDB   ;
+ $9CE6 RET           ;

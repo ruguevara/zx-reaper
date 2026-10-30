@@ -1,0 +1,29 @@
+; Land: snap Jean to the cell row when his feet are in a floor
+;
+; Called by the falling code (#R$AAC6) after Y has changed. Probes the two points under the feet (X+2 and X+5, Y+12).
+; If one of the cells has flag bit 0 or 1 (standable or blocking) Y is set to the top of the cell row: the fraction is
+; cleared and the high byte loses its low two bits (a cell row is 4 units high), so Jean stands exactly on the tile.
+; The state is not changed here: the next frame the feet flags tell the fall code that he has landed.
+; .
+; Hardware: none.
+@label=LandPlayer
+c$A950 LD HL,($A8A3) ; H = Y
+ $A953 LD A,H        ;
+ $A954 LD HL,($A8A1) ; HL = (X, Y)
+ $A957 LD L,A        ;
+@isub=LD D,COLUMN_MASK
+ $A958 LD D,$1F      ;
+ $A95A LD BC,$020C   ; (X+2 and X+5, Y+12)
+ $A95D CALL $A9B4    ;
+ $A960 LD A,E        ;
+@isub=AND TILE_BLOCKS|TILE_STANDABLE
+ $A961 AND $03       ;
+ $A963 RET Z         ; no floor
+ $A964 LD HL,$A8A3   ; Y fraction
+ $A967 LD (HL),$00   ;
+ $A969 INC HL        ; Y high byte
+ $A96A LD A,(HL)     ;
+@isub=AND 255-SUBROW_MASK
+ $A96B AND $FC       ; round down to a cell row
+ $A96D LD (HL),A     ;
+ $A96E RET           ;

@@ -1,0 +1,20 @@
+; Spawn the room's items
+;
+; Walks the room item table #R$8EDF (8-byte records sorted by room, ended by room $1A) and calls #R$896B for every
+; record of the current room #R$8509. The room and the end mark are loaded together: C = the room, B = $1A (#R$850A).
+; Called by #R$86B9 after the room script, with every slot free.
+; .
+; Hardware: none.
+@label=SpawnRoomItems
+c$8957 LD HL,$8EDF
+@isub=LD DE,ROOM_ITEM_SIZE
+ $895A LD DE,$0008
+ $895D LD BC,($8509)        ; C = room, B = $1A: the table ends with a record of room $1A
+@label=SpawnRoomItems_Loop
+*$8961 LD A,(HL)            ; room of the record
+ $8962 CP C
+ $8963 CALL Z,$896B         ; this room: spawn it (HL = record)
+ $8966 ADD HL,DE            ; next record
+ $8967 CP B                 ; A is still the room of the record just handled: stop after the end mark
+ $8968 JR NZ,$8961
+ $896A RET

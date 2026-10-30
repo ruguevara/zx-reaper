@@ -1,0 +1,6 @@
+; Script: "JUMP"
+;
+; Name of the control in the redefinition prompt, printed after #R$A4FB.
+@label=TextJump
+t$A50F DEFM "JUMP"
+ $A513 DEFB $80

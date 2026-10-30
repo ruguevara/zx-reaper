@@ -1,0 +1,22 @@
+; Behaviour block: a flying creature (kind 2, rooms 20 and 23)
+;
+; Used by the magenta flying creatures of Unexpected gate and Ashes to ashes (attribute $43). Its own shift table
+; follows the frames (four (first column, width) pairs: 3+4+4+4 = 15 columns per frame).
+; .
+; Layout: see #R$93D3.
+@label=BehaviourBird
+b$94C6 DEFB $03,$00,$04,$0B,$02  ; hit box top, left, bottom, right; slot +$15 (Unknown)
+ $94CB DEFB $43      ; attribute
+@isub=DEFW ShiftPairsBird
+ $94CC DEFW $94DB    ; table of (first column, width) for x AND 3
+ $94CE DEFB $08      ; sprite height (2-pixel units)
+@isub=DEFW BehaviourBird+$D
+ $94CF DEFW $94D3    ; sprites, first direction (left or up)
+@isub=DEFW BehaviourBird+$11
+ $94D1 DEFW $94D7    ; sprites, second direction (right or down)
+ $94D3 DEFW $EF63    ; first direction, frame 0
+ $94D5 DEFW $EF72    ; first direction, frame 1
+ $94D7 DEFW $EF81    ; second direction, frame 0
+ $94D9 DEFW $EF90    ; second direction, frame 1
+@label=ShiftPairsBird
+ $94DB DEFB $00,$03,$03,$04,$07,$04,$0B,$04  ; shift table: (first column, width) for x AND 3

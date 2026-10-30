@@ -1,0 +1,17 @@
+; Copy a tile bitmap to a screen cell
+;
+; Copy 8 bytes from HL to the screen cell at DE, one byte per pixel row: DE moves down a row with INC D. Also entered from
+; #R$9C3B and #R$9CB7 (the status bar and the parchment frame).
+;
+; HL The 8 bytes of the bitmap
+; DE Screen address of the cell
+@label=CopyTileBitmap
+@isub=LD B,CELL_SIZE
+c$9BCA LD B,$08      ;
+@label=CopyTileBitmap_Row
+*$9BCC LD A,(HL)     ;
+ $9BCD LD (DE),A     ;
+ $9BCE INC HL        ;
+ $9BCF INC D         ;
+ $9BD0 DJNZ $9BCC    ;
+ $9BD2 RET           ;

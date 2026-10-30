@@ -1,0 +1,3 @@
+OpStampRun_0 -> StampTiles_Pos | the loop over the k positions lies inside StampTiles, the part shared by $8B (OpStampRun) and $92 (OpStampOne), not in OpStampRun's own part | code: src/script.asm, label after StampTiles, target of the last DJNZ there; run: $8B and $92 scripts (F149)
+OpStampRun_1 -> StampTiles_Tile | the loop over the tiles of the list, inside StampTiles | code: src/script.asm, inside StampTiles
+OpSetFlagRect_0 -> SetFlagRect_Cell | the loop over the cells of a row lies inside SetFlagRect, the entry shared with OpSetupWater | code: src/script.asm, after SetFlagRect; run: $9D sets flag 4 on 16 cells through it (F149)

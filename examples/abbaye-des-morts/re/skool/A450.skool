@@ -1,0 +1,18 @@
+; Restore the middle of the screen and the attributes
+;
+; Called by #R$A336 when the controls screen is left. Fills the attribute file with 0 (black), then loads A with the
+; opcode of EX DE,HL and runs the copier #R$A45E, which patches that opcode over both NOPs so that the two block
+; copies run the other way: from $C500 back to $4800 and from $5B00 back to $5800. The attribute fill is overwritten
+; by the second copy.
+; .
+; Hardware: writes the screen bitmap and attributes.
+@label=RestoreMenuArea
+c$A450 LD HL,$5800   ;
+@isub=LD DE,ATTRS+1
+ $A453 LD DE,$5801   ;
+ $A456 LD (HL),L     ; L = 0: black
+@isub=LD BC,ATTRS_SIZE-1
+ $A457 LD BC,$02FF   ;
+ $A45A LDIR          ;
+@isub=LD A,OP_EX_DE_HL
+ $A45C LD A,$EB      ; makes both copies run buffer -> screen

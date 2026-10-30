@@ -1,0 +1,27 @@
+; Checkpoint flags: which checkpoint is the active respawn point
+;
+; Nine bytes, one for each checkpoint that can be reached (checkpoint 0 is the trigger in the Abandoned church, room
+; 7; checkpoints 1-8 are the ringed crosses of type 3 in rooms 8, 11, 12, 14, 15, 19, 21 and 23). At most one is
+; nonzero: touching a checkpoint (#R$A688) first clears all nine, then sets its own byte to 2 (and plays sound 9); the
+; church trigger (#R$A615) sets byte 0 to 1. The sprite frame of a checkpoint is bit 1 of its byte (ringed cross lit
+; up once active). #R$BDF3 scans the bytes for the first nonzero one: its index selects the respawn record in the
+; table #R$BE2A (room, row, column); if all nine are zero the tenth record is used, the start of the game in room 5.
+; Zeroed at the start of a game.
+@label=CheckpointFlag0
+g$8543 DEFB $00 ; room 7 (church trigger)
+@label=CheckpointFlag1
+ $8544 DEFB $00 ; room 8
+@label=CheckpointFlag2
+ $8545 DEFB $00 ; room 11
+@label=CheckpointFlag3
+ $8546 DEFB $00 ; room 12
+@label=CheckpointFlag4
+ $8547 DEFB $00 ; room 14
+@label=CheckpointFlag5
+ $8548 DEFB $00 ; room 15
+@label=CheckpointFlag6
+ $8549 DEFB $00 ; room 19
+@label=CheckpointFlag7
+ $854A DEFB $00 ; room 21
+@label=CheckpointFlag8
+ $854B DEFB $00 ; room 23

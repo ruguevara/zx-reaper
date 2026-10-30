@@ -1,0 +1,27 @@
+; Draw queue job template of the 16-pixel-wide object sprites (filled in by #R$97FD)
+;
+; #R$97FD stores its parameters here and #R$98B1 copies 16 bytes from here to the draw queue (#R$C000); the template is
+; only 8 bytes long, so the next 8 bytes (the first code bytes of #R$9836) are copied along and not used. The job is
+; run by #R$97B7: the handler #R$98F7 draws the sprite into the redraw cell buffers. Fields:
+; .
+; +0 word: handler, #R$98F7
+; .
+; +2 word: address of the graphics (16 bytes for each character row)
+; .
+; +4 byte: character rows covered
+; .
+; +5 byte: row of the top-left cell (0-21)
+; .
+; +6 byte: column of the top-left cell
+; .
+; +7 byte: attribute of the cells
+@label=BlockJob
+g$982E DEFW $98F7    ; +0: handler
+@label=BlockJobGfx
+ $9830 DEFW $0000    ; +2: graphics address
+@label=BlockJobRows
+ $9832 DEFB $00      ; +4: character rows
+@label=BlockJobCell
+ $9833 DEFW $0000    ; +5: row (low byte), +6: column (high byte)
+@label=BlockJobAttr
+ $9835 DEFB $00      ; +7: attribute

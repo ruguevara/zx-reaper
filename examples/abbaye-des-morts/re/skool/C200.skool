@@ -1,0 +1,13 @@
+; Redraw run list: the cells to copy to the screen this frame, grouped by row
+;
+; Built by #R$97B7 (through #R$9719) from the cells of the tile flag map that are marked for redraw, and read by
+; #R$95FF, which writes the cells to the screen. The list is a sequence of row groups: byte row (0-21, the character
+; row), byte n (number of runs in the row), then n runs of two bytes: byte column (0-31) of the first cell of the run
+; and byte index of that cell in the redraw cell buffers (#R$C300, #R$C400, #R$C500). The list ends with $FF where a
+; row byte would be. A run is a stretch of marked cells that follow each other in a row; its length is in #R$C300 at
+; the index of its first cell. Observed after a frame of room 5: $11 $02 $00 $00 $12 $02 / $12 $02 $00 $05 $12 $07 /
+; $13 $02 $00 $0A $12 $0C / $FF: row 17 with two runs, cells 0-1 from column 0 and cells 2-4 from column $12 (lengths
+; 2 and 3 in #R$C300), then the same for rows 18 and 19. The index is one byte, so a frame can queue at most 256
+; cells.
+@label=RedrawRuns
+g$C200 DEFS $0100,$FF ;

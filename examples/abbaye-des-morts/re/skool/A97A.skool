@@ -1,0 +1,24 @@
+; Probe three cells in a row
+;
+; ORs the tile flags of the cells at (x+B, y+C), (x+B+3, y+C) and (x+B+6, y+C) into E (E starts at 0); the crouching
+; branch of #R$A8A5 uses it for the feet. B is left increased by 6.
+; .
+; Hardware: none; reads the tile flag map.
+;
+; HL Position: H = x, L = y (2-pixel units)
+; B Offset of the first point in x
+; C Offset of the first point in y
+; D Column mask (always $1F)
+; O:E OR of the tile flags at the points
+; O:B B + 6
+@label=ProbeRowOf3
+c$A97A LD E,$00   ;
+ $A97C CALL $A9FE ;
+ $A97F INC B      ;
+ $A980 INC B      ;
+ $A981 INC B      ;
+ $A982 CALL $A9FE ;
+ $A985 INC B      ;
+ $A986 INC B      ;
+ $A987 INC B      ;
+ $A988 JP $A9FE   ;

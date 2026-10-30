@@ -1,0 +1,7 @@
+; Key code table in scan order
+;
+; The code of each key in the order #R$A304 scans the row buffer (row 0 bit 0 first): CAPS SHIFT = $01, then the
+; letters and digits as ASCII, ENTER = $0D, SPACE = $20, SYMBOL SHIFT = $02; 40 codes, then a 0 that is returned when
+; no key is held.
+@label=KeyCodeTable
+t$A2DB DEFM $01,"ZXCVASDFGQWERT1234509876POIUY",$0D,"LKJH ",$02,"MNB",$00

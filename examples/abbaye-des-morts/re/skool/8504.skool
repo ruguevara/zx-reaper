@@ -1,0 +1,8 @@
+; Address of the routine the interrupt handler calls each frame
+;
+; Word. The interrupt handler #R$8585 calls the routine at this address on its own stack every 50 Hz frame: the RET at
+; $8719 before the game starts (#R$6000), the menu key scanner #R$A43D during the title and menu (#R$85FC), and
+; #R$85E2 (beeper effects, then the frame update #R$A596) while the game runs. The image holds $8504, a value that is
+; never used.
+@label=InterruptRoutine
+g$8504 DEFB $04,$85

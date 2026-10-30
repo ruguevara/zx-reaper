@@ -1,0 +1,13 @@
+; Redefine-key prompts: 4 x (prompt script, key pair)
+;
+; One 4-byte record per key asked for by #R$A336, in the order JUMP, CROUCH, LEFT, RIGHT: +0 word: address of the
+; script that prints the name of the key (#R$A50F...), +2 word: address of the key's (row, mask) pair in #R$A2BF where
+; #R$A3B9 stores the pressed key.
+@label=PromptJump
+w$A3A9 DEFW $A50F,$A2C5; JUMP: text "JUMP", pair #R$A2C5
+@label=PromptCrouch
+ $A3AD DEFW $A514,$A2C3; CROUCH: text "CROUCH", pair #R$A2C3
+@label=PromptLeft
+ $A3B1 DEFW $A51B,$A2C1; LEFT: text "LEFT", pair #R$A2C1
+@label=PromptRight
+ $A3B5 DEFW $A520,$A2BF; RIGHT: text "RIGHT", pair #R$A2BF

@@ -1,0 +1,29 @@
+; Append a job to the draw queue
+;
+; Append the 16 bytes at HL to the draw queue; also entered from #R$97FD with its own template. A template of less
+; than 16 bytes brings along the code bytes after it, which nobody uses. The queue tail is the operand of the first
+; instruction (#R$97B7 resets it to $C000 every frame). There is no check for a full queue (16 jobs): the 17th
+; would be copied over the object slots at $C100.
+;
+; HL Address of the 16-byte job (template)
+@label=AddQueueJob
+c$98B1 LD DE,$C000   ;
+ $98B4 LDI           ;
+ $98B6 LDI           ;
+ $98B8 LDI           ;
+ $98BA LDI           ;
+ $98BC LDI           ;
+ $98BE LDI           ;
+ $98C0 LDI           ;
+ $98C2 LDI           ;
+ $98C4 LDI           ;
+ $98C6 LDI           ;
+ $98C8 LDI           ;
+ $98CA LDI           ;
+ $98CC LDI           ;
+ $98CE LDI           ;
+ $98D0 LDI           ;
+ $98D2 LDI           ;
+@isub=LD (AddQueueJob+1),DE
+ $98D4 LD ($98B2),DE ; queue tail moves on
+ $98D8 RET           ;

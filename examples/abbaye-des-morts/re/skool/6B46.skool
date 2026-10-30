@@ -1,0 +1,17 @@
+; Packed sprite set 5 (op $97 $05): 10 columns of 3 character rows
+;
+; Unpacked by room script op $97 $05 into the sprite sheet at $D768 (page = first pixel row, low byte = first column)
+; with record 5 of #R$AE9D: frame width 2 columns, no extra copies. 10 columns x 3 character rows (24 pixel rows), 148
+; bytes packed. Used by rooms: 10.
+@label=PackedSet5
+b$6B46 DEFB $0A,$03
+ $6B48 DEFB $09,$07,$0F,$49,$1F,$3F,$7F,$29,$3F,$3E,$3F,$09,$80,$00,$A3,$80
+ $6B58 DEFB $C0,$E0,$20,$D5,$00,$80,$C0,$40,$00,$0B,$01,$02,$01,$77,$03,$07
+ $6B68 DEFB $03,$07,$06,$0D,$98,$00,$01,$00,$90,$7F,$FF,$2B,$EF,$DF,$9F,$3F
+ $6B78 DEFB $1E,$17,$05,$44,$00,$5F,$80,$C0,$80,$90,$82,$C0,$F4,$E4,$C0,$E0
+ $6B88 DEFB $F0,$E0,$EB,$B0,$98,$80,$C0,$60,$00,$09,$01,$00,$A3,$01,$03,$07
+ $6B98 DEFB $04,$D5,$00,$01,$03,$02,$00,$09,$E0,$F0,$49,$F8,$FC,$FE,$29,$FC
+ $6BA8 DEFB $7C,$FC,$5F,$01,$03,$01,$09,$41,$03,$F4,$27,$03,$07,$0F,$07,$EB
+ $6BB8 DEFB $0D,$19,$01,$03,$06,$00,$90,$FE,$FF,$2B,$F7,$FB,$F9,$FC,$1E,$E8
+ $6BC8 DEFB $A0,$22,$00,$0B,$80,$40,$80,$77,$C0,$E0,$C0,$E0,$60,$B0,$98,$00
+ $6BD8 DEFB $80,$00

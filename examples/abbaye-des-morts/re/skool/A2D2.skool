@@ -1,0 +1,6 @@
+; Code of the key held now (0 = none)
+;
+; Set by #R$A304 from the key code table #R$A2DB. Updated every interrupt only while the menu frame routine #R$A43D is
+; installed, and by the title loop #R$8832; the menus wait on it.
+@label=KeyCode
+g$A2D2 DEFB $00

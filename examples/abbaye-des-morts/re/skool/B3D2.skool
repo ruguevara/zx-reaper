@@ -1,0 +1,27 @@
+; Entity sprite: pick the frame from a frame table and queue the draw command
+;
+; The end of the sprite part of most entity handlers. #R$A883 has just stepped the animation counters and jumped here
+; (IX) with HL at the frame table pointer words of the sprite description (see #R$B2D4): #R$B3D2 skips the first one
+; and takes the second (creatures facing right or down), #R$B3D4 takes the first. Both continue at #R$B3D8, which
+; adds the frame number to the table address, reads the frame's sprite sheet address, adds the byte offset of the
+; shift phase to its low byte and stores the result in the main draw command (#R$ACD1, graphics word at #R$ACD5).
+; Then, unless the frame list is being run (#R$AA1F holds RET), the ten bytes of the draw command are copied to the
+; frame call list at the write pointer #R$BE58 (through #R$B407) and the handler goes on with the next slot
+; (#R$B41F).
+; .
+; Hardware: none.
+;
+; HL Address of the first of the two frame table pointer words of the sprite description
+; E Frame number
+; A' Byte offset of the shift phase, from the shift table
+; SP Slot address + $12 (the animation counters have been pushed back)
+@label=SelectFrameRight
+c$B3D2 INC HL        ; skip the pointer of the first frame table
+ $B3D3 INC HL        ;
+; Entry point of the first frame table (creatures facing left or up), reached through IX from #R$B2D4 and through IY
+; from #R$B5D6 and others.
+@label=SelectFrameLeft
+ $B3D4 LD A,(HL)     ; HL = frame table (word array)
+ $B3D5 INC HL        ;
+ $B3D6 LD H,(HL)     ;
+ $B3D7 LD L,A        ;

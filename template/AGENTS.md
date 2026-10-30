@@ -54,6 +54,8 @@ tools/zxq.py cut $8C4A "Title"       split an annotated entry at an address, kee
 tools/zxq.py check                   byte check in a private build dir (use this, not make, in parallel agents)
 tools/zxq.py const [NAME VALUE TEXT] numeric constants (src/constants.asm), used via @isub
 tools/zxq.py equs [--uses]           address names (@equ) and every operand they replace
+tools/zxq.py rename LIST.md          labels and constants renamed everywhere (`Old -> New` lines)
+tools/zxq.py links docs/*.md         article links re-pointed at the labels' lines after edits
 tools/zxrun.py re/orig.z80 --input tests/inputs/x.txt --shot 200:/tmp/a.png --map re/maps/x.map
 tools/zxrun.py re/orig.z80 --frames 300 --watch $5C00-$5C0F --watch-from 250   # who writes here
 tools/zxpoke.py profile|search|writers|check|keys ...   POKEs and cheats (skill zx-poke)
@@ -93,7 +95,13 @@ annotation goes to subagents (cheaper model) in batches of 5–15 related entrie
 from `zxq.py next`; each subagent edits only the files it was given and returns
 the new labels and one-line titles, and proposes splits where a second routine
 starts inside an entry. The lead applies splits with `zxq.py cut`, runs `make`,
-commits, and repeats. In a port the lead writes the control flow and a contract
+commits, and repeats. Subagents that saw only their own range get names wrong
+across ranges, and a review that re-reads the code misses most of it: after
+the waves, give each subagent a group of modules to check by runs (every name,
+claim and register line against what the simulator shows, the creatures named
+once for all in a table the lead decides), renames proposed as `Old -> New`
+lines and applied by the lead with `zxq.py rename`, then the article fixed from
+their change logs. In a port the lead writes the control flow and a contract
 (signatures, events, what other modules call); subagents port one module each
 and pass its check before the lead puts them together. Size a subagent's task
 to finish well within an hour (split a module of over ~1,500 lines). A

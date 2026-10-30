@@ -1,0 +1,6 @@
+; Colour cycle of the ring of crosses: 6 attribute bytes
+;
+; Attributes (bright yellow, red, magenta, blue, cyan, green) that #R$AE4B copies one by one to the attribute of the
+; cross tile $4C (#R$CE4C), advancing every 5 frames (#R$8511), so that the twelve crosses flash through the rainbow.
+@label=CrossColours
+b$8553 DEFB $46,$42,$43,$41,$45,$44

@@ -1,0 +1,19 @@
+; Script: title screen
+;
+; Drawn by #R$85FC (on the 48K, where $8506 = 1) when a game restarts after Game Over or the ending; the first start
+; jumps over that drawing and the loader's picture serves as the title. The whole screen black, the bitmap cleared,
+; the title in two lines ("l'Abbaye" at y = 0, x = $60 and "des morts" at y = $10, x = $5C), the two prompt lines at y
+; = $A0 and y = $B0, then all attributes set to 7 (white on black). Script codes as in #R$A493.
+@label=ScriptTitle
+t$A526 DEFB $8F,$00,$00,$20,$18,$00; attributes: whole screen black
+ $A52C DEFB $81,$00,$00,$20,$C0,$00; bitmap: clear all 192 rows
+ $A532 DEFB $8E,$00,$60; text at y = 0, x = $60
+ $A535 DEFM "l'Abbaye"
+ $A53D DEFB $8E,$10,$5C; text at y = $10, x = $5C
+ $A540 DEFM "des morts"
+ $A549 DEFB $8E,$A0,$00; text at y = $A0
+ $A54C DEFM "press C for controls"
+ $A560 DEFB $8E,$B0,$00; text at y = $B0
+ $A563 DEFM "press enter to start"
+ $A577 DEFB $8F,$00,$00,$20,$18,$07; attributes: whole screen white on black
+ $A57D DEFB $80      ; end

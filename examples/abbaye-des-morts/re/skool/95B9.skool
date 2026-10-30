@@ -1,0 +1,32 @@
+; Behaviour block: Death, and the sprite block of his scythe (kind 16, room 18)
+;
+; Used by Death of Banquet of Death (attribute $47, 28 pixels tall) who flies left and right and throws scythes. After the
+; 5 header bytes (hit box as in #R$93D3): attribute, the pointer to Death's shift table (it follows the sprite lists),
+; sprite height, the lists of the two directions (3 frames each, 19 columns per frame). The shift table has four (first
+; column, width) pairs: 4+5+5+5 columns. The sprite block of the thrown scythe follows (#R$95DA, used by the templates
+; #R$BD46 and #R$BD58): attribute, the shift table #R$AC9F, height and four sprite addresses.
+@label=BehaviourDeath
+b$95B9 DEFB $02,$02,$0C,$0D,$02  ; hit box top, left, bottom, right (2-pixel units); slot +$15 (Unknown)
+ $95BE DEFB $47      ; attribute
+ $95BF DEFW $95D2    ; shift table (#R$95D2)
+ $95C1 DEFB $0E      ; sprite height
+@isub=DEFW BehaviourDeath+$D
+ $95C2 DEFW $95C6    ; sprites, first direction (left)
+@isub=DEFW BehaviourDeath+$13
+ $95C4 DEFW $95CC    ; sprites, second direction (right)
+ $95C6 DEFW $D763    ; first direction, frame 0
+ $95C8 DEFW $D776    ; first direction, frame 1
+ $95CA DEFW $D789    ; first direction, frame 2
+ $95CC DEFW $D79C    ; second direction, frame 0
+ $95CE DEFW $D7AF    ; second direction, frame 1
+ $95D0 DEFW $D7C2    ; second direction, frame 2
+@label=ShiftTableDeath
+ $95D2 DEFB $00,$04,$04,$05,$09,$05,$0E,$05  ; shift table of Death: (first column, width) for x AND 3
+@label=SpriteBlockScythe
+ $95DA DEFB $47      ; scythe: attribute
+ $95DB DEFW $AC9F    ; shift table
+ $95DD DEFB $08      ; height
+ $95DE DEFW $D7EA    ; sprite
+ $95E0 DEFW $D7F5    ; sprite
+ $95E2 DEFW $E7EA    ; sprite
+ $95E4 DEFW $E7F5    ; sprite

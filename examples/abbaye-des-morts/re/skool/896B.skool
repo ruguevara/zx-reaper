@@ -1,0 +1,25 @@
+; Spawn one item unless its flag is $FF
+;
+; The flag byte of an item (its address is the word at +1 of the record) is $FF once the item is taken or finished
+; (ITEM_GONE: a heart, a cross, the church trigger...); such an item is not created again when the room is entered
+; later. Otherwise #R$897E makes its slot. All registers are preserved.
+;
+; HL Address of the room item record (#R$8EDF)
+@label=SpawnItem
+c$896B PUSH AF
+ $896C PUSH HL
+ $896D PUSH DE
+ $896E PUSH BC
+ $896F INC HL               ; BC = address of the flag byte
+ $8970 LD C,(HL)
+ $8971 INC HL
+ $8972 LD B,(HL)
+ $8973 LD A,(BC)            ; the flag
+@isub=CP ITEM_GONE
+ $8974 CP $FF
+ $8976 CALL NZ,$897E        ; not gone: make the slot, HL = record + 2
+ $8979 POP BC
+ $897A POP DE
+ $897B POP HL
+ $897C POP AF
+ $897D RET

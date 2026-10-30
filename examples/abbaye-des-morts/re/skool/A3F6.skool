@@ -1,0 +1,39 @@
+; Append the name of a key to the key-name buffer
+;
+; ENTER, SPACE, CAPS SHIFT and SYMBOL SHIFT are written as the two letters from #R$A41A (en, sp, cs, ss); any other
+; key code is written as the character itself.
+;
+; A Key code (from #R$A2D2)
+; DE Cursor in the buffer #R$A4F2
+; O:DE Cursor after the name
+; O:BC Reduced by 2 when a short name was copied (LDI)
+@label=AddKeyName
+c$A3F6 PUSH HL       ;
+ $A3F7 LD HL,$A41A   ;
+@isub=CP KEYCODE_ENTER
+ $A3FA CP $0D        ;
+ $A3FC JR Z,$A414    ;
+ $A3FE INC HL        ;
+ $A3FF INC HL        ;
+@isub=CP CHAR_SPACE
+ $A400 CP $20        ;
+ $A402 JR Z,$A414    ;
+ $A404 INC HL        ;
+ $A405 INC HL        ;
+@isub=CP KEYCODE_CAPS_SHIFT
+ $A406 CP $01        ;
+ $A408 JR Z,$A414    ;
+ $A40A INC HL        ;
+ $A40B INC HL        ;
+@isub=CP KEYCODE_SYMBOL_SHIFT
+ $A40C CP $02        ;
+ $A40E JR Z,$A414    ;
+ $A410 LD (DE),A     ; a letter or digit: one character
+ $A411 INC DE        ;
+ $A412 POP HL        ;
+ $A413 RET           ;
+@label=AddKeyName_Short
+*$A414 LDI           ; copy the two-letter name
+ $A416 LDI           ;
+ $A418 POP HL        ;
+ $A419 RET           ;

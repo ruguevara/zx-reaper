@@ -1,0 +1,9 @@
+; Fish: queue the sprite after the animation step
+;
+; Continuation of #R$B870 after #R$A883. HL points to the sprite block + 1 and E is the frame number: #R$B6D9 makes
+; the draw command from them and queues it.
+;
+; E Frame number
+; HL Sprite block + 1
+@label=UpdateFish_Queue
+c$B87D JP $B6D9      ; queue the sprite of the frame

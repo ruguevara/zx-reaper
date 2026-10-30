@@ -1,0 +1,6 @@
+; Last value written to the 128K paging port $7FFD
+;
+; Set by #R$85CA whenever it pages a bank in; #R$85D5 saves it and restores it after calling the music player, so the
+; game's own bank (bank 0, ROM 1: $10) is restored. Unused on a 48K machine apart from the one write made by #R$6000.
+@label=PagingState
+g$8507 DEFB $00

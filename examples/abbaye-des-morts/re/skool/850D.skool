@@ -1,0 +1,7 @@
+; String number of the room name
+;
+; Number of the text string (#R$9048, 0-52) that the status bar panel #R$82F0 prints as the name of the room. Set by
+; script op $87 at the start of each room script (#R$9DEA); rooms 0 and 4 have no op $87, so they keep the previous
+; name.
+@label=RoomNameString
+g$850D DEFB $00

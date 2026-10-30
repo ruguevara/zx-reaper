@@ -1,0 +1,12 @@
+; Parchment text: string numbers of the two lines
+;
+; Set when a parchment is picked up (#R$A836 copies the two bytes after the item's coordinates), printed by the
+; parchment script #R$832A through two PRINTVAR ops (script op $84). The image holds 25 and 26, the first parchment
+; ("Twelve crosses / against the devil").
+; .
+; +0 byte ParchmentLine1: string number of the first line
+; +1 byte ParchmentLine2: string number of the second line
+@label=ParchmentLine1
+g$850E DEFB $19
+@label=ParchmentLine2
+ $850F DEFB $1A

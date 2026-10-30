@@ -1,0 +1,9 @@
+; Script: "1. Kempston "
+;
+; Clears the bitmap row of the line (y = $40, 16 pixel rows) and prints the text at y = $40; #R$A47D appends "enabled"
+; or "disabled".
+@label=ScriptKempstonLine
+t$A4B6 DEFB $81,$40,$00,$20,$10,$00
+ $A4BC DEFB $8E,$40,$00; text cursor at y = $40, x = 0
+ $A4BF DEFM "1. Kempston "
+ $A4CB DEFB $80

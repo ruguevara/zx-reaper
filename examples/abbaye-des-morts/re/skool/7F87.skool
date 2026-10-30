@@ -1,0 +1,7 @@
+; Picture: the door at the left edge of room 19, rows 16-19
+;
+; Draws a 1x4 picture of the door (tiles $BC-$BF) at row 16, column 0. Run by room 19 (op $95) while #R$851C, the
+; lever of room 9, is 0.
+@label=DoorLeftLow
+b$7F87 DEFB $91,$BC,$01,$04,$01,$10,$00 ; PICTURES tiles from $BC, 1x4, at 1 positions
+ $7F8E DEFB $80             ; END

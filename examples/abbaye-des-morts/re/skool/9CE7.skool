@@ -1,0 +1,12 @@
+; Run the pending event script (once)
+;
+; One-shot gate in the style of #R$9C51: the first byte is NOP when a script is pending and RET otherwise, and the main loop (#R$85FC) calls this address on every pass. When pending, it writes RET over itself and runs the script at the address held in its own LD HL instruction (operand at $9CEE, SmcEventScript+1) with #R$9D5F. The routines that start an event store the script address there and write 0 over the first byte: #R$A615 (lever, scripts $76A0 and $76A8), #R$A75A (script $8048) and #R$BB57 (the twelve crosses, script $82D4). #R$86B9 writes RET here when a room is entered.
+@label=RunEventScript
+c$9CE7 NOP           ;
+ $9CE8 LD HL,$9CE7   ; disarm
+@isub=LD (HL),OP_RET
+ $9CEB LD (HL),$C9   ;
+; SMC: the operand (script address) is written by #R$A615, #R$A75A and #R$BB57
+@label=SmcEventScript
+ $9CED LD HL,$9CED   ; script address; the placeholder value is never used
+ $9CF0 JP $9D5F      ; run the script

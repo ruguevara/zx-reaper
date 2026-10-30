@@ -1,0 +1,17 @@
+; Draw the Kempston line of the controls screen
+;
+; Prints "1. Kempston " with the script #R$A4B6, then "enabled" (#R$A4CC) when the byte #R$A28F is a NOP (joystick on)
+; or "disabled" (#R$A4D4) when it is a RET. Ends with a tail call into the script interpreter.
+; .
+; Hardware: draws text and background on the screen through #R$9D5F.
+@label=DrawKempstonLine
+c$A47D LD HL,$A4B6   ;
+ $A480 CALL $9D5F    ;
+ $A483 LD HL,$A4CC   ;
+ $A486 LD DE,$A4D4   ;
+ $A489 LD A,($A28F)  ; NOP (0) = joystick on
+ $A48C OR A          ;
+ $A48D JR Z,$A490    ; joystick on: keep "enabled"
+ $A48F EX DE,HL      ; joystick off: "disabled"
+@label=DrawKempstonLine_Tail
+*$A490 JP $9D5F      ;

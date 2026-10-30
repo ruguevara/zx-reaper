@@ -1,0 +1,144 @@
+; Beeper sound effects: one frame of the current effect
+;
+; Called once per frame by the frame routine #R$85E2, before the game logic. On a 128K machine with an AY chip #R$605F
+; turns the first instruction into JP #R$85D5 and this code is not used. A game routine requests an effect by storing
+; its number in #R$854F (0 = none; SFX_ constants); this routine takes the request, clears it, and plays one step of the
+; effect in #R$854E every frame until the effect ends. A new request replaces the effect that is playing at once
+; (observed, F104). An effect can chain another one when it ends (field +7 of its record).
+; .
+; Effect 1 is built in: a noise burst of 10 frames (NOISE_FRAMES), each 48 speaker samples (NOISE_SAMPLES) of bit 4 of
+; #R$87D7, about 180 T-states apart. No code of the image requests effect 1 (by reading the stores to #R$854F).
+; .
+; Effects 2-9 are tones. Their 8-byte records (#R$87F2) are copied to #R$87EA when the effect starts, and the first step
+; is played at once. One step is a burst of exactly 255 loop counts (BURST_COUNTS, about 6,900 T-states, the CPU is held
+; in the interrupt): the speaker bit is flipped every PERIOD counts, a flip every 27 * PERIOD + 29 T-states (observed:
+; PERIOD 40 gives 1,109), so the burst holds 255 / PERIOD half-waves and PERIOD 0 gives a single click. After each
+; burst PERIOD changes by STEP (8-bit wrap-around, so a large step makes the pitch jump about) and the frame counter
+; FRAMES drops. When it reaches 0 the segment is over: the segment counter SEGMENTS drops, and when that reaches 0 the
+; effect ends (and starts the chained effect, if the record has one). Otherwise the next segment starts: MODE 0 sets
+; PERIOD back to BASE, 1 lowers BASE by 2 first (higher pitch each time), 2 raises it by 2 (lower pitch), anything
+; else keeps PERIOD and reverses STEP (the pitch sweeps back); FRAMES is reloaded from RELOAD. The fields are described
+; at #R$87EA.
+; .
+; Hardware: writes the speaker through port $FE (bit 4; the border bits are 0, so the border goes black during a burst).
+; The timing loops run with interrupts disabled, inside the interrupt handler, so a step takes the CPU for 7,000-9,000
+; T-states of the frame (observed). Nothing is heard between the bursts: a tone is a 50 Hz train of 2 ms bursts.
+; .
+; The first instruction (LD HL,$85D5) is the patch point of #R$605F; on a 48K machine it only loads HL.
+@label=PlaySoundStep
+c$871A LD HL,$85D5          ; 128K with AY: becomes JP $85D5 (#R$605F)
+ $871D LD A,($854F)         ; SoundRequest
+ $8720 AND A
+ $8721 JR Z,$8741           ; none: go on with the effect playing
+ $8723 LD ($854E),A         ; SoundPlaying = the new effect (replaces one that is playing)
+ $8726 DEC A                ; effect 1?
+ $8727 JR Z,$874B           ; yes: the built-in noise
+ $8729 LD HL,$87F2          ; effect table (effects 2-9)
+ $872C DEC A                ; effect number - 2 ...
+ $872D ADD A,A              ; ... times 8, the record size
+ $872E ADD A,A
+ $872F ADD A,A
+ $8730 LD E,A
+ $8731 XOR A                ; request taken
+ $8732 LD ($854F),A
+ $8735 LD D,A
+ $8736 ADD HL,DE            ; record of the effect
+@isub=LD BC,SFX_SIZE
+ $8737 LD BC,$0008
+ $873A LD DE,$87EA          ; current effect, #R$87EA
+ $873D LDIR                 ; copy the record
+ $873F JR $876E             ; play its first step now
+@label=PlaySoundStep_Continue
+*$8741 LD A,($854E)         ; SoundPlaying
+ $8744 AND A
+ $8745 RET Z                ; no effect: nothing to play
+ $8746 DEC A
+ $8747 JR NZ,$876E          ; not effect 1: a tone step
+ $8749 JR $8754             ; effect 1: a noise step
+@label=PlaySoundStep_NoiseStart
+@isub=LD A,NOISE_FRAMES
+*$874B LD A,$0A             ; noise: 10 frames, counted in SEGMENTS #R$87ED
+ $874D LD ($87ED),A
+ $8750 XOR A
+ $8751 LD ($854F),A         ; request taken
+@label=PlaySoundStep_Noise
+@isub=LD B,NOISE_SAMPLES
+*$8754 LD B,$30             ; 48 samples per frame
+*$8756 CALL $87D7           ; = #R$87D7: a "random" byte
+@isub=AND SPEAKER_BIT
+ $8759 AND $10              ; speaker bit; the border bits are 0
+@isub=OUT (ULA_PORT),A
+ $875B OUT ($FE),A
+ $875D LD C,$02             ; delay between samples
+*$875F DEC C
+ $8760 JR NZ,$875F
+ $8762 DJNZ $8756
+ $8764 LD HL,$87ED          ; frames left
+ $8767 DEC (HL)
+ $8768 RET NZ               ; effect goes on next frame
+ $8769 XOR A                ; end: SoundPlaying = 0
+ $876A LD ($854E),A
+ $876D RET
+@label=PlaySoundStep_Tone
+*$876E LD A,($87EA)         ; PERIOD of this burst
+ $8771 LD H,A               ; H keeps it for the whole burst
+@isub=LD A,SPEAKER_BIT
+ $8772 LD A,$10             ; speaker bit set
+@isub=LD D,BURST_COUNTS
+ $8774 LD D,$FF             ; D counts the burst: 255 counts
+*$8776 LD E,H               ; E counts half a period
+@isub=OUT (ULA_PORT),A
+ $8777 OUT ($FE),A          ; flip the speaker
+@isub=XOR SPEAKER_BIT
+ $8779 XOR $10              ; next level
+*$877B DEC D                ; count the burst down
+ $877C JR Z,$8783           ; burst over
+ $877E DEC E
+ $877F JR NZ,$877B
+ $8781 JR $8776
+@label=PlaySoundStep_BurstEnd
+*$8783 LD A,($87EB)         ; burst over: PERIOD += STEP
+ $8786 ADD A,H
+ $8787 LD ($87EA),A         ; (8-bit wrap-around)
+ $878A LD HL,$87EC          ; FRAMES
+ $878D DEC (HL)             ; one frame of the segment done
+ $878E RET NZ               ; segment goes on next frame
+ $878F LD HL,$87ED          ; SEGMENTS
+ $8792 DEC (HL)             ; one segment done
+ $8793 JR NZ,$87A2          ; more segments: set up the next
+ $8795 XOR A                ; effect over: SoundPlaying = 0
+ $8796 LD ($854E),A
+ $8799 LD A,($87F1)         ; chained effect (+7)
+ $879C AND A                ; none
+ $879D RET Z
+ $879E LD ($854F),A         ; chain: SoundRequest = next effect, played from the next frame
+ $87A1 RET
+@label=PlaySoundStep_NextSeg
+*$87A2 LD A,($87EF)         ; BASE
+ $87A5 LD C,A
+ $87A6 LD A,($87EE)         ; MODE
+ $87A9 AND A
+ $87AA JR Z,$87CC           ; 0: PERIOD back to BASE
+ $87AC DEC A
+ $87AD JR Z,$87C4           ; 1: BASE - 2
+ $87AF DEC A
+ $87B0 JR Z,$87BC           ; 2: BASE + 2
+ $87B2 LD A,($87EB)         ; 3 or more: keep PERIOD, reverse STEP
+ $87B5 NEG
+ $87B7 LD ($87EB),A
+ $87BA JR $87D0
+*$87BC INC C                ; mode 2: BASE + 2 ...
+ $87BD INC C
+ $87BE LD A,C
+ $87BF LD ($87EF),A
+ $87C2 JR $87CC
+*$87C4 DEC C                ; mode 1: BASE - 2 ...
+ $87C5 DEC C
+ $87C6 LD A,C
+ $87C7 LD ($87EF),A
+ $87CA JR $87CC
+*$87CC LD A,C               ; PERIOD = BASE
+ $87CD LD ($87EA),A
+*$87D0 LD A,($87F0)         ; FRAMES = RELOAD
+ $87D3 LD ($87EC),A
+ $87D6 RET

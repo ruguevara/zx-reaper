@@ -1,0 +1,46 @@
+; Room script 10: Pestilent Beast
+;
+; Op $96 turns some cells into free space (flag $80), so that parts of the cave that look solid can be walked through.
+; .
+; Room 10: column 0, row 2 of the 5x5 map (left is room 9, right 11, up 5, down 15, counted modulo 25). Unpacks sprite
+; sets #R$6B46, #R$6BDA. Subscripts: #R$82F0, #R$7955, #R$7A2B. Items (#R$8EDF) at row,column: lever 4,7, doorway arch
+; 17,23, heart 18,10, cross 4,26.
+@label=RoomScript10
+b$786B DEFB $97,$05         ; SPRITESET 5
+ $786D DEFB $97,$06         ; SPRITESET 6
+ $786F DEFB $87,$0A         ; ROOMNAME 10 "Pestilent Beast"
+ $7871 DEFB $83 ; CALL ScriptRoomPanel
+@isub=DEFW ScriptRoomPanel
+ $7872 DEFW $82F0
+ $7874 DEFB $83 ; CALL BlockCaveRock
+@isub=DEFW BlockCaveRock
+ $7875 DEFW $7955
+ $7877 DEFB $99,$0A,$00,$00,$20,$01,$01,$00,$02,$15,$06,$02,$02,$04,$06,$06 ; TILEBLOCKS 10 rectangles
+ $7887 DEFB $0A,$01,$06,$12,$0A,$01,$00,$0A,$04,$06,$00,$1C,$04,$08,$0E,$06
+ $7897 DEFB $1A,$02,$10,$0C,$04,$06,$10,$1A,$06,$06
+ $78A1 DEFB $83 ; CALL BlockCaveGrass
+@isub=DEFW BlockCaveGrass
+ $78A2 DEFW $7A2B
+ $78A4 DEFB $99,$04,$0C,$06,$1A,$02,$14,$02,$04,$02,$14,$0A,$02,$02,$14,$14 ; TILEBLOCKS 4 rectangles
+ $78B4 DEFB $06,$02
+ $78B6 DEFB $86,$14,$14,$06,$01,$03 ; FILLTILE row 20, col 20, 6x1, tile $03
+ $78BC DEFB $9B,$A6,$06,$01,$05,$02,$01,$06,$03,$08,$1D,$02,$08,$1E,$04,$10 ; RUNS_V tile $A6, 6 vertical runs
+ $78CC DEFB $10,$01,$10,$11,$03
+ $78D1 DEFB $92,$81,$06,$0B,$08,$0B,$0D,$0B ; STAMP1 tile $81 at 6 positions
+ $78D9 DEFB $18,$0B,$1A,$0B,$1B,$13,$02
+ $78E0 DEFB $92,$24,$08,$00,$1D,$03,$0D,$04,$1F,$05,$0A,$08,$00,$0D,$0B,$0E ; STAMP1 tile $24 at 8 positions
+ $78F0 DEFB $1D,$0F,$1E
+ $78F3 DEFB $92,$25,$10,$01,$02,$01,$09,$01,$0E,$01,$1B,$07,$09,$07,$0A,$07 ; STAMP1 tile $25 at 16 positions
+ $7903 DEFB $0C,$07,$16,$07,$18,$07,$19,$07,$1B,$0A,$02,$10,$07,$10,$0A,$10
+ $7913 DEFB $0B,$10,$13
+ $7916 DEFB $92,$26,$05,$08,$04,$0E,$05,$10 ; STAMP1 tile $26 at 5 positions
+ $791E DEFB $02,$15,$06,$15,$10
+ $7923 DEFB $91,$4D,$05,$01,$01,$01,$12 ; PICTURES tiles from $4D, 5x1, at 1 positions
+ $792A DEFB $8C,$01,$18,$52 ; TILE1 row 1, col 24, tile $52
+ $792E DEFB $8C,$01,$19,$53 ; TILE1 row 1, col 25, tile $53
+ $7932 DEFB $91,$54,$08,$02,$01,$02,$12 ; PICTURES tiles from $54, 8x2, at 1 positions
+ $7939 DEFB $91,$64,$07,$01,$01,$04,$13 ; PICTURES tiles from $64, 7x1, at 1 positions
+ $7940 DEFB $91,$6B,$02,$01,$01,$05,$0E ; PICTURES tiles from $6B, 2x1, at 1 positions
+ $7947 DEFB $91,$6D,$08,$01,$01,$05,$12 ; PICTURES tiles from $6D, 8x1, at 1 positions
+ $794E DEFB $96,$05,$1C,$04,$01,$80 ; FLAGS row 5, col 28, 4x1, flags $80
+ $7954 DEFB $80             ; END

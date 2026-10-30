@@ -1,0 +1,14 @@
+; Add A to HL
+;
+; Unsigned 8-bit addition to a 16-bit register, used for row steps and table offsets.
+;
+; A Value to add
+; HL Base
+; O:HL HL + A
+; O:A Low byte of the result
+@label=AddAToHL
+c$A1D9 ADD A,L       ;
+ $A1DA LD L,A        ;
+ $A1DB RET NC        ;
+ $A1DC INC H         ;
+ $A1DD RET           ;

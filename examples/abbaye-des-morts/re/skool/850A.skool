@@ -1,0 +1,7 @@
+; Terminator of the room-keyed tables
+;
+; Constant $1A (26, one more than the last room 25). The tables of room items (#R$8EDF) and room objects (#R$8B8F) are
+; sorted by room number and end with this value; #R$8957 and #R$89D9 load BC from #R$8509 (C = the room, B = this
+; byte) and stop their scan when a record's first byte equals B. Never written.
+@label=RoomTableEnd
+g$850A DEFB $1A

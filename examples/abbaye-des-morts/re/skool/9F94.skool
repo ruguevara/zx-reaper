@@ -1,0 +1,29 @@
+; Fill a rectangle of the screen bitmap with a byte
+;
+; Worker of script code $81 (#R$9D81). Fills B pixel rows of C bytes with A, starting at the cell given by L (pixel
+; row) and H (byte column); #R$A1DE converts the position, which is only right when L is a multiple of 8 (all scripts
+; use cell-aligned rows).
+; .
+; Hardware: writes the screen bitmap at $4000-$57FF directly.
+;
+; A Byte to store
+; L Pixel row of the top, a multiple of 8
+; H Byte column 0-31
+; C Width in bytes
+; B Height in pixel rows
+@label=FillBitmapRect
+c$9F94 PUSH AF       ;
+ $9F95 CALL $A1DE    ;
+ $9F98 POP DE        ;
+@label=FillBitmapRect_Row
+*$9F99 PUSH HL       ;
+ $9F9A PUSH BC       ;
+ $9F9B LD B,C        ;
+*$9F9C LD (HL),D     ;
+ $9F9D INC L         ;
+ $9F9E DJNZ $9F9C    ;
+ $9FA0 POP BC        ;
+ $9FA1 POP HL        ;
+ $9FA2 CALL $9F17    ; next pixel row
+ $9FA5 DJNZ $9F99    ;
+ $9FA7 RET           ;

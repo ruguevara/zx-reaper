@@ -1,0 +1,108 @@
+; Draw-queue handler: masked sprite into the redraw cells
+;
+; Handler of the jobs that #R$9836 queues (template #R$98D9). #R$97B7 calls it through JP (HL) with DE = job address + 1,
+; after it has put the background of the flagged cells into the redraw cell buffers. For each character row of the job
+; it finds the row's run in the redraw run list (#R$98E4 for the first row, then the next record of the list, so the
+; rows must be consecutive records) and the index of the job's column among the cells of the run. It works out how many
+; pairs of pixel rows of the sprite fit in the character row (4 minus the offset of the first row, at most the height
+; left; the job's offset and height are updated for the next row) and calls #R$99C9, which runs the drawer for the
+; sprite's width: for every graphics byte g it stores (OutlineMasks[g] AND background) OR g, the sprite over the
+; background with the pixels next to the sprite's own pixels (one to the left and one to the right) cleared first.
+; The drawer also stores the attribute of the covered cells at $C400 + index.
+; .
+; The drawers work in the alternate register set: HL' = destination in the redraw cell buffer (H = $C5 + 2 x offset
+; selects the pixel row, L = cell index), DE' = graphics (D = pixel row, E = column; D carries on down the sprite sheet
+; from one character row to the next), B' = $FF so that BC' addresses the outline mask table OutlineMasks ($FF00) by the graphics
+; byte in C'.
+; .
+; Hardware: none; the screen is written later by #R$95FF.
+;
+; DE Job address + 1 (the handler word has been read by the caller)
+@label=DrawSpriteJob
+c$9972 EX DE,HL      ;
+ $9973 INC L         ;
+ $9974 LD C,(HL)     ;
+ $9975 INC L         ;
+ $9976 LD B,(HL)     ;
+ $9977 INC L         ;
+ $9978 PUSH BC       ;
+ $9979 EXX           ; alternate set: B' = $FF, DE' = graphics address
+@isub=LD B,OutlineMasks>>8
+ $997A LD B,$FF      ;
+ $997C POP DE        ;
+ $997D EXX           ;
+ $997E LD B,(HL)     ; B = number of character rows
+ $997F INC L         ;
+ $9980 EX DE,HL      ;
+; Find the record of the row at DE (job + 5); the INC E then makes DE point at the column field (job + 6).
+ $9981 CALL $98E4    ;
+ $9984 INC E         ;
+; One character row. Choose the run that holds the column: the last run that starts at or before it.
+@label=DrawSpriteJob_Row
+*$9985 PUSH DE       ;
+ $9986 PUSH BC       ;
+*$9987 LD C,(HL)     ;
+ $9988 INC L         ;
+ $9989 LD B,(HL)     ;
+ $998A INC L         ;
+ $998B DEC A         ;
+ $998C JR Z,$999A    ;
+ $998E EX AF,AF'     ;
+ $998F LD A,(DE)     ;
+ $9990 CP (HL)       ;
+ $9991 JR C,$9996    ;
+ $9993 EX AF,AF'     ;
+ $9994 JR $9987      ;
+*$9996 EX AF,AF'     ;
+ $9997 ADD A,A       ;
+ $9998 ADD A,L       ;
+ $9999 LD L,A        ;
+; Cell index = column - first column of the run + index of the run's first cell; HL' = $C5 + 2 x (offset of the
+; first row) in the high byte, the index in the low byte.
+*$999A EX DE,HL      ;
+ $999B LD A,(HL)     ;
+ $999C SUB C         ;
+ $999D ADD A,B       ;
+ $999E LD C,A        ;
+ $999F INC L         ;
+ $99A0 LD A,(HL)     ;
+ $99A1 ADD A,A       ;
+@isub=ADD A,PAGE_REDRAW_PIXELS
+ $99A2 ADD A,$C5     ;
+ $99A4 LD B,A        ;
+ $99A5 PUSH BC       ;
+ $99A6 EXX           ;
+ $99A7 POP HL        ;
+ $99A8 EXX           ;
+; C = pairs of pixel rows to draw in this character row = 4 - offset, but at most the height left. The offset is
+; cleared and the height reduced in the job.
+ $99A9 LD B,(HL)     ;
+@isub=LD A,SUBROWS_PER_CELL
+ $99AA LD A,$04      ;
+ $99AC SUB B         ;
+ $99AD LD C,A        ;
+ $99AE LD (HL),$00   ;
+ $99B0 INC L         ;
+ $99B1 LD A,(HL)     ;
+ $99B2 CP C          ;
+ $99B3 JR NC,$99B6   ;
+ $99B5 LD C,A        ;
+*$99B6 SUB C         ; height left after this character row
+ $99B7 LD (HL),A     ;
+ $99B8 INC L         ;
+; A = width in bytes, B = attribute (job + 10).
+ $99B9 LD A,(HL)     ;
+ $99BA INC L         ;
+ $99BB LD B,(HL)     ;
+; Run the drawer: A width, B attribute, C row pairs.
+ $99BC CALL $99C9    ;
+; Back from the drawer: main registers again. Step to the next record of the run list and the next character row.
+ $99BF EXX           ;
+ $99C0 EX DE,HL      ;
+ $99C1 POP BC        ;
+ $99C2 POP DE        ;
+ $99C3 INC L         ;
+ $99C4 LD A,(HL)     ;
+ $99C5 INC L         ;
+ $99C6 DJNZ $9985    ;
+ $99C8 RET           ;

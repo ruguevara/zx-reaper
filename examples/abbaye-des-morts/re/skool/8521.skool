@@ -1,0 +1,9 @@
+; Chalice flag: the chalice of Satan's room has been taken
+;
+; 0, or $FF once the player has touched the chalice in room 24 (item type 11, #R$A734; the chalice is drawn only once 12
+; crosses are collected, see #R$854D, but a touch takes it whatever the count). The enemy code of Satan #R$BB57 tests
+; it: while it is 0 Satan moves and attacks, once it is set he turns into a cloud of smoke (once, see #R$8522). The
+; crosses routine #R$AE4B stops adding crosses and the red scroll (item type 6, #R$A668) appears: touching it starts the
+; ending. Never cleared except by a new game.
+@label=ChaliceTaken
+g$8521 DEFB $00

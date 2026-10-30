@@ -1,0 +1,68 @@
+; Entity handler: head of the Pestilent Beast (room 10)
+;
+; The yellow dragon head of "Pestilent Beast" (room 10, 4 cells wide, 20 units high): handler of room object kind 14
+; (#R$B028, behaviour block #R$957B). The body of the dragon is part of the room's tiles; the head is this sprite, which
+; stays where it is and lowers by 2 units (4 pixels) for the last 40 frames of every 110 frames, the time in which the
+; Beast breathes fire (#R$B8C5). It is only drawn: there is no hit box test (the three words +$A, +$C and +$E are popped
+; and dropped).
+; .
+; Slot (the layout of the room enemies made by #R$89ED): +2 and +4 not used, +6 word x and +8 word y (8.8, high bytes in
+; 2-pixel units), +$A word, +$C word hit box offset and +$E word hit box far corner: not used here, +$10 pointer to the sprite
+; block (#R$9580: attribute, height, width, one frame), +$12 byte counter (110 down to 1) and +$13 its reload ($6E),
+; +$14 byte the dip (0 or 1; the slot's frame number, but there is only one frame) and +$15 number of frames.
+; .
+; When the counter equals BEAST_HEAD_DIP (40) the dip becomes 1; when it reaches 0 it is reloaded and the dip becomes
+; 0. The draw command's y is the slot's y plus twice the dip, its graphics the one frame of the block (the frame number
+; used for the table lookup is forced to 0). The routine goes on to #R$B3D8, which queues it.
+;
+; SP Slot address + 2 (the handler word was popped by the RET that entered the routine)
+@label=UpdateBeastHead
+c$B880 POP BC        ; +2, not used
+ $B881 POP BC        ; +4, not used
+ $B882 POP HL        ; x word
+ $B883 LD D,H        ; D = x
+ $B884 POP HL        ; y word
+ $B885 LD E,H        ; E = y
+ $B886 LD H,D        ;
+ $B887 LD L,E        ; HL = x (H) and y (L)
+ $B888 LD ($5DFE),HL ; SPAWN_POSITION (not used by the head)
+ $B88B SRA H         ; x / 4 = byte column
+ $B88D SRA H         ;
+ $B88F LD ($ACD3),HL ; position of the draw command: y, byte column
+ $B892 POP AF        ; +$A, dropped
+ $B893 POP AF        ; +$C, dropped
+ $B894 POP AF        ; +$E, dropped
+ $B895 POP HL        ; sprite block
+ $B896 LD A,(HL)     ; attribute
+ $B897 INC HL        ;
+ $B898 LD ($ACDA),A  ; of the draw command
+ $B89B POP BC        ; C counter, B reload
+ $B89C POP DE        ; E dip, D number of frames
+ $B89D LD A,C        ;
+@isub=CP BEAST_HEAD_DIP
+ $B89E CP $28        ; 40 frames before the end: lower the head
+ $B8A0 JR NZ,$B8A3   ;
+ $B8A2 INC E         ;
+*$B8A3 DEC C         ; count down
+ $B8A4 JR NZ,$B8A9   ;
+ $B8A6 LD C,B        ; reload
+ $B8A7 LD E,$00      ; raise the head
+*$B8A9 PUSH DE       ; store the dip
+ $B8AA PUSH BC       ; store the counter
+ $B8AB LD A,E        ;
+ $B8AC ADD A,A       ; 2 units per step
+ $B8AD EXX           ;
+ $B8AE LD HL,($ACD3) ; position of the draw command
+ $B8B1 ADD A,L       ;
+ $B8B2 LD L,A        ; y lower by 2 * dip
+ $B8B3 LD ($ACD3),HL ;
+ $B8B6 EXX           ;
+ $B8B7 XOR A         ;
+ $B8B8 LD E,A        ; frame 0 for the table lookup
+ $B8B9 EX AF,AF'     ; A' = 0: column offset
+ $B8BA LD B,(HL)     ; height
+ $B8BB INC HL        ;
+ $B8BC LD C,(HL)     ; width
+ $B8BD INC HL        ; HL = frame table
+ $B8BE LD ($ACD7),BC ; width, height of the draw command
+ $B8C2 JP $B3D8      ; graphics = table[0]; queue it

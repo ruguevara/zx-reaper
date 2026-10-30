@@ -1,0 +1,8 @@
+; Music track number
+;
+; The track the 128K music player should play: set to 3 by #R$85FC at the start of a game (the title), to the track of
+; the room from #R$83E6 each time a room is entered (#R$86B9), to 7 when Satan is turned into smoke (#R$BB57), to 5
+; and 2 during the two parts of the ending (#R$887B) and to 7 on the Game Over screen. The player lives in the 128K
+; bank (see #R$85C2) and reads this byte there; on a 48K machine nothing reads it.
+@label=MusicTrack
+g$8551 DEFB $00

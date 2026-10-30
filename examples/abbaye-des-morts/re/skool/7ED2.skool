@@ -1,0 +1,40 @@
+; Room script 19: Underground river
+;
+; The door #R$7F87 is drawn at the left edge, at row 16, while the lever of room 9 (#R$851C) is 0. Op $9D makes the
+; river a water strip reflecting the scenery (harmful): row 21, from column 14, 16 cells wide, attribute $0D (blue and cyan, #R$AD88).
+; .
+; Room 19: column 4, row 3 of the 5x5 map (left is room 18, right 20, up 14, down 24, counted modulo 25). Subscripts:
+; #R$82F0, #R$7955. Items (#R$8EDF) at row,column: doorway arch 15,21, heart 8,25, cross 2,3, checkpoint 11,8.
+@label=RoomScript19
+b$7ED2 DEFB $87,$13         ; ROOMNAME 19 "Underground river"
+ $7ED4 DEFB $83 ; CALL ScriptRoomPanel
+@isub=DEFW ScriptRoomPanel
+ $7ED5 DEFW $82F0
+ $7ED7 DEFB $83 ; CALL BlockCaveRock
+@isub=DEFW BlockCaveRock
+ $7ED8 DEFW $7955
+ $7EDA DEFB $99,$13,$00,$00,$02,$10,$14,$00,$0E,$02,$04,$02,$04,$01,$06,$06 ; TILEBLOCKS 19 rectangles
+ $7EEA DEFB $02,$01,$08,$08,$02,$01,$0E,$06,$06,$08,$10,$05,$01,$01,$12,$0C
+ $7EFA DEFB $02,$02,$00,$1C,$02,$01,$06,$1C,$02,$01,$0E,$1C,$02,$01,$00,$1E
+ $7F0A DEFB $02,$16,$02,$1A,$02,$01,$04,$18,$02,$01,$0A,$18,$04,$01,$12,$1A
+ $7F1A DEFB $02,$01,$12,$14,$04,$01,$06,$12,$04,$01,$08,$0E,$04,$01
+ $7F28 DEFB $88,$02,$01,$22,$23 ; BLOCK 2x1: $22 $23
+ $7F2D DEFB $89,$00,$02,$16,$01 ; TILEBLOCK row 0, col 2, 22x1
+ $7F32 DEFB $9B,$A6,$05,$01,$0B,$02,$01,$0C,$04,$01,$0E,$02,$07,$13,$02,$07 ; RUNS_V tile $A6, 5 vertical runs
+ $7F42 DEFB $14,$04
+ $7F44 DEFB $92,$25,$07,$01,$09,$01,$14,$01,$1D,$05,$02,$07,$1D,$09,$10,$13 ; STAMP1 tile $25 at 7 positions
+ $7F54 DEFB $16
+ $7F55 DEFB $92,$24,$06,$02,$01,$0B,$01,$0B ; STAMP1 tile $24 at 6 positions
+ $7F5D DEFB $1F,$0F,$0B,$13,$07,$13,$1F
+ $7F64 DEFB $92,$49,$03,$03,$1F,$11,$06,$15 ; STAMP1 tile $49 at 3 positions
+ $7F6C DEFB $09
+ $7F6D DEFB $8C,$13,$11,$4B ; TILE1 row 19, col 17, tile $4B
+ $7F71 DEFB $8C,$15,$0A,$4A ; TILE1 row 21, col 10, tile $4A
+ $7F75 DEFB $95 ; IFZERO run DoorLeftLow if LeverRoom9 is 0
+@isub=DEFW DoorLeftLow
+ $7F76 DEFW $7F87
+@isub=DEFW LeverRoom9
+ $7F78 DEFW $851C
+ $7F7A DEFB $9D,$15,$0E,$0D,$10 ; WATER strip: row 21, col 14, attribute $0D, 16 cells
+ $7F7F DEFB $91,$7E,$02,$01,$01,$0D,$08 ; PICTURES tiles from $7E, 2x1, at 1 positions
+ $7F86 DEFB $80             ; END

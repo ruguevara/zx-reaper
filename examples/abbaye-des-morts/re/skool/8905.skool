@@ -1,0 +1,73 @@
+; Spawn the objects queued in the object list
+;
+; Called by the game frame (#R$A596) while #R$8552 is not 0. The object list at $5DC0 holds that many 4-byte records:
+; a template address (#R$BD46 and the like, 18 bytes: the layout is described at #R$C100) and the y and x of the new
+; object. The routine sets the write pointer of the list #R$BE56 back to $5DC0 and makes an object of each record: it
+; finds a free slot (#R$8A6E, which leaves its address in IX and DE'), copies the template bytes 0-5 to the slot's
+; +0..+5 (handler, x speed, y speed), clears +6, puts the template byte 6 plus x in +7 (the high byte of the position
+; X), clears +8, puts the template byte 7 plus y in +9 (the high byte of Y) and copies the template bytes 8-17 to +$A..+$13
+; (hit box, sprite pointer, animation counters); then it decrements #R$8552. The same list is filled by the cutscene
+; loader #R$8870 and by the enemies that shoot (Death, Satan, the archers). When no slot is free the rest of the list is
+; dropped (#R$88FE).
+; .
+; The routine keeps the record in the main register set and the slot address in the alternate one (EXX).
+;
+; Hardware: none.
+@label=SpawnQueuedObjects
+c$8905 LD HL,$5DC0          ; object list
+ $8908 LD ($BE56),HL        ; ObjectListPtr: the list is consumed, appenders start again at $5DC0
+@label=SpawnQueuedObjects_Next
+*$890B LD E,(HL)            ; DE = template address
+ $890C INC HL
+ $890D LD D,(HL)
+ $890E INC HL
+ $890F LD C,(HL)            ; C = y
+ $8910 INC HL
+ $8911 LD B,(HL)            ; B = x
+ $8912 INC HL
+ $8913 PUSH BC              ; save y, x
+ $8914 PUSH DE              ; save the template address
+ $8915 EX DE,HL             ; HL = template, DE = list pointer
+ $8916 CALL $8A6E           ; free slot: IX and DE' = its address; carry set if found
+ $8919 JR NC,$88FE          ; none: give up
+ $891B EXX                  ; alternate set: DE' = slot
+ $891C POP HL               ; HL = template
+ $891D LDI                  ; template bytes 0-5 to slot +0..+5
+ $891F LDI
+ $8921 LDI
+ $8923 LDI
+ $8925 LDI
+ $8927 LDI
+ $8929 POP BC               ; BC = y, x
+ $892A XOR A                ; slot +6 = 0 (X fraction)
+ $892B LD (DE),A
+ $892C INC DE
+ $892D LD A,B               ; x + template byte 6
+ $892E ADD A,(HL)
+ $892F INC HL
+ $8930 LD (DE),A            ; slot +7: X high byte
+ $8931 INC DE
+ $8932 XOR A                ; slot +8 = 0 (Y fraction)
+ $8933 LD (DE),A
+ $8934 INC DE
+ $8935 LD A,C               ; y + template byte 7
+ $8936 ADD A,(HL)
+ $8937 INC HL
+ $8938 LD (DE),A            ; slot +9: Y high byte
+ $8939 INC DE
+ $893A LDI                  ; template bytes 8-17 to slot +$A..+$13
+ $893C LDI
+ $893E LDI
+ $8940 LDI
+ $8942 LDI
+ $8944 LDI
+ $8946 LDI
+ $8948 LDI
+ $894A LDI
+ $894C LDI
+ $894E EXX                  ; main set again
+ $894F LD HL,$8552          ; SpawnQueueCount
+ $8952 DEC (HL)             ; one record done
+ $8953 EX DE,HL             ; HL = list pointer again
+ $8954 JR NZ,$890B          ; more records
+ $8956 RET

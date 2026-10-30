@@ -1,0 +1,7 @@
+; Machine type left by the loader
+;
+; 1 on a 48K Spectrum. On a 128K it is the value for port $7FFD that pages in the bank holding the music, which
+; #R$85C7 writes to the port each time the music player is called. Stored by #R$6000 from the word the loader leaves
+; on the stack; #R$85FC compares it with 1 to draw the title screen script #R$A526 on a 48K machine.
+@label=MachineType
+g$8506 DEFB $00

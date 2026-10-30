@@ -1,0 +1,20 @@
+; Hit box of the player (2-pixel units)
+;
+; The rectangle in which the player can be hit, rebuilt every frame by #R$A8A5 from the player's position and state
+; (smaller while crouching: X+1..X+8 and Y+7..Y+13; otherwise X+2..X+6 and Y+2..Y+12, with X, Y the high bytes of
+; #R$A8A1/#R$A8A3). #R$A851/#R$A85F compare the box of each entity with it as words: the first word is (min X, max X),
+; the second (min Y, max Y) with the maximum in the low byte; an entity hits when its X range reaches min X and starts
+; below max X, and likewise for Y.
+; .
+; +0 byte PlayerBoxXMax: right edge
+; +1 byte PlayerBoxXMin: left edge
+; +2 byte PlayerBoxYMax: bottom edge
+; +3 byte PlayerBoxYMin: top edge
+@label=PlayerBoxXMax
+g$8516 DEFB $00
+@label=PlayerBoxXMin
+ $8517 DEFB $00
+@label=PlayerBoxYMax
+ $8518 DEFB $00
+@label=PlayerBoxYMin
+ $8519 DEFB $00

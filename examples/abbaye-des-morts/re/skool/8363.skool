@@ -1,0 +1,17 @@
+; Ending text 2: "Heresy!!! The Cathar is hidden on the throne of Satan, burn him"
+;
+; Run by the ending sequence #R$887B before its second part: clears the attributes and the screen, prints strings
+; 46-48 centred at pixel rows 55, 75 and 95, and marks all cells for redraw.
+; .
+; Hardware: writes the screen bitmap and the attribute file directly (ops $81 and $8F), not through the tile map.
+@label=ScriptEnding2
+b$8363 DEFB $8F,$00,$00,$20,$18,$00 ; FILLATTR row 0, col 0, 32x24, attribute $00
+ $8369 DEFB $81,$00,$00,$20,$B0,$00 ; FILLPIX pixel row 0, byte col 0, 32 bytes x 176 rows, byte $00
+ $836F DEFB $82,$02,$37     ; ALIGN mode 2, pixel row 55
+ $8372 DEFB $85,$2E         ; PRINT string 46 "Heresy!!! The Cathar"
+ $8374 DEFB $82,$02,$4B     ; ALIGN mode 2, pixel row 75
+ $8377 DEFB $85,$2F         ; PRINT string 47 "is hidden on the throne"
+ $8379 DEFB $82,$02,$5F     ; ALIGN mode 2, pixel row 95
+ $837C DEFB $85,$30         ; PRINT string 48 "of Satan, burn him"
+ $837E DEFB $90,$01         ; REDRAWMARK mark all cells
+ $8380 DEFB $80             ; END

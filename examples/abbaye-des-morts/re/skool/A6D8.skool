@@ -1,0 +1,20 @@
+; Item action: the arch of room 10 (Pestilent Beast), leading to Underground river
+;
+; The blue arch of room 10 at row 17, column 23 with flag $8523; the mirror of #R$A6BC: sets the latch of the other
+; arch ($8524), the arrival position to X $54, Y $3C (the arch in room 19) and enters room 19 through #R$A6F2.
+;
+; F Carry set when Jean's box overlaps the item's box
+; SP Slot address + 6 on entry (the RET of #R$A614 popped the action word at +4): the next stack word is the flag pointer (the action pops it); see #R$A5E9 for the slot layout
+@label=ActionArchToRiver
+c$A6D8 POP HL        ; flag pointer
+ $A6D9 JR NC,$A706   ; not touching: release the latch
+ $A6DB BIT 7,(HL)    ; latched: Jean has just arrived here
+ $A6DD JR NZ,$A708   ;
+ $A6DF LD HL,$8524   ; latch of the arch in room 19
+ $A6E2 SET 7,(HL)    ;
+ $A6E4 LD HL,$5400   ; arrival position: X = $54 (column 21) ...
+ $A6E7 LD ($8512),HL ;
+ $A6EA LD HL,$3C00   ; ... Y = $3C (row 15), 2-pixel units
+ $A6ED LD ($8514),HL ;
+@isub=LD A,ROOM_RIVER
+ $A6F0 LD A,$13      ;

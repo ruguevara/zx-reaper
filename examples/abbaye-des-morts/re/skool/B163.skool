@@ -1,0 +1,42 @@
+; Entity handler: crusader stepping up (path command 1)
+;
+; The handler that the path command 1 puts in the slot (#R$B1F3) for six frames: the crusader climbs a block 8 pixels
+; high. It is #R$B10C with the fixed x speed $00A0 (CRUSADER_STEP_SPEED) and the curve #R$B0E8 (up with decreasing
+; speed, sum -$400). Observed in room 5 at x = $48 and $50: y goes from $4400 to $4000 and from $4000 to $3C00. After
+; the sixth frame the handler goes back to #R$B1D4. The three jump handlers go on at #R$B18E with HL = index in the curve,
+; BC = the curve, DE = y and A = x.
+; .
+; Hardware: none.
+;
+; SP Slot address + 2
+@label=UpdateCrusaderStepUp
+c$B163 POP BC        ; skip +2: the speed
+ $B164 POP DE        ; skip +4: the path pointer
+ $B165 POP HL        ; x (8.8)
+@isub=LD BC,CRUSADER_STEP_SPEED
+ $B166 LD BC,$00A0   ; fixed x speed of the step
+ $B169 ADD HL,BC     ;
+ $B16A PUSH HL       ; store x
+ $B16B LD A,H        ; A = x in 2-pixel units
+ $B16C POP HL        ;
+ $B16D POP DE        ; DE = y (8.8)
+ $B16E POP BC        ; BC = state: B frames left, C index in the curve
+ $B16F LD L,C        ;
+ $B170 LD H,$00      ; HL = index
+ $B172 INC C         ;
+ $B173 DJNZ $B18A    ; not the last frame
+@isub=LD BC,CRUSADER_JUMP_FRAMES*256
+ $B175 LD BC,$0600   ; the last frame: reset the state
+ $B178 EXX           ;
+@isub=LD (SmcStepRestoreSP+1),SP
+ $B179 LD ($B188),SP ; SP (slot + $C) for the LD SP below
+ $B17D LD HL,$FFF6   ; -10: SP to slot + 2
+ $B180 ADD HL,SP     ;
+ $B181 LD SP,HL      ;
+ $B182 LD HL,$B1D4   ;
+ $B185 PUSH HL       ; back to walking
+ $B186 EXX           ;
+@label=SmcStepRestoreSP
+ $B187 LD SP,$B187   ; the operand is stored by #R$B179
+*$B18A PUSH BC       ; store the state
+ $B18B LD BC,$B0E8   ; the curve of the step

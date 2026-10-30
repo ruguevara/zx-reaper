@@ -1,0 +1,38 @@
+; Entity handler: runner of the intro screen (kind 0), and the sprite continuation for the increasing direction
+;
+; Room 0 (the intro text, "The Cathar Jean Raymond runs to escape the crusaders...") has four entities of this kind:
+; the monk (sprite description #R$93D3, the standing frames of Jean from #R$ACA7) and three cyan crusaders (#R$93E0)
+; running after him. The slot is entered with SP at slot+2 (see #R$B2A6 for the stack scheme). The x coordinate goes
+; up by the speed each frame; when its high byte equals the end coordinate (+5, $80, off the right of the screen) the
+; slot is freed through #R$B426. x starts at a value below 0 ($CB-$F7: the runner enters from the left), and the
+; compare is for equality. There is no hit box: the three words +$A..+$F are skipped. The sprite goes on at #R$B3AD.
+; .
+; Slot fields used: +2 word speed (8.8, 2-pixel units per frame), +5 byte end x, +6 word x (8.8), +8 word y (8.8);
+; the sprite fields are described at #R$B2D4.
+; .
+; Hardware: none.
+;
+; SP Slot address + 2
+@label=UpdateIntroRunner
+c$B391 POP BC        ; speed
+ $B392 POP DE        ; D end x, E not used
+ $B393 POP HL        ; x (8.8)
+ $B394 ADD HL,BC     ; x goes right
+ $B395 PUSH HL       ; store x
+ $B396 POP HL        ; SP is back at slot+8
+ $B397 LD A,H        ; x in 2-pixel units
+ $B398 CP D          ; at the end?
+ $B399 JP Z,$B426    ; yes: free the slot
+ $B39C LD D,H        ; D = x
+ $B39D POP HL        ; y (8.8)
+ $B39E LD E,H        ; E = y
+ $B39F LD L,E        ; L = y
+ $B3A0 LD H,D        ; H = x
+ $B3A1 LD A,H        ; A = x in 2-pixel units
+ $B3A2 EX AF,AF'     ; kept in A': its low two bits are the shift phase
+ $B3A3 SRA H         ; x / 4: byte column
+ $B3A5 SRA H         ;
+ $B3A7 LD ($ACD3),HL ; draw command position: (y, x/4)
+ $B3AA POP BC        ; skip the words at +$A, +$C and +$E: no hit box
+ $B3AB POP BC        ;
+ $B3AC POP BC        ;

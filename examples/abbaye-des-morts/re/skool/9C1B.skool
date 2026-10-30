@@ -1,0 +1,27 @@
+; Redraw the crosses counter in the status bar
+;
+; One-shot redraw gate: the first byte is NOP while a redraw is wanted and RET otherwise. The main loop (#R$85FC) calls this address on every pass; the routine puts RET over its own first byte at once, so it draws only once per request. A request is a NOP written at the start of a game (#R$85FC), when a cross is picked up (#R$A78B, from both cross actions #R$A777 and #R$A782) and when a parchment or text window is closed (#R$9C58).
+; .
+; Draws twelve cross icons (tile $7C) in the last cell row of the screen (cells 0-11 of row 23), then colours them: as many as crosses collected ($854D) bright white, the rest blue.
+; .
+; Hardware: writes the bitmap of cell row 23 (cells 0-11) and its attribute cells.
+@label=DrawCrossesHud
+c$9C1B NOP           ;
+ $9C1C LD HL,$9C1B   ; disarm: the next call returns at once
+@isub=LD (HL),OP_RET
+ $9C1F LD (HL),$C9   ;
+ $9C21 LD DE,$50E0   ;
+@isub=LD HL,TileGfx+TILE_CROSS*CELL_SIZE
+ $9C24 LD HL,$D2E0   ; bitmap of the cross tile
+@isub=LD C,STATUS_CELLS
+ $9C27 LD C,$0C      ;
+ $9C29 CALL $9C3B    ; bitmaps of the 12 empty cross slots
+ $9C2C LD HL,$5AE0   ;
+ $9C2F LD A,($854D)  ; crosses collected
+ $9C32 INC A         ;
+@isub=LD C,STATUS_CELLS
+ $9C33 LD C,$0C      ;
+ $9C35 LD B,A        ; B-1 cells get the collected colour
+@isub=LD A,BRIGHT+WHITE
+ $9C36 LD A,$47      ;
+ $9C38 JP $9C47      ;

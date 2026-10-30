@@ -1,0 +1,19 @@
+; Speed curves of the crusaders' jumps: 3 curves of 6 signed words
+;
+; Vertical speeds in 8.8 fixed point (2-pixel units per frame, negative = up) added to the y word of a crusader in six
+; consecutive frames while it runs a jump (path commands 1, 2 and 3, handlers #R$B163, #R$B10C and #R$B139; the
+; index in the curve is the low byte of slot word +$A). The sums are exact: curve 0 rises $400 (4 units, 8 pixels),
+; curve 1 falls $800 (8 units, 16 pixels), curve 2 returns to the start. Observed in rooms 5 and 6 (y of a crusader
+; every frame): up by 8 pixels over the six frames at the steps, down by 16 at the end of the block, a hop that comes
+; back to the floor over the pits. The first curve is the step up (command 1), the second the drop (command 3) and the
+; third the hop (command 2); note that the code of #R$B139 (command 3) uses the second and #R$B10C (command 2) the third.
+; .
+; +0 curve 0, #R$B0E8: -$249, -$125, -$92, -$49, 0, +$49 (step up, sum -$400)
+; +$C curve 1, #R$B0F4: +$20, +$42, +$84, +$108, +$20E, +$404 (fall, accelerating, sum +$800)
+; +$18 curve 2, #R$B100: -$125, -$92, -$49, +$49, +$92, +$125 (hop, sum 0)
+@label=JumpCurveStepUp
+b$B0E8 DEFW $FDB7,$FEDB,$FF6E,$FFB7,$0000,$0049 ; curve 0: step up 8 pixels
+@label=JumpCurveFall
+ $B0F4 DEFW $0020,$0042,$0084,$0108,$020E,$0404 ; curve 1: fall 16 pixels
+@label=JumpCurveHop
+ $B100 DEFW $FEDB,$FF6E,$FFB7,$0049,$0092,$0125 ; curve 2: hop

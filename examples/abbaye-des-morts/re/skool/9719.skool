@@ -1,0 +1,82 @@
+; Take a run of flagged cells of a row into the redraw list and the cell buffers
+;
+; Called by #R$97B7 when its scan of the tile flag map (#R$5E00) meets a cell with bit 7 (redraw) or bit 6 (a sprite
+; covers the cell) set. It walks along the row for as long as the cells are flagged and counts them (D): a cell with
+; bit 7 loses it, a cell with only bit 6 has bit 6 cleared and bit 7 set, so that the cell is drawn once more in the
+; next frame from the tile map and the sprite is erased from where it was (#R$9836 sets bit 6 and clears bit 7). The
+; run is then added to the redraw run list at (#R$855D): if this is the first run of the row a row record (row number,
+; 0 runs) is started; the run count is incremented and the run entry (first column, index of its first cell in the cell
+; buffers) is stored. #R$976B fills the buffers (run length #R$C300, attributes #R$C400, bitmaps #R$C500 and up) with
+; the tile data of the cells. The index of the next free buffer cell then moves on by the run length. Neither the
+; number of cells nor the size of the list is checked: the index is one byte.
+; .
+; The routine runs with the alternate register set that #R$97B7 selects (HL, B and C below are the alternate ones).
+; It returns with HL at the last cell of the run and B one higher, so that the INC L / DJNZ of the caller's loop go on
+; with the first unflagged cell.
+; .
+; Hardware: none.
+;
+; HL Address in the tile flag map of the first flagged cell of the run
+; B Cells left in the row, including this one
+; C Rows left, including this one (22 - row number)
+; O:HL Address in the flag map of the last cell of the run
+; O:B Cells left in the row after the run, plus one
+@label=CollectRedrawRun
+c$9719 PUSH HL       ;
+ $971A LD D,$00      ;
+*$971C LD A,(HL)     ;
+@isub=AND FLAG_REDRAW+FLAG_SPRITE
+ $971D AND $C0       ; bit 7 redraw, bit 6 sprite
+ $971F JR Z,$9730    ; unflagged: the run ends
+ $9721 JP P,$9728    ; bit 7 clear: only bit 6
+ $9724 RES 7,(HL)    ; bit 7 set: drawn now, nothing left
+ $9726 JR $972C      ;
+*$9728 RES 6,(HL)    ; bit 6 only: erase the sprite from the tile map next frame
+ $972A SET 7,(HL)    ;
+*$972C INC D         ; D = cells in the run
+ $972D INC L         ;
+ $972E DJNZ $971C    ;
+*$9730 EX (SP),HL    ; HL = start of the run, the end address is saved
+ $9731 PUSH BC       ;
+ $9732 PUSH HL       ;
+ $9733 LD HL,($855D) ; the end of the redraw list
+ $9736 INC (HL)      ; the slot holds $FF at the start of a row: INC makes it 0 (a new row)
+ $9737 JR NZ,$9747   ;
+@isub=LD A,MAP_ROWS
+ $9739 LD A,$16      ; a new row record: row number = 22 - rows left
+ $973B SUB C         ;
+ $973C LD (HL),A     ;
+ $973D INC L         ;
+ $973E LD (HL),$00   ; 0 runs so far
+@isub=LD (SmcRunCount+1),HL
+ $9740 LD ($9763),HL ; the address of the run count: operand of the LD HL at #R$9762
+ $9743 INC L         ;
+ $9744 LD ($855D),HL ; the list pointer is at the first run entry
+*$9747 POP HL        ;
+ $9748 CALL $976B    ; fill the cell buffers with the tile data of the run
+@label=SmcRedrawIndex
+ $974B LD A,$00      ; operand = index of the next free cell of the buffers: 0 from #R$97B7, advanced below
+ $974D LD C,A        ; C = index of the first cell of the run
+ $974E ADD A,D       ; + cells of the run: the next free index
+@isub=LD (SmcRedrawIndex+1),A
+ $974F LD ($974C),A  ;
+ $9752 LD B,D        ; (B is not used again)
+ $9753 EX DE,HL      ; DE = flag map address of the run (HL is replaced next)
+ $9754 LD HL,($855D) ; the list pointer
+ $9757 LD A,E        ;
+@isub=AND SCREEN_COLS-1
+ $9758 AND $1F       ; column of the run
+ $975A LD (HL),A     ; run entry: first column
+ $975B INC L         ;
+ $975C LD (HL),C     ; run entry: index of the first cell
+ $975D INC L         ;
+ $975E LD (HL),H     ; filler (not $FF) in the next slot: the INC at #R$9736 then starts no new row
+ $975F LD ($855D),HL ;
+@label=SmcRunCount
+ $9762 LD HL,$9762   ; operand = address of the run count byte of the row (set at #R$9740)
+ $9765 INC (HL)      ; one more run in the row
+ $9766 POP BC        ; B and C as on entry
+ $9767 POP HL        ; HL = first cell after the run
+ $9768 INC B         ; the caller's DJNZ comes after its INC L
+ $9769 DEC L         ; so that INC L finds the first cell after the run
+ $976A RET           ;

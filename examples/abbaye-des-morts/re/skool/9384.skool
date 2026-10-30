@@ -1,0 +1,9 @@
+; Ending text: strings 49-52
+;
+; The last screen of the game, printed by the script #R$8381: Jean's body has burned in the flames, but his soul has
+; found a place in Heaven.
+@label=EndingText
+t$9384 DEFM $14,"Your body has burned"  ; string 49
+ $9399 DEFM $0E,"in the flames,"  ; string 50
+ $93A8 DEFM $17,"but your soul has found"  ; string 51
+ $93C0 DEFM $12,"a place in Heaven."  ; string 52

@@ -1,0 +1,104 @@
+; Draw one character of the proportional font at the text cursor
+;
+; Draws the glyph of character A (codes $20-$7F) with its top-left pixel at the text cursor, pixel row ($9F26) and pixel column ($9F27), then moves the cursor right by the glyph width. The glyph pixels are XORed into the screen, so drawing the same text again erases it. The attributes are not touched. HL, DE and BC are preserved, A and the alternate AF are not.
+; .
+; Font format (#R$6130): the index has one word per character at $6130 + 2*(code-$20): bits 0-11 are the distance from the address of the word's high byte to the glyph, bits 12-15 the width minus 2 (the cursor advance is width, 2 to 17 pixels). A glyph is 16 pixel rows: a mask word (bit 15 for row 0, bit 0 for row 15; set = a new row pattern follows in the data, clear = the previous pattern is repeated; before the first pattern a row is blank) followed by the pattern bytes of the rows that start a new pattern: one byte when the width is up to 8, two when it is 9 or more (the right byte first, then the left one). A mask of 0 is an empty glyph (the space), only the cursor moves.
+; .
+; Each row is positioned at the cursor: the pattern is shifted right by (x mod 8) bits inside a 24-bit window (A, H, L) by jumping into the shift chain at #R$9EE4 (the JR at SmcGlyphShift has its offset set to 2*(x mod 8)) and XORed into the three screen bytes of the row. The rows are stepped with #R$9F17; #R$9EE4 holds the rest of the loop.
+; .
+; Hardware: writes the screen bitmap.
+;
+; A Character code ($20-$7F)
+; O:A Destroyed
+@label=DrawGlyph
+c$9E79 PUSH HL       ;
+ $9E7A PUSH DE       ;
+ $9E7B PUSH BC       ;
+@isub=SUB CHAR_SPACE
+ $9E7C SUB $20       ;
+ $9E7E ADD A,A       ; index word offset
+ $9E7F LD L,A        ;
+ $9E80 LD H,$00      ;
+ $9E82 LD DE,$6130   ;
+ $9E85 ADD HL,DE     ;
+ $9E86 LD E,(HL)     ;
+ $9E87 INC HL        ;
+ $9E88 LD A,(HL)     ;
+ $9E89 AND $0F       ;
+ $9E8B LD D,A        ;
+ $9E8C LD A,(HL)     ;
+ $9E8D ADD HL,DE     ;
+ $9E8E RRA           ;
+ $9E8F RRA           ;
+ $9E90 RRA           ;
+ $9E91 RRA           ;
+ $9E92 AND $0F       ;
+ $9E94 INC A         ;
+ $9E95 INC A         ;
+ $9E96 EX AF,AF'     ; A' = width of the glyph, in pixels
+ $9E97 LD E,(HL)     ; DE = mask word
+ $9E98 INC HL        ;
+ $9E99 LD D,(HL)     ;
+ $9E9A INC HL        ;
+ $9E9B LD A,D        ; empty glyph: only advance the cursor (#R$9F0A)
+ $9E9C OR E          ;
+ $9E9D JR Z,$9F0A    ;
+ $9E9F LD BC,$0000   ; BC = row pattern, none yet
+ $9EA2 PUSH HL       ; keep the glyph data pointer
+ $9EA3 LD HL,($9F26) ; L = y, H = x
+ $9EA6 LD A,H        ; x mod 8
+ $9EA7 AND $07       ;
+ $9EA9 ADD A,A       ;
+@isub=LD (SmcGlyphShift+1),A
+ $9EAA LD ($9EE3),A  ; SMC: set the offset of the JR at #R$9EE2 to skip x mod 8 shifts
+ $9EAD LD A,L        ; low byte of the screen address: ((y/8) mod 8) * 32 + x/8
+ $9EAE ADD A,A       ;
+ $9EAF ADD A,A       ;
+ $9EB0 AND $E0       ;
+ $9EB2 SRL H         ;
+ $9EB4 SRL H         ;
+ $9EB6 SRL H         ;
+ $9EB8 OR H          ;
+ $9EB9 LD H,L        ;
+ $9EBA LD L,A        ;
+ $9EBB LD A,H        ; high byte of the screen address from y
+ $9EBC AND $C0       ;
+ $9EBE RRCA          ;
+ $9EBF RRCA          ;
+ $9EC0 RRCA          ;
+ $9EC1 XOR H         ;
+ $9EC2 AND $F8       ;
+ $9EC4 XOR H         ;
+ $9EC5 ADD A,$40     ;
+ $9EC7 LD H,A        ;
+ $9EC8 EX (SP),HL    ; stack = screen address, HL = glyph data
+@isub=LD A,GLYPH_ROWS
+ $9EC9 LD A,$10      ; rows left
+; Loop head, also jumped to by #R$9EE4: next pixel row of the glyph. A = rows left,
+; DE = remaining mask bits, HL = glyph data, stack = screen address of the row.
+@label=DrawGlyph_Row
+*$9ECB EX DE,HL      ; next mask bit into carry
+ $9ECC ADD HL,HL     ;
+ $9ECD EX DE,HL      ;
+ $9ECE JR NC,$9EDA   ;
+ $9ED0 EX AF,AF'     ; A = width
+@isub=CP WIDE_GLYPH
+ $9ED1 CP $09        ; 9 or more: two bytes per pattern
+ $9ED3 JR C,$9ED7    ;
+ $9ED5 LD C,(HL)     ; right byte (stays 0 for narrow glyphs)
+ $9ED6 INC HL        ;
+*$9ED7 LD B,(HL)     ; left byte
+ $9ED8 INC HL        ;
+ $9ED9 EX AF,AF'     ;
+*$9EDA EX (SP),HL    ; HL = screen address, stack = glyph data
+ $9EDB PUSH AF       ;
+ $9EDC PUSH DE       ;
+ $9EDD PUSH HL       ;
+ $9EDE LD D,B        ; HL = B:C pattern
+ $9EDF LD E,C        ;
+ $9EE0 XOR A         ; A = the 24-bit window's top byte
+ $9EE1 EX DE,HL      ;
+; SMC: the offset byte at $9EE3 is written by #R$9E79 (2*(x mod 8)); the jump lands in the
+; ADD HL,HL / ADC A,A chain at #R$9EE4, which leaves 8 - x mod 8 shifts to do.
+@label=SmcGlyphShift
+*$9EE2 JR $9EE2      ; shift chain entry

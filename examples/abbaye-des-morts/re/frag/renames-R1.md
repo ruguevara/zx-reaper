@@ -1,0 +1,5 @@
+EraseWallBlock -> OpenAltarFloor | the 2x2 cells it blanks (row 20, column 26 of room 8) are the floor, and blanking them opens the way down to room 13 | run: room 8 with BellRung=1 Jean falls into room 13 at frame 34, with 0 he stays (F142); flag map rows 20-21 cols 26-27 class 0 / 3
+ObjectTypeTable -> ItemTypeTable | indexed only by the type byte of room item records (MakeItemSlot); enemies use EntityHandlers; "object" elsewhere means any slot | code: only reference is MakeItemSlot; 12 entries = the 12 item types
+ObjectTypeRecords -> ItemTypeRecords | the 12 records are the item types (heart ... chalice), read only by MakeItemSlot | code: MakeItemSlot copies them into item slots; all 45 items touched in runs
+DoorwayRoom10 -> ArchLatchRoom10 | flag of the arch item of room 10 (type 8 "arch", ActionArchToRiver/ActionArchToBeast, SpriteArch); it is only ever a latch (bit 7), never "taken" | run: touching room 19's arch sets $8523 0 -> $80, room 10's arch sets $8524 0 -> $80; code SET/RES 7 only
+DoorwayRoom19 -> ArchLatchRoom19 | as above, the arch of room 19 | as above

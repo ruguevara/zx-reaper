@@ -1,0 +1,40 @@
+; Entity handler: crusader falling (path command 3)
+;
+; The handler that the path command 3 puts in the slot (#R$B1F3) for six frames: the crusader drops from a block to the
+; floor, 16 pixels lower. It is #R$B10C with two differences: x goes up by the slot's own speed word (the walking speed,
+; $0060) and y follows the curve #R$B0F4 (falling faster each frame, sum +$800). Observed in room 5 at x = $64: y goes
+; from $3C00 to $4400 in six frames. After the sixth frame the handler goes back to #R$B1D4.
+; .
+; Hardware: none.
+;
+; SP Slot address + 2
+@label=UpdateCrusaderFall
+c$B139 POP BC        ; BC = +2: the x speed
+ $B13A POP DE        ; skip +4: the path pointer
+ $B13B POP HL        ; x (8.8)
+ $B13C ADD HL,BC     ;
+ $B13D PUSH HL       ; store x
+ $B13E LD A,H        ; A = x in 2-pixel units
+ $B13F POP HL        ;
+ $B140 POP DE        ; DE = y (8.8)
+ $B141 POP BC        ; BC = state: B frames left, C index in the curve
+ $B142 LD L,C        ;
+ $B143 LD H,$00      ; HL = index
+ $B145 INC C         ;
+ $B146 DJNZ $B15D    ; not the last frame
+@isub=LD BC,CRUSADER_JUMP_FRAMES*256
+ $B148 LD BC,$0600   ; the last frame: reset the state
+ $B14B EXX           ;
+@isub=LD (SmcFallRestoreSP+1),SP
+ $B14C LD ($B15B),SP ; SP (slot + $C) for the LD SP below
+ $B150 LD HL,$FFF6   ; -10: SP to slot + 2
+ $B153 ADD HL,SP     ;
+ $B154 LD SP,HL      ;
+ $B155 LD HL,$B1D4   ;
+ $B158 PUSH HL       ; back to walking
+ $B159 EXX           ;
+@label=SmcFallRestoreSP
+ $B15A LD SP,$B15A   ; the operand is stored by #R$B14C
+*$B15D PUSH BC       ; store the state
+ $B15E LD BC,$B0F4   ; the curve of the fall
+ $B161 JR $B18E      ;

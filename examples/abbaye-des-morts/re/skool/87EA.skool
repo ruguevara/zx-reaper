@@ -1,0 +1,39 @@
+; Current sound effect: the 8-byte record being played
+;
+; #R$871A copies the record of the requested effect from #R$87F2 here when the effect starts and updates the first
+; four fields while it plays. The record format is the one of the table:
+; .
+; +0 byte: PERIOD, the loop count between two flips of the speaker in the burst of a frame (0 means one click only). The
+; smaller it is, the higher the pitch.
+; .
+; +1 byte: STEP, added to PERIOD after every frame with 8-bit wrap-around ($FA is -6); a negative step raises the pitch
+; .
+; +2 byte: FRAMES, the frames (bursts) left in the current segment; the table value is the length of the first segment
+; .
+; +3 byte: SEGMENTS, the number of segments of the effect, counted down as they end (the noise effect uses it as its
+; frame counter)
+; .
+; +4 byte: MODE, what happens to PERIOD at the start of the next segment: 0 PERIOD = BASE, 1 BASE -= 2 and PERIOD = BASE,
+; 2 BASE += 2 and PERIOD = BASE, 3 or more PERIOD goes on and STEP changes sign
+; .
+; +5 byte: BASE, the PERIOD a new segment starts from (changed by modes 1 and 2)
+; .
+; +6 byte: RELOAD, the length in frames of the second and later segments (0 means 256)
+; .
+; +7 byte: NEXT, the effect to start when this one has ended, 0 for none
+@label=SoundPeriod
+g$87EA DEFB $00
+@label=SoundStep
+ $87EB DEFB $00
+@label=SoundFrames
+ $87EC DEFB $00
+@label=SoundSegments
+ $87ED DEFB $00
+@label=SoundMode
+ $87EE DEFB $00
+@label=SoundBase
+ $87EF DEFB $00
+@label=SoundReload
+ $87F0 DEFB $00
+@label=SoundNext
+ $87F1 DEFB $00

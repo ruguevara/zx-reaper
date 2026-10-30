@@ -1,0 +1,18 @@
+; Wait until all keys are released
+;
+; Enables interrupts and halts until the next frame interrupt, then reads all eight keyboard half-rows at once and
+; repeats until no key is pressed. Called together with #R$A1C3 by #R$85FC and #R$9C52, and jumped to by the ending
+; #R$887B.
+; .
+; Hardware: HALT for the frame interrupt; reads the ULA keyboard port $FE.
+@label=WaitKeyRelease
+c$A1CE EI            ;
+ $A1CF HALT          ;
+ $A1D0 XOR A         ; A = 0 selects every half-row
+@isub=IN A,(ULA_PORT)
+ $A1D1 IN A,($FE)    ;
+ $A1D3 CPL           ;
+@isub=AND KEY_BITS
+ $A1D4 AND $1F       ;
+ $A1D6 JR NZ,$A1CE   ;
+ $A1D8 RET           ;

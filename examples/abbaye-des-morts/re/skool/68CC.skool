@@ -1,0 +1,22 @@
+; Packed sprite set 0 (op $97 $00): 4 columns of 3 character rows
+;
+; Sprite sets are the animated sprites of the enemies and of Satan, stored packed and unpacked into the sprite sheet
+; (#R$D700) when a room is entered: the room script op $97 N (#R$A146) calls #R$AF15, which reads record N of #R$AE9D
+; (destination, this address, flags, frame width) and fills the sheet columns. Format of a set: byte 0 = total columns
+; (frames x frame width), byte 1 = height in character rows (8 pixel rows each); then for each column and for each 8
+; pixel rows one flag byte (most significant bit first: a set bit means that a literal byte follows, a clear bit repeats
+; the previous pixel byte of the column: 0 only at the top of a column, the byte carries over from one character row to
+; the next; observed, F113). Unpacking also builds the copies selected by the record's flags: bit 7 adds three copies
+; shifted by 2, 4 and 6 pixels (for the 2-pixel x positions of the entities), bit 6 adds mirrored frames (for the other
+; direction).
+; .
+; Unpacked by room script op $97 $00 into the sprite sheet at $D7F8 (page = first pixel row, low byte = first column)
+; with record 0 of #R$AE9D: frame width 2 columns, mirrored copies (bit 6). 4 columns x 3 character rows (24 pixel
+; rows), 74 bytes packed. Used by rooms: 17, 21.
+@label=PackedSet0
+b$68CC DEFB $04,$03
+ $68CE DEFB $00,$DB,$0D,$14,$25,$24,$34,$2E,$FD,$25,$24,$14,$15,$0D,$01,$07
+ $68DE DEFB $01,$F0,$DF,$F8,$98,$78,$F0,$10,$E6,$16,$FF,$AA,$14,$28,$98,$70
+ $68EE DEFB $26,$5A,$62,$00,$FF,$11,$28,$24,$43,$41,$40,$FF,$40,$FD,$41,$42
+ $68FE DEFB $24,$29,$11,$01,$07,$01,$F0,$DF,$F8,$98,$78,$F0,$90,$FA,$C0,$FF
+ $690E DEFB $28,$14,$28,$98,$70,$26,$5A,$62

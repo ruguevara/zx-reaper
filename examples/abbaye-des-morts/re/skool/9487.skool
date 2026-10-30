@@ -1,0 +1,19 @@
+; Behaviour block: a fly (kind 5, room 12)
+;
+; Used by two of the green flies of Plagued ruins (attribute $44); they move up and down.
+; .
+; Layout: see #R$93D3.
+@label=BehaviourFlyA
+b$9487 DEFB $01,$01,$06,$06,$02  ; hit box top, left, bottom, right; slot +$15 (Unknown)
+ $948C DEFB $44      ; attribute
+@isub=DEFW ShiftPairsAligned
+ $948D DEFW $9463    ; table of (first column, width) for x AND 3
+ $948F DEFB $08      ; sprite height (2-pixel units)
+@isub=DEFW BehaviourFlyA+$D
+ $9490 DEFW $9494    ; sprites, first direction (left or up)
+@isub=DEFW BehaviourFlyA+$11
+ $9492 DEFW $9498    ; sprites, second direction (right or down)
+ $9494 DEFW $D76B    ; first direction, frame 0
+ $9496 DEFW $D76D    ; first direction, frame 1
+ $9498 DEFW $D76F    ; second direction, frame 0
+ $949A DEFW $D771    ; second direction, frame 1

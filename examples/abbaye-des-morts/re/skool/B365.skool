@@ -1,0 +1,35 @@
+; Entity handler: patroller moving right (kind 3) and the tail shared by the movers that go right or down
+;
+; The counterpart of #R$B2A6 for a creature that starts its patrol moving right (rats, bats, skeletons, crusaders and
+; the other horizontal patrollers listed there; room record kind 3). The x coordinate goes up by the speed each frame;
+; when its high byte equals the right turning point the handler word of the slot is rewritten with #R$B2A6, so from
+; the next frame the speed is subtracted. The position goes into the draw command, then #R$B3AD tests the hit box
+; and draws the second frame table of the sprite description (creatures facing right). The slot fields are those of
+; #R$B2A6 and #R$B2D4.
+; .
+; Hardware: none.
+;
+; SP Slot address + 2
+@label=UpdateWalkRight
+c$B365 POP BC        ; speed
+ $B366 POP DE        ; D right turning point, E left turning point
+ $B367 POP HL        ; x (8.8)
+ $B368 ADD HL,BC     ; x goes right
+ $B369 PUSH HL       ; store x
+ $B36A POP HL        ; SP is back at slot+8
+ $B36B LD A,H        ; x in 2-pixel units
+ $B36C CP D          ; at the right turning point?
+ $B36D JR NZ,$B37C   ; no: go on
+ $B36F LD HL,$FFFA   ; -6: back to slot+2
+ $B372 ADD HL,SP     ;
+ $B373 LD SP,HL      ;
+ $B374 LD HL,$B2A6   ; from the next frame the creature goes left
+ $B377 PUSH HL       ; written over the handler word at slot+0
+ $B378 POP HL        ; pop the handler again
+ $B379 POP BC        ; pop speed, limits and x again
+ $B37A POP DE        ;
+ $B37B POP HL        ;
+*$B37C LD D,H        ; D = x
+ $B37D POP HL        ; y (8.8)
+ $B37E POP BC        ; skip the unused word at +$A
+ $B37F LD E,H        ; E = y

@@ -1,0 +1,42 @@
+; Turn the keyboard row buffer into control bits
+;
+; Walks the 8 (row, mask) pairs of the key table #R$A2BF: bit n of the result is set when the key of pair n is held,
+; that is when its mask bit is 0 in the half-row byte of #R$A2D3 (read by #R$A240). The bits are RIGHT, LEFT, CROUCH,
+; JUMP, JUMP (again), then the fixed keys T (debug warp when the cheat is on), R and Y (R and Y together abort the
+; game). The result is stored in #R$A2CF.
+; .
+; The byte at #R$A28F that ends this routine is a RET when no Kempston joystick is used and a NOP when it is: then the
+; code runs on into #R$A290, which adds the joystick bits to E.
+; .
+; Hardware: none itself; the ports were read by #R$A240. The routine executes an odd number of EXX, so it returns with
+; the other register set selected (the alternate set is used for the loop counter and the result bits); the callers do
+; not rely on either set.
+;
+; O:A Control bits (bit n = key pair n held)
+; O:E Control bits, for the Kempston code that follows
+@label=ReadKeyControls
+c$A271 LD BC,$A2BF   ;
+ $A274 LD DE,$A2D3   ;
+ $A277 EXX           ;
+@isub=LD B,CONTROL_KEYS
+ $A278 LD B,$08      ; eight key pairs
+@label=ReadKeyControls_Pair
+*$A27A EXX           ; next key pair (loop 8 times)
+ $A27B LD A,(BC)     ; row index of the pair
+ $A27C INC BC        ;
+ $A27D LD L,A        ;
+ $A27E LD H,$00      ;
+ $A280 ADD HL,DE     ;
+ $A281 LD A,(BC)     ; mask of the pair
+ $A282 INC BC        ;
+ $A283 AND (HL)      ; 0 when the key is held (bit = 0)
+ $A284 CP $01        ; carry set when the key is held
+ $A286 EXX           ;
+ $A287 RR E          ; shift the carry into the result, first pair ends in bit 0
+ $A289 DJNZ $A27A    ;
+ $A28B LD A,E        ;
+ $A28C LD ($A2CF),A  ;
+; RET when the Kempston joystick is off, NOP when it is on. Set at start-up by #R$6000 (a read of port $1F that never
+; shows a joystick bit means a joystick is present) and toggled by #R$A32D.
+@label=KempstonSwitch
+ $A28F RET           ; NOP: fall into ReadKempston

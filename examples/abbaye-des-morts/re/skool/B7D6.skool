@@ -1,0 +1,45 @@
+; Fish: jump out of the water
+;
+; The fish jumps. SP is at slot+6.
+;
+; SP Slot address + 6
+@label=UpdateFishWaiting_Jump
+c$B7D6 POP HL        ; x word
+ $B7D7 LD A,H        ; A = x
+ $B7D8 POP HL        ; y word
+ $B7D9 LD L,A        ;
+ $B7DA LD A,H        ;
+ $B7DB LD H,L        ; H = x
+@isub=LD L,WATER_Y
+ $B7DC LD L,$50      ; y of the water surface
+ $B7DE LD ($5DFE),HL ; SPAWN_POSITION of the splash
+ $B7E1 EXX           ;
+ $B7E2 LD HL,$854F   ; sound effect request
+@isub=LD (HL),SFX_ENEMY_SHOT
+ $B7E5 LD (HL),$07   ;
+ $B7E7 LD HL,$BD12   ; SplashTemplate
+ $B7EA LD ($5DFC),HL ; SPAWN_TEMPLATE
+ $B7ED LD HL,$8552   ; one more record waiting
+ $B7F0 INC (HL)      ;
+ $B7F1 LD HL,$5DFC   ; SPAWN_TEMPLATE, SPAWN_POSITION
+ $B7F4 LD DE,($BE56) ; end of the object list
+@isub=LD BC,OBJECT_ENTRY_SIZE
+ $B7F8 LD BC,$0004   ;
+ $B7FB LDIR          ; append the record
+ $B7FD LD ($BE56),DE ;
+ $B801 EXX           ; DE = countdown (E) and reload (D) again
+@isub=LD HL,FISH_JUMP_Y
+ $B802 LD HL,$4C7C   ; start y of the jump
+ $B805 PUSH HL       ; slot +8
+ $B806 DEC SP        ;
+ $B807 DEC SP        ; skip +6, x stays
+ $B808 PUSH DE       ; slot +4: countdown and reload
+@isub=LD BC,FISH_JUMP_SPEED
+ $B809 LD BC,$FDAE   ; speed upwards
+ $B80C PUSH BC       ; slot +2
+ $B80D LD HL,$B818   ; the jumping state
+ $B810 PUSH HL       ; handler word at slot +0
+@isub=LD HL,SLOT_SIZE
+ $B811 LD HL,$0016   ;
+ $B814 ADD HL,SP     ; next slot
+ $B815 JP $A5F0      ;

@@ -1,0 +1,19 @@
+; Behaviour block: a white walker (kind 2, rooms 13 and 22)
+;
+; Used by the patrollers of room 13 (skeletons, seen) and one in room 22 (white, attribute $47). The sprite addresses
+; are the same as the crusader's.
+; .
+; Layout: see #R$93D3.
+@label=BehaviourSkeleton
+b$93F5 DEFB $02,$01,$0C,$06,$02  ; hit box top, left, bottom, right; slot +$15 (Unknown)
+ $93FA DEFB $47      ; attribute
+ $93FB DEFW $AC9F    ; table of (first column, width) for x AND 3
+ $93FD DEFB $0C      ; sprite height (2-pixel units)
+@isub=DEFW BehaviourSkeleton+$D
+ $93FE DEFW $9402    ; sprites, first direction (left or up)
+@isub=DEFW BehaviourSkeleton+$11
+ $9400 DEFW $9406    ; sprites, second direction (right or down)
+ $9402 DEFW $D763    ; first direction, frame 0
+ $9404 DEFW $D76E    ; first direction, frame 1
+ $9406 DEFW $D779    ; second direction, frame 0
+ $9408 DEFW $D784    ; second direction, frame 1

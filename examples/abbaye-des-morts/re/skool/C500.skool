@@ -1,0 +1,10 @@
+; Redraw cells: the 8 pixel rows of each queued cell, one 256-byte page per row
+;
+; Page $C5 + r holds pixel row r (0-7) of the queued cells, indexed by the cell index of the run list (#R$C200): the
+; bytes of the cell are 256 bytes apart. #R$976B copies the tile bitmaps (#R$CF00) in, the sprite drawers draw into
+; them, and #R$95FF writes them to the screen. The first page ($C500-$C5FF) is also the table of bit-reversed bytes
+; built by #R$BE48 on room entry and used while the sprites of a room are unpacked; and #R$A450 and its partner copy
+; the middle third of the screen bitmap ($4800-$4FFF, 2048 bytes) to $C500 and back to save the screen under the
+; menus.
+@label=RedrawPixels
+g$C500 DEFS $0800,$FF ;

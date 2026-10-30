@@ -1,0 +1,94 @@
+; Copy the tile data of a run of cells into the redraw cell buffers
+;
+; Called by #R$9719 for each run of flagged cells. For each of the D cells starting at flag map address HL it looks up
+; the cell's tile number in the tile map (3 pages below the flag map), then stores the tile's attribute (#R$CE00 +
+; tile) at #R$C400 + index and the tile's 8 bitmap bytes (#R$CF00 + 8 x tile) at #R$C500 + index, #R$C600 + index ...
+; #R$CC00 + index (one page for each pixel row). The first cell of the run also gets the run length D at #R$C300 +
+; index. The index starts at the value of #R$974B (the operand of the LD A,0 there) and goes up by one for each cell.
+; Together this is the picture of the cells without sprites; #R$9972 and #R$98F7 then draw the queued sprites over it
+; and #R$95FF copies the result to the screen.
+; .
+; The 8 bitmap bytes are fetched with POP: SP is pointed at byte 2 of the tile bitmap and saved in the operand of the
+; LD SP at #R$97AA (SmcRestoreSP), which puts it back. For about 130 T-states per cell SP is inside the tile bitmaps; an
+; interrupt that came then would push over bitmap bytes (#R$8585 pushes below the interrupted SP). It does not come
+; in practice, because the main loop does this work right after the interrupt and finishes long before the next one
+; (inferred from
+; the main loop, not measured).
+; .
+; Hardware: none.
+;
+; HL Address in the tile flag map of the first cell of the run
+; D Number of cells of the run (1-32)
+; O:HL Unchanged
+; O:DE Unchanged
+; BC is changed
+@label=CopyRunCells
+c$976B PUSH HL       ;
+ $976C PUSH DE       ;
+@isub=LD BC,-FLAGS_PAGE_OFFSET*256
+ $976D LD BC,$FD00   ; HL - $0300: the tile map address of the first cell
+ $9770 ADD HL,BC     ;
+ $9771 LD B,D        ; B = number of cells
+@isub=LD DE,(SmcRedrawIndex+1)
+ $9772 LD DE,($974C) ; E = index of the first cell (the operand of #R$974B)
+@isub=LD D,PAGE_REDRAW_LENGTHS
+ $9776 LD D,$C3      ;
+ $9778 LD A,B        ;
+ $9779 LD (DE),A     ; the run length at the first cell's index
+@label=CopyRunCells_Cell
+*$977A PUSH HL       ;
+ $977B PUSH BC       ;
+ $977C LD L,(HL)     ; L = tile number
+@isub=LD D,PAGE_REDRAW_ATTRS
+ $977D LD D,$C4      ;
+@isub=LD H,TileAttrs>>8
+ $977F LD H,$CE      ;
+ $9781 LD A,(HL)     ; the tile's attribute...
+ $9782 LD (DE),A     ; ... into the attribute buffer
+@isub=LD D,PAGE_REDRAW_PIXELS
+ $9783 LD D,$C5      ;
+ $9785 LD H,$00      ; HL = tile x 8 ...
+ $9787 ADD HL,HL     ;
+ $9788 ADD HL,HL     ;
+ $9789 ADD HL,HL     ;
+@isub=LD A,TileGfx>>8
+ $978A LD A,$CF      ; ... + $CF00: the tile's bitmap
+ $978C ADD A,H       ;
+ $978D LD H,A        ;
+ $978E LD C,(HL)     ; bitmap rows 0 and 1
+ $978F INC HL        ;
+ $9790 LD B,(HL)     ;
+ $9791 INC HL        ;
+@isub=LD (SmcRestoreSP+1),SP
+ $9792 LD ($97AB),SP ; save SP; it points into the tile bitmap for the next 6 POPs
+ $9796 LD SP,HL      ; SP = bitmap row 2
+ $9797 EX DE,HL      ; HL = the cell's byte in the page of pixel row 0
+ $9798 LD (HL),C     ; pixel rows 0 to 7, one page each (INC H)
+ $9799 INC H         ;
+ $979A LD (HL),B     ;
+ $979B INC H         ;
+ $979C POP BC        ; rows 2 and 3
+ $979D LD (HL),C     ;
+ $979E INC H         ;
+ $979F LD (HL),B     ;
+ $97A0 INC H         ;
+ $97A1 POP BC        ; rows 4 and 5
+ $97A2 LD (HL),C     ;
+ $97A3 INC H         ;
+ $97A4 LD (HL),B     ;
+ $97A5 INC H         ;
+ $97A6 POP BC        ; rows 6 and 7
+ $97A7 LD (HL),C     ;
+ $97A8 INC H         ;
+ $97A9 LD (HL),B     ;
+@label=SmcRestoreSP
+ $97AA LD SP,$97AA   ; operand = SP saved at #R$9792
+ $97AD LD E,L        ; E = index of this cell (L has not changed)
+ $97AE POP BC        ; loop counter
+ $97AF POP HL        ; tile map pointer
+ $97B0 INC L         ; next cell of the tile map
+ $97B1 INC E         ; next index in the buffers
+ $97B2 DJNZ $977A    ;
+ $97B4 POP DE        ;
+ $97B5 POP HL        ;
+ $97B6 RET           ;

@@ -1,0 +1,31 @@
+; Run the handler of every object slot
+;
+; The object slots are 11 records of 22 bytes at $C100, followed by an end mark at $C1F2 whose handler word is
+; #R$A5FC. Each slot starts with a handler address (0 = free slot). The routine saves SP, then for each slot sets SP
+; to the slot address and RETs, which pops the handler address and enters the handler with SP pointing into the slot:
+; the handler POPs the slot's own fields and ends by jumping to #R$A5F0 with HL = the next slot. A free slot (handler
+; 0) is skipped by adding 22 to SP. The end-mark handler #R$A5FC restores SP and returns to this routine's caller.
+; .
+; Slot layout for the room items (made by #R$897E from the room item records at #R$8EDF and the type records at
+; #R$8A8F): +0 word: handler (#R$A600), +2 byte: row (y/8), +3 byte: column (x/8), +4 word: the item's action routine,
+; +6 word: address of the item's flag byte, +8 byte: frame countdown, +9 byte: countdown reload, +A byte: current
+; frame, +B byte: number of frames, +C word: frame list (#R$8B07), +E byte: sprite width, +F byte: sprite height
+; (2-pixel units); the rest is used by the enemies and other handlers.
+; .
+; Hardware: none. The stack pointer is used as a data pointer; this is safe because the frame routine runs inside the
+; interrupt handler with interrupts disabled.
+@label=RunObjectSlots
+@isub=LD (EndOfSlots+1),SP
+c$A5E9 LD ($A5FD),SP ; operand of the LD SP at #R$A5FC
+ $A5ED LD HL,$C100   ; first slot
+; Entry point used by every slot handler to go on with the next slot. HL = address of the slot to run.
+@label=RunObjectSlot
+*$A5F0 LD SP,HL      ; SP into the slot
+ $A5F1 LD A,(HL)     ; handler address (low)
+ $A5F2 INC L         ;
+ $A5F3 OR (HL)       ; zero = free slot
+ $A5F4 RET NZ        ; RET pops the handler address and enters it
+@isub=LD HL,SLOT_SIZE
+ $A5F5 LD HL,$0016   ; free slot: skip it
+ $A5F8 ADD HL,SP     ;
+ $A5F9 JP $A5F0      ;

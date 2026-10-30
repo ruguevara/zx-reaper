@@ -1,0 +1,76 @@
+; Build the redraw list of the frame, then run the draw queue
+;
+; The first of the two drawing steps of a frame (the main loop #R$85FC, the title #R$8832 and the cutscene loop #R$88DE
+; call it after the frame call list has queued the sprites, and #R$95FF after it). Two parts:
+; .
+; 1. The redraw list. It scans the tile flag map (#R$5E00, 22 rows of 32 cells) and takes every row's runs of cells that
+; have bit 7 (redraw) or bit 6 (a sprite is on the cell) set to #R$9719. That routine clears the flags, appends the run
+; to the redraw run list at #R$C200 (#R$855D is the write pointer) and has #R$976B copy the tile attributes and bitmaps
+; of the cells into the redraw cell buffers (#R$C300-#R$CCFF). The end mark $FF follows the list after every row. The
+; index of the next free buffer cell (the operand of the LD A,0 at #R$974B) is reset to 0 first.
+; .
+; 2. The draw queue (from #R$97E1, #R$C000 holds 16 jobs of 16 bytes): for each job whose first word is not 0 that word
+; is cleared and the routine it names is called with DE = job address + 1 (the parameters follow in the job). The
+; handlers are #R$9972 (masked sprites, queued by #R$9836) and #R$98F7 (16-pixel blocks, queued by #R$97FD); they draw
+; into the redraw cell buffers on top of the tiles. The tail of the queue (the operand of the first instruction of
+; #R$98B1) is set back to the start of the queue.
+; .
+; The scan uses the alternate register set (one EXX that is not undone here). #R$95FF later puts the cells on the
+; screen.
+; .
+; Hardware: none.
+;
+; O:All All registers are changed
+@label=BuildRedrawList
+c$97B7 LD HL,$C200   ; the redraw run list starts here...
+ $97BA LD ($855D),HL ; ... and RedrawListPtr is its write pointer
+ $97BD LD (HL),$FF   ; end mark
+ $97BF XOR A         ; index of the next free redraw cell: 0
+@isub=LD (SmcRedrawIndex+1),A
+ $97C0 LD ($974C),A  ;
+ $97C3 EXX           ; alternate set: HL = flag map pointer, C = rows left, B = cells left
+ $97C4 LD HL,$5E00   ;
+@isub=LD C,MAP_ROWS
+ $97C7 LD C,$16      ;
+@label=BuildRedrawList_Row
+@isub=LD B,SCREEN_COLS
+*$97C9 LD B,$20      ;
+@label=BuildRedrawList_Cell
+*$97CB LD A,(HL)     ;
+@isub=AND FLAG_REDRAW+FLAG_SPRITE
+ $97CC AND $C0       ; bit 7 or bit 6 set?
+ $97CE CALL NZ,$9719 ; a run of flagged cells starts here
+ $97D1 INC L         ;
+ $97D2 DJNZ $97CB    ;
+ $97D4 JR NZ,$97D7   ; Z only when L wrapped at the end of a page: then carry into H
+ $97D6 INC H         ;
+*$97D7 EX DE,HL      ;
+ $97D8 LD HL,($855D) ; $FF after the last run of the row: the end of the list so far
+ $97DB LD (HL),$FF   ;
+ $97DD EX DE,HL      ;
+ $97DE DEC C         ;
+ $97DF JR NZ,$97C9   ;
+; The draw queue runner. The queue tail is set back to the start of the queue (the operand of the LD DE at #R$98B1),
+; then the 16 jobs of 16 bytes at #R$C000 are visited.
+@label=RunDrawQueue
+ $97E1 LD HL,$C000   ;
+@isub=LD (AddQueueJob+1),HL
+ $97E4 LD ($98B2),HL ; queue tail = start of the queue (the operand of the LD DE at #R$98B1)
+@label=RunDrawQueue_Job
+*$97E7 PUSH HL       ;
+ $97E8 LD E,(HL)     ; DE = the job's handler address...
+ $97E9 LD (HL),$00   ; ... which is cleared: the job is done
+ $97EB INC L         ;
+ $97EC LD D,(HL)     ;
+ $97ED LD (HL),$00   ;
+ $97EF EX DE,HL      ; HL = handler, DE = job address + 1
+ $97F0 LD A,H        ;
+ $97F1 OR L          ; 0 = a free job
+ $97F2 CALL NZ,$85BC ; call the handler through JP (HL) at #R$85BC
+ $97F5 POP HL        ;
+ $97F6 LD A,L        ;
+@isub=ADD A,JOB_SIZE
+ $97F7 ADD A,$10     ; next job; L wraps to 0 after the 16th
+ $97F9 LD L,A        ;
+ $97FA JR NZ,$97E7   ;
+ $97FC RET           ;

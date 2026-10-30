@@ -1,0 +1,6 @@
+; Script: "disabled"
+;
+; Printed after "1. Kempston " when the joystick is off (#R$A47D).
+@label=ScriptDisabled
+t$A4D4 DEFM "disabled"
+ $A4DC DEFB $80

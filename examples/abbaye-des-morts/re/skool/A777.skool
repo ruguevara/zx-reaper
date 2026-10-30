@@ -1,0 +1,16 @@
+; Item action: cross that can be taken while the wheel is turned
+;
+; Room items of types 1 and 2 with this action are crosses; #R$A782 is the other set. Which set can be taken depends
+; on the wheel of faith at #R$851E in room 17 (#R$A6A1): with the wheel at rest the #R$A782 crosses are the real ones (bright,
+; cycling colours) and the #R$A777 crosses are drawn thin (frames 6-11); with the wheel turned it is the other way round.
+; If Jean touches the cross while the wheel state bits (flag AND 7) are nonzero it is taken (#R$A78B), otherwise it is
+; drawn by #R$A7B1.
+;
+; F Carry set when Jean's box overlaps the item's box
+@label=ActionCrossWheelTurned
+c$A777 JR NC,$A7B1   ;
+ $A779 LD A,($851E)  ;
+@isub=AND WHEEL_STATE_MASK
+ $A77C AND $07       ; wheel state bits of #R$851E
+ $A77E JR Z,$A7B1    ; wheel at rest: not takeable
+ $A780 JR $A78B      ; take the cross

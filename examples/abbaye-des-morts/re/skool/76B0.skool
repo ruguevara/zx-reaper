@@ -1,0 +1,6 @@
+; Block pattern: stone with a clear lower half (tiles $0E,$0F,$80,$80)
+;
+; Defines the current block as stone tiles over two blank tiles (a ledge or arch). Called by rooms 7, 8.
+@label=BlockStoneHalfA
+b$76B0 DEFB $88,$02,$02,$0E,$0F,$80,$80 ; BLOCK 2x2: $0E $0F $80 $80
+ $76B7 DEFB $80             ; END

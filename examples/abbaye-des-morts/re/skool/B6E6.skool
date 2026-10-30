@@ -1,0 +1,13 @@
+; Entity handler: Satan's fireball (room 24); its body flies the arrows too
+;
+; The fireballs Satan fires in room 24 (templates #R$BCE2, #R$BCF2 and #R$BD02, spawned in a volley of three by
+; #R$BB57). This 3-instruction entry removes the fireball as soon as Satan has been turned into smoke (#R$8522 nonzero,
+; see #R$BC69): #R$B08E clears the handler word and goes on to the next slot. Otherwise it falls through to #R$B6ED,
+; which is the handler of the arrows (#R$BC92, #R$BCA2 and #R$BCB2 are spawned with that address) and of the fireballs
+; alike.
+;
+; SP Slot address + 2 (the handler word was popped by the RET that entered the routine)
+@label=UpdateFireball
+c$B6E6 LD A,($8522)  ; SatanSmoked
+ $B6E9 OR A          ;
+ $B6EA JP NZ,$B08E   ; Satan is gone: remove the fireball

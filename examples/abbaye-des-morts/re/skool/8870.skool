@@ -1,0 +1,14 @@
+; Load a cutscene actor list
+;
+; Copies a list of actors to the object list at $5DC0: the first byte of the list, the number of records, goes to
+; #R$8552 (the objects waiting to be spawned), the records (template address, y, x; 4 bytes each) to $5DC0. The next game
+; frame (#R$A596) spawns them with #R$8905. Used by the ending (#R$887B) with the lists #R$83A8 and #R$83AD.
+;
+; HL Address of the list (count, then the records)
+; BC Size of the list in bytes: 1 + 4 * the count
+@label=LoadCutsceneList
+c$8870 LD DE,$8552
+ $8873 LDI
+ $8875 LD DE,$5DC0
+ $8878 LDIR
+ $887A RET

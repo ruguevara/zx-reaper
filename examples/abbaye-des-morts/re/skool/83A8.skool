@@ -1,0 +1,32 @@
+; Cutscene actor lists of the ending: a count, then 4-byte records
+;
+; Two lists loaded by #R$8870 for the ending sequence #R$887B: the first byte of a list is the number of records
+; (copied to #R$8552) and the records are copied to the object list at $5DC0, from where #R$8905 spawns them as
+; objects. A record is 4 bytes: the address of an actor template in $BD80-$BDC8 (word), then the y and x of the actor
+; in 2-pixel units, added to the offsets in the template.
+; .
+; The first list (1 record: template $BD80 at y=$34, x=$6C) is loaded for the first part of the ending, in room 25;
+; the second list (8 records: templates $BD92, $BDA4 three times, $BDC8 twice and $BDB6 twice) for the second part, in
+; room 4. Each cutscene runs until one of the actors sets #R$8501.
+@label=CutsceneList1
+b$83A8 DEFB $01
+@isub=DEFB low ActorMonkTemplate,high ActorMonkTemplate,$34,$6C
+ $83A9 DEFB $80,$BD,$34,$6C
+@label=CutsceneList2
+ $83AD DEFB $08
+@isub=DEFB low ActorPyreMonkTemplate,high ActorPyreMonkTemplate,$3A,$3E
+ $83AE DEFB $92,$BD,$3A,$3E
+@isub=DEFB low ActorFlameTemplate,high ActorFlameTemplate,$44,$36
+ $83B2 DEFB $A4,$BD,$44,$36
+@isub=DEFB low ActorFlameTemplate,high ActorFlameTemplate,$44,$3E
+ $83B6 DEFB $A4,$BD,$44,$3E
+@isub=DEFB low ActorFlameTemplate,high ActorFlameTemplate,$44,$46
+ $83BA DEFB $A4,$BD,$44,$46
+@isub=DEFB low ActorCrusaderLTemplate,high ActorCrusaderLTemplate,$44,$14
+ $83BE DEFB $C8,$BD,$44,$14
+@isub=DEFB low ActorCrusaderLTemplate,high ActorCrusaderLTemplate,$44,$24
+ $83C2 DEFB $C8,$BD,$44,$24
+@isub=DEFB low ActorCrusaderRTemplate,high ActorCrusaderRTemplate,$44,$54
+ $83C6 DEFB $B6,$BD,$44,$54
+@isub=DEFB low ActorCrusaderRTemplate,high ActorCrusaderRTemplate,$44,$60
+ $83CA DEFB $B6,$BD,$44,$60

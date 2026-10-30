@@ -1,0 +1,34 @@
+; Entity handler: the spawner of the crusaders (kind 1, rooms 5, 6 and 25)
+;
+; An invisible object that makes a new crusader from a template every 40 passes of the main loop (one pass per frame in
+; the chase rooms): the slot counts down the animation
+; counter at +$12 (the first count, 90 passes, is the parameter byte 1 of the room object record: the first crusader
+; appears 90 passes after the room is entered; the reload at +$13 is not used afterwards, a constant 40 is loaded
+; instead). When the counter reaches 0 it asks #R$8A70 for a free slot and goes on at #R$B0B1, which copies the
+; template into it. The template (#R$B04C) is pointed to by the slot word +4, from the parameter bytes 5 and 6 of the
+; record (#R$8BBB, #R$8BC6, #R$8BD1); each room has its own path script. The slot never changes: crusaders keep coming
+; for as long as Jean stays in the room (observed in room 5: four or five on the screen at a time, a new one every
+; 40 passes).
+; .
+; Slot fields used: +4 word template address; +$12 byte counter, +$13 byte reload (not used). Its x, y and sprite fields
+; are not used (nothing is drawn).
+; .
+; Hardware: none.
+;
+; SP Slot address + 2
+@label=UpdateCrusaderSpawner
+c$B099 POP DE        ; skip +2 (speed, 0)
+ $B09A POP DE        ; DE = +4: the template of the crusaders
+ $B09B LD HL,$000C   ; skip +6..+$11: the position and sprite fields, six words
+ $B09E ADD HL,SP     ;
+ $B09F LD SP,HL      ; SP = slot + $12
+ $B0A0 POP BC        ; C = counter, B = reload
+ $B0A1 DEC C         ;
+ $B0A2 JR NZ,$B0A6   ;
+@isub=LD C,CRUSADER_PERIOD
+ $B0A4 LD C,$28      ; every 40 passes from now on
+*$B0A6 PUSH BC       ; store the counter (SP back at slot + $12)
+ $B0A7 JP NZ,$B41F   ; NextSlotAfterAnim: not yet
+ $B0AA LD IY,$B0B1   ; the free slot search returns to #R$B0B1
+@isub=JP FindFreeSlot_IY
+ $B0AE JP $8A70      ; find a free slot: IX = slot, carry set when there is one

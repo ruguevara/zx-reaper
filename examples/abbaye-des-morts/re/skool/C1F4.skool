@@ -1,0 +1,4 @@
+; Unused: $FF fill
+;
+; Follows the object slots and their end mark at $C1F2. Never written in the runs made.
+u$C1F4 DEFS $0C,$FF  ;

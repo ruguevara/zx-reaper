@@ -1,0 +1,155 @@
+; Entity handler: Satan (room 24), patrolling up and down and firing, then vanishing in smoke
+;
+; Satan, the boss of the last room (room object kind 17, #R$8ED3). A two-part sprite: an upper half of 4 bytes and a
+; lower half one byte narrower and one byte to the right, 12 units (24 pixels) lower. The routine is entered with SP
+; at slot+2 (see #R$BA15 for how handlers run); #R$C100 describes the slots.
+; .
+; Slot layout, in the order it is popped: +2 word y speed (signed 8.8, from the object's first parameter: $0080), +4
+; byte lower limit and +5 byte upper limit of y ($05 and $28), +6 word x, +8 word y (8.8, high bytes in 2-pixel
+; units), +$A timer counter (starts at $96, reloads with ATTACK_PERIOD) and +$B reload, +$C word hit box offset (y, x)
+; = 0, +$E word hit box far corner (y, x) = $17, $0F (with the offset 0, a box of 46 by 30 pixels), +$10 pointer into the behaviour block of kind 17
+; (#R$95E6 + 5: attribute $42, width 4, height 12, then the frame tables), +$12 animation counter and reload, +$14
+; frame number and number of frames (2).
+; .
+; While the flag at #R$8521 is zero Satan is alive (the flag belongs to the item of room 24 made by #R$A734, which
+; exists only when all twelve crosses are collected and which sets the flag to $FF when the player takes it). Each
+; frame y changes by the speed; when its high byte reaches a limit the speed is negated (the new speed acts next
+; frame). The timer is decremented; when it reaches zero it reloads and Satan fires: sound effect 7 and three entries
+; in the object list for the fireballs #R$BCE2 (up and left), #R$BCF2 (left) and #R$BD02 (down and left), all starting
+; one unit left of and 9 units below Satan's position (the byte at +6 and +7 of the templates) and handled by #R$B6E6.
+; The first volley comes about 150 frames after the room is entered (the timer starts at $96), then one every 50
+; frames (observed). Then the hit box is tested against the player (#R$A851, which sets the hit flag at $A8A0 on
+; contact) and the sprite is set up by #R$BC26.
+; .
+; When the flag at #R$8521 is not zero Satan is finished: the first time this is seen (#R$8522 is zero, and set to
+; $FF) music track 7 starts, the script at $82D4 is started (the main loop runs the script whose address is in $9CEE
+; when $9CE7 holds a NOP), the done flag of the crosses display at $8542 is cleared, and Satan's own slot is
+; overwritten with the smoke template #R$BD6A, whose handler #R$BC69 draws a cloud of smoke in the place of Satan for
+; 150 frames (observed: a white cloud, then nothing). Later, when the room is entered again with #R$8522 set, the slot
+; is freed at once and Satan is gone for good.
+;
+; SP Slot address + 2 (the handler word was popped by the RET that entered the routine)
+@label=UpdateSatan
+c$BB57 LD A,($8521)  ; flag of the cross item in room 24 ($FF once taken)
+ $BB5A OR A          ;
+ $BB5B JR Z,$BBA0    ; not taken: Satan is alive
+ $BB5D LD HL,$8522   ; smoke already made once?
+ $BB60 LD A,(HL)     ;
+ $BB61 OR A          ;
+ $BB62 JP NZ,$B08E   ; yes: Satan is gone, free the slot
+ $BB65 LD (HL),$FF   ; remember it
+ $BB67 LD HL,$8551   ;
+@isub=LD (HL),MUSIC_TRACK_GAME_OVER
+ $BB6A LD (HL),$07   ; music track 7
+ $BB6C LD HL,$82D4   ; start the script at $82D4
+@isub=LD (SmcEventScript+1),HL
+ $BB6F LD ($9CEE),HL ;
+ $BB72 XOR A         ;
+ $BB73 LD ($9CE7),A  ; let the main loop run the script step
+ $BB76 LD ($8542),A  ; clear the done flag of the twelve crosses display ($AE4B)
+ $BB79 POP AF        ; drop y speed ...
+ $BB7A POP AF        ; ... and the limits
+ $BB7B POP HL        ; x word
+ $BB7C POP DE        ; y word
+ $BB7D LD L,D        ; HL = (x, y)
+ $BB7E SRA H         ; x / 4: byte column
+ $BB80 SRA H         ;
+@isub=LD (SmokeTemplate+4),HL
+ $BB82 LD ($BD6E),HL ; position of the upper half in the smoke template (y, byte column)
+ $BB85 LD BC,$000C   ; 12 units = 24 pixels
+ $BB88 ADD HL,BC     ;
+@isub=LD (SmokeTemplate+6),HL
+ $BB89 LD ($BD70),HL ; position of the lower half
+ $BB8C LD HL,$FFF6   ; SP - 10 is the start of the slot
+ $BB8F ADD HL,SP     ;
+ $BB90 EX DE,HL      ;
+ $BB91 LD HL,$BD6A   ; the smoke template
+@isub=LD BC,SLOT_SIZE
+ $BB94 LD BC,$0016   ; size of a slot
+ $BB97 LDIR          ; overwrite the whole slot with the template
+ $BB99 LD HL,$000C   ; 12 + SP is the next slot
+ $BB9C ADD HL,SP     ;
+ $BB9D JP $A5F0      ; on to the next slot
+@label=UpdateSatan_Alive
+*$BBA0 POP BC        ; y speed
+ $BBA1 EXX           ;
+ $BBA2 POP DE        ; D' upper limit, E' lower limit
+ $BBA3 EXX           ;
+ $BBA4 POP DE        ; x word
+ $BBA5 POP HL        ; y word
+ $BBA6 ADD HL,BC     ; y moves
+ $BBA7 PUSH HL       ; store y
+ $BBA8 EXX           ;
+ $BBA9 POP HL        ; HL' = y
+ $BBAA LD A,H        ;
+ $BBAB CP D          ; upper limit
+ $BBAC JR NC,$BBB1   ; reached: turn round
+ $BBAE CP E          ; lower limit
+ $BBAF JR NC,$BBC3   ; inside the limits
+@label=UpdateSatan_Turn
+*$BBB1 LD HL,$FFF8   ; -8: SP back to slot+2
+ $BBB4 ADD HL,SP     ;
+ $BBB5 LD SP,HL      ;
+ $BBB6 POP HL        ; y speed
+ $BBB7 LD A,H        ; negate it
+ $BBB8 CPL           ;
+ $BBB9 LD H,A        ;
+ $BBBA LD A,L        ;
+ $BBBB CPL           ;
+ $BBBC LD L,A        ;
+ $BBBD INC HL        ;
+ $BBBE PUSH HL       ; store it
+ $BBBF POP HL        ;
+ $BBC0 POP HL        ; pop the three other words again
+ $BBC1 POP HL        ;
+ $BBC2 POP HL        ;
+@label=UpdateSatan_Draw
+*$BBC3 EXX           ; main registers: D = x, H = y
+ $BBC4 LD E,H        ; E = y
+ $BBC5 LD L,E        ; L = y
+ $BBC6 LD H,D        ; H = x
+ $BBC7 LD ($5DFE),HL ; start position of the fireballs (low y, high x)
+ $BBCA SRA H         ; x / 4
+ $BBCC SRA H         ;
+ $BBCE LD ($ACD3),HL ; position of the upper half: y, byte column
+ $BBD1 LD BC,$010C   ; one column right, 12 units lower
+ $BBD4 ADD HL,BC     ;
+ $BBD5 LD ($ACDD),HL ; position of the lower half
+ $BBD8 POP BC        ; timer: C counter, B reload
+@isub=LD B,ATTACK_PERIOD
+ $BBD9 LD B,$32      ;
+ $BBDB DEC C         ; count down
+ $BBDC JR NZ,$BBDF   ;
+ $BBDE LD C,B        ; reload
+*$BBDF PUSH BC       ; store the timer back (the flags stay)
+ $BBE0 POP BC        ;
+ $BBE1 JR NZ,$BC20   ; not zero: no volley
+ $BBE3 EXX           ;
+@isub=LD A,SFX_ENEMY_SHOT
+ $BBE4 LD A,$07      ; sound effect
+ $BBE6 LD ($854F),A  ;
+ $BBE9 LD HL,$8552   ; three spawns pending for #R$8905
+ $BBEC INC (HL)      ;
+ $BBED INC (HL)      ;
+ $BBEE INC (HL)      ;
+ $BBEF LD HL,$BCE2   ; fireball up and left
+ $BBF2 LD ($5DFC),HL ; template address
+ $BBF5 LD HL,$5DFC   ;
+ $BBF8 LD DE,($BE56) ; end of the object list
+@isub=LD BC,OBJECT_ENTRY_SIZE
+ $BBFC LD BC,$0004   ; one entry
+ $BBFF LDIR          ;
+ $BC01 LD HL,$BCF2   ; fireball straight left
+ $BC04 LD ($5DFC),HL ;
+ $BC07 LD HL,$5DFC   ;
+@isub=LD C,OBJECT_ENTRY_SIZE
+ $BC0A LD C,$04      ;
+ $BC0C LDIR          ;
+ $BC0E LD HL,$BD02   ; fireball down and left
+ $BC11 LD ($5DFC),HL ;
+ $BC14 LD HL,$5DFC   ;
+@isub=LD C,OBJECT_ENTRY_SIZE
+ $BC17 LD C,$04      ;
+ $BC19 LDIR          ;
+ $BC1B LD ($BE56),DE ; object list pointer moves on
+ $BC1F EXX           ;

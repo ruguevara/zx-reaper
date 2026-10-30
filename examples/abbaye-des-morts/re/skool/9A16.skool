@@ -1,0 +1,51 @@
+; Draw two pixel rows of a 2-byte-wide sprite
+;
+; Called four times per character row by #R$9A36. The first pixel row is stored from the left byte to the right, the
+; second from the right byte to the left, so that HL and DE are back at the first column at the end and no pointer
+; has to be reloaded. Each byte is combined with the background as in #R$99F2: (OutlineMasks[g] AND old byte) OR g.
+; HL ends one pixel row down and DE two rows down.
+; .
+; The pointers are in the alternate register set (see #R$9972): HL = destination in the redraw cell buffer (H = pixel-row
+; page, L = cell index), DE = graphics in the sprite sheet (D = pixel row, E = column), B = $FF so that BC addresses the
+; outline mask table OutlineMasks ($FF00) by the graphics byte in C.
+; .
+; Hardware: none (the redraw cell buffer is in RAM).
+;
+; BC B = $FF; C is scratch
+; DE Graphics: D = pixel row, E = column of the first byte
+; HL Destination in the redraw cell buffer: H = pixel-row page, L = cell index of the first byte
+; O:DE D advanced by 2 pixel rows
+; O:HL H advanced by 1 pixel row
+@label=DrawStripW2
+c$9A16 LD A,(DE)     ;
+ $9A17 LD C,A        ;
+ $9A18 LD A,(BC)     ;
+ $9A19 AND (HL)      ;
+ $9A1A OR C          ;
+ $9A1B LD (HL),A     ;
+ $9A1C INC L         ;
+ $9A1D INC E         ;
+ $9A1E LD A,(DE)     ;
+ $9A1F LD C,A        ;
+ $9A20 LD A,(BC)     ;
+ $9A21 AND (HL)      ;
+ $9A22 OR C          ;
+ $9A23 LD (HL),A     ;
+ $9A24 INC H         ;
+ $9A25 INC D         ;
+ $9A26 LD A,(DE)     ;
+ $9A27 LD C,A        ;
+ $9A28 LD A,(BC)     ;
+ $9A29 AND (HL)      ;
+ $9A2A OR C          ;
+ $9A2B LD (HL),A     ;
+ $9A2C DEC L         ;
+ $9A2D DEC E         ;
+ $9A2E LD A,(DE)     ;
+ $9A2F LD C,A        ;
+ $9A30 LD A,(BC)     ;
+ $9A31 AND (HL)      ;
+ $9A32 OR C          ;
+ $9A33 LD (HL),A     ;
+ $9A34 INC D         ;
+ $9A35 RET           ;

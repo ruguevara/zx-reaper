@@ -1,0 +1,52 @@
+; Room script 9: Hangman tree
+;
+; Draws the tree with a compressed bitmap (op $94) and sets up the second sprite set.
+; .
+; Room 9: column 4, row 1 of the 5x5 map (left is room 8, right 10, up 4, down 14, counted modulo 25). Unpacks sprite
+; sets #R$6CF1, #R$7169. Subscripts: #R$82F0, #R$7443. Items (#R$8EDF) at row,column: lever 18,27, cross 4,6.
+@label=RoomScript09
+b$7792 DEFB $97,$0A         ; SPRITESET 10
+ $7794 DEFB $97,$13         ; SPRITESET 19
+ $7796 DEFB $87,$09         ; ROOMNAME 9 "Hangman tree"
+ $7798 DEFB $83 ; CALL ScriptRoomPanel
+@isub=DEFW ScriptRoomPanel
+ $7799 DEFW $82F0
+ $779B DEFB $88,$05,$02,$82,$A4,$A5,$80,$85 ; BLOCK 5x2: $82 $A4 $A5 $80 $85 $84 $A4 $A5 $80 $83
+ $77A3 DEFB $84,$A4,$A5,$80,$83
+ $77A8 DEFB $89,$04,$0D,$05,$10 ; TILEBLOCK row 4, col 13, 5x16
+ $77AD DEFB $88,$03,$02,$07,$08,$14,$0A,$09 ; BLOCK 3x2: $07 $08 $14 $0A $09 $15
+ $77B5 DEFB $15
+ $77B6 DEFB $99,$02,$00,$00,$03,$0E,$12,$00 ; TILEBLOCKS 2 rectangles
+ $77BE DEFB $03,$02
+ $77C0 DEFB $83 ; CALL BlockGrassEarth
+@isub=DEFW BlockGrassEarth
+ $77C1 DEFW $7443
+ $77C3 DEFB $99,$02,$0C,$1A,$04,$02,$14,$00 ; TILEBLOCKS 2 rectangles
+ $77CB DEFB $20,$02
+ $77CD DEFB $88,$02,$01,$01,$02 ; BLOCK 2x1: $01 $02
+ $77D2 DEFB $89,$00,$1E,$02,$16 ; TILEBLOCK row 0, col 30, 2x22
+ $77D7 DEFB $98,$1C,$02,$06,$07,$06,$01,$08 ; RECTS tile $1C, 2 rectangles
+ $77DF DEFB $0A,$03,$01
+ $77E2 DEFB $98,$1E,$02,$07,$12,$05,$01,$0A ; RECTS tile $1E, 2 rectangles
+ $77EA DEFB $12,$02,$01
+ $77ED DEFB $86,$00,$03,$19,$04,$8A ; FILLTILE row 0, col 3, 25x4, tile $8A
+ $77F3 DEFB $86,$04,$0F,$03,$01,$80 ; FILLTILE row 4, col 15, 3x1, tile $80
+ $77F9 DEFB $93,$13,$02,$02,$0A,$14 ; ROW row 19, col 2, 2 tiles
+ $77FF DEFB $92,$10,$03,$09,$1A,$0F,$18,$11 ; STAMP1 tile $10 at 3 positions
+ $7807 DEFB $19
+ $7808 DEFB $92,$1D,$02,$06,$06,$08,$09 ; STAMP1 tile $1D at 2 positions
+ $780F DEFB $92,$1F,$02,$07,$17,$0A,$14 ; STAMP1 tile $1F at 2 positions
+ $7816 DEFB $92,$81,$05,$0B,$1C,$13,$05,$13 ; STAMP1 tile $81 at 5 positions
+ $781E DEFB $09,$13,$14,$13,$15
+ $7823 DEFB $92,$86,$02,$06,$0D,$08,$0D ; STAMP1 tile $86 at 2 positions
+ $782A DEFB $92,$87,$02,$07,$11,$0A,$11 ; STAMP1 tile $87 at 2 positions
+ $7831 DEFB $92,$A7,$02,$0C,$0E,$0C,$10 ; STAMP1 tile $A7 at 2 positions
+ $7838 DEFB $9B,$A6,$02,$0E,$1B,$04,$0E,$1C ; RUNS_V tile $A6, 2 vertical runs
+ $7840 DEFB $02
+ $7841 DEFB $8C,$0E,$0E,$A5 ; TILE1 row 14, col 14, tile $A5
+ $7845 DEFB $8C,$0A,$0D,$8B ; TILE1 row 10, col 13, tile $8B
+ $7849 DEFB $8C,$0E,$0F,$80 ; TILE1 row 14, col 15, tile $80
+ $784D DEFB $8C,$10,$11,$99 ; TILE1 row 16, col 17, tile $99
+ $7851 DEFB $94,$00,$00,$89,$14,$11,$0C,$1C,$FF,$10,$1C,$08,$FC,$1D,$3E,$3F ; BITMAP row 0, col 0, tile $89, 20 bytes
+ $7861 DEFB $FC,$FB,$1C,$F0,$1F,$3C,$18,$0E,$0C
+ $786A DEFB $80             ; END

@@ -1,0 +1,33 @@
+; Two-part sprite: graphics of both halves for the current frame, queue both draw commands
+;
+; Continuation of #R$A883 for Satan (#R$BB57) and for his smoke (#R$BC69). HL points to the frame tables, E is the
+; frame number. The table holds one graphics address per frame for the upper half and then, immediately after, one per
+; frame for the lower half, so it is read at 2 * E and again 4 bytes later (the code assumes two frames). The
+; addresses go to the draw commands at $ACD1 (graphics at $ACD5) and $ACDB ($ACDF). Unless the frame list is being run
+; (the flag at $AA1F is not zero) both commands are copied, 20 bytes, to the end of the frame call list at ($BE58) by
+; #R$B3F3, which also continues with the next slot.
+;
+; E Frame number (0 or 1)
+; HL Frame tables: upper half graphics per frame, lower half graphics per frame
+@label=QueueTwoPartSprite
+c$BC43 LD D,$00      ;
+ $BC45 ADD HL,DE     ;
+ $BC46 ADD HL,DE     ; HL = table + 2 * frame
+ $BC47 LD E,(HL)     ; graphics of the upper half
+ $BC48 INC HL        ;
+ $BC49 LD D,(HL)     ;
+ $BC4A INC HL        ;
+ $BC4B LD ($ACD5),DE ; upper half command
+ $BC4F INC HL        ; skip to the lower half table (2 frames)
+ $BC50 INC HL        ;
+ $BC51 LD A,(HL)     ; graphics of the lower half
+ $BC52 INC HL        ;
+ $BC53 LD H,(HL)     ;
+ $BC54 LD L,A        ;
+ $BC55 LD ($ACDF),HL ; lower half command
+ $BC58 LD A,($AA1F)  ; frame list being run: do not queue
+ $BC5B OR A          ;
+ $BC5C JP NZ,$B41F   ;
+ $BC5F LD HL,$ACD1   ; both draw commands
+ $BC62 LD DE,($BE58) ; end of the frame call list
+ $BC66 JP $B3F3      ; copy 20 bytes, continue with the next slot

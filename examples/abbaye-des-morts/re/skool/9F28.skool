@@ -1,0 +1,12 @@
+; Script code $8E: set the text cursor
+;
+; Operands: y (pixel row), x (pixel column), copied to #R$9F26 and #R$9F27. No room script uses it (a static decode of
+; the scripts at $726A-$83A7 finds no $8E); the rooms set only y, with $82 (#R$9D99), and let the alignment choose x.
+;
+; HL Script pointer, at the operands
+; O:HL Script pointer after the two operands
+@label=OpSetTextCursor
+c$9F28 LD DE,$9F26   ;
+ $9F2B LDI           ;
+ $9F2D LDI           ;
+ $9F2F RET           ;

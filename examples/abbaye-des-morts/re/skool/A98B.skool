@@ -1,0 +1,16 @@
+; Probe one cell
+;
+; ORs the tile flags of the cell at (x+B, y+C) into E (E starts at 0). Used for the left and right sides of the
+; crouching monk (#R$A8A5).
+; .
+; Hardware: none; reads the tile flag map.
+;
+; HL Position: H = x, L = y (2-pixel units)
+; B Offset of the first point in x
+; C Offset of the first point in y
+; D Column mask (always $1F)
+; O:E OR of the tile flags at the points
+; O:B B unchanged
+@label=ProbePoint
+c$A98B LD E,$00 ;
+ $A98D JP $A9FE ;

@@ -1,0 +1,41 @@
+; Tile flags: one byte per tile number, copied to the flag map with the tile
+;
+; When the room script puts a tile into the tile map at $5B00 (#R$9E6A) the byte of this table is stored in the flag
+; map three pages above ($5E00, one byte per cell, 22 rows of 32); the script can change the flags of a cell
+; afterwards (observed: in room 16 row 21, columns 6-21 hold class 4 under the blank tile $80, the pit with the
+; bones). Bit 7 is the redraw mark: set when the cell must be drawn this frame (every tile starts with it, so a new
+; room is drawn in full). Bit 6 is set by the sprite queue (#R$9836) on the cells a sprite covers and #R$9719 turns it
+; into bit 7 on the next pass, which erases the sprite. Bits 0-2 are the class that the player and enemies test:
+; .
+; class 0 ($80): background, nothing there (tiles $25, $75-$76, $7B-$7C, $7E-$86, $88-$B7, $C0-$FF)
+; .
+; class 1 ($81, bit 0 TILE_STANDABLE alone): tiles $10, $26 and $87, a one-way platform: Jean jumps up through it and
+; walks through it from the sides, and lands on it only when falling across its top edge (observed, F74); the scythe of
+; #R$BAB1 lands on it like on class 3
+; .
+; class 3 ($83, bits 0 and 1): the walls and floors, solid from every side (bit 1, TILE_BLOCKS, stops walking and the
+; head) (tiles $00-$04, $06-$0F, $11-$24, $27-$3A, $3D-$4D, $77-$7A, $7D, $B8-$BF); a falling scythe lands on it
+; (observed on the ledges of room 18)
+; .
+; class 4 ($84, FLAG_HARMFUL): harmful (tiles $05, $3B-$3C, $4E-$74); the player's code sets the hit flag $A8A0 from
+; bit 2 (#R$A8A5), and #R$BAB1 and #R$BB07 remove a scythe that meets bit 2 (from the code, not observed)
+; .
+; Class 2 (bit 1 alone: blocks walking and the head, cannot be stood on) is not used by any tile of the table; the
+; border cells set by script op $8A (#R$A065) get bit 1.
+@label=TileFlags
+b$CD00 DEFB $83,$83,$83,$83,$83,$84,$83,$83,$83,$83,$83,$83,$83,$83,$83,$83 ;
+ $CD10 DEFB $81,$83,$83,$83,$83,$83,$83,$83,$83,$83,$83,$83,$83,$83,$83,$83 ;
+ $CD20 DEFB $83,$83,$83,$83,$83,$80,$81,$83,$83,$83,$83,$83,$83,$83,$83,$83 ;
+ $CD30 DEFB $83,$83,$83,$83,$83,$83,$83,$83,$83,$83,$83,$84,$84,$83,$83,$83 ;
+ $CD40 DEFB $83,$83,$83,$83,$83,$83,$83,$83,$83,$83,$83,$83,$83,$83,$84,$84 ;
+ $CD50 DEFB $84,$84,$84,$84,$84,$84,$84,$84,$84,$84,$84,$84,$84,$84,$84,$84 ;
+ $CD60 DEFB $84,$84,$84,$84,$84,$84,$84,$84,$84,$84,$84,$84,$84,$84,$84,$84 ;
+ $CD70 DEFB $84,$84,$84,$84,$84,$80,$80,$83,$83,$83,$83,$80,$80,$83,$80,$80 ;
+ $CD80 DEFB $80,$80,$80,$80,$80,$80,$80,$81,$80,$80,$80,$80,$80,$80,$80,$80 ;
+ $CD90 DEFB $80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80 ;
+ $CDA0 DEFB $80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80 ;
+ $CDB0 DEFB $80,$80,$80,$80,$80,$80,$80,$80,$83,$83,$83,$83,$83,$83,$83,$83 ;
+ $CDC0 DEFB $80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80 ;
+ $CDD0 DEFB $80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80 ;
+ $CDE0 DEFB $80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80 ;
+ $CDF0 DEFB $80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80 ;

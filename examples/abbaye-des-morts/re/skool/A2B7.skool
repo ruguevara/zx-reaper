@@ -1,0 +1,12 @@
+; Cheat check: 4 (row, mask) pairs that spell RAGE ($A422)
+;
+; The four key pairs, in the order of the first four pairs of #R$A2BF (RIGHT, LEFT, CROUCH, JUMP), that #R$A422
+; compares with the redefined keys: (2, 4) = E, (1, $10) = G, (1, 1) = A, (2, 8) = R. Typed in the order of the
+; redefinition prompts (JUMP, CROUCH, LEFT, RIGHT) the keys spell RAGE.
+; .
+; Each pair is a keyboard half-row index (0-7, see #R$A2D3) and a key bit mask within it.
+@label=CheatKeyPairs
+b$A2B7 DEFB $02,$04  ; RIGHT = E
+ $A2B9 DEFB $01,$10  ; LEFT = G
+ $A2BB DEFB $01,$01  ; CROUCH = A
+ $A2BD DEFB $02,$08  ; JUMP = R

@@ -1,0 +1,47 @@
+; Room script 22: Tortured souls
+;
+; Op $9E starts the animation of the blood tiles $3B/$3C in the bottom row (#R$AE20).
+; .
+; Room 22: column 2, row 4 of the 5x5 map (left is room 21, right 23, up 17, down 2, counted modulo 25). Unpacks
+; sprite sets #R$70B7, #R$6AA7, #R$710E, #R$6C4F. Subscripts: #R$82F0, #R$8104, #R$8114, #R$811C, #R$8124. Items
+; (#R$8EDF) at row,column: cross 18,27.
+@label=RoomScript22
+b$812C DEFB $97,$11         ; SPRITESET 17
+ $812E DEFB $97,$03         ; SPRITESET 3
+ $8130 DEFB $97,$12         ; SPRITESET 18
+ $8132 DEFB $97,$07         ; SPRITESET 7
+ $8134 DEFB $87,$16         ; ROOMNAME 22 "Tortured souls"
+ $8136 DEFB $83 ; CALL ScriptRoomPanel
+@isub=DEFW ScriptRoomPanel
+ $8137 DEFW $82F0
+ $8139 DEFB $83 ; CALL BlockAbbeyStoneA
+@isub=DEFW BlockAbbeyStoneA
+ $813A DEFW $8104
+ $813C DEFB $99,$05,$00,$00,$20,$06,$00,$00,$02,$10,$0A,$1E,$02,$0A,$10,$06 ; TILEBLOCKS 5 rectangles
+ $814C DEFB $02,$02,$12,$05,$04,$02
+ $8152 DEFB $86,$01,$02,$0E,$05,$80 ; FILLTILE row 1, col 2, 14x5, tile $80
+ $8158 DEFB $83 ; CALL BlockAbbeyBlood
+@isub=DEFW BlockAbbeyBlood
+ $8159 DEFW $8114
+ $815B DEFB $89,$14,$00,$20,$02 ; TILEBLOCK row 20, col 0, 32x2
+ $8160 DEFB $83 ; CALL BlockBloodPool
+@isub=DEFW BlockBloodPool
+ $8161 DEFW $811C
+ $8163 DEFB $99,$02,$14,$0A,$04,$02,$14,$12 ; TILEBLOCKS 2 rectangles
+ $816B DEFB $04,$02
+ $816D DEFB $83 ; CALL BlockStoneHalfB
+@isub=DEFW BlockStoneHalfB
+ $816E DEFW $8124
+ $8170 DEFB $99,$05,$05,$06,$08,$02,$09,$04,$02,$02,$0B,$0F,$06,$02,$0B,$18 ; TILEBLOCKS 5 rectangles
+ $8180 DEFB $06,$02,$0D,$02,$02,$02
+ $8186 DEFB $91,$AA,$02,$03,$03,$02,$12,$02 ; PICTURES tiles from $AA, 2x3, at 3 positions
+ $818E DEFB $16,$02,$1A
+ $8191 DEFB $9B,$B5,$05,$01,$03,$05,$01,$04,$03,$06,$15,$03,$06,$16,$09,$06 ; RUNS_V tile $B5, 5 vertical runs
+ $81A1 DEFB $1B,$02
+ $81A3 DEFB $86,$13,$18,$02,$01,$05 ; FILLTILE row 19, col 24, 2x1, tile $05
+ $81A9 DEFB $98,$4B,$03,$02,$14,$02,$03,$02 ; RECTS tile $4B, 3 rectangles
+ $81B1 DEFB $18,$02,$03,$02,$1C,$02,$03
+ $81B8 DEFB $92,$49,$03,$02,$18,$03,$14,$03 ; STAMP1 tile $49 at 3 positions
+ $81C0 DEFB $1D
+ $81C1 DEFB $9E             ; enable the blood animation
+ $81C2 DEFB $80             ; END

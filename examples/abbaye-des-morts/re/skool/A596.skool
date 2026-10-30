@@ -1,0 +1,47 @@
+; Game frame: read the controls, update Jean, the objects and the room exits
+;
+; The per-frame game routine, run from the interrupt handler through the vector at $8504 (#R$85E2 plays the sound
+; effects, then jumps here). Reads the keyboard (#R$A240, #R$A271, and the Kempston joystick through #R$A28F) into
+; #R$A2CF. If the room state (#R$850C) has bit 7 clear (not playing) it stops there. Otherwise it works out the newly
+; pressed bits (#R$A2D1), keeps the held bits (#R$A2D0) and, if R and Y are both held, sets the room state to 5 (Game
+; Over). Then it restarts the frame call list at $BE5A, runs the player probes (#R$A8A5), every object slot (#R$A5E9:
+; items, enemies and other objects queue their sprites), the player state machine (#R$AAAB), closes the call list
+; (#R$A5DB, unless the list is being drawn: #R$AA1F is a RET then), spawns the cutscene actors if $8552 is nonzero
+; (#R$8905) and ends with the room-exit check #R$ACEF.
+; .
+; Hardware: reads the keyboard half-rows (port $FE) and, if on, the Kempston port $1F; nothing is drawn here, the
+; sprites are queued for the drawing phase run by #R$BDDB.
+@label=GameFrame
+c$A596 CALL $A240    ; keyboard half-rows into #R$A2D3
+ $A599 CALL $A271    ; control bits (and the joystick)
+ $A59C LD A,($850C)  ; room state: bit 7 set = playing
+ $A59F RLA           ;
+ $A5A0 RET NC        ; not playing: nothing more
+ $A5A1 LD HL,$A2CF   ; newly pressed = (previous XOR now) AND now
+ $A5A4 LD A,($A2D0)  ;
+ $A5A7 XOR (HL)      ;
+ $A5A8 AND (HL)      ;
+ $A5A9 LD ($A2D1),A  ;
+ $A5AC LD A,(HL)     ;
+ $A5AD LD ($A2D0),A  ; keep the bits now as the held bits
+@isub=AND CTRL_ABORT
+ $A5B0 AND $C0       ; R and Y together
+@isub=CP CTRL_ABORT
+ $A5B2 CP $C0        ;
+ $A5B4 JR NZ,$A5BB   ;
+@isub=LD A,STATE_GAME_OVER
+ $A5B6 LD A,$05      ; abort the game: Game Over screen
+ $A5B8 LD ($850C),A  ;
+@label=GameFrame_List
+*$A5BB LD HL,$BE5A   ; frame call list starts at $BE5A
+ $A5BE LD ($BE58),HL ;
+ $A5C1 CALL $A8A5    ; player: tile flags around Jean, hit box
+ $A5C4 CALL $A5E9    ; run every object slot
+ $A5C7 CALL $AAAB    ; player state machine
+ $A5CA LD A,($AA1F)  ; $AA1F is a RET while the list is being drawn
+ $A5CD OR A          ;
+ $A5CE CALL Z,$A5DB  ; otherwise close the list
+ $A5D1 LD A,($8552)  ; cutscene actors pending?
+ $A5D4 OR A          ;
+ $A5D5 CALL NZ,$8905 ;
+ $A5D8 JP $ACEF      ; room exits; returns to the interrupt handler

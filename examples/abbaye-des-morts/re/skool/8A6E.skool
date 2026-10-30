@@ -1,0 +1,36 @@
+; Find a free object slot
+;
+; Scans the 11 slots at $C100 (22 bytes each) for one whose handler word is 0. The routine pops its return address into
+; IY and returns with JP (IY), and does its work in the alternate register set, so HL, DE and BC of the caller are
+; preserved. Used by the three spawners #R$897E, #R$89ED and #R$8905 (which takes the slot address from DE' after its own
+; EXX).
+; .
+; O:F Carry set when a free slot was found, clear when all are in use
+; O:IX Address of the free slot (unchanged when none)
+; O:DE' Address of the free slot (the alternate DE; #R$8905 uses it)
+; O:IY Changed (holds the return address)
+@label=FindFreeSlot
+c$8A6E POP IY               ; return address; the routine ends with JP (IY)
+@label=FindFreeSlot_IY
+ $8A70 EXX                  ; alternate set
+ $8A71 LD HL,$C100          ; ObjectSlots
+@isub=LD BC,OBJECT_SLOTS*256+SLOT_SIZE-1
+ $8A74 LD BC,$0B15          ; B = 11 slots, C = 21 (22 less the INC L)
+*$8A77 LD A,(HL)            ; handler word, low byte ...
+ $8A78 INC L
+ $8A79 OR (HL)              ; ... OR high byte: 0 when free
+ $8A7A JR Z,$8A85
+ $8A7C LD A,L               ; next slot
+ $8A7D ADD A,C
+ $8A7E LD L,A
+ $8A7F DJNZ $8A77
+ $8A81 EXX                  ; none: main set again, carry clear
+ $8A82 OR A
+ $8A83 JP (IY)
+*$8A85 DEC L                ; found: HL = slot address
+ $8A86 EX DE,HL             ; DE = slot address
+ $8A87 LD IXl,E             ; IX = slot
+ $8A89 LD IXh,D
+ $8A8B EXX                  ; main set again
+ $8A8C SCF                  ; carry set
+ $8A8D JP (IY)

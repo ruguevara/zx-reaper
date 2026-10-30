@@ -1,0 +1,31 @@
+; Draw-queue job template for a masked sprite
+;
+; The 16-byte record that #R$9836 fills in and #R$98B1 copies to the end of the draw queue at $C000 (the copy also takes
+; the 5 bytes of code after the template, which are not used). #R$97B7 runs the queue: it calls the handler in the first
+; word with DE = job address + 1 and clears the word. The handler #R$9972 consumes the fields as it draws. Fields:
+; .
+; +0 word: handler address (#R$9972)
+; +2 word: address of the graphics in the sprite sheet, clipped (D = pixel row, E = column)
+; +4 byte: character rows covered
+; +5 byte: first character row (0-21)
+; +6 byte: character column (0-31)
+; +7 byte: offset of the first pixel row inside its character row, in 2-pixel units (0-3); cleared once used
+; +8 byte: height still to draw, in 2-pixel units
+; +9 byte: width in bytes (1-5)
+; +10 byte: attribute of the cells
+@label=SpriteJob
+g$98D9 DEFW $9972    ; +0: handler
+@label=SpriteJobGfx
+ $98DB DEFW $0000    ; +2: graphics address
+@label=SpriteJobRows
+ $98DD DEFB $00      ; +4: character rows covered
+@label=SpriteJobCell
+ $98DE DEFW $0000    ; +5: row (low byte), +6: column (high byte)
+@label=SpriteJobSubRow
+ $98E0 DEFB $00      ; +7: first row offset
+@label=SpriteJobHeight
+ $98E1 DEFB $00      ; +8: height
+@label=SpriteJobWidth
+ $98E2 DEFB $00      ; +9: width
+@label=SpriteJobAttr
+ $98E3 DEFB $00      ; +10: attribute

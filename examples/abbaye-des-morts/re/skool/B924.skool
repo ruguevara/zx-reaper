@@ -1,0 +1,71 @@
+; Beast fire: sizes of the two sprites, their frames, queue both draw commands
+;
+; Continuation of #R$B8C5 after the hit test #R$A851 (reached by a JP through $A881; SP is at slot+$10, the hit test
+; has popped the two hit box words), made only while the jet is visible. It takes the sprite block (slot +$10:
+; attribute, width, height, then four graphics addresses: frames 0 and 1 of the upper sprite, frames 0 and 1 of the
+; lower one; #R$958A) and puts the attribute and the width and height into both draw commands at #R$ACD1 and #R$ACDB
+; (the lower sprite is one cell wider). The animation counter and frame number in slot +$12..+$15 are stepped here:
+; when the counter reaches 0 it is reloaded, the sound effect SFX_ENEMY_SHOT is requested (so the fire crackles every
+; two frames) and the frame number is increased, which wraps to 0. The graphics of the upper sprite is table[frame],
+; that of the lower sprite table[frame + 2]; in frame 0 the lower sprite is also moved one cell to the left (its byte
+; column at #R$ACDE is decreased). Both draw commands are copied together to the frame call list (#R$B3F3), unless the
+; call list is being run (#R$AA1F is not a NOP), and the routine goes on to the next slot.
+;
+; SP Slot address + $10
+@label=UpdateBeastFire_Draw
+c$B924 POP HL        ; sprite block
+ $B925 LD A,(HL)     ; attribute
+ $B926 INC HL        ;
+ $B927 LD C,(HL)     ; width
+ $B928 INC HL        ;
+ $B929 LD B,(HL)     ; height
+ $B92A INC HL        ; HL = table of the four graphics addresses
+ $B92B LD ($ACDA),A  ; attribute of the first draw command
+ $B92E LD ($ACE4),A  ; and of the second
+ $B931 LD ($ACD7),BC ; width, height of the first
+ $B935 INC C         ; the lower sprite is one cell wider
+ $B936 LD ($ACE1),BC ; width, height of the second
+ $B93A POP BC        ; C animation counter, B reload
+ $B93B POP DE        ; E frame, D number of frames
+ $B93C DEC C         ;
+ $B93D JR NZ,$B94C   ;
+ $B93F LD C,B        ; reload
+@isub=LD A,SFX_ENEMY_SHOT
+ $B940 LD A,$07      ;
+ $B942 LD ($854F),A  ; sound effect request
+ $B945 INC E         ; next frame: wraps to 0
+ $B946 LD A,E        ;
+ $B947 CP D          ;
+ $B948 JR NZ,$B94C   ;
+ $B94A SUB D         ;
+ $B94B LD E,A        ;
+*$B94C PUSH DE       ; store frame
+ $B94D PUSH BC       ; store counter
+ $B94E LD D,$00      ;
+ $B950 ADD HL,DE     ;
+ $B951 ADD HL,DE     ; HL = table + 2 * frame
+ $B952 DEC E         ; frame 0: nonzero
+ $B953 EXX           ;
+@isub=LD HL,SpriteCmd2Pos+1
+ $B954 LD HL,$ACDE   ; byte column of the second draw command
+ $B957 JR Z,$B95A    ; frame 1: keep it
+ $B959 DEC (HL)      ; frame 0: one cell to the left
+*$B95A EXX           ;
+ $B95B LD E,(HL)     ;
+ $B95C INC HL        ;
+ $B95D LD D,(HL)     ;
+ $B95E INC HL        ;
+ $B95F LD ($ACD5),DE ; graphics of the upper sprite
+ $B963 INC HL        ;
+ $B964 INC HL        ; skip the other frame of the upper sprite: table[frame + 2]
+ $B965 LD A,(HL)     ;
+ $B966 INC HL        ;
+ $B967 LD H,(HL)     ;
+ $B968 LD L,A        ;
+ $B969 LD ($ACDF),HL ; graphics of the lower sprite
+ $B96C LD A,($AA1F)  ; the call list is being run?
+ $B96F OR A          ;
+ $B970 JP NZ,$B41F   ; yes: draw nothing
+ $B973 LD HL,$ACD1   ; both draw commands (20 bytes)
+ $B976 LD DE,($BE58) ; write pointer of the frame call list
+ $B97A JP $B3F3      ; copy them, next slot

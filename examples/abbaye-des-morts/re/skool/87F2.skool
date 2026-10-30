@@ -1,0 +1,22 @@
+; Sound effects 2-9: 8-byte records, effect n at $87F2 + 8 * (n - 2)
+;
+; The tone effects of #R$871A. #R$871A copies the record of the requested effect to #R$87EA, where the fields are
+; described: +0 PERIOD, +1 STEP, +2 FRAMES (first segment, frames), +3 SEGMENTS, +4 MODE, +5 BASE, +6 RELOAD (later
+; segments, frames), +7 NEXT (chained effect). Effect 1 (noise) is built into the routine and has no record.
+; .
+; Who plays what (SFX_ constants; observed by watching #R$854F in runs, except the checkpoint and the portal, which are
+; inferred from the callers): 2 jump, 3 bell or lever touched, 4 passage between rooms 10 and 19, 5 item taken or lever
+; pulled, 6 Jean dies, 7 Death throws a scythe or Satan fires, 8 the church door, 9 a checkpoint.
+; .
+; Effects 2 and 8 are the same record, 5 and 9 too. Lengths and sweeps, from the fields: every effect is one segment
+; except effect 6; the lengths are 2, 30, 10, 8, 56 (40 + 8 + 8), 1, 2 and 8 frames. Effect 5 (observed with the
+; simulator, one burst per frame): PERIOD 40, 34, 28, 22, 16, 10, 4, 254, a rising chirp that ends in one low blip.
+@label=SoundEffects
+b$87F2 DEFB $00,$02,$02,$01,$00,$00,$00,$00 ; 2 SFX_JUMP: 2 frames, PERIOD 0 (one click) then 2 (about 21 kHz)
+ $87FA DEFB $A0,$50,$1E,$01,$00,$00,$00,$00 ; 3 SFX_TRIGGER: 30 frames, PERIOD $A0 + $50 per frame (wraps: a warble)
+ $8802 DEFB $E6,$E6,$0A,$01,$02,$00,$00,$00 ; 4 SFX_PORTAL: 10 frames, PERIOD $E6 - $1A per frame
+ $880A DEFB $28,$FA,$08,$01,$00,$00,$00,$00 ; 5 SFX_PICKUP: 8 frames, PERIOD 40 - 6 per frame (rising)
+ $8812 DEFB $04,$F2,$28,$03,$02,$50,$08,$00 ; 6 SFX_DEATH: 3 segments, 40 frames from PERIOD 4 (STEP -14), then 8 frames from BASE+2 = $52 and 8 from $54
+ $881A DEFB $14,$00,$01,$01,$00,$00,$00,$00 ; 7 SFX_ENEMY_SHOT: one frame, PERIOD 20
+ $8822 DEFB $00,$02,$02,$01,$00,$00,$00,$00 ; 8 SFX_DOOR: as effect 2
+ $882A DEFB $28,$FA,$08,$01,$00,$00,$00,$00 ; 9 SFX_CHECKPOINT: as effect 5

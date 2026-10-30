@@ -1,0 +1,10 @@
+; Free the object slot with sound 5
+;
+; Entry point used by the other actions (taking a cross, the chalice, the final parchment): play sound effect 5, then
+; free the slot; SP is at slot + 8.
+;
+; SP Slot address + 8
+@label=FreeSlotWithSound
+@isub=LD A,SFX_PICKUP
+c$A71F LD A,$05      ;
+ $A721 LD ($854F),A  ;

@@ -1,0 +1,50 @@
+; Player variables: state, animation, speed, tile probes, hit flag and position of Jean
+;
+; The state of the monk, rewritten every frame by #R$A8A5 (probes) and #R$AAAB (state machine). Positions are 8.8 fixed
+; point words: the low byte is a fraction, the high byte counts 2-pixel units, so X runs 0-$7F across the 256-pixel
+; room and Y 0-$57 down the 176-pixel room area; X/4 is the byte column of the sprite and X mod 4 the sub-byte
+; shift phase (0, 2, 4 or 6 pixels). The top left corner of the 16x24 pixel sprite is at (X, Y). Positions outside the
+; room are held modulo 256: just left of the room X is $FC-$FF, just above it Y is $FA-$FF (#R$ACEF).
+; .
+; +0 byte PlayerState: 0 none (nothing runs), 1 dying, 2 jumping (rising), 3 crouching, 4 standing or walking, 5
+;   falling, $FF debug room warp (#R$83CE, entered by #R$AAC0 with the cheat on)
+; +1 byte PlayerAnimTimer: frames left to the next animation frame (reloaded with 8 when walking, 4 when dying)
+; +2 byte PlayerFrame: animation frame, 0-1 walking (also crouching), 2 in the air, 0-7 when dying
+; +3 byte PlayerFacing: 0 right, 1 left
+; +4 word PlayerSpeedY: vertical speed, 8.8 units per frame, positive up while jumping and down while falling
+;   ($01FE at the start of a jump, at most $021C in a fall)
+; +6 word PlayerSpare: unused
+; +8 byte PlayerTileHead: OR of the tile flags (#R$CD00) at the head
+; +9 byte PlayerTileRight: the same at the right side
+; +A byte PlayerTileFeet: the same just below the feet
+; +B byte PlayerTileLeft: the same at the left side
+; +C byte PlayerHit: 0, 4 when a harmful tile (class 4) touches the body, $FF when an enemy box overlaps (#R$A87A),
+;   2 set by the pyre monk of the ending (#R$B97D, with PlayerState 2); any value but 0 kills the monk in #R$AAC6
+; +D word PlayerX: horizontal position, 8.8 (high byte 0-$7F)
+; +F word PlayerY: vertical position, 8.8 (high byte 0-$57)
+@label=PlayerState
+g$A894 DEFB $04             ; State: 0 none, 1 dying, 2 jumping, 3 crouching, 4 standing/walking, 5 falling, $FF debug warp
+@label=PlayerAnimTimer
+ $A895 DEFB $00             ; Animation timer
+@label=PlayerFrame
+ $A896 DEFB $00             ; Animation frame
+@label=PlayerFacing
+ $A897 DEFB $00             ; Facing: 0 right, 1 left
+@label=PlayerSpeedY
+ $A898 DEFW $0000           ; Vertical speed (8.8)
+@label=PlayerSpare
+ $A89A DEFB $00,$00         ; Unused
+@label=PlayerTileHead
+ $A89C DEFB $00             ; Tile flags at the head
+@label=PlayerTileRight
+ $A89D DEFB $00             ; Tile flags at the right side
+@label=PlayerTileFeet
+ $A89E DEFB $00             ; Tile flags just below the feet
+@label=PlayerTileLeft
+ $A89F DEFB $00             ; Tile flags at the left side
+@label=PlayerHit
+ $A8A0 DEFB $00             ; Hit flag (4 harmful tile, $FF enemy, 2 ending)
+@label=PlayerX
+ $A8A1 DEFW $2400           ; X (8.8, high byte in 2-pixel units, 0-$7F)
+@label=PlayerY
+ $A8A3 DEFW $4400           ; Y (8.8, high byte in 2-pixel units, 0-$57)
