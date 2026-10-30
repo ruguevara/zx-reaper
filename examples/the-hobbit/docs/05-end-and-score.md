@@ -38,7 +38,7 @@ as well (inferred).
 | staying with the trolls | "The hideous troll eats you." | [LA94E](../src/handlers.asm#L1100) |
 | eating until the strength reaches 128 | "Your foul gluttony has killed you." | [L929C](../src/verbs.asm#L1148) (F81) |
 | not answering Gollum | "Someone strangles you from behind." | [LA8F6](../src/handlers.asm#L1044) (F76) |
-| the forest off the road | "Some thing drops from above and stings." | [LA9E5_18](../src/handlers.asm#L1350) (F83) |
+| the forest off the road | "Some thing drops from above and stings." | [LA9E5_18](../src/handlers.asm#L1354) (F83) |
 | the deep bog | "You are slowly sinking into the bog." | [LA761_3](../src/handlers.asm#L852) (F80) |
 | staying at the spider threads place 5 turns | "The spider web is slowly smothering you" | [LA9E5_13](../src/handlers.asm#L1317) |
 | swimming in the black river | "As soon as you touch the river you fall asleep and gently float away." | [LA244_9](../src/handlers.asm#L187) |
