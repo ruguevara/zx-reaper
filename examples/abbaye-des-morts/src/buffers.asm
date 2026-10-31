@@ -146,7 +146,8 @@ SpareFill2:
 ; 5: $11 $02 $00 $00 $12 $02 / $12 $02 $00 $05 $12 $07 / $13 $02 $00 $0A $12
 ; $0C / $FF: row 17 with two runs, cells 0-1 from column 0 and cells 2-4 from
 ; column $12 (lengths 2 and 3 in RedrawLengths), then the same for rows 18 and
-; 19. The index is one byte, so a frame can queue at most 256 cells.
+; 19. The index is one byte, so a frame can queue at most 256 cells. Measured
+; (F159): at most 105 cells in a frame and at most 80 bytes of this list.
 RedrawRuns:
   DEFS $0100,$FF
 
@@ -178,6 +179,8 @@ RedrawAttrs:
 ; BuildMirrorTable on room entry and used while the sprites of a room are
 ; unpacked; and SaveMenuArea and RestoreMenuArea (through CopyMenuArea) copy
 ; the middle third of the screen bitmap ($4800-$4FFF, 2048 bytes) to $C500 and
-; back to save the screen under the menus.
+; back to save the screen under the menus. In play at most 105 cells are
+; queued in a frame (F159): the game uses bytes $00-$68 of each of the 8 pages;
+; the menus and the mirror table use the whole 2048 bytes.
 RedrawPixels:
   DEFS $0800,$FF

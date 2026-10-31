@@ -102,7 +102,7 @@ can be moved as a block (`make shift-test`), the rest stays where it is
 | $C000-&#36;C0FF | 256 | sprite draw queue: 16 jobs of 16 bytes | [DrawQueue](../src/buffers.asm#L75) |
 | $C100-&#36;C1F3 | 244 | 11 object slots of 22 bytes and their end mark | [ObjectSlots](../src/buffers.asm#L125) |
 | $C1F4-&#36;C1FF | 12 | unused (&#36;FF) | [SpareFill2](../src/buffers.asm#L132) |
-| $C200-&#36;CCFF | 2816 | redraw buffers: run list, lengths, attributes, 8 pixel-row pages | [RedrawRuns](../src/buffers.asm#L150) to [RedrawPixels](../src/buffers.asm#L182) |
+| $C200-&#36;CCFF | 2816 | redraw buffers: run list, lengths, attributes, 8 pixel-row pages | [RedrawRuns](../src/buffers.asm#L151) to [RedrawPixels](../src/buffers.asm#L185) |
 | $CD00-&#36;D6FF | 2560 | tile flags, tile attributes, tile bitmaps (256 tiles) | [TileFlags](../src/tiles.asm#L37), [TileAttrs](../src/tiles.asm#L64), [TileGfx](../src/tiles.asm#L93) |
 | $D700-&#36;FEFF | 10240 | sprite sheet: 40 pages, one per pixel row; columns $63-&#36;FF filled per room | [SpriteSheet](../src/spritesheet.asm#L25), [SpriteSheetLower](../src/spritesheet.asm#L281) |
 | $FF00-&#36;FFFF | 256 | outline mask table, built at start-up | [OutlineMasks](../src/game.asm#L13) |

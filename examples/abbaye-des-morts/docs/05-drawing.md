@@ -67,10 +67,10 @@ and 22 224-243 times, room 14 145 and room 10 128 times (F147).
 | $5E00 flag map | 704 | one byte per cell, 3 pages above the tile map: bits 0-2 tile class, bit 6 "a sprite is here", bit 7 "redraw" | [PlaceTile](../src/script.asm#L514), [QueueSprite](../src/sprites.asm#L50), [CollectRedrawRun](../src/redraw.asm#L363), [RedrawCell](../src/sprites.asm#L1246) | the same, collision code |
 | $BE5A [FrameList](../src/buffers.asm#L50) | 162 | up to 16 draw commands of 10 bytes and the closing word | game frame | [RunFrameList](../src/templates.asm#L163) |
 | $C000 [DrawQueue](../src/buffers.asm#L75) | 256 | 16 jobs of 16 bytes | [AddQueueJob](../src/sprites.asm#L162) | [RunDrawQueue](../src/redraw.asm#L588) |
-| $C200 [RedrawRuns](../src/buffers.asm#L150) | 256 | the run list of the frame | [CollectRedrawRun](../src/redraw.asm#L363) | [DrawRedrawList](../src/redraw.asm#L32), the job handlers |
-| $C300 [RedrawLengths](../src/buffers.asm#L159) | 256 | run length at the index of a run's first cell | [CopyRunCells](../src/redraw.asm#L460) | [DrawRedrawList](../src/redraw.asm#L32) |
-| $C400 [RedrawAttrs](../src/buffers.asm#L168) | 256 | attribute of each queued cell | [CopyRunCells](../src/redraw.asm#L460), the drawers | [DrawRedrawList](../src/redraw.asm#L32) |
-| $C500 [RedrawPixels](../src/buffers.asm#L182) | 2048 | pixel row r of each queued cell at $C500 + 256 r + index | [CopyRunCells](../src/redraw.asm#L460), the drawers | [DrawRedrawList](../src/redraw.asm#L32) |
+| $C200 [RedrawRuns](../src/buffers.asm#L151) | 256 | the run list of the frame | [CollectRedrawRun](../src/redraw.asm#L363) | [DrawRedrawList](../src/redraw.asm#L32), the job handlers |
+| $C300 [RedrawLengths](../src/buffers.asm#L160) | 256 | run length at the index of a run's first cell | [CopyRunCells](../src/redraw.asm#L460) | [DrawRedrawList](../src/redraw.asm#L32) |
+| $C400 [RedrawAttrs](../src/buffers.asm#L169) | 256 | attribute of each queued cell | [CopyRunCells](../src/redraw.asm#L460), the drawers | [DrawRedrawList](../src/redraw.asm#L32) |
+| $C500 [RedrawPixels](../src/buffers.asm#L185) | 2048 | pixel row r of each queued cell at $C500 + 256 r + index | [CopyRunCells](../src/redraw.asm#L460), the drawers | [DrawRedrawList](../src/redraw.asm#L32) |
 | $CD00 [TileFlags](../src/tiles.asm#L37), $CE00 [TileAttrs](../src/tiles.asm#L64), $CF00 [TileGfx](../src/tiles.asm#L93) | 256 + 256 + 2048 | class, attribute and 8 bitmap bytes of each of the 256 tiles | (data) | the drawing and collision code |
 | $D700 [SpriteSheet](../src/spritesheet.asm#L25) | 10240 | 40 pages, one per pixel row | the image, [UnpackSpriteSet](../src/unpack.asm#L92) | the drawers |
 | $FF00 OutlineMasks | 256 | outline mask of every byte | [StartUp](../src/startup.asm#L39) | the drawers |
@@ -130,12 +130,16 @@ sprite is drawn by XOR. The tile class in bits 0-2 is kept.
 ## The redraw list and the cell buffers
 
 [BuildRedrawList](../src/redraw.asm#L556) scans the 22 x 32 flag map row by row. Each run of
-consecutive flagged cells goes to the run list [RedrawRuns](../src/buffers.asm#L150), and
+consecutive flagged cells goes to the run list [RedrawRuns](../src/buffers.asm#L151), and
 [CopyRunCells](../src/redraw.asm#L460) copies the tile of every cell of the run into the cell
 buffers: the attribute to $C400 + index, the 8 bitmap bytes to $C500 +
 index ... $CC00 + index, and the run length to $C300 + index of the first
 cell. The index counts the cells queued this frame and is one byte, so a
-frame can hold 256 cells (not checked).
+frame can hold 256 cells (not checked). In the runs made, the most queued
+in one frame was 105 cells (mean 26, 99th percentile 90) and the run list
+took at most 80 bytes (F159): the game itself uses bytes $00-$68 of each of
+the eight bitmap pages, while the menus use all 2048 bytes to save the
+middle third of the screen.
 
 | Run list item | Size | Meaning |
 | --- | --- | --- |
